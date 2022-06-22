@@ -1,0 +1,56 @@
+name: Event Connect - CI
+on: [pull_request]
+jobs:
+  event-connect-build:
+    env:
+      MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+    concurrency:
+      group: event-connect-pr-${{ github.head_ref }}
+      cancel-in-progress: true
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    name: Build and Test
+    steps:
+      - name: Disk space report before modification
+        shell: bash
+        run: |
+          echo "Available storage:"
+          df -h
+      # Inspired to maximize-build-space action https://github.com/easimon/maximize-build-space
+      - name: Free disk space (remove dotnet, android and haskell)
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+      - name: Disk space report after modification
+        shell: bash
+        run: |
+          echo "Available storage:"
+          df -h
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Cache Maven Packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+      - name: Compile and Validate Formating
+        shell: bash
+        run: mvn -Dmaven.test.skip=true -Pvalidate-formatting package
+      - name: Run Test Suite
+        shell: bash
+        run: mvn verify
+      - name: Publish Test Report
+        if: ${{ always() }}
+        uses: scacap/action-surefire-report@v1.0.10
+        with:
+          skip_publishing: true
+          check_name: Test Results
+          fail_on_test_failures: true
+          fail_if_no_tests: false
