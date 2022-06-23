@@ -15,8 +15,8 @@
   <packaging>pom</packaging>
 
   <modules>
-    <module>trustyaiexplainability-core</module>
-    <module>trustyaiexplainability-integrationtests</module>
+    <module>explainability-core</module>
+    <module>explainability-integrationtests</module>
   </modules>
 
 </project>

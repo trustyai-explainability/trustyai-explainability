@@ -8,7 +8,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kie.trustyai</groupId>
-  <artifactId>trustyaiexplainability-integrationtests-dmn</artifactId>
+  <artifactId>explainability-integrationtests-dmn</artifactId>
   <name>TrustyAI Explainability Integration Tests DMN</name>
 
   <dependencies>
