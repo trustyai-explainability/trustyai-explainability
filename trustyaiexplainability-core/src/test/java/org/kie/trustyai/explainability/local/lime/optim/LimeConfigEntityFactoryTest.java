@@ -18,7 +18,6 @@ package org.kie.trustyai.explainability.local.lime.optim;
 import java.util.Collections;
 import java.util.List;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
@@ -50,24 +49,24 @@ class LimeConfigEntityFactoryTest {
     @Test
     void testWeightingEntities() {
         List<? extends LimeConfigEntity> entities = LimeConfigEntityFactory.createWeightingEntities(new LimeConfig());
-        Assertions.assertThat(entities).isNotNull().hasSize(1);
+        assertThat(entities).isNotNull().hasSize(1);
     }
 
     @Test
     void testSamplingEntities() {
         List<? extends LimeConfigEntity> entities = LimeConfigEntityFactory.createSamplingEntities(new LimeConfig());
-        Assertions.assertThat(entities).isNotNull().hasSize(4);
+        assertThat(entities).isNotNull().hasSize(4);
     }
 
     @Test
     void testEncodingEntities() {
         List<? extends LimeConfigEntity> entities = LimeConfigEntityFactory.createEncodingEntities(new LimeConfig());
-        Assertions.assertThat(entities).isNotNull().hasSize(2);
+        assertThat(entities).isNotNull().hasSize(2);
     }
 
     @Test
     void testProximityEntities() {
         List<? extends LimeConfigEntity> entities = LimeConfigEntityFactory.createProximityEntities(new LimeConfig());
-        Assertions.assertThat(entities).isNotNull().hasSize(4);
+        assertThat(entities).isNotNull().hasSize(4);
     }
 }
