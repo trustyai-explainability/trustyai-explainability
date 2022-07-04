@@ -168,7 +168,8 @@ public class CounterfactualEntityFactory {
                     entity = URIEntity.from(feature, ((URIFeatureDomain) featureDomain).getCategories());
                 } else {
                     entity = CategoricalEntity.from(feature, ((CategoricalFeatureDomain) featureDomain).getCategories());
-                }            }
+                }
+            }
         } else if (feature.getType() == Type.UNDEFINED) {
             if (isConstrained) {
                 entity = FixedObjectEntity.from(feature);
@@ -199,7 +200,7 @@ public class CounterfactualEntityFactory {
     public static List<CounterfactualEntity> createEntities(PredictionInput predictionInput) {
         final List<Feature> linearizedFeatures = CompositeFeatureUtils.flattenFeatures(predictionInput.getFeatures());
         return linearizedFeatures.stream().map(
-                (Feature feature) -> CounterfactualEntityFactory.from(feature, feature.getDistribution()))
+                        (Feature feature) -> CounterfactualEntityFactory.from(feature, feature.getDistribution()))
                 .collect(Collectors.toList());
     }
 }
