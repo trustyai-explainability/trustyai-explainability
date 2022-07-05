@@ -33,6 +33,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntityFactory;
+import org.kie.trustyai.explainability.local.counterfactual.score.DefaultCounterfactualScoreCalculator;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.Output;
@@ -70,7 +71,7 @@ class CounterfactualScoreCalculatorTest {
         Output oy = outputFromFeature(y);
 
         // Use a random threshold, mustn't make a difference
-        final double distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        final double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(Type.NUMBER, ox.getType());
         assertEquals(0.0, Math.abs(distance));
@@ -88,7 +89,7 @@ class CounterfactualScoreCalculatorTest {
         Output oy = outputFromFeature(y);
 
         // Use a random threshold, mustn't make a difference
-        final double distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        final double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(Type.NUMBER, ox.getType());
         assertEquals(0.0, Math.abs(distance));
@@ -106,7 +107,7 @@ class CounterfactualScoreCalculatorTest {
         Output oy = outputFromFeature(y);
 
         // Use a random threshold, mustn't make a difference
-        final double distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        final double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(Type.NUMBER, ox.getType());
         assertEquals(0.0, distance);
@@ -124,7 +125,7 @@ class CounterfactualScoreCalculatorTest {
         Output oy = outputFromFeature(y);
 
         // Use a random threshold, mustn't make a difference
-        final double distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        final double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(Type.NUMBER, ox.getType());
         assertEquals(0.0, distance);
@@ -141,13 +142,13 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.BOOLEAN, ox.getType());
         assertEquals(0.0, distance);
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(0.0, distance);
     }
@@ -161,7 +162,7 @@ class CounterfactualScoreCalculatorTest {
         Output predictionOutput = outputFromFeature(predictionFeature);
         Output goalOutput = outputFromFeature(goalFeature);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.BOOLEAN, goalOutput.getType());
         assertEquals(1.0, distance);
@@ -174,7 +175,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.BOOLEAN, predictionOutput.getType());
         assertEquals(1.0, distance);
@@ -187,7 +188,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.BOOLEAN, predictionOutput.getType());
         assertEquals(0.0, distance);
@@ -204,13 +205,13 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.CATEGORICAL, ox.getType());
         assertEquals(0.0, distance);
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(0.0, distance);
     }
@@ -228,7 +229,7 @@ class CounterfactualScoreCalculatorTest {
         Output predictionOutput = outputFromFeature(predictionFeature);
         Output goalOutput = outputFromFeature(goalFeature);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.CATEGORICAL, goalOutput.getType());
         assertEquals(1.0, distance);
@@ -241,7 +242,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.CATEGORICAL, predictionOutput.getType());
         assertEquals(1.0, distance);
@@ -254,7 +255,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.CATEGORICAL, predictionOutput.getType());
     }
@@ -269,7 +270,7 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        final double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        final double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.TEXT, ox.getType());
         assertEquals(0.0, distance);
@@ -286,7 +287,7 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.NUMBER, ox.getType());
         assertEquals(Type.NUMBER, oy.getType());
@@ -294,7 +295,7 @@ class CounterfactualScoreCalculatorTest {
 
         y = FeatureFactory.newNumericalFeature("y", value - 100);
         oy = outputFromFeature(y);
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertTrue(distance * distance > 0);
     }
@@ -310,7 +311,7 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy, 0.05);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, 0.05);
 
         assertEquals(Type.NUMBER, ox.getType());
         assertEquals(Type.NUMBER, oy.getType());
@@ -318,7 +319,7 @@ class CounterfactualScoreCalculatorTest {
 
         y = FeatureFactory.newNumericalFeature("y", value - 100);
         oy = outputFromFeature(y);
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, 0.05);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, 0.05);
 
         assertTrue(distance * distance > 0);
     }
@@ -336,7 +337,7 @@ class CounterfactualScoreCalculatorTest {
 
             Output predictionOutput = outputFromFeature(predictionFeature);
             Output goalOutput = outputFromFeature(goalFeature);
-            CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+            DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
         });
 
         assertEquals("Unsupported NaN or NULL for numeric feature 'x'",
@@ -350,7 +351,7 @@ class CounterfactualScoreCalculatorTest {
             Output predictionOutput = outputFromFeature(predictionFeature);
             Output goalOutput = outputFromFeature(goalFeature);
 
-            CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+            DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
         });
 
         assertEquals("Unsupported NaN or NULL for numeric feature 'x'",
@@ -364,7 +365,7 @@ class CounterfactualScoreCalculatorTest {
             Output predictionOutput = outputFromFeature(predictionFeature);
             Output goalOutput = outputFromFeature(goalFeature);
 
-            CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+            DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
         });
 
         assertEquals("Unsupported NaN or NULL for numeric feature 'x'",
@@ -382,14 +383,14 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
         assertEquals(Type.NUMBER, ox.getType());
         assertEquals(Type.NUMBER, oy.getType());
         assertEquals(1, distance);
 
         y = FeatureFactory.newNumericalFeature("y", -1.0);
         oy = outputFromFeature(y);
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
         assertEquals(1, distance);
     }
 
@@ -403,19 +404,19 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.NUMBER, ox.getType());
         assertEquals(Type.NUMBER, oy.getType());
         assertTrue(distance * distance > 0);
 
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, 0.1);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, 0.1);
         assertTrue(distance * distance > 0);
 
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, 0.2);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, 0.2);
         assertTrue(distance * distance > 0);
 
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, 0.3);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, 0.3);
         assertFalse(distance * distance > 0);
 
     }
@@ -431,7 +432,7 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy, 0.25);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, 0.25);
 
         assertEquals(Type.NUMBER, ox.getType());
         assertEquals(Type.NUMBER, oy.getType());
@@ -439,7 +440,7 @@ class CounterfactualScoreCalculatorTest {
 
         y = FeatureFactory.newNumericalFeature("y", value - 100);
         oy = outputFromFeature(y);
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, 0.25);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, 0.25);
 
         assertTrue(distance * distance > 0);
     }
@@ -457,7 +458,7 @@ class CounterfactualScoreCalculatorTest {
 
             Output predictionOutput = outputFromFeature(predictionFeature);
             Output goalOutput = outputFromFeature(goalFeature);
-            CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+            DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
         });
 
         assertEquals("Unsupported NaN or NULL for numeric feature 'x'",
@@ -471,7 +472,7 @@ class CounterfactualScoreCalculatorTest {
             Output predictionOutput = outputFromFeature(predictionFeature);
             Output goalOutput = outputFromFeature(goalFeature);
 
-            CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+            DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
         });
 
         assertEquals("Unsupported NaN or NULL for numeric feature 'x'",
@@ -485,7 +486,7 @@ class CounterfactualScoreCalculatorTest {
             Output predictionOutput = outputFromFeature(predictionFeature);
             Output goalOutput = outputFromFeature(goalFeature);
 
-            CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+            DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
         });
 
         assertEquals("Unsupported NaN or NULL for numeric feature 'x'",
@@ -504,7 +505,7 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.BOOLEAN, ox.getType());
         assertEquals(Type.BOOLEAN, oy.getType());
@@ -522,7 +523,7 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy, 0.25);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, 0.25);
 
         assertEquals(Type.BOOLEAN, ox.getType());
         assertEquals(Type.BOOLEAN, oy.getType());
@@ -539,14 +540,14 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.CATEGORICAL, ox.getType());
         assertEquals(Type.CATEGORICAL, oy.getType());
         assertEquals(1.0, distance);
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(1.0, distance);
 
@@ -562,14 +563,14 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.CURRENCY, ox.getType());
         assertEquals(Type.CURRENCY, oy.getType());
         assertEquals(1.0, distance);
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(1.0, distance);
 
@@ -588,7 +589,7 @@ class CounterfactualScoreCalculatorTest {
         Output predictionOutput = outputFromFeature(predictionFeature);
         Output goalOutput = outputFromFeature(goalFeature);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.CURRENCY, goalOutput.getType());
         assertEquals(1.0, distance);
@@ -601,7 +602,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.CURRENCY, predictionOutput.getType());
         assertEquals(1.0, distance);
@@ -614,7 +615,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.CURRENCY, predictionOutput.getType());
     }
@@ -630,13 +631,13 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.CURRENCY, ox.getType());
         assertEquals(0.0, distance);
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(0.0, distance);
     }
@@ -651,14 +652,14 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.BINARY, ox.getType());
         assertEquals(Type.BINARY, oy.getType());
         assertEquals(1.0, distance);
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(1.0, distance);
 
@@ -677,7 +678,7 @@ class CounterfactualScoreCalculatorTest {
         Output predictionOutput = outputFromFeature(predictionFeature);
         Output goalOutput = outputFromFeature(goalFeature);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.BINARY, goalOutput.getType());
         assertEquals(1.0, distance);
@@ -690,7 +691,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.BINARY, predictionOutput.getType());
         assertEquals(1.0, distance);
@@ -703,7 +704,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.BINARY, predictionOutput.getType());
     }
@@ -718,14 +719,14 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.UNDEFINED, ox.getType());
         assertEquals(Type.UNDEFINED, oy.getType());
         assertEquals(1.0, distance);
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(1.0, distance);
 
@@ -742,13 +743,13 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.UNDEFINED, ox.getType());
         assertEquals(0.0, distance);
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(0.0, distance);
     }
@@ -766,7 +767,7 @@ class CounterfactualScoreCalculatorTest {
         Output predictionOutput = outputFromFeature(predictionFeature);
         Output goalOutput = outputFromFeature(goalFeature);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.UNDEFINED, goalOutput.getType());
         assertEquals(1.0, distance);
@@ -779,7 +780,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.UNDEFINED, predictionOutput.getType());
         assertEquals(1.0, distance);
@@ -792,7 +793,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.UNDEFINED, predictionOutput.getType());
     }
@@ -808,13 +809,13 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.BINARY, ox.getType());
         assertEquals(0.0, distance);
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(0.0, distance);
     }
@@ -828,7 +829,7 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.DURATION, ox.getType());
         assertEquals(Type.DURATION, oy.getType());
@@ -839,14 +840,14 @@ class CounterfactualScoreCalculatorTest {
         y = FeatureFactory.newDurationFeature("y", Duration.ofDays(1L));
         ox = outputFromFeature(x);
         oy = outputFromFeature(y);
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
         assertEquals(0.9986, distance, 0.01);
 
         x = FeatureFactory.newDurationFeature("x", Duration.ofDays(2L));
         y = FeatureFactory.newDurationFeature("y", Duration.ofDays(1L));
         ox = outputFromFeature(x);
         oy = outputFromFeature(y);
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
         System.out.println(distance);
         assertEquals(0.5, distance, 1e-4);
     }
@@ -862,7 +863,7 @@ class CounterfactualScoreCalculatorTest {
         Output predictionOutput = outputFromFeature(predictionFeature);
         Output goalOutput = outputFromFeature(goalFeature);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.DURATION, goalOutput.getType());
         assertEquals(1.0, distance);
@@ -874,7 +875,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.DURATION, predictionOutput.getType());
         assertEquals(1.0, distance);
@@ -886,7 +887,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.DURATION, predictionOutput.getType());
         System.out.println(distance);
@@ -903,13 +904,13 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.DURATION, ox.getType());
         assertEquals(0.0, Math.abs(distance));
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(0.0, Math.abs(distance));
     }
@@ -923,7 +924,7 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.TIME, ox.getType());
         assertEquals(Type.TIME, oy.getType());
@@ -934,14 +935,14 @@ class CounterfactualScoreCalculatorTest {
         y = FeatureFactory.newTimeFeature("y", LocalTime.of(12, 57));
         ox = outputFromFeature(x);
         oy = outputFromFeature(y);
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
         assertEquals(0.039, distance, 0.01);
 
         x = FeatureFactory.newTimeFeature("x", LocalTime.of(0, 0));
         y = FeatureFactory.newTimeFeature("y", LocalTime.of(15, 17));
         ox = outputFromFeature(x);
         oy = outputFromFeature(y);
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
         assertEquals(0.636, distance, 0.01);
     }
 
@@ -956,7 +957,7 @@ class CounterfactualScoreCalculatorTest {
         Output predictionOutput = outputFromFeature(predictionFeature);
         Output goalOutput = outputFromFeature(goalFeature);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.TIME, goalOutput.getType());
         assertEquals(1.0, distance);
@@ -968,7 +969,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.TIME, predictionOutput.getType());
         assertEquals(1.0, distance);
@@ -980,7 +981,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = CounterFactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.TIME, predictionOutput.getType());
     }
@@ -996,13 +997,13 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.TIME, ox.getType());
         assertEquals(0.0, Math.abs(distance));
 
         // Use a random threshold, mustn't make a difference
-        distance = CounterFactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
+        distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy, random.nextDouble());
 
         assertEquals(0.0, Math.abs(distance));
     }
@@ -1017,7 +1018,7 @@ class CounterfactualScoreCalculatorTest {
         Output ox = outputFromFeature(x);
         Output oy = outputFromFeature(y);
 
-        double distance = CounterFactualScoreCalculator.outputDistance(ox, oy);
+        double distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
 
         assertEquals(Type.TEXT, ox.getType());
         assertEquals(Type.TEXT, oy.getType());
@@ -1033,7 +1034,7 @@ class CounterfactualScoreCalculatorTest {
         Output oy = outputFromFeature(y);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            CounterFactualScoreCalculator.outputDistance(ox, oy);
+            DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
         });
 
         assertEquals("Features must have the same type. Feature 'x', has type 'categorical' and 'number'",
@@ -1050,7 +1051,7 @@ class CounterfactualScoreCalculatorTest {
         Output oy = outputFromFeature(y);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            CounterFactualScoreCalculator.outputDistance(ox, oy);
+            DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
         });
 
         assertEquals("Feature 'x' has unsupported type 'vector'", exception.getMessage());
@@ -1061,7 +1062,7 @@ class CounterfactualScoreCalculatorTest {
      */
     @Test
     void testGoalSizeMatch() throws ExecutionException, InterruptedException {
-        final CounterFactualScoreCalculator scoreCalculator = new CounterFactualScoreCalculator();
+        final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
         PredictionProvider model = TestUtils.getFeatureSkipModel(0);
 
@@ -1119,7 +1120,7 @@ class CounterfactualScoreCalculatorTest {
      */
     @Test
     void testGoalSizeSmaller() throws ExecutionException, InterruptedException {
-        final CounterFactualScoreCalculator scoreCalculator = new CounterFactualScoreCalculator();
+        final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
         PredictionProvider model = TestUtils.getFeatureSkipModel(0);
 
@@ -1172,7 +1173,7 @@ class CounterfactualScoreCalculatorTest {
      */
     @Test
     void testGoalSizeLarger() throws ExecutionException, InterruptedException {
-        final CounterFactualScoreCalculator scoreCalculator = new CounterFactualScoreCalculator();
+        final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
         PredictionProvider model = TestUtils.getFeatureSkipModel(0);
 
@@ -1226,7 +1227,7 @@ class CounterfactualScoreCalculatorTest {
      */
     @Test
     void testNullBooleanInput() throws ExecutionException, InterruptedException {
-        final CounterFactualScoreCalculator scoreCalculator = new CounterFactualScoreCalculator();
+        final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
         PredictionProvider model = TestUtils.getFeatureSkipModel(0);
 
@@ -1375,7 +1376,7 @@ class CounterfactualScoreCalculatorTest {
                 CounterfactualEntityFactory.createEntities(input);
 
         // Create score calculator and model
-        final CounterFactualScoreCalculator scoreCalculator = new CounterFactualScoreCalculator();
+        final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
         PredictionProvider model = TestUtils.getFeatureSkipModel(0);
 
         // Create goal

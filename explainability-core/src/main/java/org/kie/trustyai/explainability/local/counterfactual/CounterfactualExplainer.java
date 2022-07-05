@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntityFactory;
+import org.kie.trustyai.explainability.local.counterfactual.score.DefaultCounterfactualScoreCalculator;
 import org.kie.trustyai.explainability.model.CounterfactualPrediction;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
@@ -47,7 +48,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides exemplar (counterfactual) explanations for a predictive model.
  * This implementation uses the Constraint Solution Problem solver OptaPlanner to search for
- * counterfactuals which minimize a score calculated by {@link CounterFactualScoreCalculator}.
+ * counterfactuals which minimize a score calculated by {@link DefaultCounterfactualScoreCalculator}.
  */
 public class CounterfactualExplainer implements LocalExplainer<CounterfactualResult> {
 
@@ -67,7 +68,7 @@ public class CounterfactualExplainer implements LocalExplainer<CounterfactualRes
      * The data distribution information (if available) will be used to scale the features during the search.
      * A customizable OptaPlanner solver configuration can be passed using a {@link SolverConfig}.
      * An specific {@link Executor} can also be provided.
-     * The score calculation (as performed by {@link CounterFactualScoreCalculator}) will use the goal threshold
+     * The score calculation (as performed by {@link DefaultCounterfactualScoreCalculator}) will use the goal threshold
      * to if a proposed solution is close enough to the goal to be considered a match. This will only apply
      * to numerical variables. This threshold is a positive ratio of the variable value (e.g. 0.01 of the value)
      * A strict match can be implemented by using a threshold of zero.

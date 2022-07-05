@@ -29,6 +29,8 @@ import org.kie.trustyai.explainability.local.counterfactual.entities.LongEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.ObjectEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.TimeEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.URIEntity;
+import org.kie.trustyai.explainability.local.counterfactual.score.CounterfactualScoreCalculator;
+import org.kie.trustyai.explainability.local.counterfactual.score.DefaultCounterfactualScoreCalculator;
 import org.optaplanner.core.config.localsearch.LocalSearchPhaseConfig;
 import org.optaplanner.core.config.localsearch.decider.acceptor.LocalSearchAcceptorConfig;
 import org.optaplanner.core.config.localsearch.decider.forager.LocalSearchForagerConfig;
@@ -50,6 +52,8 @@ public class SolverConfigBuilder {
     }
 
     public static class Builder {
+
+        private Class<? extends CounterfactualScoreCalculator> scoreCalculator = DefaultCounterfactualScoreCalculator.class;
 
         // create a default termination config if none supplied
         private TerminationConfig terminationConfig = new TerminationConfig();
@@ -77,7 +81,7 @@ public class SolverConfigBuilder {
             solverConfig.setSolutionClass(CounterfactualSolution.class);
 
             ScoreDirectorFactoryConfig scoreDirectorFactoryConfig = new ScoreDirectorFactoryConfig();
-            scoreDirectorFactoryConfig.setEasyScoreCalculatorClass(CounterFactualScoreCalculator.class);
+            scoreDirectorFactoryConfig.setEasyScoreCalculatorClass(scoreCalculator);
             solverConfig.setScoreDirectorFactoryConfig(scoreDirectorFactoryConfig);
 
             solverConfig.setTerminationConfig(terminationConfig);
@@ -112,6 +116,11 @@ public class SolverConfigBuilder {
 
         public Builder withTerminationConfig(TerminationConfig terminationConfig) {
             this.terminationConfig = terminationConfig;
+            return this;
+        }
+
+        public Builder withScoreCalculator(Class<? extends CounterfactualScoreCalculator> scoreCalculator) {
+            this.scoreCalculator = scoreCalculator;
             return this;
         }
     }
