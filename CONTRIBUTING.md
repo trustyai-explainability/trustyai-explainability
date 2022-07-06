@@ -7,7 +7,7 @@ But first, read this page (including the small print at the end).
 
 ## Legal
 
-All original contributions to Kogito are licensed under the
+All original contributions to TrustyAI-explainability are licensed under the
 [ASL - Apache License](https://www.apache.org/licenses/LICENSE-2.0),
 version 2.0 or later, or, if another license is specified as governing the file or directory being
 modified, such other license.
