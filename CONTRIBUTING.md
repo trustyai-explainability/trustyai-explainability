@@ -118,7 +118,7 @@ All submissions, including those by project members, need to be reviewed by othe
 
 ## Feature Proposals
 
-If you would like to see some feature in TrustyAI-explainability, just [pop into our Zulip chat](https://kie.zulipchat.com/) and tell us what you would like to see.
+If you would like to see some feature in TrustyAI-explainability, just [pop into our Zulip chat](https://kie.zulipchat.com/#narrow/stream/232681-trusty-ai) and tell us what you would like to see.
 
 Great feature proposals should include a short **Description** of the feature, the **Motivation** that makes that feature necessary and the **Goals** that are achieved by realizing it. If the feature is deemed worthy, then an Epic will be created.
 
@@ -132,23 +132,16 @@ If you have not done so on this machine, you need to:
 
 ## Build
 
-* Clone the repository, navigate to the directory, invoke `./mvn clean install -Dquickly` from the root directory.
+* Clone the repository, navigate to the directory, invoke `./mvn clean install` from the root directory.
 
 ```bash
 git clone git@github.com:trustyai-explainability/trustyai-explainability.git
 cd trustyai-explainability
-./mvn clean install -Dquickly
+./mvn clean install
 # Wait... success!
 ```
 
-This build skipped all the plugins and just go straight to build and install phases.
-
-By removing the flags, you will run the unit and integration tests.
-It will take much longer to build but will give you more guarantees on your code.
-
-Alternatively, you can invoke `./mvn clean install -DquickTests` from the root directory.
 It will perform the basic formatting validation and will run all the unit tests.
-Use this command for quick checks.
 
 ## Usage
 
