@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -543,8 +544,9 @@ class ShapKernelExplainerTest {
     void testErrorBounds(double noise) throws InterruptedException, ExecutionException {
         for (double interval : new double[] { .95, .975, .99 }) {
             int[] testResults = new int[600];
+            SplittableRandom rn = new SplittableRandom();
+            PredictionProvider model = TestUtils.getNoisySumModel(rn, noise, 64 * 100);
             for (int test = 0; test < 100; test++) {
-                PredictionProvider model = TestUtils.getNoisySumModel(pc.getRandom(), noise);
                 ShapConfig skConfig = testConfig
                         .withBackground(createPIFromMatrix(backgroundAllZeros))
                         .withConfidence(interval)

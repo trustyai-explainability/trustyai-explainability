@@ -60,7 +60,11 @@ public class Value {
     public double asNumber() {
         if (underlyingObject != null) {
             try {
-                if (underlyingObject instanceof Boolean) {
+                if (underlyingObject instanceof Double) {
+                    return (double) underlyingObject;
+                } else if (underlyingObject instanceof Number) {
+                    return ((Number) underlyingObject).doubleValue();
+                } else if (underlyingObject instanceof Boolean) {
                     return (boolean) underlyingObject ? 1d : 0d;
                 } else {
                     return Double.parseDouble(asString());
