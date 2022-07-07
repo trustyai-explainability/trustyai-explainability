@@ -848,7 +848,7 @@ class CounterfactualScoreCalculatorTest {
         ox = outputFromFeature(x);
         oy = outputFromFeature(y);
         distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
-        System.out.println(distance);
+
         assertEquals(0.5, distance, 1e-4);
     }
 
@@ -890,7 +890,7 @@ class CounterfactualScoreCalculatorTest {
         distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.DURATION, predictionOutput.getType());
-        System.out.println(distance);
+        
     }
 
     @ParameterizedTest
