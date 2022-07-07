@@ -890,7 +890,7 @@ class CounterfactualScoreCalculatorTest {
         distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
 
         assertEquals(Type.DURATION, predictionOutput.getType());
-        
+
     }
 
     @ParameterizedTest
