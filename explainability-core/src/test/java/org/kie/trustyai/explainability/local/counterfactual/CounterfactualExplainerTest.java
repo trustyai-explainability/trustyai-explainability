@@ -23,7 +23,6 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -96,7 +95,6 @@ class CounterfactualExplainerTest {
         this.solverManagerFactory = mock(Function.class);
         this.solverManager = mock(SolverManager.class);
     }
-
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2 })
