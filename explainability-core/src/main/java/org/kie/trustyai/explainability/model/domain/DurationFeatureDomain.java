@@ -64,5 +64,7 @@ public class DurationFeatureDomain extends NumericalFeatureDomain {
     }
 
     @Override
-    public String toString(){ return String.format("%f->%f", getLowerBound(), getUpperBound());}
+    public String toString() {
+        return String.format("%f->%f", getLowerBound(), getUpperBound());
+    }
 }

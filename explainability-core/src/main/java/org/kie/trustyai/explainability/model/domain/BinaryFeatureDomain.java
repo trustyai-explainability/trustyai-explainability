@@ -46,5 +46,7 @@ public class BinaryFeatureDomain extends AbstractCategoricalFeatureDomain<ByteBu
     }
 
     @Override
-    public String toString(){ return getCategories().toString(); }
+    public String toString() {
+        return getCategories().toString();
+    }
 }

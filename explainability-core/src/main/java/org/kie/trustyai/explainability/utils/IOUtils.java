@@ -16,6 +16,13 @@
 
 package org.kie.trustyai.explainability.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.util.Pair;
 import org.kie.trustyai.explainability.model.Feature;
@@ -24,34 +31,29 @@ import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.Type;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 public class IOUtils {
     // === ROUMDING HELPERS ============================================================================================
     /**
      * Round a given double to N decimal places
+     * 
      * @param d: Double to round
      * @param decimalPlaces: decimal places to round to
      *
      * @return A string representation of the rounded double
      */
-    public static String roundedString(double d, int decimalPlaces){
+    public static String roundedString(double d, int decimalPlaces) {
         return String.format(String.format("%%.%df", decimalPlaces), d);
     }
 
     /**
      * Round a given Feature to N decimal places, if applicable
+     * 
      * @param f: Feature to round
      * @param decimalPlaces: decimal places to round to
      *
      * @return A string representation of the rounded feature
      */
-    public static String roundedString(Feature f, int decimalPlaces){
+    public static String roundedString(Feature f, int decimalPlaces) {
         if (f.getType().equals(Type.NUMBER)) {
             return roundedString(f.getValue().asNumber(), decimalPlaces);
         } else {
@@ -61,12 +63,13 @@ public class IOUtils {
 
     /**
      * Round a given output to N decimal places, if applicable
+     * 
      * @param o: Output to round
      * @param decimalPlaces: decimal places to round to
      *
      * @return A string representation of the rounded output
      */
-    public static String roundedString(Output o, int decimalPlaces){
+    public static String roundedString(Output o, int decimalPlaces) {
         if (o.getType().equals(Type.NUMBER)) {
             return roundedString(o.getValue().asNumber(), decimalPlaces);
         } else {
@@ -74,25 +77,26 @@ public class IOUtils {
         }
     }
 
-
     // === TABLE GENERATORS ============================================================================================
     /**
      * Generate a well-formatted table
+     * 
      * @param heading: The table name
      * @param columns: A list of columns, each a list of column values
      *
      * @return Pair<String, Integer> of the formatted table and its max line width
      */
-    public static Pair<String, Integer> generateTable(String heading, List<List<String>> columns){
-        List<String> separators = IntStream.range(0, columns.size()-1).mapToObj(i -> " |").collect(Collectors.toList());
+    public static Pair<String, Integer> generateTable(String heading, List<List<String>> columns) {
+        List<String> separators = IntStream.range(0, columns.size() - 1).mapToObj(i -> " |").collect(Collectors.toList());
         return generateTable(List.of(heading), List.of(0), List.of(), columns, separators);
     }
 
     /**
      * Generate a well-formatted table
+     * 
      * @param headings: The table names (one for each headingPosition)
      * @param headingPositions: A list of integers, describing which column indeces represent column names
-     *          For example, headingPositions = [0, 3], columns = [[Column Name 1, value, value, Column Name 2, value, etc]]
+     *        For example, headingPositions = [0, 3], columns = [[Column Name 1, value, value, Column Name 2, value, etc]]
      * @param lineSeparatorPositions: A list of integers, describing after which rows to place table seperator
      * @param columns: A list of columns, each a list of column values
      * @param separators: A list of strings to be used as the column separators
@@ -100,9 +104,9 @@ public class IOUtils {
      * @return Pair<String, Integer> of the formatted table and its max line width
      */
     public static Pair<String, Integer> generateTable(List<String> headings, List<Integer> headingPositions,
-                                                      List<Integer> lineSeparatorPositions, List<List<String>> columns,
-                                                      List<String> separators) {
-        int[] largestCellWidths = new int[columns.size()+separators.size()];
+            List<Integer> lineSeparatorPositions, List<List<String>> columns,
+            List<String> separators) {
+        int[] largestCellWidths = new int[columns.size() + separators.size()];
         StringBuilder formatter = new StringBuilder();
         int spacers = 0;
         for (int i = 0; i < columns.size(); i++) {
@@ -130,9 +134,7 @@ public class IOUtils {
                         String.format(
                                 "=== %s %s%n",
                                 heading,
-                                StringUtils.repeat("=", Math.max(0, totalWidth - heading.length() - 5))
-                        )
-                );
+                                StringUtils.repeat("=", Math.max(0, totalWidth - heading.length() - 5))));
 
                 // print row names
                 table.append(String.format(formatString, columns.stream().map(cs -> cs.get(finalI)).toArray()));
@@ -144,19 +146,18 @@ public class IOUtils {
             }
 
             // print header
-            if (headingPositions.contains(i+1)){
+            if (headingPositions.contains(i + 1)) {
                 table.append(StringUtils.repeat("=", totalWidth)).append(String.format("%n"));
             }
-            if (lineSeparatorPositions.contains(i+1)) {
+            if (lineSeparatorPositions.contains(i + 1)) {
                 table.append(StringUtils.repeat("-", totalWidth)).append(String.format("%n"));
             }
-            if (i == columns.get(0).size()-1){
+            if (i == columns.get(0).size() - 1) {
                 table.append(StringUtils.repeat("=", totalWidth));
             }
         }
         return new Pair<>(table.toString(), totalWidth);
     }
-
 
     // === LIME I/O ====================================================================================================
     /**
@@ -170,6 +171,7 @@ public class IOUtils {
 
     /**
      * Represent LIME results as a string
+     * 
      * @param decimalPlaces The decimal places to round all numeric values in the table to
      *
      * @return LIME results string
@@ -186,10 +188,10 @@ public class IOUtils {
 
         List<Map.Entry<String, Saliency>> entries = results.entrySet().stream().collect(Collectors.toList());
 
-        for (int s=0; s<entries.size(); s++){
+        for (int s = 0; s < entries.size(); s++) {
             Saliency saliency = entries.get(s).getValue();
             List<FeatureImportance> pfis = saliency.getPerFeatureImportance();
-            headers.add(saliency.getOutput().getName()+" LIME Scores");
+            headers.add(saliency.getOutput().getName() + " LIME Scores");
             headerPositions.add(lineIDX);
 
             featureNames.add("Feature");
@@ -197,8 +199,7 @@ public class IOUtils {
             limeScores.add("Saliency ");
             lineIDX++;
 
-
-            for (int i=0; i<pfis.size(); i++){
+            for (int i = 0; i < pfis.size(); i++) {
                 featureNames.add(pfis.get(i).getFeature().getName() + " = ");
                 featureValues.add(IOUtils.roundedString(pfis.get(i).getFeature(), decimalPlaces));
                 limeScores.add(IOUtils.roundedString(pfis.get(i).getScore(), decimalPlaces));
@@ -216,7 +217,6 @@ public class IOUtils {
                 headerPositions,
                 lineSeparatorPositions,
                 List.of(featureNames, featureValues, limeScores),
-                List.of("", " | ")
-        ).getFirst();
+                List.of("", " | ")).getFirst();
     }
 }

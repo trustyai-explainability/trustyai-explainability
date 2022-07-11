@@ -20,7 +20,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.concurrent.CompletableFuture;
@@ -38,8 +37,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
-import org.kie.trustyai.explainability.local.lime.LimeConfig;
-import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.FeatureImportance;
@@ -53,7 +50,6 @@ import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
-import org.kie.trustyai.explainability.utils.IOUtils;
 import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -864,10 +860,10 @@ class ShapKernelExplainerTest {
         Random random = new Random(0L);
 
         List<PredictionInput> background = new ArrayList<>();
-        for (int bg=0; bg<1; bg++) {
+        for (int bg = 0; bg < 1; bg++) {
             List<Feature> features = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
-                if (i==2){
+                if (i == 2) {
                     features.add(new Feature("Feature " + i, Type.CATEGORICAL, new Value("B")));
                 } else {
                     features.add(new Feature("Feature " + i, Type.NUMBER, new Value(0)));
@@ -882,14 +878,13 @@ class ShapKernelExplainerTest {
 
         List<Feature> features = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            if (i==2) {
+            if (i == 2) {
                 features.add(new Feature(
                         "Feature " + i,
                         Type.CATEGORICAL,
                         new Value("A"),
                         false,
-                        CategoricalFeatureDomain.create(List.of("A","B")))
-                );
+                        CategoricalFeatureDomain.create(List.of("A", "B"))));
             } else {
                 features.add(new Feature("Feature " + i, Type.NUMBER, new Value(i)));
             }

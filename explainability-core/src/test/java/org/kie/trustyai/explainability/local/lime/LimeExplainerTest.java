@@ -356,14 +356,13 @@ class LimeExplainerTest {
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         List<Feature> features = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            if (i==2) {
+            if (i == 2) {
                 features.add(new Feature(
                         "Feature " + i,
                         Type.CATEGORICAL,
                         new Value("A"),
                         false,
-                        CategoricalFeatureDomain.create(List.of("A","B")))
-                );
+                        CategoricalFeatureDomain.create(List.of("A", "B"))));
             } else {
                 features.add(new Feature("Feature " + i, Type.NUMBER, new Value(i)));
             }

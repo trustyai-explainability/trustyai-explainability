@@ -46,5 +46,7 @@ public class URIFeatureDomain extends AbstractCategoricalFeatureDomain<URI> {
     }
 
     @Override
-    public String toString(){ return getCategories().toString(); }
+    public String toString() {
+        return getCategories().toString();
+    }
 }

@@ -908,7 +908,6 @@ class CounterfactualExplainerTest {
                         Config.INSTANCE.getAsyncTimeUnit());
     }
 
-
     @Test
     void testToString()
             throws ExecutionException, InterruptedException, TimeoutException {
@@ -916,14 +915,13 @@ class CounterfactualExplainerTest {
         random.setSeed(0L);
         List<Feature> features = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            if (i==2) {
+            if (i == 2) {
                 features.add(new Feature(
                         "Feature " + i,
                         Type.CATEGORICAL,
                         new Value("A"),
                         false,
-                        CategoricalFeatureDomain.create(List.of("A","B")))
-                );
+                        CategoricalFeatureDomain.create(List.of("A", "B"))));
             } else {
                 features.add(
                         new Feature(
@@ -938,8 +936,7 @@ class CounterfactualExplainerTest {
 
         final List<Output> goal = List.of(
                 new Output("Semi-Categorical", Type.NUMBER, new Value(1), 0.0),
-                new Output("Semi-Categorical*2", Type.NUMBER, new Value(2), 0.0)
-        );
+                new Output("Semi-Categorical*2", Type.NUMBER, new Value(2), 0.0));
         List<Output> originalOutputs = model.predictAsync(List.of(new PredictionInput(features))).get().get(0).getOutputs();
 
         final CounterfactualResult result = runCounterfactualSearch(0L, goal, features, model, .01, 100_000);

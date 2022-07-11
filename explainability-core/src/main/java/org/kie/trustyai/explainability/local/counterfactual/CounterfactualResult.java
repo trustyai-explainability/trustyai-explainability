@@ -88,12 +88,13 @@ public class CounterfactualResult {
         return sequenceId;
     }
 
-    public String toString(List<Output> originalOutputs, List<Output> goal){
+    public String toString(List<Output> originalOutputs, List<Output> goal) {
         return toString(3, originalOutputs, goal);
     }
-    /**
 
     /**
+     * 
+     * /**
      * Represent the counterfactual result as a string
      *
      * @param decimalPlaces The amount of decimals to round the numeric values to
@@ -101,13 +102,13 @@ public class CounterfactualResult {
      * @param goal The counterfactual goal
      * @return CounterfactualResult string
      */
-    public String toString(int decimalPlaces, List<Output> originalOutputs, List<Output> goal){
+    public String toString(int decimalPlaces, List<Output> originalOutputs, List<Output> goal) {
         List<Feature> newFeatures = this.getEntities().stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList());
         List<String> featureNames = new ArrayList<>(List.of("Features"));
         List<String> featureDomains = new ArrayList<>(List.of("Domain"));
         List<String> featureValues = new ArrayList<>(List.of("Found Value"));
         List<String> originalFeatureValues = new ArrayList<>(List.of("Original Value"));
-        for (int i=0; i< newFeatures.size(); i++){
+        for (int i = 0; i < newFeatures.size(); i++) {
             featureNames.add(newFeatures.get(i).getName());
             featureDomains.add(this.features.get(i).getDomain().toString());
             featureValues.add(IOUtils.roundedString(newFeatures.get(i), decimalPlaces));
@@ -121,7 +122,7 @@ public class CounterfactualResult {
         List<String> originalOutputValues = new ArrayList<>(List.of("Original Value"));
         List<String> outputValues = new ArrayList<>(List.of("Found Value"));
 
-        for (int i=0; i<newOutputs.size(); i++){
+        for (int i = 0; i < newOutputs.size(); i++) {
             outputNames.add(newOutputs.get(i).getName());
             goalOutputs.add(IOUtils.roundedString(goal.get(i), decimalPlaces));
             originalOutputValues.add(IOUtils.roundedString(originalOutputs.get(i), decimalPlaces));
@@ -137,7 +138,7 @@ public class CounterfactualResult {
         Pair<String, Integer> tableAndWidth = IOUtils.generateTable(
                 List.of("Counterfactual Search Results"),
                 List.of(0),
-                List.of(featureTableLength, featureTableLength+1),
+                List.of(featureTableLength, featureTableLength + 1),
                 List.of(featureNames, featureDomains, originalFeatureValues, featureValues),
                 List.of(" |", " | ", "  →"));
 

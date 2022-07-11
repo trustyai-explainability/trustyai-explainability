@@ -45,5 +45,7 @@ public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<Object
     }
 
     @Override
-    public String toString(){ return getCategories().toString(); }
+    public String toString() {
+        return getCategories().toString();
+    }
 }

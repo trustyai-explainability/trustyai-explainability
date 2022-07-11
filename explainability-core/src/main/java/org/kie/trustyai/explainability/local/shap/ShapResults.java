@@ -20,16 +20,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.IntFunction;
-import java.util.stream.Collectors;
 
 import org.apache.commons.math3.linear.RealVector;
-import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
-import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureImportance;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.utils.IOUtils;
-import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 
 public class ShapResults {
     private final Saliency[] saliencies;
@@ -95,6 +90,7 @@ public class ShapResults {
 
     /**
      * Represent the ShapResult as a string
+     * 
      * @param decimalPlaces The decimal places to round all numeric values in the table to
      *
      * @return ShapResult string
@@ -110,10 +106,10 @@ public class ShapResults {
         List<Integer> lineSeparatorPositions = new ArrayList<>();
         int lineIDX = 0;
 
-        for (int s=0; s<saliencies.length; s++){
+        for (int s = 0; s < saliencies.length; s++) {
             Saliency saliency = saliencies[s];
             List<FeatureImportance> pfis = saliency.getPerFeatureImportance();
-            headers.add(saliency.getOutput().getName()+" SHAP Values");
+            headers.add(saliency.getOutput().getName() + " SHAP Values");
             headerPositions.add(lineIDX);
 
             featureNames.add("Feature");
@@ -128,7 +124,7 @@ public class ShapResults {
             confidences.add("");
             lineIDX++;
 
-            for (int i=0; i<pfis.size(); i++){
+            for (int i = 0; i < pfis.size(); i++) {
                 featureNames.add(pfis.get(i).getFeature().getName() + " = ");
                 featureValues.add(IOUtils.roundedString(pfis.get(i).getFeature(), decimalPlaces));
                 shapValues.add(IOUtils.roundedString(pfis.get(i).getScore(), decimalPlaces));
@@ -148,7 +144,6 @@ public class ShapResults {
                 headerPositions,
                 lineSeparatorPositions,
                 List.of(featureNames, featureValues, shapValues, confidences),
-                List.of("", " | ", "")
-        ).getFirst();
+                List.of("", " | ", "")).getFirst();
     }
 }

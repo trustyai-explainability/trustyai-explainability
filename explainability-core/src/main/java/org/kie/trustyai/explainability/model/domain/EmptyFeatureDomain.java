@@ -44,5 +44,7 @@ public class EmptyFeatureDomain implements FeatureDomain<Object> {
     }
 
     @Override
-    public String toString() { return "null"; }
+    public String toString() {
+        return "null";
+    }
 }
