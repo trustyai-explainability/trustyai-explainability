@@ -219,10 +219,6 @@ public class DefaultCounterfactualScoreCalculator implements CounterfactualScore
                     }
                 }
                 primaryHardScore -= Math.sqrt(outputDistance);
-                logger.debug("Distance penalty: {}", primaryHardScore);
-
-                logger.debug("Confidence threshold penalty: {}", tertiaryHardScore);
-
             } else {
                 final GoalScore score = solution.getGoalCriteria().apply(outputs);
                 primaryHardScore -= Math.abs(score.getDistance());
