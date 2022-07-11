@@ -898,8 +898,30 @@ class ShapKernelExplainerTest {
         ShapResults results = ske.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         String table = results.toString();
-        //System.out.println(table);
-        assertTrue(true);
+        assertEquals("=== Semi-Categorical SHAP Values ===================\n" +
+                "      Feature      Value |  SHAP Value  | Confidence\n" +
+                "----------------------------------------------------\n" +
+                "                   FNull |     -10.000              \n" +
+                " Feature 0 =       0.000 |       0.000         0.000\n" +
+                " Feature 1 =       1.000 |       1.000         0.000\n" +
+                " Feature 2 =           A |      -0.000         0.000\n" +
+                " Feature 3 =       3.000 |       3.000         0.000\n" +
+                " Feature 4 =       4.000 |       4.000         0.000\n" +
+                "----------------------------------------------------\n" +
+                "              Prediction |      -2.000              \n" +
+                "====================================================\n" +
+                "=== Semi-Categorical*2 SHAP Values =================\n" +
+                "      Feature      Value |  SHAP Value  | Confidence\n" +
+                "----------------------------------------------------\n" +
+                "                   FNull |     -20.000              \n" +
+                " Feature 0 =       0.000 |       0.000         0.000\n" +
+                " Feature 1 =       1.000 |       2.000         0.000\n" +
+                " Feature 2 =           A |      -0.000         0.000\n" +
+                " Feature 3 =       3.000 |       6.000         0.000\n" +
+                " Feature 4 =       4.000 |       8.000         0.000\n" +
+                "----------------------------------------------------\n" +
+                "              Prediction |      -4.000              \n" +
+                "====================================================", table);
     }
 
 }

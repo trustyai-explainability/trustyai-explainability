@@ -941,8 +941,22 @@ class CounterfactualExplainerTest {
 
         final CounterfactualResult result = runCounterfactualSearch(0L, goal, features, model, .01, 100_000);
         String resultString = result.toString(originalOutputs, goal);
-        //System.out.println(resultString);
-        assertTrue(true);
+        assertEquals("=== Counterfactual Search Results ========================================\n" +
+                "           Features |              Domain |  Original Value  → Found Value\n" +
+                "--------------------------------------------------------------------------\n" +
+                "          Feature 0 | -5.000000->5.000000 |           0.000  →       1.000\n" +
+                "          Feature 1 | -5.000000->5.000000 |           1.000  →       4.000\n" +
+                "          Feature 2 |              [A, B] |               A  →           B\n" +
+                "          Feature 3 | -5.000000->5.000000 |           3.000  →       3.000\n" +
+                "          Feature 4 | -5.000000->5.000000 |           4.000  →       3.000\n" +
+                "--------------------------------------------------------------------------\n" +
+                "            Outputs |                Goal |  Original Value  → Found Value\n" +
+                "--------------------------------------------------------------------------\n" +
+                "   Semi-Categorical |               1.000 |          -2.000  →       1.000\n" +
+                " Semi-Categorical*2 |               2.000 |          -4.000  →       2.000\n" +
+                "==========================================================================\n" +
+                "Meets Validity Criteria? true\n" +
+                "==========================================================================", resultString);
     }
 
 }

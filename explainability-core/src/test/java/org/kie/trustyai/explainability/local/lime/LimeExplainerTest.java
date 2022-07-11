@@ -51,9 +51,9 @@ import org.kie.trustyai.explainability.utils.IOUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 class LimeExplainerTest {
@@ -376,7 +376,27 @@ class LimeExplainerTest {
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         String table = IOUtils.LimeResultsToString(saliencyMap);
-        //System.out.println(table);
-        assertTrue(true);
+        assertEquals("=== Semi-Categorical*2 LIME Scores ==\n" +
+                "      Feature      Value |  Saliency \n" +
+                "-------------------------------------\n" +
+                " Feature 0 =       0.000 |     -3.964\n" +
+                " Feature 1 =       1.000 |     -0.760\n" +
+                " Feature 2 =           A |     -5.363\n" +
+                " Feature 3 =       3.000 |      2.887\n" +
+                " Feature 4 =       4.000 |      2.864\n" +
+                "-------------------------------------\n" +
+                "              Prediction |     -4.000\n" +
+                "=====================================\n" +
+                "=== Semi-Categorical LIME Scores ====\n" +
+                "      Feature      Value |  Saliency \n" +
+                "-------------------------------------\n" +
+                " Feature 0 =       0.000 |     -2.030\n" +
+                " Feature 1 =       1.000 |     -0.400\n" +
+                " Feature 2 =           A |     -2.746\n" +
+                " Feature 3 =       3.000 |      1.404\n" +
+                " Feature 4 =       4.000 |      1.370\n" +
+                "-------------------------------------\n" +
+                "              Prediction |     -2.000\n" +
+                "=====================================", table);
     }
 }
