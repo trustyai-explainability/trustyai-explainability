@@ -43,4 +43,7 @@ public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<Object
     public static FeatureDomain<Object> create(Object... categories) {
         return new ObjectFeatureDomain(new HashSet<>(Arrays.asList(categories)));
     }
+
+    @Override
+    public String toString(){ return getCategories().toString(); }
 }

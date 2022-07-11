@@ -58,4 +58,7 @@ public class TimeFeatureDomain extends NumericalFeatureDomain {
         return null;
     }
 
+    @Override
+    public String toString(){ return String.format("%f->%f", getLowerBound(), getUpperBound());}
+
 }

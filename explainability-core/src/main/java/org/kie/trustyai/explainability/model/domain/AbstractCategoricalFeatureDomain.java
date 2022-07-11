@@ -45,4 +45,7 @@ public class AbstractCategoricalFeatureDomain<T> implements FeatureDomain<T> {
         return this.categories;
     }
 
+    @Override
+    public String toString(){ return getCategories().toString(); }
+
 }

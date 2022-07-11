@@ -39,9 +39,9 @@ class ShapResultsTest {
         for (int i = 0; i < nOutputs; i++) {
             List<FeatureImportance> fis = new ArrayList<>();
             for (int j = 0; j < nFeatures; j++) {
-                fis.add(new FeatureImportance(new Feature("f" + String.valueOf(j), Type.NUMBER, new Value(j)), i * j * scalar1));
+                fis.add(new FeatureImportance(new Feature("Feature " + String.valueOf(j), Type.NUMBER, new Value(j)), (i+1) * j * scalar1));
             }
-            saliencies[i] = new Saliency(new Output("o" + String.valueOf(i), Type.NUMBER, new Value(i), 1.0), fis);
+            saliencies[i] = new Saliency(new Output("Output " + String.valueOf(i), Type.NUMBER, new Value(i+1), 1.0), fis);
         }
         RealVector fnull = MatrixUtils.createRealVector(new double[nOutputs]);
         fnull.mapAddToSelf(scalar2);
@@ -94,12 +94,5 @@ class ShapResultsTest {
         ShapResults sr2 = buildShapResults(2, 2, 1, 10);
         assertNotEquals(sr1, sr2);
         assertNotEquals(sr1.hashCode(), sr2.hashCode());
-    }
-
-    @Test
-    void testToString() {
-        ShapResults sr = buildShapResults(2, 10, 1, 1);
-        String srs = sr.toString(2);
-        assertTrue(true);
     }
 }

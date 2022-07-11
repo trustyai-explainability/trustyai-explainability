@@ -15,6 +15,7 @@
  */
 package org.kie.trustyai.explainability.model.domain;
 
+import javax.enterprise.inject.Default;
 import java.util.Set;
 
 /**
@@ -50,5 +51,13 @@ public interface FeatureDomain<T> {
      * @return the end value
      */
     Set<T> getCategories();
+
+    /**
+     * Get a string representation of the domain
+     *
+     * @return the string representation
+     */
+    String toString();
+
 
 }

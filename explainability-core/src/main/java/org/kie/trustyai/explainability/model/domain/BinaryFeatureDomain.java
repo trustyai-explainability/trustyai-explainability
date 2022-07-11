@@ -44,4 +44,7 @@ public class BinaryFeatureDomain extends AbstractCategoricalFeatureDomain<ByteBu
     public static FeatureDomain<ByteBuffer> create(ByteBuffer... categories) {
         return new BinaryFeatureDomain(new HashSet<>(Arrays.asList(categories)));
     }
+
+    @Override
+    public String toString(){ return getCategories().toString(); }
 }
