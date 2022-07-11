@@ -903,7 +903,7 @@ class ShapKernelExplainerTest {
         ShapResults results = ske.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         String table = results.toString();
-        System.out.println(table);
+        //System.out.println(table);
         assertTrue(true);
     }
 

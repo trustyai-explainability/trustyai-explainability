@@ -377,7 +377,7 @@ class LimeExplainerTest {
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         String table = IOUtils.LimeResultsToString(saliencyMap);
-        System.out.println(table);
+        //System.out.println(table);
         assertTrue(true);
     }
 }

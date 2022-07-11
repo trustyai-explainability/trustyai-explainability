@@ -944,7 +944,7 @@ class CounterfactualExplainerTest {
 
         final CounterfactualResult result = runCounterfactualSearch(0L, goal, features, model, .01, 100_000);
         String resultString = result.toString(originalOutputs, goal);
-        System.out.println(resultString);
+        //System.out.println(resultString);
         assertTrue(true);
     }
 
