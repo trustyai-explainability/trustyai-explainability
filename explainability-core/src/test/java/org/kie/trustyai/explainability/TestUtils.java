@@ -17,10 +17,11 @@ package org.kie.trustyai.explainability;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
@@ -75,14 +76,15 @@ public class TestUtils {
         });
     }
 
-    public static PredictionProvider getNoisySumModel(Random rn, double noiseMagnitude) {
+    public static PredictionProvider getNoisySumModel(SplittableRandom rn, double noiseMagnitude, long noiseSamples) {
         return inputs -> supplyAsync(() -> {
+            Iterator<Double> noiseStream = rn.doubles(noiseSamples).iterator();
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
                 List<Feature> features = predictionInput.getFeatures();
                 double result = 0;
                 for (int i = 0; i < features.size(); i++) {
-                    result += features.get(i).getValue().asNumber() + ((rn.nextDouble() - .5) * noiseMagnitude);
+                    result += features.get(i).getValue().asNumber() + ((noiseStream.next() - .5) * noiseMagnitude);
                 }
                 PredictionOutput predictionOutput = new PredictionOutput(
                         List.of(new Output("noisy-sum", Type.NUMBER, new Value(result), 1d)));
