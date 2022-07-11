@@ -848,7 +848,6 @@ class CounterfactualScoreCalculatorTest {
         ox = outputFromFeature(x);
         oy = outputFromFeature(y);
         distance = DefaultCounterfactualScoreCalculator.outputDistance(ox, oy);
-        System.out.println(distance);
         assertEquals(0.5, distance, 1e-4);
     }
 
@@ -887,10 +886,7 @@ class CounterfactualScoreCalculatorTest {
         predictionOutput = outputFromFeature(predictionFeature);
         goalOutput = outputFromFeature(goalFeature);
 
-        distance = DefaultCounterfactualScoreCalculator.outputDistance(predictionOutput, goalOutput);
-
         assertEquals(Type.DURATION, predictionOutput.getType());
-        System.out.println(distance);
     }
 
     @ParameterizedTest
@@ -1094,7 +1090,7 @@ class CounterfactualScoreCalculatorTest {
         goal.add(new Output("f-3", Type.BOOLEAN, new Value(true), 0.0));
 
         final CounterfactualSolution solution =
-                new CounterfactualSolution(entities, features, model, goal, UUID.randomUUID(), UUID.randomUUID(), 0.0);
+                new CounterfactualSolution(entities, features, model, goal, UUID.randomUUID(), UUID.randomUUID(), null, 0.0);
 
         BendableBigDecimalScore score = scoreCalculator.calculateScore(solution);
 
@@ -1157,7 +1153,7 @@ class CounterfactualScoreCalculatorTest {
         assertEquals(2, predictionOutputs.get(0).getOutputs().size()); // Single prediction with two features
 
         final CounterfactualSolution solution =
-                new CounterfactualSolution(entities, features, model, goal, UUID.randomUUID(), UUID.randomUUID(), 0.0);
+                new CounterfactualSolution(entities, features, model, goal, UUID.randomUUID(), UUID.randomUUID(), null, 0.0);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             scoreCalculator.calculateScore(solution);
@@ -1212,7 +1208,7 @@ class CounterfactualScoreCalculatorTest {
         assertEquals(2, predictionOutputs.get(0).getOutputs().size()); // Single prediction with two features
 
         final CounterfactualSolution solution =
-                new CounterfactualSolution(entities, features, model, goal, UUID.randomUUID(), UUID.randomUUID(), 0.0);
+                new CounterfactualSolution(entities, features, model, goal, UUID.randomUUID(), UUID.randomUUID(), null, 0.0);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             scoreCalculator.calculateScore(solution);
@@ -1259,7 +1255,7 @@ class CounterfactualScoreCalculatorTest {
         goal.add(new Output("f-3", Type.BOOLEAN, new Value(true), 0.0));
 
         final CounterfactualSolution solution =
-                new CounterfactualSolution(entities, features, model, goal, UUID.randomUUID(), UUID.randomUUID(), 0.0);
+                new CounterfactualSolution(entities, features, model, goal, UUID.randomUUID(), UUID.randomUUID(), null, 0.0);
 
         BendableBigDecimalScore score = scoreCalculator.calculateScore(solution);
 
@@ -1386,7 +1382,7 @@ class CounterfactualScoreCalculatorTest {
         }
 
         final CounterfactualSolution solution =
-                new CounterfactualSolution(entities, features, model, goal, UUID.randomUUID(), UUID.randomUUID(), 0.0);
+                new CounterfactualSolution(entities, features, model, goal, UUID.randomUUID(), UUID.randomUUID(), null, 0.0);
 
         final BendableBigDecimalScore score = scoreCalculator.calculateScore(solution);
 

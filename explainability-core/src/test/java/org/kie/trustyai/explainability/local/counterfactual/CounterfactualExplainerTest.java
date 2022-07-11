@@ -39,9 +39,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
+import org.kie.trustyai.explainability.local.counterfactual.score.CounterfactualGoalCriteria;
+import org.kie.trustyai.explainability.local.counterfactual.score.GoalScore;
 import org.kie.trustyai.explainability.local.counterfactual.score.MockCounterFactualScoreCalculator;
 import org.kie.trustyai.explainability.model.CounterfactualPrediction;
 import org.kie.trustyai.explainability.model.DataDomain;
+import org.kie.trustyai.explainability.model.DynamicGoalPrediction;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureDistribution;
 import org.kie.trustyai.explainability.model.FeatureFactory;
@@ -127,6 +130,31 @@ class CounterfactualExplainerTest {
                         output,
                         null,
                         UUID.randomUUID(),
+                        null);
+        return explainer.explainAsync(prediction, model)
+                .get(predictionTimeOut, predictionTimeUnit);
+    }
+
+    private CounterfactualResult runCounterfactualDynamicGoalSearch(Long randomSeed, CounterfactualGoalCriteria goalScoreFunction,
+            List<Feature> features,
+            PredictionProvider model,
+            double goalThresold,
+            long steps) throws InterruptedException, ExecutionException, TimeoutException {
+        final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
+        final SolverConfig solverConfig = SolverConfigBuilder
+                .builder().withTerminationConfig(terminationConfig).build();
+        solverConfig.setRandomSeed(randomSeed);
+        solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
+        final CounterfactualConfig counterfactualConfig = new CounterfactualConfig();
+        counterfactualConfig.withSolverConfig(solverConfig).withGoalThreshold(goalThresold);
+        final CounterfactualExplainer explainer = new CounterfactualExplainer(counterfactualConfig);
+        final PredictionInput input = new PredictionInput(features);
+        Prediction prediction =
+                new DynamicGoalPrediction(input,
+                        null,
+                        null,
+                        UUID.randomUUID(),
+                        goalScoreFunction,
                         null);
         return explainer.explainAsync(prediction, model)
                 .get(predictionTimeOut, predictionTimeUnit);
@@ -906,6 +934,42 @@ class CounterfactualExplainerTest {
                 intermediateResultsConsumer)
                 .get(Config.INSTANCE.getAsyncTimeout(),
                         Config.INSTANCE.getAsyncTimeUnit());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testDynamicGoals(int seed)
+            throws ExecutionException, InterruptedException, TimeoutException {
+        Random random = new Random();
+        random.setSeed(seed);
+
+        List<Feature> features = new LinkedList<>();
+        features.add(FeatureFactory.newNumericalFeature("f-num1", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num2", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num3", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num4", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+
+        final PredictionProvider model = TestUtils.getSumSkipModel(1);
+
+        CounterfactualGoalCriteria goalFunction = (outputs) -> {
+            double sum = outputs.stream().mapToDouble(o -> o.getValue().asNumber()).sum();
+            if ((sum >= 500.0) && (sum <= 700.0)) {
+                return GoalScore.create(0.0, 1.0);
+            } else {
+                return GoalScore.create(Math.abs(sum - 600.0), 0.0);
+            }
+        };
+
+        final CounterfactualResult result =
+                runCounterfactualDynamicGoalSearch((long) seed, goalFunction, features,
+                        model,
+                        DEFAULT_GOAL_THRESHOLD, 100_000);
+
+        final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
+
+        final double sum = counterfactualEntities.stream().mapToDouble(e -> e.asFeature().getValue().asNumber()).sum();
+        assertTrue(result.isValid());
+        assertTrue(sum >= 500 && sum <= 700);
     }
 
 }

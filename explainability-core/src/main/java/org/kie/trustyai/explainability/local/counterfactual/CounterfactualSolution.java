@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
+import org.kie.trustyai.explainability.local.counterfactual.score.CounterfactualGoalCriteria;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionOutput;
@@ -57,6 +58,7 @@ public class CounterfactualSolution {
     private UUID executionId;
 
     private List<PredictionOutput> predictionOutputs;
+    private CounterfactualGoalCriteria goalCriteria;
 
     protected CounterfactualSolution() {
     }
@@ -68,6 +70,7 @@ public class CounterfactualSolution {
             List<Output> goal,
             UUID solutionId,
             UUID executionId,
+            CounterfactualGoalCriteria goalCriteria,
             double goalThreshold) {
         this.entities = entities;
         this.originalFeatures = originalFeatures;
@@ -76,6 +79,7 @@ public class CounterfactualSolution {
         this.solutionId = solutionId;
         this.executionId = executionId;
         this.goalThreshold = goalThreshold;
+        this.goalCriteria = goalCriteria;
     }
 
     @PlanningScore(bendableHardLevelsSize = 3, bendableSoftLevelsSize = 2)
@@ -129,5 +133,9 @@ public class CounterfactualSolution {
 
     public List<Feature> getOriginalFeatures() {
         return originalFeatures;
+    }
+
+    public CounterfactualGoalCriteria getGoalCriteria() {
+        return goalCriteria;
     }
 }

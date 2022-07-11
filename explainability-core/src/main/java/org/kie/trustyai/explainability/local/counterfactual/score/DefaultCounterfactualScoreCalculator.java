@@ -205,27 +205,40 @@ public class DefaultCounterfactualScoreCalculator implements CounterfactualScore
         for (PredictionOutput predictionOutput : predictions) {
 
             final List<Output> outputs = predictionOutput.getOutputs();
-
-            if (goal.size() != outputs.size()) {
-                throw new IllegalArgumentException("Prediction size must be equal to goal size");
-            }
-
             final int numberOutputs = outputs.size();
-            for (int i = 0; i < numberOutputs; i++) {
-                final Output output = outputs.get(i);
-                final Output goalOutput = goal.get(i);
-                final double d =
-                        DefaultCounterfactualScoreCalculator.outputDistance(output, goalOutput, solution.getGoalThreshold());
-                outputDistance += d * d;
 
-                if (output.getScore() < goalOutput.getScore()) {
-                    tertiaryHardScore -= 1;
+            if (solution.getGoalCriteria() == null) {
+
+                if (goal.size() != outputs.size()) {
+                    throw new IllegalArgumentException("Prediction size must be equal to goal size");
+                }
+
+                for (int i = 0; i < numberOutputs; i++) {
+                    final Output output = outputs.get(i);
+                    final Output goalOutput = goal.get(i);
+                    final double d =
+                            DefaultCounterfactualScoreCalculator.outputDistance(output, goalOutput,
+                                    solution.getGoalThreshold());
+                    outputDistance += d * d;
+
+                    if (output.getScore() < goalOutput.getScore()) {
+                        tertiaryHardScore -= 1;
+                    }
+                }
+                primaryHardScore -= Math.sqrt(outputDistance);
+                logger.debug("Distance penalty: {}", primaryHardScore);
+
+                logger.debug("Confidence threshold penalty: {}", tertiaryHardScore);
+
+            } else {
+                final GoalScore score = solution.getGoalCriteria().apply(outputs);
+                primaryHardScore -= Math.abs(score.getDistance());
+                for (final Output output : outputs) {
+                    if (output.getScore() < score.getScore()) {
+                        tertiaryHardScore -= 1;
+                    }
                 }
             }
-            primaryHardScore -= Math.sqrt(outputDistance);
-            logger.debug("Distance penalty: {}", primaryHardScore);
-
-            logger.debug("Confidence threshold penalty: {}", tertiaryHardScore);
         }
         return BendableBigDecimalScore.of(
                 new BigDecimal[] {
