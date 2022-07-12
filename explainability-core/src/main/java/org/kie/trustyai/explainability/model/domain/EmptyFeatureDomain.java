@@ -42,9 +42,4 @@ public class EmptyFeatureDomain implements FeatureDomain<Object> {
     public Set<Object> getCategories() {
         return null;
     }
-
-    @Override
-    public String toString() {
-        return "null";
-    }
 }

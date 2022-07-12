@@ -909,7 +909,7 @@ class CounterfactualExplainerTest {
     }
 
     @Test
-    void testToString()
+    void testAsTable()
             throws ExecutionException, InterruptedException, TimeoutException {
         Random random = new Random();
         random.setSeed(0L);
@@ -940,7 +940,7 @@ class CounterfactualExplainerTest {
         List<Output> originalOutputs = model.predictAsync(List.of(new PredictionInput(features))).get().get(0).getOutputs();
 
         final CounterfactualResult result = runCounterfactualSearch(0L, goal, features, model, .01, 100_000);
-        String resultString = result.toString(originalOutputs, goal);
+        String resultString = result.asTable(originalOutputs, goal);
         assertEquals("=== Counterfactual Search Results ========================================\n" +
                 "           Features |              Domain |  Original Value  → Found Value\n" +
                 "--------------------------------------------------------------------------\n" +

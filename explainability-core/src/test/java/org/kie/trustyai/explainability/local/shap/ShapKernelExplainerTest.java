@@ -897,7 +897,7 @@ class ShapKernelExplainerTest {
         Prediction prediction = new SimplePrediction(input, output);
         ShapResults results = ske.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-        String table = results.toString();
+        String table = results.asTable();
         assertEquals("=== Semi-Categorical SHAP Values ===================\n" +
                 "      Feature      Value |  SHAP Value  | Confidence\n" +
                 "----------------------------------------------------\n" +

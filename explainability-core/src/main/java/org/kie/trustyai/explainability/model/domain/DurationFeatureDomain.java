@@ -62,9 +62,4 @@ public class DurationFeatureDomain extends NumericalFeatureDomain {
     public TemporalUnit getUnit() {
         return unit;
     }
-
-    @Override
-    public String toString() {
-        return String.format("%f->%f", getLowerBound(), getUpperBound());
-    }
 }

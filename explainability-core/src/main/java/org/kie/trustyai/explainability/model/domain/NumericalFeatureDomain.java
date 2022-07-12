@@ -57,9 +57,4 @@ public class NumericalFeatureDomain implements FeatureDomain {
     public Set<?> getCategories() {
         return null;
     }
-
-    @Override
-    public String toString() {
-        return String.format("%f->%f", getLowerBound(), getUpperBound());
-    }
 }

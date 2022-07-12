@@ -83,9 +83,8 @@ public class ShapResults {
      *
      * @return ShapResult string
      */
-    @Override
-    public String toString() {
-        return toString(3);
+    public String asTable() {
+        return asTable(3);
     }
 
     /**
@@ -95,7 +94,7 @@ public class ShapResults {
      *
      * @return ShapResult string
      */
-    public String toString(int decimalPlaces) {
+    public String asTable(int decimalPlaces) {
         List<String> featureNames = new ArrayList<>();
         List<String> featureValues = new ArrayList<>();
         List<String> shapValues = new ArrayList<>();

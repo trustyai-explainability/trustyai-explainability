@@ -44,9 +44,4 @@ public class CurrencyFeatureDomain extends AbstractCategoricalFeatureDomain<Curr
     public static FeatureDomain<Currency> create(Currency... categories) {
         return new CurrencyFeatureDomain(new HashSet<>(Arrays.asList(categories)));
     }
-
-    @Override
-    public String toString() {
-        return getCategories().toString();
-    }
 }

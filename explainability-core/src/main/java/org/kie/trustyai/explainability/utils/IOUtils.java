@@ -165,8 +165,8 @@ public class IOUtils {
      *
      * @return LIME results string
      */
-    public static String LimeResultsToString(Map<String, Saliency> results) {
-        return LimeResultsToString(results, 3);
+    public static String LimeResultsAsTable(Map<String, Saliency> results) {
+        return LimeResultsAsTable(results, 3);
     }
 
     /**
@@ -176,7 +176,7 @@ public class IOUtils {
      *
      * @return LIME results string
      */
-    public static String LimeResultsToString(Map<String, Saliency> results, int decimalPlaces) {
+    public static String LimeResultsAsTable(Map<String, Saliency> results, int decimalPlaces) {
         List<String> featureNames = new ArrayList<>();
         List<String> featureValues = new ArrayList<>();
         List<String> limeScores = new ArrayList<>();

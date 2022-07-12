@@ -44,9 +44,4 @@ public class URIFeatureDomain extends AbstractCategoricalFeatureDomain<URI> {
     public static FeatureDomain<URI> create(URI... categories) {
         return new URIFeatureDomain(new HashSet<>(Arrays.asList(categories)));
     }
-
-    @Override
-    public String toString() {
-        return getCategories().toString();
-    }
 }

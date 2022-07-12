@@ -56,6 +56,13 @@ public interface FeatureDomain<T> {
      *
      * @return the string representation
      */
-    String toString();
-
+    default String prettyPrint() {
+        if (getCategories() == null && getLowerBound() != null && getUpperBound() != null) {
+            return String.format("%f->%f", getLowerBound(), getUpperBound());
+        } else if (getCategories() != null) {
+            return getCategories().toString();
+        } else {
+            return "null";
+        }
+    }
 }

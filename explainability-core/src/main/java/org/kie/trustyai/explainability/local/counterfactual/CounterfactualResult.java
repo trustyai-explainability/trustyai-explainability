@@ -88,8 +88,8 @@ public class CounterfactualResult {
         return sequenceId;
     }
 
-    public String toString(List<Output> originalOutputs, List<Output> goal) {
-        return toString(3, originalOutputs, goal);
+    public String asTable(List<Output> originalOutputs, List<Output> goal) {
+        return asTable(3, originalOutputs, goal);
     }
 
     /**
@@ -102,7 +102,7 @@ public class CounterfactualResult {
      * @param goal The counterfactual goal
      * @return CounterfactualResult string
      */
-    public String toString(int decimalPlaces, List<Output> originalOutputs, List<Output> goal) {
+    public String asTable(int decimalPlaces, List<Output> originalOutputs, List<Output> goal) {
         List<Feature> newFeatures = this.getEntities().stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList());
         List<String> featureNames = new ArrayList<>(List.of("Features"));
         List<String> featureDomains = new ArrayList<>(List.of("Domain"));
@@ -110,7 +110,7 @@ public class CounterfactualResult {
         List<String> originalFeatureValues = new ArrayList<>(List.of("Original Value"));
         for (int i = 0; i < newFeatures.size(); i++) {
             featureNames.add(newFeatures.get(i).getName());
-            featureDomains.add(this.features.get(i).getDomain().toString());
+            featureDomains.add(this.features.get(i).getDomain().prettyPrint());
             featureValues.add(IOUtils.roundedString(newFeatures.get(i), decimalPlaces));
             originalFeatureValues.add(IOUtils.roundedString(features.get(i), decimalPlaces));
         }
@@ -142,10 +142,8 @@ public class CounterfactualResult {
                 List.of(featureNames, featureDomains, originalFeatureValues, featureValues),
                 List.of(" |", " | ", "  →"));
 
-        StringBuilder out = new StringBuilder();
-        out.append(tableAndWidth.getFirst()).append(String.format("%n"));
-        out.append("Meets Validity Criteria? ").append(this.isValid()).append(String.format("%n"));
-        out.append(StringUtils.repeat("=", tableAndWidth.getSecond()));
-        return out.toString();
+        return tableAndWidth.getFirst() + String.format("%n") +
+                "Meets Validity Criteria? " + this.isValid() + String.format("%n") +
+                StringUtils.repeat("=", tableAndWidth.getSecond());
     }
 }
