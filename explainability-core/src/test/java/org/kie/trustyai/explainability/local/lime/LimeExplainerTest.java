@@ -376,6 +376,8 @@ class LimeExplainerTest {
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         String table = IOUtils.LimeResultsAsTable(saliencyMap);
-        assertTrue(true);
+        assertTrue(table.contains("Prediction"));
+        assertTrue(table.contains("=== Semi-Categorical LIME Scores ===="));
+        assertTrue(table.contains("Feature 2 =           A "));
     }
 }
