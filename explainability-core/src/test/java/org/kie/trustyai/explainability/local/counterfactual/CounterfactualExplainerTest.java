@@ -908,4 +908,55 @@ class CounterfactualExplainerTest {
                         Config.INSTANCE.getAsyncTimeUnit());
     }
 
+    @Test
+    void testAsTable()
+            throws ExecutionException, InterruptedException, TimeoutException {
+        Random random = new Random();
+        random.setSeed(0L);
+        List<Feature> features = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            if (i == 2) {
+                features.add(new Feature(
+                        "Feature " + i,
+                        Type.CATEGORICAL,
+                        new Value("A"),
+                        false,
+                        CategoricalFeatureDomain.create(List.of("A", "B"))));
+            } else {
+                features.add(
+                        new Feature(
+                                "Feature " + i,
+                                Type.NUMBER,
+                                new Value(i),
+                                false,
+                                NumericalFeatureDomain.create(-5, 5)));
+            }
+        }
+        PredictionProvider model = TestUtils.getTwoOutputSemiCategoricalModel(2);
+
+        final List<Output> goal = List.of(
+                new Output("Semi-Categorical", Type.NUMBER, new Value(1), 0.0),
+                new Output("Semi-Categorical*2", Type.NUMBER, new Value(2), 0.0));
+        List<Output> originalOutputs = model.predictAsync(List.of(new PredictionInput(features))).get().get(0).getOutputs();
+
+        final CounterfactualResult result = runCounterfactualSearch(0L, goal, features, model, .01, 100_000);
+        String resultString = result.asTable(originalOutputs, goal);
+        assertEquals("=== Counterfactual Search Results ========================================\n" +
+                "           Features |              Domain |  Original Value  → Found Value\n" +
+                "--------------------------------------------------------------------------\n" +
+                "          Feature 0 | -5.000000->5.000000 |           0.000  →       1.000\n" +
+                "          Feature 1 | -5.000000->5.000000 |           1.000  →       4.000\n" +
+                "          Feature 2 |              [A, B] |               A  →           B\n" +
+                "          Feature 3 | -5.000000->5.000000 |           3.000  →       3.000\n" +
+                "          Feature 4 | -5.000000->5.000000 |           4.000  →       3.000\n" +
+                "--------------------------------------------------------------------------\n" +
+                "            Outputs |                Goal |  Original Value  → Found Value\n" +
+                "--------------------------------------------------------------------------\n" +
+                "   Semi-Categorical |               1.000 |          -2.000  →       1.000\n" +
+                " Semi-Categorical*2 |               2.000 |          -4.000  →       2.000\n" +
+                "==========================================================================\n" +
+                "Meets Validity Criteria? true\n" +
+                "==========================================================================", resultString);
+    }
+
 }
