@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -908,6 +909,7 @@ class CounterfactualExplainerTest {
                         Config.INSTANCE.getAsyncTimeUnit());
     }
 
+    @Disabled("https://issues.redhat.com/browse/FAI-804")
     @Test
     void testAsTable()
             throws ExecutionException, InterruptedException, TimeoutException {
