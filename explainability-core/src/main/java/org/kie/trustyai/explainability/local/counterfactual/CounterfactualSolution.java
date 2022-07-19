@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
-import org.kie.trustyai.explainability.local.counterfactual.score.CounterfactualGoalCriteria;
+import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionOutput;
@@ -47,7 +47,6 @@ public class CounterfactualSolution {
                 .collect(Collectors.toList());
     }
 
-    private List<Output> goal;
     private double goalThreshold;
 
     private PredictionProvider model;
@@ -67,7 +66,6 @@ public class CounterfactualSolution {
             List<CounterfactualEntity> entities,
             List<Feature> originalFeatures,
             PredictionProvider model,
-            List<Output> goal,
             UUID solutionId,
             UUID executionId,
             CounterfactualGoalCriteria goalCriteria,
@@ -75,7 +73,6 @@ public class CounterfactualSolution {
         this.entities = entities;
         this.originalFeatures = originalFeatures;
         this.model = model;
-        this.goal = goal;
         this.solutionId = solutionId;
         this.executionId = executionId;
         this.goalThreshold = goalThreshold;
@@ -93,10 +90,6 @@ public class CounterfactualSolution {
 
     public PredictionProvider getModel() {
         return model;
-    }
-
-    public List<Output> getGoal() {
-        return goal;
     }
 
     public List<CounterfactualEntity> getEntities() {
@@ -125,10 +118,6 @@ public class CounterfactualSolution {
 
     public void setPredictionOutputs(List<PredictionOutput> predictionOutputs) {
         this.predictionOutputs = predictionOutputs;
-    }
-
-    public double getGoalThreshold() {
-        return goalThreshold;
     }
 
     public List<Feature> getOriginalFeatures() {

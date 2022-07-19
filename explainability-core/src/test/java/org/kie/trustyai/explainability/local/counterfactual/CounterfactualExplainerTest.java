@@ -39,12 +39,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
-import org.kie.trustyai.explainability.local.counterfactual.score.CounterfactualGoalCriteria;
-import org.kie.trustyai.explainability.local.counterfactual.score.GoalScore;
+import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
+import org.kie.trustyai.explainability.local.counterfactual.goal.GoalScore;
 import org.kie.trustyai.explainability.local.counterfactual.score.MockCounterFactualScoreCalculator;
 import org.kie.trustyai.explainability.model.CounterfactualPrediction;
 import org.kie.trustyai.explainability.model.DataDomain;
-import org.kie.trustyai.explainability.model.DynamicGoalPrediction;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureDistribution;
 import org.kie.trustyai.explainability.model.FeatureFactory;
@@ -113,7 +112,7 @@ class CounterfactualExplainerTest {
     private CounterfactualResult runCounterfactualSearch(Long randomSeed, List<Output> goal,
             List<Feature> features,
             PredictionProvider model,
-            double goalThresold,
+            double goalThreshold,
             long steps) throws InterruptedException, ExecutionException, TimeoutException {
         final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
         final SolverConfig solverConfig = SolverConfigBuilder
@@ -121,13 +120,14 @@ class CounterfactualExplainerTest {
         solverConfig.setRandomSeed(randomSeed);
         solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
         final CounterfactualConfig counterfactualConfig = new CounterfactualConfig();
-        counterfactualConfig.withSolverConfig(solverConfig).withGoalThreshold(goalThresold);
+        counterfactualConfig.withSolverConfig(solverConfig);
         final CounterfactualExplainer explainer = new CounterfactualExplainer(counterfactualConfig);
         final PredictionInput input = new PredictionInput(features);
         PredictionOutput output = new PredictionOutput(goal);
         Prediction prediction =
                 new CounterfactualPrediction(input,
                         output,
+                        goalThreshold,
                         null,
                         UUID.randomUUID(),
                         null);
@@ -135,10 +135,11 @@ class CounterfactualExplainerTest {
                 .get(predictionTimeOut, predictionTimeUnit);
     }
 
-    private CounterfactualResult runCounterfactualDynamicGoalSearch(Long randomSeed, CounterfactualGoalCriteria goalScoreFunction,
+    private CounterfactualResult runCounterfactualSearch(Long randomSeed,
             List<Feature> features,
             PredictionProvider model,
-            double goalThresold,
+            double goalThreshold,
+            CounterfactualGoalCriteria goalCriteria,
             long steps) throws InterruptedException, ExecutionException, TimeoutException {
         final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
         final SolverConfig solverConfig = SolverConfigBuilder
@@ -146,16 +147,16 @@ class CounterfactualExplainerTest {
         solverConfig.setRandomSeed(randomSeed);
         solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
         final CounterfactualConfig counterfactualConfig = new CounterfactualConfig();
-        counterfactualConfig.withSolverConfig(solverConfig).withGoalThreshold(goalThresold);
+        counterfactualConfig.withSolverConfig(solverConfig);
         final CounterfactualExplainer explainer = new CounterfactualExplainer(counterfactualConfig);
         final PredictionInput input = new PredictionInput(features);
         Prediction prediction =
-                new DynamicGoalPrediction(input,
+                new CounterfactualPrediction(input,
                         null,
                         null,
                         UUID.randomUUID(),
-                        goalScoreFunction,
-                        null);
+                        null,
+                        goalCriteria);
         return explainer.explainAsync(prediction, model)
                 .get(predictionTimeOut, predictionTimeUnit);
     }
@@ -653,7 +654,7 @@ class CounterfactualExplainerTest {
         final Consumer<CounterfactualResult> assertIntermediateCounterfactualNotNull =
                 mock(Consumer.class);
         final CounterfactualConfig counterfactualConfig =
-                new CounterfactualConfig().withSolverConfig(solverConfig).withGoalThreshold(0.01);
+                new CounterfactualConfig().withSolverConfig(solverConfig);
         final CounterfactualExplainer counterfactualExplainer =
                 new CounterfactualExplainer(counterfactualConfig);
 
@@ -667,6 +668,7 @@ class CounterfactualExplainerTest {
         PredictionOutput output = new PredictionOutput(goal);
         Prediction prediction = new CounterfactualPrediction(input,
                 output,
+                0.01,
                 null,
                 UUID.randomUUID(),
                 null);
@@ -954,16 +956,16 @@ class CounterfactualExplainerTest {
         CounterfactualGoalCriteria goalFunction = (outputs) -> {
             double sum = outputs.stream().mapToDouble(o -> o.getValue().asNumber()).sum();
             if ((sum >= 500.0) && (sum <= 700.0)) {
-                return GoalScore.create(0.0, 1.0);
+                return GoalScore.getExactMatch();
             } else {
                 return GoalScore.create(Math.abs(sum - 600.0), 0.0);
             }
         };
 
         final CounterfactualResult result =
-                runCounterfactualDynamicGoalSearch((long) seed, goalFunction, features,
+                runCounterfactualSearch((long) seed, features,
                         model,
-                        DEFAULT_GOAL_THRESHOLD, 100_000);
+                        DEFAULT_GOAL_THRESHOLD, goalFunction, 100_000);
 
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
 

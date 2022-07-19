@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.explainability.local.counterfactual.score;
+package org.kie.trustyai.explainability.local.counterfactual.goal;
 
 import java.util.List;
 
@@ -22,6 +22,6 @@ import org.kie.trustyai.explainability.model.Output;
 @FunctionalInterface
 public interface CounterfactualGoalCriteria {
 
-    GoalScore apply(List<Output> outputs);
+    GoalScore apply(List<Output> prediction);
 
 }
