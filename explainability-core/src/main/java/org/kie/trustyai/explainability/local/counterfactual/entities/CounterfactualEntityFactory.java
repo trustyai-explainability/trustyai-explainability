@@ -40,6 +40,7 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.domain.BinaryFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.CategoricalNumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.CurrencyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.DurationFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
@@ -166,6 +167,8 @@ public class CounterfactualEntityFactory {
                     entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getCategories());
                 } else if (featureDomain instanceof URIFeatureDomain) {
                     entity = URIEntity.from(feature, ((URIFeatureDomain) featureDomain).getCategories());
+                } else if (featureDomain instanceof CategoricalNumericalEntity) {
+                    entity = CategoricalNumericalEntity.from(feature, ((CategoricalNumericalFeatureDomain) featureDomain).getCategories());
                 } else {
                     entity = CategoricalEntity.from(feature, ((CategoricalFeatureDomain) featureDomain).getCategories());
                 }
