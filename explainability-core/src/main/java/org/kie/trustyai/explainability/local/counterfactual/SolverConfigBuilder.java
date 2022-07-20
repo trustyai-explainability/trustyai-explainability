@@ -42,8 +42,8 @@ import org.optaplanner.core.config.solver.termination.TerminationConfig;
 
 public class SolverConfigBuilder {
 
-    private static final int DEFAULT_TABU_SIZE = 70;
-    private static final int DEFAULT_ACCEPTED_COUNT = 5000;
+    private static final int DEFAULT_TABU_SIZE = 10;
+    private static final int DEFAULT_ACCEPTED_COUNT = 1000;
 
     private SolverConfigBuilder() {
     }

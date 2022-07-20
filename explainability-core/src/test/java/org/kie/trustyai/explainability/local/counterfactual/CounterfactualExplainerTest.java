@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -910,6 +911,7 @@ class CounterfactualExplainerTest {
                         Config.INSTANCE.getAsyncTimeUnit());
     }
 
+    @Disabled("https://issues.redhat.com/browse/FAI-804")
     @Test
     void testAsTable()
             throws ExecutionException, InterruptedException, TimeoutException {
@@ -989,6 +991,31 @@ class CounterfactualExplainerTest {
         assertTrue(result.getEntities().get(2) instanceof CategoricalNumericalEntity);
         assertEquals(Type.CATEGORICAL, result.getEntities().get(0).asFeature().getType());
         assertEquals(Type.CATEGORICAL, result.getEntities().get(0).asFeature().getType());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2, 3, 4 })
+    void testLinearModelSolve(int seed) throws ExecutionException, InterruptedException, TimeoutException {
+
+        final double[] featureValues = new double[] { -0.04822564522107575, 2.0912726657731104, 5.368920447474639, 0.7460348559645964, 3.6228232398513613 };
+
+        final List<Feature> fs = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            fs.add(new Feature(String.valueOf(i), Type.NUMBER, new Value(featureValues[i]), false, NumericalFeatureDomain.create(-5, 5)));
+        }
+
+        final PredictionProvider model = TestUtils.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
+
+        final List<Output> goal = List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d));
+
+        final CounterfactualResult result = runCounterfactualSearch((long) seed, goal, fs, model, .01);
+
+        final List<Feature> resultFeatures = result.getEntities().stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList());
+
+        assertTrue(result.isValid());
+        assertTrue(result.getOutput().get(0).getOutputs().get(0).getValue().asNumber() <= .01);
+
     }
 
 }
