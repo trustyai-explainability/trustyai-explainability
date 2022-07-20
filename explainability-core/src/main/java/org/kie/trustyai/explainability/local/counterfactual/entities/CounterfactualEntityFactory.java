@@ -167,7 +167,7 @@ public class CounterfactualEntityFactory {
                     entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getCategories());
                 } else if (featureDomain instanceof URIFeatureDomain) {
                     entity = URIEntity.from(feature, ((URIFeatureDomain) featureDomain).getCategories());
-                } else if (featureDomain instanceof CategoricalNumericalEntity) {
+                } else if (featureDomain instanceof CategoricalNumericalFeatureDomain) {
                     entity = CategoricalNumericalEntity.from(feature, ((CategoricalNumericalFeatureDomain) featureDomain).getCategories());
                 } else {
                     entity = CategoricalEntity.from(feature, ((CategoricalFeatureDomain) featureDomain).getCategories());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2022 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
-import java.nio.ByteBuffer;
 import java.util.Set;
 
 import org.kie.trustyai.explainability.model.Feature;
@@ -76,7 +75,7 @@ public class CategoricalNumericalEntity extends AbstractCategoricalEntity<Intege
      */
     @Override
     public Feature asFeature() {
-        return FeatureFactory.newNumericalFeature(featureName, this.proposedValue);
+        return FeatureFactory.newCategoricalNumericalFeature(featureName, this.proposedValue);
     }
 
     @PlanningVariable(valueRangeProviderRefs = { "categoricalNumericalRange" })
