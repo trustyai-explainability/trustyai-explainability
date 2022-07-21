@@ -46,11 +46,14 @@ import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
+import org.kie.trustyai.explainability.utils.IOUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 class LimeExplainerTest {
@@ -342,5 +345,39 @@ class LimeExplainerTest {
         assertNotNull(saliencyMap);
         List<FeatureImportance> filteredFeatureImportance = saliencyMap.get("sum-but0").getPerFeatureImportance();
         assertThat(filteredFeatureImportance.size()).isEqualTo(3);
+    }
+
+    @Test
+    void testToString() throws ExecutionException, InterruptedException, TimeoutException {
+        Random random = new Random(0L);
+        LimeConfig limeConfig = new LimeConfig()
+                .withPerturbationContext(new PerturbationContext(0L, random, DEFAULT_NO_OF_PERTURBATIONS))
+                .withSamples(10);
+        LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
+        List<Feature> features = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            if (i == 2) {
+                features.add(new Feature(
+                        "Feature " + i,
+                        Type.CATEGORICAL,
+                        new Value("A"),
+                        false,
+                        CategoricalFeatureDomain.create(List.of("A", "B"))));
+            } else {
+                features.add(new Feature("Feature " + i, Type.NUMBER, new Value(i)));
+            }
+        }
+        PredictionInput input = new PredictionInput(features);
+        PredictionProvider model = TestUtils.getTwoOutputSemiCategoricalModel(2);
+        PredictionOutput output = model.predictAsync(List.of(input))
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
+                .get(0);
+        Prediction prediction = new SimplePrediction(input, output);
+        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+        String table = IOUtils.LimeResultsAsTable(saliencyMap);
+        assertTrue(table.contains("Prediction"));
+        assertTrue(table.contains("=== Semi-Categorical LIME Scores ===="));
+        assertTrue(table.contains("Feature 2 =           A "));
     }
 }
