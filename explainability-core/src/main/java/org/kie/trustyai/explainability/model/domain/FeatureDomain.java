@@ -51,4 +51,18 @@ public interface FeatureDomain<T> {
      */
     Set<T> getCategories();
 
+    /**
+     * Get a string representation of the domain
+     *
+     * @return the string representation
+     */
+    default String prettyPrint() {
+        if (getCategories() == null && getLowerBound() != null && getUpperBound() != null) {
+            return String.format("%f->%f", getLowerBound(), getUpperBound());
+        } else if (getCategories() != null) {
+            return getCategories().toString();
+        } else {
+            return "null";
+        }
+    }
 }

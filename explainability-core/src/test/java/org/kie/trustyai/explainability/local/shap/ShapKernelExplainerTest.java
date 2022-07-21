@@ -35,6 +35,7 @@ import org.apache.commons.math3.linear.RealVector;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
@@ -48,6 +49,7 @@ import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
 import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -851,6 +853,75 @@ class ShapKernelExplainerTest {
         assertEquals(61, shapResults.getSaliencies()[0].getPerFeatureImportance().get(1).getScore(), 1e-6);
         assertEquals(1, shapResults.getSaliencies()[1].getPerFeatureImportance().get(0).getScore(), 1e-6);
         assertEquals(1, shapResults.getSaliencies()[1].getPerFeatureImportance().get(1).getScore(), 1e-6);
+    }
+
+    @Test
+    void testToString() throws ExecutionException, InterruptedException, TimeoutException {
+        Random random = new Random(0L);
+
+        List<PredictionInput> background = new ArrayList<>();
+        for (int bg = 0; bg < 1; bg++) {
+            List<Feature> features = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                if (i == 2) {
+                    features.add(new Feature("Feature " + i, Type.CATEGORICAL, new Value("B")));
+                } else {
+                    features.add(new Feature("Feature " + i, Type.NUMBER, new Value(0)));
+                }
+            }
+            background.add(new PredictionInput(features));
+        }
+        ShapConfig shapConfig = testConfig.copy()
+                .withBackground(background)
+                .build();
+        ShapKernelExplainer ske = new ShapKernelExplainer(shapConfig);
+
+        List<Feature> features = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            if (i == 2) {
+                features.add(new Feature(
+                        "Feature " + i,
+                        Type.CATEGORICAL,
+                        new Value("A"),
+                        false,
+                        CategoricalFeatureDomain.create(List.of("A", "B"))));
+            } else {
+                features.add(new Feature("Feature " + i, Type.NUMBER, new Value(i)));
+            }
+        }
+        PredictionInput input = new PredictionInput(features);
+        PredictionProvider model = TestUtils.getTwoOutputSemiCategoricalModel(2);
+        PredictionOutput output = model.predictAsync(List.of(input))
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
+                .get(0);
+        Prediction prediction = new SimplePrediction(input, output);
+        ShapResults results = ske.explainAsync(prediction, model)
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+        String table = results.asTable();
+        assertEquals("=== Semi-Categorical SHAP Values ===================\n" +
+                "      Feature      Value |  SHAP Value  | Confidence\n" +
+                "----------------------------------------------------\n" +
+                "                   FNull |     -10.000              \n" +
+                " Feature 0 =       0.000 |       0.000         0.000\n" +
+                " Feature 1 =       1.000 |       1.000         0.000\n" +
+                " Feature 2 =           A |      -0.000         0.000\n" +
+                " Feature 3 =       3.000 |       3.000         0.000\n" +
+                " Feature 4 =       4.000 |       4.000         0.000\n" +
+                "----------------------------------------------------\n" +
+                "              Prediction |      -2.000              \n" +
+                "====================================================\n" +
+                "=== Semi-Categorical*2 SHAP Values =================\n" +
+                "      Feature      Value |  SHAP Value  | Confidence\n" +
+                "----------------------------------------------------\n" +
+                "                   FNull |     -20.000              \n" +
+                " Feature 0 =       0.000 |       0.000         0.000\n" +
+                " Feature 1 =       1.000 |       2.000         0.000\n" +
+                " Feature 2 =           A |      -0.000         0.000\n" +
+                " Feature 3 =       3.000 |       6.000         0.000\n" +
+                " Feature 4 =       4.000 |       8.000         0.000\n" +
+                "----------------------------------------------------\n" +
+                "              Prediction |      -4.000              \n" +
+                "====================================================", table);
     }
 
 }
