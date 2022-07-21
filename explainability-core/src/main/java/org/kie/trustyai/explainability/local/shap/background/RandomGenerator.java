@@ -16,18 +16,16 @@
 
 package org.kie.trustyai.explainability.local.shap.background;
 
-
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.kie.trustyai.explainability.model.PerturbationContext;
+import org.kie.trustyai.explainability.model.PredictionInput;
 
-public class RandomGenerator implements BackgroundGenerator{
+public class RandomGenerator implements BackgroundGenerator {
     List<PredictionInput> seeds;
     PerturbationContext pc;
 
@@ -36,7 +34,7 @@ public class RandomGenerator implements BackgroundGenerator{
      *
      * @param seeds: All or a subset of the available training {@link PredictionInput}s
      */
-    public RandomGenerator(List<PredictionInput> seeds){
+    public RandomGenerator(List<PredictionInput> seeds) {
         this.pc = new PerturbationContext(new Random(), 0);
         this.seeds = seeds;
     }
@@ -44,10 +42,10 @@ public class RandomGenerator implements BackgroundGenerator{
     /**
      * Create a Random Background Generator
      *
-     * @param seeds:  All or a subset of the available training {@link PredictionInput}s
+     * @param seeds: All or a subset of the available training {@link PredictionInput}s
      * @param pc: A {@link PerturbationContext} object to provide the source of randomness in the sampling
      */
-    public RandomGenerator(List<PredictionInput> seeds, PerturbationContext pc){
+    public RandomGenerator(List<PredictionInput> seeds, PerturbationContext pc) {
         this.pc = pc;
         this.seeds = seeds;
     }

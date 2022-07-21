@@ -16,12 +16,15 @@
 
 package org.kie.trustyai.explainability.local.shap.background;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.TestUtils;
-import org.kie.trustyai.explainability.local.counterfactual.CounterfactualConfig;
-import org.kie.trustyai.explainability.local.counterfactual.SolverConfigBuilder;
 import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.NumericFeatureDistribution;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
@@ -29,17 +32,6 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
-import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
-import org.optaplanner.core.config.solver.EnvironmentMode;
-import org.optaplanner.core.config.solver.SolverConfig;
-import org.optaplanner.core.config.solver.termination.TerminationConfig;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -52,10 +44,10 @@ class CounterfactualGeneratorTest {
         // generate 100 seed prediction inputs, gaussian around {0, 1, 2, 3, 4}
         for (int i = 0; i < 100; i++) {
             List<Feature> features = new ArrayList<>();
-            for (int j=0; j<5; j++){
+            for (int j = 0; j < 5; j++) {
                 features.add(new Feature(String.valueOf(j),
                         Type.NUMBER,
-                        new Value(j+rn.nextGaussian()),
+                        new Value(j + rn.nextGaussian()),
                         false,
                         NumericalFeatureDomain.create(-5, 5)));
             }
@@ -63,16 +55,17 @@ class CounterfactualGeneratorTest {
         }
 
         // given some arbitrary linear model
-        PredictionProvider model = TestUtils.getLinearModel(new double[]{5., 0., 1., 25., -5.});
+        PredictionProvider model = TestUtils.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
 
         // generate a background such that f(bg) == 0 for all bg in the backgrounds
         PredictionOutput goal = new PredictionOutput(
                 List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d)));
         List<PredictionInput> background = CounterfactualGenerator.builder(seeds, model, goal)
-                .withTimeoutSeconds(1)
+                .withTimeoutSeconds(10)
+                .withStepCount(250_000L) // this is way higher than it needs to be, but this is an Optaplanner bug
                 .build()
                 .generate(5);
-        List<PredictionOutput> fnull =  model.predictAsync(background).get();
+        List<PredictionOutput> fnull = model.predictAsync(background).get();
 
         // make sure the fnull is within the default goal of .01
         for (PredictionOutput output : fnull) {
@@ -80,26 +73,4 @@ class CounterfactualGeneratorTest {
             assertEquals(0., output.getOutputs().get(0).getValue().asNumber(), .02);
         }
     }
-
-    @Test
-    void reproducibleError(){
-        double[] featureValues = new double[]{-0.04822564522107575, 2.0912726657731104, 5.368920447474639, 0.7460348559645964, 3.6228232398513613};
-        List<Feature> fs = new ArrayList<>();
-        for (int i=0; i<5; i++){
-            fs.add(new Feature(
-                    String.valueOf(i),
-                    Type.NUMBER,
-                    new Value(featureValues[i]),
-                    false,
-                    NumericalFeatureDomain.create(-5, 5))
-            );
-        }
-        PredictionInput pi = new PredictionInput(fs);
-        PredictionProvider model = TestUtils.getLinearModel(new double[]{5., 0., 1., 25., -5.});
-        PredictionOutput goal = new PredictionOutput(
-                List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d)));
-
-
-    }
-
 }

@@ -16,21 +16,19 @@
 
 package org.kie.trustyai.explainability.local.shap.background;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.PredictionInput;
-
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-
-public class KMeansGenerator implements BackgroundGenerator{
+public class KMeansGenerator implements BackgroundGenerator {
     List<PredictionInput> seeds;
 
     /**
@@ -38,7 +36,7 @@ public class KMeansGenerator implements BackgroundGenerator{
      *
      * @param seeds: All or a subset of available training {@link PredictionInput}s.
      */
-    public KMeansGenerator(List<PredictionInput> seeds){
+    public KMeansGenerator(List<PredictionInput> seeds) {
         this.seeds = seeds;
     }
 
@@ -47,12 +45,12 @@ public class KMeansGenerator implements BackgroundGenerator{
      *
      * @param n: The total number of background points to generate. This functionally sets the number of clusters
      *        within the k-means clustering, thus generating n clusters from the seeds passed to the generator. The
-     *         centroids of these clusters are the generated background points.
+     *        centroids of these clusters are the generated background points.
      */
     public List<PredictionInput> generate(int n) {
         PredictionInput prototypePI = seeds.get(0);
         List<DoublePoint> datapoints = seeds.stream().map(pi -> new DoublePoint(pi.getFeatures().stream()
-                        .mapToDouble(f -> f.getValue().asNumber()).toArray()))
+                .mapToDouble(f -> f.getValue().asNumber()).toArray()))
                 .collect(Collectors.toList());
         KMeansPlusPlusClusterer<DoublePoint> clusterer = new KMeansPlusPlusClusterer<>(n);
         List<CentroidCluster<DoublePoint>> clusters = clusterer.cluster(datapoints);

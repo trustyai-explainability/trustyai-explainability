@@ -16,9 +16,9 @@
 
 package org.kie.trustyai.explainability.local.shap.background;
 
-import org.kie.trustyai.explainability.model.PredictionInput;
-
 import java.util.List;
+
+import org.kie.trustyai.explainability.model.PredictionInput;
 
 public interface BackgroundGenerator {
     public List<PredictionInput> generate(int n);
