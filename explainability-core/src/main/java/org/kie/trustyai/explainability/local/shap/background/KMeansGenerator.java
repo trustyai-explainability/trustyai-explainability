@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
+import org.apache.commons.math3.ml.distance.EuclideanDistance;
+import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.Type;
@@ -30,6 +32,7 @@ import org.kie.trustyai.explainability.model.Value;
 
 public class KMeansGenerator implements BackgroundGenerator {
     List<PredictionInput> seeds;
+    int randomSeed;
 
     /**
      * Generate a K-Means Background Selector
@@ -38,6 +41,18 @@ public class KMeansGenerator implements BackgroundGenerator {
      */
     public KMeansGenerator(List<PredictionInput> seeds) {
         this.seeds = seeds;
+        this.randomSeed = 0;
+    }
+
+    /**
+     * Generate a K-Means Background Selector
+     *
+     * @param seeds: All or a subset of available training {@link PredictionInput}s.
+     * @param randomSeed: The random seed to use during the KMeans++ algorithm.
+     */
+    public KMeansGenerator(List<PredictionInput> seeds, int randomSeed) {
+        this.seeds = seeds;
+        this.randomSeed = randomSeed;
     }
 
     /**
@@ -52,7 +67,11 @@ public class KMeansGenerator implements BackgroundGenerator {
         List<DoublePoint> datapoints = seeds.stream().map(pi -> new DoublePoint(pi.getFeatures().stream()
                 .mapToDouble(f -> f.getValue().asNumber()).toArray()))
                 .collect(Collectors.toList());
-        KMeansPlusPlusClusterer<DoublePoint> clusterer = new KMeansPlusPlusClusterer<>(n);
+        KMeansPlusPlusClusterer<DoublePoint> clusterer = new KMeansPlusPlusClusterer<>(
+                n,
+                -1,
+                new EuclideanDistance(),
+                new JDKRandomGenerator(randomSeed));
         List<CentroidCluster<DoublePoint>> clusters = clusterer.cluster(datapoints);
         List<PredictionInput> background = new ArrayList<>();
         for (CentroidCluster c : clusters) {
@@ -61,7 +80,7 @@ public class KMeansGenerator implements BackgroundGenerator {
             for (int i = 0; i < center.length; i++) {
                 Feature f = prototypePI.getFeatures().get(i);
                 if (f.getType() != Type.NUMBER) {
-                    throw new IllegalArgumentException("KMeans Background Selection Can Only Be Called On Numeric Features");
+                    throw new IllegalArgumentException("KMeans Background Selection can only be called on numeric features");
                 }
                 newFeatures.add(new Feature(f.getName(), f.getType(), new Value(center[i])));
             }

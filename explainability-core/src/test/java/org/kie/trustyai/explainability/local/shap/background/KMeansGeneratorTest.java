@@ -46,7 +46,7 @@ class KMeansGeneratorTest {
         }
 
         // returning 5 clusters should return the exact centroids of the constructed clusters
-        List<PredictionInput> background = new KMeansGenerator(seeds).generate(clusters);
+        List<PredictionInput> background = new KMeansGenerator(seeds, 0).generate(clusters);
         assertTrue(background.stream().allMatch(pi -> expectedCentroids.contains(pi.getFeatures().get(0).getValue().asNumber())));
     }
 
@@ -56,10 +56,10 @@ class KMeansGeneratorTest {
         List<PredictionInput> seeds = new ArrayList<>();
         Random rn = new Random(0L);
 
-        // deliberately make clustered data with k=5, each cluster a gaussian distribution around j*10
+        // deliberately make clustered data with k=clusters, each cluster a gaussian distribution around j*100
         List<Double> expectedCentroids = new ArrayList<>();
         for (int j = 0; j < clusters; j++) {
-            double expectedCentroid = j * 10;
+            double expectedCentroid = j * 100;
             expectedCentroids.add(expectedCentroid);
             for (int i = 0; i < 1000; i++) {
                 seeds.add(new PredictionInput(List.of(
@@ -67,7 +67,7 @@ class KMeansGeneratorTest {
             }
         }
 
-        List<PredictionInput> background = new KMeansGenerator(seeds).generate(clusters);
+        List<PredictionInput> background = new KMeansGenerator(seeds, 0).generate(clusters);
 
         // each background point should be close to *one* of the gaussian centroids of the constructed clusters
         assertTrue(background.stream().allMatch(pi -> expectedCentroids.stream().anyMatch(o -> Math.sqrt(Math.pow(o - pi.getFeatures().get(0).getValue().asNumber(), 2)) < .05)));

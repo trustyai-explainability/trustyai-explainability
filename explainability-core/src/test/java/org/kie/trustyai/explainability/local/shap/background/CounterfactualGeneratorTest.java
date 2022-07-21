@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.PerturbationContext;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
@@ -62,6 +63,7 @@ class CounterfactualGeneratorTest {
                 List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d)));
         List<PredictionInput> background = CounterfactualGenerator.builder(seeds, model, goal)
                 .withTimeoutSeconds(10)
+                .withPerturbationContext(new PerturbationContext(rn, 0))
                 .withStepCount(250_000L) // this is way higher than it needs to be, but this is an Optaplanner bug
                 .build()
                 .generate(5);
@@ -69,7 +71,6 @@ class CounterfactualGeneratorTest {
 
         // make sure the fnull is within the default goal of .01
         for (PredictionOutput output : fnull) {
-            System.out.println(output.getOutputs().get(0).getValue().asNumber());
             assertEquals(0., output.getOutputs().get(0).getValue().asNumber(), .02);
         }
     }

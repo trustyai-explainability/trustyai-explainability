@@ -105,7 +105,6 @@ public class CounterfactualGenerator {
         PredictionInput seedPerturb;
         while (generatedBackground.size() < n) {
             for (PredictionInput seed : bestSeeds) {
-                System.out.println("======================================");
                 // if we've used this seed already, perturb it a bit
                 if (generatedBackground.size() > bestSeeds.size()) {
                     seedPerturb = new PredictionInput(DataUtils.perturbFeatures(seed.getFeatures(), this.pc));
@@ -124,9 +123,6 @@ public class CounterfactualGenerator {
                         .get(this.runningSeconds + 10, TimeUnit.SECONDS);
 
                 // add it to our found list if valid
-                System.out.println(MatrixUtilsExtensions.vectorFromPredictionInput(seed));
-                System.out.println(counterfactualResult.isValid());
-                System.out.println(String.valueOf(counterfactualResult.isValid()) + counterfactualResult.getOutput().get(0).getOutputs());
                 if (counterfactualResult.isValid()) {
                     generatedBackground.add(
                             new PredictionInput(
