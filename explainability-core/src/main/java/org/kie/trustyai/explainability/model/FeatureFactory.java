@@ -71,6 +71,14 @@ public class FeatureFactory {
         return new Feature(name, Type.CATEGORICAL, new Value(category), false, domain);
     }
 
+    public static Feature newCategoricalNumericalFeature(String name, Integer value) {
+        return new Feature(name, Type.CATEGORICAL, new Value(value));
+    }
+
+    public static Feature newCategoricalNumericalFeature(String name, Integer value, FeatureDomain domain) {
+        return new Feature(name, Type.CATEGORICAL, new Value(value), false, domain);
+    }
+
     public static Feature newNumericalFeature(String name, Number number) {
         return new Feature(name, Type.NUMBER, new Value(number));
     }

@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.local.counterfactual.entities.BinaryEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.BooleanEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CategoricalEntity;
+import org.kie.trustyai.explainability.local.counterfactual.entities.CategoricalNumericalEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntityFactory;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CurrencyEntity;
@@ -71,6 +72,7 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.domain.BinaryFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.CategoricalNumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.CurrencyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.DurationFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
@@ -466,5 +468,27 @@ class CounterfactualEntityFactoryTest {
         });
 
         assertEquals("Null numeric features are not supported in counterfactuals", exception.getMessage());
+    }
+
+    @Test
+    void testCategoricalNumericalFactory() {
+        final int value = 1;
+        final Set<Integer> categories = new HashSet<>(List.of(0, 1, 2, 3));
+        final FeatureDomain domain = CategoricalNumericalFeatureDomain.create(categories);
+        final Feature feature = FeatureFactory.newCategoricalNumericalFeature("int-feature", value, domain);
+        final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
+        assertTrue(counterfactualEntity instanceof CategoricalNumericalEntity);
+        assertEquals(value, counterfactualEntity.asFeature().getValue().asNumber());
+        assertEquals(Type.CATEGORICAL, counterfactualEntity.asFeature().getType());
+    }
+
+    @Test
+    void testFixedCategoricalNumericalFactory() {
+        final int value = 5;
+        final Feature feature = FeatureFactory.newCategoricalNumericalFeature("int-feature", value);
+        final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
+        assertTrue(counterfactualEntity instanceof FixedCategoricalEntity);
+        assertEquals(value, counterfactualEntity.asFeature().getValue().asNumber());
+        assertEquals(Type.CATEGORICAL, counterfactualEntity.asFeature().getType());
     }
 }
