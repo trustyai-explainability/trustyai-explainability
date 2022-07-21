@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
 import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;

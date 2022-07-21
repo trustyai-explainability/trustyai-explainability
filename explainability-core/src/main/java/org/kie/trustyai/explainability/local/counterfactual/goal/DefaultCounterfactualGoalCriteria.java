@@ -52,57 +52,62 @@ public class DefaultCounterfactualGoalCriteria implements CounterfactualGoalCrit
         double distance = 0.0;
         double score = 1.0;
         final int N = predictions.size();
-        for (int i = 0; i < N; i++)
-            for (Output prediction : predictions) {
-                final Type predictionType = prediction.getType();
-                final Output goal = this.goals.get(i);
-                final Type goalType = goal.getType();
 
-                score = Math.min(goal.getScore(), score);
+        if (this.goals.size() != predictions.size()) {
+            throw new IllegalArgumentException("Prediction size must be equal to goal size");
+        }
 
-                // If the prediction types differ and the prediction is not null, this is not allowed.
-                // An allowance is made if the types differ but the prediction is null, since for DMN models
-                // there could be a type difference (e.g. a numerical feature is predicted as a textual "null")
-                if (predictionType != goalType) {
-                    if (Objects.nonNull(prediction.getValue().getUnderlyingObject())) {
-                        String message = String.format("Features must have the same type. Feature '%s', has type '%s' and '%s'",
-                                prediction.getName(), predictionType.toString(), goalType.toString());
-                        logger.error(message);
-                        throw new IllegalArgumentException(message);
-                    } else {
-                        distance += GoalScore.getDefaultDistance();
-                    }
+        for (int i = 0; i < N; i++) {
+            final Output prediction = predictions.get(i);
+            final Type predictionType = prediction.getType();
+            final Output goal = this.goals.get(i);
+            final Type goalType = goal.getType();
+
+            score = Math.min(goal.getScore(), score);
+
+            // If the prediction types differ and the prediction is not null, this is not allowed.
+            // An allowance is made if the types differ but the prediction is null, since for DMN models
+            // there could be a type difference (e.g. a numerical feature is predicted as a textual "null")
+            if (predictionType != goalType) {
+                if (Objects.nonNull(prediction.getValue().getUnderlyingObject())) {
+                    String message = String.format("Features must have the same type. Feature '%s', has type '%s' and '%s'",
+                            prediction.getName(), predictionType.toString(), goalType.toString());
+                    logger.error(message);
+                    throw new IllegalArgumentException(message);
+                } else {
+                    distance += GoalScore.getDefaultDistance();
                 }
+            }
 
-                if (predictionType == Type.NUMBER) {
-                    final double predictionValue = prediction.getValue().asNumber();
-                    final double goalValue = goal.getValue().asNumber();
-                    final double difference = Math.abs(predictionValue - goalValue);
-                    // If any of the values is zero use the difference instead of change
-                    // If neither of the values is zero use the change rate
-                    double temporaryDistance;
-                    if (Double.isNaN(predictionValue) || Double.isNaN(goalValue)) {
-                        String message = String.format("Unsupported NaN or NULL for numeric feature '%s'", prediction.getName());
-                        logger.error(message);
-                        throw new IllegalArgumentException(message);
-                    }
-                    if (predictionValue == 0 || goalValue == 0) {
-                        temporaryDistance = difference;
-                    } else {
-                        temporaryDistance = difference / Math.max(predictionValue, goalValue);
-                    }
-                    if (temporaryDistance < threshold) {
-                        distance += 0.0;
-                    } else {
-                        distance += temporaryDistance;
-                    }
-                } else if (predictionType == Type.DURATION) {
-                    final Duration predictionValue = (Duration) prediction.getValue().getUnderlyingObject();
-                    final Duration goalValue = (Duration) goal.getValue().getUnderlyingObject();
+            if (predictionType == Type.NUMBER) {
+                final double predictionValue = prediction.getValue().asNumber();
+                final double goalValue = goal.getValue().asNumber();
+                final double difference = Math.abs(predictionValue - goalValue);
+                // If any of the values is zero use the difference instead of change
+                // If neither of the values is zero use the change rate
+                double temporaryDistance;
+                if (Double.isNaN(predictionValue) || Double.isNaN(goalValue)) {
+                    String message = String.format("Unsupported NaN or NULL for numeric feature '%s'", prediction.getName());
+                    logger.error(message);
+                    throw new IllegalArgumentException(message);
+                }
+                if (predictionValue == 0 || goalValue == 0) {
+                    temporaryDistance = difference;
+                } else {
+                    temporaryDistance = difference / Math.max(predictionValue, goalValue);
+                }
+                if (temporaryDistance < threshold) {
+                    distance += 0.0;
+                } else {
+                    distance += temporaryDistance;
+                }
+            } else if (predictionType == Type.DURATION) {
+                final Duration predictionValue = (Duration) prediction.getValue().getUnderlyingObject();
+                final Duration goalValue = (Duration) goal.getValue().getUnderlyingObject();
 
-                    if (Objects.isNull(predictionValue) || Objects.isNull(goalValue)) {
-                        distance += GoalScore.getDefaultDistance();
-                    }
+                if (Objects.isNull(predictionValue) || Objects.isNull(goalValue)) {
+                    distance += GoalScore.getDefaultDistance();
+                } else {
                     // Duration distances calculated from value in seconds
                     final double difference = predictionValue.minus(goalValue).abs().getSeconds();
                     // If any of the values is zero use the difference instead of change
@@ -118,13 +123,14 @@ public class DefaultCounterfactualGoalCriteria implements CounterfactualGoalCrit
                     } else {
                         distance += temporaryDistance;
                     }
-                } else if (predictionType == Type.TIME) {
-                    final LocalTime predictionValue = (LocalTime) prediction.getValue().getUnderlyingObject();
-                    final LocalTime goalValue = (LocalTime) goal.getValue().getUnderlyingObject();
+                }
+            } else if (predictionType == Type.TIME) {
+                final LocalTime predictionValue = (LocalTime) prediction.getValue().getUnderlyingObject();
+                final LocalTime goalValue = (LocalTime) goal.getValue().getUnderlyingObject();
 
-                    if (Objects.isNull(predictionValue) || Objects.isNull(goalValue)) {
-                        distance += GoalScore.getDefaultDistance();
-                    }
+                if (Objects.isNull(predictionValue) || Objects.isNull(goalValue)) {
+                    distance += GoalScore.getDefaultDistance();
+                } else {
                     final double interval = LocalTime.MIN.until(LocalTime.MAX, ChronoUnit.SECONDS);
                     // Time distances calculated from value in seconds
                     final double temporaryDistance = Math.abs(predictionValue.until(goalValue, ChronoUnit.SECONDS)) / interval;
@@ -133,18 +139,19 @@ public class DefaultCounterfactualGoalCriteria implements CounterfactualGoalCrit
                     } else {
                         distance += temporaryDistance;
                     }
-                } else if (SUPPORTED_CATEGORICAL_TYPES.contains(predictionType)) {
-                    final Object goalValueObject = goal.getValue().getUnderlyingObject();
-                    final Object predictionValueObject = prediction.getValue().getUnderlyingObject();
-                    distance += (Objects.equals(goalValueObject, predictionValueObject) ? 0.0 : GoalScore.getDefaultDistance());
-                } else {
-                    String message =
-                            String.format("Feature '%s' has unsupported type '%s'", prediction.getName(),
-                                    predictionType.toString());
-                    logger.error(message);
-                    throw new IllegalArgumentException(message);
                 }
+            } else if (SUPPORTED_CATEGORICAL_TYPES.contains(predictionType)) {
+                final Object goalValueObject = goal.getValue().getUnderlyingObject();
+                final Object predictionValueObject = prediction.getValue().getUnderlyingObject();
+                distance += (Objects.equals(goalValueObject, predictionValueObject) ? 0.0 : GoalScore.getDefaultDistance());
+            } else {
+                String message =
+                        String.format("Feature '%s' has unsupported type '%s'", prediction.getName(),
+                                predictionType.toString());
+                logger.error(message);
+                throw new IllegalArgumentException(message);
             }
+        }
         return GoalScore.create(distance, score);
     }
 

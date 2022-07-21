@@ -151,7 +151,6 @@ public class DefaultCounterfactualScoreCalculator implements CounterfactualScore
         } catch (TimeoutException e) {
             logger.error("Timed out while waiting for prediction");
         }
-
         return currentScore;
     }
 }

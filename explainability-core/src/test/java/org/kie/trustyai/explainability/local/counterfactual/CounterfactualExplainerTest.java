@@ -40,6 +40,7 @@ import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
+import org.kie.trustyai.explainability.local.counterfactual.goal.DefaultCounterfactualGoalCriteria;
 import org.kie.trustyai.explainability.local.counterfactual.goal.GoalScore;
 import org.kie.trustyai.explainability.local.counterfactual.score.MockCounterFactualScoreCalculator;
 import org.kie.trustyai.explainability.model.CounterfactualPrediction;
@@ -103,7 +104,7 @@ class CounterfactualExplainerTest {
             List<Feature> features,
             PredictionProvider model,
             double goalThresold) throws InterruptedException, ExecutionException, TimeoutException {
-        return runCounterfactualSearch(randomSeed, goal, features, model, goalThresold, DEFAULT_STEPS);
+        return runCounterfactualSearch(randomSeed, goal, features, model, goalThresold, CounterfactualUtils.DEFAULT_STEPS);
     }
 
     private CounterfactualResult runCounterfactualSearch(Long randomSeed, List<Output> goal,
@@ -129,7 +130,7 @@ class CounterfactualExplainerTest {
                         UUID.randomUUID(),
                         null);
         return explainer.explainAsync(prediction, model)
-                .get(predictionTimeOut, predictionTimeUnit);
+                .get(CounterfactualUtils.predictionTimeOut, CounterfactualUtils.predictionTimeUnit);
     }
 
     private CounterfactualResult runCounterfactualSearch(Long randomSeed,
@@ -155,7 +156,7 @@ class CounterfactualExplainerTest {
                         null,
                         goalCriteria);
         return explainer.explainAsync(prediction, model)
-                .get(predictionTimeOut, predictionTimeUnit);
+                .get(CounterfactualUtils.predictionTimeOut, CounterfactualUtils.predictionTimeUnit);
     }
 
     @ParameterizedTest
@@ -447,10 +448,9 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("x-2", 40.0, NumericalFeatureDomain.create(0.0, 100.0)));
         features.add(FeatureFactory.newCategoricalFeature("operand", "*", CategoricalFeatureDomain.create("+", "-", "/", "*")));
 
+        final PredictionProvider model = TestUtils.getSymbolicArithmeticModel();
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
-                        TestUtils.getSymbolicArithmeticModel(),
-                        0.01);
+                runCounterfactualSearch((long) seed, features, model, 0.01, DefaultCounterfactualGoalCriteria.create(goal, 0.01), 100_000);
 
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
 
@@ -1003,12 +1003,10 @@ class CounterfactualExplainerTest {
 
         final List<Output> goal = List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d));
 
-        final CounterfactualResult result = runCounterfactualSearch((long) seed, goal, fs, model, .01);
-
-        final List<Feature> resultFeatures = result.getEntities().stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList());
+        final CounterfactualResult result = runCounterfactualSearch((long) seed, goal, fs, model, .01, 100_000);
 
         assertTrue(result.isValid());
-        assertTrue(result.getOutput().get(0).getOutputs().get(0).getValue().asNumber() <= .01);
+        assertTrue(Math.abs(result.getOutput().get(0).getOutputs().get(0).getValue().asNumber()) <= .01);
 
     }
 
