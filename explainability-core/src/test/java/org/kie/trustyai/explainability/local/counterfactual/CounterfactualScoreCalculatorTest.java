@@ -589,10 +589,8 @@ class CounterfactualScoreCalculatorTest {
 
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = { 0, 1, 2, 3, 4 })
-    void currencyDistanceNull(int seed) {
-        final Random random = new Random(seed);
+    @Test
+    void currencyDistanceNull() {
         final Currency value = Currency.getInstance(Locale.UK);
 
         // Null as a goal
@@ -630,6 +628,7 @@ class CounterfactualScoreCalculatorTest {
 
         distance = getOutputDistance(predictionOutput, goalOutput);
 
+        assertEquals(0.0, distance);
         assertEquals(Type.CURRENCY, predictionOutput.getType());
     }
 
@@ -1085,8 +1084,8 @@ class CounterfactualScoreCalculatorTest {
         List<CounterfactualEntity> entities = CounterfactualEntityFactory.createEntities(input);
 
         List<Output> goal = List.of(
-        new Output("f-2", Type.NUMBER, new Value(2.0), 0.0),
-        new Output("f-3", Type.BOOLEAN, new Value(true), 0.0));
+                new Output("f-2", Type.NUMBER, new Value(2.0), 0.0),
+                new Output("f-3", Type.BOOLEAN, new Value(true), 0.0));
 
         final CounterfactualSolution solution =
                 new CounterfactualSolution(entities,
