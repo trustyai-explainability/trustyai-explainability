@@ -905,7 +905,7 @@ class CounterfactualExplainerTest {
                 new Output("Semi-Categorical*2", Type.NUMBER, new Value(2), 0.0));
         List<Output> originalOutputs = model.predictAsync(List.of(new PredictionInput(features))).get().get(0).getOutputs();
 
-        final CounterfactualResult result = runCounterfactualSearch(0L, goal, features, model, .01, 100_000);
+        final CounterfactualResult result = CounterfactualUtils.runCounterfactualSearch(0L, goal, features, model, .01, 100_000);
         String resultString = result.asTable(originalOutputs, goal);
         assertEquals("=== Counterfactual Search Results ========================================\n" +
                 "           Features |              Domain |  Original Value  → Found Value\n" +
@@ -941,7 +941,7 @@ class CounterfactualExplainerTest {
 
         final List<Output> goal = List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d));
 
-        final CounterfactualResult result = runCounterfactualSearch((long) seed, goal, fs, model, .01);
+        final CounterfactualResult result = CounterfactualUtils.runCounterfactualSearch((long) seed, goal, fs, model, .01);
 
         final List<Feature> resultFeatures = result.getEntities().stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList());
 
