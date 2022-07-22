@@ -54,7 +54,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.java-version }}-maven${{ matrix.maven-version }}
       - name: Compile and Validate Formating
         shell: bash
-        run: mvn -Dmaven.test.skip=true -Pvalidate-formatting package
+        run: mvn -Dmaven.test.skip=true -Pvalidate-formatting package -nsu -fae -e
       - name: Run Test Suite
         shell: bash
         run: mvn verify
