@@ -201,8 +201,11 @@ public class CounterfactualGenerator {
                     .builder().withTerminationConfig(terminationConfig).build();
             solverConfig.setRandomSeed(0L);
             solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
-            this.counterfactualConfig = new CounterfactualConfig();
-            this.counterfactualConfig.withSolverConfig(solverConfig).withGoalThreshold(.01);
+            if (this.counterfactualConfig == null) {
+                this.counterfactualConfig = new CounterfactualConfig()
+                        .withSolverConfig(solverConfig)
+                        .withGoalThreshold(.01);
+            }
             return new CounterfactualGenerator(
                     seeds, kSeeds, model, goal, counterfactualConfig, pc, runningSeconds);
         }
