@@ -16,12 +16,10 @@
 package org.kie.trustyai.explainability.local.counterfactual.goal;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.kie.trustyai.explainability.model.Output;
 
-@FunctionalInterface
-public interface CounterfactualGoalCriteria {
-
-    GoalScore apply(List<Output> prediction);
+public interface CounterfactualGoalCriteria extends Function<List<Output>, GoalScore> {
 
 }
