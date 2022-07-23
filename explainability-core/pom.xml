@@ -85,7 +85,11 @@
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-shade-plugin</artifactId>
       <configuration>
-
+        <artifactSet>
+          <excludes>
+            <exclude>org.optaplanner:optaplanner-constraint-streams</exclude>
+          </excludes>
+        </artifactSet>
       </configuration>
       <executions>
         <execution>
