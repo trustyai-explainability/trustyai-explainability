@@ -79,4 +79,31 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <configuration>
+        <artifactSet>
+          <excludes>
+            <exclude>org.optaplanner:optaplanner-constraint-streams</exclude>
+          </excludes>
+        </artifactSet>
+      </configuration>
+      <executions>
+        <execution>
+          <phase>package</phase>
+          <goals>
+            <goal>shade</goal>
+          </goals>
+          <configuration>
+            <shadeTestJar>true</shadeTestJar>
+          </configuration>
+        </execution>
+      </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
