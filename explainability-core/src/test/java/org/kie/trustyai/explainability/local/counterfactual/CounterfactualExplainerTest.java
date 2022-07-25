@@ -99,65 +99,6 @@ class CounterfactualExplainerTest {
         this.solverManager = mock(SolverManager.class);
     }
 
-    private CounterfactualResult runCounterfactualSearch(Long randomSeed, List<Output> goal,
-            List<Feature> features,
-            PredictionProvider model,
-            double goalThresold) throws InterruptedException, ExecutionException, TimeoutException {
-        return runCounterfactualSearch(randomSeed, goal, features, model, goalThresold, CounterfactualUtils.DEFAULT_STEPS);
-    }
-
-    private CounterfactualResult runCounterfactualSearch(Long randomSeed, List<Output> goal,
-            List<Feature> features,
-            PredictionProvider model,
-            double goalThreshold,
-            long steps) throws InterruptedException, ExecutionException, TimeoutException {
-        final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
-        final SolverConfig solverConfig = SolverConfigBuilder
-                .builder().withTerminationConfig(terminationConfig).build();
-        solverConfig.setRandomSeed(randomSeed);
-        solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
-        final CounterfactualConfig counterfactualConfig = new CounterfactualConfig();
-        counterfactualConfig.withSolverConfig(solverConfig);
-        final CounterfactualExplainer explainer = new CounterfactualExplainer(counterfactualConfig);
-        final PredictionInput input = new PredictionInput(features);
-        PredictionOutput output = new PredictionOutput(goal);
-        Prediction prediction =
-                new CounterfactualPrediction(input,
-                        output,
-                        goalThreshold,
-                        null,
-                        UUID.randomUUID(),
-                        null);
-        return explainer.explainAsync(prediction, model)
-                .get(CounterfactualUtils.predictionTimeOut, CounterfactualUtils.predictionTimeUnit);
-    }
-
-    private CounterfactualResult runCounterfactualSearch(Long randomSeed,
-            List<Feature> features,
-            PredictionProvider model,
-            double goalThreshold,
-            CounterfactualGoalCriteria goalCriteria,
-            long steps) throws InterruptedException, ExecutionException, TimeoutException {
-        final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
-        final SolverConfig solverConfig = SolverConfigBuilder
-                .builder().withTerminationConfig(terminationConfig).build();
-        solverConfig.setRandomSeed(randomSeed);
-        solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
-        final CounterfactualConfig counterfactualConfig = new CounterfactualConfig();
-        counterfactualConfig.withSolverConfig(solverConfig);
-        final CounterfactualExplainer explainer = new CounterfactualExplainer(counterfactualConfig);
-        final PredictionInput input = new PredictionInput(features);
-        Prediction prediction =
-                new CounterfactualPrediction(input,
-                        null,
-                        null,
-                        UUID.randomUUID(),
-                        null,
-                        goalCriteria);
-        return explainer.explainAsync(prediction, model)
-                .get(CounterfactualUtils.predictionTimeOut, CounterfactualUtils.predictionTimeUnit);
-    }
-
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2 })
     void testNonEmptyInput(int seed) throws ExecutionException, InterruptedException, TimeoutException {
@@ -449,7 +390,7 @@ class CounterfactualExplainerTest {
 
         final PredictionProvider model = TestUtils.getSymbolicArithmeticModel();
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, features, model, 0.01, DefaultCounterfactualGoalCriteria.create(goal, 0.01), 100_000);
+                CounterfactualUtils.runCounterfactualSearch((long) seed, features, model, 0.01, DefaultCounterfactualGoalCriteria.create(goal, 0.01), 100_000);
 
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
 
@@ -982,7 +923,7 @@ class CounterfactualExplainerTest {
         final List<Feature> fs = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
-            fs.add(new Feature(String.valueOf(i), Type.NUMBER, new Value(featureValues[i]), false, NumericalFeatureDomain.create(-5, 5)));
+            fs.add(new Feature(String.valueOf(i), Type.NUMBER, new Value(featureValues[i]), false, NumericalFeatureDomain.create(-6, 6)));
         }
 
         final PredictionProvider model = TestUtils.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
@@ -1021,7 +962,7 @@ class CounterfactualExplainerTest {
         };
 
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, features,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, features,
                         model,
                         DEFAULT_GOAL_THRESHOLD, goalFunction, 100_000);
 
