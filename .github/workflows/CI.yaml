@@ -5,7 +5,7 @@ jobs:
     env:
       MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
     concurrency:
-      group: trustyai-explainability-pr-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.java-version }}
+      group: pull_request-${{ github.event_name }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.java-version }}
       cancel-in-progress: true
     timeout-minutes: 45
     strategy:
@@ -13,6 +13,7 @@ jobs:
         os: [ 'ubuntu-latest', 'windows-latest' ]
         java-version: [ 11, 17 ]
         maven-version: [ '3.8.6' ]
+      fail-fast: false
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }} - Java ${{ matrix.java-version }} - Build and Test
     steps:
@@ -52,7 +53,7 @@ jobs:
         with:
           path: ~/.m2
           key: ${{ runner.os }}-${{ matrix.java-version }}-maven${{ matrix.maven-version }}
-      - name: Compile and Validate Formating
+      - name: Compile and Validate Formatting
         shell: bash
         run: mvn -Dmaven.test.skip=true -Pvalidate-formatting package -nsu -fae -e
       - name: Run Test Suite
