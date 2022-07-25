@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
 import org.kie.trustyai.explainability.model.CounterfactualPrediction;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
@@ -44,13 +45,13 @@ public class CounterfactualUtils {
             List<Feature> features,
             PredictionProvider model,
             double goalThresold) throws InterruptedException, ExecutionException, TimeoutException {
-        return runCounterfactualSearch(randomSeed, goal, features, model, goalThresold, DEFAULT_STEPS);
+        return runCounterfactualSearch(randomSeed, goal, features, model, goalThresold, CounterfactualUtils.DEFAULT_STEPS);
     }
 
     public static CounterfactualResult runCounterfactualSearch(Long randomSeed, List<Output> goal,
             List<Feature> features,
             PredictionProvider model,
-            double goalThresold,
+            double goalThreshold,
             long steps) throws InterruptedException, ExecutionException, TimeoutException {
         final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
         final SolverConfig solverConfig = SolverConfigBuilder
@@ -58,17 +59,45 @@ public class CounterfactualUtils {
         solverConfig.setRandomSeed(randomSeed);
         solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
         final CounterfactualConfig counterfactualConfig = new CounterfactualConfig();
-        counterfactualConfig.withSolverConfig(solverConfig).withGoalThreshold(goalThresold);
+        counterfactualConfig.withSolverConfig(solverConfig);
         final CounterfactualExplainer explainer = new CounterfactualExplainer(counterfactualConfig);
         final PredictionInput input = new PredictionInput(features);
         PredictionOutput output = new PredictionOutput(goal);
         Prediction prediction =
                 new CounterfactualPrediction(input,
                         output,
+                        goalThreshold,
                         null,
                         UUID.randomUUID(),
                         null);
         return explainer.explainAsync(prediction, model)
                 .get(CounterfactualUtils.predictionTimeOut, CounterfactualUtils.predictionTimeUnit);
     }
+
+    public static CounterfactualResult runCounterfactualSearch(Long randomSeed,
+            List<Feature> features,
+            PredictionProvider model,
+            double goalThreshold,
+            CounterfactualGoalCriteria goalCriteria,
+            long steps) throws InterruptedException, ExecutionException, TimeoutException {
+        final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
+        final SolverConfig solverConfig = SolverConfigBuilder
+                .builder().withTerminationConfig(terminationConfig).build();
+        solverConfig.setRandomSeed(randomSeed);
+        solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
+        final CounterfactualConfig counterfactualConfig = new CounterfactualConfig();
+        counterfactualConfig.withSolverConfig(solverConfig);
+        final CounterfactualExplainer explainer = new CounterfactualExplainer(counterfactualConfig);
+        final PredictionInput input = new PredictionInput(features);
+        Prediction prediction =
+                new CounterfactualPrediction(input,
+                        null,
+                        null,
+                        UUID.randomUUID(),
+                        null,
+                        goalCriteria);
+        return explainer.explainAsync(prediction, model)
+                .get(CounterfactualUtils.predictionTimeOut, CounterfactualUtils.predictionTimeUnit);
+    }
+
 }

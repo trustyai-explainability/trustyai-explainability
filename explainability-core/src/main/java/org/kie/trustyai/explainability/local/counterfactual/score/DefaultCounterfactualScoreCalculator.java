@@ -16,12 +16,7 @@
 package org.kie.trustyai.explainability.local.counterfactual.score;
 
 import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -30,12 +25,13 @@ import java.util.stream.Collectors;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualSolution;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
+import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
+import org.kie.trustyai.explainability.local.counterfactual.goal.GoalScore;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.utils.CompositeFeatureUtils;
 import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
 import org.slf4j.Logger;
@@ -50,111 +46,8 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultCounterfactualScoreCalculator implements CounterfactualScoreCalculator {
 
-    private static final double DEFAULT_DISTANCE = 1.0;
-
     private static final Logger logger =
             LoggerFactory.getLogger(DefaultCounterfactualScoreCalculator.class);
-
-    public static Double outputDistance(Output prediction, Output goal) throws IllegalArgumentException {
-        return outputDistance(prediction, goal, 0.0);
-    }
-
-    private static final Set<Type> SUPPORTED_CATEGORICAL_TYPES = Set.of(
-            Type.CATEGORICAL,
-            Type.BOOLEAN,
-            Type.TEXT,
-            Type.CURRENCY,
-            Type.BINARY,
-            Type.UNDEFINED);
-
-    public static Double outputDistance(Output prediction, Output goal, double threshold) throws IllegalArgumentException {
-        final Type predictionType = prediction.getType();
-        final Type goalType = goal.getType();
-
-        // If the prediction types differ and the prediction is not null, this is not allowed.
-        // An allowance is made if the types differ but the prediction is null, since for DMN models
-        // there could be a type difference (e.g. a numerical feature is predicted as a textual "null")
-        if (predictionType != goalType) {
-            if (Objects.nonNull(prediction.getValue().getUnderlyingObject())) {
-                String message = String.format("Features must have the same type. Feature '%s', has type '%s' and '%s'",
-                        prediction.getName(), predictionType.toString(), goalType.toString());
-                logger.error(message);
-                throw new IllegalArgumentException(message);
-            } else {
-                return DEFAULT_DISTANCE;
-            }
-        }
-
-        if (predictionType == Type.NUMBER) {
-            final double predictionValue = prediction.getValue().asNumber();
-            final double goalValue = goal.getValue().asNumber();
-            final double difference = Math.abs(predictionValue - goalValue);
-            // If any of the values is zero use the difference instead of change
-            // If neither of the values is zero use the change rate
-            double distance;
-            if (Double.isNaN(predictionValue) || Double.isNaN(goalValue)) {
-                String message = String.format("Unsupported NaN or NULL for numeric feature '%s'", prediction.getName());
-                logger.error(message);
-                throw new IllegalArgumentException(message);
-            }
-            if (predictionValue == 0 || goalValue == 0) {
-                distance = difference;
-            } else {
-                distance = difference / Math.max(predictionValue, goalValue);
-            }
-            if (distance < threshold) {
-                return 0d;
-            } else {
-                return distance;
-            }
-        } else if (predictionType == Type.DURATION) {
-            final Duration predictionValue = (Duration) prediction.getValue().getUnderlyingObject();
-            final Duration goalValue = (Duration) goal.getValue().getUnderlyingObject();
-
-            if (Objects.isNull(predictionValue) || Objects.isNull(goalValue)) {
-                return 1.0;
-            }
-            // Duration distances calculated from value in seconds
-            final double difference = predictionValue.minus(goalValue).abs().getSeconds();
-            // If any of the values is zero use the difference instead of change
-            // If neither of the values is zero use the change rate
-            double distance;
-            if (predictionValue.isZero() || goalValue.isZero()) {
-                distance = difference;
-            } else {
-                distance = difference / Math.max(predictionValue.getSeconds(), goalValue.getSeconds());
-            }
-            if (distance < threshold) {
-                return 0d;
-            } else {
-                return distance;
-            }
-        } else if (predictionType == Type.TIME) {
-            final LocalTime predictionValue = (LocalTime) prediction.getValue().getUnderlyingObject();
-            final LocalTime goalValue = (LocalTime) goal.getValue().getUnderlyingObject();
-
-            if (Objects.isNull(predictionValue) || Objects.isNull(goalValue)) {
-                return 1.0;
-            }
-            final double interval = LocalTime.MIN.until(LocalTime.MAX, ChronoUnit.SECONDS);
-            // Time distances calculated from value in seconds
-            final double distance = Math.abs(predictionValue.until(goalValue, ChronoUnit.SECONDS)) / interval;
-            if (distance < threshold) {
-                return 0d;
-            } else {
-                return distance;
-            }
-        } else if (SUPPORTED_CATEGORICAL_TYPES.contains(predictionType)) {
-            final Object goalValueObject = goal.getValue().getUnderlyingObject();
-            final Object predictionValueObject = prediction.getValue().getUnderlyingObject();
-            return Objects.equals(goalValueObject, predictionValueObject) ? 0.0 : DEFAULT_DISTANCE;
-        } else {
-            String message =
-                    String.format("Feature '%s' has unsupported type '%s'", prediction.getName(), predictionType.toString());
-            logger.error(message);
-            throw new IllegalArgumentException(message);
-        }
-    }
 
     private BendableBigDecimalScore calculateInputScore(CounterfactualSolution solution) {
         int secondarySoftScore = 0;
@@ -189,34 +82,25 @@ public class DefaultCounterfactualScoreCalculator implements CounterfactualScore
 
     private BendableBigDecimalScore calculateOutputScore(CounterfactualSolution solution) {
         final List<PredictionOutput> predictions = solution.getPredictionOutputs();
-        final List<Output> goal = solution.getGoal();
+        final CounterfactualGoalCriteria goalCriteria = solution.getGoalCriteria();
 
         double outputDistance = 0.0;
         int tertiaryHardScore = 0;
         double primaryHardScore = 0;
 
         for (PredictionOutput predictionOutput : predictions) {
-
             final List<Output> outputs = predictionOutput.getOutputs();
+            final GoalScore score = goalCriteria.apply(outputs);
+            outputDistance += score.getDistance() * score.getDistance();
 
-            if (goal.size() != outputs.size()) {
-                throw new IllegalArgumentException("Prediction size must be equal to goal size");
-            }
-
-            final int numberOutputs = outputs.size();
-            for (int i = 0; i < numberOutputs; i++) {
-                final Output output = outputs.get(i);
-                final Output goalOutput = goal.get(i);
-                final double d =
-                        DefaultCounterfactualScoreCalculator.outputDistance(output, goalOutput, solution.getGoalThreshold());
-                outputDistance += d * d;
-
-                if (output.getScore() < goalOutput.getScore()) {
+            for (final Output output : outputs) {
+                if (output.getScore() < score.getScore()) {
                     tertiaryHardScore -= 1;
                 }
             }
             primaryHardScore -= Math.sqrt(outputDistance);
         }
+
         return BendableBigDecimalScore.of(
                 new BigDecimal[] {
                         BigDecimal.valueOf(primaryHardScore),
@@ -267,7 +151,6 @@ public class DefaultCounterfactualScoreCalculator implements CounterfactualScore
         } catch (TimeoutException e) {
             logger.error("Timed out while waiting for prediction");
         }
-
         return currentScore;
     }
 }

@@ -56,6 +56,7 @@ public class CounterfactualConfig {
         return this;
     }
 
+    @Deprecated(forRemoval = true)
     public CounterfactualConfig withGoalThreshold(double threshold) {
         this.goalThreshold = threshold;
         return this;

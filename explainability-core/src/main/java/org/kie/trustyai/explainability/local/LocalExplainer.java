@@ -30,7 +30,8 @@ public interface LocalExplainer<T> {
 
     default CompletableFuture<T> explainAsync(Prediction prediction, PredictionProvider model) {
         return explainAsync(prediction, model, unused -> {
-            /* NOP */});
+            /* NOP */
+        });
     };
 
     CompletableFuture<T> explainAsync(Prediction prediction, PredictionProvider model, Consumer<T> intermediateResultsConsumer);
