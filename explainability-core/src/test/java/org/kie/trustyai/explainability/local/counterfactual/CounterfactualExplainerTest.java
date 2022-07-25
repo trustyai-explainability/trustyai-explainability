@@ -74,8 +74,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.kie.trustyai.explainability.local.counterfactual.CounterfactualUtils.DEFAULT_GOAL_THRESHOLD;
-import static org.kie.trustyai.explainability.local.counterfactual.CounterfactualUtils.MAX_RUNNING_TIME_SECONDS;
+import static org.kie.trustyai.explainability.local.counterfactual.CounterfactualUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -156,7 +155,7 @@ class CounterfactualExplainerTest {
         final double epsilon = 10.0;
 
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
@@ -192,7 +191,7 @@ class CounterfactualExplainerTest {
         final double epsilon = 10.0;
 
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
@@ -239,7 +238,7 @@ class CounterfactualExplainerTest {
         final double epsilon = 10.0;
 
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
@@ -278,7 +277,7 @@ class CounterfactualExplainerTest {
         final double epsilon = 10.0;
 
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         0.005, 200_000);
 
@@ -318,7 +317,7 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newCategoricalFeature("operand", "*", CategoricalFeatureDomain.create("+", "-", "/", "*")));
 
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSymbolicArithmeticModel(),
                         0.0);
 
@@ -386,7 +385,7 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newCategoricalFeature("operand", "*", CategoricalFeatureDomain.create("+", "-", "/", "*")));
 
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSymbolicArithmeticModel(),
                         0.01);
 
@@ -452,7 +451,7 @@ class CounterfactualExplainerTest {
         final PredictionProvider model = TestUtils.getSumThresholdModel(center, epsilon);
 
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                runCounterfactualSearch((long) seed, goal, features,
                         model,
                         DEFAULT_GOAL_THRESHOLD, 100_000);
 
@@ -499,7 +498,7 @@ class CounterfactualExplainerTest {
 
         final PredictionProvider model = TestUtils.getSumThresholdModel(center, epsilon);
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                runCounterfactualSearch((long) seed, goal, features,
                         model,
                         DEFAULT_GOAL_THRESHOLD, 100_000);
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
@@ -557,7 +556,7 @@ class CounterfactualExplainerTest {
         List<Feature> perturbedFeatures = DataUtils.perturbFeatures(features, perturbationContext);
 
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, perturbedFeatures,
+                runCounterfactualSearch((long) seed, goal, perturbedFeatures,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
@@ -805,7 +804,7 @@ class CounterfactualExplainerTest {
         final double epsilon = 0.1;
 
         final CounterfactualResult result =
-                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
