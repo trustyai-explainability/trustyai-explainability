@@ -17,29 +17,28 @@
 package org.kie.trustyai.explainability.local.shap;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.math3.linear.RealVector;
 import org.kie.trustyai.explainability.model.FeatureImportance;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.utils.IOUtils;
 
 public class ShapResults {
-    private final Saliency[] saliencies;
-    private final RealVector fnull;
+    private final Map<String, Saliency> saliencies;
+    private final Map<String, Double> fnull;
 
-    public ShapResults(Saliency[] saliencies, RealVector fnull) {
+    public ShapResults(Map<String, Saliency> saliencies, Map<String, Double> fnull) {
         this.saliencies = saliencies;
         this.fnull = fnull;
     }
 
-    public Saliency[] getSaliencies() {
+    public Map<String, Saliency> getSaliencies() {
         return saliencies;
     }
 
-    public RealVector getFnull() {
+    public Map<String, Double> getFnull() {
         return fnull;
     }
 
@@ -52,22 +51,26 @@ public class ShapResults {
             return false;
         }
         ShapResults other = (ShapResults) o;
-        if (this.saliencies.length != other.getSaliencies().length) {
+        if (this.saliencies.size() != other.getSaliencies().size()) {
             return false;
         }
         if (!this.fnull.equals(other.getFnull())) {
             return false;
         }
-        for (int i = 0; i < this.saliencies.length; i++) {
-            List<FeatureImportance> thisPFIs = this.saliencies[i].getPerFeatureImportance();
-            List<FeatureImportance> otherPFIs = other.getSaliencies()[i].getPerFeatureImportance();
-            if (thisPFIs.size() != otherPFIs.size()) {
-                return false;
-            }
-            for (int j = 0; j < thisPFIs.size(); j++) {
-                if (!thisPFIs.get(j).equals(otherPFIs.get(j))) {
+        for (Map.Entry<String, Saliency> entry : this.saliencies.entrySet()) {
+            if (other.getSaliencies().containsKey(entry.getKey())) {
+                List<FeatureImportance> thisPFIs = this.saliencies.get(entry.getKey()).getPerFeatureImportance();
+                List<FeatureImportance> otherPFIs = other.getSaliencies().get(entry.getKey()).getPerFeatureImportance();
+                if (thisPFIs.size() != otherPFIs.size()) {
                     return false;
                 }
+                for (int j = 0; j < thisPFIs.size(); j++) {
+                    if (!thisPFIs.get(j).equals(otherPFIs.get(j))) {
+                        return false;
+                    }
+                }
+            } else {
+                return false;
             }
         }
         return true;
@@ -75,7 +78,7 @@ public class ShapResults {
 
     @Override
     public int hashCode() {
-        return Objects.hash(Arrays.hashCode(saliencies), fnull);
+        return Objects.hash(saliencies.hashCode(), fnull);
     }
 
     /**
@@ -105,10 +108,10 @@ public class ShapResults {
         List<Integer> lineSeparatorPositions = new ArrayList<>();
         int lineIDX = 0;
 
-        for (int s = 0; s < saliencies.length; s++) {
-            Saliency saliency = saliencies[s];
+        for (Map.Entry<String, Saliency> entry : saliencies.entrySet()) {
+            Saliency saliency = entry.getValue();
             List<FeatureImportance> pfis = saliency.getPerFeatureImportance();
-            headers.add(saliency.getOutput().getName() + " SHAP Values");
+            headers.add(entry.getKey() + " SHAP Values");
             headerPositions.add(lineIDX);
 
             featureNames.add("Feature");
@@ -119,7 +122,7 @@ public class ShapResults {
 
             featureNames.add("");
             featureValues.add("FNull");
-            shapValues.add(IOUtils.roundedString(this.fnull.getEntry(s), decimalPlaces));
+            shapValues.add(IOUtils.roundedString(this.fnull.get(entry.getKey()), decimalPlaces));
             confidences.add("");
             lineIDX++;
 
