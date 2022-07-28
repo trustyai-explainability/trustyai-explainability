@@ -27,7 +27,7 @@ public abstract class AbstractCategoricalEntity<T> extends AbstractEntity<T> {
 
     protected Set<T> allowedCategories;
 
-    public AbstractCategoricalEntity() {
+    protected AbstractCategoricalEntity() {
         super();
     }
 
