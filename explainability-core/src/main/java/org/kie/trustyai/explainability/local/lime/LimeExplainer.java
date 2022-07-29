@@ -139,9 +139,9 @@ public class LimeExplainer implements LocalExplainer<Map<String, Saliency>> {
     private CompletableFuture<Map<String, Saliency>> adjustAndRetry(PredictionProvider model, PredictionInput originalInput,
             List<Feature> linearizedTargetInputFeatures, List<Output> actualOutputs,
             LimeConfig executionConfig) {
-        if (limeConfig.isAdaptDatasetVariance()) {
+        if (executionConfig.isAdaptDatasetVariance()) {
             PerturbationContext newPerturbationContext = getNewPerturbationContext(linearizedTargetInputFeatures, executionConfig.getNoOfRetries(), executionConfig.getPerturbationContext());
-            int newNoOfSamples = executionConfig.getNoOfSamples() + executionConfig.getNoOfSamples() / limeConfig.getNoOfRetries();
+            int newNoOfSamples = executionConfig.getNoOfSamples() + executionConfig.getNoOfSamples() / executionConfig.getNoOfRetries();
             executionConfig = executionConfig.withSamples(newNoOfSamples).withPerturbationContext(newPerturbationContext);
         }
         return explainRetryCycle(model, originalInput, linearizedTargetInputFeatures, actualOutputs, executionConfig.withRetries(executionConfig.getNoOfRetries() - 1));
@@ -281,7 +281,7 @@ public class LimeExplainer implements LocalExplainer<Map<String, Saliency>> {
             for (int i = 0; i < weights.length; i++) {
                 fis.add(new FeatureImportance(linearizedTargetInputFeatures.get(i), weights[i]));
             }
-            List<FeatureImportance> topFeatures = new Saliency(originalOutput, fis).getTopFeatures(limeConfig.getNoOfFeatures());
+            List<FeatureImportance> topFeatures = new Saliency(originalOutput, fis).getTopFeatures(executionConfig.getNoOfFeatures());
             selectedFeatures = topFeatures.stream().map(FeatureImportance::getFeature).collect(Collectors.toList());
         } else {
             // forward selection

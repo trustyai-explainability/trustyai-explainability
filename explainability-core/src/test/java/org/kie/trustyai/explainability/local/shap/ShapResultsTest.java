@@ -17,10 +17,10 @@
 package org.kie.trustyai.explainability.local.shap;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealVector;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureImportance;
@@ -34,16 +34,18 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class ShapResultsTest {
     ShapResults buildShapResults(int nOutputs, int nFeatures, int scalar1, int scalar2) {
-        Saliency[] saliencies = new Saliency[nOutputs];
+        Map<String, Saliency> saliencies = new HashMap<>();
+        Map<String, Double> fnull = new HashMap<>();
         for (int i = 0; i < nOutputs; i++) {
             List<FeatureImportance> fis = new ArrayList<>();
             for (int j = 0; j < nFeatures; j++) {
                 fis.add(new FeatureImportance(new Feature("Feature " + String.valueOf(j), Type.NUMBER, new Value(j)), (i + 1) * j * scalar1));
             }
-            saliencies[i] = new Saliency(new Output("Output " + String.valueOf(i), Type.NUMBER, new Value(i + 1), 1.0), fis);
+            String oname = "Output " + i;
+            saliencies.put(oname,
+                    new Saliency(new Output(oname, Type.NUMBER, new Value(i + 1), 1.0), fis));
+            fnull.put(oname, (double) scalar2);
         }
-        RealVector fnull = MatrixUtils.createRealVector(new double[nOutputs]);
-        fnull.mapAddToSelf(scalar2);
         return new ShapResults(saliencies, fnull);
     }
 
