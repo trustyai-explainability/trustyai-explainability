@@ -30,10 +30,10 @@ import java.util.stream.Collectors;
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntityFactory;
+import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
 import org.kie.trustyai.explainability.local.counterfactual.score.DefaultCounterfactualScoreCalculator;
 import org.kie.trustyai.explainability.model.CounterfactualPrediction;
 import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
@@ -120,24 +120,17 @@ public class CounterfactualExplainer implements LocalExplainer<CounterfactualRes
                 entities.stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList())));
     }
 
-    @Override
-    public CompletableFuture<CounterfactualResult> explainAsync(Prediction prediction,
-            PredictionProvider model,
-            Consumer<CounterfactualResult> intermediateResultsConsumer) {
+    private CompletableFuture<CounterfactualResult> search(final List<CounterfactualEntity> entities,
+            final List<Feature> originalFeatures,
+            final PredictionProvider model,
+            final UUID executionId,
+            final CounterfactualGoalCriteria goalCriteria,
+            final Long maxRunningTimeSeconds,
+            final Consumer<CounterfactualResult> intermediateResultsConsumer) {
         final AtomicLong sequenceId = new AtomicLong(0);
-        final CounterfactualPrediction cfPrediction = (CounterfactualPrediction) prediction;
-        final UUID executionId = cfPrediction.getExecutionId();
-        final Long maxRunningTimeSeconds = cfPrediction.getMaxRunningTimeSeconds();
-        final List<CounterfactualEntity> entities =
-                CounterfactualEntityFactory.createEntities(prediction.getInput());
-
-        final List<Output> goal = prediction.getOutput().getOutputs();
-        // Original features kept as structural reference to re-assemble composite features
-        final List<Feature> originalFeatures = prediction.getInput().getFeatures();
-
         Function<UUID, CounterfactualSolution> initial =
-                uuid -> new CounterfactualSolution(entities, originalFeatures, model, goal, UUID.randomUUID(), executionId,
-                        this.counterfactualConfig.getGoalThreshold());
+                uuid -> new CounterfactualSolution(entities, originalFeatures, model, UUID.randomUUID(), executionId,
+                        goalCriteria, this.counterfactualConfig.getGoalThreshold());
 
         final CompletableFuture<CounterfactualSolution> cfSolution = CompletableFuture.supplyAsync(() -> {
             SolverConfig solverConfig = this.counterfactualConfig.getSolverConfig();
@@ -166,7 +159,8 @@ public class CounterfactualExplainer implements LocalExplainer<CounterfactualRes
             }
         }, this.counterfactualConfig.getExecutor());
 
-        final CompletableFuture<List<PredictionOutput>> cfOutputs = cfSolution.thenCompose(s -> model.predictAsync(buildInput(s.getEntities())));
+        final CompletableFuture<List<PredictionOutput>> cfOutputs =
+                cfSolution.thenCompose(s -> model.predictAsync(buildInput(s.getEntities())));
         return CompletableFuture.allOf(cfOutputs, cfSolution).thenApply(v -> {
             CounterfactualSolution solution = cfSolution.join();
             return new CounterfactualResult(solution.getEntities(),
@@ -177,7 +171,32 @@ public class CounterfactualExplainer implements LocalExplainer<CounterfactualRes
                     solution.getExecutionId(),
                     sequenceId.incrementAndGet());
         });
+    }
 
+    @Override
+    public CompletableFuture<CounterfactualResult> explainAsync(Prediction prediction,
+            PredictionProvider model,
+            Consumer<CounterfactualResult> intermediateResultsConsumer) {
+
+        if (!(prediction instanceof CounterfactualPrediction)) {
+            final String message = "Prediction must be an instance of CounterfactualPredicton.";
+            logger.error(message);
+            throw new IllegalArgumentException(message);
+        }
+
+        final CounterfactualPrediction cfPrediction = (CounterfactualPrediction) prediction;
+
+        final List<CounterfactualEntity> entities =
+                CounterfactualEntityFactory.createEntities(cfPrediction.getInput());
+        final UUID executionId = cfPrediction.getExecutionId();
+
+        // Original features kept as structural reference to re-assemble composite features
+        final List<Feature> originalFeatures = cfPrediction.getInput().getFeatures();
+
+        final CounterfactualGoalCriteria goalCriteria = cfPrediction.getGoalCriteria();
+        final Long maxRunningTimeSeconds = cfPrediction.getMaxRunningTimeSeconds();
+
+        return search(entities, originalFeatures, model, executionId, goalCriteria, maxRunningTimeSeconds, intermediateResultsConsumer);
     }
 
 }
