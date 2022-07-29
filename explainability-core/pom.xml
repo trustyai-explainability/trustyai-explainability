@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <parent>
     <groupId>org.kie.kogito</groupId>
     <artifactId>kogito-apps-build-parent</artifactId>
@@ -51,7 +51,7 @@
           <artifactId>optaplanner-constraint-drl</artifactId>
         </exclusion>
         <exclusion>
-          <groupId> org.drools</groupId>
+          <groupId>org.drools</groupId>
           <artifactId>drools-wiring-static</artifactId>
         </exclusion>
       </exclusions>
@@ -79,31 +79,43 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-shade-plugin</artifactId>
-      <configuration>
-        <artifactSet>
-          <excludes>
-            <exclude>org.optaplanner:optaplanner-constraint-streams</exclude>
-          </excludes>
-        </artifactSet>
-      </configuration>
-      <executions>
-        <execution>
-          <phase>package</phase>
-          <goals>
-            <goal>shade</goal>
-          </goals>
-          <configuration>
-            <shadeTestJar>true</shadeTestJar>
-          </configuration>
-        </execution>
-      </executions>
-      </plugin>
-    </plugins>
-  </build>
+  <profiles>
+    <profile>
+      <id>default</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+    <profile>
+      <id>shaded</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <configuration>
+              <artifactSet>
+                <excludes>
+                  <exclude>org.optaplanner:optaplanner-constraint-streams</exclude>
+                </excludes>
+              </artifactSet>
+            </configuration>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
+                <configuration>
+                  <shadeTestJar>true</shadeTestJar>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 
 </project>
