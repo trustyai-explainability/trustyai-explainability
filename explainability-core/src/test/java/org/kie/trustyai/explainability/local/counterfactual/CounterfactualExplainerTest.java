@@ -37,6 +37,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
+import org.kie.trustyai.explainability.local.counterfactual.entities.CategoricalNumericalEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
 import org.kie.trustyai.explainability.local.counterfactual.goal.DefaultCounterfactualGoalCriteria;
@@ -57,6 +58,7 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.CategoricalNumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -912,6 +914,36 @@ class CounterfactualExplainerTest {
         assertTrue(resultString.contains("Meets Validity Criteria?"));
         assertTrue(resultString.contains("Feature 3"));
         assertTrue(resultString.contains("[A, B]"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testCounterfactualCategoricalFeature(int seed) throws ExecutionException, InterruptedException, TimeoutException {
+        Random random = new Random();
+        random.setSeed(seed);
+
+        final List<Output> goal = List.of(new Output("sum-but1", Type.NUMBER, new Value(10), 0.0d));
+        List<Feature> features = new LinkedList<>();
+        features.add(FeatureFactory.newCategoricalNumericalFeature("f-num1", 0,
+                CategoricalNumericalFeatureDomain.create(0, 1, 5)));
+        features.add(FeatureFactory.newNumericalFeature("f-num3", 1.0, NumericalFeatureDomain.create(0.0, 10.0)));
+        features.add(FeatureFactory.newCategoricalNumericalFeature("f-num4", 0,
+                CategoricalNumericalFeatureDomain.create(5, 6, 7)));
+
+        final PredictionProvider model = TestUtils.getSumSkipModel(1);
+        final CounterfactualResult result =
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                        model,
+                        DEFAULT_GOAL_THRESHOLD);
+
+        assertTrue(result.isValid());
+        assertEquals(10, result.getOutput().get(0).getOutputs().get(0).getValue().asNumber());
+        assertEquals(5, result.getEntities().get(0).asFeature().getValue().asNumber());
+        assertEquals(5, result.getEntities().get(2).asFeature().getValue().asNumber());
+        assertTrue(result.getEntities().get(0) instanceof CategoricalNumericalEntity);
+        assertTrue(result.getEntities().get(2) instanceof CategoricalNumericalEntity);
+        assertEquals(Type.CATEGORICAL, result.getEntities().get(0).asFeature().getType());
+        assertEquals(Type.CATEGORICAL, result.getEntities().get(0).asFeature().getType());
     }
 
     @ParameterizedTest

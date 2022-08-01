@@ -68,7 +68,7 @@ public class DefaultCounterfactualGoalCriteria implements CounterfactualGoalCrit
             // If the prediction types differ and the prediction is not null, this is not allowed.
             // An allowance is made if the types differ but the prediction is null, since for DMN models
             // there could be a type difference (e.g. a numerical feature is predicted as a textual "null")
-            if (predictionType != goalType) {
+            if (predictionType != goalType && goalType != Type.CATEGORICAL) {
                 if (Objects.nonNull(prediction.getValue().getUnderlyingObject())) {
                     String message = String.format("Features must have the same type. Feature '%s', has type '%s' and '%s'",
                             prediction.getName(), predictionType.toString(), goalType.toString());
