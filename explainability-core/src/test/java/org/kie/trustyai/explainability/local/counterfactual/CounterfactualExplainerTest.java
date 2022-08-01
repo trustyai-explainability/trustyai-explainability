@@ -932,7 +932,7 @@ class CounterfactualExplainerTest {
 
         final PredictionProvider model = TestUtils.getSumSkipModel(1);
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         model,
                         DEFAULT_GOAL_THRESHOLD);
 
