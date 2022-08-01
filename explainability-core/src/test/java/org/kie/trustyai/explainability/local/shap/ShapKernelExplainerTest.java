@@ -20,6 +20,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.concurrent.CompletableFuture;
@@ -102,8 +103,8 @@ class ShapKernelExplainerTest {
     };
 
     double[][][] oneVarianceMultiOutputSHAP = {
-            { { 2., 0., 0. }, { 4., 0., 0. } },
-            { { 0., 0., -1. }, { 0., 0., -2 } },
+            { { 4., 0., 0. }, { 2., 0., 0. } },
+            { { 0., 0., -2 }, { 0., 0., -1. } },
     };
 
     // multi variance, one output logit test case matrices ===============
@@ -133,9 +134,9 @@ class ShapKernelExplainerTest {
     };
 
     double[][][] multiVarianceMultiOutputSHAP = {
-            { { 0.66666667, 0., 0.66666667, 0., 0. }, { 1.333333333, 0., 1.33333333, 0., 0. } },
-            { { 6.66666667, 0., 6.66666667, -1., 6. }, { 13.333333333, 0., 13.333333333, -2., 12. } },
-            { { -4.33333333, 0., -5.33333333, 8., -6. }, { -8.6666666667, 0., -10.666666666, 16., -12. } },
+            { { 1.333333333, 0., 1.33333333, 0., 0. }, { 0.66666667, 0., 0.66666667, 0., 0. }, },
+            { { 13.333333333, 0., 13.333333333, -2., 12. }, { 6.66666667, 0., 6.66666667, -1., 6. }, },
+            { { -8.6666666667, 0., -10.666666666, 16., -12. }, { -4.33333333, 0., -5.33333333, 8., -6. }, },
     };
 
     PerturbationContext pc = new PerturbationContext(new Random(0), 0);
@@ -156,12 +157,13 @@ class ShapKernelExplainerTest {
         return pis;
     }
 
-    private RealMatrix[] saliencyToMatrix(Saliency[] saliencies) {
+    private RealMatrix[] saliencyToMatrix(Map<String, Saliency> saliencies) {
+        String[] keySet = saliencies.keySet().toArray(String[]::new);
         RealMatrix emptyMatrix = MatrixUtils.createRealMatrix(
-                new double[saliencies.length][saliencies[0].getPerFeatureImportance().size()]);
+                new double[saliencies.size()][saliencies.get(keySet[0]).getPerFeatureImportance().size()]);
         RealMatrix[] out = new RealMatrix[] { emptyMatrix.copy(), emptyMatrix.copy() };
-        for (int i = 0; i < saliencies.length; i++) {
-            List<FeatureImportance> fis = saliencies[i].getPerFeatureImportance();
+        for (int i = 0; i < keySet.length; i++) {
+            List<FeatureImportance> fis = saliencies.get(keySet[i]).getPerFeatureImportance();
             for (int j = 0; j < fis.size(); j++) {
                 out[0].setEntry(i, j, fis.get(j).getScore());
                 out[1].setEntry(i, j, fis.get(j).getConfidence());
@@ -193,7 +195,7 @@ class ShapKernelExplainerTest {
         ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
         for (int i = 0; i < toExplain.size(); i++) {
             //explanations shape: outputSize x nfeatures
-            Saliency[] explanationSaliencies = ske.explainAsync(predictions.get(i), model)
+            Map<String, Saliency> explanationSaliencies = ske.explainAsync(predictions.get(i), model)
                     .get(5, TimeUnit.SECONDS).getSaliencies();
             RealMatrix explanations = saliencyToMatrix(explanationSaliencies)[0];
             for (int j = 0; j < explanations.getRowDimension(); j++) {
@@ -223,7 +225,7 @@ class ShapKernelExplainerTest {
         // evaluate if the explanations match the expected value
         for (int i = 0; i < toExplain.size(); i++) {
             //explanations shape: outputSize x nfeatures
-            Saliency[] explanationSaliencies = ske.explainAsync(predictions.get(i), model)
+            Map<String, Saliency> explanationSaliencies = ske.explainAsync(predictions.get(i), model)
                     .get(5, TimeUnit.SECONDS).getSaliencies();
             RealMatrix explanations = saliencyToMatrix(explanationSaliencies)[0];
             for (int j = 0; j < explanations.getRowDimension(); j++) {
@@ -337,7 +339,7 @@ class ShapKernelExplainerTest {
         // evaluate if the explanations match the expected value
         ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
         for (int i = 0; i < toExplain.size(); i++) {
-            Saliency[] explanationSaliencies = ske.explainAsync(predictions.get(i), model)
+            Map<String, Saliency> explanationSaliencies = ske.explainAsync(predictions.get(i), model)
                     .get(5, TimeUnit.SECONDS).getSaliencies();
             RealMatrix[] explanationsAndConfs = saliencyToMatrix(explanationSaliencies);
             RealMatrix explanations = explanationsAndConfs[0];
@@ -382,7 +384,7 @@ class ShapKernelExplainerTest {
         // evaluate if the explanations match the expected value
         ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
         for (int i = 0; i < toExplain.size(); i++) {
-            Saliency[] explanationSaliencies = ske.explainAsync(predictions.get(i), model)
+            Map<String, Saliency> explanationSaliencies = ske.explainAsync(predictions.get(i), model)
                     .get(5, TimeUnit.SECONDS).getSaliencies();
             RealMatrix[] explanationsAndConfs = saliencyToMatrix(explanationSaliencies);
             RealMatrix explanations = explanationsAndConfs[0];
@@ -430,7 +432,7 @@ class ShapKernelExplainerTest {
 
         ExecutorService executor = ForkJoinPool.commonPool();
         executor.submit(() -> {
-            Saliency[] explanationSaliencies = explanationsCF.join().getSaliencies();
+            Map<String, Saliency> explanationSaliencies = explanationsCF.join().getSaliencies();
             RealMatrix explanations = saliencyToMatrix(explanationSaliencies)[0];
             assertArrayEquals(expected[0][0], explanations.getRow(0), 1e-2);
         });
@@ -557,7 +559,7 @@ class ShapKernelExplainerTest {
                 ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
                 List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
                 Prediction p = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
-                Saliency[] saliencies = ske.explainAsync(p, model).get().getSaliencies();
+                Map<String, Saliency> saliencies = ske.explainAsync(p, model).get().getSaliencies();
                 RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies);
                 RealMatrix explanations = explanationsAndConfs[0];
                 RealMatrix confidence = explanationsAndConfs[1];
@@ -629,12 +631,13 @@ class ShapKernelExplainerTest {
         ShapConfig skConfig = getSks().get(config);
         ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
         ShapResults shapResults = ske.explainAsync(p, model).get();
-        Saliency[] saliencies = shapResults.getSaliencies();
+        Map<String, Saliency> saliencies = shapResults.getSaliencies();
         RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies);
         RealMatrix explanations = explanationsAndConfs[0];
 
         double actualOut = predictionOutputVector.getEntry(0);
-        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) + shapResults.getFnull().getEntry(0);
+        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) +
+                shapResults.getFnull().get("sum-but1");
         assertTrue(Math.abs(predOut - actualOut) < 1e-6);
     }
 
@@ -678,12 +681,13 @@ class ShapKernelExplainerTest {
             for (ShapConfig.Builder sk : testConfigs) {
                 ShapKernelExplainer ske = new ShapKernelExplainer(sk.withNSamples(nsamp).build());
                 ShapResults shapResults = ske.explainAsync(p, model).get();
-                Saliency[] saliencies = shapResults.getSaliencies();
+                Map<String, Saliency> saliencies = shapResults.getSaliencies();
                 RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies);
                 RealMatrix explanations = explanationsAndConfs[0];
 
                 double actualOut = predictionOutputVector.getEntry(0);
-                double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) + shapResults.getFnull().getEntry(0);
+                double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) +
+                        shapResults.getFnull().get("linear-sum");
                 assertTrue(Math.abs(predOut - actualOut) < 1e-6);
 
                 double coefMSE = (data.getRowVector(100).ebeMultiply(modelWeights)).getDistance(explanations.getRowVector(0));
@@ -711,12 +715,13 @@ class ShapKernelExplainerTest {
 
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
         ShapResults shapResults = ske.explainAsync(p, model).get();
-        Saliency[] saliencies = shapResults.getSaliencies();
+        Map<String, Saliency> saliencies = shapResults.getSaliencies();
         RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies);
         RealMatrix explanations = explanationsAndConfs[0];
 
         double actualOut = predictionOutputVector.getEntry(0);
-        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) + shapResults.getFnull().getEntry(0);
+        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) +
+                shapResults.getFnull().get("linear-sum");
         assertTrue(Math.abs(predOut - actualOut) < 1e-6);
         double coefMSE = (data.getRowVector(100).ebeMultiply(modelWeights)).getDistance(explanations.getRowVector(0));
         assertTrue(coefMSE < .01);
@@ -806,10 +811,14 @@ class ShapKernelExplainerTest {
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
         ShapResults shapResults = ske.explainAsync(p, model).get();
 
-        assertEquals(25, shapResults.getSaliencies()[0].getPerFeatureImportance().get(0).getScore(), 1e-6);
-        assertEquals(61, shapResults.getSaliencies()[0].getPerFeatureImportance().get(1).getScore(), 1e-6);
-        assertEquals(1, shapResults.getSaliencies()[1].getPerFeatureImportance().get(0).getScore(), 1e-6);
-        assertEquals(1, shapResults.getSaliencies()[1].getPerFeatureImportance().get(1).getScore(), 1e-6);
+        assertEquals(25, shapResults.getSaliencies().get("calories")
+                .getPerFeatureImportance().get(0).getScore(), 1e-6);
+        assertEquals(61, shapResults.getSaliencies().get("calories")
+                .getPerFeatureImportance().get(1).getScore(), 1e-6);
+        assertEquals(1, shapResults.getSaliencies().get("fruit_eaten")
+                .getPerFeatureImportance().get(0).getScore(), 1e-6);
+        assertEquals(1, shapResults.getSaliencies().get("fruit_eaten")
+                .getPerFeatureImportance().get(1).getScore(), 1e-6);
     }
 
     @Test
@@ -849,10 +858,14 @@ class ShapKernelExplainerTest {
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
         ShapResults shapResults = ske.explainAsync(p, model).get();
 
-        assertEquals(25, shapResults.getSaliencies()[0].getPerFeatureImportance().get(0).getScore(), 1e-6);
-        assertEquals(61, shapResults.getSaliencies()[0].getPerFeatureImportance().get(1).getScore(), 1e-6);
-        assertEquals(1, shapResults.getSaliencies()[1].getPerFeatureImportance().get(0).getScore(), 1e-6);
-        assertEquals(1, shapResults.getSaliencies()[1].getPerFeatureImportance().get(1).getScore(), 1e-6);
+        assertEquals(25, shapResults.getSaliencies().get("calories")
+                .getPerFeatureImportance().get(0).getScore(), 1e-6);
+        assertEquals(61, shapResults.getSaliencies().get("calories")
+                .getPerFeatureImportance().get(1).getScore(), 1e-6);
+        assertEquals(1, shapResults.getSaliencies().get("fruit_eaten")
+                .getPerFeatureImportance().get(0).getScore(), 1e-6);
+        assertEquals(1, shapResults.getSaliencies().get("fruit_eaten")
+                .getPerFeatureImportance().get(1).getScore(), 1e-6);
     }
 
     @Test
@@ -898,30 +911,9 @@ class ShapKernelExplainerTest {
         ShapResults results = ske.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         String table = results.asTable();
-        assertEquals("=== Semi-Categorical SHAP Values ===================\n" +
-                "      Feature      Value |  SHAP Value  | Confidence\n" +
-                "----------------------------------------------------\n" +
-                "                   FNull |     -10.000              \n" +
-                " Feature 0 =       0.000 |       0.000         0.000\n" +
-                " Feature 1 =       1.000 |       1.000         0.000\n" +
-                " Feature 2 =           A |      -0.000         0.000\n" +
-                " Feature 3 =       3.000 |       3.000         0.000\n" +
-                " Feature 4 =       4.000 |       4.000         0.000\n" +
-                "----------------------------------------------------\n" +
-                "              Prediction |      -2.000              \n" +
-                "====================================================\n" +
-                "=== Semi-Categorical*2 SHAP Values =================\n" +
-                "      Feature      Value |  SHAP Value  | Confidence\n" +
-                "----------------------------------------------------\n" +
-                "                   FNull |     -20.000              \n" +
-                " Feature 0 =       0.000 |       0.000         0.000\n" +
-                " Feature 1 =       1.000 |       2.000         0.000\n" +
-                " Feature 2 =           A |      -0.000         0.000\n" +
-                " Feature 3 =       3.000 |       6.000         0.000\n" +
-                " Feature 4 =       4.000 |       8.000         0.000\n" +
-                "----------------------------------------------------\n" +
-                "              Prediction |      -4.000              \n" +
-                "====================================================", table);
+        assertTrue(table.contains("Semi-Categorical"));
+        assertTrue(table.contains("SHAP Value"));
+        assertTrue(table.contains("Feature 1"));
     }
 
 }

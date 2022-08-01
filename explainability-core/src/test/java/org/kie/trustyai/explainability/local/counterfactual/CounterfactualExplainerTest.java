@@ -23,7 +23,6 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -33,7 +32,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -41,6 +39,9 @@ import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CategoricalNumericalEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
+import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
+import org.kie.trustyai.explainability.local.counterfactual.goal.DefaultCounterfactualGoalCriteria;
+import org.kie.trustyai.explainability.local.counterfactual.goal.GoalScore;
 import org.kie.trustyai.explainability.local.counterfactual.score.MockCounterFactualScoreCalculator;
 import org.kie.trustyai.explainability.model.CounterfactualPrediction;
 import org.kie.trustyai.explainability.model.DataDomain;
@@ -78,6 +79,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.kie.trustyai.explainability.local.counterfactual.CounterfactualUtils.DEFAULT_GOAL_THRESHOLD;
+import static org.kie.trustyai.explainability.local.counterfactual.CounterfactualUtils.MAX_RUNNING_TIME_SECONDS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -88,11 +91,6 @@ class CounterfactualExplainerTest {
 
     private static final Logger logger =
             LoggerFactory.getLogger(CounterfactualExplainerTest.class);
-    private static final Long MAX_RUNNING_TIME_SECONDS = 60L;
-    final long predictionTimeOut = 20L;
-    final TimeUnit predictionTimeUnit = TimeUnit.MINUTES;
-    final Long DEFAULT_STEPS = 30_000L;
-    final double DEFAULT_GOAL_THRESHOLD = 0.01;
     private Function<SolverConfig, SolverManager<CounterfactualSolution, UUID>> solverManagerFactory;
     private SolverManager<CounterfactualSolution, UUID> solverManager;
 
@@ -101,38 +99,6 @@ class CounterfactualExplainerTest {
     private void setup() {
         this.solverManagerFactory = mock(Function.class);
         this.solverManager = mock(SolverManager.class);
-    }
-
-    private CounterfactualResult runCounterfactualSearch(Long randomSeed, List<Output> goal,
-            List<Feature> features,
-            PredictionProvider model,
-            double goalThresold) throws InterruptedException, ExecutionException, TimeoutException {
-        return runCounterfactualSearch(randomSeed, goal, features, model, goalThresold, DEFAULT_STEPS);
-    }
-
-    private CounterfactualResult runCounterfactualSearch(Long randomSeed, List<Output> goal,
-            List<Feature> features,
-            PredictionProvider model,
-            double goalThresold,
-            long steps) throws InterruptedException, ExecutionException, TimeoutException {
-        final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
-        final SolverConfig solverConfig = SolverConfigBuilder
-                .builder().withTerminationConfig(terminationConfig).build();
-        solverConfig.setRandomSeed(randomSeed);
-        solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
-        final CounterfactualConfig counterfactualConfig = new CounterfactualConfig();
-        counterfactualConfig.withSolverConfig(solverConfig).withGoalThreshold(goalThresold);
-        final CounterfactualExplainer explainer = new CounterfactualExplainer(counterfactualConfig);
-        final PredictionInput input = new PredictionInput(features);
-        PredictionOutput output = new PredictionOutput(goal);
-        Prediction prediction =
-                new CounterfactualPrediction(input,
-                        output,
-                        null,
-                        UUID.randomUUID(),
-                        null);
-        return explainer.explainAsync(prediction, model)
-                .get(predictionTimeOut, predictionTimeUnit);
     }
 
     @ParameterizedTest
@@ -195,7 +161,7 @@ class CounterfactualExplainerTest {
         final double epsilon = 10.0;
 
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
@@ -231,7 +197,7 @@ class CounterfactualExplainerTest {
         final double epsilon = 10.0;
 
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
@@ -278,7 +244,7 @@ class CounterfactualExplainerTest {
         final double epsilon = 10.0;
 
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
@@ -317,7 +283,7 @@ class CounterfactualExplainerTest {
         final double epsilon = 10.0;
 
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         0.005, 200_000);
 
@@ -357,7 +323,7 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newCategoricalFeature("operand", "*", CategoricalFeatureDomain.create("+", "-", "/", "*")));
 
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSymbolicArithmeticModel(),
                         0.0);
 
@@ -424,10 +390,9 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("x-2", 40.0, NumericalFeatureDomain.create(0.0, 100.0)));
         features.add(FeatureFactory.newCategoricalFeature("operand", "*", CategoricalFeatureDomain.create("+", "-", "/", "*")));
 
+        final PredictionProvider model = TestUtils.getSymbolicArithmeticModel();
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
-                        TestUtils.getSymbolicArithmeticModel(),
-                        0.01);
+                CounterfactualUtils.runCounterfactualSearch((long) seed, features, model, 0.01, DefaultCounterfactualGoalCriteria.create(goal, 0.01), 100_000);
 
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
 
@@ -491,7 +456,7 @@ class CounterfactualExplainerTest {
         final PredictionProvider model = TestUtils.getSumThresholdModel(center, epsilon);
 
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         model,
                         DEFAULT_GOAL_THRESHOLD, 100_000);
 
@@ -538,7 +503,7 @@ class CounterfactualExplainerTest {
 
         final PredictionProvider model = TestUtils.getSumThresholdModel(center, epsilon);
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         model,
                         DEFAULT_GOAL_THRESHOLD, 100_000);
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
@@ -596,7 +561,7 @@ class CounterfactualExplainerTest {
         List<Feature> perturbedFeatures = DataUtils.perturbFeatures(features, perturbationContext);
 
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, perturbedFeatures,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, perturbedFeatures,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
@@ -628,7 +593,7 @@ class CounterfactualExplainerTest {
         final Consumer<CounterfactualResult> assertIntermediateCounterfactualNotNull =
                 mock(Consumer.class);
         final CounterfactualConfig counterfactualConfig =
-                new CounterfactualConfig().withSolverConfig(solverConfig).withGoalThreshold(0.01);
+                new CounterfactualConfig().withSolverConfig(solverConfig);
         final CounterfactualExplainer counterfactualExplainer =
                 new CounterfactualExplainer(counterfactualConfig);
 
@@ -642,6 +607,7 @@ class CounterfactualExplainerTest {
         PredictionOutput output = new PredictionOutput(goal);
         Prediction prediction = new CounterfactualPrediction(input,
                 output,
+                0.01,
                 null,
                 UUID.randomUUID(),
                 null);
@@ -844,7 +810,7 @@ class CounterfactualExplainerTest {
         final double epsilon = 0.1;
 
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         TestUtils.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
@@ -911,7 +877,6 @@ class CounterfactualExplainerTest {
                         Config.INSTANCE.getAsyncTimeUnit());
     }
 
-    @Disabled("https://issues.redhat.com/browse/FAI-804")
     @Test
     void testAsTable()
             throws ExecutionException, InterruptedException, TimeoutException {
@@ -943,24 +908,12 @@ class CounterfactualExplainerTest {
                 new Output("Semi-Categorical*2", Type.NUMBER, new Value(2), 0.0));
         List<Output> originalOutputs = model.predictAsync(List.of(new PredictionInput(features))).get().get(0).getOutputs();
 
-        final CounterfactualResult result = runCounterfactualSearch(0L, goal, features, model, .01, 100_000);
+        final CounterfactualResult result = CounterfactualUtils.runCounterfactualSearch(0L, goal, features, model, .01, 100_000);
         String resultString = result.asTable(originalOutputs, goal);
-        assertEquals("=== Counterfactual Search Results ========================================\n" +
-                "           Features |              Domain |  Original Value  → Found Value\n" +
-                "--------------------------------------------------------------------------\n" +
-                "          Feature 0 | -5.000000->5.000000 |           0.000  →       1.000\n" +
-                "          Feature 1 | -5.000000->5.000000 |           1.000  →       4.000\n" +
-                "          Feature 2 |              [A, B] |               A  →           B\n" +
-                "          Feature 3 | -5.000000->5.000000 |           3.000  →       3.000\n" +
-                "          Feature 4 | -5.000000->5.000000 |           4.000  →       3.000\n" +
-                "--------------------------------------------------------------------------\n" +
-                "            Outputs |                Goal |  Original Value  → Found Value\n" +
-                "--------------------------------------------------------------------------\n" +
-                "   Semi-Categorical |               1.000 |          -2.000  →       1.000\n" +
-                " Semi-Categorical*2 |               2.000 |          -4.000  →       2.000\n" +
-                "==========================================================================\n" +
-                "Meets Validity Criteria? true\n" +
-                "==========================================================================", resultString);
+        assertTrue(resultString.contains("Counterfactual Search Results"));
+        assertTrue(resultString.contains("Meets Validity Criteria?"));
+        assertTrue(resultString.contains("Feature 3"));
+        assertTrue(resultString.contains("[A, B]"));
     }
 
     @ParameterizedTest
@@ -1002,20 +955,54 @@ class CounterfactualExplainerTest {
         final List<Feature> fs = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
-            fs.add(new Feature(String.valueOf(i), Type.NUMBER, new Value(featureValues[i]), false, NumericalFeatureDomain.create(-5, 5)));
+            fs.add(new Feature(String.valueOf(i), Type.NUMBER, new Value(featureValues[i]), false, NumericalFeatureDomain.create(-6, 6)));
         }
 
         final PredictionProvider model = TestUtils.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
 
         final List<Output> goal = List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d));
 
-        final CounterfactualResult result = runCounterfactualSearch((long) seed, goal, fs, model, .01);
-
-        final List<Feature> resultFeatures = result.getEntities().stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList());
+        final CounterfactualResult result = CounterfactualUtils.runCounterfactualSearch((long) seed, goal, fs, model, .01);
 
         assertTrue(result.isValid());
-        assertTrue(result.getOutput().get(0).getOutputs().get(0).getValue().asNumber() <= .01);
+        assertTrue(Math.abs(result.getOutput().get(0).getOutputs().get(0).getValue().asNumber()) <= .01);
 
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testDynamicGoals(int seed)
+            throws ExecutionException, InterruptedException, TimeoutException {
+        Random random = new Random();
+        random.setSeed(seed);
+
+        List<Feature> features = new LinkedList<>();
+        features.add(FeatureFactory.newNumericalFeature("f-num1", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num2", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num3", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num4", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+
+        final PredictionProvider model = TestUtils.getSumSkipModel(1);
+
+        CounterfactualGoalCriteria goalFunction = (outputs) -> {
+            double sum = outputs.stream().mapToDouble(o -> o.getValue().asNumber()).sum();
+            if ((sum >= 500.0) && (sum <= 700.0)) {
+                return GoalScore.getExactMatch();
+            } else {
+                return GoalScore.create(Math.abs(sum - 600.0), 0.0);
+            }
+        };
+
+        final CounterfactualResult result =
+                CounterfactualUtils.runCounterfactualSearch((long) seed, features,
+                        model,
+                        DEFAULT_GOAL_THRESHOLD, goalFunction, 100_000);
+
+        final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
+
+        final double sum = counterfactualEntities.stream().mapToDouble(e -> e.asFeature().getValue().asNumber()).sum();
+        assertTrue(result.isValid());
+        assertTrue(sum >= 500 && sum <= 700);
     }
 
 }

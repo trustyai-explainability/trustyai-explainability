@@ -1,1 +1,3 @@
 *.class
+/explainability-core/target/
+/.idea/

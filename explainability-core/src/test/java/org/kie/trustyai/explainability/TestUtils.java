@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2022 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,7 +226,7 @@ public class TestUtils {
                 }
                 final boolean inside = (result >= center - epsilon && result <= center + epsilon);
                 PredictionOutput predictionOutput = new PredictionOutput(
-                        List.of(new Output("inside", Type.BOOLEAN, new Value(inside), epsilon - Math.abs((result - center)))));
+                        List.of(new Output("inside", Type.BOOLEAN, new Value(inside), Math.abs(epsilon - Math.abs((result - center))))));
                 predictionOutputs.add(predictionOutput);
             }
             return predictionOutputs;

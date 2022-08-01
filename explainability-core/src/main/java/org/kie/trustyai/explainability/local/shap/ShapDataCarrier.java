@@ -18,6 +18,7 @@ package org.kie.trustyai.explainability.local.shap;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.math3.linear.RealVector;
@@ -27,6 +28,7 @@ public class ShapDataCarrier {
     private PredictionProvider model;
     private CompletableFuture<RealVector> linkNull;
     private CompletableFuture<RealVector> fnull;
+    private CompletableFuture<Map<String, Double>> nullOutput;
     private int rows;
     private int cols;
     private CompletableFuture<Integer> outputSize;
@@ -87,6 +89,14 @@ public class ShapDataCarrier {
 
     public void setFnull(CompletableFuture<RealVector> fnull) {
         this.fnull = fnull;
+    }
+
+    public CompletableFuture<Map<String, Double>> getNullOutput() {
+        return nullOutput;
+    }
+
+    public void setNullOutput(CompletableFuture<Map<String, Double>> nullOutput) {
+        this.nullOutput = nullOutput;
     }
 
     // shap configuration =========================================================
@@ -158,5 +168,4 @@ public class ShapDataCarrier {
     public ShapDataCarrier() {
         // empty
     }
-
 }

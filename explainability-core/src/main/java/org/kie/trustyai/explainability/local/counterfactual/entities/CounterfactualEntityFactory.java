@@ -50,6 +50,8 @@ import org.kie.trustyai.explainability.utils.CompositeFeatureUtils;
 
 public class CounterfactualEntityFactory {
 
+    private static final String UNSUPPORTED_TYPE_MESSAGE = "Unsupported feature type: ";
+
     private CounterfactualEntityFactory() {
     }
 
@@ -98,7 +100,7 @@ public class CounterfactualEntityFactory {
             if (isConstrained) {
                 entity = FixedTextEntity.from(feature);
             } else {
-                throw new IllegalArgumentException("Unsupported feature type: " + feature.getType());
+                throw new IllegalArgumentException(UNSUPPORTED_TYPE_MESSAGE + feature.getType());
             }
 
         } else if (feature.getType() == Type.BINARY) {
@@ -138,14 +140,14 @@ public class CounterfactualEntityFactory {
             if (isConstrained) {
                 entity = FixedVectorEntity.from(feature);
             } else {
-                throw new IllegalArgumentException("Unsupported feature type: " + feature.getType());
+                throw new IllegalArgumentException(UNSUPPORTED_TYPE_MESSAGE + feature.getType());
             }
 
         } else if (feature.getType() == Type.COMPOSITE) {
             if (isConstrained) {
                 entity = FixedCompositeEntity.from(feature);
             } else {
-                throw new IllegalArgumentException("Unsupported feature type: " + feature.getType());
+                throw new IllegalArgumentException(UNSUPPORTED_TYPE_MESSAGE + feature.getType());
             }
 
         } else if (feature.getType() == Type.CURRENCY) {
@@ -180,7 +182,7 @@ public class CounterfactualEntityFactory {
                 entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getCategories(), isConstrained);
             }
         } else {
-            throw new IllegalArgumentException("Unsupported feature type: " + feature.getType());
+            throw new IllegalArgumentException(UNSUPPORTED_TYPE_MESSAGE + feature.getType());
         }
         return entity;
     }
