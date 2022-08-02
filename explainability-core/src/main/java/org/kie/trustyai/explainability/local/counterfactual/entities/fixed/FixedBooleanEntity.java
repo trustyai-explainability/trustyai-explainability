@@ -18,6 +18,9 @@ package org.kie.trustyai.explainability.local.counterfactual.entities.fixed;
 import org.kie.trustyai.explainability.local.counterfactual.entities.AbstractEntity;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
+import org.optaplanner.core.api.domain.valuerange.ValueRange;
+import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
+import org.optaplanner.core.impl.domain.valuerange.buildin.composite.EmptyValueRange;
 
 /**
  * OptaPlanner representation of a fixed Boolean feature
@@ -25,9 +28,7 @@ import org.kie.trustyai.explainability.model.FeatureFactory;
 
 public class FixedBooleanEntity extends AbstractEntity<Boolean> {
 
-    public FixedBooleanEntity() {
-        super();
-    }
+    public FixedBooleanEntity() { super(); }
 
     private FixedBooleanEntity(Boolean originalValue, String featureName) {
         super(originalValue, featureName, true);

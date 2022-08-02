@@ -36,11 +36,10 @@ import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDeci
  */
 @PlanningSolution
 public class CounterfactualSolution {
-
+    @PlanningEntityCollectionProperty
     private List<CounterfactualEntity> entities;
     private List<Feature> originalFeatures;
 
-    @PlanningEntityCollectionProperty
     public List<CounterfactualEntity> getVaryingEntities() {
         return entities.stream().filter(counterfactualEntity -> !counterfactualEntity.isConstrained())
                 .collect(Collectors.toList());

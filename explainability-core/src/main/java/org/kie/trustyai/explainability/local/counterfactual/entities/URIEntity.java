@@ -16,13 +16,17 @@
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Set;
 
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.entity.PlanningPin;
+import org.optaplanner.core.api.domain.valuerange.CountableValueRange;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
+import org.optaplanner.core.impl.domain.valuerange.buildin.collection.ListValueRange;
 
 /**
  * Mapping between a categorical feature an OptaPlanner {@link PlanningEntity}
@@ -64,9 +68,10 @@ public class URIEntity extends AbstractCategoricalEntity<URI> {
         return URIEntity.from(originalFeature, categories, false);
     }
 
+    @Override
     @ValueRangeProvider(id = "uriRange")
-    public Set<URI> getValueRange() {
-        return allowedCategories;
+    public CountableValueRange<URI> getValueRange() {
+        return new ListValueRange<>(new ArrayList<>(allowedCategories));
     }
 
     /**
@@ -79,13 +84,21 @@ public class URIEntity extends AbstractCategoricalEntity<URI> {
         return FeatureFactory.newURIFeature(featureName, this.proposedValue);
     }
 
+    @Override
     @PlanningVariable(valueRangeProviderRefs = { "uriRange" })
     public URI getProposedValue() {
         return proposedValue;
     }
 
+    @Override
     public void setProposedValue(URI proposedValue) {
         this.proposedValue = proposedValue;
+    }
+
+    @Override
+    @PlanningPin
+    public boolean isConstrained() {
+        return constrained;
     }
 
 }

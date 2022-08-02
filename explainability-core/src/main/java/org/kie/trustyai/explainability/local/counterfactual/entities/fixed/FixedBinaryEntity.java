@@ -17,14 +17,23 @@ package org.kie.trustyai.explainability.local.counterfactual.entities.fixed;
 
 import java.nio.ByteBuffer;
 
+import org.kie.trustyai.explainability.local.counterfactual.entities.AbstractCategoricalEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.AbstractEntity;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
+import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.entity.PlanningPin;
+import org.optaplanner.core.api.domain.valuerange.ValueRange;
+import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
+import org.optaplanner.core.api.domain.variable.PlanningVariable;
+import org.optaplanner.core.impl.domain.valuerange.buildin.composite.EmptyValueRange;
+
+import javax.enterprise.inject.Default;
 
 /**
  * OptaPlanner representation of a fixed binary feature
  */
-
+@PlanningEntity
 public class FixedBinaryEntity extends AbstractEntity<ByteBuffer> {
 
     public FixedBinaryEntity() {
@@ -69,5 +78,31 @@ public class FixedBinaryEntity extends AbstractEntity<ByteBuffer> {
     @Override
     public Feature asFeature() {
         return FeatureFactory.newBinaryFeature(this.featureName, this.proposedValue);
+    }
+
+
+    @Override
+    @PlanningPin
+    public boolean isConstrained() {
+        return super.isConstrained();
+    }
+
+    @Default
+    @Override
+    @ValueRangeProvider(id = "fixedBinaryRange")
+    public ValueRange<ByteBuffer> getValueRange() {
+        return super.getValueRange();
+    }
+
+    @Default
+    @Override
+    @PlanningVariable(valueRangeProviderRefs = { "fixedBinaryRange" })
+    public ByteBuffer getProposedValue() {
+        return super.proposedValue;
+    }
+
+    @Default
+    public void setProposedValue(ByteBuffer proposedValue) {
+        this.proposedValue = proposedValue;
     }
 }

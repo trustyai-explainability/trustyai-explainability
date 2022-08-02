@@ -16,6 +16,7 @@
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
 import org.kie.trustyai.explainability.model.Feature;
+import org.optaplanner.core.api.domain.valuerange.ValueRange;
 
 public interface CounterfactualEntity {
     public double distance();
@@ -33,4 +34,12 @@ public interface CounterfactualEntity {
      * @return Similarity score, a {@link Double} between 0.0 (lowest similarity) and 1.0 (highest similarity).
      */
     public double similarity();
+
+    public ValueRange getValueRange();
+
+    public Object getProposedValue();
+
+
+
+
 }

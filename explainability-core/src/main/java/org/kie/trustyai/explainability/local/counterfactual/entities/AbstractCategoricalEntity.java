@@ -16,8 +16,13 @@
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.valuerange.CountableValueRange;
 
 /**
  * Abstract categorical feature an OptaPlanner {@link PlanningEntity}
@@ -52,9 +57,18 @@ public abstract class AbstractCategoricalEntity<T> extends AbstractEntity<T> {
         return 1.0 - distance();
     }
 
+    @Override
     public abstract void setProposedValue(T proposedValue);
 
+    @Override
     public abstract T getProposedValue();
 
-    public abstract Set<T> getValueRange();
+    @Override
+    public abstract CountableValueRange<T> getValueRange();
+
+    public Set<T> recoverSet(){
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                getValueRange().createOriginalIterator(), Spliterator.ORDERED), false)
+                .collect(Collectors.toSet());
+    }
 }

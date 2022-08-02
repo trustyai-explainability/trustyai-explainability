@@ -15,9 +15,19 @@
  */
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
+import java.lang.annotation.Inherited;
 import java.util.Objects;
+import java.util.UUID;
+
+import javax.enterprise.inject.Default;
 
 import org.kie.trustyai.explainability.model.Feature;
+import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.entity.PlanningPin;
+import org.optaplanner.core.api.domain.valuerange.ValueRange;
+import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
+import org.optaplanner.core.api.domain.variable.PlanningVariable;
+import org.optaplanner.core.impl.domain.valuerange.buildin.composite.EmptyValueRange;
 
 /**
  * Common class for counterfactual entities
@@ -26,6 +36,7 @@ public abstract class AbstractEntity<T> implements CounterfactualEntity {
 
     protected T proposedValue;
     protected String featureName;
+
     protected boolean constrained;
     protected T originalValue;
 
@@ -38,6 +49,7 @@ public abstract class AbstractEntity<T> implements CounterfactualEntity {
         this.featureName = featureName;
         this.constrained = constrained;
     }
+
 
     @Override
     public boolean isConstrained() {
@@ -64,5 +76,23 @@ public abstract class AbstractEntity<T> implements CounterfactualEntity {
                 + featureName
                 + '\''
                 + '}';
+    }
+
+
+    @Default
+    @Override
+    public ValueRange getValueRange() {
+        return new EmptyValueRange<>();
+    }
+
+    @Default
+    @Override
+    public T getProposedValue() {
+        return proposedValue;
+    }
+
+    @Default
+    public void setProposedValue(T proposedValue) {
+        this.proposedValue = proposedValue;
     }
 }

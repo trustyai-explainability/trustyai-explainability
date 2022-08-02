@@ -17,11 +17,15 @@ package org.kie.trustyai.explainability.local.counterfactual.entities.fixed;
 
 import org.kie.trustyai.explainability.local.counterfactual.entities.AbstractNumericEntity;
 import org.kie.trustyai.explainability.model.Feature;
+import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.valuerange.ValueRange;
+import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
+import org.optaplanner.core.api.domain.variable.PlanningVariable;
+import org.optaplanner.core.impl.domain.valuerange.buildin.composite.EmptyValueRange;
 
 /**
  * OptaPlanner representation of a fixed double feature
  */
-
 public class FixedDoubleEntity extends AbstractNumericEntity<Double> {
 
     public FixedDoubleEntity() {

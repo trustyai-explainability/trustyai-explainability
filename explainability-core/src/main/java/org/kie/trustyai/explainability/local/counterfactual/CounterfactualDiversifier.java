@@ -38,6 +38,7 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 
 /**
  * Counterfactual diversity generator.
@@ -167,6 +168,7 @@ public class CounterfactualDiversifier {
         final Set<List<Feature>> uniqueFeatures = new HashSet<>();
         final List<Prediction> predictions = new ArrayList<>();
         final double[] probabilities = generateProbabilities();
+        int totalTries = 0;
         for (int i = 0; i < this.nSamples; i++) {
             for (double probability : probabilities) {
                 final double[] featureProbabilities = new Random().doubles(this.nFeatures).toArray();
@@ -178,12 +180,18 @@ public class CounterfactualDiversifier {
                         alternativeFeatures.add(original.get(f));
                     }
                 }
+                totalTries+=1;
 
                 if (!uniqueFeatures.contains(alternativeFeatures)) {
                     uniqueFeatures.add(alternativeFeatures);
                     final List<PredictionInput> inputs = List.of(new PredictionInput(alternativeFeatures));
                     final List<PredictionOutput> outputs = model.predictAsync(inputs).get();
                     final Prediction prediction = new SimplePrediction(inputs.get(0), outputs.get(0));
+
+                    System.out.printf("NOVEL (%d)%n ==",totalTries);
+                    System.out.println(uniqueFeatures.size());
+                    System.out.println(MatrixUtilsExtensions.vectorFromPredictionInput(inputs.get(0)));
+                    System.out.println(outputs.get(0).getOutputs().get(0).getValue().asNumber());
                     if (goalMatches(prediction.getOutput().getOutputs(), this.goal)) {
                         predictions.add(prediction);
                     }

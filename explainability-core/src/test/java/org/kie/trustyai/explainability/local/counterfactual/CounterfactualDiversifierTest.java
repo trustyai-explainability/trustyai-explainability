@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,10 +32,12 @@ import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
+import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +72,11 @@ class CounterfactualDiversifierTest {
                         DEFAULT_GOAL_THRESHOLD);
 
         double totalSum = 0;
+        System.out.println(MatrixUtilsExtensions.vectorFromPredictionInput(
+                new PredictionInput(
+                        result.getEntities().stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList())
+                )
+        ));
         for (CounterfactualEntity entity : result.getEntities()) {
             totalSum += entity.asFeature().getValue().asNumber();
             logger.debug("Entity: {}", entity);
@@ -80,7 +88,7 @@ class CounterfactualDiversifierTest {
         assertTrue(totalSum >= center - epsilon);
         assertTrue(result.isValid());
 
-        final CounterfactualDiversifier diversifier = CounterfactualDiversifier.builder(model, features, result, goal).withNSamples(100).build();
+        final CounterfactualDiversifier diversifier = CounterfactualDiversifier.builder(model, features, result, goal).withNSamples(1000).build();
         final Dataset diverse = diversifier.diversify(10);
         assertTrue(diverse.getData().size() > 1 && diverse.getData().size() < 10);
         assertTrue(diverse.getOutputs().stream().map(po -> po.getOutputs().get(0).getValue().getUnderlyingObject()).allMatch(x -> x.equals(true)));

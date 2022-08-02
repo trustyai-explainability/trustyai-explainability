@@ -15,14 +15,18 @@
  */
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Set;
 
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.entity.PlanningPin;
+import org.optaplanner.core.api.domain.valuerange.CountableValueRange;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
+import org.optaplanner.core.impl.domain.valuerange.buildin.collection.ListValueRange;
 
 /**
  * Mapping between a currency categorical feature an OptaPlanner {@link PlanningEntity}
@@ -64,9 +68,10 @@ public class CurrencyEntity extends AbstractCategoricalEntity<Currency> {
         return CurrencyEntity.from(originalFeature, categories, false);
     }
 
+    @Override
     @ValueRangeProvider(id = "currencyRange")
-    public Set<Currency> getValueRange() {
-        return allowedCategories;
+    public CountableValueRange<Currency> getValueRange() {
+        return new ListValueRange<>(new ArrayList<>(allowedCategories));
     }
 
     /**
@@ -79,13 +84,21 @@ public class CurrencyEntity extends AbstractCategoricalEntity<Currency> {
         return FeatureFactory.newCurrencyFeature(featureName, this.proposedValue);
     }
 
+    @Override
     @PlanningVariable(valueRangeProviderRefs = { "currencyRange" })
     public Currency getProposedValue() {
         return proposedValue;
     }
 
+    @Override
     public void setProposedValue(Currency proposedValue) {
         this.proposedValue = proposedValue;
+    }
+
+    @Override
+    @PlanningPin
+    public boolean isConstrained() {
+        return constrained;
     }
 
 }

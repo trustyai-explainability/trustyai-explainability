@@ -34,7 +34,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.local.counterfactual.entities.BinaryEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.BooleanEntity;
@@ -48,6 +50,7 @@ import org.kie.trustyai.explainability.local.counterfactual.entities.DurationEnt
 import org.kie.trustyai.explainability.local.counterfactual.entities.IntegerEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.LongEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.ObjectEntity;
+import org.kie.trustyai.explainability.local.counterfactual.entities.TextEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.TimeEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.URIEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedBinaryEntity;
@@ -81,9 +84,11 @@ import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.TimeFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.URIFeatureDomain;
+import org.optaplanner.core.api.domain.valuerange.CountableValueRange;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -105,7 +110,8 @@ class CounterfactualEntityFactoryTest {
         final int value = 5;
         final Feature feature = FeatureFactory.newNumericalFeature("int-feature", value);
         final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedIntegerEntity);
+        assertTrue(counterfactualEntity instanceof IntegerEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(value, counterfactualEntity.asFeature().getValue().asNumber());
     }
 
@@ -126,7 +132,8 @@ class CounterfactualEntityFactoryTest {
         final Feature feature = FeatureFactory.newNumericalFeature("long-feature", value);
         final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
         assertNotNull(counterfactualEntity);
-        assertTrue(counterfactualEntity instanceof FixedLongEntity);
+        assertTrue(counterfactualEntity instanceof LongEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(value, counterfactualEntity.asFeature().getValue().asNumber());
     }
 
@@ -145,7 +152,8 @@ class CounterfactualEntityFactoryTest {
         final double value = 5.5;
         final Feature feature = FeatureFactory.newNumericalFeature("double-feature", value);
         final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedDoubleEntity);
+        assertTrue(counterfactualEntity instanceof DoubleEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(value, counterfactualEntity.asFeature().getValue().asNumber());
     }
 
@@ -163,7 +171,8 @@ class CounterfactualEntityFactoryTest {
         final boolean value = false;
         final Feature feature = FeatureFactory.newBooleanFeature("bool-feature", value);
         final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedBooleanEntity);
+        assertTrue(counterfactualEntity instanceof BooleanEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(value, counterfactualEntity.asFeature().getValue().getUnderlyingObject());
     }
 
@@ -174,7 +183,7 @@ class CounterfactualEntityFactoryTest {
         final Feature feature = FeatureFactory.newCategoricalFeature("categorical-feature", value, domain);
         final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
         assertTrue(counterfactualEntity instanceof CategoricalEntity);
-        assertEquals(domain.getCategories(), ((CategoricalEntity) counterfactualEntity).getValueRange());
+        assertIterableEquals(domain.getCategories(), ((CategoricalEntity) counterfactualEntity).recoverSet());
         assertEquals(value, counterfactualEntity.asFeature().getValue().toString());
     }
 
@@ -183,7 +192,8 @@ class CounterfactualEntityFactoryTest {
         final String value = "foo";
         final Feature feature = FeatureFactory.newCategoricalFeature("categorical-feature", value);
         final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedCategoricalEntity);
+        assertTrue(counterfactualEntity instanceof CategoricalEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(value, counterfactualEntity.asFeature().getValue().toString());
     }
 
@@ -194,7 +204,7 @@ class CounterfactualEntityFactoryTest {
         final Feature feature = FeatureFactory.newCategoricalFeature("categorical-feature", value, domain);
         final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
         assertTrue(counterfactualEntity instanceof CategoricalEntity);
-        assertEquals(domain.getCategories(), ((CategoricalEntity) counterfactualEntity).getValueRange());
+        assertEquals(domain.getCategories(), ((CategoricalEntity) counterfactualEntity).recoverSet());
         assertEquals(value, counterfactualEntity.asFeature().getValue().toString());
     }
 
@@ -205,7 +215,7 @@ class CounterfactualEntityFactoryTest {
         final Feature feature = FeatureFactory.newCategoricalFeature("categorical-feature", value, domain);
         final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
         assertTrue(counterfactualEntity instanceof CategoricalEntity);
-        assertEquals(domain.getCategories(), ((CategoricalEntity) counterfactualEntity).getValueRange());
+        assertEquals(domain.getCategories(), ((CategoricalEntity) counterfactualEntity).recoverSet());
         assertEquals(value, counterfactualEntity.asFeature().getValue().toString());
     }
 
@@ -214,7 +224,8 @@ class CounterfactualEntityFactoryTest {
         final ByteBuffer value = ByteBuffer.allocate(256);
         Feature feature = FeatureFactory.newBinaryFeature("binary-feature", value);
         CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedBinaryEntity);
+        assertTrue(counterfactualEntity instanceof BinaryEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(Type.BINARY, counterfactualEntity.asFeature().getType());
 
         final List<ByteBuffer> categories = Stream.of(
@@ -225,43 +236,20 @@ class CounterfactualEntityFactoryTest {
         feature = FeatureFactory.newBinaryFeature("binary-feature", value, domain);
         counterfactualEntity = CounterfactualEntityFactory.from(feature);
         assertTrue(counterfactualEntity instanceof BinaryEntity);
-        assertEquals(domain.getCategories(), ((BinaryEntity) counterfactualEntity).getValueRange());
+        assertEquals(domain.getCategories(), ((BinaryEntity) counterfactualEntity).recoverSet());
 
         domain = BinaryFeatureDomain.create(new HashSet<>(categories));
         feature = FeatureFactory.newBinaryFeature("binary-feature", value, domain);
         counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertEquals(domain.getCategories(), ((BinaryEntity) counterfactualEntity).getValueRange());
+        assertEquals(domain.getCategories(), ((BinaryEntity) counterfactualEntity).recoverSet());
 
         domain = BinaryFeatureDomain.create(ByteBuffer.wrap("bar".getBytes()),
                 ByteBuffer.wrap("baz".getBytes()), ByteBuffer.wrap("fun".getBytes()));
         feature = FeatureFactory.newBinaryFeature("binary-feature", value, domain);
         counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertEquals(domain.getCategories(), ((BinaryEntity) counterfactualEntity).getValueRange());
+        assertEquals(domain.getCategories(), ((BinaryEntity) counterfactualEntity).recoverSet());
 
         assertEquals(value, counterfactualEntity.asFeature().getValue().getUnderlyingObject());
-    }
-
-    @Test
-    void testCompositeFactory() {
-        Map<String, Object> map = new HashMap<>();
-        List<Feature> features = new LinkedList<>();
-        features.add(FeatureFactory.newObjectFeature("f1", new Object()));
-        features.add(FeatureFactory.newTextFeature("f2", "hola"));
-        features.add(FeatureFactory.newFulltextFeature("f3", "foo bar"));
-        features.add(FeatureFactory.newNumericalFeature("f4", 131));
-        features.add(FeatureFactory.newBooleanFeature("f5", false));
-        features.add(FeatureFactory.newDurationFeature("f6", Duration.ofDays(2)));
-        Map<String, Object> nestedMap = new HashMap<>();
-        nestedMap.put("nf-1", "nested text");
-        nestedMap.put("nf-2", ByteBuffer.allocate(1024));
-        features.add(FeatureFactory.newCompositeFeature("f7", nestedMap));
-        for (Feature f : features) {
-            map.put(f.getName(), f.getValue().getUnderlyingObject());
-        }
-        final Feature feature = FeatureFactory.newCompositeFeature("composite-feature", map);
-        CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedCompositeEntity);
-        assertEquals(Type.COMPOSITE, counterfactualEntity.asFeature().getType());
     }
 
     @Test
@@ -269,7 +257,8 @@ class CounterfactualEntityFactoryTest {
         final Currency value = Currency.getInstance(Locale.ITALY);
         Feature feature = FeatureFactory.newCurrencyFeature("currrency-feature", value);
         CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedCurrencyEntity);
+        assertTrue(counterfactualEntity instanceof CurrencyEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(Type.CURRENCY, counterfactualEntity.asFeature().getType());
 
         final Feature fixedFeature = FeatureFactory.newCurrencyFeature("currrency-feature", value);
@@ -277,14 +266,14 @@ class CounterfactualEntityFactoryTest {
         feature = FeatureFactory.newCurrencyFeature("currrency-feature", value, domain);
         counterfactualEntity = CounterfactualEntityFactory.from(feature);
         assertTrue(counterfactualEntity instanceof CurrencyEntity);
-        assertEquals(domain.getCategories(), ((CurrencyEntity) counterfactualEntity).getValueRange());
+        assertEquals(domain.getCategories(), ((CurrencyEntity) counterfactualEntity).recoverSet());
         assertEquals(value, counterfactualEntity.asFeature().getValue().getUnderlyingObject());
 
         domain = CurrencyFeatureDomain.create(new ArrayList<>(Currency.getAvailableCurrencies()));
         feature = FeatureFactory.newCurrencyFeature("currrency-feature", value, domain);
         counterfactualEntity = CounterfactualEntityFactory.from(feature);
         assertTrue(counterfactualEntity instanceof CurrencyEntity);
-        assertEquals(domain.getCategories(), ((CurrencyEntity) counterfactualEntity).getValueRange());
+        assertEquals(domain.getCategories(), ((CurrencyEntity) counterfactualEntity).recoverSet());
         assertEquals(value, counterfactualEntity.asFeature().getValue().getUnderlyingObject());
 
         Currency[] currencies = List.of(Locale.ITALY, Locale.UK, Locale.US).stream().map(Currency::getInstance).collect(
@@ -293,7 +282,7 @@ class CounterfactualEntityFactoryTest {
         feature = FeatureFactory.newCurrencyFeature("currrency-feature", value, domain);
         counterfactualEntity = CounterfactualEntityFactory.from(feature);
         assertTrue(counterfactualEntity instanceof CurrencyEntity);
-        assertEquals(currencies.length, ((CurrencyEntity) counterfactualEntity).getValueRange().size());
+        assertEquals(currencies.length, ((CurrencyEntity) counterfactualEntity).getValueRange().getSize());
         assertEquals(value, counterfactualEntity.asFeature().getValue().getUnderlyingObject());
 
     }
@@ -303,7 +292,8 @@ class CounterfactualEntityFactoryTest {
         final Duration value = Duration.ofDays(1);
         Feature feature = FeatureFactory.newDurationFeature("duration-feature", value);
         CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedDurationEntity);
+        assertTrue(counterfactualEntity instanceof DurationEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(Type.DURATION, counterfactualEntity.asFeature().getType());
 
         FeatureDomain domain = DurationFeatureDomain.create(0, 60, ChronoUnit.SECONDS);
@@ -317,7 +307,6 @@ class CounterfactualEntityFactoryTest {
         assertEquals(0, entity.distance());
         assertTrue(((DurationEntity) entity).getValueRange().contains(1e5));
         assertFalse(((DurationEntity) entity).getValueRange().contains(2e5));
-        assertFalse(entity.isConstrained());
 
         entity = DurationEntity.from(feature, Duration.ZERO, Duration.ofDays(2), false);
         assertEquals(0, entity.distance());
@@ -334,8 +323,11 @@ class CounterfactualEntityFactoryTest {
     void testTextFactory() {
         final String value = "foo";
         final Feature feature = FeatureFactory.newTextFeature("text-feature", value);
+        System.out.println(feature.getType());
         CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedTextEntity);
+        System.out.println(counterfactualEntity);
+        assertTrue(counterfactualEntity instanceof TextEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(Type.TEXT, counterfactualEntity.asFeature().getType());
 
         final Feature varyingFeature = FeatureFactory.newTextFeature("text-feature", value, EmptyFeatureDomain.create());
@@ -352,7 +344,8 @@ class CounterfactualEntityFactoryTest {
         final LocalTime value = LocalTime.now();
         Feature feature = FeatureFactory.newTimeFeature("time-feature", value);
         CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedTimeEntity);
+        assertTrue(counterfactualEntity instanceof TimeEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(Type.TIME, counterfactualEntity.asFeature().getType());
 
         FeatureDomain domain = TimeFeatureDomain.create(value.minusHours(10), value.plusHours(10));
@@ -368,7 +361,8 @@ class CounterfactualEntityFactoryTest {
         final URI value = URI.create("./");
         Feature feature = FeatureFactory.newURIFeature("uri-feature", value);
         CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedURIEntity);
+        assertTrue(counterfactualEntity instanceof URIEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(Type.URI, counterfactualEntity.asFeature().getType());
 
         FeatureDomain domain = URIFeatureDomain.create(new URI("./"), new URI("../"), new URI("https://example.com"));
@@ -395,7 +389,8 @@ class CounterfactualEntityFactoryTest {
         final URI value = URI.create("./");
         Feature feature = FeatureFactory.newObjectFeature("f", value);
         CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedObjectEntity);
+        assertTrue(counterfactualEntity instanceof ObjectEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(Type.UNDEFINED, counterfactualEntity.asFeature().getType());
 
         FeatureDomain domain = ObjectFeatureDomain.create("test", 45L);
@@ -417,15 +412,6 @@ class CounterfactualEntityFactoryTest {
         assertEquals(value, counterfactualEntity.asFeature().getValue().getUnderlyingObject());
     }
 
-    @Test
-    void testVectorFactory() {
-        final double[] value = new double[10];
-        Arrays.fill(value, 1d);
-        final Feature feature = FeatureFactory.newVectorFeature("uri-feature", value);
-        CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedVectorEntity);
-        assertEquals(Type.VECTOR, counterfactualEntity.asFeature().getType());
-    }
 
     @Test
     void testCreateFixedEntities() {
@@ -441,9 +427,9 @@ class CounterfactualEntityFactoryTest {
                 CounterfactualEntityFactory.createEntities(input);
 
         // Check types
-        assertTrue(entities.get(0) instanceof FixedDoubleEntity);
+        assertTrue(entities.get(0) instanceof DoubleEntity);
         assertTrue(entities.get(1) instanceof DoubleEntity);
-        assertTrue(entities.get(2) instanceof FixedDoubleEntity);
+        assertTrue(entities.get(2) instanceof DoubleEntity);
         assertTrue(entities.get(3) instanceof DoubleEntity);
 
         // Check values
@@ -487,7 +473,8 @@ class CounterfactualEntityFactoryTest {
         final int value = 5;
         final Feature feature = FeatureFactory.newCategoricalNumericalFeature("int-feature", value);
         final CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        assertTrue(counterfactualEntity instanceof FixedCategoricalEntity);
+        assertTrue(counterfactualEntity instanceof CategoricalEntity);
+        assertTrue(counterfactualEntity.isConstrained());
         assertEquals(value, counterfactualEntity.asFeature().getValue().asNumber());
         assertEquals(Type.CATEGORICAL, counterfactualEntity.asFeature().getType());
     }

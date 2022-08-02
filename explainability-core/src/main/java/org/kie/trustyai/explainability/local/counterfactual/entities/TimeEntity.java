@@ -22,6 +22,7 @@ import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureDistribution;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.entity.PlanningPin;
 import org.optaplanner.core.api.domain.valuerange.ValueRange;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeFactory;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
@@ -100,6 +101,7 @@ public class TimeEntity extends AbstractAlgebraicEntity<LocalTime> {
         return TimeEntity.from(originalFeature, minimum, maximum, featureDistribution, false);
     }
 
+    @Override
     @ValueRangeProvider(id = "timeRange")
     public ValueRange<Double> getValueRange() {
         final double minimum = LocalTime.MIN.until(rangeMinimum, ChronoUnit.SECONDS);
@@ -107,11 +109,13 @@ public class TimeEntity extends AbstractAlgebraicEntity<LocalTime> {
         return ValueRangeFactory.createDoubleValueRange(minimum, maximum);
     }
 
+    @Override
     @PlanningVariable(valueRangeProviderRefs = { "timeRange" })
     public LocalTime getProposedValue() {
         return proposedValue;
     }
 
+    @Override
     public void setProposedValue(LocalTime proposedValue) {
         this.proposedValue = proposedValue;
     }
@@ -130,5 +134,11 @@ public class TimeEntity extends AbstractAlgebraicEntity<LocalTime> {
     @Override
     public double similarity() {
         return 1.0 - Math.abs(this.proposedValue.until(this.originalValue, ChronoUnit.SECONDS)) / this.range;
+    }
+
+    @Override
+    @PlanningPin
+    public boolean isConstrained() {
+        return constrained;
     }
 }

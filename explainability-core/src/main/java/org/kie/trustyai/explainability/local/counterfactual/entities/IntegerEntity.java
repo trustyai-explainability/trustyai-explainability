@@ -18,6 +18,7 @@ package org.kie.trustyai.explainability.local.counterfactual.entities;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureDistribution;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.entity.PlanningPin;
 import org.optaplanner.core.api.domain.valuerange.ValueRange;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeFactory;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
@@ -83,17 +84,26 @@ public class IntegerEntity extends AbstractNumericEntity<Integer> {
         return IntegerEntity.from(feature, minimum, maximum, featureDistribution, false);
     }
 
+    @Override
     @ValueRangeProvider(id = "intRange")
     public ValueRange<Integer> getValueRange() {
         return ValueRangeFactory.createIntValueRange(rangeMinimum, rangeMaximum);
     }
 
+    @Override
     @PlanningVariable(valueRangeProviderRefs = { "intRange" })
     public Integer getProposedValue() {
         return proposedValue;
     }
 
+    @Override
     public void setProposedValue(Integer proposedValue) {
         this.proposedValue = proposedValue;
+    }
+
+    @Override
+    @PlanningPin
+    public boolean isConstrained() {
+        return constrained;
     }
 }
