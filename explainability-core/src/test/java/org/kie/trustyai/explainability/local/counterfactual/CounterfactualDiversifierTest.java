@@ -58,18 +58,18 @@ class CounterfactualDiversifierTest {
 
         final List<Output> goal = List.of(new Output("inside", Type.BOOLEAN, new Value(true), 0.0d));
         List<Feature> features = new LinkedList<>();
-        features.add(FeatureFactory.newNumericalFeature("f-num1", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
-        features.add(FeatureFactory.newNumericalFeature("f-num2", 150.0, NumericalFeatureDomain.create(0.0, 1000.0)));
-        features.add(FeatureFactory.newNumericalFeature("f-num3", 1.0, NumericalFeatureDomain.create(0.0, 1000.0)));
-        features.add(FeatureFactory.newNumericalFeature("f-num4", 2.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num1", 10.0, NumericalFeatureDomain.create(5.0, 15.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num2", 10.0, NumericalFeatureDomain.create(5.0, 15.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num3", 10.0, NumericalFeatureDomain.create(5.0, 15.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num4", 10.0, NumericalFeatureDomain.create(5.0, 15.0)));
 
-        final double center = 500.0;
-        final double epsilon = 10.0;
+        final double center = 50.0;
+        final double epsilon = 2.0;
 
         PredictionProvider model = TestUtils.getSumThresholdModel(center, epsilon);
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features, model,
-                        DEFAULT_GOAL_THRESHOLD);
+                        DEFAULT_GOAL_THRESHOLD, 100_000L);
 
         double totalSum = 0;
         System.out.println(MatrixUtilsExtensions.vectorFromPredictionInput(
@@ -88,7 +88,7 @@ class CounterfactualDiversifierTest {
         assertTrue(totalSum >= center - epsilon);
         assertTrue(result.isValid());
 
-        final CounterfactualDiversifier diversifier = CounterfactualDiversifier.builder(model, features, result, goal).withNSamples(1000).build();
+        final CounterfactualDiversifier diversifier = CounterfactualDiversifier.builder(model, features, result, goal).withNSamples(100).build();
         final Dataset diverse = diversifier.diversify(10);
         assertTrue(diverse.getData().size() > 1 && diverse.getData().size() < 10);
         assertTrue(diverse.getOutputs().stream().map(po -> po.getOutputs().get(0).getValue().getUnderlyingObject()).allMatch(x -> x.equals(true)));
