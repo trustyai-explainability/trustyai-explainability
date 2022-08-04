@@ -28,14 +28,14 @@ import org.kie.dmn.api.core.DMNRuntime;
 import org.kie.kogito.decision.DecisionModel;
 import org.kie.kogito.dmn.DMNKogito;
 import org.kie.kogito.dmn.DmnDecisionModel;
-import org.kie.kogito.explainability.Config;
-import org.kie.kogito.explainability.global.pdp.PartialDependencePlotExplainer;
-import org.kie.kogito.explainability.model.PartialDependenceGraph;
-import org.kie.kogito.explainability.model.Prediction;
-import org.kie.kogito.explainability.model.PredictionInput;
-import org.kie.kogito.explainability.model.PredictionOutput;
-import org.kie.kogito.explainability.model.PredictionProvider;
-import org.kie.kogito.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.global.pdp.PartialDependencePlotExplainer;
+import org.kie.trustyai.explainability.model.PartialDependenceGraph;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.SimplePrediction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
