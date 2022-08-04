@@ -18,9 +18,6 @@ package org.kie.trustyai.explainability.local.counterfactual.entities.fixed;
 import org.kie.trustyai.explainability.local.counterfactual.entities.AbstractEntity;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.optaplanner.core.api.domain.entity.PlanningEntity;
-import org.optaplanner.core.api.domain.entity.PlanningPin;
-import org.optaplanner.core.api.domain.variable.PlanningVariable;
 
 /**
  * OptaPlanner representation of a fixed text feature

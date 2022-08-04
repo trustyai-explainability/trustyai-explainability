@@ -64,7 +64,7 @@ public abstract class AbstractNumericEntity<T extends Number> extends AbstractAl
 
     @Override
     public double similarity() {
-        if (isConstrained()){
+        if (isConstrained()) {
             return 1.0;
         } else {
             return 1.0 - Math.abs(this.proposedValue.doubleValue() - originalValue.doubleValue()) / this.range;

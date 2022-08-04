@@ -18,7 +18,6 @@ package org.kie.trustyai.explainability.local.counterfactual;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kie.trustyai.explainability.local.counterfactual.entities.AbstractEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.BinaryEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.BooleanEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CategoricalEntity;
@@ -70,21 +69,21 @@ public class SolverConfigBuilder {
             SolverConfig solverConfig = new SolverConfig();
 
             solverConfig.withEntityClasses(
-//                    FixedBinaryEntity.class,
-//                    FixedBinaryEntity.class,
-//                    FixedBooleanEntity.class,
-//                    FixedCategoricalEntity.class,
-//                    FixedCompositeEntity.class,
-//                    FixedCurrencyEntity.class,
-//                    FixedDoubleEntity.class,
-//                    FixedDurationEntity.class,
-//                    FixedIntegerEntity.class,
-//                    FixedLongEntity.class,
-//                    FixedObjectEntity.class,
-//                    FixedTextEntity.class,
-//                    FixedTimeEntity.class,
-//                    FixedURIEntity.class,
-//                    FixedVectorEntity.class,
+                    //                    FixedBinaryEntity.class,
+                    //                    FixedBinaryEntity.class,
+                    //                    FixedBooleanEntity.class,
+                    //                    FixedCategoricalEntity.class,
+                    //                    FixedCompositeEntity.class,
+                    //                    FixedCurrencyEntity.class,
+                    //                    FixedDoubleEntity.class,
+                    //                    FixedDurationEntity.class,
+                    //                    FixedIntegerEntity.class,
+                    //                    FixedLongEntity.class,
+                    //                    FixedObjectEntity.class,
+                    //                    FixedTextEntity.class,
+                    //                    FixedTimeEntity.class,
+                    //                    FixedURIEntity.class,
+                    //                    FixedVectorEntity.class,
                     BinaryEntity.class,
                     BooleanEntity.class,
                     CategoricalEntity.class,

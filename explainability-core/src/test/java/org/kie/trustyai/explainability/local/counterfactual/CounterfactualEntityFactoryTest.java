@@ -22,21 +22,16 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Currency;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.local.counterfactual.entities.BinaryEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.BooleanEntity;
@@ -53,20 +48,6 @@ import org.kie.trustyai.explainability.local.counterfactual.entities.ObjectEntit
 import org.kie.trustyai.explainability.local.counterfactual.entities.TextEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.TimeEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.URIEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedBinaryEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedBooleanEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedCategoricalEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedCompositeEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedCurrencyEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedDoubleEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedDurationEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedIntegerEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedLongEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedObjectEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedTextEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedTimeEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedURIEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedVectorEntity;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureDistribution;
 import org.kie.trustyai.explainability.model.FeatureFactory;
@@ -84,7 +65,6 @@ import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.TimeFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.URIFeatureDomain;
-import org.optaplanner.core.api.domain.valuerange.CountableValueRange;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -411,7 +391,6 @@ class CounterfactualEntityFactoryTest {
         assertTrue(counterfactualEntity instanceof ObjectEntity);
         assertEquals(value, counterfactualEntity.asFeature().getValue().getUnderlyingObject());
     }
-
 
     @Test
     void testCreateFixedEntities() {

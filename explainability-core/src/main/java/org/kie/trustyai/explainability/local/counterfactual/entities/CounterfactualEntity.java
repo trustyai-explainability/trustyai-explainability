@@ -39,7 +39,4 @@ public interface CounterfactualEntity {
 
     public Object getProposedValue();
 
-
-
-
 }

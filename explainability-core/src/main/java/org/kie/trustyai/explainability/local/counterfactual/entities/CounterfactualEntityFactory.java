@@ -20,20 +20,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedBinaryEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedBooleanEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedCategoricalEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedCompositeEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedCurrencyEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedDoubleEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedDurationEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedIntegerEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedLongEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedObjectEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedTextEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedTimeEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedURIEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedVectorEntity;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureDistribution;
 import org.kie.trustyai.explainability.model.PredictionInput;
@@ -95,33 +81,33 @@ public class CounterfactualEntityFactory {
         } else if (feature.getType() == Type.BOOLEAN) {
             entity = BooleanEntity.from(feature, isConstrained);
         } else if (feature.getType() == Type.TEXT) {
-            if (isConstrained){
+            if (isConstrained) {
                 entity = TextEntity.from(feature, null, true);
             } else {
                 throw new IllegalArgumentException(UNSUPPORTED_TYPE_MESSAGE + feature.getType());
             }
         } else if (feature.getType() == Type.BINARY) {
-            if (isConstrained){
+            if (isConstrained) {
                 entity = BinaryEntity.from(feature, null, true);
             } else {
                 entity = BinaryEntity.from(feature, ((BinaryFeatureDomain) featureDomain).getCategories(), isConstrained);
             }
         } else if (feature.getType() == Type.URI) {
-            if (isConstrained){
+            if (isConstrained) {
                 entity = URIEntity.from(feature, null, true);
             } else {
                 entity = URIEntity.from(feature, ((URIFeatureDomain) featureDomain).getCategories(), isConstrained);
             }
         } else if (feature.getType() == Type.TIME) {
-            if (isConstrained){
-                entity = TimeEntity.from(feature,  (LocalTime) valueObject, (LocalTime) valueObject, true);
+            if (isConstrained) {
+                entity = TimeEntity.from(feature, (LocalTime) valueObject, (LocalTime) valueObject, true);
             } else {
                 final LocalTime lowerBound = LocalTime.MIN.plusSeconds(featureDomain.getLowerBound().longValue());
                 final LocalTime upperBound = LocalTime.MIN.plusSeconds(featureDomain.getUpperBound().longValue());
                 entity = TimeEntity.from(feature, lowerBound, upperBound, isConstrained);
             }
         } else if (feature.getType() == Type.DURATION) {
-            if (isConstrained){
+            if (isConstrained) {
                 entity = DurationEntity.from(feature,
                         (Duration) valueObject,
                         (Duration) valueObject,
@@ -160,7 +146,7 @@ public class CounterfactualEntityFactory {
                 entity = CategoricalEntity.from(feature, ((CategoricalFeatureDomain) featureDomain).getCategories());
             }
         } else if (feature.getType() == Type.UNDEFINED) {
-            if (isConstrained){
+            if (isConstrained) {
                 entity = ObjectEntity.from(feature, null, true);
             } else {
                 entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getCategories(), isConstrained);

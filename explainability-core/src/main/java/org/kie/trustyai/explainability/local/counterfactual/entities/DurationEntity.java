@@ -16,7 +16,6 @@
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureDistribution;

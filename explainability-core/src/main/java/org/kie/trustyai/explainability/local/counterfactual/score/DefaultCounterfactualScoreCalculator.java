@@ -33,7 +33,6 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.utils.CompositeFeatureUtils;
-import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,10 +89,6 @@ public class DefaultCounterfactualScoreCalculator implements CounterfactualScore
 
         for (PredictionOutput predictionOutput : predictions) {
             final List<Output> outputs = predictionOutput.getOutputs();
-            System.out.printf("Input %s %n", MatrixUtilsExtensions.vectorFromPredictionInput(
-                    new PredictionInput(
-                            solution.getEntities().stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList()))));
-            System.out.printf("Output %s %n", outputs.get(0));
             final GoalScore score = goalCriteria.apply(outputs);
             outputDistance += score.getDistance() * score.getDistance();
 

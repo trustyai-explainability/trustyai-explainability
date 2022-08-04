@@ -15,6 +15,9 @@
  */
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
@@ -23,9 +26,6 @@ import org.optaplanner.core.api.domain.valuerange.CountableValueRange;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
 import org.optaplanner.core.impl.domain.valuerange.buildin.collection.ListValueRange;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Mapping between a categorical feature an OptaPlanner {@link PlanningEntity}

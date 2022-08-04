@@ -66,7 +66,7 @@ public abstract class AbstractCategoricalEntity<T> extends AbstractEntity<T> {
     @Override
     public abstract CountableValueRange<T> getValueRange();
 
-    public Set<T> recoverSet(){
+    public Set<T> recoverSet() {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                 getValueRange().createOriginalIterator(), Spliterator.ORDERED), false)
                 .collect(Collectors.toSet());
