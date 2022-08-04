@@ -23,28 +23,29 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.kie.dmn.api.core.DMNRuntime;
 import org.kie.kogito.decision.DecisionModel;
 import org.kie.kogito.dmn.DMNKogito;
 import org.kie.kogito.dmn.DmnDecisionModel;
-import org.kie.kogito.explainability.Config;
-import org.kie.kogito.explainability.local.counterfactual.CounterfactualConfig;
-import org.kie.kogito.explainability.local.counterfactual.CounterfactualExplainer;
-import org.kie.kogito.explainability.local.counterfactual.CounterfactualResult;
-import org.kie.kogito.explainability.local.counterfactual.SolverConfigBuilder;
-import org.kie.kogito.explainability.local.counterfactual.entities.CounterfactualEntity;
-import org.kie.kogito.explainability.model.CounterfactualPrediction;
-import org.kie.kogito.explainability.model.Feature;
-import org.kie.kogito.explainability.model.FeatureFactory;
-import org.kie.kogito.explainability.model.Output;
-import org.kie.kogito.explainability.model.Prediction;
-import org.kie.kogito.explainability.model.PredictionInput;
-import org.kie.kogito.explainability.model.PredictionOutput;
-import org.kie.kogito.explainability.model.PredictionProvider;
-import org.kie.kogito.explainability.model.Type;
-import org.kie.kogito.explainability.model.Value;
-import org.kie.kogito.explainability.model.domain.NumericalFeatureDomain;
+import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.local.counterfactual.CounterfactualConfig;
+import org.kie.trustyai.explainability.local.counterfactual.CounterfactualExplainer;
+import org.kie.trustyai.explainability.local.counterfactual.CounterfactualResult;
+import org.kie.trustyai.explainability.local.counterfactual.SolverConfigBuilder;
+import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
+import org.kie.trustyai.explainability.model.CounterfactualPrediction;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureFactory;
+import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.optaplanner.core.config.solver.EnvironmentMode;
 import org.optaplanner.core.config.solver.SolverConfig;
 import org.optaplanner.core.config.solver.termination.TerminationConfig;
@@ -55,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ComplexEligibilityDmnCounterfactualExplainerTest {
 
+    @Disabled("https://github.com/trustyai-explainability/trustyai-explainability/pull/19")
     @Test
     void testDMNValidCounterfactualExplanation() throws ExecutionException, InterruptedException, TimeoutException {
         PredictionProvider model = getModel();
@@ -108,6 +110,7 @@ class ComplexEligibilityDmnCounterfactualExplainerTest {
         assertTrue(entities.get(2).asFeature().getValue().asNumber() > 6000);
     }
 
+    @Disabled("https://github.com/trustyai-explainability/trustyai-explainability/pull/19")
     @Test
     void testDMNScoringFunction() throws ExecutionException, InterruptedException, TimeoutException {
         PredictionProvider model = getModel();

@@ -2,19 +2,20 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <parent>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-apps-build-parent</artifactId>
-    <version>1.22.1.Final</version>
+    <groupId>org.kie.trustyai</groupId>
+    <artifactId>explainability-integrationtests</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.kie.trustyai</groupId>
   <artifactId>explainability-integrationtests-dmn</artifactId>
   <name>TrustyAI Explainability Integration Tests DMN</name>
 
   <dependencies>
     <dependency>
-      <groupId>org.kie.kogito</groupId>
+      <groupId>org.kie.trustyai</groupId>
       <artifactId>explainability-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
