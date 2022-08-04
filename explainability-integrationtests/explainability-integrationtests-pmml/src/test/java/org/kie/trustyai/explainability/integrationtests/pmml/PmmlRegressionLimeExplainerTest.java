@@ -28,6 +28,7 @@ import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.kie.api.pmml.PMML4Result;
+import org.kie.pmml.api.runtime.PMMLRuntime;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
@@ -49,7 +50,6 @@ import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.ValidationUtils;
-import org.kie.pmml.api.runtime.PMMLRuntime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
