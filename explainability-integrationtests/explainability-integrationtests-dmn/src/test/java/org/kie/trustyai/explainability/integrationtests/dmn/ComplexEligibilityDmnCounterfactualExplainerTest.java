@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.kie.dmn.api.core.DMNRuntime;
 import org.kie.kogito.decision.DecisionModel;
@@ -55,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ComplexEligibilityDmnCounterfactualExplainerTest {
 
+    @Disabled("https://github.com/trustyai-explainability/trustyai-explainability/pull/19")
     @Test
     void testDMNValidCounterfactualExplanation() throws ExecutionException, InterruptedException, TimeoutException {
         PredictionProvider model = getModel();
@@ -108,6 +110,7 @@ class ComplexEligibilityDmnCounterfactualExplainerTest {
         assertTrue(entities.get(2).asFeature().getValue().asNumber() > 6000);
     }
 
+    @Disabled("https://github.com/trustyai-explainability/trustyai-explainability/pull/19")
     @Test
     void testDMNScoringFunction() throws ExecutionException, InterruptedException, TimeoutException {
         PredictionProvider model = getModel();
