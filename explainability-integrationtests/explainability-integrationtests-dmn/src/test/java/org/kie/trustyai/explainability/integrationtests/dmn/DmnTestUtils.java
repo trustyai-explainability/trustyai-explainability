@@ -22,11 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.kie.kogito.explainability.model.Feature;
-import org.kie.kogito.explainability.model.FeatureFactory;
-import org.kie.kogito.explainability.model.PerturbationContext;
-import org.kie.kogito.explainability.model.PredictionInput;
-import org.kie.kogito.explainability.utils.DataUtils;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureFactory;
+import org.kie.trustyai.explainability.model.PerturbationContext;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.utils.DataUtils;
 
 public class DmnTestUtils {
 

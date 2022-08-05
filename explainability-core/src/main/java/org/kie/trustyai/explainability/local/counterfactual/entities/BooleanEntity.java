@@ -20,7 +20,8 @@ import java.util.Objects;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
-import org.optaplanner.core.api.domain.valuerange.ValueRange;
+import org.optaplanner.core.api.domain.entity.PlanningPin;
+import org.optaplanner.core.api.domain.valuerange.CountableValueRange;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeFactory;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
@@ -87,17 +88,26 @@ public class BooleanEntity extends AbstractEntity<Boolean> {
         return FeatureFactory.newBooleanFeature(this.featureName, this.proposedValue);
     }
 
+    @Override
     @ValueRangeProvider(id = "booleanRange")
-    public ValueRange<Boolean> getValueRange() {
+    public CountableValueRange<Boolean> getValueRange() {
         return ValueRangeFactory.createBooleanValueRange();
     }
 
+    @Override
     @PlanningVariable(valueRangeProviderRefs = { "booleanRange" })
     public Boolean getProposedValue() {
         return proposedValue;
     }
 
+    @Override
     public void setProposedValue(Boolean proposedValue) {
         this.proposedValue = proposedValue;
+    }
+
+    @Override
+    @PlanningPin
+    public boolean isConstrained() {
+        return constrained;
     }
 }

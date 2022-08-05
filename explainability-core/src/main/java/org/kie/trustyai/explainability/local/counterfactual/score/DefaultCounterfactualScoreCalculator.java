@@ -71,7 +71,6 @@ public class DefaultCounterfactualScoreCalculator implements CounterfactualScore
 
         // Calculate Gower distance from the similarities
         final double primarySoftScore = -Math.sqrt(Math.abs(1.0 - inputSimilarities));
-
         return BendableBigDecimalScore.of(new BigDecimal[] {
                 BigDecimal.ZERO,
                 BigDecimal.valueOf(secondaryHardScore),
