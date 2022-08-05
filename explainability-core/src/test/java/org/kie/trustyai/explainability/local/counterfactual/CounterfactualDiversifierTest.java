@@ -53,7 +53,7 @@ class CounterfactualDiversifierTest {
 
     // these tests fail to find diverse counterfactuals; the original CF is too sparse + close to decision
     // boundary for the diversifier to work
-    @Disabled
+    @Disabled("FAI-820: https://issues.redhat.com/browse/FAI-820")
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2 })
     void simpleDiverse(int seed) throws ExecutionException, InterruptedException, TimeoutException {
@@ -77,15 +77,12 @@ class CounterfactualDiversifierTest {
                         DEFAULT_GOAL_THRESHOLD, 100_000L);
 
         double totalSum = 0;
-        System.out.println(MatrixUtilsExtensions.vectorFromPredictionInput(
-                new PredictionInput(
-                        result.getEntities().stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList()))));
-        System.out.println(result.isValid());
+
         for (CounterfactualEntity entity : result.getEntities()) {
             totalSum += entity.asFeature().getValue().asNumber();
             logger.debug("Entity: {}", entity);
         }
-        System.out.println(result.getOutput().get(0).getOutputs());
+
         logger.debug("Outputs: {}", result.getOutput().get(0).getOutputs());
 
         assertTrue(totalSum <= center + epsilon);
@@ -106,7 +103,7 @@ class CounterfactualDiversifierTest {
 
     // these tests fail to find diverse counterfactuals; the original CF is too sparse + close to decision
     // boundary for the diversifier to work
-    @Disabled
+    @Disabled("FAI-820: https://issues.redhat.com/browse/FAI-820")
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2 })
     void simpleDiverseEvenSumModel(int seed) throws ExecutionException, InterruptedException, TimeoutException {

@@ -30,7 +30,6 @@ import org.kie.trustyai.explainability.local.counterfactual.entities.LongEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.ObjectEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.TimeEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.URIEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.*;
 import org.kie.trustyai.explainability.local.counterfactual.score.CounterfactualScoreCalculator;
 import org.kie.trustyai.explainability.local.counterfactual.score.DefaultCounterfactualScoreCalculator;
 import org.optaplanner.core.config.localsearch.LocalSearchPhaseConfig;
@@ -69,21 +68,6 @@ public class SolverConfigBuilder {
             SolverConfig solverConfig = new SolverConfig();
 
             solverConfig.withEntityClasses(
-                    //                    FixedBinaryEntity.class,
-                    //                    FixedBinaryEntity.class,
-                    //                    FixedBooleanEntity.class,
-                    //                    FixedCategoricalEntity.class,
-                    //                    FixedCompositeEntity.class,
-                    //                    FixedCurrencyEntity.class,
-                    //                    FixedDoubleEntity.class,
-                    //                    FixedDurationEntity.class,
-                    //                    FixedIntegerEntity.class,
-                    //                    FixedLongEntity.class,
-                    //                    FixedObjectEntity.class,
-                    //                    FixedTextEntity.class,
-                    //                    FixedTimeEntity.class,
-                    //                    FixedURIEntity.class,
-                    //                    FixedVectorEntity.class,
                     BinaryEntity.class,
                     BooleanEntity.class,
                     CategoricalEntity.class,

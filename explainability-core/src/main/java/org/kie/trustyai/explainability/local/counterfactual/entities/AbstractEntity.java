@@ -17,8 +17,6 @@ package org.kie.trustyai.explainability.local.counterfactual.entities;
 
 import java.util.Objects;
 
-import javax.enterprise.inject.Default;
-
 import org.kie.trustyai.explainability.model.Feature;
 import org.optaplanner.core.api.domain.valuerange.ValueRange;
 import org.optaplanner.core.impl.domain.valuerange.buildin.composite.EmptyValueRange;
@@ -71,19 +69,18 @@ public abstract class AbstractEntity<T> implements CounterfactualEntity {
                 + '}';
     }
 
-    @Default
     @Override
     public ValueRange getValueRange() {
         return new EmptyValueRange<>();
     }
 
-    @Default
+
     @Override
     public T getProposedValue() {
         return proposedValue;
     }
 
-    @Default
+
     public void setProposedValue(T proposedValue) {
         this.proposedValue = proposedValue;
     }

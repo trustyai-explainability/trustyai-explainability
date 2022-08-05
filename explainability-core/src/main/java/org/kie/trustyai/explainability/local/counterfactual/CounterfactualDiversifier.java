@@ -167,7 +167,7 @@ public class CounterfactualDiversifier {
         final Set<List<Feature>> uniqueFeatures = new HashSet<>();
         final List<Prediction> predictions = new ArrayList<>();
         final double[] probabilities = generateProbabilities();
-        int totalTries = 0;
+
         for (int i = 0; i < this.nSamples; i++) {
             for (double probability : probabilities) {
                 final double[] featureProbabilities = new Random().doubles(this.nFeatures).toArray();
@@ -179,7 +179,6 @@ public class CounterfactualDiversifier {
                         alternativeFeatures.add(original.get(f));
                     }
                 }
-                totalTries += 1;
 
                 if (!uniqueFeatures.contains(alternativeFeatures)) {
                     uniqueFeatures.add(alternativeFeatures);
