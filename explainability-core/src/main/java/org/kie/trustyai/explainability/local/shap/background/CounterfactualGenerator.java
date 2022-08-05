@@ -53,7 +53,8 @@ public class CounterfactualGenerator {
     private final CounterfactualConfig counterfactualConfig;
     private final PredictionOutput goal;
     private final PerturbationContext pc;
-    private final long runningSeconds;
+    private final long timeoutSeconds;
+    private final double goalThreshold;
 
     /**
      * Create a Counterfactual Background Generator
@@ -67,19 +68,19 @@ public class CounterfactualGenerator {
      * @param goal: The desired fnull (intercept) value of the ShapKernelExplainer, given by a {@link PredictionOutput}
      * @param counterfactualConfig: The {@link CounterfactualConfig} to be used in the counterfactual search
      * @param pc: The {@link PerturbationContext} to be used in the counterfactual search
-     * @param runningSeconds: The number of seconds to run the counterfactual search. The timeout is automatically
-     *        set to {@param runningSeconds} + 10
+     * @param timeoutSeconds: The number of seconds before the counterfactual search times out.
      */
     protected CounterfactualGenerator(List<PredictionInput> seeds, Integer kSeeds, PredictionProvider model,
-            PredictionOutput goal, CounterfactualConfig counterfactualConfig,
-            PerturbationContext pc, long runningSeconds) {
+            PredictionOutput goal, double goalThreshold, CounterfactualConfig counterfactualConfig,
+            PerturbationContext pc, long timeoutSeconds) {
         this.seeds = seeds;
         this.kSeeds = kSeeds;
         this.model = model;
         this.goal = goal;
+        this.goalThreshold = goalThreshold;
         this.counterfactualConfig = counterfactualConfig;
         this.pc = pc;
-        this.runningSeconds = runningSeconds;
+        this.timeoutSeconds = timeoutSeconds;
     }
 
     /**
@@ -116,11 +117,12 @@ public class CounterfactualGenerator {
                 Prediction prediction = new CounterfactualPrediction(
                         seedPerturb,
                         goal,
+                        this.goalThreshold,
                         null,
                         UUID.randomUUID(),
-                        this.runningSeconds);
+                        null);
                 final CounterfactualResult counterfactualResult = counterfactualExplainer.explainAsync(prediction, model)
-                        .get(this.runningSeconds + 10, TimeUnit.SECONDS);
+                        .get(this.timeoutSeconds, TimeUnit.SECONDS);
 
                 // add it to our found list if valid
                 if (counterfactualResult.isValid()) {
@@ -160,8 +162,9 @@ public class CounterfactualGenerator {
         private CounterfactualConfig counterfactualConfig;
         private final PredictionOutput goal;
         private PerturbationContext pc = new PerturbationContext(new Random(), 0);
-        private long runningSeconds = 30;
+        private long timeoutSeconds = 30;
         private long stepCount = 30_000L;
+        private double goalThreshold = 0.1;
 
         private Builder(List<PredictionInput> seeds, PredictionProvider model, PredictionOutput goal) {
             this.seeds = seeds;
@@ -184,13 +187,18 @@ public class CounterfactualGenerator {
             return this;
         }
 
-        public Builder withTimeoutSeconds(long runningSeconds) {
-            this.runningSeconds = runningSeconds;
+        public Builder withTimeoutSeconds(long timeoutSeconds) {
+            this.timeoutSeconds = timeoutSeconds;
             return this;
         }
 
         public Builder withStepCount(long stepCount) {
             this.stepCount = stepCount;
+            return this;
+        }
+
+        public Builder withGoalThreshold(double goalThreshold){
+            this.goalThreshold = goalThreshold;
             return this;
         }
 
@@ -203,11 +211,10 @@ public class CounterfactualGenerator {
             solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
             if (this.counterfactualConfig == null) {
                 this.counterfactualConfig = new CounterfactualConfig()
-                        .withSolverConfig(solverConfig)
-                        .withGoalThreshold(.01);
+                        .withSolverConfig(solverConfig);
             }
             return new CounterfactualGenerator(
-                    seeds, kSeeds, model, goal, counterfactualConfig, pc, runningSeconds);
+                    seeds, kSeeds, model, goal, goalThreshold, counterfactualConfig, pc, timeoutSeconds);
         }
     }
 }

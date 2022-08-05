@@ -23,6 +23,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
@@ -37,10 +39,11 @@ import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CounterfactualGeneratorTest {
-    @Test
-    void testDefaultGeneration() throws ExecutionException, InterruptedException, TimeoutException {
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2})
+    void testDefaultGeneration(int seed) throws ExecutionException, InterruptedException, TimeoutException {
         List<PredictionInput> seeds = new ArrayList<>();
-        Random rn = new Random(0);
+        Random rn = new Random(seed);
 
         // generate 100 seed prediction inputs, gaussian around {0, 1, 2, 3, 4}
         for (int i = 0; i < 100; i++) {
@@ -60,13 +63,14 @@ class CounterfactualGeneratorTest {
 
         // generate a background such that f(bg) == 0 for all bg in the backgrounds
         PredictionOutput goal = new PredictionOutput(
-                List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d)));
+                List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 0d)));
         List<PredictionInput> background = CounterfactualGenerator.builder(seeds, model, goal)
-                .withTimeoutSeconds(10)
+                .withTimeoutSeconds(1)
                 .withPerturbationContext(new PerturbationContext(rn, 0))
-                .withStepCount(250_000L) // this is way higher than it needs to be, but this is an Optaplanner bug
+                .withStepCount(1_000L)
+                .withGoalThreshold(.01)
                 .build()
-                .generate(5);
+                .generate(10);
         List<PredictionOutput> fnull = model.predictAsync(background).get();
 
         // make sure the fnull is within the default goal of .01
