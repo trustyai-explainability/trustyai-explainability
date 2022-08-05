@@ -197,7 +197,7 @@ public class CounterfactualGenerator {
             return this;
         }
 
-        public Builder withGoalThreshold(double goalThreshold){
+        public Builder withGoalThreshold(double goalThreshold) {
             this.goalThreshold = goalThreshold;
             return this;
         }

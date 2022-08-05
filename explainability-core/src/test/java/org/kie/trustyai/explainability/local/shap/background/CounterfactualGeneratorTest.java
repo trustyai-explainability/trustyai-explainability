@@ -22,7 +22,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.TestUtils;
@@ -40,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CounterfactualGeneratorTest {
     @ParameterizedTest
-    @ValueSource(ints = {0, 1, 2})
+    @ValueSource(ints = { 0, 1, 2 })
     void testDefaultGeneration(int seed) throws ExecutionException, InterruptedException, TimeoutException {
         List<PredictionInput> seeds = new ArrayList<>();
         Random rn = new Random(seed);
