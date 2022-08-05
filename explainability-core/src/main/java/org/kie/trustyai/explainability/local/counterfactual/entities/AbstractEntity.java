@@ -74,12 +74,10 @@ public abstract class AbstractEntity<T> implements CounterfactualEntity {
         return new EmptyValueRange<>();
     }
 
-
     @Override
     public T getProposedValue() {
         return proposedValue;
     }
-
 
     public void setProposedValue(T proposedValue) {
         this.proposedValue = proposedValue;
