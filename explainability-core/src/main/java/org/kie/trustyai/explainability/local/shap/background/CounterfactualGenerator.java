@@ -42,7 +42,6 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
-import org.optaplanner.core.config.solver.EnvironmentMode;
 import org.optaplanner.core.config.solver.SolverConfig;
 import org.optaplanner.core.config.solver.termination.TerminationConfig;
 
@@ -207,8 +206,6 @@ public class CounterfactualGenerator {
                     new TerminationConfig().withScoreCalculationCountLimit(this.stepCount);
             final SolverConfig solverConfig = SolverConfigBuilder
                     .builder().withTerminationConfig(terminationConfig).build();
-            solverConfig.setRandomSeed(0L);
-            solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
             if (this.counterfactualConfig == null) {
                 this.counterfactualConfig = new CounterfactualConfig()
                         .withSolverConfig(solverConfig);
