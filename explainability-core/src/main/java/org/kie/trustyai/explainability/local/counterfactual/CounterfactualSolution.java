@@ -17,7 +17,6 @@ package org.kie.trustyai.explainability.local.counterfactual;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
@@ -39,11 +38,6 @@ public class CounterfactualSolution {
     @PlanningEntityCollectionProperty
     private List<CounterfactualEntity> entities;
     private List<Feature> originalFeatures;
-
-    public List<CounterfactualEntity> getVaryingEntities() {
-        return entities.stream().filter(counterfactualEntity -> !counterfactualEntity.isConstrained())
-                .collect(Collectors.toList());
-    }
 
     private double goalThreshold;
 
