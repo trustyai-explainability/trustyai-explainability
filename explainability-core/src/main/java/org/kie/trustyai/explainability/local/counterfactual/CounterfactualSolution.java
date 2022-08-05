@@ -17,7 +17,6 @@ package org.kie.trustyai.explainability.local.counterfactual;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
@@ -36,15 +35,9 @@ import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDeci
  */
 @PlanningSolution
 public class CounterfactualSolution {
-
+    @PlanningEntityCollectionProperty
     private List<CounterfactualEntity> entities;
     private List<Feature> originalFeatures;
-
-    @PlanningEntityCollectionProperty
-    public List<CounterfactualEntity> getVaryingEntities() {
-        return entities.stream().filter(counterfactualEntity -> !counterfactualEntity.isConstrained())
-                .collect(Collectors.toList());
-    }
 
     private double goalThreshold;
 

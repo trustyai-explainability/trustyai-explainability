@@ -233,6 +233,28 @@ public class TestUtils {
         });
     }
 
+    public static PredictionProvider getSumThresholdDifferentiableModel(double center, double epsilon) {
+        return inputs -> supplyAsync(() -> {
+            List<PredictionOutput> predictionOutputs = new LinkedList<>();
+            for (PredictionInput predictionInput : inputs) {
+                List<Feature> features = predictionInput.getFeatures();
+                double result = 0;
+                for (Feature feature : features) {
+                    result += feature.getValue().asNumber();
+                }
+                final boolean inside = (result >= center - epsilon && result <= center + epsilon);
+                double distance_from_center = Math.abs(result - center);
+                double value = inside ? 0 : distance_from_center;
+                PredictionOutput predictionOutput = new PredictionOutput(
+                        List.of(
+                                new Output("inside", Type.BOOLEAN, new Value(inside), 1.0),
+                                new Output("distance", Type.NUMBER, new Value(value), 1.0)));
+                predictionOutputs.add(predictionOutput);
+            }
+            return predictionOutputs;
+        });
+    }
+
     public static PredictionProvider getDummyTextClassifier() {
         List<String> blackList = Arrays.asList("money", "$", "£", "bitcoin");
         return inputs -> supplyAsync(() -> {

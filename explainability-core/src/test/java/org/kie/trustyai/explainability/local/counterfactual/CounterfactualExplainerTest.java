@@ -955,7 +955,7 @@ class CounterfactualExplainerTest {
         final List<Feature> fs = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
-            fs.add(new Feature(String.valueOf(i), Type.NUMBER, new Value(featureValues[i]), false, NumericalFeatureDomain.create(-6, 6)));
+            fs.add(new Feature(String.valueOf(i), Type.NUMBER, new Value(featureValues[i]), false, NumericalFeatureDomain.create(-5, 5)));
         }
 
         final PredictionProvider model = TestUtils.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
@@ -965,7 +965,7 @@ class CounterfactualExplainerTest {
         final CounterfactualResult result = CounterfactualUtils.runCounterfactualSearch((long) seed, goal, fs, model, .01);
 
         assertTrue(result.isValid());
-        assertTrue(Math.abs(result.getOutput().get(0).getOutputs().get(0).getValue().asNumber()) <= .01);
+        assertEquals(0.0, result.getOutput().get(0).getOutputs().get(0).getValue().asNumber(), .01);
 
     }
 

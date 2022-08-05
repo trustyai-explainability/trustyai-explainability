@@ -15,13 +15,17 @@
  */
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.entity.PlanningPin;
+import org.optaplanner.core.api.domain.valuerange.CountableValueRange;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
+import org.optaplanner.core.impl.domain.valuerange.buildin.collection.ListValueRange;
 
 /**
  * Mapping between a numerical categorical feature an OptaPlanner {@link PlanningEntity}
@@ -64,8 +68,8 @@ public class CategoricalNumericalEntity extends AbstractCategoricalEntity<Intege
     }
 
     @ValueRangeProvider(id = "categoricalNumericalRange")
-    public Set<Integer> getValueRange() {
-        return allowedCategories;
+    public CountableValueRange<Integer> getValueRange() {
+        return new ListValueRange<>(new ArrayList<>(allowedCategories));
     }
 
     /**
@@ -78,13 +82,21 @@ public class CategoricalNumericalEntity extends AbstractCategoricalEntity<Intege
         return FeatureFactory.newCategoricalNumericalFeature(featureName, this.proposedValue);
     }
 
+    @Override
     @PlanningVariable(valueRangeProviderRefs = { "categoricalNumericalRange" })
     public Integer getProposedValue() {
         return proposedValue;
     }
 
+    @Override
     public void setProposedValue(Integer proposedValue) {
         this.proposedValue = proposedValue;
+    }
+
+    @Override
+    @PlanningPin
+    public boolean isConstrained() {
+        return constrained;
     }
 
 }

@@ -31,18 +31,18 @@ import org.optaplanner.core.impl.domain.valuerange.buildin.collection.ListValueR
  * Mapping between a categorical feature an OptaPlanner {@link PlanningEntity}
  */
 @PlanningEntity
-public class ObjectEntity extends AbstractCategoricalEntity<Object> {
+public class TextEntity extends AbstractCategoricalEntity<String> {
 
-    public ObjectEntity() {
+    public TextEntity() {
         super();
     }
 
-    private ObjectEntity(Object originalValue, String featureName, Set<Object> allowedCategories, boolean constrained) {
+    private TextEntity(String originalValue, String featureName, Set<String> allowedCategories, boolean constrained) {
         super(originalValue, featureName, allowedCategories, constrained);
     }
 
     /**
-     * Creates a {@link ObjectEntity}, taking the original input value from the
+     * Creates a {@link TextEntity}, taking the original input value from the
      * provided {@link Feature} and specifying whether the entity is constrained or not.
      * A set of allowed category values must be passed.
      *
@@ -50,47 +50,46 @@ public class ObjectEntity extends AbstractCategoricalEntity<Object> {
      * @param categories Set of allowed category values
      * @param constrained Whether this entity's value should be fixed or not
      */
-    public static ObjectEntity from(Feature originalFeature, Set<Object> categories, boolean constrained) {
-        return new ObjectEntity(originalFeature.getValue().getUnderlyingObject(), originalFeature.getName(), categories,
-                constrained);
+    public static TextEntity from(Feature originalFeature, Set<String> categories, boolean constrained) {
+        return new TextEntity(originalFeature.getValue().asString(), originalFeature.getName(), categories, constrained);
     }
 
     /**
-     * Creates an unconstrained {@link ObjectEntity}, taking the original input value from the
+     * Creates an unconstrained {@link TextEntity}, taking the original input value from the
      * provided {@link Feature}.
      * A set of allowed category values must be passed.
      *
      * @param originalFeature feature Original input {@link Feature}
      * @param categories Set of allowed category values
      */
-    public static ObjectEntity from(Feature originalFeature, Set<Object> categories) {
-        return ObjectEntity.from(originalFeature, categories, false);
+    public static TextEntity from(Feature originalFeature, Set<String> categories) {
+        return TextEntity.from(originalFeature, categories, false);
     }
 
     @Override
-    @ValueRangeProvider(id = "objectRange")
-    public CountableValueRange<Object> getValueRange() {
+    @ValueRangeProvider(id = "textRange")
+    public CountableValueRange<String> getValueRange() {
         return new ListValueRange<>(new ArrayList<>(allowedCategories));
     }
 
     /**
-     * Returns the {@link ObjectEntity} as a {@link Feature}
+     * Returns the {@link TextEntity} as a {@link Feature}
      *
      * @return {@link Feature}
      */
     @Override
     public Feature asFeature() {
-        return FeatureFactory.newObjectFeature(featureName, this.proposedValue);
+        return FeatureFactory.newTextFeature(featureName, this.proposedValue);
     }
 
     @Override
-    @PlanningVariable(valueRangeProviderRefs = { "objectRange" })
-    public Object getProposedValue() {
+    @PlanningVariable(valueRangeProviderRefs = { "categoricalRange" })
+    public String getProposedValue() {
         return proposedValue;
     }
 
     @Override
-    public void setProposedValue(Object proposedValue) {
+    public void setProposedValue(String proposedValue) {
         this.proposedValue = proposedValue;
     }
 
