@@ -158,13 +158,19 @@ class ShapKernelExplainerTest {
     }
 
     private RealMatrix[] saliencyToMatrix(Map<String, Saliency> saliencies) {
+        return saliencyToMatrix(saliencies, false);
+    }
+
+    private RealMatrix[] saliencyToMatrix(Map<String, Saliency> saliencies, boolean withBackground) {
         String[] keySet = saliencies.keySet().toArray(String[]::new);
         RealMatrix emptyMatrix = MatrixUtils.createRealMatrix(
-                new double[saliencies.size()][saliencies.get(keySet[0]).getPerFeatureImportance().size()]);
+                new double[saliencies.size()][saliencies
+                        .get(keySet[0])
+                        .getPerFeatureImportance().size() - (withBackground ? 0 : 1)]);
         RealMatrix[] out = new RealMatrix[] { emptyMatrix.copy(), emptyMatrix.copy() };
         for (int i = 0; i < keySet.length; i++) {
             List<FeatureImportance> fis = saliencies.get(keySet[i]).getPerFeatureImportance();
-            for (int j = 0; j < fis.size(); j++) {
+            for (int j = 0; j < fis.size() - (withBackground ? 0 : 1); j++) {
                 out[0].setEntry(i, j, fis.get(j).getScore());
                 out[1].setEntry(i, j, fis.get(j).getConfidence());
             }
@@ -302,6 +308,34 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(backgroundRaw);
         ShapConfig skConfig = testConfig.withBackground(background).build();
         shapTestCase(model, skConfig, toExplainRaw, multiVarianceMultiOutputSHAP);
+    }
+
+    // test that the last saliency is always the background
+    @Test
+    void testLastSaliencyIsBackground() throws InterruptedException, TimeoutException, ExecutionException {
+        PredictionProvider model = TestUtils.getSumSkipTwoOutputModel(1);
+        List<PredictionInput> background = createPIFromMatrix(backgroundRaw);
+        ShapConfig skConfig = testConfig.withBackground(background).build();
+        List<PredictionInput> toExplain = createPIFromMatrix(toExplainRaw);
+
+        //initialize explainer
+        List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get(5, TimeUnit.SECONDS);
+        List<Prediction> predictions = new ArrayList<>();
+        for (int i = 0; i < predictionOutputs.size(); i++) {
+            predictions.add(new SimplePrediction(toExplain.get(i), predictionOutputs.get(i)));
+        }
+
+        // evaluate if the explanations match the expected value
+        ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
+        for (int i = 0; i < toExplain.size(); i++) {
+            //explanations shape: outputSize x nfeatures
+            Map<String, Saliency> explanationSaliencies = ske.explainAsync(predictions.get(i), model)
+                    .get(5, TimeUnit.SECONDS).getSaliencies();
+            for (Map.Entry<String, Saliency> entry : explanationSaliencies.entrySet()) {
+                List<FeatureImportance> pfis = entry.getValue().getPerFeatureImportance();
+                assertEquals("Background", pfis.get(pfis.size() - 1).getFeature().getName());
+            }
+        }
     }
 
     // Test cases where search space cannot be fully enumerated ========================================================
@@ -632,12 +666,11 @@ class ShapKernelExplainerTest {
         ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
         ShapResults shapResults = ske.explainAsync(p, model).get();
         Map<String, Saliency> saliencies = shapResults.getSaliencies();
-        RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies);
+        RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies, true);
         RealMatrix explanations = explanationsAndConfs[0];
 
         double actualOut = predictionOutputVector.getEntry(0);
-        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) +
-                shapResults.getFnull().get("sum-but1");
+        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0));
         assertTrue(Math.abs(predOut - actualOut) < 1e-6);
     }
 
@@ -682,15 +715,15 @@ class ShapKernelExplainerTest {
                 ShapKernelExplainer ske = new ShapKernelExplainer(sk.withNSamples(nsamp).build());
                 ShapResults shapResults = ske.explainAsync(p, model).get();
                 Map<String, Saliency> saliencies = shapResults.getSaliencies();
-                RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies);
+                RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies, true);
                 RealMatrix explanations = explanationsAndConfs[0];
 
                 double actualOut = predictionOutputVector.getEntry(0);
-                double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) +
-                        shapResults.getFnull().get("linear-sum");
+                double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0));
                 assertTrue(Math.abs(predOut - actualOut) < 1e-6);
 
-                double coefMSE = (data.getRowVector(100).ebeMultiply(modelWeights)).getDistance(explanations.getRowVector(0));
+                double coefMSE = (data.getRowVector(100).ebeMultiply(modelWeights))
+                        .getDistance(explanations.getRowVector(0).getSubVector(0, 25));
                 assertTrue(coefMSE < 10);
             }
         }
@@ -720,8 +753,7 @@ class ShapKernelExplainerTest {
         RealMatrix explanations = explanationsAndConfs[0];
 
         double actualOut = predictionOutputVector.getEntry(0);
-        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) +
-                shapResults.getFnull().get("linear-sum");
+        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0));
         assertTrue(Math.abs(predOut - actualOut) < 1e-6);
         double coefMSE = (data.getRowVector(100).ebeMultiply(modelWeights)).getDistance(explanations.getRowVector(0));
         assertTrue(coefMSE < .01);
