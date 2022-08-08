@@ -39,10 +39,11 @@ class ShapResultsTest {
         Map<String, Double> fnull = new HashMap<>();
         for (int i = 0; i < nOutputs; i++) {
             List<FeatureImportance> fis = new ArrayList<>();
+            fis.add(new FeatureImportance(FeatureFactory.newNumericalFeature("Background", (double) scalar2), scalar2));
             for (int j = 0; j < nFeatures; j++) {
                 fis.add(new FeatureImportance(new Feature("Feature " + String.valueOf(j), Type.NUMBER, new Value(j)), (i + 1) * j * scalar1));
             }
-            fis.add(new FeatureImportance(FeatureFactory.newNumericalFeature("Background", (double) scalar2), scalar2));
+
             String oname = "Output " + i;
             saliencies.put(oname,
                     new Saliency(new Output(oname, Type.NUMBER, new Value(i + 1), 1.0), fis));
