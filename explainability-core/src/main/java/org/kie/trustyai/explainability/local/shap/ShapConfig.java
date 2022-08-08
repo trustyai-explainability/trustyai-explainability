@@ -49,7 +49,7 @@ public class ShapConfig {
     private final double confidence;
     private final PerturbationContext pc;
     private final Executor executor;
-    private final int batchSize;
+    private final int batchCount;
     private final List<PredictionInput> background;
     private final RealMatrix backgroundMatrix;
     private final OneHotter onehotter;
@@ -69,13 +69,14 @@ public class ShapConfig {
      * @param pc: PerturbationContext for random number generator
      * @param executor: The executor to use for the Shap CompletableFutures
      * @param nSamples: int, the number of data samples to run when computing shap values
+     * @param batchCount: int, the number of batches of synthetic data to pass to the PredictionProvider at a time
      * @param confidence: The size of the confidence window to use for shap values
      * @param regularizerType: The choice of regularizer to use when fitting data. This will select a certain fraction
      *        of features to use, based on which are most important to the regression
      * @param nRegularizationFeatures: If desired, the exact number of top regularization features can be specified
      */
     protected ShapConfig(LinkType link, List<PredictionInput> background, PerturbationContext pc, Executor executor,
-            Integer nSamples, Integer batchSize, double confidence, RegularizerType regularizerType,
+            Integer nSamples, Integer batchCount, double confidence, RegularizerType regularizerType,
             Integer nRegularizationFeatures) {
         this.link = link;
         this.background = background;
@@ -85,7 +86,7 @@ public class ShapConfig {
         this.executor = executor;
         this.nSamples = nSamples;
         this.confidence = confidence;
-        this.batchSize = batchSize;
+        this.batchCount = batchCount;
         this.regularizerType = regularizerType;
         this.nRegularizationFeatures = nRegularizationFeatures;
     }
@@ -102,7 +103,7 @@ public class ShapConfig {
 
         // optional
         private Executor builderExecutor = ForkJoinPool.commonPool();
-        private int builderBatchSize = 1;
+        private int builderBatchCount = 1;
         private Integer builderNSamples = null;
         private RegularizerType builderRegularizerType = RegularizerType.AUTO;
         private Integer builderNRegularizerFeatures = null;
@@ -118,7 +119,7 @@ public class ShapConfig {
                     .withBackground(this.builderBackground)
                     .withExecutor(this.builderExecutor)
                     .withConfidence(this.builderConfidence)
-                    .withBatchSize(this.builderBatchSize)
+                    .withBatchCount(this.builderBatchCount)
                     .withPC(this.builderPC);
             output.builderRegularizerType = this.builderRegularizerType;
             output.builderNRegularizerFeatures = this.builderNRegularizerFeatures;
@@ -183,17 +184,33 @@ public class ShapConfig {
 
         /**
          * Add predictAsync batch size to the builder
+         * 
+         * @deprecated withBatchSize() has been deprecated in favor of the more accurately named withBatchCount()
          *
-         * @param batchSize: int, the number of batches of synthetic data per model predict call
+         * @param batchSize: int, the number of batches of synthetic data per model.predict call
          *
          * @return Builder
          */
+        @Deprecated(forRemoval = true)
         public Builder withBatchSize(int batchSize) {
-            this.builderBatchSize = batchSize;
+            this.builderBatchCount = batchSize;
             return this;
         }
 
         /**
+         * Add predictAsync batch size to the builder
+         *
+         * @param batchCount: int, the number of batches of synthetic data per model.predict call
+         *
+         * @return Builder
+         */
+        public Builder withBatchCount(int batchCount) {
+            this.builderBatchCount = batchCount;
+            return this;
+        }
+
+        /**
+         *
          * Add confidence interval to the builder
          *
          * @param confidence: double, the desired confidence interval to report in the ShapValues, default is .95 for
@@ -261,7 +278,7 @@ public class ShapConfig {
                 throw new IllegalArgumentException("Background data list cannot be empty.");
             }
             return new ShapConfig(this.builderLink, this.builderBackground, this.builderPC, this.builderExecutor,
-                    this.builderNSamples, this.builderBatchSize, this.builderConfidence, this.builderRegularizerType,
+                    this.builderNSamples, this.builderBatchCount, this.builderConfidence, this.builderRegularizerType,
                     this.builderNRegularizerFeatures);
         }
     }
@@ -301,8 +318,17 @@ public class ShapConfig {
         return this.regularizerType;
     }
 
+    /**
+     *
+     * @deprecated getBatchSize() has been deprecated in favor of the more accurately named getBatchCount()
+     */
+    @Deprecated(forRemoval = true)
     public int getBatchSize() {
-        return this.batchSize;
+        return this.batchCount;
+    }
+
+    public int getBatchCount() {
+        return this.batchCount;
     }
 
     public Integer getNRegularizationFeatures() {

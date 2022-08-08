@@ -760,11 +760,11 @@ class ShapKernelExplainerTest {
 
         ShapConfig skNB = testConfig.copy()
                 .withBackground(bg)
-                .withBatchSize(1)
+                .withBatchCount(1)
                 .build();
         ShapConfig skB = testConfig.copy()
                 .withBackground(bg)
-                .withBatchSize(20)
+                .withBatchCount(20)
                 .build();
 
         ShapKernelExplainer skeNB = new ShapKernelExplainer(skNB);
