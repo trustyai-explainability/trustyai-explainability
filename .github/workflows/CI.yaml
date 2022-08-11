@@ -41,7 +41,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         shell: bash
         run: git config --system core.longpaths true
-      - name: Set up JDK 11 + Maven version
+      - name: Set up JDK + Maven version
         uses: s4u/setup-maven-action@v1.4.0
         with:
           java-version: ${{ matrix.java-version }}
@@ -53,12 +53,17 @@ jobs:
         with:
           path: ~/.m2
           key: ${{ runner.os }}-${{ matrix.java-version }}-maven${{ matrix.maven-version }}
-      - name: Compile and Validate Formatting
+      - name: Compile
         shell: bash
-        run: mvn -Dmaven.test.skip=true -Pvalidate-formatting package -nsu -fae -e
+        run: mvn -Dmaven.test.skip=true package -nsu -fae -e
+      - name: Validate Formatting
+        # execute formatting validation only on Ubuntu to avoid issues with CR LF
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        shell: bash
+        run: mvn net.revelc.code.formatter:formatter-maven-plugin:validate -nsu -fae -e
       - name: Run Test Suite
         shell: bash
-        run: mvn verify
+        run: mvn verify -nsu -fae -e
       - name: Publish Test Report
         if: ${{ always() }}
         uses: scacap/action-surefire-report@v1.0.10
