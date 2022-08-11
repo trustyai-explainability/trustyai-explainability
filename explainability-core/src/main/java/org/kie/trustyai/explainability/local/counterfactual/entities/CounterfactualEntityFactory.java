@@ -20,26 +20,13 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedBinaryEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedBooleanEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedCategoricalEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedCompositeEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedCurrencyEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedDoubleEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedDurationEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedIntegerEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedLongEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedObjectEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedTextEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedTimeEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedURIEntity;
-import org.kie.trustyai.explainability.local.counterfactual.entities.fixed.FixedVectorEntity;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureDistribution;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.domain.BinaryFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.CategoricalNumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.CurrencyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.DurationFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
@@ -48,6 +35,8 @@ import org.kie.trustyai.explainability.model.domain.URIFeatureDomain;
 import org.kie.trustyai.explainability.utils.CompositeFeatureUtils;
 
 public class CounterfactualEntityFactory {
+
+    private static final String UNSUPPORTED_TYPE_MESSAGE = "Unsupported feature type: ";
 
     private CounterfactualEntityFactory() {
     }
@@ -66,118 +55,104 @@ public class CounterfactualEntityFactory {
         if (type == Type.NUMBER) {
             if (valueObject instanceof Double) {
                 if (isConstrained) {
-                    entity = FixedDoubleEntity.from(feature);
+                    entity = DoubleEntity.from(feature, (double) valueObject, (double) valueObject,
+                            null, true);
                 } else {
                     entity = DoubleEntity.from(feature, featureDomain.getLowerBound(), featureDomain.getUpperBound(),
                             featureDistribution, isConstrained);
                 }
             } else if (valueObject instanceof Long) {
                 if (isConstrained) {
-                    entity = FixedLongEntity.from(feature);
+                    entity = LongEntity.from(feature, (long) valueObject,
+                            (long) valueObject, null, true);
                 } else {
                     entity = LongEntity.from(feature, featureDomain.getLowerBound().intValue(),
                             featureDomain.getUpperBound().intValue(), featureDistribution, isConstrained);
                 }
             } else if (valueObject instanceof Integer) {
                 if (isConstrained) {
-                    entity = FixedIntegerEntity.from(feature);
+                    entity = IntegerEntity.from(feature, (int) valueObject,
+                            (int) valueObject, null, true);
                 } else {
                     entity = IntegerEntity.from(feature, featureDomain.getLowerBound().intValue(),
                             featureDomain.getUpperBound().intValue(), featureDistribution, isConstrained);
                 }
             }
         } else if (feature.getType() == Type.BOOLEAN) {
-            if (isConstrained) {
-                entity = FixedBooleanEntity.from(feature);
-            } else {
-                entity = BooleanEntity.from(feature, isConstrained);
-            }
-
+            entity = BooleanEntity.from(feature, isConstrained);
         } else if (feature.getType() == Type.TEXT) {
             if (isConstrained) {
-                entity = FixedTextEntity.from(feature);
+                entity = TextEntity.from(feature, null, true);
             } else {
-                throw new IllegalArgumentException("Unsupported feature type: " + feature.getType());
+                throw new IllegalArgumentException(UNSUPPORTED_TYPE_MESSAGE + feature.getType());
             }
-
         } else if (feature.getType() == Type.BINARY) {
             if (isConstrained) {
-                entity = FixedBinaryEntity.from(feature);
+                entity = BinaryEntity.from(feature, null, true);
             } else {
                 entity = BinaryEntity.from(feature, ((BinaryFeatureDomain) featureDomain).getCategories(), isConstrained);
             }
-
         } else if (feature.getType() == Type.URI) {
             if (isConstrained) {
-                entity = FixedURIEntity.from(feature);
+                entity = URIEntity.from(feature, null, true);
             } else {
                 entity = URIEntity.from(feature, ((URIFeatureDomain) featureDomain).getCategories(), isConstrained);
             }
-
         } else if (feature.getType() == Type.TIME) {
             if (isConstrained) {
-                entity = FixedTimeEntity.from(feature);
+                entity = TimeEntity.from(feature, (LocalTime) valueObject, (LocalTime) valueObject, true);
             } else {
                 final LocalTime lowerBound = LocalTime.MIN.plusSeconds(featureDomain.getLowerBound().longValue());
                 final LocalTime upperBound = LocalTime.MIN.plusSeconds(featureDomain.getUpperBound().longValue());
                 entity = TimeEntity.from(feature, lowerBound, upperBound, isConstrained);
             }
-
         } else if (feature.getType() == Type.DURATION) {
             if (isConstrained) {
-                entity = FixedDurationEntity.from(feature);
+                entity = DurationEntity.from(feature,
+                        (Duration) valueObject,
+                        (Duration) valueObject,
+                        null,
+                        true);
             } else {
                 DurationFeatureDomain domain = (DurationFeatureDomain) featureDomain;
                 entity = DurationEntity.from(feature, Duration.of(domain.getLowerBound().longValue(), domain.getUnit()),
                         Duration.of(domain.getUpperBound().longValue(), domain.getUnit()),
                         featureDistribution, isConstrained);
             }
-
         } else if (feature.getType() == Type.VECTOR) {
-            if (isConstrained) {
-                entity = FixedVectorEntity.from(feature);
-            } else {
-                throw new IllegalArgumentException("Unsupported feature type: " + feature.getType());
-            }
-
+            throw new IllegalArgumentException(UNSUPPORTED_TYPE_MESSAGE + feature.getType());
         } else if (feature.getType() == Type.COMPOSITE) {
-            if (isConstrained) {
-                entity = FixedCompositeEntity.from(feature);
-            } else {
-                throw new IllegalArgumentException("Unsupported feature type: " + feature.getType());
-            }
-
+            throw new IllegalArgumentException(UNSUPPORTED_TYPE_MESSAGE + feature.getType());
         } else if (feature.getType() == Type.CURRENCY) {
             if (isConstrained) {
-                entity = FixedCurrencyEntity.from(feature);
+                entity = CurrencyEntity.from(feature, null, true);
             } else {
                 entity = CurrencyEntity.from(feature, ((CurrencyFeatureDomain) featureDomain).getCategories(), isConstrained);
             }
-
         } else if (feature.getType() == Type.CATEGORICAL) {
             if (isConstrained) {
-                entity = FixedCategoricalEntity.from(feature);
+                entity = CategoricalEntity.from(feature, null, true);
+            } else if (featureDomain instanceof BinaryFeatureDomain) {
+                entity = BinaryEntity.from(feature, ((BinaryFeatureDomain) featureDomain).getCategories());
+            } else if (featureDomain instanceof CurrencyFeatureDomain) {
+                entity = CurrencyEntity.from(feature, ((CurrencyFeatureDomain) featureDomain).getCategories());
+            } else if (featureDomain instanceof ObjectFeatureDomain) {
+                entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getCategories());
+            } else if (featureDomain instanceof URIFeatureDomain) {
+                entity = URIEntity.from(feature, ((URIFeatureDomain) featureDomain).getCategories());
+            } else if (featureDomain instanceof CategoricalNumericalFeatureDomain) {
+                entity = CategoricalNumericalEntity.from(feature, ((CategoricalNumericalFeatureDomain) featureDomain).getCategories());
             } else {
-                if (featureDomain instanceof BinaryFeatureDomain) {
-                    entity = BinaryEntity.from(feature, ((BinaryFeatureDomain) featureDomain).getCategories());
-                } else if (featureDomain instanceof CurrencyFeatureDomain) {
-                    entity = CurrencyEntity.from(feature, ((CurrencyFeatureDomain) featureDomain).getCategories());
-                } else if (featureDomain instanceof ObjectFeatureDomain) {
-                    entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getCategories());
-                } else if (featureDomain instanceof URIFeatureDomain) {
-                    entity = URIEntity.from(feature, ((URIFeatureDomain) featureDomain).getCategories());
-                } else {
-                    entity = CategoricalEntity.from(feature, ((CategoricalFeatureDomain) featureDomain).getCategories());
-                }
+                entity = CategoricalEntity.from(feature, ((CategoricalFeatureDomain) featureDomain).getCategories());
             }
         } else if (feature.getType() == Type.UNDEFINED) {
             if (isConstrained) {
-                entity = FixedObjectEntity.from(feature);
+                entity = ObjectEntity.from(feature, null, true);
             } else {
                 entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getCategories(), isConstrained);
             }
         } else {
-            throw new IllegalArgumentException("Unsupported feature type: " + feature.getType());
+            throw new IllegalArgumentException(UNSUPPORTED_TYPE_MESSAGE + feature.getType());
         }
         return entity;
     }

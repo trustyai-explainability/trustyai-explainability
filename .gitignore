@@ -11,6 +11,7 @@ nbproject
 *.ipr
 *.iws
 *.iml
+*.class
 
 # generated files
 dependency-reduced-pom.xml

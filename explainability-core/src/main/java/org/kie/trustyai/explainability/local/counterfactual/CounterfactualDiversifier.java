@@ -167,6 +167,7 @@ public class CounterfactualDiversifier {
         final Set<List<Feature>> uniqueFeatures = new HashSet<>();
         final List<Prediction> predictions = new ArrayList<>();
         final double[] probabilities = generateProbabilities();
+
         for (int i = 0; i < this.nSamples; i++) {
             for (double probability : probabilities) {
                 final double[] featureProbabilities = new Random().doubles(this.nFeatures).toArray();
@@ -184,6 +185,7 @@ public class CounterfactualDiversifier {
                     final List<PredictionInput> inputs = List.of(new PredictionInput(alternativeFeatures));
                     final List<PredictionOutput> outputs = model.predictAsync(inputs).get();
                     final Prediction prediction = new SimplePrediction(inputs.get(0), outputs.get(0));
+
                     if (goalMatches(prediction.getOutput().getOutputs(), this.goal)) {
                         predictions.add(prediction);
                     }

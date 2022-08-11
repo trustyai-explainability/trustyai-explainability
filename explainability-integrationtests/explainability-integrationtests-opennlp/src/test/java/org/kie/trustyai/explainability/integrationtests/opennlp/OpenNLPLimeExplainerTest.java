@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.kogito.explainability.integrationtests.opennlp;
+package org.kie.trustyai.explainability.integrationtests.opennlp;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,27 +32,27 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.kie.kogito.explainability.Config;
-import org.kie.kogito.explainability.local.lime.LimeConfig;
-import org.kie.kogito.explainability.local.lime.LimeExplainer;
-import org.kie.kogito.explainability.local.lime.optim.LimeConfigOptimizer;
-import org.kie.kogito.explainability.model.DataDistribution;
-import org.kie.kogito.explainability.model.Feature;
-import org.kie.kogito.explainability.model.FeatureFactory;
-import org.kie.kogito.explainability.model.Output;
-import org.kie.kogito.explainability.model.PerturbationContext;
-import org.kie.kogito.explainability.model.Prediction;
-import org.kie.kogito.explainability.model.PredictionInput;
-import org.kie.kogito.explainability.model.PredictionInputsDataDistribution;
-import org.kie.kogito.explainability.model.PredictionOutput;
-import org.kie.kogito.explainability.model.PredictionProvider;
-import org.kie.kogito.explainability.model.Saliency;
-import org.kie.kogito.explainability.model.SimplePrediction;
-import org.kie.kogito.explainability.model.Type;
-import org.kie.kogito.explainability.model.Value;
-import org.kie.kogito.explainability.utils.DataUtils;
-import org.kie.kogito.explainability.utils.ExplainabilityMetrics;
-import org.kie.kogito.explainability.utils.ValidationUtils;
+import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.local.lime.LimeConfig;
+import org.kie.trustyai.explainability.local.lime.LimeExplainer;
+import org.kie.trustyai.explainability.local.lime.optim.LimeConfigOptimizer;
+import org.kie.trustyai.explainability.model.DataDistribution;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureFactory;
+import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.PerturbationContext;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.Saliency;
+import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.utils.DataUtils;
+import org.kie.trustyai.explainability.utils.ExplainabilityMetrics;
+import org.kie.trustyai.explainability.utils.ValidationUtils;
 
 import opennlp.tools.langdetect.Language;
 import opennlp.tools.langdetect.LanguageDetector;

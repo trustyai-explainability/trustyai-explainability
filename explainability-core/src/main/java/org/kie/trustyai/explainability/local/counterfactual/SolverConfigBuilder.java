@@ -21,6 +21,7 @@ import java.util.List;
 import org.kie.trustyai.explainability.local.counterfactual.entities.BinaryEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.BooleanEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CategoricalEntity;
+import org.kie.trustyai.explainability.local.counterfactual.entities.CategoricalNumericalEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CurrencyEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.DoubleEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.DurationEntity;
@@ -70,6 +71,7 @@ public class SolverConfigBuilder {
                     BinaryEntity.class,
                     BooleanEntity.class,
                     CategoricalEntity.class,
+                    CategoricalNumericalEntity.class,
                     CurrencyEntity.class,
                     DoubleEntity.class,
                     DurationEntity.class,

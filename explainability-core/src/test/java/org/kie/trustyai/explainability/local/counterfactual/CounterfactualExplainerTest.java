@@ -32,13 +32,16 @@ import java.util.stream.Stream;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
+import org.kie.trustyai.explainability.local.counterfactual.entities.CategoricalNumericalEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
+import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
+import org.kie.trustyai.explainability.local.counterfactual.goal.DefaultCounterfactualGoalCriteria;
+import org.kie.trustyai.explainability.local.counterfactual.goal.GoalScore;
 import org.kie.trustyai.explainability.local.counterfactual.score.MockCounterFactualScoreCalculator;
 import org.kie.trustyai.explainability.model.CounterfactualPrediction;
 import org.kie.trustyai.explainability.model.DataDomain;
@@ -55,6 +58,7 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.CategoricalNumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -385,10 +389,9 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("x-2", 40.0, NumericalFeatureDomain.create(0.0, 100.0)));
         features.add(FeatureFactory.newCategoricalFeature("operand", "*", CategoricalFeatureDomain.create("+", "-", "/", "*")));
 
+        final PredictionProvider model = TestUtils.getSymbolicArithmeticModel();
         final CounterfactualResult result =
-                runCounterfactualSearch((long) seed, goal, features,
-                        TestUtils.getSymbolicArithmeticModel(),
-                        0.01);
+                runCounterfactualSearch((long) seed, features, model, 0.01, DefaultCounterfactualGoalCriteria.create(goal, 0.01), 100_000);
 
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
 
@@ -589,7 +592,7 @@ class CounterfactualExplainerTest {
         final Consumer<CounterfactualResult> assertIntermediateCounterfactualNotNull =
                 mock(Consumer.class);
         final CounterfactualConfig counterfactualConfig =
-                new CounterfactualConfig().withSolverConfig(solverConfig).withGoalThreshold(0.01);
+                new CounterfactualConfig().withSolverConfig(solverConfig);
         final CounterfactualExplainer counterfactualExplainer =
                 new CounterfactualExplainer(counterfactualConfig);
 
@@ -603,6 +606,7 @@ class CounterfactualExplainerTest {
         PredictionOutput output = new PredictionOutput(goal);
         Prediction prediction = new CounterfactualPrediction(input,
                 output,
+                0.01,
                 null,
                 UUID.randomUUID(),
                 null);
@@ -872,7 +876,6 @@ class CounterfactualExplainerTest {
                         Config.INSTANCE.getAsyncTimeUnit());
     }
 
-    @Disabled("https://issues.redhat.com/browse/FAI-804")
     @Test
     void testAsTable()
             throws ExecutionException, InterruptedException, TimeoutException {
@@ -904,24 +907,42 @@ class CounterfactualExplainerTest {
                 new Output("Semi-Categorical*2", Type.NUMBER, new Value(2), 0.0));
         List<Output> originalOutputs = model.predictAsync(List.of(new PredictionInput(features))).get().get(0).getOutputs();
 
-        final CounterfactualResult result = runCounterfactualSearch(0L, goal, features, model, .01, 100_000);
+        final CounterfactualResult result = CounterfactualUtils.runCounterfactualSearch(0L, goal, features, model, .01, 100_000);
         String resultString = result.asTable(originalOutputs, goal);
-        assertEquals("=== Counterfactual Search Results ========================================\n" +
-                "           Features |              Domain |  Original Value  → Found Value\n" +
-                "--------------------------------------------------------------------------\n" +
-                "          Feature 0 | -5.000000->5.000000 |           0.000  →       1.000\n" +
-                "          Feature 1 | -5.000000->5.000000 |           1.000  →       4.000\n" +
-                "          Feature 2 |              [A, B] |               A  →           B\n" +
-                "          Feature 3 | -5.000000->5.000000 |           3.000  →       3.000\n" +
-                "          Feature 4 | -5.000000->5.000000 |           4.000  →       3.000\n" +
-                "--------------------------------------------------------------------------\n" +
-                "            Outputs |                Goal |  Original Value  → Found Value\n" +
-                "--------------------------------------------------------------------------\n" +
-                "   Semi-Categorical |               1.000 |          -2.000  →       1.000\n" +
-                " Semi-Categorical*2 |               2.000 |          -4.000  →       2.000\n" +
-                "==========================================================================\n" +
-                "Meets Validity Criteria? true\n" +
-                "==========================================================================", resultString);
+        assertTrue(resultString.contains("Counterfactual Search Results"));
+        assertTrue(resultString.contains("Meets Validity Criteria?"));
+        assertTrue(resultString.contains("Feature 3"));
+        assertTrue(resultString.contains("[A, B]"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testCounterfactualCategoricalFeature(int seed) throws ExecutionException, InterruptedException, TimeoutException {
+        Random random = new Random();
+        random.setSeed(seed);
+
+        final List<Output> goal = List.of(new Output("sum-but1", Type.NUMBER, new Value(10), 0.0d));
+        List<Feature> features = new LinkedList<>();
+        features.add(FeatureFactory.newCategoricalNumericalFeature("f-num1", 0,
+                CategoricalNumericalFeatureDomain.create(0, 1, 5)));
+        features.add(FeatureFactory.newNumericalFeature("f-num3", 1.0, NumericalFeatureDomain.create(0.0, 10.0)));
+        features.add(FeatureFactory.newCategoricalNumericalFeature("f-num4", 0,
+                CategoricalNumericalFeatureDomain.create(5, 6, 7)));
+
+        final PredictionProvider model = TestUtils.getSumSkipModel(1);
+        final CounterfactualResult result =
+                CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
+                        model,
+                        DEFAULT_GOAL_THRESHOLD);
+
+        assertTrue(result.isValid());
+        assertEquals(10, result.getOutput().get(0).getOutputs().get(0).getValue().asNumber());
+        assertEquals(5, result.getEntities().get(0).asFeature().getValue().asNumber());
+        assertEquals(5, result.getEntities().get(2).asFeature().getValue().asNumber());
+        assertTrue(result.getEntities().get(0) instanceof CategoricalNumericalEntity);
+        assertTrue(result.getEntities().get(2) instanceof CategoricalNumericalEntity);
+        assertEquals(Type.CATEGORICAL, result.getEntities().get(0).asFeature().getType());
+        assertEquals(Type.CATEGORICAL, result.getEntities().get(0).asFeature().getType());
     }
 
     @ParameterizedTest
@@ -940,13 +961,47 @@ class CounterfactualExplainerTest {
 
         final List<Output> goal = List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d));
 
-        final CounterfactualResult result = runCounterfactualSearch((long) seed, goal, fs, model, .01);
-
-        final List<Feature> resultFeatures = result.getEntities().stream().map(CounterfactualEntity::asFeature).collect(Collectors.toList());
+        final CounterfactualResult result = CounterfactualUtils.runCounterfactualSearch((long) seed, goal, fs, model, .01);
 
         assertTrue(result.isValid());
-        assertTrue(result.getOutput().get(0).getOutputs().get(0).getValue().asNumber() <= .01);
+        assertEquals(0.0, result.getOutput().get(0).getOutputs().get(0).getValue().asNumber(), .01);
 
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testDynamicGoals(int seed)
+            throws ExecutionException, InterruptedException, TimeoutException {
+        Random random = new Random();
+        random.setSeed(seed);
+
+        List<Feature> features = new LinkedList<>();
+        features.add(FeatureFactory.newNumericalFeature("f-num1", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num2", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num3", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+        features.add(FeatureFactory.newNumericalFeature("f-num4", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
+
+        final PredictionProvider model = TestUtils.getSumSkipModel(1);
+
+        CounterfactualGoalCriteria goalFunction = (outputs) -> {
+            double sum = outputs.stream().mapToDouble(o -> o.getValue().asNumber()).sum();
+            if ((sum >= 500.0) && (sum <= 700.0)) {
+                return GoalScore.getExactMatch();
+            } else {
+                return GoalScore.create(Math.abs(sum - 600.0), 0.0);
+            }
+        };
+
+        final CounterfactualResult result =
+                CounterfactualUtils.runCounterfactualSearch((long) seed, features,
+                        model,
+                        DEFAULT_GOAL_THRESHOLD, goalFunction, 100_000);
+
+        final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
+
+        final double sum = counterfactualEntities.stream().mapToDouble(e -> e.asFeature().getValue().asNumber()).sum();
+        assertTrue(result.isValid());
+        assertTrue(sum >= 500 && sum <= 700);
     }
 
 }

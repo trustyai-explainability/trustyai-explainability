@@ -21,6 +21,7 @@ import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureDistribution;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
+import org.optaplanner.core.api.domain.entity.PlanningPin;
 import org.optaplanner.core.api.domain.valuerange.ValueRange;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeFactory;
 import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
@@ -104,11 +105,13 @@ public class DurationEntity extends AbstractAlgebraicEntity<Duration> {
         return ValueRangeFactory.createDoubleValueRange(rangeMinimum.getSeconds(), rangeMaximum.getSeconds());
     }
 
+    @Override
     @PlanningVariable(valueRangeProviderRefs = { "durationRange" })
     public Duration getProposedValue() {
         return proposedValue;
     }
 
+    @Override
     public void setProposedValue(Duration proposedValue) {
         this.proposedValue = proposedValue;
     }
@@ -126,5 +129,11 @@ public class DurationEntity extends AbstractAlgebraicEntity<Duration> {
     @Override
     public double similarity() {
         return 1.0 - Math.abs(this.proposedValue.getSeconds() - originalValue.getSeconds()) / this.range;
+    }
+
+    @Override
+    @PlanningPin
+    public boolean isConstrained() {
+        return constrained;
     }
 }

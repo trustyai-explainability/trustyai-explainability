@@ -17,11 +17,10 @@ package org.kie.trustyai.explainability.local.counterfactual;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
+import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
 import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
@@ -36,17 +35,10 @@ import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDeci
  */
 @PlanningSolution
 public class CounterfactualSolution {
-
+    @PlanningEntityCollectionProperty
     private List<CounterfactualEntity> entities;
     private List<Feature> originalFeatures;
 
-    @PlanningEntityCollectionProperty
-    public List<CounterfactualEntity> getVaryingEntities() {
-        return entities.stream().filter(counterfactualEntity -> !counterfactualEntity.isConstrained())
-                .collect(Collectors.toList());
-    }
-
-    private List<Output> goal;
     private double goalThreshold;
 
     private PredictionProvider model;
@@ -57,6 +49,7 @@ public class CounterfactualSolution {
     private UUID executionId;
 
     private List<PredictionOutput> predictionOutputs;
+    private CounterfactualGoalCriteria goalCriteria;
 
     protected CounterfactualSolution() {
     }
@@ -65,17 +58,17 @@ public class CounterfactualSolution {
             List<CounterfactualEntity> entities,
             List<Feature> originalFeatures,
             PredictionProvider model,
-            List<Output> goal,
             UUID solutionId,
             UUID executionId,
+            CounterfactualGoalCriteria goalCriteria,
             double goalThreshold) {
         this.entities = entities;
         this.originalFeatures = originalFeatures;
         this.model = model;
-        this.goal = goal;
         this.solutionId = solutionId;
         this.executionId = executionId;
         this.goalThreshold = goalThreshold;
+        this.goalCriteria = goalCriteria;
     }
 
     @PlanningScore(bendableHardLevelsSize = 3, bendableSoftLevelsSize = 2)
@@ -89,10 +82,6 @@ public class CounterfactualSolution {
 
     public PredictionProvider getModel() {
         return model;
-    }
-
-    public List<Output> getGoal() {
-        return goal;
     }
 
     public List<CounterfactualEntity> getEntities() {
@@ -123,11 +112,11 @@ public class CounterfactualSolution {
         this.predictionOutputs = predictionOutputs;
     }
 
-    public double getGoalThreshold() {
-        return goalThreshold;
-    }
-
     public List<Feature> getOriginalFeatures() {
         return originalFeatures;
+    }
+
+    public CounterfactualGoalCriteria getGoalCriteria() {
+        return goalCriteria;
     }
 }
