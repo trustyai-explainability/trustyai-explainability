@@ -55,7 +55,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.java-version }}-maven${{ matrix.maven-version }}
       - name: Compile
         shell: bash
-        run: mvn -Dmaven.test.skip=true package -nsu -fae -e
+        run: mvn -Dmaven.test.skip=true package -nsu -fae -e -Dformatter.skip=true
       - name: Validate Formatting
         # execute formatting validation only on Ubuntu to avoid issues with CR LF
         if: ${{ matrix.os == 'ubuntu-latest' }}
