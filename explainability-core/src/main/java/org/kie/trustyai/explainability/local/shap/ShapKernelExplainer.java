@@ -585,16 +585,16 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
      */
 
     private CompletableFuture<RealMatrix> runSyntheticData(ShapDataCarrier sdc) {
-        if (config.getBatchSize() > 1) {
-            int batchSize = this.config.getBatchSize();
+        if (config.getBatchCount() > 1) {
+            int batchCount = this.config.getBatchCount();
             return sdc.getLinkNull().thenCompose(ln -> sdc.getOutputSize().thenCompose(os -> {
                 CompletableFuture<RealMatrix> expectations = CompletableFuture.supplyAsync(() -> MatrixUtils.createRealMatrix(
                         new double[sdc.getSamplesAddedSize()][os]),
                         this.config.getExecutor());
                 //in theory all of these can happen in parallel
-                for (int i = 0; i < sdc.getSamplesAddedSize(); i += batchSize) {
+                for (int i = 0; i < sdc.getSamplesAddedSize(); i += batchCount) {
                     int finalI = i;
-                    List<PredictionInput> batch = IntStream.range(i, Math.min(sdc.getSamplesAddedSize(), i + batchSize))
+                    List<PredictionInput> batch = IntStream.range(i, Math.min(sdc.getSamplesAddedSize(), i + batchCount))
                             .mapToObj(b -> sdc.getSamplesAdded(b).getSyntheticData())
                             .collect(ArrayList::new, List::addAll, List::addAll);
                     expectations = sdc.getModel().predictAsync(config.getOneHotter().oneHotDecode(batch, true))
