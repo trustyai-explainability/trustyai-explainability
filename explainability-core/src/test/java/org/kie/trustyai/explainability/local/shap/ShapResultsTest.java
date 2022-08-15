@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.FeatureImportance;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Saliency;
@@ -38,15 +39,16 @@ class ShapResultsTest {
         Map<String, Double> fnull = new HashMap<>();
         for (int i = 0; i < nOutputs; i++) {
             List<FeatureImportance> fis = new ArrayList<>();
+            fis.add(new FeatureImportance(FeatureFactory.newNumericalFeature("Background", (double) scalar2), scalar2));
             for (int j = 0; j < nFeatures; j++) {
                 fis.add(new FeatureImportance(new Feature("Feature " + String.valueOf(j), Type.NUMBER, new Value(j)), (i + 1) * j * scalar1));
             }
+
             String oname = "Output " + i;
             saliencies.put(oname,
                     new Saliency(new Output(oname, Type.NUMBER, new Value(i + 1), 1.0), fis));
-            fnull.put(oname, (double) scalar2);
         }
-        return new ShapResults(saliencies, fnull);
+        return new ShapResults(saliencies);
     }
 
     // test equals and hashing

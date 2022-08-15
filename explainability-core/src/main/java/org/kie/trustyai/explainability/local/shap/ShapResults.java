@@ -27,19 +27,13 @@ import org.kie.trustyai.explainability.utils.IOUtils;
 
 public class ShapResults {
     private final Map<String, Saliency> saliencies;
-    private final Map<String, Double> fnull;
 
-    public ShapResults(Map<String, Saliency> saliencies, Map<String, Double> fnull) {
+    public ShapResults(Map<String, Saliency> saliencies) {
         this.saliencies = saliencies;
-        this.fnull = fnull;
     }
 
     public Map<String, Saliency> getSaliencies() {
         return saliencies;
-    }
-
-    public Map<String, Double> getFnull() {
-        return fnull;
     }
 
     @Override
@@ -52,9 +46,6 @@ public class ShapResults {
         }
         ShapResults other = (ShapResults) o;
         if (this.saliencies.size() != other.getSaliencies().size()) {
-            return false;
-        }
-        if (!this.fnull.equals(other.getFnull())) {
             return false;
         }
         for (Map.Entry<String, Saliency> entry : this.saliencies.entrySet()) {
@@ -78,7 +69,7 @@ public class ShapResults {
 
     @Override
     public int hashCode() {
-        return Objects.hash(saliencies.hashCode(), fnull);
+        return Objects.hash(saliencies.hashCode());
     }
 
     /**
@@ -122,11 +113,11 @@ public class ShapResults {
 
             featureNames.add("");
             featureValues.add("FNull");
-            shapValues.add(IOUtils.roundedString(this.fnull.get(entry.getKey()), decimalPlaces));
+            shapValues.add(IOUtils.roundedString(pfis.get(pfis.size() - 1).getScore(), decimalPlaces));
             confidences.add("");
             lineIDX++;
 
-            for (int i = 0; i < pfis.size(); i++) {
+            for (int i = 0; i < pfis.size() - 1; i++) {
                 featureNames.add(pfis.get(i).getFeature().getName() + " = ");
                 featureValues.add(IOUtils.roundedString(pfis.get(i).getFeature(), decimalPlaces));
                 shapValues.add(IOUtils.roundedString(pfis.get(i).getScore(), decimalPlaces));

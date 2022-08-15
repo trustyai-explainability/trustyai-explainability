@@ -35,6 +35,8 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.kie.trustyai.explainability.local.LocalExplainer;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.FeatureImportance;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
@@ -263,14 +265,18 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
      * @return an array of n saliencies, one for each output of the model. Each Saliency lists the feature
      *         importances of each input feature to that particular output
      */
-    public static Map<String, Saliency> saliencyFromMatrix(RealMatrix m, PredictionInput pi, PredictionOutput po) {
+    public static Map<String, Saliency> saliencyFromMatrix(RealMatrix m, PredictionInput pi, PredictionOutput po,
+            Map<String, Double> nullOutput) {
         Map<String, Saliency> saliencies = new HashMap<>();
         for (int i = 0; i < m.getRowDimension(); i++) {
+            String outputName = po.getOutputs().get(i).getName();
             List<FeatureImportance> fis = new ArrayList<>();
             for (int j = 0; j < m.getColumnDimension(); j++) {
                 fis.add(new FeatureImportance(pi.getFeatures().get(j), m.getEntry(i, j)));
             }
-            saliencies.put(po.getOutputs().get(i).getName(), new Saliency(po.getOutputs().get(i), fis));
+            Feature background = FeatureFactory.newNumericalFeature("Background", nullOutput.get(outputName));
+            fis.add(new FeatureImportance(background, nullOutput.get(outputName)));
+            saliencies.put(outputName, new Saliency(po.getOutputs().get(i), fis));
         }
         return saliencies;
     }
@@ -286,14 +292,18 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
      * @return an array of n saliencies, one for each output of the model. Each Saliency lists the feature
      *         importances and confidences of each input feature to that particular output
      */
-    public static Map<String, Saliency> saliencyFromMatrix(RealMatrix m, RealMatrix bounds, PredictionInput pi, PredictionOutput po) {
+    public static Map<String, Saliency> saliencyFromMatrix(RealMatrix m, RealMatrix bounds, PredictionInput pi,
+            PredictionOutput po, Map<String, Double> nullOutput) {
         Map<String, Saliency> saliencies = new HashMap<>();
         for (int i = 0; i < m.getRowDimension(); i++) {
+            String outputName = po.getOutputs().get(i).getName();
             List<FeatureImportance> fis = new ArrayList<>();
             for (int j = 0; j < m.getColumnDimension(); j++) {
                 fis.add(new FeatureImportance(pi.getFeatures().get(j), m.getEntry(i, j), bounds.getEntry(i, j)));
             }
-            saliencies.put(po.getOutputs().get(i).getName(), new Saliency(po.getOutputs().get(i), fis));
+            Feature background = FeatureFactory.newNumericalFeature("Background", nullOutput.get(outputName));
+            fis.add(new FeatureImportance(background, nullOutput.get(outputName)));
+            saliencies.put(outputName, new Saliency(po.getOutputs().get(i), fis));
         }
         return saliencies;
     }
@@ -335,7 +345,8 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
 
         // if no features vary, then the features do not effect output, and all shap values are zero.
         if (sdc.getNumVarying() == 0) {
-            return output.thenApply(o -> saliencyFromMatrix(o, pi, po)).thenCombine(sdc.getNullOutput(), ShapResults::new);
+            return output.thenCombine(sdc.getNullOutput(), (o, no) -> saliencyFromMatrix(o, pi, po, no))
+                    .thenApply(ShapResults::new);
         } else if (sdc.getNumVarying() == 1)
         // if 1 feature varies, this feature has all the effect
         {
@@ -345,8 +356,9 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
                 for (int i = 0; i < os; i++) {
                     out.setEntry(i, sdc.getVaryingFeatureGroups(0), df.getEntry(i));
                 }
-                return saliencyFromMatrix(out, pi, po);
-            })).thenCombine(sdc.getNullOutput(), ShapResults::new);
+                return out;
+            })).thenCombine(sdc.getNullOutput(), (out, no) -> saliencyFromMatrix(out, pi, po, no))
+                    .thenApply(ShapResults::new);
         } else
         // if more than 1 feature varies, we need to perform WLR
         {
@@ -370,8 +382,8 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
 
             // run the wlr model over the synthetic data results
             return output.thenCompose(o -> this.solveSystem(expectations, poVector, sdc)
-                    .thenApply(wo -> saliencyFromMatrix(wo[0], wo[1], pi, po)))
-                    .thenCombine(sdc.getNullOutput(), ShapResults::new);
+                    .thenCombine(sdc.getNullOutput(), (wo, no) -> saliencyFromMatrix(wo[0], wo[1], pi, po, no)))
+                    .thenApply(ShapResults::new);
         }
     }
 
