@@ -131,7 +131,7 @@ class RecordingLimeExplainerTest {
             Prediction prediction = new SimplePrediction(input, outputs.get(0));
 
             Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model).toCompletableFuture()
-                    .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                    .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
             for (Saliency saliency : saliencyMap.values()) {
                 assertNotNull(saliency);
             }
@@ -162,7 +162,7 @@ class RecordingLimeExplainerTest {
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         assertNotNull(saliencyMap);
     }
 

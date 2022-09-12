@@ -66,7 +66,7 @@ class DummyModelsLimeExplainerTest {
         LimeConfig limeConfig = new LimeConfig().withSamples(100).withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertNotNull(saliency);
             List<FeatureImportance> topFeatures = saliency.getTopFeatures(3);
@@ -118,7 +118,7 @@ class DummyModelsLimeExplainerTest {
                 .withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertNotNull(saliency);
             List<FeatureImportance> topFeatures = saliency.getTopFeatures(3);
@@ -171,7 +171,7 @@ class DummyModelsLimeExplainerTest {
                 .withPerturbationContext(new PerturbationContext(seed, random, 2));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertNotNull(saliency);
             List<FeatureImportance> topFeatures = saliency.getTopFeatures(3);
@@ -225,7 +225,7 @@ class DummyModelsLimeExplainerTest {
                 .withSamples(100).withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model).toCompletableFuture()
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertNotNull(saliency);
             List<FeatureImportance> topFeatures = saliency.getPositiveFeatures(1);
@@ -278,7 +278,7 @@ class DummyModelsLimeExplainerTest {
                 .withSamples(100).withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertNotNull(saliency);
             List<FeatureImportance> topFeatures = saliency.getTopFeatures(3);
@@ -330,7 +330,7 @@ class DummyModelsLimeExplainerTest {
                 .withSamples(10).withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertNotNull(saliency);
             List<FeatureImportance> topFeatures = saliency.getTopFeatures(3);

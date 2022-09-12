@@ -86,7 +86,7 @@ class PmmlScorecardCategoricalLimeExplainerTest {
         assertThat(output).isNotNull();
         Prediction prediction = new SimplePrediction(input, output);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertThat(saliency).isNotNull();
             double v = ExplainabilityMetrics.impactScore(model, prediction, saliency.getTopFeatures(2));

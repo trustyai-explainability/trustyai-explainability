@@ -24,7 +24,7 @@ import org.kie.pmml.api.runtime.PMMLRuntime;
 import org.kie.pmml.evaluator.core.PMMLContextImpl;
 import org.kie.pmml.evaluator.core.utils.PMMLRequestDataBuilder;
 
-public abstract class AbstractPMMLExecutor {
+public abstract class lsAbstractPMMLExecutor {
 
     public abstract PMML4Result execute(final PMMLRuntime pmmlRuntime) throws Exception;
 

@@ -110,7 +110,7 @@ class LimeStabilityTest {
             List<Saliency> saliencies = new LinkedList<>();
             for (int i = 0; i < 100; i++) {
                 Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                        .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                        .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
                 saliencies.addAll(saliencyMap.values());
             }
             // check that the topmost important feature is stable

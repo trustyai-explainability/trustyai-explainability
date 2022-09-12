@@ -39,6 +39,7 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
+import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -159,7 +160,7 @@ public class ExplainabilityMetrics {
      * @return a report about stability of all the decisions/predictions (and for each {@code k < topK})
      */
     public static LocalSaliencyStability getLocalSaliencyStability(PredictionProvider model, Prediction prediction,
-            LocalExplainer<Map<String, Saliency>> saliencyLocalExplainer,
+            LocalExplainer<SaliencyResults> saliencyLocalExplainer,
             int topK, int runs)
             throws InterruptedException, ExecutionException, TimeoutException {
         Map<String, List<Saliency>> saliencies = getMultipleSaliencies(model, prediction, saliencyLocalExplainer, runs);
@@ -202,14 +203,14 @@ public class ExplainabilityMetrics {
      * @return the generated saliencies, aggregated by decision name, across the different runs
      */
     private static Map<String, List<Saliency>> getMultipleSaliencies(PredictionProvider model, Prediction prediction,
-            LocalExplainer<Map<String, Saliency>> saliencyLocalExplainer,
+            LocalExplainer<SaliencyResults> saliencyLocalExplainer,
             int runs)
             throws InterruptedException, ExecutionException, TimeoutException {
         Map<String, List<Saliency>> saliencies = new HashMap<>();
         int skipped = 0;
         for (int i = 0; i < runs; i++) {
             Map<String, Saliency> saliencyMap = saliencyLocalExplainer.explainAsync(prediction, model)
-                    .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                    .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
             for (Map.Entry<String, Saliency> saliencyEntry : saliencyMap.entrySet()) {
                 // aggregate saliencies by output name
                 List<FeatureImportance> topFeatures = saliencyEntry.getValue().getTopFeatures(1);
@@ -263,7 +264,7 @@ public class ExplainabilityMetrics {
      * @return the saliency recall
      */
     public static double getLocalSaliencyRecall(String outputName, PredictionProvider predictionProvider,
-            LocalExplainer<Map<String, Saliency>> localExplainer,
+            LocalExplainer<SaliencyResults> localExplainer,
             DataDistribution dataDistribution, int k, int chunkSize)
             throws InterruptedException, ExecutionException, TimeoutException {
 
@@ -284,7 +285,7 @@ public class ExplainabilityMetrics {
             if (optionalOutput.isPresent()) {
                 Output output = optionalOutput.get();
                 Map<String, Saliency> stringSaliencyMap = localExplainer.explainAsync(prediction, predictionProvider)
-                        .get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT);
+                        .get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT).getSaliencies();
                 if (stringSaliencyMap.containsKey(outputName)) {
                     Saliency saliency = stringSaliencyMap.get(outputName);
                     List<FeatureImportance> topFeatures = saliency.getPerFeatureImportance().stream()
@@ -347,7 +348,7 @@ public class ExplainabilityMetrics {
      * @return the saliency precision
      */
     public static double getLocalSaliencyPrecision(String outputName, PredictionProvider predictionProvider,
-            LocalExplainer<Map<String, Saliency>> localExplainer,
+            LocalExplainer<SaliencyResults> localExplainer,
             DataDistribution dataDistribution, int k, int chunkSize)
             throws InterruptedException, ExecutionException, TimeoutException {
         List<Prediction> sorted = DataUtils.getScoreSortedPredictions(outputName, predictionProvider, dataDistribution);
@@ -362,7 +363,7 @@ public class ExplainabilityMetrics {
 
         for (Prediction prediction : bottomChunk) {
             Map<String, Saliency> stringSaliencyMap = localExplainer.explainAsync(prediction, predictionProvider)
-                    .get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT);
+                    .get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT).getSaliencies();
             if (stringSaliencyMap.containsKey(outputName)) {
                 Saliency saliency = stringSaliencyMap.get(outputName);
                 List<FeatureImportance> topFeatures = saliency.getPerFeatureImportance().stream()
@@ -417,7 +418,7 @@ public class ExplainabilityMetrics {
      * @return the saliency F1
      */
     public static double getLocalSaliencyF1(String outputName, PredictionProvider predictionProvider,
-            LocalExplainer<Map<String, Saliency>> localExplainer,
+            LocalExplainer<SaliencyResults> localExplainer,
             DataDistribution dataDistribution, int k, int chunkSize)
             throws InterruptedException, ExecutionException, TimeoutException {
         double precision = getLocalSaliencyPrecision(outputName, predictionProvider, localExplainer, dataDistribution, k, chunkSize);

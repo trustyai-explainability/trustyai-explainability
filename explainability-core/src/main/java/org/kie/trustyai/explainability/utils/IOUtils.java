@@ -16,19 +16,15 @@
 
 package org.kie.trustyai.explainability.utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.util.Pair;
 import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureImportance;
 import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.Type;
 
 public class IOUtils {
@@ -157,66 +153,5 @@ public class IOUtils {
             }
         }
         return new Pair<>(table.toString(), totalWidth);
-    }
-
-    // === LIME I/O ====================================================================================================
-    /**
-     * Represent LIME results as a string
-     *
-     * @return LIME results string
-     */
-    public static String LimeResultsAsTable(Map<String, Saliency> results) {
-        return LimeResultsAsTable(results, 3);
-    }
-
-    /**
-     * Represent LIME results as a string
-     * 
-     * @param decimalPlaces The decimal places to round all numeric values in the table to
-     *
-     * @return LIME results string
-     */
-    public static String LimeResultsAsTable(Map<String, Saliency> results, int decimalPlaces) {
-        List<String> featureNames = new ArrayList<>();
-        List<String> featureValues = new ArrayList<>();
-        List<String> limeScores = new ArrayList<>();
-
-        List<String> headers = new ArrayList<>();
-        List<Integer> headerPositions = new ArrayList<>();
-        List<Integer> lineSeparatorPositions = new ArrayList<>();
-        int lineIDX = 0;
-
-        List<Map.Entry<String, Saliency>> entries = results.entrySet().stream().collect(Collectors.toList());
-
-        for (int s = 0; s < entries.size(); s++) {
-            Saliency saliency = entries.get(s).getValue();
-            List<FeatureImportance> pfis = saliency.getPerFeatureImportance();
-            headers.add(saliency.getOutput().getName() + " LIME Scores");
-            headerPositions.add(lineIDX);
-
-            featureNames.add("Feature");
-            featureValues.add("Value");
-            limeScores.add("Saliency ");
-            lineIDX++;
-
-            for (int i = 0; i < pfis.size(); i++) {
-                featureNames.add(pfis.get(i).getFeature().getName() + " = ");
-                featureValues.add(IOUtils.roundedString(pfis.get(i).getFeature(), decimalPlaces));
-                limeScores.add(IOUtils.roundedString(pfis.get(i).getScore(), decimalPlaces));
-                lineIDX++;
-            }
-
-            lineSeparatorPositions.add(lineIDX);
-            featureNames.add("");
-            featureValues.add("Prediction");
-            limeScores.add(IOUtils.roundedString(saliency.getOutput(), decimalPlaces));
-            lineIDX++;
-        }
-        return IOUtils.generateTable(
-                headers,
-                headerPositions,
-                lineSeparatorPositions,
-                List.of(featureNames, featureValues, limeScores),
-                List.of("", " | ")).getFirst();
     }
 }

@@ -22,6 +22,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.TestUtils;
@@ -36,6 +37,7 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.PredictionProviderMetadata;
 import org.kie.trustyai.explainability.model.Saliency;
+import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
@@ -77,7 +79,7 @@ class AggregatedLimeExplainerTest {
         };
 
         AggregatedLimeExplainer aggregatedLimeExplainer = new AggregatedLimeExplainer();
-        Map<String, Saliency> explain = aggregatedLimeExplainer.explainFromMetadata(sumSkipModel, metadata).get();
+        Map<String, Saliency> explain = aggregatedLimeExplainer.explainFromMetadata(sumSkipModel, metadata).get().getSaliencies();
         assertNotNull(explain);
         assertEquals(1, explain.size());
         assertTrue(explain.containsKey("sum-but1"));
@@ -99,7 +101,7 @@ class AggregatedLimeExplainerTest {
         List<PredictionOutput> predictionOutputs = sumSkipModel.predictAsync(samples).get();
         List<Prediction> predictions = DataUtils.getPredictions(samples, predictionOutputs);
         AggregatedLimeExplainer aggregatedLimeExplainer = new AggregatedLimeExplainer();
-        Map<String, Saliency> explain = aggregatedLimeExplainer.explainFromPredictions(sumSkipModel, predictions).get();
+        Map<String, Saliency> explain = aggregatedLimeExplainer.explainFromPredictions(sumSkipModel, predictions).get().getSaliencies();
         assertNotNull(explain);
         assertEquals(1, explain.size());
         assertTrue(explain.containsKey("sum-but1"));
@@ -108,5 +110,22 @@ class AggregatedLimeExplainerTest {
         List<String> collect = saliency.getPositiveFeatures(2).stream()
                 .map(FeatureImportance::getFeature).map(Feature::getName).collect(Collectors.toList());
         assertFalse(collect.contains("f1")); // skipped feature should not appear in top two positive features
+    }
+
+    @Test
+    void testToString() throws ExecutionException, InterruptedException {
+        Random random = new Random();
+        random.setSeed(0);
+        PredictionProvider sumSkipModel = TestUtils.getSumSkipModel(1);
+        DataDistribution dataDistribution = DataUtils.generateRandomDataDistribution(3, 100, random);
+        List<PredictionInput> samples = dataDistribution.sample(10);
+        List<PredictionOutput> predictionOutputs = sumSkipModel.predictAsync(samples).get();
+        List<Prediction> predictions = DataUtils.getPredictions(samples, predictionOutputs);
+        AggregatedLimeExplainer aggregatedLimeExplainer = new AggregatedLimeExplainer();
+        SaliencyResults explain = aggregatedLimeExplainer.explainFromPredictions(sumSkipModel, predictions).get();
+        String table = explain.asTable();
+        assertTrue(table.contains("sum-but1 Aggregated LIME Saliencies"));
+        assertTrue(table.contains("Saliency"));
+        assertTrue(table.contains("f_1"));
     }
 }

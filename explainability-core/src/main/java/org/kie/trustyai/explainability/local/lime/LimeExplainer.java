@@ -41,6 +41,7 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
+import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
@@ -60,7 +61,7 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
  * - perturbing numerical features is done by sampling from a standard normal distribution centered around the value of the feature value associated with the prediction to be explained
  * - numerical features are max-min scaled and clustered via a gaussian kernel
  */
-public class LimeExplainer implements LocalExplainer<Map<String, Saliency>> {
+public class LimeExplainer implements LocalExplainer<SaliencyResults> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LimeExplainer.class);
 
@@ -79,8 +80,8 @@ public class LimeExplainer implements LocalExplainer<Map<String, Saliency>> {
     }
 
     @Override
-    public CompletableFuture<Map<String, Saliency>> explainAsync(Prediction prediction, PredictionProvider model,
-            Consumer<Map<String, Saliency>> intermediateResultsConsumer) {
+    public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model,
+            Consumer<SaliencyResults> intermediateResultsConsumer) {
         PredictionInput originalInput = prediction.getInput();
         if (originalInput == null || originalInput.getFeatures() == null ||
                 (originalInput.getFeatures() != null && originalInput.getFeatures().isEmpty())) {
@@ -98,7 +99,7 @@ public class LimeExplainer implements LocalExplainer<Map<String, Saliency>> {
         return explainWithExecutionConfig(model, originalInput, linearizedTargetInputFeatures, actualOutputs, executionConfig);
     }
 
-    protected CompletableFuture<Map<String, Saliency>> explainWithExecutionConfig(PredictionProvider model, PredictionInput originalInput, List<Feature> linearizedTargetInputFeatures,
+    protected CompletableFuture<SaliencyResults> explainWithExecutionConfig(PredictionProvider model, PredictionInput originalInput, List<Feature> linearizedTargetInputFeatures,
             List<Output> actualOutputs, LimeConfig executionConfig) {
         int noOfSamples = executionConfig.getNoOfSamples();
 
@@ -111,7 +112,7 @@ public class LimeExplainer implements LocalExplainer<Map<String, Saliency>> {
         return explainRetryCycle(model, originalInput, linearizedTargetInputFeatures, actualOutputs, executionConfig);
     }
 
-    protected CompletableFuture<Map<String, Saliency>> explainRetryCycle(
+    protected CompletableFuture<SaliencyResults> explainRetryCycle(
             PredictionProvider model,
             PredictionInput originalInput,
             List<Feature> linearizedTargetInputFeatures,
@@ -136,7 +137,7 @@ public class LimeExplainer implements LocalExplainer<Map<String, Saliency>> {
                 });
     }
 
-    private CompletableFuture<Map<String, Saliency>> adjustAndRetry(PredictionProvider model, PredictionInput originalInput,
+    private CompletableFuture<SaliencyResults> adjustAndRetry(PredictionProvider model, PredictionInput originalInput,
             List<Feature> linearizedTargetInputFeatures, List<Output> actualOutputs,
             LimeConfig executionConfig) {
         if (executionConfig.isAdaptDatasetVariance()) {
@@ -187,7 +188,7 @@ public class LimeExplainer implements LocalExplainer<Map<String, Saliency>> {
         return limeInputsList;
     }
 
-    private Map<String, Saliency> getSaliencies(List<Feature> linearizedTargetInputFeatures, List<Output> actualOutputs,
+    private SaliencyResults getSaliencies(List<Feature> linearizedTargetInputFeatures, List<Output> actualOutputs,
             List<LimeInputs> limeInputsList, LimeConfig executionConfig) {
         Map<String, Saliency> result = new HashMap<>();
         for (int o = 0; o < actualOutputs.size(); o++) {
@@ -197,7 +198,7 @@ public class LimeExplainer implements LocalExplainer<Map<String, Saliency>> {
             getSaliency(linearizedTargetInputFeatures, result, limeInputs, originalOutput, executionConfig);
             LOGGER.debug("weights set for output {}", originalOutput);
         }
-        return result;
+        return SaliencyResults.newLimeResults(result);
     }
 
     private void getSaliency(List<Feature> linearizedTargetInputFeatures, Map<String, Saliency> result,

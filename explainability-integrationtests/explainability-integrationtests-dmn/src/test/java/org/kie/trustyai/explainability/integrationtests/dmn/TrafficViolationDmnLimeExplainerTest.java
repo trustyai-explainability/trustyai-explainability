@@ -74,7 +74,7 @@ class TrafficViolationDmnLimeExplainerTest {
                 .withPerturbationContext(perturbationContext);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertNotNull(saliency);
             List<String> strings = saliency.getTopFeatures(3).stream().map(f -> f.getFeature().getName()).collect(Collectors.toList());

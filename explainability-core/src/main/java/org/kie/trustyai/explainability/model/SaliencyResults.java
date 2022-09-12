@@ -14,21 +14,33 @@
  * limitations under the License.
  */
 
-package org.kie.trustyai.explainability.local.shap;
+package org.kie.trustyai.explainability.model;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.utils.IOUtils;
 
-public class ShapResults {
+public class SaliencyResults {
+    private final String explainerName;
     private final Map<String, Saliency> saliencies;
 
-    public ShapResults(Map<String, Saliency> saliencies) {
+    public static SaliencyResults newAggregatedLimeResults(Map<String, Saliency> saliencies) {
+        return new SaliencyResults("Aggregated LIME", saliencies);
+    }
+
+    public static SaliencyResults newLimeResults(Map<String, Saliency> saliencies) {
+        return new SaliencyResults("LIME", saliencies);
+    }
+
+    public static SaliencyResults newShapResults(Map<String, Saliency> saliencies) {
+        return new SaliencyResults("SHAP", saliencies);
+    }
+
+    private SaliencyResults(String explainerName, Map<String, Saliency> saliencies) {
+        this.explainerName = explainerName;
         this.saliencies = saliencies;
     }
 
@@ -44,7 +56,7 @@ public class ShapResults {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ShapResults other = (ShapResults) o;
+        SaliencyResults other = (SaliencyResults) o;
         if (this.saliencies.size() != other.getSaliencies().size()) {
             return false;
         }
@@ -73,7 +85,7 @@ public class ShapResults {
     }
 
     /**
-     * Represent the ShapResult as a string
+     * Represent the SaliencyResults as a string
      *
      * @return ShapResult string
      */
@@ -82,8 +94,8 @@ public class ShapResults {
     }
 
     /**
-     * Represent the ShapResult as a string
-     * 
+     * Represent the SaliencyResults as a string
+     *
      * @param decimalPlaces The decimal places to round all numeric values in the table to
      *
      * @return ShapResult string
@@ -91,7 +103,7 @@ public class ShapResults {
     public String asTable(int decimalPlaces) {
         List<String> featureNames = new ArrayList<>();
         List<String> featureValues = new ArrayList<>();
-        List<String> shapValues = new ArrayList<>();
+        List<String> saliencyValues = new ArrayList<>();
         List<String> confidences = new ArrayList<>();
 
         List<String> headers = new ArrayList<>();
@@ -102,25 +114,19 @@ public class ShapResults {
         for (Map.Entry<String, Saliency> entry : saliencies.entrySet()) {
             Saliency saliency = entry.getValue();
             List<FeatureImportance> pfis = saliency.getPerFeatureImportance();
-            headers.add(entry.getKey() + " SHAP Values");
+            headers.add(entry.getKey() + " " + explainerName + " Saliencies");
             headerPositions.add(lineIDX);
 
             featureNames.add("Feature");
             featureValues.add("Value");
-            shapValues.add("SHAP Value");
+            saliencyValues.add(explainerName + " Saliency");
             confidences.add(" | Confidence");
             lineIDX++;
 
-            featureNames.add("");
-            featureValues.add("FNull");
-            shapValues.add(IOUtils.roundedString(pfis.get(pfis.size() - 1).getScore(), decimalPlaces));
-            confidences.add("");
-            lineIDX++;
-
-            for (int i = 0; i < pfis.size() - 1; i++) {
+            for (int i = 0; i < pfis.size(); i++) {
                 featureNames.add(pfis.get(i).getFeature().getName() + " = ");
                 featureValues.add(IOUtils.roundedString(pfis.get(i).getFeature(), decimalPlaces));
-                shapValues.add(IOUtils.roundedString(pfis.get(i).getScore(), decimalPlaces));
+                saliencyValues.add(IOUtils.roundedString(pfis.get(i).getScore(), decimalPlaces));
                 confidences.add(IOUtils.roundedString(pfis.get(i).getConfidence(), decimalPlaces));
                 lineIDX++;
             }
@@ -128,7 +134,7 @@ public class ShapResults {
             lineSeparatorPositions.add(lineIDX);
             featureNames.add("");
             featureValues.add("Prediction");
-            shapValues.add(IOUtils.roundedString(saliency.getOutput().getValue().asNumber(), decimalPlaces));
+            saliencyValues.add(IOUtils.roundedString(saliency.getOutput().getValue().asNumber(), decimalPlaces));
             confidences.add("");
             lineIDX++;
         }
@@ -136,7 +142,7 @@ public class ShapResults {
                 headers,
                 headerPositions,
                 lineSeparatorPositions,
-                List.of(featureNames, featureValues, shapValues, confidences),
+                List.of(featureNames, featureValues, saliencyValues, confidences),
                 List.of("", " | ", "")).getFirst();
     }
 }

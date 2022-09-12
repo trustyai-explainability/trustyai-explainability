@@ -57,7 +57,7 @@ public class LimeImpactScoreCalculator implements EasyScoreCalculator<LimeConfig
         for (Prediction prediction : predictions) {
             try {
                 Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, solution.getModel()).get(
-                        Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT);
+                        Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT).getSaliencies();
 
                 for (Map.Entry<String, Saliency> entry : saliencyMap.entrySet()) {
                     List<FeatureImportance> topFeatures = entry.getValue().getTopFeatures(TOP_FEATURES);

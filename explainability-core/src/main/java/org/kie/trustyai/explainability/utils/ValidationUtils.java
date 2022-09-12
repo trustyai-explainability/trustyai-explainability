@@ -15,14 +15,13 @@
  */
 package org.kie.trustyai.explainability.utils;
 
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
+import org.kie.trustyai.explainability.model.SaliencyResults;
 
 /**
  * Utility class for validating desiderata about models' explainability.
@@ -45,7 +44,7 @@ public class ValidationUtils {
      * @throws ValidationException if either positive or negative stability scores are lower than minimum for any decision
      */
     public static void validateLocalSaliencyStability(PredictionProvider model, Prediction prediction,
-            LocalExplainer<Map<String, Saliency>> explainer,
+            LocalExplainer<SaliencyResults> explainer,
             int topK, double minimumPositiveStabilityScore,
             double minimumNegativeStabilityScore)
             throws ValidationException, InterruptedException, ExecutionException, TimeoutException {
