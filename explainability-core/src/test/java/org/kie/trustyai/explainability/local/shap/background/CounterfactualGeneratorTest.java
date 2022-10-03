@@ -24,7 +24,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.utils.models.TestModels;

@@ -15,20 +15,18 @@
  */
 package org.kie.trustyai.explainability.utils;
 
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.Config;
-import org.kie.trustyai.explainability.local.lime.LimeConfig;
-import org.kie.trustyai.explainability.local.lime.LimeExplainer;
-import org.kie.trustyai.explainability.model.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.local.lime.LimeConfig;
+import org.kie.trustyai.explainability.local.lime.LimeExplainer;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.models.TestModels;
-
 
 class ValidationUtilsTest {
 

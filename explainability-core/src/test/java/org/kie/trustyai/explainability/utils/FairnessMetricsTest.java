@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.Dataset;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;

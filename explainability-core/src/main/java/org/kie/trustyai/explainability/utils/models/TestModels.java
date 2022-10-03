@@ -15,9 +15,9 @@
  */
 package org.kie.trustyai.explainability.utils.models;
 
-import org.kie.trustyai.explainability.model.*;
-
 import java.util.*;
+
+import org.kie.trustyai.explainability.model.*;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 

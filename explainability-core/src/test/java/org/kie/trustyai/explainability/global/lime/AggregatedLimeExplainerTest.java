@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.DataDistribution;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
