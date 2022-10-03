@@ -15,26 +15,20 @@
  */
 package org.kie.trustyai.explainability.utils;
 
+import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.local.lime.LimeConfig;
+import org.kie.trustyai.explainability.local.lime.LimeExplainer;
+import org.kie.trustyai.explainability.model.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.Config;
-import org.kie.trustyai.explainability.TestUtils;
-import org.kie.trustyai.explainability.local.lime.LimeConfig;
-import org.kie.trustyai.explainability.local.lime.LimeExplainer;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.SimplePrediction;
-import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.utils.models.TestModels;
+
 
 class ValidationUtilsTest {
 
@@ -45,7 +39,7 @@ class ValidationUtilsTest {
             PerturbationContext perturbationContext = new PerturbationContext(4L, random, 1);
             LimeConfig config = new LimeConfig().withPerturbationContext(perturbationContext);
             LimeExplainer explainer = new LimeExplainer(config);
-            PredictionProvider model = TestUtils.getSumThresholdModel(0.1, 0.1);
+            PredictionProvider model = TestModels.getSumThresholdModel(0.1, 0.1);
             List<Feature> features = new ArrayList<>();
             for (int i = 0; i < 4; i++) {
                 features.add(FeatureFactory.newNumericalFeature("f-" + i, Type.NUMBER.randomValue(perturbationContext).asNumber()));

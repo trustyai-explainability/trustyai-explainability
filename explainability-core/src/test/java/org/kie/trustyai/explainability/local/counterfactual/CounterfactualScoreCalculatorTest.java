@@ -49,6 +49,7 @@ import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1070,7 +1071,7 @@ class CounterfactualScoreCalculatorTest {
     void testGoalSizeMatch() throws ExecutionException, InterruptedException {
         final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
-        PredictionProvider model = TestUtils.getFeatureSkipModel(0);
+        PredictionProvider model = TestModels.getFeatureSkipModel(0);
 
         List<Feature> features = List.of(
                 // f-1
@@ -1122,7 +1123,7 @@ class CounterfactualScoreCalculatorTest {
     void testGoalSizeSmaller() throws ExecutionException, InterruptedException {
         final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
-        PredictionProvider model = TestUtils.getFeatureSkipModel(0);
+        PredictionProvider model = TestModels.getFeatureSkipModel(0);
 
         List<Feature> features = new ArrayList<>();
         List<FeatureDomain> featureDomains = new ArrayList<>();
@@ -1176,7 +1177,7 @@ class CounterfactualScoreCalculatorTest {
     void testGoalSizeLarger() throws ExecutionException, InterruptedException {
         final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
-        PredictionProvider model = TestUtils.getFeatureSkipModel(0);
+        PredictionProvider model = TestModels.getFeatureSkipModel(0);
 
         List<Feature> features = List.of(
                 // f-1
@@ -1217,7 +1218,7 @@ class CounterfactualScoreCalculatorTest {
     void testNullBooleanInput() throws ExecutionException, InterruptedException {
         final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
-        PredictionProvider model = TestUtils.getFeatureSkipModel(0);
+        PredictionProvider model = TestModels.getFeatureSkipModel(0);
 
         List<Feature> features = new ArrayList<>();
 
@@ -1357,7 +1358,7 @@ class CounterfactualScoreCalculatorTest {
 
         // Create score calculator and model
         final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
-        PredictionProvider model = TestUtils.getFeatureSkipModel(0);
+        PredictionProvider model = TestModels.getFeatureSkipModel(0);
 
         // Create goal
         final List<Output> goal = new ArrayList<>();

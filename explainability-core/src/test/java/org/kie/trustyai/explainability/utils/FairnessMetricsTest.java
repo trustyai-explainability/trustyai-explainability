@@ -39,6 +39,7 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -54,7 +55,7 @@ class FairnessMetricsTest {
                     .collect(Collectors.toList()).subList(1, 3);
         };
         List<PredictionInput> testInputs = getTestInputs();
-        PredictionProvider model = TestUtils.getDummyTextClassifier();
+        PredictionProvider model = TestModels.getDummyTextClassifier();
         double individualConsistency = FairnessMetrics.individualConsistency(proximityFunction, testInputs, model);
         assertThat(individualConsistency).isBetween(0d, 1d);
     }
@@ -62,7 +63,7 @@ class FairnessMetricsTest {
     @Test
     void testGroupSPDTextClassifier() throws ExecutionException, InterruptedException {
         List<PredictionInput> testInputs = getTestInputs();
-        PredictionProvider model = TestUtils.getDummyTextClassifier();
+        PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
         double spd = FairnessMetrics.groupStatisticalParityDifference(selector, testInputs, model, output);
@@ -72,7 +73,7 @@ class FairnessMetricsTest {
     @Test
     void testGroupDIRTextClassifier() throws ExecutionException, InterruptedException {
         List<PredictionInput> testInputs = getTestInputs();
-        PredictionProvider model = TestUtils.getDummyTextClassifier();
+        PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
         double dir = FairnessMetrics.groupDisparateImpactRatio(selector, testInputs, model, output);
@@ -83,7 +84,7 @@ class FairnessMetricsTest {
     void testGroupAODTextClassifier() throws ExecutionException, InterruptedException {
         List<Prediction> predictions = getTestData();
         Dataset dataset = new Dataset(predictions);
-        PredictionProvider model = TestUtils.getDummyTextClassifier();
+        PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> inputSelector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Predicate<PredictionOutput> outputSelector = predictionOutput -> predictionOutput.getByName("spam").get().getValue().asNumber() == 0;
         double aod = FairnessMetrics.groupAverageOddsDifference(inputSelector, outputSelector, dataset, model);
@@ -94,7 +95,7 @@ class FairnessMetricsTest {
     void testGroupAPVDTextClassifier() throws ExecutionException, InterruptedException {
         List<Prediction> predictions = getTestData();
         Dataset dataset = new Dataset(predictions);
-        PredictionProvider model = TestUtils.getDummyTextClassifier();
+        PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> inputSelector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Predicate<PredictionOutput> outputSelector = predictionOutput -> predictionOutput.getByName("spam").get().getValue().asNumber() == 0;
         double apvd = FairnessMetrics.groupAveragePredictiveValueDifference(inputSelector, outputSelector, dataset, model);

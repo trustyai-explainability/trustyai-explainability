@@ -15,23 +15,14 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
+import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.utils.models.TestModels;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.TestUtils;
-import org.kie.trustyai.explainability.model.DataDistribution;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureDistribution;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.GenericFeatureDistribution;
-import org.kie.trustyai.explainability.model.IndependentFeaturesDataDistribution;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -40,7 +31,7 @@ class HighScoreNumericFeatureZonesProviderTest {
     @Test
     void testEmptyData() {
         List<Feature> features = new ArrayList<>();
-        PredictionProvider predictionProvider = TestUtils.getSumThresholdModel(0.1, 0.1);
+        PredictionProvider predictionProvider = TestModels.getSumThresholdModel(0.1, 0.1);
         List<FeatureDistribution> featureDistributions = new ArrayList<>();
         DataDistribution dataDistribution = new IndependentFeaturesDataDistribution(featureDistributions);
         Map<String, HighScoreNumericFeatureZones> highScoreFeatureZones =
@@ -55,7 +46,7 @@ class HighScoreNumericFeatureZonesProviderTest {
         random.setSeed(0);
         PerturbationContext perturbationContext = new PerturbationContext(random, 1);
         List<Feature> features = new ArrayList<>();
-        PredictionProvider predictionProvider = TestUtils.getSumThresholdModel(0.1, 0.1);
+        PredictionProvider predictionProvider = TestModels.getSumThresholdModel(0.1, 0.1);
         List<FeatureDistribution> featureDistributions = new ArrayList<>();
         int nf = 4;
         for (int i = 0; i < nf; i++) {

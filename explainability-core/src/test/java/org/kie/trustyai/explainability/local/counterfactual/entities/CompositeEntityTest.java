@@ -80,7 +80,7 @@ class CompositeEntityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 0, 1, 2, 3, 4 })
+    @ValueSource(ints = {0, 1, 2, 3, 4})
     void distanceScaled(int seed) {
         Random random = new Random();
         random.setSeed(seed);

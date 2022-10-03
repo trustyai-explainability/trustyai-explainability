@@ -16,13 +16,6 @@
 
 package org.kie.trustyai.explainability.local.shap;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
-
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Feature;
@@ -31,12 +24,14 @@ import org.kie.trustyai.explainability.model.PerturbationContext;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class ShapConfigTest {
     PerturbationContext pc = new PerturbationContext(new Random(), 0);

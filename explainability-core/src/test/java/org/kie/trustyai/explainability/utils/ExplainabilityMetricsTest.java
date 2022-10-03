@@ -39,6 +39,7 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -97,7 +98,7 @@ class ExplainabilityMetricsTest {
         LimeConfig limeConfig = new LimeConfig()
                 .withSamples(10);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
-        PredictionProvider model = TestUtils.getDummyTextClassifier();
+        PredictionProvider model = TestModels.getDummyTextClassifier();
         List<Feature> features = new LinkedList<>();
         features.add(FeatureFactory.newFulltextFeature("f-0", "brown fox", s -> Arrays.asList(s.split(" "))));
         features.add(FeatureFactory.newTextFeature("f-1", "money"));
@@ -124,7 +125,7 @@ class ExplainabilityMetricsTest {
                 .withSamples(10);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
 
-        PredictionProvider model = TestUtils.getEvenSumModel(1);
+        PredictionProvider model = TestModels.getEvenSumModel(1);
         List<Feature> features = new LinkedList<>();
         features.add(FeatureFactory.newNumericalFeature("f-1", 1));
         features.add(FeatureFactory.newNumericalFeature("f-2", 2));

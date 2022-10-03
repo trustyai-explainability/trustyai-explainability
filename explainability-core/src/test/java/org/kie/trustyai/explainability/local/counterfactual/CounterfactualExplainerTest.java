@@ -63,6 +63,7 @@ import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.utils.DataUtils;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 import org.mockito.ArgumentCaptor;
 import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
 import org.optaplanner.core.api.solver.SolverJob;
@@ -122,7 +123,7 @@ class CounterfactualExplainerTest {
         final CounterfactualExplainer counterfactualExplainer =
                 new CounterfactualExplainer(counterfactualConfig);
 
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
 
         PredictionInput input = new PredictionInput(features);
         PredictionOutput output = new PredictionOutput(goal);
@@ -162,7 +163,7 @@ class CounterfactualExplainerTest {
 
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
-                        TestUtils.getSumThresholdModel(center, epsilon),
+                        TestModels.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
         double totalSum = 0;
@@ -198,7 +199,7 @@ class CounterfactualExplainerTest {
 
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
-                        TestUtils.getSumThresholdModel(center, epsilon),
+                        TestModels.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
@@ -245,7 +246,7 @@ class CounterfactualExplainerTest {
 
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
-                        TestUtils.getSumThresholdModel(center, epsilon),
+                        TestModels.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
@@ -284,7 +285,7 @@ class CounterfactualExplainerTest {
 
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
-                        TestUtils.getSumThresholdModel(center, epsilon),
+                        TestModels.getSumThresholdModel(center, epsilon),
                         0.005, 200_000);
 
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
@@ -324,7 +325,7 @@ class CounterfactualExplainerTest {
 
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
-                        TestUtils.getSymbolicArithmeticModel(),
+                        TestModels.getSymbolicArithmeticModel(),
                         0.0);
 
         final List<CounterfactualEntity> counterfactualEntities = result.getEntities();
@@ -390,7 +391,7 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("x-2", 40.0, NumericalFeatureDomain.create(0.0, 100.0)));
         features.add(FeatureFactory.newCategoricalFeature("operand", "*", CategoricalFeatureDomain.create("+", "-", "/", "*")));
 
-        final PredictionProvider model = TestUtils.getSymbolicArithmeticModel();
+        final PredictionProvider model = TestModels.getSymbolicArithmeticModel();
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, features, model, 0.01, DefaultCounterfactualGoalCriteria.create(goal, 0.01), 100_000);
 
@@ -453,7 +454,7 @@ class CounterfactualExplainerTest {
         final double center = 500.0;
         final double epsilon = 10.0;
 
-        final PredictionProvider model = TestUtils.getSumThresholdModel(center, epsilon);
+        final PredictionProvider model = TestModels.getSumThresholdModel(center, epsilon);
 
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
@@ -501,7 +502,7 @@ class CounterfactualExplainerTest {
         final double center = 500.0;
         final double epsilon = 10.0;
 
-        final PredictionProvider model = TestUtils.getSumThresholdModel(center, epsilon);
+        final PredictionProvider model = TestModels.getSumThresholdModel(center, epsilon);
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         model,
@@ -562,7 +563,7 @@ class CounterfactualExplainerTest {
 
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, perturbedFeatures,
-                        TestUtils.getSumThresholdModel(center, epsilon),
+                        TestModels.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
         assertFalse(result.isValid());
@@ -602,7 +603,7 @@ class CounterfactualExplainerTest {
         final double center = 500.0;
         final double epsilon = 10.0;
 
-        final PredictionProvider model = TestUtils.getSumThresholdModel(center, epsilon);
+        final PredictionProvider model = TestModels.getSumThresholdModel(center, epsilon);
 
         PredictionOutput output = new PredictionOutput(goal);
         Prediction prediction = new CounterfactualPrediction(input,
@@ -663,7 +664,7 @@ class CounterfactualExplainerTest {
         List<Feature> features = List.of(FeatureFactory.newNumericalFeature("f-num1", 10.0,
                 NumericalFeatureDomain.create(0, 20)));
 
-        PredictionProvider model = TestUtils.getFeaturePassModel(0);
+        PredictionProvider model = TestModels.getFeaturePassModel(0);
 
         final TerminationConfig terminationConfig =
                 new TerminationConfig().withScoreCalculationCountLimit(100_000L);
@@ -725,7 +726,7 @@ class CounterfactualExplainerTest {
                 FeatureFactory.newNumericalFeature("f-num1", 10.0,
                         NumericalFeatureDomain.create(0, 20)));
 
-        PredictionProvider model = TestUtils.getFeaturePassModel(0);
+        PredictionProvider model = TestModels.getFeaturePassModel(0);
 
         final TerminationConfig terminationConfig =
                 new TerminationConfig().withScoreCalculationCountLimit(100_000L);
@@ -811,7 +812,7 @@ class CounterfactualExplainerTest {
 
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
-                        TestUtils.getSumThresholdModel(center, epsilon),
+                        TestModels.getSumThresholdModel(center, epsilon),
                         DEFAULT_GOAL_THRESHOLD);
 
         assertTrue(!result.getEntities().get(0).isChanged() || !result.getEntities().get(1).isChanged());
@@ -901,7 +902,7 @@ class CounterfactualExplainerTest {
                                 NumericalFeatureDomain.create(-5, 5)));
             }
         }
-        PredictionProvider model = TestUtils.getTwoOutputSemiCategoricalModel(2);
+        PredictionProvider model = TestModels.getTwoOutputSemiCategoricalModel(2);
 
         final List<Output> goal = List.of(
                 new Output("Semi-Categorical", Type.NUMBER, new Value(1), 0.0),
@@ -930,7 +931,7 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newCategoricalNumericalFeature("f-num4", 0,
                 CategoricalNumericalFeatureDomain.create(5, 6, 7)));
 
-        final PredictionProvider model = TestUtils.getSumSkipModel(1);
+        final PredictionProvider model = TestModels.getSumSkipModel(1);
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         model,
@@ -958,7 +959,7 @@ class CounterfactualExplainerTest {
             fs.add(new Feature(String.valueOf(i), Type.NUMBER, new Value(featureValues[i]), false, NumericalFeatureDomain.create(-5, 5)));
         }
 
-        final PredictionProvider model = TestUtils.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
+        final PredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
 
         final List<Output> goal = List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d));
 
@@ -982,7 +983,7 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("f-num3", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
         features.add(FeatureFactory.newNumericalFeature("f-num4", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
 
-        final PredictionProvider model = TestUtils.getSumSkipModel(1);
+        final PredictionProvider model = TestModels.getSumSkipModel(1);
 
         CounterfactualGoalCriteria goalFunction = (outputs) -> {
             double sum = outputs.stream().mapToDouble(o -> o.getValue().asNumber()).sum();

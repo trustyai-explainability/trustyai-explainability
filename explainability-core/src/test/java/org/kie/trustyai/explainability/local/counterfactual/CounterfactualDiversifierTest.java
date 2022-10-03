@@ -36,6 +36,7 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,7 @@ class CounterfactualDiversifierTest {
         final double center = nfeats * 11;
         final double epsilon = 5;
 
-        PredictionProvider model = TestUtils.getSumThresholdDifferentiableModel(center, epsilon);
+        PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(center, epsilon);
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features, model,
                         DEFAULT_GOAL_THRESHOLD, 100_000L);
@@ -114,7 +115,7 @@ class CounterfactualDiversifierTest {
         features.add(FeatureFactory.newNumericalFeature("f-num3", 1.0, NumericalFeatureDomain.create(0.0, 1000.0)));
         features.add(FeatureFactory.newNumericalFeature("f-num4", 2.0, NumericalFeatureDomain.create(0.0, 1000.0)));
 
-        PredictionProvider model = TestUtils.getEvenSumModel(0);
+        PredictionProvider model = TestModels.getEvenSumModel(0);
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features, model,
                         0.1);

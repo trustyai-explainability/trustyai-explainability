@@ -15,32 +15,17 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.function.Function;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
-import org.kie.trustyai.explainability.model.DataDistribution;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.ExplainabilityMetrics;
+import org.kie.trustyai.explainability.utils.models.TestModels;
+
+import java.util.*;
+import java.util.function.Function;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class DummyModelsLimeExplainerTest {
 
     @ParameterizedTest
-    @ValueSource(longs = { 0 })
+    @ValueSource(longs = {0})
     void testMapOneFeatureToOutputRegression(long seed) throws Exception {
         Random random = new Random();
         int idx = 1;
@@ -58,7 +43,7 @@ class DummyModelsLimeExplainerTest {
         features.add(TestUtils.getMockedNumericFeature(20));
         features.add(TestUtils.getMockedNumericFeature(0.1));
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getFeaturePassModel(idx);
+        PredictionProvider model = TestModels.getFeaturePassModel(idx);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
@@ -101,7 +86,7 @@ class DummyModelsLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = { 0 })
+    @ValueSource(longs = {0})
     void testUnusedFeatureRegression(long seed) throws Exception {
         Random random = new Random();
         int idx = 2;
@@ -109,7 +94,7 @@ class DummyModelsLimeExplainerTest {
         features.add(TestUtils.getMockedNumericFeature(100));
         features.add(TestUtils.getMockedNumericFeature(20));
         features.add(TestUtils.getMockedNumericFeature(10));
-        PredictionProvider model = TestUtils.getSumSkipModel(idx);
+        PredictionProvider model = TestModels.getSumSkipModel(idx);
         PredictionInput input = new PredictionInput(features);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
@@ -153,7 +138,7 @@ class DummyModelsLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = { 0 })
+    @ValueSource(longs = {0})
     void testMapOneFeatureToOutputClassification(long seed) throws Exception {
         Random random = new Random();
         int idx = 1;
@@ -162,7 +147,7 @@ class DummyModelsLimeExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("f2", 1));
         features.add(FeatureFactory.newNumericalFeature("f3", 3));
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getEvenFeatureModel(idx);
+        PredictionProvider model = TestModels.getEvenFeatureModel(idx);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
@@ -207,7 +192,7 @@ class DummyModelsLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = { 0 })
+    @ValueSource(longs = {0})
     void testTextSpamClassification(long seed) throws Exception {
         Random random = new Random();
         List<Feature> features = new LinkedList<>();
@@ -216,7 +201,7 @@ class DummyModelsLimeExplainerTest {
         features.add(FeatureFactory.newFulltextFeature("f2", "please give me some money", tokenizer));
         features.add(FeatureFactory.newFulltextFeature("f3", "dear friend, please reply", tokenizer));
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getDummyTextClassifier();
+        PredictionProvider model = TestModels.getDummyTextClassifier();
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
@@ -261,7 +246,7 @@ class DummyModelsLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = { 0 })
+    @ValueSource(longs = {0})
     void testUnusedFeatureClassification(long seed) throws Exception {
         Random random = new Random();
         int idx = 2;
@@ -269,7 +254,7 @@ class DummyModelsLimeExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("f1", 6));
         features.add(FeatureFactory.newNumericalFeature("f2", 3));
         features.add(FeatureFactory.newNumericalFeature("f3", 5));
-        PredictionProvider model = TestUtils.getEvenSumModel(idx);
+        PredictionProvider model = TestModels.getEvenSumModel(idx);
         PredictionInput input = new PredictionInput(features);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
@@ -314,14 +299,14 @@ class DummyModelsLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = { 0 })
+    @ValueSource(longs = {0})
     void testFixedOutput(long seed) throws Exception {
         Random random = new Random();
         List<Feature> features = new LinkedList<>();
         features.add(FeatureFactory.newNumericalFeature("f1", 6));
         features.add(FeatureFactory.newNumericalFeature("f2", 3));
         features.add(FeatureFactory.newNumericalFeature("f3", 5));
-        PredictionProvider model = TestUtils.getFixedOutputClassifier();
+        PredictionProvider model = TestModels.getFixedOutputClassifier();
         PredictionInput input = new PredictionInput(features);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());

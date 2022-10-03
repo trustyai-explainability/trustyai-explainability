@@ -15,6 +15,11 @@
  */
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.kie.trustyai.explainability.model.FeatureFactory;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
@@ -27,11 +32,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.kie.trustyai.explainability.model.FeatureFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -87,7 +87,7 @@ class SimilarityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 0, 1, 2, 3, 4 })
+    @ValueSource(ints = {0, 1, 2, 3, 4})
     void booleanSimpleSimilarity(int seed) {
         final Random random = new Random(seed);
         final boolean originalValue = random.nextBoolean();
@@ -170,7 +170,7 @@ class SimilarityTest {
         ByteBuffer bytes = ByteBuffer.wrap("foo".getBytes());
 
         final List<ByteBuffer> categories = Stream.of(
-                "bar".getBytes(), "baz".getBytes(), "fun".getBytes())
+                        "bar".getBytes(), "baz".getBytes(), "fun".getBytes())
                 .map(ByteBuffer::wrap).collect(Collectors.toList());
 
         final BinaryEntity x = BinaryEntity.from(FeatureFactory.newBinaryFeature("f", bytes), new HashSet<>(categories));
@@ -255,7 +255,7 @@ class SimilarityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 0, 1, 2, 3, 4 })
+    @ValueSource(ints = {0, 1, 2, 3, 4})
     void constantRelativeSimilarityIntegerEntity(int seed) {
         final Random random = new Random(seed);
         final int MAX_UPPER_BOUND_RANGE = 10_000;
@@ -297,7 +297,7 @@ class SimilarityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 0, 1, 2, 3, 4 })
+    @ValueSource(ints = {0, 1, 2, 3, 4})
     void constantRelativeSimilarityDoubleEntity(int seed) {
         final Random random = new Random(seed);
         final double MAX_UPPER_BOUND_RANGE = 10_000.0;
@@ -339,7 +339,7 @@ class SimilarityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 0, 1, 2, 3, 4 })
+    @ValueSource(ints = {0, 1, 2, 3, 4})
     void constantRelativeSimilarityLongEntity(int seed) {
         final Random random = new Random(seed);
         final int MAX_UPPER_BOUND_RANGE = 10_000;

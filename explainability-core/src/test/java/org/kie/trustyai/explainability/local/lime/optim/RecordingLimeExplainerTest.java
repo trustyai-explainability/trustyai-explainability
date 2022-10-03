@@ -15,35 +15,17 @@
  */
 package org.kie.trustyai.explainability.local.lime.optim;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SimplePrediction;
-import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.utils.models.TestModels;
+
+import java.util.*;
+import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -114,9 +96,9 @@ class RecordingLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = { 0 })
+    @ValueSource(longs = {0})
     void testAutomaticConfigOptimization(long seed) throws Exception {
-        PredictionProvider model = TestUtils.getSumThresholdModel(10, 10);
+        PredictionProvider model = TestModels.getSumThresholdModel(10, 10);
         PerturbationContext pc = new PerturbationContext(seed, new Random(), 1);
         LimeConfig config = new LimeConfig().withPerturbationContext(pc);
         RecordingLimeExplainer limeExplainer = new RecordingLimeExplainer(2);
@@ -156,7 +138,7 @@ class RecordingLimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
