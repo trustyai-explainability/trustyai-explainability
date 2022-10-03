@@ -15,12 +15,7 @@
  */
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -80,7 +75,7 @@ class CompositeEntityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 1, 2, 3, 4})
+    @ValueSource(ints = { 0, 1, 2, 3, 4 })
     void distanceScaled(int seed) {
         Random random = new Random();
         random.setSeed(seed);
