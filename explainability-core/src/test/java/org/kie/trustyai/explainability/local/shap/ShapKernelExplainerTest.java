@@ -16,6 +16,10 @@
 
 package org.kie.trustyai.explainability.local.shap;
 
+import java.math.BigInteger;
+import java.util.*;
+import java.util.concurrent.*;
+
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
@@ -28,91 +32,87 @@ import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
 import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
-import java.math.BigInteger;
-import java.util.*;
-import java.util.concurrent.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class ShapKernelExplainerTest {
     double[][] backgroundRaw = {
-            {1., 2., 3., -4., 5.},
-            {10., 11., 12., -4., 13.},
-            {2., 3, 4., -4., 6.},
+            { 1., 2., 3., -4., 5. },
+            { 10., 11., 12., -4., 13. },
+            { 2., 3, 4., -4., 6. },
     };
     double[][] toExplainRaw = {
-            {5., 6., 7., -4., 8.},
-            {11., 12., 13., -5., 14.},
-            {0., 0, 1., 4., 2.},
+            { 5., 6., 7., -4., 8. },
+            { 11., 12., 13., -5., 14. },
+            { 0., 0, 1., 4., 2. },
     };
 
     // no variance test case matrices  ===============
     double[][] backgroundNoVariance = {
-            {1., 2., 3.},
-            {1., 2., 3.}
+            { 1., 2., 3. },
+            { 1., 2., 3. }
     };
 
     double[][] toExplainZeroVariance = {
-            {1., 2., 3.},
-            {1., 2., 3.},
+            { 1., 2., 3. },
+            { 1., 2., 3. },
     };
 
     double[][][] zeroVarianceOneOutputSHAP = {
-            {{0., 0., 0.}},
-            {{0., 0., 0.}},
+            { { 0., 0., 0. } },
+            { { 0., 0., 0. } },
     };
 
     double[][][] zeroVarianceMultiOutputSHAP = {
-            {{0., 0., 0.}, {0., 0., 0}},
-            {{0., 0., 0.}, {0., 0., 0}},
+            { { 0., 0., 0. }, { 0., 0., 0 } },
+            { { 0., 0., 0. }, { 0., 0., 0 } },
     };
 
     // single variance test case matrices ===============
     double[][] toExplainOneVariance = {
-            {3., 2., 3.},
-            {1., 2., 2.},
+            { 3., 2., 3. },
+            { 1., 2., 2. },
     };
 
     double[][][] oneVarianceOneOutputSHAP = {
-            {{2., 0., 0.}},
-            {{0., 0., -1.}},
+            { { 2., 0., 0. } },
+            { { 0., 0., -1. } },
     };
 
     double[][][] oneVarianceMultiOutputSHAP = {
-            {{4., 0., 0.}, {2., 0., 0.}},
-            {{0., 0., -2}, {0., 0., -1.}},
+            { { 4., 0., 0. }, { 2., 0., 0. } },
+            { { 0., 0., -2 }, { 0., 0., -1. } },
     };
 
     // multi variance, one output logit test case matrices ===============
     double[][] toExplainLogit = {
-            {0.1, 0.12, 0.14, -0.08, 0.16},
-            {0.22, 0.24, 0.26, -0.1, 0.38},
-            {-0.1, 0., 0.02, 0.1, 0.04}
+            { 0.1, 0.12, 0.14, -0.08, 0.16 },
+            { 0.22, 0.24, 0.26, -0.1, 0.38 },
+            { -0.1, 0., 0.02, 0.1, 0.04 }
     };
 
     double[][] backgroundLogit = {
-            {0.02380952, 0.04761905, 0.07142857, -0.0952381, 0.11904762},
-            {0.23809524, 0.26190476, 0.28571429, -0.0952381, 0.30952381},
-            {0.04761905, 0.07142857, 0.11904762, -0.0952381, 0.14285714}
+            { 0.02380952, 0.04761905, 0.07142857, -0.0952381, 0.11904762 },
+            { 0.23809524, 0.26190476, 0.28571429, -0.0952381, 0.30952381 },
+            { 0.04761905, 0.07142857, 0.11904762, -0.0952381, 0.14285714 }
     };
 
     double[][][] logitSHAP = {
-            {{-0.01420862, 0., -0.08377778, 0.06825253, -0.13625127}},
-            {{0.50970797, 0., 0.44412765, -0.02169177, 0.80832232}},
-            {{Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN}}
+            { { -0.01420862, 0., -0.08377778, 0.06825253, -0.13625127 } },
+            { { 0.50970797, 0., 0.44412765, -0.02169177, 0.80832232 } },
+            { { Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN } }
     };
 
     // multiple variance test case matrices ===============
     double[][][] multiVarianceOneOutputSHAP = {
-            {{0.66666667, 0., 0.66666667, 0., 0.}},
-            {{6.66666667, 0., 6.66666667, -1., 6.}},
-            {{-4.33333333, 0., -5.33333333, 8., -6.}},
+            { { 0.66666667, 0., 0.66666667, 0., 0. } },
+            { { 6.66666667, 0., 6.66666667, -1., 6. } },
+            { { -4.33333333, 0., -5.33333333, 8., -6. } },
     };
 
     double[][][] multiVarianceMultiOutputSHAP = {
-            {{1.333333333, 0., 1.33333333, 0., 0.}, {0.66666667, 0., 0.66666667, 0., 0.},},
-            {{13.333333333, 0., 13.333333333, -2., 12.}, {6.66666667, 0., 6.66666667, -1., 6.},},
-            {{-8.6666666667, 0., -10.666666666, 16., -12.}, {-4.33333333, 0., -5.33333333, 8., -6.},},
+            { { 1.333333333, 0., 1.33333333, 0., 0. }, { 0.66666667, 0., 0.66666667, 0., 0. }, },
+            { { 13.333333333, 0., 13.333333333, -2., 12. }, { 6.66666667, 0., 6.66666667, -1., 6. }, },
+            { { -8.6666666667, 0., -10.666666666, 16., -12. }, { -4.33333333, 0., -5.33333333, 8., -6. }, },
     };
 
     PerturbationContext pc = new PerturbationContext(new Random(0), 0);
@@ -122,7 +122,7 @@ class ShapKernelExplainerTest {
     // create a list of prediction inputs from double matrix
     private List<PredictionInput> createPIFromMatrix(double[][] m) {
         List<PredictionInput> pis = new ArrayList<>();
-        int[] shape = new int[]{m.length, m[0].length};
+        int[] shape = new int[] { m.length, m[0].length };
         for (int i = 0; i < shape[0]; i++) {
             List<Feature> fs = new ArrayList<>();
             for (int j = 0; j < shape[1]; j++) {
@@ -143,7 +143,7 @@ class ShapKernelExplainerTest {
                 new double[saliencies.size()][saliencies
                         .get(keySet[0])
                         .getPerFeatureImportance().size() - (withBackground ? 0 : 1)]);
-        RealMatrix[] out = new RealMatrix[]{emptyMatrix.copy(), emptyMatrix.copy()};
+        RealMatrix[] out = new RealMatrix[] { emptyMatrix.copy(), emptyMatrix.copy() };
         for (int i = 0; i < keySet.length; i++) {
             List<FeatureImportance> fis = saliencies.get(keySet[i]).getPerFeatureImportance();
             for (int j = 0; j < fis.size() - (withBackground ? 0 : 1); j++) {
@@ -159,7 +159,7 @@ class ShapKernelExplainerTest {
      * test that the computed shape values match expected shap values
      */
     private void shapTestCase(PredictionProvider model, ShapConfig skConfig,
-                              double[][] toExplainRaw, double[][][] expected)
+            double[][] toExplainRaw, double[][][] expected)
             throws InterruptedException, TimeoutException, ExecutionException {
 
         // establish background data and desired data to explain
@@ -191,7 +191,7 @@ class ShapKernelExplainerTest {
      * test that the computed shape values match expected shap values
      */
     private void shapTestCase(PredictionProvider model, ShapKernelExplainer ske,
-                              double[][] toExplainRaw, double[][][] expected)
+            double[][] toExplainRaw, double[][][] expected)
             throws InterruptedException, TimeoutException, ExecutionException {
 
         // establish background data and desired data to explain
@@ -325,12 +325,12 @@ class ShapKernelExplainerTest {
             }
         }
         double[][] toExplainLargeBackground = {
-                {0, 1., -2., 3.5, -4.1, 5.5, -12., .8, .11, 15.}
+                { 0, 1., -2., 3.5, -4.1, 5.5, -12., .8, .11, 15. }
         };
 
         double[][][] expected = {
-                {{-0.495, 0., -4.495, 0.005, -8.595, 0.005, -18.495,
-                        -6.695, -8.385, 5.505}}
+                { { -0.495, 0., -4.495, 0.005, -8.595, 0.005, -18.495,
+                        -6.695, -8.385, 5.505 } }
         };
 
         List<PredictionInput> background = createPIFromMatrix(largeBackground);
@@ -370,12 +370,12 @@ class ShapKernelExplainerTest {
             }
         }
         double[][] toExplainLargeBackground = {
-                {0, 1., -2., 3.5, -4.1, 5.5, -12., .8, .11, 15.}
+                { 0, 1., -2., 3.5, -4.1, 5.5, -12., .8, .11, 15. }
         };
 
         double[][][] expected = {
-                {{-0.495, 0., -4.495, 0.005, -8.595, 0.005, -18.495,
-                        -6.695, -8.385, 5.505}}
+                { { -0.495, 0., -4.495, 0.005, -8.595, 0.005, -18.495,
+                        -6.695, -8.385, 5.505 } }
         };
 
         List<PredictionInput> background = createPIFromMatrix(largeBackground);
@@ -415,12 +415,12 @@ class ShapKernelExplainerTest {
             }
         }
         double[][] toExplainLargeBackground = {
-                {0, 1., -2., 3.5, -4.1, 5.5, -12., .8, .11, 15.}
+                { 0, 1., -2., 3.5, -4.1, 5.5, -12., .8, .11, 15. }
         };
 
         double[][][] expected = {
-                {{-0.495, 0., -4.495, 0.005, -8.595, 0.005, -18.495,
-                        -6.695, -8.385, 5.505}}
+                { { -0.495, 0., -4.495, 0.005, -8.595, 0.005, -18.495,
+                        -6.695, -8.385, 5.505 } }
         };
 
         List<PredictionInput> background = createPIFromMatrix(largeBackground);
@@ -459,7 +459,7 @@ class ShapKernelExplainerTest {
             }
         }
         double[][] toExplainTooSmall = {
-                {0, 1., 2., 3., 4.}
+                { 0, 1., 2., 3., 4. }
         };
 
         List<PredictionInput> background = createPIFromMatrix(tooLargeBackground);
@@ -494,7 +494,7 @@ class ShapKernelExplainerTest {
             }
         }
         double[][] toExplainTooSmall = {
-                {0, 1., 2., 3., 4.}
+                { 0, 1., 2., 3., 4. }
         };
 
         List<PredictionInput> background = createPIFromMatrix(backgroundMat);
@@ -549,14 +549,14 @@ class ShapKernelExplainerTest {
     double[][] backgroundAllZeros = new double[100][6];
 
     double[][] toExplainAllOnes = {
-            {1., 1., 1., 1., 1, 1.}
+            { 1., 1., 1., 1., 1, 1. }
     };
 
     //given a noisy model, expect the n% confidence window to include true value roughly n% of the time
     @ParameterizedTest
-    @ValueSource(doubles = {.001, .1, .25, .5})
+    @ValueSource(doubles = { .001, .1, .25, .5 })
     void testErrorBounds(double noise) throws InterruptedException, ExecutionException {
-        for (double interval : new double[]{.95, .975, .99}) {
+        for (double interval : new double[] { .95, .975, .99 }) {
             int[] testResults = new int[600];
             SplittableRandom rn = new SplittableRandom();
             PredictionProvider model = TestModels.getNoisySumModel(rn, noise, 64 * 100);
@@ -591,18 +591,18 @@ class ShapKernelExplainerTest {
         }
     }
 
-    double[][] toExplainRegTests = {{0.5488135, 0.71518937, 0.60276338, 0.54488318, 0.4236548, 0.64589411, 0.43758721, 0.891773, 0.96366276},
+    double[][] toExplainRegTests = { { 0.5488135, 0.71518937, 0.60276338, 0.54488318, 0.4236548, 0.64589411, 0.43758721, 0.891773, 0.96366276 },
     };
-    double[][] backgroundRegTests = {{0.38344152, 0.79172504, 0.52889492, 0.56804456, 0.92559664, 0.07103606, 0.0871293, 0.0202184, 0.83261985},
-            {0.77815675, 0.87001215, 0.97861834, 0.79915856, 0.46147936, 0.78052918, 0.11827443, 0.63992102, 0.14335329},
-            {0.94466892, 0.52184832, 0.41466194, 0.26455561, 0.77423369, 0.45615033, 0.56843395, 0.0187898, 0.6176355,},
-            {0.61209572, 0.616934, 0.94374808, 0.6818203, 0.3595079, 0.43703195, 0.6976312, 0.06022547, 0.66676672},
-            {0.67063787, 0.21038256, 0.1289263, 0.31542835, 0.36371077, 0.57019677, 0.43860151, 0.98837384, 0.10204481},
-            {0.20887676, 0.16130952, 0.65310833, 0.2532916, 0.46631077, 0.24442559, 0.15896958, 0.11037514, 0.65632959},
-            {0.13818295, 0.19658236, 0.36872517, 0.82099323, 0.09710128, 0.83794491, 0.09609841, 0.97645947, 0.4686512,},
-            {0.97676109, 0.60484552, 0.73926358, 0.03918779, 0.28280696, 0.12019656, 0.2961402, 0.11872772, 0.31798318},
-            {0.41426299, 0.0641475, 0.69247212, 0.56660145, 0.26538949, 0.52324805, 0.09394051, 0.5759465, 0.9292962,},
-            {0.31856895, 0.66741038, 0.13179786, 0.7163272, 0.28940609, 0.18319136, 0.58651293, 0.02010755, 0.82894003},
+    double[][] backgroundRegTests = { { 0.38344152, 0.79172504, 0.52889492, 0.56804456, 0.92559664, 0.07103606, 0.0871293, 0.0202184, 0.83261985 },
+            { 0.77815675, 0.87001215, 0.97861834, 0.79915856, 0.46147936, 0.78052918, 0.11827443, 0.63992102, 0.14335329 },
+            { 0.94466892, 0.52184832, 0.41466194, 0.26455561, 0.77423369, 0.45615033, 0.56843395, 0.0187898, 0.6176355, },
+            { 0.61209572, 0.616934, 0.94374808, 0.6818203, 0.3595079, 0.43703195, 0.6976312, 0.06022547, 0.66676672 },
+            { 0.67063787, 0.21038256, 0.1289263, 0.31542835, 0.36371077, 0.57019677, 0.43860151, 0.98837384, 0.10204481 },
+            { 0.20887676, 0.16130952, 0.65310833, 0.2532916, 0.46631077, 0.24442559, 0.15896958, 0.11037514, 0.65632959 },
+            { 0.13818295, 0.19658236, 0.36872517, 0.82099323, 0.09710128, 0.83794491, 0.09609841, 0.97645947, 0.4686512, },
+            { 0.97676109, 0.60484552, 0.73926358, 0.03918779, 0.28280696, 0.12019656, 0.2961402, 0.11872772, 0.31798318 },
+            { 0.41426299, 0.0641475, 0.69247212, 0.56660145, 0.26538949, 0.52324805, 0.09394051, 0.5759465, 0.9292962, },
+            { 0.31856895, 0.66741038, 0.13179786, 0.7163272, 0.28940609, 0.18319136, 0.58651293, 0.02010755, 0.82894003 },
     };
 
     private List<ShapConfig> getSks() {
@@ -630,7 +630,7 @@ class ShapKernelExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 1, 2, 3})
+    @ValueSource(ints = { 0, 1, 2, 3 })
     void testRegularizations(int config) throws InterruptedException, ExecutionException {
         PredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainRegTests);

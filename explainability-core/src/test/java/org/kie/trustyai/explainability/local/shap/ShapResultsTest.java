@@ -16,13 +16,14 @@
 
 package org.kie.trustyai.explainability.local.shap;
 
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.*;
+
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

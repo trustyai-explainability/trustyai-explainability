@@ -24,7 +24,7 @@ class HighScoreNumericFeatureZonesTest {
     @Test
     void testAccept() {
         double tolerance = 0.1d;
-        double[] points = new double[]{1d, 2d};
+        double[] points = new double[] { 1d, 2d };
         HighScoreNumericFeatureZones highScoreNumericFeatureZones = new HighScoreNumericFeatureZones(points, tolerance);
 
         assertThat(highScoreNumericFeatureZones.test(Double.NaN)).isFalse();

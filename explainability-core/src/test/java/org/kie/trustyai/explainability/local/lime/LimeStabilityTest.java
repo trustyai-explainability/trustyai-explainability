@@ -15,6 +15,10 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
@@ -24,10 +28,6 @@ import org.kie.trustyai.explainability.utils.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.LocalSaliencyStability;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -36,7 +36,7 @@ class LimeStabilityTest {
     static final double TOP_FEATURE_THRESHOLD = 0.9;
 
     @ParameterizedTest
-    @ValueSource(longs = {0})
+    @ValueSource(longs = { 0 })
     void testStabilityWithNumericData(long seed) throws Exception {
         Random random = new Random();
         PredictionProvider sumSkipModel = TestModels.getSumSkipModel(0);
@@ -50,7 +50,7 @@ class LimeStabilityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0})
+    @ValueSource(longs = { 0 })
     void testStabilityWithTextData(long seed) throws Exception {
         Random random = new Random();
         PredictionProvider sumSkipModel = TestModels.getDummyTextClassifier();
@@ -67,7 +67,7 @@ class LimeStabilityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0})
+    @ValueSource(longs = { 0 })
     void testAdaptiveVariance(long seed) throws Exception {
         Random random = new Random();
         PerturbationContext perturbationContext = new PerturbationContext(seed, random, 1);
@@ -137,7 +137,7 @@ class LimeStabilityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0, 1, 2, 3, 4})
+    @ValueSource(longs = { 0, 1, 2, 3, 4 })
     void testStabilityDeterministic(long seed) throws Exception {
         List<LocalSaliencyStability> stabilities = new ArrayList<>();
         for (int j = 0; j < 2; j++) {

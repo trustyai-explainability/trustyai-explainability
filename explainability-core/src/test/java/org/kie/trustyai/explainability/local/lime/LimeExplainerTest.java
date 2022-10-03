@@ -15,6 +15,11 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -26,11 +31,6 @@ import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
 import org.kie.trustyai.explainability.utils.IOUtils;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,7 +41,7 @@ class LimeExplainerTest {
     private static final int DEFAULT_NO_OF_PERTURBATIONS = 1;
 
     @ParameterizedTest
-    @ValueSource(longs = {0, 1, 2, 3, 4})
+    @ValueSource(longs = { 0, 1, 2, 3, 4 })
     void testEmptyPrediction(long seed) throws ExecutionException, InterruptedException, TimeoutException {
         Random random = new Random();
         LimeConfig limeConfig = new LimeConfig()
@@ -59,7 +59,7 @@ class LimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0, 1, 2, 3, 4})
+    @ValueSource(longs = { 0, 1, 2, 3, 4 })
     void testNonEmptyInput(long seed) throws ExecutionException, InterruptedException, TimeoutException {
         Random random = new Random();
         LimeConfig limeConfig = new LimeConfig()
@@ -82,7 +82,7 @@ class LimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0, 1, 2, 3, 4})
+    @ValueSource(longs = { 0, 1, 2, 3, 4 })
     void testSparseBalance(long seed) throws InterruptedException, ExecutionException, TimeoutException {
         for (int nf = 1; nf < 4; nf++) {
             Random random = new Random();
@@ -224,7 +224,7 @@ class LimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0, 1, 2, 3, 4})
+    @ValueSource(longs = { 0, 1, 2, 3, 4 })
     void testDeterministic(long seed) throws ExecutionException, InterruptedException, TimeoutException {
         List<Saliency> saliencies = new ArrayList<>();
         for (int j = 0; j < 2; j++) {
@@ -249,8 +249,8 @@ class LimeExplainerTest {
         }
         assertThat(saliencies.get(0).getPerFeatureImportance().stream().map(FeatureImportance::getScore)
                 .collect(Collectors.toList()))
-                .isEqualTo(saliencies.get(1).getPerFeatureImportance().stream().map(FeatureImportance::getScore)
-                        .collect(Collectors.toList()));
+                        .isEqualTo(saliencies.get(1).getPerFeatureImportance().stream().map(FeatureImportance::getScore)
+                                .collect(Collectors.toList()));
     }
 
     @Test

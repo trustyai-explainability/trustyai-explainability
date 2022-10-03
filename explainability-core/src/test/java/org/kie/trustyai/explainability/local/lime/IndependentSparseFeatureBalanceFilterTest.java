@@ -15,14 +15,14 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.Feature;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 

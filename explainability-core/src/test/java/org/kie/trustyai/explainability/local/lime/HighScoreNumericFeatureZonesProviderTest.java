@@ -15,14 +15,14 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.explainability.utils.models.TestModels;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 

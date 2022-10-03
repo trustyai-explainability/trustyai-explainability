@@ -27,12 +27,12 @@ class ShapStatisticsTest {
 
     int numSubsetSizes = 5;
     int largestPairedSubsetSize = 3;
-    int[] numSubsetsAtSize = {1, 3, 5, 3, 1};
+    int[] numSubsetsAtSize = { 1, 3, 5, 3, 1 };
     int numSamplesRemaining = 10;
 
-    RealVector weightOfSubsetSize = MatrixUtils.createRealVector(new double[]{.1, .3, .5, .3, .1});
-    RealVector finalRemainingWeights = MatrixUtils.createRealVector(new double[]{.2, .4, .6, .4, .2});
-    RealVector remainingWeights = MatrixUtils.createRealVector(new double[]{.02, .04, .06, .04, .02});
+    RealVector weightOfSubsetSize = MatrixUtils.createRealVector(new double[] { .1, .3, .5, .3, .1 });
+    RealVector finalRemainingWeights = MatrixUtils.createRealVector(new double[] { .2, .4, .6, .4, .2 });
+    RealVector remainingWeights = MatrixUtils.createRealVector(new double[] { .02, .04, .06, .04, .02 });
 
     // subset stats getters and setters tests ==================
     @Test

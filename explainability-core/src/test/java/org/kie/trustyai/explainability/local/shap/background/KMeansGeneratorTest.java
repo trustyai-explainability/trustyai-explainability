@@ -16,6 +16,10 @@
 
 package org.kie.trustyai.explainability.local.shap.background;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.model.Feature;
@@ -23,15 +27,11 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class KMeansGeneratorTest {
     @ParameterizedTest
-    @ValueSource(ints = {5, 10, 15})
+    @ValueSource(ints = { 5, 10, 15 })
     void testKMeansGeneration(int clusters) {
         List<PredictionInput> seeds = new ArrayList<>();
 
@@ -51,7 +51,7 @@ class KMeansGeneratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {5, 10, 15})
+    @ValueSource(ints = { 5, 10, 15 })
     void testKMeansGaussian(int clusters) {
         List<PredictionInput> seeds = new ArrayList<>();
         Random rn = new Random(0L);

@@ -15,15 +15,15 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.TestUtils;
-import org.kie.trustyai.explainability.model.Feature;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.TestUtils;
+import org.kie.trustyai.explainability.model.Feature;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

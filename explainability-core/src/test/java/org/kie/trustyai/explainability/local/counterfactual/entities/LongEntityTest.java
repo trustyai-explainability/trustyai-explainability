@@ -15,6 +15,8 @@
  */
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -24,8 +26,6 @@ import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.NumericFeatureDistribution;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
-
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,7 +42,7 @@ class LongEntityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 1, 2, 3, 4})
+    @ValueSource(ints = { 0, 1, 2, 3, 4 })
     void distanceScaled(int seed) {
         Random random = new Random();
         random.setSeed(seed);

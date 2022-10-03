@@ -15,6 +15,9 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
+import java.util.*;
+import java.util.function.Function;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -24,9 +27,6 @@ import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
-import java.util.*;
-import java.util.function.Function;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class DummyModelsLimeExplainerTest {
 
     @ParameterizedTest
-    @ValueSource(longs = {0})
+    @ValueSource(longs = { 0 })
     void testMapOneFeatureToOutputRegression(long seed) throws Exception {
         Random random = new Random();
         int idx = 1;
@@ -86,7 +86,7 @@ class DummyModelsLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0})
+    @ValueSource(longs = { 0 })
     void testUnusedFeatureRegression(long seed) throws Exception {
         Random random = new Random();
         int idx = 2;
@@ -138,7 +138,7 @@ class DummyModelsLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0})
+    @ValueSource(longs = { 0 })
     void testMapOneFeatureToOutputClassification(long seed) throws Exception {
         Random random = new Random();
         int idx = 1;
@@ -192,7 +192,7 @@ class DummyModelsLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0})
+    @ValueSource(longs = { 0 })
     void testTextSpamClassification(long seed) throws Exception {
         Random random = new Random();
         List<Feature> features = new LinkedList<>();
@@ -246,7 +246,7 @@ class DummyModelsLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0})
+    @ValueSource(longs = { 0 })
     void testUnusedFeatureClassification(long seed) throws Exception {
         Random random = new Random();
         int idx = 2;
@@ -299,7 +299,7 @@ class DummyModelsLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0})
+    @ValueSource(longs = { 0 })
     void testFixedOutput(long seed) throws Exception {
         Random random = new Random();
         List<Feature> features = new LinkedList<>();

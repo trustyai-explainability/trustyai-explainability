@@ -16,15 +16,15 @@
 
 package org.kie.trustyai.explainability.local.shap;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,10 +40,10 @@ class ShapSyntheticDataSampleTest {
         fs.add(FeatureFactory.newNumericalFeature("f5", -1));
         PredictionInput pi = new PredictionInput(fs);
 
-        boolean[] mask = {true, true, false, false, true};
-        RealMatrix background = MatrixUtils.createRealMatrix(new double[][]{
-                {0., 1., 2., 3., 4.},
-                {5., 6., 7., 8., 9.}
+        boolean[] mask = { true, true, false, false, true };
+        RealMatrix background = MatrixUtils.createRealMatrix(new double[][] {
+                { 0., 1., 2., 3., 4. },
+                { 5., 6., 7., 8., 9. }
         });
         double weight = .5;
         boolean fixed = true;
@@ -98,7 +98,7 @@ class ShapSyntheticDataSampleTest {
     @Test
     void testGetMask() {
         ShapSyntheticDataSample shapSamp = generateShapSample();
-        boolean[] mask = {true, true, false, false, true};
+        boolean[] mask = { true, true, false, false, true };
         assertArrayEquals(mask, shapSamp.getMask());
     }
 

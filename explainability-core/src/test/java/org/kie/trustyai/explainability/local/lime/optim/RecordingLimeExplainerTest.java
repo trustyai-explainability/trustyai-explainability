@@ -15,6 +15,9 @@
  */
 package org.kie.trustyai.explainability.local.lime.optim;
 
+import java.util.*;
+import java.util.concurrent.*;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -23,9 +26,6 @@ import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.models.TestModels;
-
-import java.util.*;
-import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -96,7 +96,7 @@ class RecordingLimeExplainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(longs = {0})
+    @ValueSource(longs = { 0 })
     void testAutomaticConfigOptimization(long seed) throws Exception {
         PredictionProvider model = TestModels.getSumThresholdModel(10, 10);
         PerturbationContext pc = new PerturbationContext(seed, new Random(), 1);

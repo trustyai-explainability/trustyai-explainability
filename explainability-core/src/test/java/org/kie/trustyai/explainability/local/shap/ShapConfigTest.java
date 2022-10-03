@@ -16,6 +16,13 @@
 
 package org.kie.trustyai.explainability.local.shap;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Feature;
@@ -23,13 +30,6 @@ import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PerturbationContext;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -15,11 +15,11 @@
  */
 package org.kie.trustyai.explainability.local.counterfactual.score;
 
+import java.math.BigDecimal;
+
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualSolution;
 import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
 import org.optaplanner.core.api.score.calculator.EasyScoreCalculator;
-
-import java.math.BigDecimal;
 
 /**
  * Mock score calculation class which guarantees an increasing soft score with each call
@@ -43,11 +43,11 @@ public class MockCounterFactualScoreCalculator implements EasyScoreCalculator<Co
         }
 
         return BendableBigDecimalScore.of(
-                new BigDecimal[]{
+                new BigDecimal[] {
                         BigDecimal.valueOf(0),
                         BigDecimal.valueOf(0),
                         BigDecimal.valueOf(0)
                 },
-                new BigDecimal[]{BigDecimal.valueOf(0), BigDecimal.valueOf(score)});
+                new BigDecimal[] { BigDecimal.valueOf(0), BigDecimal.valueOf(score) });
     }
 }
