@@ -74,8 +74,8 @@ class DummyModelsLimeExplainerTest {
             Assertions.assertEquals(1d, ExplainabilityMetrics.impactScore(model, prediction, topFeatures));
         }
         int topK = 1;
-        double minimumPositiveStabilityRate = 0.5;
-        double minimumNegativeStabilityRate = 0.5;
+        double minimumPositiveStabilityRate = 0.8;
+        double minimumNegativeStabilityRate = 0.8;
         TestUtils.assertLimeStability(model, prediction, limeExplainer, topK, minimumPositiveStabilityRate,
                 minimumNegativeStabilityRate);
         List<PredictionInput> inputs = new ArrayList<>();
@@ -126,8 +126,8 @@ class DummyModelsLimeExplainerTest {
             assertEquals(1d, ExplainabilityMetrics.impactScore(model, prediction, topFeatures));
         }
         int topK = 1;
-        double minimumPositiveStabilityRate = 0.5;
-        double minimumNegativeStabilityRate = 0.5;
+        double minimumPositiveStabilityRate = 0.8;
+        double minimumNegativeStabilityRate = 0.8;
         TestUtils.assertLimeStability(model, prediction, limeExplainer, topK, minimumPositiveStabilityRate,
                 minimumNegativeStabilityRate);
         List<PredictionInput> inputs = new ArrayList<>();
@@ -167,7 +167,7 @@ class DummyModelsLimeExplainerTest {
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
 
-        LimeConfig limeConfig = new LimeConfig().withSamples(100)
+        LimeConfig limeConfig = new LimeConfig()
                 .withPerturbationContext(new PerturbationContext(seed, random, 2));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
@@ -179,7 +179,7 @@ class DummyModelsLimeExplainerTest {
             assertEquals(1d, ExplainabilityMetrics.impactScore(model, prediction, topFeatures));
         }
         double minimumPositiveStabilityRate = 0.5;
-        double minimumNegativeStabilityRate = 0.5;
+        double minimumNegativeStabilityRate = 0.9;
         int topK = 1;
         TestUtils.assertLimeStability(model, prediction, limeExplainer, topK, minimumPositiveStabilityRate,
                 minimumNegativeStabilityRate);
@@ -233,8 +233,8 @@ class DummyModelsLimeExplainerTest {
             assertEquals(1d, ExplainabilityMetrics.impactScore(model, prediction, topFeatures));
         }
         int topK = 1;
-        double minimumPositiveStabilityRate = 0.5;
-        double minimumNegativeStabilityRate = 0.2;
+        double minimumPositiveStabilityRate = 0.9;
+        double minimumNegativeStabilityRate = 0.9;
         TestUtils.assertLimeStability(model, prediction, limeExplainer, topK, minimumPositiveStabilityRate,
                 minimumNegativeStabilityRate);
 
@@ -286,7 +286,7 @@ class DummyModelsLimeExplainerTest {
             assertEquals(1d, ExplainabilityMetrics.impactScore(model, prediction, topFeatures));
         }
         int topK = 1;
-        double minimumPositiveStabilityRate = 0.5;
+        double minimumPositiveStabilityRate = 0.6;
         double minimumNegativeStabilityRate = 0.5;
         TestUtils.assertLimeStability(model, prediction, limeExplainer, topK, minimumPositiveStabilityRate,
                 minimumNegativeStabilityRate);
@@ -337,8 +337,8 @@ class DummyModelsLimeExplainerTest {
             assertEquals(0d, ExplainabilityMetrics.impactScore(model, prediction, topFeatures));
         }
         int topK = 1;
-        double minimumPositiveStabilityRate = 0.5;
-        double minimumNegativeStabilityRate = 0.5;
+        double minimumPositiveStabilityRate = 0.9;
+        double minimumNegativeStabilityRate = 0.9;
         TestUtils.assertLimeStability(model, prediction, limeExplainer, topK, minimumPositiveStabilityRate,
                 minimumNegativeStabilityRate);
 
