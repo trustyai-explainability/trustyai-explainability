@@ -15,11 +15,7 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -30,30 +26,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.LocalExplanationException;
-import org.kie.trustyai.explainability.model.DataDistribution;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureDistribution;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.GenericFeatureDistribution;
-import org.kie.trustyai.explainability.model.IndependentFeaturesDataDistribution;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SimplePrediction;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
 import org.kie.trustyai.explainability.utils.IOUtils;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 class LimeExplainerTest {
@@ -69,7 +49,7 @@ class LimeExplainerTest {
                 .withSamples(10);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         PredictionInput input = new PredictionInput(Collections.emptyList());
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -91,7 +71,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -118,7 +98,7 @@ class LimeExplainerTest {
                 features.add(TestUtils.getMockedNumericFeature(i));
             }
             PredictionInput input = new PredictionInput(features);
-            PredictionProvider model = TestUtils.getSumSkipModel(0);
+            PredictionProvider model = TestModels.getSumSkipModel(0);
             PredictionOutput output = model.predictAsync(List.of(input))
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                     .get(0);
@@ -165,7 +145,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -208,7 +188,7 @@ class LimeExplainerTest {
                 .withSamples(10);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumThresholdModel(random.nextDouble(), random.nextDouble());
+        PredictionProvider model = TestModels.getSumThresholdModel(random.nextDouble(), random.nextDouble());
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -233,7 +213,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -258,7 +238,7 @@ class LimeExplainerTest {
                 features.add(TestUtils.getMockedNumericFeature(i));
             }
             PredictionInput input = new PredictionInput(features);
-            PredictionProvider model = TestUtils.getSumSkipModel(0);
+            PredictionProvider model = TestModels.getSumSkipModel(0);
             PredictionOutput output = model.predictAsync(List.of(input))
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                     .get(0);
@@ -288,7 +268,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -321,7 +301,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -368,7 +348,7 @@ class LimeExplainerTest {
             }
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getTwoOutputSemiCategoricalModel(2);
+        PredictionProvider model = TestModels.getTwoOutputSemiCategoricalModel(2);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);

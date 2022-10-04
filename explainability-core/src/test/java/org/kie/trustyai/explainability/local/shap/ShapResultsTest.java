@@ -22,13 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

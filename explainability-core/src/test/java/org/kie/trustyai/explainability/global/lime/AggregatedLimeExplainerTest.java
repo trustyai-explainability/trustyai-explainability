@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.DataDistribution;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
@@ -39,6 +38,7 @@ import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,7 +52,7 @@ class AggregatedLimeExplainerTest {
     void testExplainWithMetadata(int seed) throws ExecutionException, InterruptedException {
         Random random = new Random();
         random.setSeed(seed);
-        PredictionProvider sumSkipModel = TestUtils.getSumSkipModel(1);
+        PredictionProvider sumSkipModel = TestModels.getSumSkipModel(1);
         PredictionProviderMetadata metadata = new PredictionProviderMetadata() {
             @Override
             public DataDistribution getDataDistribution() {
@@ -93,7 +93,7 @@ class AggregatedLimeExplainerTest {
     void testExplainWithPredictions(int seed) throws ExecutionException, InterruptedException {
         Random random = new Random();
         random.setSeed(seed);
-        PredictionProvider sumSkipModel = TestUtils.getSumSkipModel(1);
+        PredictionProvider sumSkipModel = TestModels.getSumSkipModel(1);
         DataDistribution dataDistribution = DataUtils.generateRandomDataDistribution(3, 100, random);
         List<PredictionInput> samples = dataDistribution.sample(10);
         List<PredictionOutput> predictionOutputs = sumSkipModel.predictAsync(samples).get();

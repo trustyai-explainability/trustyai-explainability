@@ -24,18 +24,11 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.kie.trustyai.explainability.TestUtils;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CounterfactualGeneratorTest {
     @ParameterizedTest
@@ -58,7 +51,7 @@ class CounterfactualGeneratorTest {
         }
 
         // given some arbitrary linear model
-        PredictionProvider model = TestUtils.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
+        PredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
 
         // generate a background such that f(bg) == 0 for all bg in the backgrounds
         PredictionOutput goal = new PredictionOutput(
