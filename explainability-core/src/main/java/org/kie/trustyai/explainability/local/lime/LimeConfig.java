@@ -282,7 +282,6 @@ public class LimeConfig {
         return this;
     }
 
-
     public LimeConfig copy() {
         return new LimeConfig()
                 .withSeparableDatasetRatio(separableDatasetRatio)

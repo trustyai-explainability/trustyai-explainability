@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.local.LocalExplainer;
@@ -202,15 +201,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
             getSaliency(linearizedTargetInputFeatures, result, limeInputs, originalOutput, executionConfig);
             LOGGER.debug("weights set for output {}", originalOutput);
         }
-        if (executionConfig.isTrackCounterfactuals()) {
-            Map<PredictionOutput, PredictionInput> availableCounterfactuals = IntStream
-                    .range(0, predictionInputs.size()).boxed()
-                    .collect(Collectors.toMap(predictionOutputs::get, predictionInputs::get));
-            return new SaliencyResults(result,
-                    "LIME");
-        } else {
-            return new SaliencyResults(result, "LIME");
-        }
+        return new SaliencyResults(result, "LIME");
     }
 
     private void getSaliency(List<Feature> linearizedTargetInputFeatures, Map<String, Saliency> result,
