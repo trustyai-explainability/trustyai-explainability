@@ -77,7 +77,7 @@ class AggregatedLimeExplainerTest {
         };
 
         AggregatedLimeExplainer aggregatedLimeExplainer = new AggregatedLimeExplainer();
-        Map<String, Saliency> explain = aggregatedLimeExplainer.explainFromMetadata(sumSkipModel, metadata).get();
+        Map<String, Saliency> explain = aggregatedLimeExplainer.explainFromMetadata(sumSkipModel, metadata).get().getSaliencies();
         assertNotNull(explain);
         assertEquals(1, explain.size());
         assertTrue(explain.containsKey("sum-but1"));
@@ -99,7 +99,7 @@ class AggregatedLimeExplainerTest {
         List<PredictionOutput> predictionOutputs = sumSkipModel.predictAsync(samples).get();
         List<Prediction> predictions = DataUtils.getPredictions(samples, predictionOutputs);
         AggregatedLimeExplainer aggregatedLimeExplainer = new AggregatedLimeExplainer();
-        Map<String, Saliency> explain = aggregatedLimeExplainer.explainFromPredictions(sumSkipModel, predictions).get();
+        Map<String, Saliency> explain = aggregatedLimeExplainer.explainFromPredictions(sumSkipModel, predictions).get().getSaliencies();
         assertNotNull(explain);
         assertEquals(1, explain.size());
         assertTrue(explain.containsKey("sum-but1"));

@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.math3.linear.RealVector;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 
 public class ShapDataCarrier {
@@ -39,6 +41,7 @@ public class ShapDataCarrier {
     private List<Integer> varyingFeatureGroups;
     private int numVarying;
     private HashMap<Integer, Integer> masksUsed;
+    private Map<PredictionOutput, PredictionInput> availableOutputs = new HashMap<>();
 
     // data statistics ======================================================
     public int getRows() {
@@ -125,6 +128,16 @@ public class ShapDataCarrier {
     public void addSample(ShapSyntheticDataSample sample) {
         this.samplesAdded.add(sample);
         this.samplesAddedSize += 1;
+    }
+
+    public void addAvailableOutputs(List<PredictionInput> pis, List<PredictionOutput> pos) {
+        for (int i = 0; i < pis.size(); i++) {
+            this.availableOutputs.put(pos.get(i), pis.get(i));
+        }
+    }
+
+    public Map<PredictionOutput, PredictionInput> getAvailableOutputs() {
+        return this.availableOutputs;
     }
 
     //varying feature groups getters and setters
