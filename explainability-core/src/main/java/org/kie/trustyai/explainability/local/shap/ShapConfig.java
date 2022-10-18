@@ -53,7 +53,6 @@ public class ShapConfig {
     private final List<PredictionInput> background;
     private final RealMatrix backgroundMatrix;
     private final OneHotter onehotter;
-    private final boolean trackCounterfactuals;
 
     /**
      * Create a ShapConfig instance. This sets the configuration of the SHAP explainer.
@@ -78,7 +77,7 @@ public class ShapConfig {
      */
     protected ShapConfig(LinkType link, List<PredictionInput> background, PerturbationContext pc, Executor executor,
             Integer nSamples, Integer batchCount, double confidence, RegularizerType regularizerType,
-            Integer nRegularizationFeatures, boolean trackCounterfactuals) {
+            Integer nRegularizationFeatures) {
         this.link = link;
         this.background = background;
         this.onehotter = new OneHotter(background, pc);
@@ -90,7 +89,6 @@ public class ShapConfig {
         this.batchCount = batchCount;
         this.regularizerType = regularizerType;
         this.nRegularizationFeatures = nRegularizationFeatures;
-        this.trackCounterfactuals = trackCounterfactuals;
     }
 
     public static Builder builder() {
@@ -111,7 +109,6 @@ public class ShapConfig {
         private Integer builderNRegularizerFeatures = null;
         private double builderConfidence = .95;
         private PerturbationContext builderPC = new PerturbationContext(new SecureRandom(), 0);
-        private boolean builderTrackCounterfactuals = false;
 
         private Builder() {
         }
@@ -123,7 +120,6 @@ public class ShapConfig {
                     .withExecutor(this.builderExecutor)
                     .withConfidence(this.builderConfidence)
                     .withBatchCount(this.builderBatchCount)
-                    .withTrackCounterfactuals(this.builderTrackCounterfactuals)
                     .withPC(this.builderPC);
             output.builderRegularizerType = this.builderRegularizerType;
             output.builderNRegularizerFeatures = this.builderNRegularizerFeatures;
@@ -276,7 +272,6 @@ public class ShapConfig {
          * @return Builder
          */
         public Builder withTrackCounterfactuals(boolean trackCounterfactuals) {
-            this.builderTrackCounterfactuals = trackCounterfactuals;
             return this;
         }
 
@@ -295,7 +290,7 @@ public class ShapConfig {
             }
             return new ShapConfig(this.builderLink, this.builderBackground, this.builderPC, this.builderExecutor,
                     this.builderNSamples, this.builderBatchCount, this.builderConfidence, this.builderRegularizerType,
-                    this.builderNRegularizerFeatures, this.builderTrackCounterfactuals);
+                    this.builderNRegularizerFeatures);
         }
     }
 
@@ -332,10 +327,6 @@ public class ShapConfig {
 
     public RegularizerType getRegularizerType() {
         return this.regularizerType;
-    }
-
-    public boolean isTrackCounterfactuals() {
-        return this.trackCounterfactuals;
     }
 
     /**

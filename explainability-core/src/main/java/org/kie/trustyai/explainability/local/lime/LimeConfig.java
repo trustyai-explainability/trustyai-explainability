@@ -45,7 +45,6 @@ public class LimeConfig {
     private static final int DEFAULT_BOOSTRAP_INPUTS = 50;
     private static final boolean DEFAULT_FEATURE_SELECTION = true;
     private static final int DEFAULT_NO_OF_FEATURES = 6;
-    private static final boolean DEFAULT_TRACK_COUNTERFACTUALS = false;
 
     private double separableDatasetRatio = DEFAULT_SEPARABLE_DATASET_RATIO;
 
@@ -283,19 +282,6 @@ public class LimeConfig {
         return this;
     }
 
-    /**
-     * Whether to track byproduct counterfactuals
-     */
-    private boolean trackCounterfactuals = DEFAULT_TRACK_COUNTERFACTUALS;
-
-    public boolean isTrackCounterfactuals() {
-        return trackCounterfactuals;
-    }
-
-    public LimeConfig withTrackCounterfactuals(boolean trackCounterfactuals) {
-        this.trackCounterfactuals = trackCounterfactuals;
-        return this;
-    }
 
     public LimeConfig copy() {
         return new LimeConfig()
@@ -313,8 +299,7 @@ public class LimeConfig {
                 .withEncodingParams(encodingParams)
                 .withNormalizeWeights(normalizeWeights)
                 .withFeatureSelection(featureSelection)
-                .withNoOfFeatures(noOfFeatures)
-                .withTrackCounterfactuals(trackCounterfactuals);
+                .withNoOfFeatures(noOfFeatures);
     }
 
     @Override
@@ -336,7 +321,6 @@ public class LimeConfig {
                 ", highScoreFeatureZones=" + highScoreFeatureZones +
                 ", featureSelection=" + featureSelection +
                 ", noOfFeatures=" + noOfFeatures +
-                ", trackCounterfactuals=" + trackCounterfactuals +
                 '}';
     }
 
@@ -352,7 +336,7 @@ public class LimeConfig {
         return Double.compare(that.separableDatasetRatio, separableDatasetRatio) == 0 && noOfSamples == that.noOfSamples && noOfRetries == that.noOfRetries
                 && adaptDatasetVariance == that.adaptDatasetVariance && highScoreFeatureZones == that.highScoreFeatureZones && penalizeBalanceSparse == that.penalizeBalanceSparse
                 && proximityFilter == that.proximityFilter && Double.compare(that.proximityThreshold, proximityThreshold) == 0 && Double.compare(that.proximityKernelWidth, proximityKernelWidth) == 0
-                && normalizeWeights == that.normalizeWeights && boostrapInputs == that.boostrapInputs && trackCounterfactuals == that.trackCounterfactuals
+                && normalizeWeights == that.normalizeWeights && boostrapInputs == that.boostrapInputs
                 && Objects.equals(perturbationContext, that.perturbationContext)
                 && Objects.equals(dataDistribution, that.dataDistribution) && Objects.equals(proximityFilteredDatasetMinimum, that.proximityFilteredDatasetMinimum)
                 && Objects.equals(encodingParams, that.encodingParams) && featureSelection == that.featureSelection && noOfFeatures == that.noOfFeatures;
@@ -361,6 +345,6 @@ public class LimeConfig {
     @Override
     public int hashCode() {
         return Objects.hash(separableDatasetRatio, noOfSamples, noOfRetries, perturbationContext, adaptDatasetVariance, dataDistribution, highScoreFeatureZones, penalizeBalanceSparse, proximityFilter,
-                proximityThreshold, proximityFilteredDatasetMinimum, proximityKernelWidth, encodingParams, normalizeWeights, boostrapInputs, featureSelection, noOfFeatures, trackCounterfactuals);
+                proximityThreshold, proximityFilteredDatasetMinimum, proximityKernelWidth, encodingParams, normalizeWeights, boostrapInputs, featureSelection, noOfFeatures);
     }
 }
