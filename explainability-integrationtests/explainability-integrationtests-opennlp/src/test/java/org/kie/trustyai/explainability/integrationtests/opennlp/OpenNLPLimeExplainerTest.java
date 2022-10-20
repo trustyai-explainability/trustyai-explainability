@@ -93,7 +93,7 @@ class OpenNLPLimeExplainerTest {
         Prediction prediction = new SimplePrediction(testInput, output);
 
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertNotNull(saliency);
             double i1 = ExplainabilityMetrics.impactScore(model, prediction, saliency.getPositiveFeatures(3));

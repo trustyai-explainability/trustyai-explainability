@@ -28,7 +28,6 @@ import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.LocalExplanationException;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
-import org.kie.trustyai.explainability.utils.IOUtils;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -76,7 +75,7 @@ class LimeExplainerTest {
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         assertNotNull(saliencyMap);
     }
@@ -104,12 +103,12 @@ class LimeExplainerTest {
                     .get(0);
             Prediction prediction = new SimplePrediction(input, output);
 
-            Map<String, Saliency> saliencyMapNoPenalty = limeExplainerNoPenalty.explainAsync(prediction, model)
+            SaliencyResults saliencyMapNoPenalty = limeExplainerNoPenalty.explainAsync(prediction, model)
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
             assertThat(saliencyMapNoPenalty).isNotNull();
 
             String decisionName = "sum-but0";
-            Saliency saliencyNoPenalty = saliencyMapNoPenalty.get(decisionName);
+            Saliency saliencyNoPenalty = saliencyMapNoPenalty.getSaliencies().get(decisionName);
 
             LimeConfig limeConfig = new LimeConfig()
                     .withPerturbationContext(new PerturbationContext(seed, random, DEFAULT_NO_OF_PERTURBATIONS))
@@ -117,11 +116,11 @@ class LimeExplainerTest {
                     .withPenalizeBalanceSparse(true);
             LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
 
-            Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+            SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
             assertThat(saliencyMap).isNotNull();
 
-            Saliency saliency = saliencyMap.get(decisionName);
+            Saliency saliency = saliencyMap.getSaliencies().get(decisionName);
 
             for (int i = 0; i < features.size(); i++) {
                 double score = saliency.getPerFeatureImportance().get(i).getScore();
@@ -151,12 +150,12 @@ class LimeExplainerTest {
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
 
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         assertThat(saliencyMap).isNotNull();
 
         String decisionName = "sum-but0";
-        Saliency saliency = saliencyMap.get(decisionName);
+        Saliency saliency = saliencyMap.getSaliencies().get(decisionName);
         List<FeatureImportance> perFeatureImportance = saliency.getPerFeatureImportance();
         for (FeatureImportance featureImportance : perFeatureImportance) {
             assertThat(featureImportance.getScore()).isBetween(0d, 1d);
@@ -194,12 +193,12 @@ class LimeExplainerTest {
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
 
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         assertThat(saliencyMap).isNotNull();
 
         String decisionName = "inside";
-        Saliency saliency = saliencyMap.get(decisionName);
+        Saliency saliency = saliencyMap.getSaliencies().get(decisionName);
         assertThat(saliency).isNotNull();
     }
 
@@ -218,7 +217,7 @@ class LimeExplainerTest {
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         assertNotNull(saliencyMap);
     }
@@ -243,9 +242,9 @@ class LimeExplainerTest {
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                     .get(0);
             Prediction prediction = new SimplePrediction(input, output);
-            Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+            SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-            saliencies.add(saliencyMap.get("sum-but0"));
+            saliencies.add(saliencyMap.getSaliencies().get("sum-but0"));
         }
         assertThat(saliencies.get(0).getPerFeatureImportance().stream().map(FeatureImportance::getScore)
                 .collect(Collectors.toList()))
@@ -280,17 +279,17 @@ class LimeExplainerTest {
                 .withSamples(10)
                 .withFeatureSelection(false);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         assertNotNull(saliencyMap);
-        List<FeatureImportance> perFeatureImportance = saliencyMap.get("sum-but0").getPerFeatureImportance();
+        List<FeatureImportance> perFeatureImportance = saliencyMap.getSaliencies().get("sum-but0").getPerFeatureImportance();
         assertThat(perFeatureImportance.size()).isEqualTo(10);
 
         limeExplainer = new LimeExplainer(limeConfig.withFeatureSelection(true));
         saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         assertNotNull(saliencyMap);
-        List<FeatureImportance> filteredFeatureImportance = saliencyMap.get("sum-but0").getPerFeatureImportance();
+        List<FeatureImportance> filteredFeatureImportance = saliencyMap.getSaliencies().get("sum-but0").getPerFeatureImportance();
         assertThat(filteredFeatureImportance.size()).isEqualTo(6);
     }
 
@@ -313,17 +312,17 @@ class LimeExplainerTest {
                 .withSamples(10)
                 .withFeatureSelection(false);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         assertNotNull(saliencyMap);
-        List<FeatureImportance> perFeatureImportance = saliencyMap.get("sum-but0").getPerFeatureImportance();
+        List<FeatureImportance> perFeatureImportance = saliencyMap.getSaliencies().get("sum-but0").getPerFeatureImportance();
         assertThat(perFeatureImportance.size()).isEqualTo(5);
 
         limeExplainer = new LimeExplainer(limeConfig.withFeatureSelection(true).withNoOfFeatures(3));
         saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(111111, Config.INSTANCE.getAsyncTimeUnit());
         assertNotNull(saliencyMap);
-        List<FeatureImportance> filteredFeatureImportance = saliencyMap.get("sum-but0").getPerFeatureImportance();
+        List<FeatureImportance> filteredFeatureImportance = saliencyMap.getSaliencies().get("sum-but0").getPerFeatureImportance();
         assertThat(filteredFeatureImportance.size()).isEqualTo(3);
     }
 
@@ -353,11 +352,11 @@ class LimeExplainerTest {
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-        String table = IOUtils.LimeResultsAsTable(saliencyMap);
+        String table = saliencyMap.asTable();
         assertTrue(table.contains("Prediction"));
-        assertTrue(table.contains("=== Semi-Categorical LIME Scores ===="));
+        assertTrue(table.contains("=== Semi-Categorical LIME Saliencies ===="));
         assertTrue(table.contains("Feature 2 =           A "));
     }
 }

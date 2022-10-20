@@ -335,7 +335,8 @@ public class LimeConfig {
         return Double.compare(that.separableDatasetRatio, separableDatasetRatio) == 0 && noOfSamples == that.noOfSamples && noOfRetries == that.noOfRetries
                 && adaptDatasetVariance == that.adaptDatasetVariance && highScoreFeatureZones == that.highScoreFeatureZones && penalizeBalanceSparse == that.penalizeBalanceSparse
                 && proximityFilter == that.proximityFilter && Double.compare(that.proximityThreshold, proximityThreshold) == 0 && Double.compare(that.proximityKernelWidth, proximityKernelWidth) == 0
-                && normalizeWeights == that.normalizeWeights && boostrapInputs == that.boostrapInputs && Objects.equals(perturbationContext, that.perturbationContext)
+                && normalizeWeights == that.normalizeWeights && boostrapInputs == that.boostrapInputs
+                && Objects.equals(perturbationContext, that.perturbationContext)
                 && Objects.equals(dataDistribution, that.dataDistribution) && Objects.equals(proximityFilteredDatasetMinimum, that.proximityFilteredDatasetMinimum)
                 && Objects.equals(encodingParams, that.encodingParams) && featureSelection == that.featureSelection && noOfFeatures == that.noOfFeatures;
     }

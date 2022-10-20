@@ -265,6 +265,17 @@ public class ShapConfig {
         }
 
         /**
+         * Add a TOP_N_FEATURES regularization method to the builder
+         *
+         * @param trackCounterfactuals: whether or not SHAP will track available byproduct counterfactuals
+         *
+         * @return Builder
+         */
+        public Builder withTrackCounterfactuals(boolean trackCounterfactuals) {
+            return this;
+        }
+
+        /**
          * Build
          *
          * @return ShapConfig

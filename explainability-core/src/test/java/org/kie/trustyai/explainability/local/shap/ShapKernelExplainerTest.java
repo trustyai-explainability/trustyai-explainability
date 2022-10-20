@@ -438,7 +438,7 @@ class ShapKernelExplainerTest {
 
         // evaluate if the explanations match the expected value
         ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
-        CompletableFuture<ShapResults> explanationsCF = ske.explainAsync(predictions.get(0), model);
+        CompletableFuture<SaliencyResults> explanationsCF = ske.explainAsync(predictions.get(0), model);
 
         ExecutorService executor = ForkJoinPool.commonPool();
         executor.submit(() -> {
@@ -640,7 +640,7 @@ class ShapKernelExplainerTest {
         Prediction p = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
         ShapConfig skConfig = getSks().get(config);
         ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
-        ShapResults shapResults = ske.explainAsync(p, model).get();
+        SaliencyResults shapResults = ske.explainAsync(p, model).get();
         Map<String, Saliency> saliencies = shapResults.getSaliencies();
         RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies, true);
         RealMatrix explanations = explanationsAndConfs[0];
@@ -689,7 +689,7 @@ class ShapKernelExplainerTest {
         for (Integer nsamp : nsamples) {
             for (ShapConfig.Builder sk : testConfigs) {
                 ShapKernelExplainer ske = new ShapKernelExplainer(sk.withNSamples(nsamp).build());
-                ShapResults shapResults = ske.explainAsync(p, model).get();
+                SaliencyResults shapResults = ske.explainAsync(p, model).get();
                 Map<String, Saliency> saliencies = shapResults.getSaliencies();
                 RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies, true);
                 RealMatrix explanations = explanationsAndConfs[0];
@@ -723,7 +723,7 @@ class ShapKernelExplainerTest {
                 .build();
 
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
-        ShapResults shapResults = ske.explainAsync(p, model).get();
+        SaliencyResults shapResults = ske.explainAsync(p, model).get();
         Map<String, Saliency> saliencies = shapResults.getSaliencies();
         RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies);
         RealMatrix explanations = explanationsAndConfs[0];
@@ -752,7 +752,7 @@ class ShapKernelExplainerTest {
                 .build();
 
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
-        ShapResults shapResults = ske.explainAsync(p, model).get();
+        SaliencyResults shapResults = ske.explainAsync(p, model).get();
         assertTrue(true);
     }
 
@@ -776,9 +776,9 @@ class ShapKernelExplainerTest {
                 .build();
 
         ShapKernelExplainer skeNB = new ShapKernelExplainer(skNB);
-        ShapResults shapResultsNB = skeNB.explainAsync(p, model).get();
+        SaliencyResults shapResultsNB = skeNB.explainAsync(p, model).get();
         ShapKernelExplainer skeB = new ShapKernelExplainer(skB);
-        ShapResults shapResultsB = skeB.explainAsync(p, model).get();
+        SaliencyResults shapResultsB = skeB.explainAsync(p, model).get();
         assertEquals(shapResultsNB, shapResultsB);
     }
 
@@ -817,7 +817,7 @@ class ShapKernelExplainerTest {
                 .withNSamples(5000)
                 .build();
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
-        ShapResults shapResults = ske.explainAsync(p, model).get();
+        SaliencyResults shapResults = ske.explainAsync(p, model).get();
 
         assertEquals(25, shapResults.getSaliencies().get("calories")
                 .getPerFeatureImportance().get(0).getScore(), 1e-6);
@@ -864,7 +864,7 @@ class ShapKernelExplainerTest {
                 .withNSamples(5000)
                 .build();
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
-        ShapResults shapResults = ske.explainAsync(p, model).get();
+        SaliencyResults shapResults = ske.explainAsync(p, model).get();
 
         assertEquals(25, shapResults.getSaliencies().get("calories")
                 .getPerFeatureImportance().get(0).getScore(), 1e-6);
@@ -916,7 +916,7 @@ class ShapKernelExplainerTest {
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
-        ShapResults results = ske.explainAsync(prediction, model)
+        SaliencyResults results = ske.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         String table = results.asTable();
         assertTrue(table.contains("Semi-Categorical"));
