@@ -26,15 +26,26 @@ import org.kie.trustyai.explainability.utils.IOUtils;
 
 public class SaliencyResults {
     private final Map<String, Saliency> saliencies;
-    private final String sourceExplainer;
 
-    public SaliencyResults(Map<String, Saliency> saliencies, String sourceExplainer) {
+    private final SourceExplainer sourceExplainer;
+
+    public enum SourceExplainer {
+        SHAP,
+        LIME,
+        AGGREGATED_LIME
+    }
+
+    public SaliencyResults(Map<String, Saliency> saliencies, SourceExplainer sourceExplainer) {
         this.saliencies = saliencies;
         this.sourceExplainer = sourceExplainer;
     }
 
     public Map<String, Saliency> getSaliencies() {
         return saliencies;
+    }
+
+    public SourceExplainer getSourceExplainer() {
+        return sourceExplainer;
     }
 
     public SaliencyResults difference(SaliencyResults other) {
@@ -138,8 +149,15 @@ public class SaliencyResults {
         List<String> saliencyValues = new ArrayList<>();
         List<String> confidences = new ArrayList<>();
 
-        String saliencyHeader = this.sourceExplainer.equals("SHAP") ? "SHAP Value" : "Saliency";
-        String pluralSaliencyHeader = this.sourceExplainer.equals("SHAP") ? "SHAP Values" : "LIME Saliencies";
+        String saliencyHeader;
+        String pluralSaliencyHeader;
+        if (this.sourceExplainer.equals(SourceExplainer.SHAP)) {
+            saliencyHeader = "SHAP Value";
+            pluralSaliencyHeader = "SHAP Values";
+        } else {
+            saliencyHeader = "Saliency";
+            pluralSaliencyHeader = "LIME Saliencies";
+        }
 
         List<String> headers = new ArrayList<>();
         List<Integer> headerPositions = new ArrayList<>();
@@ -158,7 +176,7 @@ public class SaliencyResults {
             confidences.add(" | Confidence");
             lineIDX++;
 
-            if (sourceExplainer.equals("SHAP")) {
+            if (sourceExplainer.equals(SourceExplainer.SHAP)) {
                 featureNames.add("");
                 featureValues.add("FNull");
                 saliencyValues.add(IOUtils.roundedString(pfis.get(pfis.size() - 1).getScore(), decimalPlaces));

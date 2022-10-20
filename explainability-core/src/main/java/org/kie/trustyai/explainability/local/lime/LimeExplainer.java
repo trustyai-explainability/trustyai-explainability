@@ -201,7 +201,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
             getSaliency(linearizedTargetInputFeatures, result, limeInputs, originalOutput, executionConfig);
             LOGGER.debug("weights set for output {}", originalOutput);
         }
-        return new SaliencyResults(result, "LIME");
+        return new SaliencyResults(result, SaliencyResults.SourceExplainer.LIME);
     }
 
     private void getSaliency(List<Feature> linearizedTargetInputFeatures, Map<String, Saliency> result,

@@ -60,7 +60,7 @@ public class AggregatedLimeExplainer implements GlobalExplainer<CompletableFutur
         return CompletableFuture.completedFuture(predictions)
                 .thenApply(p -> p.stream().map(prediction -> limeExplainer.explainAsync(prediction, model)) // extract saliency for each input
                         .map(CompletableFuture::join) // aggregate all the saliencies
-                        .reduce(new SaliencyResults(new HashMap<>(), "Aggregated LIME"),
-                                (m1, m2) -> new SaliencyResults(Saliency.merge(List.of(m1.getSaliencies(), m2.getSaliencies())), "Aggregated LIME"))); // merge all the saliencies together
+                        .reduce(new SaliencyResults(new HashMap<>(), SaliencyResults.SourceExplainer.AGGREGATED_LIME),
+                                (m1, m2) -> new SaliencyResults(Saliency.merge(List.of(m1.getSaliencies(), m2.getSaliencies())), SaliencyResults.SourceExplainer.AGGREGATED_LIME))); // merge all the saliencies together
     }
 }

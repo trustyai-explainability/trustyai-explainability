@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SaliencyResultsTest {
 
-    SaliencyResults buildSaliencyResults(int nOutputs, int nFeatures, int scalar1, int scalar2, String source) {
+    SaliencyResults buildSaliencyResults(int nOutputs, int nFeatures, int scalar1, int scalar2, SaliencyResults.SourceExplainer source) {
         Map<String, Saliency> saliencies = new HashMap<>();
         Map<String, Double> fnull = new HashMap<>();
         for (int i = 0; i < nOutputs; i++) {
@@ -47,63 +47,63 @@ class SaliencyResultsTest {
     // test equals and hashing
     @Test
     void testEqualsSameObj() {
-        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, "SHAP");
+        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, SaliencyResults.SourceExplainer.SHAP);
         assertEquals(sr1, sr1);
         assertEquals(sr1.hashCode(), sr1.hashCode());
     }
 
     @Test
     void testEquals() {
-        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, "LIME");
-        SaliencyResults sr2 = buildSaliencyResults(2, 2, 1, 1, "LIME");
+        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, SaliencyResults.SourceExplainer.LIME);
+        SaliencyResults sr2 = buildSaliencyResults(2, 2, 1, 1, SaliencyResults.SourceExplainer.LIME);
         assertEquals(sr1, sr2);
         assertNotEquals(sr1.hashCode(), sr2.hashCode());
     }
 
     @Test
     void testDiffOutputs() {
-        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, "SHAP");
-        SaliencyResults sr2 = buildSaliencyResults(20, 2, 1, 1, "SHAP");
+        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, SaliencyResults.SourceExplainer.SHAP);
+        SaliencyResults sr2 = buildSaliencyResults(20, 2, 1, 1, SaliencyResults.SourceExplainer.SHAP);
         assertNotEquals(sr1, sr2);
         assertNotEquals(sr1.hashCode(), sr2.hashCode());
     }
 
     @Test
     void testDiffFeatures() {
-        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, "SHAP");
-        SaliencyResults sr2 = buildSaliencyResults(2, 20, 1, 1, "SHAP");
+        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, SaliencyResults.SourceExplainer.SHAP);
+        SaliencyResults sr2 = buildSaliencyResults(2, 20, 1, 1, SaliencyResults.SourceExplainer.SHAP);
         assertNotEquals(sr1, sr2);
         assertNotEquals(sr1.hashCode(), sr2.hashCode());
     }
 
     @Test
     void testDiffImportances() {
-        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, "SHAP");
-        SaliencyResults sr2 = buildSaliencyResults(2, 2, 10, 1, "SHAP");
+        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, SaliencyResults.SourceExplainer.SHAP);
+        SaliencyResults sr2 = buildSaliencyResults(2, 2, 10, 1, SaliencyResults.SourceExplainer.SHAP);
         assertNotEquals(sr1, sr2);
         assertNotEquals(sr1.hashCode(), sr2.hashCode());
     }
 
     @Test
     void testDiffFnull() {
-        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, "SHAP");
-        SaliencyResults sr2 = buildSaliencyResults(2, 2, 1, 10, "SHAP");
+        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 1, SaliencyResults.SourceExplainer.SHAP);
+        SaliencyResults sr2 = buildSaliencyResults(2, 2, 1, 10, SaliencyResults.SourceExplainer.SHAP);
         assertNotEquals(sr1, sr2);
         assertNotEquals(sr1.hashCode(), sr2.hashCode());
     }
 
     @Test
     void testDiffSource() {
-        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 10, "SHAP");
-        SaliencyResults sr2 = buildSaliencyResults(2, 2, 1, 10, "LIME");
+        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 10, SaliencyResults.SourceExplainer.SHAP);
+        SaliencyResults sr2 = buildSaliencyResults(2, 2, 1, 10, SaliencyResults.SourceExplainer.LIME);
         assertNotEquals(sr1, sr2);
         assertNotEquals(sr1.hashCode(), sr2.hashCode());
     }
 
     @Test
     void difference() {
-        SaliencyResults sr1 = buildSaliencyResults(1, 5, 1, 10, "SHAP");
-        SaliencyResults sr2 = buildSaliencyResults(1, 5, 2, 11, "SHAP");
+        SaliencyResults sr1 = buildSaliencyResults(1, 5, 1, 10, SaliencyResults.SourceExplainer.SHAP);
+        SaliencyResults sr2 = buildSaliencyResults(1, 5, 2, 11, SaliencyResults.SourceExplainer.SHAP);
 
         SaliencyResults srDiff = sr2.difference(sr1);
 
@@ -119,7 +119,7 @@ class SaliencyResultsTest {
 
     @Test
     void testAsTableSHAP() {
-        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 10, "SHAP");
+        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 10, SaliencyResults.SourceExplainer.SHAP);
         String tableString = sr1.asTable();
         assertTrue(tableString.contains("FNull"));
         assertTrue(tableString.contains("SHAP Values"));
@@ -127,7 +127,7 @@ class SaliencyResultsTest {
 
     @Test
     void testAsTableLIME() {
-        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 10, "LIME");
+        SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 10, SaliencyResults.SourceExplainer.LIME);
         String tableString = sr1.asTable();
         assertFalse(tableString.contains("FNull"));
         assertTrue(tableString.contains("Saliency"));

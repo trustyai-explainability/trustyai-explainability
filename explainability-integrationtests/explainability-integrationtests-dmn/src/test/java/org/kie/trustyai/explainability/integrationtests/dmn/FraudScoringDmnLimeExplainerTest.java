@@ -74,7 +74,7 @@ class FraudScoringDmnLimeExplainerTest {
                 .withPerturbationContext(perturbationContext);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertNotNull(saliency);
             List<FeatureImportance> topFeatures = saliency.getTopFeatures(4);

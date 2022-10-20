@@ -349,7 +349,7 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
             return output.thenCombine(sdc.getNullOutput(), (o, no) -> saliencyFromMatrix(o, pi, po, no))
                     .thenApply(saliencies -> new SaliencyResults(
                             saliencies,
-                            "SHAP"));
+                            SaliencyResults.SourceExplainer.SHAP));
         } else if (sdc.getNumVarying() == 1)
         // if 1 feature varies, this feature has all the effect
         {
@@ -362,7 +362,7 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
                 return out;
             })).thenCombine(sdc.getNullOutput(), (out, no) -> saliencyFromMatrix(out, pi, po, no))
                     .thenApply(saliencies -> new SaliencyResults(saliencies,
-                            "SHAP"));
+                            SaliencyResults.SourceExplainer.SHAP));
         } else
         // if more than 1 feature varies, we need to perform WLR
         {
@@ -389,7 +389,7 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
                     .thenCombine(sdc.getNullOutput(), (wo, no) -> saliencyFromMatrix(wo[0], wo[1], pi, po, no)))
                     .thenApply(saliencies -> new SaliencyResults(
                             saliencies,
-                            "SHAP"));
+                            SaliencyResults.SourceExplainer.SHAP));
         }
     }
 
