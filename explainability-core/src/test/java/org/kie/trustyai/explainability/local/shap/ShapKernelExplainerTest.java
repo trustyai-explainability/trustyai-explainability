@@ -924,4 +924,47 @@ class ShapKernelExplainerTest {
         assertTrue(table.contains("Feature 1"));
     }
 
+    @Test
+    void testNoByproductCounterfactuals() throws InterruptedException, ExecutionException {
+        PredictionProvider model = TestModels.getSumSkipModel(1);
+        List<PredictionInput> toExplain = createPIFromMatrix(toExplainRaw);
+        List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
+
+        Prediction p0 = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
+        ShapConfig skConfig = testConfig.copy()
+                .withBackground(createPIFromMatrix(backgroundRaw))
+                .withBatchCount(1)
+                .withNSamples(1000)
+                .withTrackCounterfactuals(false)
+                .build();
+        ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
+        SaliencyResults shapResults0 = ske.explainAsync(p0, model).get();
+
+        // check that SHAP returns the expected number of Counterfactuals
+        assertEquals(0, shapResults0.getAvailableCFs().size());
+    }
+
+    @Test
+    void testByproductCounterfactuals() throws InterruptedException, ExecutionException {
+        PredictionProvider model = TestModels.getSumSkipModel(1);
+        List<PredictionInput> toExplain = createPIFromMatrix(toExplainRaw);
+        List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
+
+        Prediction p0 = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
+        Prediction p1 = new SimplePrediction(toExplain.get(1), predictionOutputs.get(1));
+        ShapConfig skConfig = testConfig.copy()
+                .withBackground(createPIFromMatrix(backgroundRaw))
+                .withBatchCount(1)
+                .withNSamples(1000)
+                .withTrackCounterfactuals(true)
+                .build();
+        ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
+        SaliencyResults shapResults0 = ske.explainAsync(p0, model).get();
+        SaliencyResults shapResults1 = ske.explainAsync(p1, model).get();
+
+        // check that SHAP returns the expected number of Counterfactuals
+        assertEquals(42, shapResults0.getAvailableCFs().size());
+        assertEquals(90, shapResults1.getAvailableCFs().size());
+    }
+
 }

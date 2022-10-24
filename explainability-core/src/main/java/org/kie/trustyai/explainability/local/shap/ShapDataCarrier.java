@@ -16,6 +16,7 @@
 
 package org.kie.trustyai.explainability.local.shap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.apache.commons.math3.linear.RealVector;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.SimplePrediction;
 
 public class ShapDataCarrier {
     private PredictionProvider model;
@@ -41,7 +43,7 @@ public class ShapDataCarrier {
     private List<Integer> varyingFeatureGroups;
     private int numVarying;
     private HashMap<Integer, Integer> masksUsed;
-    private Map<PredictionOutput, PredictionInput> availableOutputs = new HashMap<>();
+    private List<SimplePrediction> availablePredictions = new ArrayList<>();
 
     // data statistics ======================================================
     public int getRows() {
@@ -130,14 +132,14 @@ public class ShapDataCarrier {
         this.samplesAddedSize += 1;
     }
 
-    public void addAvailableOutputs(List<PredictionInput> pis, List<PredictionOutput> pos) {
+    public void addAvailablePredictions(List<PredictionInput> pis, List<PredictionOutput> pos) {
         for (int i = 0; i < pis.size(); i++) {
-            this.availableOutputs.put(pos.get(i), pis.get(i));
+            this.availablePredictions.add(new SimplePrediction(pis.get(i), pos.get(i)));
         }
     }
 
-    public Map<PredictionOutput, PredictionInput> getAvailableOutputs() {
-        return this.availableOutputs;
+    public List<SimplePrediction> getAvailablePredictions() {
+        return this.availablePredictions;
     }
 
     //varying feature groups getters and setters

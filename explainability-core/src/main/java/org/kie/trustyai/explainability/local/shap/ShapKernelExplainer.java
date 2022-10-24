@@ -362,6 +362,7 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
                 return out;
             })).thenCombine(sdc.getNullOutput(), (out, no) -> saliencyFromMatrix(out, pi, po, no))
                     .thenApply(saliencies -> new SaliencyResults(saliencies,
+                            SaliencyResults.processAvailableCounterfactuals(pi, sdc.getAvailablePredictions()),
                             SaliencyResults.SourceExplainer.SHAP));
         } else
         // if more than 1 feature varies, we need to perform WLR
@@ -389,6 +390,7 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
                     .thenCombine(sdc.getNullOutput(), (wo, no) -> saliencyFromMatrix(wo[0], wo[1], pi, po, no)))
                     .thenApply(saliencies -> new SaliencyResults(
                             saliencies,
+                            SaliencyResults.processAvailableCounterfactuals(pi, sdc.getAvailablePredictions()),
                             SaliencyResults.SourceExplainer.SHAP));
         }
     }
@@ -603,7 +605,14 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
                     List<PredictionInput> batch = IntStream.range(i, Math.min(sdc.getSamplesAddedSize(), i + batchCount))
                             .mapToObj(b -> sdc.getSamplesAdded(b).getSyntheticData())
                             .collect(ArrayList::new, List::addAll, List::addAll);
-                    expectations = sdc.getModel().predictAsync(config.getOneHotter().oneHotDecode(batch, true))
+                    List<PredictionInput> inputs = config.getOneHotter().oneHotDecode(batch, true);
+                    expectations = sdc.getModel().predictAsync(inputs)
+                            .thenApply(pos -> {
+                                if (config.isTrackCounterfactuals()) {
+                                    sdc.addAvailablePredictions(inputs, pos);
+                                }
+                                return pos;
+                            })
                             .thenApply(MatrixUtilsExtensions::matrixFromPredictionOutput)
                             .thenApply(ops -> MatrixUtilsExtensions.batchRowMean(ops, sdc.getRows()))
                             .thenCombine(expectations, (expSlices, exps) -> {
@@ -624,6 +633,11 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
                             sdc.getSamplesAdded(i).getSyntheticData(), true);
                     expectationSlices.put(i,
                             sdc.getModel().predictAsync(pis)
+                                    .thenApply(pos -> {
+                                        if (config.isTrackCounterfactuals())
+                                            sdc.addAvailablePredictions(pis, pos);
+                                        return pos;
+                                    })
                                     .thenApply(MatrixUtilsExtensions::matrixFromPredictionOutput)
                                     .thenApply(posMatrix -> MatrixUtilsExtensions.rowSum(posMatrix).mapDivide(posMatrix.getRowDimension()))
                                     .thenApply(this::link)

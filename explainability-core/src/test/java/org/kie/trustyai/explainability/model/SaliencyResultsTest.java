@@ -118,6 +118,55 @@ class SaliencyResultsTest {
     }
 
     @Test
+    void processAvailableCounterfactuals() {
+        PredictionOutput po1 = new PredictionOutput(List.of(new Output("o1", Type.NUMBER, new Value(1), 1.0)));
+        PredictionOutput po2 = new PredictionOutput(List.of(new Output("o1", Type.NUMBER, new Value(2), 1.0)));
+        PredictionOutput po3 = new PredictionOutput(List.of(new Output("o1", Type.NUMBER, new Value(2), 1.0)));
+
+        PredictionInput originalpPI = new PredictionInput(
+                List.of(new Feature("f1", Type.NUMBER, new Value(1)),
+                        new Feature("f2", Type.NUMBER, new Value(1)),
+                        new Feature("f3", Type.NUMBER, new Value(1))));
+        HashMap<PredictionOutput, PredictionInput> availableCFs = new HashMap<>();
+        PredictionInput pi1 = new PredictionInput(
+                List.of(new Feature("f1", Type.NUMBER, new Value(1)),
+                        new Feature("f2", Type.NUMBER, new Value(1)),
+                        new Feature("f3", Type.NUMBER, new Value(2))));
+        PredictionInput pi2 = new PredictionInput(
+                List.of(new Feature("f1", Type.NUMBER, new Value(1)),
+                        new Feature("f2", Type.NUMBER, new Value(2)),
+                        new Feature("f3", Type.NUMBER, new Value(2))));
+        PredictionInput pi3 = new PredictionInput(
+                List.of(new Feature("f1", Type.NUMBER, new Value(2)),
+                        new Feature("f2", Type.NUMBER, new Value(2)),
+                        new Feature("f3", Type.NUMBER, new Value(2))));
+
+        SimplePrediction sp1 = new SimplePrediction(pi1, po1);
+        SimplePrediction sp2 = new SimplePrediction(pi2, po2);
+        SimplePrediction sp3 = new SimplePrediction(pi3, po3);
+
+        List<SimplePrediction> availablePredictionPairs = List.of(sp1, sp2, sp3);
+
+        Map<SimplePrediction, List<Boolean>> procCFs =
+                SaliencyResults.processAvailableCounterfactuals(originalpPI, availablePredictionPairs);
+
+        // pi1 checks
+        assertEquals(false, procCFs.get(sp1).get(0));
+        assertEquals(false, procCFs.get(sp1).get(1));
+        assertEquals(true, procCFs.get(sp1).get(2));
+
+        // pi2 checks
+        assertEquals(false, procCFs.get(sp2).get(0));
+        assertEquals(true, procCFs.get(sp2).get(1));
+        assertEquals(true, procCFs.get(sp2).get(2));
+
+        // pi3 checks
+        assertEquals(true, procCFs.get(sp3).get(0));
+        assertEquals(true, procCFs.get(sp3).get(1));
+        assertEquals(true, procCFs.get(sp3).get(2));
+    }
+
+    @Test
     void testAsTableSHAP() {
         SaliencyResults sr1 = buildSaliencyResults(2, 2, 1, 10, SaliencyResults.SourceExplainer.SHAP);
         String tableString = sr1.asTable();

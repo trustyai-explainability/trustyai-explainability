@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.local.LocalExplainer;
@@ -42,6 +43,7 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SaliencyResults;
+import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
@@ -201,7 +203,17 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
             getSaliency(linearizedTargetInputFeatures, result, limeInputs, originalOutput, executionConfig);
             LOGGER.debug("weights set for output {}", originalOutput);
         }
-        return new SaliencyResults(result, SaliencyResults.SourceExplainer.LIME);
+        List<SimplePrediction> pairedOutputs = IntStream.range(0, predictionInputs.size())
+                .mapToObj(i -> new SimplePrediction(predictionInputs.get(i), predictionOutputs.get(i)))
+                .collect(Collectors.toList());
+
+        if (executionConfig.isTrackCounterfactuals()) {
+            return new SaliencyResults(result,
+                    SaliencyResults.processAvailableCounterfactuals(originalInput, pairedOutputs),
+                    SaliencyResults.SourceExplainer.LIME);
+        } else {
+            return new SaliencyResults(result, new HashMap<>(), SaliencyResults.SourceExplainer.LIME);
+        }
     }
 
     private void getSaliency(List<Feature> linearizedTargetInputFeatures, Map<String, Saliency> result,
