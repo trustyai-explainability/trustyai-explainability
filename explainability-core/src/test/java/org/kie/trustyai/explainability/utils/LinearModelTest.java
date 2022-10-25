@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Random;
-import java.util.function.Predicate;
 import java.util.stream.DoubleStream;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
