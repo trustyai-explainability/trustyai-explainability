@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.local.LocalExplainer;
@@ -121,16 +120,16 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
             List<Output> actualOutputs,
             LimeConfig executionConfig) {
 
-        List<PredictionInput> perturbedInputs = getPerturbedInputs(originalInput.getFeatures(), executionConfig, model);
+        Pair<List<PredictionInput>, List<boolean[]>> perturbedInputsAndPreservationMask =
+                getPerturbedInputs(originalInput.getFeatures(), executionConfig, model);
 
-        return model.predictAsync(perturbedInputs)
+        return model.predictAsync(perturbedInputsAndPreservationMask.getLeft())
                 .thenCompose(predictionOutputs -> {
                     try {
                         boolean strict = executionConfig.getNoOfRetries() > 0;
                         List<LimeInputs> limeInputsList = getLimeInputs(linearizedTargetInputFeatures, actualOutputs,
-                                perturbedInputs, predictionOutputs, strict);
-                        return completedFuture(getSaliencies(linearizedTargetInputFeatures, actualOutputs, limeInputsList,
-                                originalInput, perturbedInputs, predictionOutputs, executionConfig));
+                                perturbedInputsAndPreservationMask.getLeft(), perturbedInputsAndPreservationMask.getRight(), predictionOutputs, strict);
+                        return completedFuture(getSaliencies(linearizedTargetInputFeatures, actualOutputs, limeInputsList, executionConfig));
                     } catch (DatasetNotSeparableException e) {
                         if (executionConfig.getNoOfRetries() > 0) {
                             return adjustAndRetry(model, originalInput, linearizedTargetInputFeatures, actualOutputs, executionConfig);
@@ -180,11 +179,11 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
      * @return a list of inputs to the LIME algorithm
      */
     private List<LimeInputs> getLimeInputs(List<Feature> linearizedTargetInputFeatures, List<Output> actualOutputs,
-            List<PredictionInput> perturbedInputs, List<PredictionOutput> predictionOutputs, boolean strict) {
+            List<PredictionInput> perturbedInputs, List<boolean[]> preservationMasks, List<PredictionOutput> predictionOutputs, boolean strict) {
         List<LimeInputs> limeInputsList = new ArrayList<>();
         for (int o = 0; o < actualOutputs.size(); o++) {
             Output currentOutput = actualOutputs.get(o);
-            LimeInputs limeInputs = prepareInputs(perturbedInputs, predictionOutputs, linearizedTargetInputFeatures,
+            LimeInputs limeInputs = prepareInputs(perturbedInputs, preservationMasks, predictionOutputs, linearizedTargetInputFeatures,
                     o, currentOutput, strict);
             limeInputsList.add(limeInputs);
         }
@@ -192,28 +191,28 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
     }
 
     private SaliencyResults getSaliencies(List<Feature> linearizedTargetInputFeatures, List<Output> actualOutputs,
-            List<LimeInputs> limeInputsList, PredictionInput originalInput, List<PredictionInput> predictionInputs,
-            List<PredictionOutput> predictionOutputs, LimeConfig executionConfig) {
+            List<LimeInputs> limeInputsList, LimeConfig executionConfig) {
 
         Map<String, Saliency> result = new HashMap<>();
         for (int o = 0; o < actualOutputs.size(); o++) {
             LimeInputs limeInputs = limeInputsList.get(o);
             Output originalOutput = actualOutputs.get(o);
-
             getSaliency(linearizedTargetInputFeatures, result, limeInputs, originalOutput, executionConfig);
             LOGGER.debug("weights set for output {}", originalOutput);
         }
-        List<SimplePrediction> pairedOutputs = IntStream.range(0, predictionInputs.size())
-                .mapToObj(i -> new SimplePrediction(predictionInputs.get(i), predictionOutputs.get(i)))
-                .collect(Collectors.toList());
 
+        List<Pair<SimplePrediction, boolean[]>> availableCounterfactuals = new ArrayList<>();
         if (executionConfig.isTrackCounterfactuals()) {
-            return new SaliencyResults(result,
-                    SaliencyResults.processAvailableCounterfactuals(originalInput, pairedOutputs),
-                    SaliencyResults.SourceExplainer.LIME);
-        } else {
-            return new SaliencyResults(result, new HashMap<>(), SaliencyResults.SourceExplainer.LIME);
+            for (int inputIDX = 0; inputIDX < limeInputsList.get(0).getPerturbedInputs().size(); inputIDX++) {
+                availableCounterfactuals.add(Pair.of(
+                        new SimplePrediction(limeInputsList.get(0).getPerturbedInputs().get(inputIDX),
+                                limeInputsList.get(0).getPerturbedPredictionOutputs().get(inputIDX)),
+                        limeInputsList.get(0).getPreservationMasks().get(inputIDX)));
+            }
         }
+        return new SaliencyResults(result,
+                availableCounterfactuals,
+                SaliencyResults.SourceExplainer.LIME);
     }
 
     private void getSaliency(List<Feature> linearizedTargetInputFeatures, Map<String, Saliency> result,
@@ -365,7 +364,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
      * The check can be {@code strict} or not, if so it will throw a {@code DatasetNotSeparableException} when the dataset
      * for a given output is not separable.
      */
-    private LimeInputs prepareInputs(List<PredictionInput> perturbedInputs, List<PredictionOutput> perturbedOutputs,
+    private LimeInputs prepareInputs(List<PredictionInput> perturbedInputs, List<boolean[]> preservationMasks, List<PredictionOutput> perturbedOutputs,
             List<Feature> linearizedTargetInputFeatures, int o, Output currentOutput, boolean strict) {
 
         if (currentOutput.getValue() != null && currentOutput.getValue().getUnderlyingObject() != null) {
@@ -383,18 +382,18 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
                 // check if the dataset is separable and also if the linear model should fit a regressor or a classifier
                 if (rawClassesBalance.size() > 1 && separationRatio < limeConfig.getSeparableDatasetRatio()) {
                     // if dataset creation process succeeds use it to train the linear model
-                    return new LimeInputs(classification, linearizedTargetInputFeatures, currentOutput, perturbedInputs, outputs);
+                    return new LimeInputs(classification, linearizedTargetInputFeatures, currentOutput, perturbedInputs, preservationMasks, perturbedOutputs, outputs);
                 } else {
                     throw new DatasetNotSeparableException(currentOutput, rawClassesBalance);
                 }
             } else {
                 LOGGER.warn("Using an hardly separable dataset for output '{}' of type '{}' with value '{}' ({})",
                         currentOutput.getName(), currentOutput.getType(), currentOutput.getValue(), rawClassesBalance);
-                return new LimeInputs(classification, linearizedTargetInputFeatures, currentOutput, perturbedInputs, outputs);
+                return new LimeInputs(classification, linearizedTargetInputFeatures, currentOutput, perturbedInputs, preservationMasks, perturbedOutputs, outputs);
             }
 
         } else {
-            return new LimeInputs(false, linearizedTargetInputFeatures, currentOutput, emptyList(), emptyList());
+            return new LimeInputs(false, linearizedTargetInputFeatures, currentOutput, emptyList(), emptyList(), emptyList(), emptyList());
         }
     }
 
@@ -423,9 +422,10 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
         return nullValues || equalityCheck ? 1d : 0d;
     }
 
-    private List<PredictionInput> getPerturbedInputs(List<Feature> features, LimeConfig executionConfig,
+    private Pair<List<PredictionInput>, List<boolean[]>> getPerturbedInputs(List<Feature> features, LimeConfig executionConfig,
             PredictionProvider predictionProvider) {
         List<PredictionInput> perturbedInputs = new ArrayList<>();
+        List<boolean[]> preservationMask = new ArrayList<>();
         int size = executionConfig.getNoOfSamples();
         DataDistribution dataDistribution = executionConfig.getDataDistribution();
 
@@ -450,10 +450,12 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
         }
 
         for (int i = 0; i < size; i++) {
-            List<Feature> newFeatures = DataUtils.perturbFeatures(features, perturbationContext, featureDistributionsMap);
-            perturbedInputs.add(new PredictionInput(newFeatures));
+            Pair<List<Feature>, boolean[]> newFeaturesAndPreservationMask =
+                    DataUtils.perturbFeaturesWithPreservationMask(features, perturbationContext, featureDistributionsMap);
+            perturbedInputs.add(new PredictionInput(newFeaturesAndPreservationMask.getLeft()));
+            preservationMask.add(newFeaturesAndPreservationMask.getRight());
         }
-        return perturbedInputs;
+        return Pair.of(perturbedInputs, preservationMask);
     }
 
     @Override

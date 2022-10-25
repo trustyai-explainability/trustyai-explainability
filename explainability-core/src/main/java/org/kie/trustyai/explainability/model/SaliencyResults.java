@@ -21,14 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.utils.IOUtils;
 
 public class SaliencyResults {
     private final Map<String, Saliency> saliencies;
-    private final Map<SimplePrediction, List<Boolean>> availableCFs;
+    private final List<Pair<SimplePrediction, boolean[]>> availableCFs;
     private final SourceExplainer sourceExplainer;
 
     public enum SourceExplainer {
@@ -37,7 +36,7 @@ public class SaliencyResults {
         AGGREGATED_LIME
     }
 
-    public SaliencyResults(Map<String, Saliency> saliencies, Map<SimplePrediction, List<Boolean>> availableCFs, SourceExplainer sourceExplainer) {
+    public SaliencyResults(Map<String, Saliency> saliencies, List<Pair<SimplePrediction, boolean[]>> availableCFs, SourceExplainer sourceExplainer) {
         this.saliencies = saliencies;
         this.availableCFs = availableCFs;
         this.sourceExplainer = sourceExplainer;
@@ -45,34 +44,8 @@ public class SaliencyResults {
 
     public SaliencyResults(Map<String, Saliency> saliencies, SourceExplainer sourceExplainer) {
         this.saliencies = saliencies;
-        this.availableCFs = new HashMap<>();
+        this.availableCFs = new ArrayList<>();
         this.sourceExplainer = sourceExplainer;
-    }
-
-    /**
-     * For an original PredictionInput and a map of counterfactual PredictionOutputs and PredictionOutputs, calculate the
-     * number of changed features per counterfactual. This is returned as a map keyed by the counterfactual prediction
-     * where values are boolean lists where list[i] indicates whether the ith
-     * feature has changed
-     *
-     * @param original The original prediction input
-     * @param availablePredictions A map of available counterfactual PredictionOutput->PredictionInputs
-     * @return map keyed by the counterfactual prediction
-     *         * where values are boolean lists where list[i] indicates whether the ith
-     *         * feature has changed
-     */
-    public static Map<SimplePrediction, List<Boolean>> processAvailableCounterfactuals(
-            PredictionInput original, List<SimplePrediction> availablePredictions) {
-        int nInputs = availablePredictions.size();
-        List<Feature> originalFeatures = original.getFeatures();
-
-        Map<SimplePrediction, List<Boolean>> availableCounterfactuals = new HashMap<>();
-        for (int idx = 0; idx < nInputs; idx++) {
-            List<Feature> newFeatures = availablePredictions.get(idx).getInput().getFeatures();
-            List<Boolean> differences = IntStream.range(0, newFeatures.size()).mapToObj(i -> !originalFeatures.get(i).equals(newFeatures.get(i))).collect(Collectors.toList());
-            availableCounterfactuals.put(availablePredictions.get(idx), differences);
-        }
-        return availableCounterfactuals;
     }
 
     public Map<String, Saliency> getSaliencies() {
@@ -83,7 +56,12 @@ public class SaliencyResults {
         return sourceExplainer;
     }
 
-    public Map<SimplePrediction, List<Boolean>> getAvailableCFs() {
+    /**
+     * @return map keyed by the counterfactual prediction
+     *         where values are boolean lists where list[i] indicates whether the ith
+     *         feature is equal to the original or not
+     */
+    public List<Pair<SimplePrediction, boolean[]>> getAvailableCFs() {
         return availableCFs;
     }
 
