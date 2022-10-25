@@ -54,6 +54,7 @@ class DummyModelsLimeExplainerTest {
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         for (Saliency saliency : saliencyMap.getSaliencies().values()) {
             assertNotNull(saliency);
+            System.err.println(saliency);
             List<FeatureImportance> topFeatures = saliency.getTopFeatures(3);
             assertEquals(3, topFeatures.size());
             Assertions.assertEquals(1d, ExplainabilityMetrics.impactScore(model, prediction, topFeatures));
@@ -105,6 +106,7 @@ class DummyModelsLimeExplainerTest {
         SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         for (Saliency saliency : saliencyMap.getSaliencies().values()) {
+            System.err.println(saliency);
             assertNotNull(saliency);
             List<FeatureImportance> topFeatures = saliency.getTopFeatures(3);
             assertEquals(3, topFeatures.size());

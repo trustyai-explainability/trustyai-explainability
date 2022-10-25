@@ -32,7 +32,7 @@ public class LinearModel {
     private static final Logger logger = LoggerFactory.getLogger(LinearModel.class);
     private static final double GOOD_LOSS_THRESHOLD = 1e-2;
     private static final int MAX_NO_EPOCHS = 50;
-    private static final double INITIAL_LEARNING_RATE = 1;
+    private static final double INITIAL_LEARNING_RATE = 1e-2;
     private static final double DECAY_RATE = 1e-5;
 
     private final double[] weights;
