@@ -109,7 +109,6 @@ public class LinearModel {
             e++;
             logger.debug("epoch {}, loss: {}", e, loss);
             if (lossNotDecreasingIterations > PATIENCE) {
-                                System.err.println("breaking at " + e);
                 logger.debug("early stopping at iteration {}", e);
                 break;
             }
