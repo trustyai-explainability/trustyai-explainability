@@ -68,7 +68,6 @@ class PrequalificationDmnLimeExplainerTest {
 
         PerturbationContext perturbationContext = new PerturbationContext(0L, random, 1);
         LimeConfig limeConfig = new LimeConfig()
-                .withSamples(10)
                 .withPerturbationContext(perturbationContext);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
 
@@ -161,7 +160,7 @@ class PrequalificationDmnLimeExplainerTest {
         LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withDeterministicExecution(true)
                 .withWeightedStability(0.4, 0.6).withSampling(false).withStepCountLimit(20);
         Random random = new Random();
-        LimeConfig initialConfig = new LimeConfig().withSamples(10)
+        LimeConfig initialConfig = new LimeConfig()
                 .withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeConfig optimizedConfig = limeConfigOptimizer.optimize(initialConfig, predictions, model);
         assertThat(optimizedConfig).isNotSameAs(initialConfig);
