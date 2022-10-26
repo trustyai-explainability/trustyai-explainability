@@ -53,6 +53,7 @@ public class ShapConfig {
     private final List<PredictionInput> background;
     private final RealMatrix backgroundMatrix;
     private final OneHotter onehotter;
+    private final boolean trackCounterfactuals;
 
     /**
      * Create a ShapConfig instance. This sets the configuration of the SHAP explainer.
@@ -74,10 +75,11 @@ public class ShapConfig {
      * @param regularizerType: The choice of regularizer to use when fitting data. This will select a certain fraction
      *        of features to use, based on which are most important to the regression
      * @param nRegularizationFeatures: If desired, the exact number of top regularization features can be specified
+     * @param trackCounterfactuals Whether to track byproduct counterfactuals generated during explanation
      */
     protected ShapConfig(LinkType link, List<PredictionInput> background, PerturbationContext pc, Executor executor,
             Integer nSamples, Integer batchCount, double confidence, RegularizerType regularizerType,
-            Integer nRegularizationFeatures) {
+            Integer nRegularizationFeatures, boolean trackCounterfactuals) {
         this.link = link;
         this.background = background;
         this.onehotter = new OneHotter(background, pc);
@@ -89,6 +91,7 @@ public class ShapConfig {
         this.batchCount = batchCount;
         this.regularizerType = regularizerType;
         this.nRegularizationFeatures = nRegularizationFeatures;
+        this.trackCounterfactuals = trackCounterfactuals;
     }
 
     public static Builder builder() {
@@ -109,6 +112,7 @@ public class ShapConfig {
         private Integer builderNRegularizerFeatures = null;
         private double builderConfidence = .95;
         private PerturbationContext builderPC = new PerturbationContext(new SecureRandom(), 0);
+        private boolean builderTrackCounterfactuals = false;
 
         private Builder() {
         }
@@ -120,6 +124,7 @@ public class ShapConfig {
                     .withExecutor(this.builderExecutor)
                     .withConfidence(this.builderConfidence)
                     .withBatchCount(this.builderBatchCount)
+                    .withTrackCounterfactuals(this.builderTrackCounterfactuals)
                     .withPC(this.builderPC);
             output.builderRegularizerType = this.builderRegularizerType;
             output.builderNRegularizerFeatures = this.builderNRegularizerFeatures;
@@ -265,13 +270,14 @@ public class ShapConfig {
         }
 
         /**
-         * Add a TOP_N_FEATURES regularization method to the builder
+         * Set the ShapConfig to track byproduct counterfactuals
          *
          * @param trackCounterfactuals: whether or not SHAP will track available byproduct counterfactuals
          *
          * @return Builder
          */
         public Builder withTrackCounterfactuals(boolean trackCounterfactuals) {
+            this.builderTrackCounterfactuals = trackCounterfactuals;
             return this;
         }
 
@@ -290,7 +296,7 @@ public class ShapConfig {
             }
             return new ShapConfig(this.builderLink, this.builderBackground, this.builderPC, this.builderExecutor,
                     this.builderNSamples, this.builderBatchCount, this.builderConfidence, this.builderRegularizerType,
-                    this.builderNRegularizerFeatures);
+                    this.builderNRegularizerFeatures, this.builderTrackCounterfactuals);
         }
     }
 
@@ -327,6 +333,10 @@ public class ShapConfig {
 
     public RegularizerType getRegularizerType() {
         return this.regularizerType;
+    }
+
+    public boolean isTrackCounterfactuals() {
+        return this.trackCounterfactuals;
     }
 
     /**

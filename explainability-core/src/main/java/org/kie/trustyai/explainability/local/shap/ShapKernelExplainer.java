@@ -362,6 +362,7 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
                 return out;
             })).thenCombine(sdc.getNullOutput(), (out, no) -> saliencyFromMatrix(out, pi, po, no))
                     .thenApply(saliencies -> new SaliencyResults(saliencies,
+                            sdc.getAvailableCounterfactuals(),
                             SaliencyResults.SourceExplainer.SHAP));
         } else
         // if more than 1 feature varies, we need to perform WLR
@@ -389,6 +390,7 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
                     .thenCombine(sdc.getNullOutput(), (wo, no) -> saliencyFromMatrix(wo[0], wo[1], pi, po, no)))
                     .thenApply(saliencies -> new SaliencyResults(
                             saliencies,
+                            sdc.getAvailableCounterfactuals(),
                             SaliencyResults.SourceExplainer.SHAP));
         }
     }
@@ -600,10 +602,30 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
                 //in theory all of these can happen in parallel
                 for (int i = 0; i < sdc.getSamplesAddedSize(); i += batchCount) {
                     int finalI = i;
-                    List<PredictionInput> batch = IntStream.range(i, Math.min(sdc.getSamplesAddedSize(), i + batchCount))
-                            .mapToObj(b -> sdc.getSamplesAdded(b).getSyntheticData())
-                            .collect(ArrayList::new, List::addAll, List::addAll);
-                    expectations = sdc.getModel().predictAsync(config.getOneHotter().oneHotDecode(batch, true))
+                    List<PredictionInput> batch = new ArrayList<>();
+                    List<boolean[]> masks = new ArrayList<>();
+                    List<Integer> batchSizes = new ArrayList<>();
+
+                    for (int batchIdx = i; batchIdx < Math.min(sdc.getSamplesAddedSize(), i + batchCount); batchIdx++) {
+                        List<PredictionInput> batchElements = sdc.getSamplesAdded(batchIdx).getSyntheticData();
+                        batch.addAll(batchElements);
+                        if (config.isTrackCounterfactuals()) {
+                            synchronized (this) {
+                                masks.add(sdc.getSamplesAdded(batchIdx).getMask());
+                                batchSizes.add(batchElements.size());
+                            }
+                        }
+                    }
+                    List<PredictionInput> inputs = config.getOneHotter().oneHotDecode(batch, true);
+                    expectations = sdc.getModel().predictAsync(inputs)
+                            .thenApply(pos -> {
+                                if (config.isTrackCounterfactuals()) {
+                                    synchronized (this) {
+                                        sdc.addAvailableCounterfactual(inputs, pos, masks, batchSizes, finalI);
+                                    }
+                                }
+                                return pos;
+                            })
                             .thenApply(MatrixUtilsExtensions::matrixFromPredictionOutput)
                             .thenApply(ops -> MatrixUtilsExtensions.batchRowMean(ops, sdc.getRows()))
                             .thenCombine(expectations, (expSlices, exps) -> {
@@ -622,8 +644,17 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
                 for (int i = 0; i < sdc.getSamplesAddedSize(); i++) {
                     List<PredictionInput> pis = config.getOneHotter().oneHotDecode(
                             sdc.getSamplesAdded(i).getSyntheticData(), true);
+                    int finalI = i;
                     expectationSlices.put(i,
                             sdc.getModel().predictAsync(pis)
+                                    .thenApply(pos -> {
+                                        if (config.isTrackCounterfactuals()) {
+                                            synchronized (this) {
+                                                sdc.addAvailableCounterfactual(pis, pos, sdc.getSamplesAdded(finalI).getMask(), finalI);
+                                            }
+                                        }
+                                        return pos;
+                                    })
                                     .thenApply(MatrixUtilsExtensions::matrixFromPredictionOutput)
                                     .thenApply(posMatrix -> MatrixUtilsExtensions.rowSum(posMatrix).mapDivide(posMatrix.getRowDimension()))
                                     .thenApply(this::link)

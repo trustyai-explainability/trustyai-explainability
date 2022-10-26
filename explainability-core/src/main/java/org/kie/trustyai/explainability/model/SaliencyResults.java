@@ -22,11 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.utils.IOUtils;
 
 public class SaliencyResults {
     private final Map<String, Saliency> saliencies;
-
+    private final List<Pair<SimplePrediction, boolean[]>> availableCFs;
     private final SourceExplainer sourceExplainer;
 
     public enum SourceExplainer {
@@ -35,8 +36,15 @@ public class SaliencyResults {
         AGGREGATED_LIME
     }
 
+    public SaliencyResults(Map<String, Saliency> saliencies, List<Pair<SimplePrediction, boolean[]>> availableCFs, SourceExplainer sourceExplainer) {
+        this.saliencies = saliencies;
+        this.availableCFs = availableCFs;
+        this.sourceExplainer = sourceExplainer;
+    }
+
     public SaliencyResults(Map<String, Saliency> saliencies, SourceExplainer sourceExplainer) {
         this.saliencies = saliencies;
+        this.availableCFs = new ArrayList<>();
         this.sourceExplainer = sourceExplainer;
     }
 
@@ -48,6 +56,22 @@ public class SaliencyResults {
         return sourceExplainer;
     }
 
+    /**
+     * @return map keyed by the counterfactual prediction
+     *         where values are boolean lists where list[i] indicates whether the ith
+     *         feature is equal to the original or not
+     */
+    public List<Pair<SimplePrediction, boolean[]>> getAvailableCFs() {
+        return availableCFs;
+    }
+
+    /**
+     * Find the difference between two SaliencyResults, where a feature's saliencies and scores
+     * are subtracted between the two. The confidences are propagated according to their orthogonal vector product.
+     *
+     * @param other The SaliencyResult to subtract from this one.
+     * @return A SaliencyResult containing the delta between the two
+     */
     public SaliencyResults difference(SaliencyResults other) {
         if (!this.sourceExplainer.equals(other.sourceExplainer)) {
             throw new IllegalArgumentException(

@@ -20,22 +20,27 @@ import java.util.List;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
 
 public class LimeInputs {
 
     private final boolean classification;
     private final List<Feature> features;
     private final Output targetOutput;
+    private final List<boolean[]> preservationMasks;
     private final List<PredictionInput> perturbedInputs;
+    private final List<PredictionOutput> perturbedPredictionOutputs;
     private final List<Output> perturbedOutputs;
 
     public LimeInputs(boolean classification, List<Feature> features, Output targetOutput,
-            List<PredictionInput> perturbedInputs, List<Output> perturbedOutputs) {
+            List<PredictionInput> perturbedInputs, List<boolean[]> preservationMasks, List<PredictionOutput> perturbedPredictionOutputs, List<Output> perturbedOutputs) {
         this.classification = classification;
         this.features = features;
         this.targetOutput = targetOutput;
         this.perturbedInputs = perturbedInputs;
+        this.perturbedPredictionOutputs = perturbedPredictionOutputs;
         this.perturbedOutputs = perturbedOutputs;
+        this.preservationMasks = preservationMasks;
     }
 
     public List<Feature> getFeatures() {
@@ -56,5 +61,14 @@ public class LimeInputs {
 
     public boolean isClassification() {
         return classification;
+    }
+
+    // boolean array showing whether feature i is original (true) or perturbed (false)
+    public List<boolean[]> getPreservationMasks() {
+        return preservationMasks;
+    }
+
+    public List<PredictionOutput> getPerturbedPredictionOutputs() {
+        return perturbedPredictionOutputs;
     }
 }

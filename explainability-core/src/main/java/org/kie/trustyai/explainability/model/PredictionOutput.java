@@ -16,6 +16,7 @@
 package org.kie.trustyai.explainability.model;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -38,5 +39,22 @@ public class PredictionOutput {
         return outputs.stream()
                 .filter(output -> name.equalsIgnoreCase(output.getName()))
                 .findFirst();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        PredictionOutput po = (PredictionOutput) o;
+        return outputs.equals(po.getOutputs());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(outputs);
     }
 }

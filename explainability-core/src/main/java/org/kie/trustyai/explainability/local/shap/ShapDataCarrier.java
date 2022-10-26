@@ -16,15 +16,18 @@
 
 package org.kie.trustyai.explainability.local.shap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.linear.RealVector;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.SimplePrediction;
 
 public class ShapDataCarrier {
     private PredictionProvider model;
@@ -41,7 +44,7 @@ public class ShapDataCarrier {
     private List<Integer> varyingFeatureGroups;
     private int numVarying;
     private HashMap<Integer, Integer> masksUsed;
-    private Map<PredictionOutput, PredictionInput> availableOutputs = new HashMap<>();
+    private List<Pair<SimplePrediction, boolean[]>> availableCounterfactuals = new ArrayList<>();
 
     // data statistics ======================================================
     public int getRows() {
@@ -130,14 +133,28 @@ public class ShapDataCarrier {
         this.samplesAddedSize += 1;
     }
 
-    public void addAvailableOutputs(List<PredictionInput> pis, List<PredictionOutput> pos) {
+    public void addAvailableCounterfactual(List<PredictionInput> pis, List<PredictionOutput> pos, List<boolean[]> masks,
+            List<Integer> batchSizes, int index) {
+        int currentBatch = 0;
+        int currentPredictionIndex = 0;
         for (int i = 0; i < pis.size(); i++) {
-            this.availableOutputs.put(pos.get(i), pis.get(i));
+            if (currentPredictionIndex > batchSizes.get(currentBatch)) {
+                currentBatch++;
+                currentPredictionIndex = 0;
+            }
+            this.availableCounterfactuals.add(Pair.of(new SimplePrediction(pis.get(i), pos.get(i)), masks.get(currentBatch)));
+            currentPredictionIndex++;
         }
     }
 
-    public Map<PredictionOutput, PredictionInput> getAvailableOutputs() {
-        return this.availableOutputs;
+    public void addAvailableCounterfactual(List<PredictionInput> pis, List<PredictionOutput> pos, boolean[] mask, int index) {
+        for (int i = 0; i < pis.size(); i++) {
+            this.availableCounterfactuals.add(Pair.of(new SimplePrediction(pis.get(i), pos.get(i)), mask));
+        }
+    }
+
+    public List<Pair<SimplePrediction, boolean[]>> getAvailableCounterfactuals() {
+        return this.availableCounterfactuals;
     }
 
     //varying feature groups getters and setters

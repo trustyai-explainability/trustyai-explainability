@@ -15,6 +15,7 @@
  */
 package org.kie.trustyai.explainability.model;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class SimplePrediction extends BasePrediction {
@@ -25,4 +26,24 @@ public class SimplePrediction extends BasePrediction {
     public SimplePrediction(PredictionInput input, PredictionOutput output, UUID uuid) {
         super(input, output, uuid);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SimplePrediction that = (SimplePrediction) o;
+        return Objects.equals(this.getInput(), that.getInput()) &&
+                Objects.equals(this.getOutput(), that.getOutput()) &&
+                Objects.equals(this.getExecutionId(), that.getExecutionId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getInput(), getOutput(), getExecutionId());
+    }
+
 }

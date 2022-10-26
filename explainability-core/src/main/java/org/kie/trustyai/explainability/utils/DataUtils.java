@@ -39,6 +39,7 @@ import java.util.stream.IntStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.local.lime.HighScoreNumericFeatureZones;
 import org.kie.trustyai.explainability.model.DataDistribution;
@@ -175,7 +176,7 @@ public class DataUtils {
      *
      * @param originalFeatures the input features that need to be perturbed
      * @param perturbationContext the perturbation context
-     * @return a perturbed copy of the input features
+     * @return a perturbed copy of the input features and a boolean array of feature preservation (true)/perturbation (false)
      */
     public static List<Feature> perturbFeatures(List<Feature> originalFeatures, PerturbationContext perturbationContext) {
         return perturbFeatures(originalFeatures, perturbationContext, Collections.emptyMap());
@@ -189,11 +190,30 @@ public class DataUtils {
      * @param originalFeatures the input features that need to be perturbed
      * @param perturbationContext the perturbation context
      * @param featureDistributionsMap the map of feature distributions
-     * @return a perturbed copy of the input features
+     * @return perturbed copy of the input features
      */
     public static List<Feature> perturbFeatures(List<Feature> originalFeatures, PerturbationContext perturbationContext,
             Map<String, FeatureDistribution> featureDistributionsMap) {
+        return perturbFeaturesWithPreservationMask(originalFeatures, perturbationContext, featureDistributionsMap).getLeft();
+    }
+
+    /**
+     * Perform perturbations on a fixed number of features in the given input.
+     * A map of feature distributions to draw (all, none or some of them) is given.
+     * Which feature will be perturbed is non deterministic.
+     *
+     * @param originalFeatures the input features that need to be perturbed
+     * @param perturbationContext the perturbation context
+     * @param featureDistributionsMap the map of feature distributions
+     * @return pair, perturbed copy of the input features and boolean array of whether the feature is original (true)
+     *         or perturbed (false)
+     */
+    public static Pair<List<Feature>, boolean[]> perturbFeaturesWithPreservationMask(List<Feature> originalFeatures, PerturbationContext perturbationContext,
+            Map<String, FeatureDistribution> featureDistributionsMap) {
         List<Feature> newFeatures = new ArrayList<>(originalFeatures);
+        boolean[] originalMarker = new boolean[originalFeatures.size()];
+        Arrays.fill(originalMarker, true);
+
         if (!newFeatures.isEmpty()) {
             // perturb at most in the range [|features|/2), noOfPerturbations]
             int lowerBound = (int) Math.min(perturbationContext.getNoOfPerturbations(), 0.5d * newFeatures.size());
@@ -219,11 +239,12 @@ public class DataUtils {
                     }
                     Feature perturbedFeature =
                             FeatureFactory.copyOf(feature, newValue);
+                    originalMarker[index] = false;
                     newFeatures.set(index, perturbedFeature);
                 }
             }
         }
-        return newFeatures;
+        return Pair.of(newFeatures, originalMarker);
     }
 
     /**
