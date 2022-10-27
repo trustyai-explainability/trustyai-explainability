@@ -4,7 +4,7 @@ jobs:
   event-connect-build:
     env:
       MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
-      MAVEN_ARGS: "-nsu -fae -e"
+      MAVEN_ARGS: "-nsu -fae -e -T1C"
     concurrency:
       group: pull_request-${{ github.event_name }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.java-version }}
       cancel-in-progress: true
