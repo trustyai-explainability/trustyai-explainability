@@ -3,7 +3,7 @@ on: [ push, pull_request ]
 jobs:
   event-connect-build:
     env:
-      MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+      MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -nsu -fae -e"
     concurrency:
       group: pull_request-${{ github.event_name }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.java-version }}
       cancel-in-progress: true
@@ -55,15 +55,15 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.java-version }}-maven${{ matrix.maven-version }}
       - name: Compile
         shell: bash
-        run: mvn -Dmaven.test.skip=true package -nsu -fae -e -Dformatter.skip=true
+        run: mvn -Dmaven.test.skip=true package -Dformatter.skip=true
       - name: Validate Formatting
         # execute formatting validation only on Ubuntu to avoid issues with CR LF
         if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash
-        run: mvn net.revelc.code.formatter:formatter-maven-plugin:validate -nsu -fae -e
+        run: mvn net.revelc.code.formatter:formatter-maven-plugin:validate
       - name: Run Test Suite
         shell: bash
-        run: mvn verify -nsu -fae -e
+        run: mvn verify
       - name: Publish Test Report
         if: ${{ always() }}
         uses: scacap/action-surefire-report@v1.0.10
