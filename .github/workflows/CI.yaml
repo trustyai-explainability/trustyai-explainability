@@ -11,8 +11,10 @@ jobs:
     timeout-minutes: 45
     strategy:
       matrix:
-        os: [ 'ubuntu-latest', 'windows-latest' ]
-        java-version: [ 11, 17 ]
+        # configure with [ 'ubuntu-latest', 'windows-latest' ] to enable Windows builds
+        os: [ 'ubuntu-latest' ]
+        # configure with [ 11, 17 ] to enable the build also with Java 17
+        java-version: [ 11 ]
         maven-version: [ '3.8.6' ]
       fail-fast: false
     runs-on: ${{ matrix.os }}
