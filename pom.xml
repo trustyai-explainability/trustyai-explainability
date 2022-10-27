@@ -2,21 +2,156 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <parent>
-    <groupId>org.kie.kogito</groupId>
-    <artifactId>kogito-apps-build-parent</artifactId>
-    <version>1.22.1.Final</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.kie.trustyai</groupId>
-  <artifactId>trustyaiexplainability</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
-  <name>TrustyAI Explainability</name>
-  <packaging>pom</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.kie.trustyai</groupId>
+    <artifactId>trustyaiexplainability</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+    <name>TrustyAI Explainability</name>
+    <packaging>pom</packaging>
 
-  <modules>
-    <module>explainability-core</module>
-    <module>explainability-integrationtests</module>
-  </modules>
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+
+        <version.org.slf4j>1.7.30</version.org.slf4j>
+        <version.com.fasterxml.jackson.databind>2.13.4.2</version.com.fasterxml.jackson.databind>
+        <version.org.apache.commons.commons-lang3>3.12.0</version.org.apache.commons.commons-lang3>
+        <version.org.apache.commons.commons-csv>1.9.0</version.org.apache.commons.commons-csv>
+        <version.org.optaplanner>8.29.0.Final</version.org.optaplanner>
+        <version.org.kie.kogito>1.29.0.Final</version.org.kie.kogito>
+        <version.org.apache.opennlp>1.9.2</version.org.apache.opennlp>
+        <version.org.junit.jupiter>5.9.1</version.org.junit.jupiter>
+        <version.org.mockito>4.8.0</version.org.mockito>
+        <version.org.assertj>3.22.0</version.org.assertj>
+        <version.org.awaitility>4.2.0</version.org.awaitility>
+
+        <version.surefire.plugin>2.22.2</version.surefire.plugin> <!-- minimum required by JUnit 5 -->
+        <version.shade.plugin>3.4.0</version.shade.plugin> <!-- minimum required by JUnit 5 -->
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.optaplanner</groupId>
+                <artifactId>optaplanner-bom</artifactId>
+                <version>${version.org.optaplanner}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${version.org.apache.commons.commons-lang3}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>${version.org.apache.commons.commons-csv}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${version.org.slf4j}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${version.com.fasterxml.jackson.databind}</version>
+            </dependency>
+
+            <!-- TEST dependencies -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${version.org.junit.jupiter}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${version.org.assertj}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${version.org.mockito}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${version.org.awaitility}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${version.org.slf4j}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.kie.kogito</groupId>
+                <artifactId>kogito-dmn</artifactId>
+                <version>${version.org.kie.kogito}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.kie.kogito</groupId>
+                <artifactId>kogito-pmml</artifactId>
+                <version>${version.org.kie.kogito}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.opennlp</groupId>
+                <artifactId>opennlp-tools</artifactId>
+                <version>${version.org.apache.opennlp}</version>
+                <scope>test</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${version.surefire.plugin}</version>
+                    <configuration>
+                        <argLine>-Xmx1024m -Dfile.encoding=UTF-8</argLine>
+                        <systemPropertyVariables>
+                            <apple.awt.UIElement>true</apple.awt.UIElement>
+                            <org.uberfire.nio.git.daemon.enabled>false</org.uberfire.nio.git.daemon.enabled>
+                            <org.uberfire.nio.git.ssh.enabled>false</org.uberfire.nio.git.ssh.enabled>
+                            <org.uberfire.sys.repo.monitor.disabled>true</org.uberfire.sys.repo.monitor.disabled>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${version.surefire.plugin}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${version.shade.plugin}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <modules>
+        <module>explainability-core</module>
+        <module>explainability-integrationtests</module>
+    </modules>
 
 </project>
