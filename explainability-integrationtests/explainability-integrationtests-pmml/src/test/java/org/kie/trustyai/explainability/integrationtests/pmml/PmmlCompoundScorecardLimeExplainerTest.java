@@ -56,6 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.kie.pmml.evaluator.assembler.factories.PMMLRuntimeFactoryInternal.getPMMLRuntime;
 
+@Disabled
 class PmmlCompoundScorecardLimeExplainerTest {
 
     private static PMMLRuntime compoundScoreCardRuntime;
@@ -86,7 +87,7 @@ class PmmlCompoundScorecardLimeExplainerTest {
         Prediction prediction = new SimplePrediction(input, output);
 
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         for (Saliency saliency : saliencyMap.values()) {
             assertThat(saliency).isNotNull();
             double v = ExplainabilityMetrics.impactScore(model, prediction, saliency.getTopFeatures(2));

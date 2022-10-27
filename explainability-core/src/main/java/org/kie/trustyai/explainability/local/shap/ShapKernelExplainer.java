@@ -35,12 +35,15 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.kie.trustyai.explainability.local.LocalExplainer;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.FeatureImportance;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
+import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.utils.LarsPath;
 import org.kie.trustyai.explainability.utils.LassoLarsIC;
 import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
@@ -55,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * https://proceedings.neurips.cc/paper/2017/file/8a20a8621978632d76c43dfd28b67767-Paper.pdf
  * see also https://github.com/slundberg/shap/blob/master/shap/explainers/_kernel.py
  */
-public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
+public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShapKernelExplainer.class);
     private ShapConfig config;
 
@@ -263,14 +266,18 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
      * @return an array of n saliencies, one for each output of the model. Each Saliency lists the feature
      *         importances of each input feature to that particular output
      */
-    public static Map<String, Saliency> saliencyFromMatrix(RealMatrix m, PredictionInput pi, PredictionOutput po) {
+    public static Map<String, Saliency> saliencyFromMatrix(RealMatrix m, PredictionInput pi, PredictionOutput po,
+            Map<String, Double> nullOutput) {
         Map<String, Saliency> saliencies = new HashMap<>();
         for (int i = 0; i < m.getRowDimension(); i++) {
+            String outputName = po.getOutputs().get(i).getName();
             List<FeatureImportance> fis = new ArrayList<>();
             for (int j = 0; j < m.getColumnDimension(); j++) {
                 fis.add(new FeatureImportance(pi.getFeatures().get(j), m.getEntry(i, j)));
             }
-            saliencies.put(po.getOutputs().get(i).getName(), new Saliency(po.getOutputs().get(i), fis));
+            Feature background = FeatureFactory.newNumericalFeature("Background", nullOutput.get(outputName));
+            fis.add(new FeatureImportance(background, nullOutput.get(outputName)));
+            saliencies.put(outputName, new Saliency(po.getOutputs().get(i), fis));
         }
         return saliencies;
     }
@@ -286,14 +293,18 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
      * @return an array of n saliencies, one for each output of the model. Each Saliency lists the feature
      *         importances and confidences of each input feature to that particular output
      */
-    public static Map<String, Saliency> saliencyFromMatrix(RealMatrix m, RealMatrix bounds, PredictionInput pi, PredictionOutput po) {
+    public static Map<String, Saliency> saliencyFromMatrix(RealMatrix m, RealMatrix bounds, PredictionInput pi,
+            PredictionOutput po, Map<String, Double> nullOutput) {
         Map<String, Saliency> saliencies = new HashMap<>();
         for (int i = 0; i < m.getRowDimension(); i++) {
+            String outputName = po.getOutputs().get(i).getName();
             List<FeatureImportance> fis = new ArrayList<>();
             for (int j = 0; j < m.getColumnDimension(); j++) {
                 fis.add(new FeatureImportance(pi.getFeatures().get(j), m.getEntry(i, j), bounds.getEntry(i, j)));
             }
-            saliencies.put(po.getOutputs().get(i).getName(), new Saliency(po.getOutputs().get(i), fis));
+            Feature background = FeatureFactory.newNumericalFeature("Background", nullOutput.get(outputName));
+            fis.add(new FeatureImportance(background, nullOutput.get(outputName)));
+            saliencies.put(outputName, new Saliency(po.getOutputs().get(i), fis));
         }
         return saliencies;
     }
@@ -306,7 +317,7 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
      *
      * @return the shap values for this prediction, of shape [n_model_outputs x n_features]
      */
-    private CompletableFuture<ShapResults> explain(Prediction prediction, PredictionProvider model) {
+    private CompletableFuture<SaliencyResults> explain(Prediction prediction, PredictionProvider model) {
         ShapDataCarrier sdc = this.initialize(model);
         sdc.setSamplesAdded(new ArrayList<>());
         PredictionInput pi = prediction.getInput();
@@ -335,7 +346,10 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
 
         // if no features vary, then the features do not effect output, and all shap values are zero.
         if (sdc.getNumVarying() == 0) {
-            return output.thenApply(o -> saliencyFromMatrix(o, pi, po)).thenCombine(sdc.getNullOutput(), ShapResults::new);
+            return output.thenCombine(sdc.getNullOutput(), (o, no) -> saliencyFromMatrix(o, pi, po, no))
+                    .thenApply(saliencies -> new SaliencyResults(
+                            saliencies,
+                            SaliencyResults.SourceExplainer.SHAP));
         } else if (sdc.getNumVarying() == 1)
         // if 1 feature varies, this feature has all the effect
         {
@@ -345,8 +359,11 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
                 for (int i = 0; i < os; i++) {
                     out.setEntry(i, sdc.getVaryingFeatureGroups(0), df.getEntry(i));
                 }
-                return saliencyFromMatrix(out, pi, po);
-            })).thenCombine(sdc.getNullOutput(), ShapResults::new);
+                return out;
+            })).thenCombine(sdc.getNullOutput(), (out, no) -> saliencyFromMatrix(out, pi, po, no))
+                    .thenApply(saliencies -> new SaliencyResults(saliencies,
+                            sdc.getAvailableCounterfactuals(),
+                            SaliencyResults.SourceExplainer.SHAP));
         } else
         // if more than 1 feature varies, we need to perform WLR
         {
@@ -370,8 +387,11 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
 
             // run the wlr model over the synthetic data results
             return output.thenCompose(o -> this.solveSystem(expectations, poVector, sdc)
-                    .thenApply(wo -> saliencyFromMatrix(wo[0], wo[1], pi, po)))
-                    .thenCombine(sdc.getNullOutput(), ShapResults::new);
+                    .thenCombine(sdc.getNullOutput(), (wo, no) -> saliencyFromMatrix(wo[0], wo[1], pi, po, no)))
+                    .thenApply(saliencies -> new SaliencyResults(
+                            saliencies,
+                            sdc.getAvailableCounterfactuals(),
+                            SaliencyResults.SourceExplainer.SHAP));
         }
     }
 
@@ -573,19 +593,39 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
      */
 
     private CompletableFuture<RealMatrix> runSyntheticData(ShapDataCarrier sdc) {
-        if (config.getBatchSize() > 1) {
-            int batchSize = this.config.getBatchSize();
+        if (config.getBatchCount() > 1) {
+            int batchCount = this.config.getBatchCount();
             return sdc.getLinkNull().thenCompose(ln -> sdc.getOutputSize().thenCompose(os -> {
                 CompletableFuture<RealMatrix> expectations = CompletableFuture.supplyAsync(() -> MatrixUtils.createRealMatrix(
                         new double[sdc.getSamplesAddedSize()][os]),
                         this.config.getExecutor());
                 //in theory all of these can happen in parallel
-                for (int i = 0; i < sdc.getSamplesAddedSize(); i += batchSize) {
+                for (int i = 0; i < sdc.getSamplesAddedSize(); i += batchCount) {
                     int finalI = i;
-                    List<PredictionInput> batch = IntStream.range(i, Math.min(sdc.getSamplesAddedSize(), i + batchSize))
-                            .mapToObj(b -> sdc.getSamplesAdded(b).getSyntheticData())
-                            .collect(ArrayList::new, List::addAll, List::addAll);
-                    expectations = sdc.getModel().predictAsync(config.getOneHotter().oneHotDecode(batch, true))
+                    List<PredictionInput> batch = new ArrayList<>();
+                    List<boolean[]> masks = new ArrayList<>();
+                    List<Integer> batchSizes = new ArrayList<>();
+
+                    for (int batchIdx = i; batchIdx < Math.min(sdc.getSamplesAddedSize(), i + batchCount); batchIdx++) {
+                        List<PredictionInput> batchElements = sdc.getSamplesAdded(batchIdx).getSyntheticData();
+                        batch.addAll(batchElements);
+                        if (config.isTrackCounterfactuals()) {
+                            synchronized (this) {
+                                masks.add(sdc.getSamplesAdded(batchIdx).getMask());
+                                batchSizes.add(batchElements.size());
+                            }
+                        }
+                    }
+                    List<PredictionInput> inputs = config.getOneHotter().oneHotDecode(batch, true);
+                    expectations = sdc.getModel().predictAsync(inputs)
+                            .thenApply(pos -> {
+                                if (config.isTrackCounterfactuals()) {
+                                    synchronized (this) {
+                                        sdc.addAvailableCounterfactual(inputs, pos, masks, batchSizes, finalI);
+                                    }
+                                }
+                                return pos;
+                            })
                             .thenApply(MatrixUtilsExtensions::matrixFromPredictionOutput)
                             .thenApply(ops -> MatrixUtilsExtensions.batchRowMean(ops, sdc.getRows()))
                             .thenCombine(expectations, (expSlices, exps) -> {
@@ -604,8 +644,17 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
                 for (int i = 0; i < sdc.getSamplesAddedSize(); i++) {
                     List<PredictionInput> pis = config.getOneHotter().oneHotDecode(
                             sdc.getSamplesAdded(i).getSyntheticData(), true);
+                    int finalI = i;
                     expectationSlices.put(i,
                             sdc.getModel().predictAsync(pis)
+                                    .thenApply(pos -> {
+                                        if (config.isTrackCounterfactuals()) {
+                                            synchronized (this) {
+                                                sdc.addAvailableCounterfactual(pis, pos, sdc.getSamplesAdded(finalI).getMask(), finalI);
+                                            }
+                                        }
+                                        return pos;
+                                    })
                                     .thenApply(MatrixUtilsExtensions::matrixFromPredictionOutput)
                                     .thenApply(posMatrix -> MatrixUtilsExtensions.rowSum(posMatrix).mapDivide(posMatrix.getRowDimension()))
                                     .thenApply(this::link)
@@ -815,7 +864,7 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
      * @return shap values, Saliency[] of shape [n_outputs], with each saliency reporting m feature importances+confidences
      */
     @Override
-    public CompletableFuture<ShapResults> explainAsync(Prediction prediction, PredictionProvider model) {
+    public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model) {
         return explainAsync(prediction, model, null);
     }
 
@@ -829,7 +878,7 @@ public class ShapKernelExplainer implements LocalExplainer<ShapResults> {
      * @return shap values, Saliency[] of shape [n_outputs], with each saliency reporting m feature importances+confidences
      */
     @Override
-    public CompletableFuture<ShapResults> explainAsync(Prediction prediction, PredictionProvider model, Consumer<ShapResults> intermediateResultsConsumer) {
+    public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model, Consumer<SaliencyResults> intermediateResultsConsumer) {
         return this.explain(prediction, model);
     }
 }

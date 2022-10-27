@@ -22,15 +22,10 @@ import java.util.concurrent.ExecutionException;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
-import org.kie.trustyai.explainability.model.DataDistribution;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.DataUtils;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -152,7 +147,7 @@ class LimeConfigOptimizerTest {
         long seed = 0;
         List<LimeConfig> optimizedConfigs = new ArrayList<>();
 
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         DataDistribution dataDistribution = DataUtils.generateRandomDataDistribution(5, 100, new Random());
         List<PredictionInput> samples = dataDistribution.sample(3);
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples).get();
@@ -186,7 +181,7 @@ class LimeConfigOptimizerTest {
 
     private void assertConfigOptimized(LimeConfigOptimizer limeConfigOptimizer) throws InterruptedException, java.util.concurrent.ExecutionException {
         LimeConfig initialConfig = new LimeConfig().withSamples(10);
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         Random random = new Random();
         random.setSeed(4);
         DataDistribution dataDistribution = DataUtils.generateRandomDataDistribution(5, 100, random);

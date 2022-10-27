@@ -18,7 +18,6 @@ package org.kie.trustyai.explainability.local.lime.optim;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -31,6 +30,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
+import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +66,7 @@ public class RecordingLimeExplainer extends LimeExplainer {
     }
 
     @Override
-    public CompletableFuture<Map<String, Saliency>> explainAsync(Prediction prediction, PredictionProvider model) {
+    public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model) {
         if (!recordedPredictions.offer(prediction)) {
             LOGGER.debug("Prediction {} not recorded", prediction);
         }
@@ -76,7 +76,7 @@ public class RecordingLimeExplainer extends LimeExplainer {
     }
 
     @Override
-    protected CompletableFuture<Map<String, Saliency>> explainWithExecutionConfig(PredictionProvider model, PredictionInput originalInput, List<Feature> linearizedTargetInputFeatures,
+    protected CompletableFuture<SaliencyResults> explainWithExecutionConfig(PredictionProvider model, PredictionInput originalInput, List<Feature> linearizedTargetInputFeatures,
             List<Output> actualOutputs, LimeConfig config) {
         LimeConfig optimizedConfig = strategy.bestConfigFor(this);
         if (optimizedConfig != null) {

@@ -31,9 +31,11 @@ public class LinearModel {
 
     private static final Logger logger = LoggerFactory.getLogger(LinearModel.class);
     private static final double GOOD_LOSS_THRESHOLD = 1e-2;
-    private static final int MAX_NO_EPOCHS = 50;
-    private static final double INITIAL_LEARNING_RATE = 1e-1;
+    private static final int MAX_NO_EPOCHS = 5000;
+    private static final double INITIAL_LEARNING_RATE = 1e-2;
     private static final double DECAY_RATE = 1e-5;
+
+    private static final int PATIENCE = 50;
 
     private final double[] weights;
     private final boolean classification;
@@ -61,10 +63,14 @@ public class LinearModel {
             Arrays.fill(weights, 0);
             return finalLoss;
         }
+        double bestLoss = Double.MAX_VALUE;
+        double[] bestWeights = new double[weights.length];
+        double bestBias = bias;
         double lr = INITIAL_LEARNING_RATE;
         int e = 0;
+        int lossNotDecreasingIterations = 0;
         while (checkFinalLoss(finalLoss) && e < MAX_NO_EPOCHS) {
-            double loss = 0;
+            double loss = 0; // MAE
             int i = 0;
             for (Pair<double[], Double> sample : trainingSet) {
                 double[] doubles = sample.getLeft();
@@ -80,17 +86,35 @@ public class LinearModel {
                         }
                         v = finiteOrZero(v);
                         weights[j] += v;
-                        bias += lr * diff * sampleWeights[i];
                     }
+                    double biasUpdate = lr * diff;
+                    if (trainingSet.size() == sampleWeights.length) {
+                        biasUpdate *= sampleWeights[i];
+                    }
+                    bias += biasUpdate;
                 }
                 i++;
             }
             lr *= (1d / (1d + DECAY_RATE * e)); // learning rate decay
-
             finalLoss = loss;
+            if (finalLoss < bestLoss) {
+                bestLoss = finalLoss;
+                System.arraycopy(weights, 0, bestWeights, 0, weights.length);
+                bestBias = bias;
+                logger.debug("weights updated, loss: {}", bestLoss);
+                lossNotDecreasingIterations = 0;
+            } else {
+                lossNotDecreasingIterations++;
+            }
             e++;
             logger.debug("epoch {}, loss: {}", e, loss);
+            if (lossNotDecreasingIterations > PATIENCE) {
+                logger.debug("early stopping at iteration {}", e);
+                break;
+            }
         }
+        bias = bestBias;
+        System.arraycopy(bestWeights, 0, weights, 0, weights.length);
         return finalLoss;
     }
 

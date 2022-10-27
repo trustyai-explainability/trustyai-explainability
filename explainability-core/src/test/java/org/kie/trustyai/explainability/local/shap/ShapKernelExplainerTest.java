@@ -17,18 +17,8 @@
 package org.kie.trustyai.explainability.local.shap;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.SplittableRandom;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.*;
+import java.util.concurrent.*;
 
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -37,26 +27,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
-import org.kie.trustyai.explainability.TestUtils;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SimplePrediction;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
 import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ShapKernelExplainerTest {
     double[][] backgroundRaw = {
@@ -158,13 +134,19 @@ class ShapKernelExplainerTest {
     }
 
     private RealMatrix[] saliencyToMatrix(Map<String, Saliency> saliencies) {
+        return saliencyToMatrix(saliencies, false);
+    }
+
+    private RealMatrix[] saliencyToMatrix(Map<String, Saliency> saliencies, boolean withBackground) {
         String[] keySet = saliencies.keySet().toArray(String[]::new);
         RealMatrix emptyMatrix = MatrixUtils.createRealMatrix(
-                new double[saliencies.size()][saliencies.get(keySet[0]).getPerFeatureImportance().size()]);
+                new double[saliencies.size()][saliencies
+                        .get(keySet[0])
+                        .getPerFeatureImportance().size() - (withBackground ? 0 : 1)]);
         RealMatrix[] out = new RealMatrix[] { emptyMatrix.copy(), emptyMatrix.copy() };
         for (int i = 0; i < keySet.length; i++) {
             List<FeatureImportance> fis = saliencies.get(keySet[i]).getPerFeatureImportance();
-            for (int j = 0; j < fis.size(); j++) {
+            for (int j = 0; j < fis.size() - (withBackground ? 0 : 1); j++) {
                 out[0].setEntry(i, j, fis.get(j).getScore());
                 out[1].setEntry(i, j, fis.get(j).getConfidence());
             }
@@ -238,7 +220,7 @@ class ShapKernelExplainerTest {
     // test a single output model with no varying features
     @Test
     void testNoVarianceOneOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundNoVariance);
         ShapConfig skConfig = testConfig.withBackground(background).withNSamples(100).build();
         shapTestCase(model, skConfig, toExplainZeroVariance, zeroVarianceOneOutputSHAP);
@@ -247,7 +229,7 @@ class ShapKernelExplainerTest {
     // test a single output model with one varying feature
     @Test
     void testOneVarianceOneOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundNoVariance);
         ShapConfig skConfig = testConfig.withBackground(background).withNSamples(100).build();
         shapTestCase(model, skConfig, toExplainOneVariance, oneVarianceOneOutputSHAP);
@@ -256,7 +238,7 @@ class ShapKernelExplainerTest {
     // test a single output model with many varying features
     @Test
     void testMultiVarianceOneOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundRaw);
         ShapConfig skConfig = testConfig.withBackground(background).withNSamples(35).build();
         shapTestCase(model, skConfig, toExplainRaw, multiVarianceOneOutputSHAP);
@@ -265,7 +247,7 @@ class ShapKernelExplainerTest {
     // test a single output model with many varying features and logit link
     @Test
     void testMultiVarianceOneOutputLogit() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundLogit);
         ShapConfig skConfig = ShapConfig.builder()
                 .withBackground(background)
@@ -280,7 +262,7 @@ class ShapKernelExplainerTest {
     // test a multi-output model with no varying features
     @Test
     void testNoVarianceMultiOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestUtils.getSumSkipTwoOutputModel(1);
+        PredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundNoVariance);
         ShapConfig skConfig = testConfig.withBackground(background).build();
         shapTestCase(model, skConfig, toExplainZeroVariance, zeroVarianceMultiOutputSHAP);
@@ -289,7 +271,7 @@ class ShapKernelExplainerTest {
     // test a multi-output model with one varying feature
     @Test
     void testOneVarianceMultiOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestUtils.getSumSkipTwoOutputModel(1);
+        PredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundNoVariance);
         ShapConfig skConfig = testConfig.withBackground(background).build();
         shapTestCase(model, skConfig, toExplainOneVariance, oneVarianceMultiOutputSHAP);
@@ -298,10 +280,38 @@ class ShapKernelExplainerTest {
     // test a multi-output model with many varying features
     @Test
     void testMultiVarianceMultiOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestUtils.getSumSkipTwoOutputModel(1);
+        PredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundRaw);
         ShapConfig skConfig = testConfig.withBackground(background).build();
         shapTestCase(model, skConfig, toExplainRaw, multiVarianceMultiOutputSHAP);
+    }
+
+    // test that the last saliency is always the background
+    @Test
+    void testLastSaliencyIsBackground() throws InterruptedException, TimeoutException, ExecutionException {
+        PredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
+        List<PredictionInput> background = createPIFromMatrix(backgroundRaw);
+        ShapConfig skConfig = testConfig.withBackground(background).build();
+        List<PredictionInput> toExplain = createPIFromMatrix(toExplainRaw);
+
+        //initialize explainer
+        List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get(5, TimeUnit.SECONDS);
+        List<Prediction> predictions = new ArrayList<>();
+        for (int i = 0; i < predictionOutputs.size(); i++) {
+            predictions.add(new SimplePrediction(toExplain.get(i), predictionOutputs.get(i)));
+        }
+
+        // evaluate if the explanations match the expected value
+        ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
+        for (int i = 0; i < toExplain.size(); i++) {
+            //explanations shape: outputSize x nfeatures
+            Map<String, Saliency> explanationSaliencies = ske.explainAsync(predictions.get(i), model)
+                    .get(5, TimeUnit.SECONDS).getSaliencies();
+            for (Map.Entry<String, Saliency> entry : explanationSaliencies.entrySet()) {
+                List<FeatureImportance> pfis = entry.getValue().getPerFeatureImportance();
+                assertEquals("Background", pfis.get(pfis.size() - 1).getFeature().getName());
+            }
+        }
     }
 
     // Test cases where search space cannot be fully enumerated ========================================================
@@ -326,7 +336,7 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(largeBackground);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainLargeBackground);
 
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         ShapConfig skConfig = testConfig.withBackground(background).build();
 
         //initialize explainer
@@ -371,7 +381,7 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(largeBackground);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainLargeBackground);
 
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         ShapConfig skConfig = testConfig.withBackground(background).withNSamples(1000).build();
 
         //initialize explainer
@@ -416,7 +426,7 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(largeBackground);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainLargeBackground);
 
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         ShapConfig skConfig = testConfig.withBackground(background).build();
 
         //initialize explainer
@@ -428,7 +438,7 @@ class ShapKernelExplainerTest {
 
         // evaluate if the explanations match the expected value
         ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
-        CompletableFuture<ShapResults> explanationsCF = ske.explainAsync(predictions.get(0), model);
+        CompletableFuture<SaliencyResults> explanationsCF = ske.explainAsync(predictions.get(0), model);
 
         ExecutorService executor = ForkJoinPool.commonPool();
         executor.submit(() -> {
@@ -455,7 +465,7 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(tooLargeBackground);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainTooSmall);
 
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         ShapConfig skConfig = testConfig.withBackground(background).build();
 
         //initialize explainer
@@ -490,8 +500,8 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(backgroundMat);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainTooSmall);
 
-        PredictionProvider modelForPredictions = TestUtils.getSumSkipTwoOutputModel(1);
-        PredictionProvider modelForShap = TestUtils.getSumSkipModel(1);
+        PredictionProvider modelForPredictions = TestModels.getSumSkipTwoOutputModel(1);
+        PredictionProvider modelForShap = TestModels.getSumSkipModel(1);
         ShapConfig skConfig = testConfig.withBackground(background).build();
 
         //initialize explainer
@@ -513,7 +523,7 @@ class ShapKernelExplainerTest {
     // See if using the same explainer multiple times causes issues ====================================================
     @Test
     void testStateless() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         ShapConfig skConfig1 = testConfig
                 .withBackground(createPIFromMatrix(backgroundNoVariance))
                 .withNSamples(100)
@@ -549,7 +559,7 @@ class ShapKernelExplainerTest {
         for (double interval : new double[] { .95, .975, .99 }) {
             int[] testResults = new int[600];
             SplittableRandom rn = new SplittableRandom();
-            PredictionProvider model = TestUtils.getNoisySumModel(rn, noise, 64 * 100);
+            PredictionProvider model = TestModels.getNoisySumModel(rn, noise, 64 * 100);
             for (int test = 0; test < 100; test++) {
                 ShapConfig skConfig = testConfig
                         .withBackground(createPIFromMatrix(backgroundAllZeros))
@@ -622,7 +632,7 @@ class ShapKernelExplainerTest {
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2, 3 })
     void testRegularizations(int config) throws InterruptedException, ExecutionException {
-        PredictionProvider model = TestUtils.getSumSkipModel(1);
+        PredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainRegTests);
         RealMatrix toExplainMatrix = MatrixUtils.createRealMatrix(toExplainRegTests);
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
@@ -630,14 +640,13 @@ class ShapKernelExplainerTest {
         Prediction p = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
         ShapConfig skConfig = getSks().get(config);
         ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
-        ShapResults shapResults = ske.explainAsync(p, model).get();
+        SaliencyResults shapResults = ske.explainAsync(p, model).get();
         Map<String, Saliency> saliencies = shapResults.getSaliencies();
-        RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies);
+        RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies, true);
         RealMatrix explanations = explanationsAndConfs[0];
 
         double actualOut = predictionOutputVector.getEntry(0);
-        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) +
-                shapResults.getFnull().get("sum-but1");
+        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0));
         assertTrue(Math.abs(predOut - actualOut) < 1e-6);
     }
 
@@ -662,7 +671,7 @@ class ShapKernelExplainerTest {
     @Test
     void testManyFeatureRegularization() throws ExecutionException, InterruptedException {
         RealVector modelWeights = MatrixUtils.createRealMatrix(generateN(1, 25, "5021")).getRowVector(0);
-        PredictionProvider model = TestUtils.getLinearModel(modelWeights.toArray());
+        PredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
         RealMatrix data = MatrixUtils.createRealMatrix(generateN(101, 25, "8629"));
         List<PredictionInput> toExplain = createPIFromMatrix(data.getRowMatrix(100).getData());
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
@@ -680,17 +689,17 @@ class ShapKernelExplainerTest {
         for (Integer nsamp : nsamples) {
             for (ShapConfig.Builder sk : testConfigs) {
                 ShapKernelExplainer ske = new ShapKernelExplainer(sk.withNSamples(nsamp).build());
-                ShapResults shapResults = ske.explainAsync(p, model).get();
+                SaliencyResults shapResults = ske.explainAsync(p, model).get();
                 Map<String, Saliency> saliencies = shapResults.getSaliencies();
-                RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies);
+                RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies, true);
                 RealMatrix explanations = explanationsAndConfs[0];
 
                 double actualOut = predictionOutputVector.getEntry(0);
-                double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) +
-                        shapResults.getFnull().get("linear-sum");
+                double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0));
                 assertTrue(Math.abs(predOut - actualOut) < 1e-6);
 
-                double coefMSE = (data.getRowVector(100).ebeMultiply(modelWeights)).getDistance(explanations.getRowVector(0));
+                double coefMSE = (data.getRowVector(100).ebeMultiply(modelWeights))
+                        .getDistance(explanations.getRowVector(0).getSubVector(0, 25));
                 assertTrue(coefMSE < 10);
             }
         }
@@ -699,7 +708,7 @@ class ShapKernelExplainerTest {
     @Test
     void testManyFeatureRegularization2() throws ExecutionException, InterruptedException {
         RealVector modelWeights = MatrixUtils.createRealMatrix(generateN(1, 25, "5021")).getRowVector(0);
-        PredictionProvider model = TestUtils.getLinearModel(modelWeights.toArray());
+        PredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
         RealMatrix data = MatrixUtils.createRealMatrix(generateN(101, 25, "8629"));
         List<PredictionInput> toExplain = createPIFromMatrix(data.getRowMatrix(100).getData());
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
@@ -714,14 +723,13 @@ class ShapKernelExplainerTest {
                 .build();
 
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
-        ShapResults shapResults = ske.explainAsync(p, model).get();
+        SaliencyResults shapResults = ske.explainAsync(p, model).get();
         Map<String, Saliency> saliencies = shapResults.getSaliencies();
         RealMatrix[] explanationsAndConfs = saliencyToMatrix(saliencies);
         RealMatrix explanations = explanationsAndConfs[0];
 
         double actualOut = predictionOutputVector.getEntry(0);
-        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0)) +
-                shapResults.getFnull().get("linear-sum");
+        double predOut = MatrixUtilsExtensions.sum(explanations.getRowVector(0));
         assertTrue(Math.abs(predOut - actualOut) < 1e-6);
         double coefMSE = (data.getRowVector(100).ebeMultiply(modelWeights)).getDistance(explanations.getRowVector(0));
         assertTrue(coefMSE < .01);
@@ -730,7 +738,7 @@ class ShapKernelExplainerTest {
     @Test
     void testExceedSubsetSamplerRange() throws ExecutionException, InterruptedException {
         RealVector modelWeights = MatrixUtils.createRealMatrix(generateN(1, 50, "5021")).getRowVector(0);
-        PredictionProvider model = TestUtils.getLinearModel(modelWeights.toArray());
+        PredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
         RealMatrix data = MatrixUtils.createRealMatrix(generateN(101, 50, "8629"));
         List<PredictionInput> toExplain = createPIFromMatrix(data.getRowMatrix(100).getData());
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
@@ -744,14 +752,14 @@ class ShapKernelExplainerTest {
                 .build();
 
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
-        ShapResults shapResults = ske.explainAsync(p, model).get();
+        SaliencyResults shapResults = ske.explainAsync(p, model).get();
         assertTrue(true);
     }
 
     @Test
     void testBatched() throws ExecutionException, InterruptedException {
         RealVector modelWeights = MatrixUtils.createRealMatrix(generateN(1, 10, "5021")).getRowVector(0);
-        PredictionProvider model = TestUtils.getLinearModel(modelWeights.toArray());
+        PredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
         RealMatrix data = MatrixUtils.createRealMatrix(generateN(101, 10, "8629"));
         List<PredictionInput> toExplain = createPIFromMatrix(data.getRowMatrix(100).getData());
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
@@ -760,17 +768,17 @@ class ShapKernelExplainerTest {
 
         ShapConfig skNB = testConfig.copy()
                 .withBackground(bg)
-                .withBatchSize(1)
+                .withBatchCount(1)
                 .build();
         ShapConfig skB = testConfig.copy()
                 .withBackground(bg)
-                .withBatchSize(20)
+                .withBatchCount(20)
                 .build();
 
         ShapKernelExplainer skeNB = new ShapKernelExplainer(skNB);
-        ShapResults shapResultsNB = skeNB.explainAsync(p, model).get();
+        SaliencyResults shapResultsNB = skeNB.explainAsync(p, model).get();
         ShapKernelExplainer skeB = new ShapKernelExplainer(skB);
-        ShapResults shapResultsB = skeB.explainAsync(p, model).get();
+        SaliencyResults shapResultsB = skeB.explainAsync(p, model).get();
         assertEquals(shapResultsNB, shapResultsB);
     }
 
@@ -801,7 +809,7 @@ class ShapKernelExplainerTest {
         nulldata.add(new PredictionInput(fs));
         List<PredictionInput> bg = nulldata;
         List<PredictionInput> toExplain = data.subList(100, 101);
-        PredictionProvider model = TestUtils.getCategoricalRegressor();
+        PredictionProvider model = TestModels.getCategoricalRegressor();
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
         Prediction p = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
         ShapConfig sk = testConfig.copy()
@@ -809,7 +817,7 @@ class ShapKernelExplainerTest {
                 .withNSamples(5000)
                 .build();
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
-        ShapResults shapResults = ske.explainAsync(p, model).get();
+        SaliencyResults shapResults = ske.explainAsync(p, model).get();
 
         assertEquals(25, shapResults.getSaliencies().get("calories")
                 .getPerFeatureImportance().get(0).getScore(), 1e-6);
@@ -848,7 +856,7 @@ class ShapKernelExplainerTest {
         nulldata.add(new PredictionInput(fs));
         List<PredictionInput> bg = nulldata;
         List<PredictionInput> toExplain = data.subList(100, 101);
-        PredictionProvider model = TestUtils.getCategoricalRegressor();
+        PredictionProvider model = TestModels.getCategoricalRegressor();
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
         Prediction p = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
         ShapConfig sk = testConfig.copy()
@@ -856,7 +864,7 @@ class ShapKernelExplainerTest {
                 .withNSamples(5000)
                 .build();
         ShapKernelExplainer ske = new ShapKernelExplainer(sk);
-        ShapResults shapResults = ske.explainAsync(p, model).get();
+        SaliencyResults shapResults = ske.explainAsync(p, model).get();
 
         assertEquals(25, shapResults.getSaliencies().get("calories")
                 .getPerFeatureImportance().get(0).getScore(), 1e-6);
@@ -903,17 +911,65 @@ class ShapKernelExplainerTest {
             }
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getTwoOutputSemiCategoricalModel(2);
+        PredictionProvider model = TestModels.getTwoOutputSemiCategoricalModel(2);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
-        ShapResults results = ske.explainAsync(prediction, model)
+        SaliencyResults results = ske.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         String table = results.asTable();
         assertTrue(table.contains("Semi-Categorical"));
         assertTrue(table.contains("SHAP Value"));
         assertTrue(table.contains("Feature 1"));
+    }
+
+    @Test
+    void testNoByproductCounterfactuals() throws InterruptedException, ExecutionException {
+        PredictionProvider model = TestModels.getSumSkipModel(1);
+        List<PredictionInput> toExplain = createPIFromMatrix(toExplainRaw);
+        List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
+
+        Prediction p0 = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
+        ShapConfig skConfig = testConfig.copy()
+                .withBackground(createPIFromMatrix(backgroundRaw))
+                .withBatchCount(1)
+                .withNSamples(1000)
+                .withTrackCounterfactuals(false)
+                .build();
+        ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
+        SaliencyResults shapResults0 = ske.explainAsync(p0, model).get();
+
+        // check that SHAP returns the expected number of Counterfactuals
+        assertEquals(0, shapResults0.getAvailableCFs().size());
+    }
+
+    @Test
+    void testByproductCounterfactuals() throws InterruptedException, ExecutionException {
+        // this has to be run many times to ensure there's no race condition issues
+        for (long i = 0; i < 100; i++) {
+            PredictionProvider model = TestModels.getSumSkipModel(1);
+            List<PredictionInput> toExplain = createPIFromMatrix(toExplainRaw);
+            List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
+
+            Prediction p0 = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
+            Prediction p1 = new SimplePrediction(toExplain.get(1), predictionOutputs.get(1));
+            ShapConfig skConfig = testConfig.copy()
+                    .withPC(new PerturbationContext(new Random(i), 0))
+                    .withBackground(createPIFromMatrix(backgroundRaw))
+                    .withBatchCount(1)
+                    .withNSamples(1000)
+                    .withTrackCounterfactuals(true)
+                    .build();
+            ShapKernelExplainer ske = new ShapKernelExplainer(skConfig);
+            SaliencyResults shapResults0 = ske.explainAsync(p0, model).get();
+            SaliencyResults shapResults1 = ske.explainAsync(p1, model).get();
+
+            // check that SHAP returns the expected number of Counterfactuals
+            assertEquals(42, shapResults0.getAvailableCFs().size());
+            assertEquals(90, shapResults1.getAvailableCFs().size());
+
+        }
     }
 
 }

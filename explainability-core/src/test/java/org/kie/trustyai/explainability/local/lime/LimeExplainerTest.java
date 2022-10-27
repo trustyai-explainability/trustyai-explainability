@@ -15,11 +15,7 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -30,30 +26,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.LocalExplanationException;
-import org.kie.trustyai.explainability.model.DataDistribution;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureDistribution;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.GenericFeatureDistribution;
-import org.kie.trustyai.explainability.model.IndependentFeaturesDataDistribution;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SimplePrediction;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
-import org.kie.trustyai.explainability.utils.IOUtils;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 class LimeExplainerTest {
@@ -69,7 +48,7 @@ class LimeExplainerTest {
                 .withSamples(10);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         PredictionInput input = new PredictionInput(Collections.emptyList());
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -91,14 +70,14 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-        assertNotNull(saliencyMap);
+        assertNotNull(saliencyResults);
     }
 
     @ParameterizedTest
@@ -118,18 +97,18 @@ class LimeExplainerTest {
                 features.add(TestUtils.getMockedNumericFeature(i));
             }
             PredictionInput input = new PredictionInput(features);
-            PredictionProvider model = TestUtils.getSumSkipModel(0);
+            PredictionProvider model = TestModels.getSumSkipModel(0);
             PredictionOutput output = model.predictAsync(List.of(input))
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                     .get(0);
             Prediction prediction = new SimplePrediction(input, output);
 
-            Map<String, Saliency> saliencyMapNoPenalty = limeExplainerNoPenalty.explainAsync(prediction, model)
+            SaliencyResults saliencyResultsNoPenalty = limeExplainerNoPenalty.explainAsync(prediction, model)
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-            assertThat(saliencyMapNoPenalty).isNotNull();
+            assertThat(saliencyResultsNoPenalty).isNotNull();
 
             String decisionName = "sum-but0";
-            Saliency saliencyNoPenalty = saliencyMapNoPenalty.get(decisionName);
+            Saliency saliencyNoPenalty = saliencyResultsNoPenalty.getSaliencies().get(decisionName);
 
             LimeConfig limeConfig = new LimeConfig()
                     .withPerturbationContext(new PerturbationContext(seed, random, DEFAULT_NO_OF_PERTURBATIONS))
@@ -137,11 +116,11 @@ class LimeExplainerTest {
                     .withPenalizeBalanceSparse(true);
             LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
 
-            Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+            SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-            assertThat(saliencyMap).isNotNull();
+            assertThat(saliencyResults).isNotNull();
 
-            Saliency saliency = saliencyMap.get(decisionName);
+            Saliency saliency = saliencyResults.getSaliencies().get(decisionName);
 
             for (int i = 0; i < features.size(); i++) {
                 double score = saliency.getPerFeatureImportance().get(i).getScore();
@@ -165,18 +144,18 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
 
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-        assertThat(saliencyMap).isNotNull();
+        assertThat(saliencyResults).isNotNull();
 
         String decisionName = "sum-but0";
-        Saliency saliency = saliencyMap.get(decisionName);
+        Saliency saliency = saliencyResults.getSaliencies().get(decisionName);
         List<FeatureImportance> perFeatureImportance = saliency.getPerFeatureImportance();
         for (FeatureImportance featureImportance : perFeatureImportance) {
             assertThat(featureImportance.getScore()).isBetween(0d, 1d);
@@ -208,18 +187,18 @@ class LimeExplainerTest {
                 .withSamples(10);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumThresholdModel(random.nextDouble(), random.nextDouble());
+        PredictionProvider model = TestModels.getSumThresholdModel(random.nextDouble(), random.nextDouble());
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
 
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-        assertThat(saliencyMap).isNotNull();
+        assertThat(saliencyResults).isNotNull();
 
         String decisionName = "inside";
-        Saliency saliency = saliencyMap.get(decisionName);
+        Saliency saliency = saliencyResults.getSaliencies().get(decisionName);
         assertThat(saliency).isNotNull();
     }
 
@@ -233,14 +212,14 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-        assertNotNull(saliencyMap);
+        assertNotNull(saliencyResults);
     }
 
     @ParameterizedTest
@@ -258,14 +237,14 @@ class LimeExplainerTest {
                 features.add(TestUtils.getMockedNumericFeature(i));
             }
             PredictionInput input = new PredictionInput(features);
-            PredictionProvider model = TestUtils.getSumSkipModel(0);
+            PredictionProvider model = TestModels.getSumSkipModel(0);
             PredictionOutput output = model.predictAsync(List.of(input))
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                     .get(0);
             Prediction prediction = new SimplePrediction(input, output);
-            Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+            SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-            saliencies.add(saliencyMap.get("sum-but0"));
+            saliencies.add(saliencyResults.getSaliencies().get("sum-but0"));
         }
         assertThat(saliencies.get(0).getPerFeatureImportance().stream().map(FeatureImportance::getScore)
                 .collect(Collectors.toList()))
@@ -288,7 +267,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -300,17 +279,17 @@ class LimeExplainerTest {
                 .withSamples(10)
                 .withFeatureSelection(false);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-        assertNotNull(saliencyMap);
-        List<FeatureImportance> perFeatureImportance = saliencyMap.get("sum-but0").getPerFeatureImportance();
+        assertNotNull(saliencyResults);
+        List<FeatureImportance> perFeatureImportance = saliencyResults.getSaliencies().get("sum-but0").getPerFeatureImportance();
         assertThat(perFeatureImportance.size()).isEqualTo(10);
 
         limeExplainer = new LimeExplainer(limeConfig.withFeatureSelection(true));
-        saliencyMap = limeExplainer.explainAsync(prediction, model)
+        saliencyResults = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-        assertNotNull(saliencyMap);
-        List<FeatureImportance> filteredFeatureImportance = saliencyMap.get("sum-but0").getPerFeatureImportance();
+        assertNotNull(saliencyResults);
+        List<FeatureImportance> filteredFeatureImportance = saliencyResults.getSaliencies().get("sum-but0").getPerFeatureImportance();
         assertThat(filteredFeatureImportance.size()).isEqualTo(6);
     }
 
@@ -321,7 +300,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getSumSkipModel(0);
+        PredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -333,17 +312,17 @@ class LimeExplainerTest {
                 .withSamples(10)
                 .withFeatureSelection(false);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-        assertNotNull(saliencyMap);
-        List<FeatureImportance> perFeatureImportance = saliencyMap.get("sum-but0").getPerFeatureImportance();
+        assertNotNull(saliencyResults);
+        List<FeatureImportance> perFeatureImportance = saliencyResults.getSaliencies().get("sum-but0").getPerFeatureImportance();
         assertThat(perFeatureImportance.size()).isEqualTo(5);
 
         limeExplainer = new LimeExplainer(limeConfig.withFeatureSelection(true).withNoOfFeatures(3));
-        saliencyMap = limeExplainer.explainAsync(prediction, model)
+        saliencyResults = limeExplainer.explainAsync(prediction, model)
                 .get(111111, Config.INSTANCE.getAsyncTimeUnit());
-        assertNotNull(saliencyMap);
-        List<FeatureImportance> filteredFeatureImportance = saliencyMap.get("sum-but0").getPerFeatureImportance();
+        assertNotNull(saliencyResults);
+        List<FeatureImportance> filteredFeatureImportance = saliencyResults.getSaliencies().get("sum-but0").getPerFeatureImportance();
         assertThat(filteredFeatureImportance.size()).isEqualTo(3);
     }
 
@@ -368,16 +347,78 @@ class LimeExplainerTest {
             }
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestUtils.getTwoOutputSemiCategoricalModel(2);
+        PredictionProvider model = TestModels.getTwoOutputSemiCategoricalModel(2);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
         Prediction prediction = new SimplePrediction(input, output);
-        Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
+        SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
-        String table = IOUtils.LimeResultsAsTable(saliencyMap);
+        String table = saliencyResults.asTable();
         assertTrue(table.contains("Prediction"));
-        assertTrue(table.contains("=== Semi-Categorical LIME Scores ===="));
+        assertTrue(table.contains("=== Semi-Categorical LIME Saliencies ===="));
         assertTrue(table.contains("Feature 2 =           A "));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 100, 200, 33 })
+    void testByproductCounterfactuals(int noOfSamples) throws InterruptedException, ExecutionException, TimeoutException {
+        for (int nf = 1; nf < 4; nf++) {
+            Long seed = 0L;
+            Random random = new Random();
+            LimeConfig limeConfig = new LimeConfig()
+                    .withPerturbationContext(new PerturbationContext(seed, random, DEFAULT_NO_OF_PERTURBATIONS))
+                    .withSamples(noOfSamples)
+                    .withAdaptiveVariance(false)
+                    .withTrackCounterfactuals(true);
+            LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
+
+            List<Feature> features = new ArrayList<>();
+            for (int i = 0; i < nf; i++) {
+                features.add(TestUtils.getMockedNumericFeature(i));
+            }
+            PredictionInput input = new PredictionInput(features);
+            PredictionProvider model = TestModels.getSumSkipModel(0);
+            PredictionOutput output = model.predictAsync(List.of(input))
+                    .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
+                    .get(0);
+            Prediction prediction = new SimplePrediction(input, output);
+            SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
+                    .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+
+            // check that LIME returns the expected number of CFs
+            assertEquals(noOfSamples, saliencyResults.getAvailableCFs().size());
+        }
+    }
+
+    @Test
+    void testNoByproductCounterfactuals() throws InterruptedException, ExecutionException, TimeoutException {
+        for (int nf = 1; nf < 4; nf++) {
+            Long seed = 0L;
+            Random random = new Random();
+            int noOfSamples = 100;
+            LimeConfig limeConfig = new LimeConfig()
+                    .withPerturbationContext(new PerturbationContext(seed, random, DEFAULT_NO_OF_PERTURBATIONS))
+                    .withSamples(noOfSamples)
+                    .withAdaptiveVariance(false)
+                    .withTrackCounterfactuals(false);
+            LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
+
+            List<Feature> features = new ArrayList<>();
+            for (int i = 0; i < nf; i++) {
+                features.add(TestUtils.getMockedNumericFeature(i));
+            }
+            PredictionInput input = new PredictionInput(features);
+            PredictionProvider model = TestModels.getSumSkipModel(0);
+            PredictionOutput output = model.predictAsync(List.of(input))
+                    .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
+                    .get(0);
+            Prediction prediction = new SimplePrediction(input, output);
+            SaliencyResults saliencyResults = limeExplainer.explainAsync(prediction, model)
+                    .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+
+            // check that LIME returns thhe expected number of CFs
+            assertEquals(0, saliencyResults.getAvailableCFs().size());
+        }
     }
 }

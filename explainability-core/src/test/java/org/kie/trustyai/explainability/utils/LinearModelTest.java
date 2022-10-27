@@ -15,6 +15,7 @@
  */
 package org.kie.trustyai.explainability.utils;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Random;
@@ -63,6 +64,7 @@ class LinearModelTest {
             trainingSet.add(new ImmutablePair<>(x, y));
         }
         assertThat(linearModel.fit(trainingSet)).isLessThan(1d);
+        assertThat(linearModel.getWeights()).hasSize(size).matches(doubles -> Arrays.stream(doubles).allMatch(d -> Math.abs(d) < 10));
     }
 
     @Test
@@ -79,5 +81,6 @@ class LinearModelTest {
             trainingSet.add(new ImmutablePair<>(x, y));
         }
         assertThat(linearModel.fit(trainingSet)).isLessThan(1d);
+        assertThat(linearModel.getWeights()).hasSize(size).matches(doubles -> Arrays.stream(doubles).allMatch(d -> Math.abs(d) < 10));
     }
 }

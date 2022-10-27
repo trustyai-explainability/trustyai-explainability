@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
-import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.DataDistribution;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
@@ -42,6 +41,7 @@ import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,7 +83,7 @@ class PartialDependencePlotExplainerTest {
     void testPdpNumericClassifier(int seed) throws Exception {
         Random random = new Random();
         random.setSeed(seed);
-        PredictionProvider modelInfo = TestUtils.getSumSkipModel(0);
+        PredictionProvider modelInfo = TestModels.getSumSkipModel(0);
         PartialDependencePlotExplainer partialDependencePlotProvider = new PartialDependencePlotExplainer();
         List<PartialDependenceGraph> pdps = partialDependencePlotProvider.explainFromMetadata(modelInfo, getMetadata(random));
         assertNotNull(pdps);
@@ -142,7 +142,7 @@ class PartialDependencePlotExplainerTest {
         Random random = new Random();
         random.setSeed(seed);
         PartialDependencePlotExplainer partialDependencePlotExplainer = new PartialDependencePlotExplainer();
-        PredictionProvider model = TestUtils.getDummyTextClassifier();
+        PredictionProvider model = TestModels.getDummyTextClassifier();
         Collection<Prediction> predictions = new ArrayList<>(3);
 
         List<String> texts = List.of("we want your money", "please reply quickly", "you are the lucky winner",

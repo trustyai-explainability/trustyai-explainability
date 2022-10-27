@@ -15,11 +15,7 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -27,17 +23,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.LocalSaliencyStability;
+import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -50,7 +39,7 @@ class LimeStabilityTest {
     @ValueSource(longs = { 0 })
     void testStabilityWithNumericData(long seed) throws Exception {
         Random random = new Random();
-        PredictionProvider sumSkipModel = TestUtils.getSumSkipModel(0);
+        PredictionProvider sumSkipModel = TestModels.getSumSkipModel(0);
         List<Feature> featureList = new LinkedList<>();
         for (int i = 0; i < 5; i++) {
             featureList.add(TestUtils.getMockedNumericFeature(i));
@@ -64,7 +53,7 @@ class LimeStabilityTest {
     @ValueSource(longs = { 0 })
     void testStabilityWithTextData(long seed) throws Exception {
         Random random = new Random();
-        PredictionProvider sumSkipModel = TestUtils.getDummyTextClassifier();
+        PredictionProvider sumSkipModel = TestModels.getDummyTextClassifier();
         List<Feature> featureList = new LinkedList<>();
         for (int i = 0; i < 4; i++) {
             featureList.add(TestUtils.getMockedTextFeature("foo " + i));
@@ -96,7 +85,7 @@ class LimeStabilityTest {
         for (int i = 0; i < 4; i++) {
             features.add(FeatureFactory.newNumericalFeature("f-" + i, 2));
         }
-        PredictionProvider model = TestUtils.getEvenSumModel(0);
+        PredictionProvider model = TestModels.getEvenSumModel(0);
         assertStable(adaptiveVarianceLE, model, features);
     }
 
@@ -110,7 +99,7 @@ class LimeStabilityTest {
             List<Saliency> saliencies = new LinkedList<>();
             for (int i = 0; i < 100; i++) {
                 Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                        .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                        .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
                 saliencies.addAll(saliencyMap.values());
             }
             // check that the topmost important feature is stable
@@ -153,7 +142,7 @@ class LimeStabilityTest {
         List<LocalSaliencyStability> stabilities = new ArrayList<>();
         for (int j = 0; j < 2; j++) {
             Random random = new Random();
-            PredictionProvider model = TestUtils.getSumSkipModel(0);
+            PredictionProvider model = TestModels.getSumSkipModel(0);
             List<Feature> featureList = new LinkedList<>();
             for (int i = 0; i < 5; i++) {
                 featureList.add(TestUtils.getMockedNumericFeature(i));

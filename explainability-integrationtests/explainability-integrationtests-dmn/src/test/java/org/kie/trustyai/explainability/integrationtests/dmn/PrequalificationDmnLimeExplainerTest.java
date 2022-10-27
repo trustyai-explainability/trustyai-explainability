@@ -68,7 +68,6 @@ class PrequalificationDmnLimeExplainerTest {
 
         PerturbationContext perturbationContext = new PerturbationContext(0L, random, 1);
         LimeConfig limeConfig = new LimeConfig()
-                .withSamples(10)
                 .withPerturbationContext(perturbationContext);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
 
@@ -76,7 +75,8 @@ class PrequalificationDmnLimeExplainerTest {
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(predictionInput, predictionOutputs.get(0));
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
-                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+                .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
+        ;
         for (Saliency saliency : saliencyMap.values()) {
             assertNotNull(saliency);
             List<FeatureImportance> topFeatures = saliency.getTopFeatures(2);
@@ -160,7 +160,7 @@ class PrequalificationDmnLimeExplainerTest {
         LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withDeterministicExecution(true)
                 .withWeightedStability(0.4, 0.6).withSampling(false).withStepCountLimit(20);
         Random random = new Random();
-        LimeConfig initialConfig = new LimeConfig().withSamples(10)
+        LimeConfig initialConfig = new LimeConfig()
                 .withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeConfig optimizedConfig = limeConfigOptimizer.optimize(initialConfig, predictions, model);
         assertThat(optimizedConfig).isNotSameAs(initialConfig);

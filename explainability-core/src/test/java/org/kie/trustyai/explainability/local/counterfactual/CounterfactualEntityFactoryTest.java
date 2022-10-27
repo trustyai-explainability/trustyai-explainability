@@ -303,9 +303,7 @@ class CounterfactualEntityFactoryTest {
     void testTextFactory() {
         final String value = "foo";
         final Feature feature = FeatureFactory.newTextFeature("text-feature", value);
-        System.out.println(feature.getType());
         CounterfactualEntity counterfactualEntity = CounterfactualEntityFactory.from(feature);
-        System.out.println(counterfactualEntity);
         assertTrue(counterfactualEntity instanceof TextEntity);
         assertTrue(counterfactualEntity.isConstrained());
         assertEquals(Type.TEXT, counterfactualEntity.asFeature().getType());
