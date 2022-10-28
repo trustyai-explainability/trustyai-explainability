@@ -24,13 +24,21 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CounterfactualGeneratorTest {
+    int N_COUNTERFACTUALS_TO_GENERATE = 10;
+
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2 })
     void testDefaultGeneration(int seed) throws ExecutionException, InterruptedException, TimeoutException {
@@ -56,18 +64,60 @@ class CounterfactualGeneratorTest {
         // generate a background such that f(bg) == 0 for all bg in the backgrounds
         PredictionOutput goal = new PredictionOutput(
                 List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 0d)));
-        List<PredictionInput> background = CounterfactualGenerator.builder(seeds, model, goal)
-                .withTimeoutSeconds(1)
-                .withPerturbationContext(new PerturbationContext(rn, 0))
-                .withStepCount(1_000L)
+        List<PredictionInput> background = CounterfactualGenerator.builder()
+                .withModel(model)
+                .withTimeoutSeconds(5)
+                .withStepCount(10_000L)
                 .withGoalThreshold(.01)
+                .withRandom(rn)
                 .build()
-                .generate(10);
-        List<PredictionOutput> fnull = model.predictAsync(background).get();
+                .generate(seeds, goal, N_COUNTERFACTUALS_TO_GENERATE);
+        assertEquals(N_COUNTERFACTUALS_TO_GENERATE, background.size());
 
+        List<PredictionOutput> fnull = model.predictAsync(background).get();
         // make sure the fnull is within the default goal of .01
         for (PredictionOutput output : fnull) {
             assertEquals(0., output.getOutputs().get(0).getValue().asNumber(), .05);
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testChaining(int seed) throws ExecutionException, InterruptedException, TimeoutException {
+        List<PredictionInput> seeds = new ArrayList<>();
+        Random rn = new Random(seed);
+
+        // generate a single seed point
+        List<Feature> features = new ArrayList<>();
+        for (int j = 0; j < 5; j++) {
+            features.add(new Feature(String.valueOf(j),
+                    Type.NUMBER,
+                    new Value(0.),
+                    false,
+                    NumericalFeatureDomain.create(-5, 5)));
+        }
+        seeds.add(new PredictionInput(features));
+
+        // given some arbitrary linear model
+        PredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
+
+        // generate a background such that f(bg) == 0 for all bg in the backgrounds
+        List<PredictionOutput> goals = new ArrayList<>();
+        for (int i = 0; i < N_COUNTERFACTUALS_TO_GENERATE; i++) {
+            goals.add(new PredictionOutput(
+                    List.of(new Output("linear-sum", Type.NUMBER, new Value(i / 10.), 0d))));
+        }
+        List<PredictionInput> background = CounterfactualGenerator.builder()
+                .withModel(model)
+                .withTimeoutSeconds(5)
+                .withStepCount(30_000L)
+                .withGoalThreshold(0.01)
+                .withRandom(rn)
+                .withKSeeds(5)
+                .withMaxAttemptCount(10)
+                .build()
+                .generateRange(seeds, goals, true);
+        assertEquals(1, seeds.size());
+        assertEquals(N_COUNTERFACTUALS_TO_GENERATE, background.size());
     }
 }
