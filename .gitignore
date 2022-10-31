@@ -1,20 +1,24 @@
 target/
-local/
+/local
+
+**/.idea
+
+# Repository wide ignore mac DS_Store files
+.DS_Store
 
 # Eclipse, Netbeans and IntelliJ files
-.*
 !.gitignore
 !.github
-!.git-blame-ignore-revs
-!.openrewrite
-nbproject
-*.ipr
-*.iws
+/nbproject
+/*.ipr
+/*.iws
 *.iml
-*.class
+.settings/
+.project
+.classpath
+.factorypath
+.vscode
+.run/
+.checkstyle
 
-# generated files
-dependency-reduced-pom.xml
-
-#CI
-!.ci
+*.log

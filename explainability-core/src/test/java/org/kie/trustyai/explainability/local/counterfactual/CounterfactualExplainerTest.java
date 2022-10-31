@@ -96,7 +96,7 @@ class CounterfactualExplainerTest {
 
     @BeforeEach
     @SuppressWarnings({ "unused", "unchecked" })
-    private void setup() {
+    protected void setup() {
         this.solverManagerFactory = mock(Function.class);
         this.solverManager = mock(SolverManager.class);
     }
