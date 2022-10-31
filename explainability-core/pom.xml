@@ -36,7 +36,7 @@
     </dependency>
     <dependency>
       <groupId>org.optaplanner</groupId>
-      <artifactId>optaplanner-core</artifactId>
+      <artifactId>optaplanner-quarkus</artifactId>
       <exclusions>
         <!--
           Removes all dependencies on OptaPlanner Drools, as Trusty does not use it.
