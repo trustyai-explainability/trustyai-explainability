@@ -8,7 +8,7 @@ jobs:
     concurrency:
       group: pull_request-${{ github.event_name }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.java-version }}
       cancel-in-progress: true
-    timeout-minutes: 120
+    timeout-minutes: 45
     strategy:
       matrix:
         # configure with [ 'ubuntu-latest', 'windows-latest' ] to enable Windows builds
