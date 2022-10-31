@@ -16,6 +16,8 @@
 package org.kie.trustyai.explainability.utils;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalTime;
@@ -390,7 +392,7 @@ class DataUtilsTest {
     }
 
     @Test
-    void testReadCsv() throws IOException {
+    void testReadCsv() throws IOException, URISyntaxException {
         List<Type> schema = new ArrayList<>();
         schema.add(Type.CATEGORICAL);
         schema.add(Type.BOOLEAN);
@@ -405,8 +407,10 @@ class DataUtilsTest {
         schema.add(Type.BOOLEAN);
         schema.add(Type.NUMBER);
         schema.add(Type.NUMBER);
+        // Convert to URI to be compatible with Windows
+        String miniTrainPath = Paths.get(getClass().getResource("/mini-train.csv").toURI()).toString();
         DataDistribution dataDistribution = DataUtils.readCSV(
-                Paths.get(getClass().getResource("/mini-train.csv").getFile()), schema);
+                Paths.get(miniTrainPath), schema);
         assertThat(dataDistribution).isNotNull();
         assertThat(dataDistribution.getAllSamples()).hasSize(10);
     }
