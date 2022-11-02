@@ -18,6 +18,7 @@ package org.kie.trustyai.explainability.utils.arrow;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.channels.Channels;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +33,8 @@ import org.apache.arrow.vector.Float8Vector;
 import org.apache.arrow.vector.IntVector;
 import org.apache.arrow.vector.VarCharVector;
 import org.apache.arrow.vector.VectorSchemaRoot;
+import org.apache.arrow.vector.complex.StructVector;
+import org.apache.arrow.vector.complex.writer.BaseWriter;
 import org.apache.arrow.vector.ipc.ArrowFileReader;
 import org.apache.arrow.vector.ipc.ArrowFileWriter;
 import org.apache.arrow.vector.types.FloatingPointPrecision;
@@ -103,11 +106,22 @@ public class ArrowConverters {
                         1.0));
             } else if (fv.getMinorType() == Types.MinorType.VARCHAR) {
                 VarCharVector castv = (VarCharVector) fv;
-                IntStream.range(0, rowCount).forEach(row -> outputBuffer[row][destinationCol] = new Output(
-                        fv.getName(),
-                        Type.TEXT,
-                        new Value(castv.get(row)),
-                        1.0));
+                if (castv.getName().endsWith("_type_categorical")) {
+                    IntStream.range(0, rowCount).forEach(row -> outputBuffer[row][destinationCol] = new Output(
+                            fv.getName().replace("_type_categorical",""),
+                            Type.CATEGORICAL,
+                            new Value(castv.getObject(row).toString()),
+                            1.0));
+                } else if (castv.getName().endsWith("_type_text")) {
+                    IntStream.range(0, rowCount).forEach(row -> outputBuffer[row][destinationCol] = new Output(
+                            fv.getName().replace("_type_text", ""),
+                            Type.TEXT,
+                            new Value(castv.getObject(row).toString()),
+                            1.0));
+                } else {
+                    throw new IllegalArgumentException(String.format("VarCharVector name %s does not contain a valid" +
+                                    "TrustyAi type", castv.getName()));
+                }
             } else {
                 throw new IllegalArgumentException(String.format("FieldVector Type %s currently unsupported",
                         fv.getMinorType()));
@@ -121,10 +135,9 @@ public class ArrowConverters {
     }
 
     //Outbound Processing ==============================================================================================
-    //generate the schema that all predictioninputs for this explanation will take
-    public static Schema generatePrototypePISchema(PredictionInput paradigm) {
+    public static List<Field> getFieldsFromFeatures(List<Feature> features){
         List<Field> fields = new ArrayList<>();
-        for (Feature f : paradigm.getFeatures()) {
+        for (Feature f : features) {
             if (f.getType() == Type.NUMBER) {
                 Field doubleField = new Field(f.getName(), FieldType.nullable(new ArrowType.FloatingPoint(FloatingPointPrecision.DOUBLE)), null);
                 fields.add(doubleField);
@@ -132,21 +145,33 @@ public class ArrowConverters {
                 Field boolField = new Field(f.getName(), FieldType.nullable(new ArrowType.Bool()), null);
                 fields.add(boolField);
             } else if (f.getType() == Type.TEXT || f.getType() == Type.CATEGORICAL) {
-                Field textField = new Field(f.getName(), FieldType.nullable(new ArrowType.Utf8()), null);
+                Field textField = new Field(f.getName() + "_type_" + f.getType().toString(), FieldType.nullable(new ArrowType.Utf8()), null);
                 fields.add(textField);
+            } else if (f.getType() == Type.COMPOSITE) {
+                Field compositeField = new Field(f.getName(),
+                        FieldType.nullable(new ArrowType.Struct()),
+                        getFieldsFromFeatures((List<Feature>) f.getValue().getUnderlyingObject()));
+                fields.add(compositeField);
             } else {
                 throw new IllegalArgumentException(String.format("Output type %s currently unsupported",
                         f.getType()));
             }
         }
-        return new Schema(fields, null);
+        return fields;
     }
+
+
+    //generate the schema that all predictioninputs for this explanation will take
+    public static Schema generatePrototypePISchema(PredictionInput paradigm) {
+        return new Schema(getFieldsFromFeatures(paradigm.getFeatures()), null);
+    }
+
+
 
     // convert a list of PIs to VectorSchemaRoot as per the prototype Schema
     public static VectorSchemaRoot convertPItoVSR(List<PredictionInput> inputs, Schema sourceSchema, RootAllocator allocator) {
         int nrows = inputs.size();
         VectorSchemaRoot sourceRoot = VectorSchemaRoot.create(sourceSchema, allocator);
-
         List<FieldVector> fvs = sourceRoot.getFieldVectors();
         for (int col = 0; col < fvs.size(); col++) {
             FieldVector fv = fvs.get(col);
@@ -183,6 +208,7 @@ public class ArrowConverters {
                 new ByteArrayReadableSeekableByteChannel(byteArray), allocator)) {
             reader.loadRecordBatch(reader.getRecordBlocks().get(0));
             VectorSchemaRoot vsr = reader.getVectorSchemaRoot();
+
             return ArrowConverters.convertFieldVectorstoPO(vsr.getFieldVectors());
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -25,35 +25,44 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ArrowConvertersTest {
-    double[][] mat = {
-            { 5., 6., 7., -4., 8. },
-            { 11., 12., 13., -5., 14. },
-            { 0., 0, 1., 4., 2. },
-    };
-
-    private List<PredictionInput> createPIFromMatrix(double[][] m) {
-        List<PredictionInput> pis = new ArrayList<>();
-        int[] shape = new int[] { m.length, m[0].length };
-        for (int i = 0; i < shape[0]; i++) {
-            List<Feature> fs = new ArrayList<>();
-            for (int j = 0; j < shape[1]; j++) {
-                fs.add(FeatureFactory.newNumericalFeature("f", m[i][j]));
-            }
-            pis.add(new PredictionInput(fs));
-        }
-        return pis;
-    }
-
+    List<PredictionInput> pis = List.of(
+            new PredictionInput(List.of(
+                    FeatureFactory.newTextFeature("text", "string1"),
+                    FeatureFactory.newNumericalFeature("float", 5.),
+                    FeatureFactory.newBooleanFeature("bool", false),
+                    FeatureFactory.newCategoricalFeature("categorical", "category")
+                    )),
+            new PredictionInput(List.of(
+                    FeatureFactory.newTextFeature("text", "string2"),
+                    FeatureFactory.newNumericalFeature("float", 6.),
+                    FeatureFactory.newBooleanFeature("bool", true),
+                    FeatureFactory.newCategoricalFeature("categorical", "category")
+            )),
+            new PredictionInput(List.of(
+                    FeatureFactory.newTextFeature("text", "long complicated string"),
+                    FeatureFactory.newNumericalFeature("float", 7.),
+                    FeatureFactory.newBooleanFeature("bool", false),
+                    FeatureFactory.newCategoricalFeature("categorical", "category")
+            ))
+    );
     @Test
-    public void scratch1() {
-        List<PredictionInput> matPI = createPIFromMatrix(mat);
-        Schema prototype = ArrowConverters.generatePrototypePISchema(matPI.get(0));
+    void testReadWrite() {
+        Schema prototype = ArrowConverters.generatePrototypePISchema(pis.get(0));
         RootAllocator sourceRootAlloc = new RootAllocator(Integer.MAX_VALUE);
-        VectorSchemaRoot vsr = ArrowConverters.convertPItoVSR(matPI, prototype, sourceRootAlloc);
-        System.out.println(vsr.contentToTSVString());
+        VectorSchemaRoot vsr = ArrowConverters.convertPItoVSR(pis, prototype, sourceRootAlloc);
+        byte[] buffer = ArrowConverters.write(vsr);
+        List<PredictionOutput> outputs = ArrowConverters.read(buffer, sourceRootAlloc);
+        for (int i=0; i<pis.size(); i++){
+            for (int j=0; j<pis.get(0).getFeatures().size(); j++){
+                assertEquals(pis.get(i).getFeatures().get(j).getName(), outputs.get(i).getOutputs().get(j).getName());
+                assertEquals(pis.get(i).getFeatures().get(j).getType(), outputs.get(i).getOutputs().get(j).getType());
+                assertEquals(pis.get(i).getFeatures().get(j).getValue().getUnderlyingObject(), outputs.get(i).getOutputs().get(j).getValue().getUnderlyingObject());
+            }
+        }
     }
 }
