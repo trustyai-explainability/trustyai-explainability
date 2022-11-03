@@ -15,14 +15,12 @@
  */
 package org.kie.trustyai.explainability.utils.arrow;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.arrow.memory.RootAllocator;
 import org.apache.arrow.vector.VectorSchemaRoot;
 import org.apache.arrow.vector.types.pojo.Schema;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
@@ -35,21 +33,18 @@ class ArrowConvertersTest {
                     FeatureFactory.newTextFeature("text", "string1"),
                     FeatureFactory.newNumericalFeature("float", 5.),
                     FeatureFactory.newBooleanFeature("bool", false),
-                    FeatureFactory.newCategoricalFeature("categorical", "category")
-                    )),
+                    FeatureFactory.newCategoricalFeature("categorical", "category"))),
             new PredictionInput(List.of(
                     FeatureFactory.newTextFeature("text", "string2"),
                     FeatureFactory.newNumericalFeature("float", 6.),
                     FeatureFactory.newBooleanFeature("bool", true),
-                    FeatureFactory.newCategoricalFeature("categorical", "category")
-            )),
+                    FeatureFactory.newCategoricalFeature("categorical", "category"))),
             new PredictionInput(List.of(
                     FeatureFactory.newTextFeature("text", "long complicated string"),
                     FeatureFactory.newNumericalFeature("float", 7.),
                     FeatureFactory.newBooleanFeature("bool", false),
-                    FeatureFactory.newCategoricalFeature("categorical", "category")
-            ))
-    );
+                    FeatureFactory.newCategoricalFeature("categorical", "category"))));
+
     @Test
     void testReadWrite() {
         Schema prototype = ArrowConverters.generatePrototypePISchema(pis.get(0));
@@ -57,8 +52,8 @@ class ArrowConvertersTest {
         VectorSchemaRoot vsr = ArrowConverters.convertPItoVSR(pis, prototype, sourceRootAlloc);
         byte[] buffer = ArrowConverters.write(vsr);
         List<PredictionOutput> outputs = ArrowConverters.read(buffer, sourceRootAlloc);
-        for (int i=0; i<pis.size(); i++){
-            for (int j=0; j<pis.get(0).getFeatures().size(); j++){
+        for (int i = 0; i < pis.size(); i++) {
+            for (int j = 0; j < pis.get(0).getFeatures().size(); j++) {
                 assertEquals(pis.get(i).getFeatures().get(j).getName(), outputs.get(i).getOutputs().get(j).getName());
                 assertEquals(pis.get(i).getFeatures().get(j).getType(), outputs.get(i).getOutputs().get(j).getType());
                 assertEquals(pis.get(i).getFeatures().get(j).getValue().getUnderlyingObject(), outputs.get(i).getOutputs().get(j).getValue().getUnderlyingObject());
