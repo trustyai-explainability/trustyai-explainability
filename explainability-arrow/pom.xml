@@ -9,69 +9,51 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>explainability-core</artifactId>
+  <artifactId>explainability-arrow</artifactId>
   <version>2.0.0-SNAPSHOT</version>
-  <name>TrustyAI Explainability Core</name>
+  <name>TrustyAI Arrow</name>
 
   <dependencies>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
+      <groupId>org.kie.trustyai</groupId>
+      <artifactId>explainability-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- Arrow dependencies -->
+    <dependency>
+      <groupId>org.apache.arrow</groupId>
+      <artifactId>arrow-vector</artifactId>
+      <version>7.0.0</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
+      <groupId>org.apache.arrow</groupId>
+      <artifactId>arrow-compression</artifactId>
+      <version>7.0.0</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-csv</artifactId>
+      <groupId>org.apache.arrow</groupId>
+      <artifactId>arrow-memory-netty</artifactId>
+      <version>7.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.8.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-buffer</artifactId>
+      <version>4.1.68.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.flatbuffers</groupId>
+      <artifactId>flatbuffers-java</artifactId>
+      <version>2.0.3</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.optaplanner</groupId>
-      <artifactId>optaplanner-core</artifactId>
-      <exclusions>
-        <!--
-          Removes all dependencies on OptaPlanner Drools, as Trusty does not use it.
-          This prevents diamond dependency on Drools between OptaPlanner and Kogito.
-        -->
-        <exclusion>
-          <groupId>org.optaplanner</groupId>
-          <artifactId>optaplanner-constraint-streams-drools</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.optaplanner</groupId>
-          <artifactId>optaplanner-constraint-drl</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.drools</groupId>
-          <artifactId>drools-wiring-static</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.awaitility</groupId>
-      <artifactId>awaitility</artifactId>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -111,6 +93,4 @@
       </build>
     </profile>
   </profiles>
-
-
 </project>

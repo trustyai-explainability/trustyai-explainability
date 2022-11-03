@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.trustyai.explainability.utils.arrow;
+package org.kie.trustyai.arrow;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

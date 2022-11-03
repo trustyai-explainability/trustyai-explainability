@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.explainability.utils.arrow;
+package org.kie.trustyai.arrow;
 
 import java.util.List;
 
