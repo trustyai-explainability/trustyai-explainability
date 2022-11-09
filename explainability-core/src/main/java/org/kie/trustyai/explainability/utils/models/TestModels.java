@@ -178,21 +178,6 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getEvenFeatureModel(int featureIndex) {
-        return inputs -> supplyAsync(() -> {
-            List<PredictionOutput> predictionOutputs = new LinkedList<>();
-            for (PredictionInput predictionInput : inputs) {
-                List<Feature> features = predictionInput.getFeatures();
-                Feature feature = features.get(featureIndex);
-                double v = feature.getValue().asNumber();
-                PredictionOutput predictionOutput = new PredictionOutput(
-                        List.of(new Output("feature-" + featureIndex, Type.BOOLEAN, new Value(v % 2 == 0), 1d)));
-                predictionOutputs.add(predictionOutput);
-            }
-            return predictionOutputs;
-        });
-    }
-
     public static PredictionProvider getEvenSumModel(int skipFeatureIndex) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
