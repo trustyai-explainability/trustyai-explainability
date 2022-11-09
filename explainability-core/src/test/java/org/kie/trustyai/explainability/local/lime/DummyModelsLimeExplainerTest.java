@@ -256,7 +256,7 @@ class DummyModelsLimeExplainerTest {
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
-        LimeConfig limeConfig = new LimeConfig().withSamples(500)
+        LimeConfig limeConfig = new LimeConfig()
                 .withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
