@@ -69,6 +69,7 @@ public class LinearModel {
         double lr = INITIAL_LEARNING_RATE;
         int e = 0;
         int lossNotDecreasingIterations = 0;
+
         while (checkFinalLoss(finalLoss) && e < MAX_NO_EPOCHS) {
             double loss = 0; // MAE
             int i = 0;

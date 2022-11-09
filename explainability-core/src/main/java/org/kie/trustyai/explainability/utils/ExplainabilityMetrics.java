@@ -211,9 +211,11 @@ public class ExplainabilityMetrics {
         for (int i = 0; i < runs; i++) {
             SaliencyResults saliencyMap = saliencyLocalExplainer.explainAsync(prediction, model)
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
+
             for (Map.Entry<String, Saliency> saliencyEntry : saliencyMap.getSaliencies().entrySet()) {
                 // aggregate saliencies by output name
                 List<FeatureImportance> topFeatures = saliencyEntry.getValue().getTopFeatures(1);
+
                 if (!topFeatures.isEmpty() && topFeatures.get(0).getScore() != 0) { // skip empty or 0 valued saliencies
                     if (saliencies.containsKey(saliencyEntry.getKey())) {
                         List<Saliency> localSaliencies = saliencies.get(saliencyEntry.getKey());
@@ -285,7 +287,7 @@ public class ExplainabilityMetrics {
             if (optionalOutput.isPresent()) {
                 Output output = optionalOutput.get();
                 SaliencyResults stringSaliencyMap = localExplainer.explainAsync(prediction, predictionProvider)
-                        .get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT);
+                        .get(Config.DEFAULT_ASYNC_TIMEOUT * 2, Config.DEFAULT_ASYNC_TIMEUNIT);
                 if (stringSaliencyMap.getSaliencies().containsKey(outputName)) {
                     Saliency saliency = stringSaliencyMap.getSaliencies().get(outputName);
                     List<FeatureImportance> topFeatures = saliency.getPerFeatureImportance().stream()
@@ -363,7 +365,7 @@ public class ExplainabilityMetrics {
 
         for (Prediction prediction : bottomChunk) {
             SaliencyResults stringSaliencyMap = localExplainer.explainAsync(prediction, predictionProvider)
-                    .get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT);
+                    .get(Config.DEFAULT_ASYNC_TIMEOUT * 2, Config.DEFAULT_ASYNC_TIMEUNIT);
             if (stringSaliencyMap.getSaliencies().containsKey(outputName)) {
                 Saliency saliency = stringSaliencyMap.getSaliencies().get(outputName);
                 List<FeatureImportance> topFeatures = saliency.getPerFeatureImportance().stream()
