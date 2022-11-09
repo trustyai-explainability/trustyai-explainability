@@ -203,9 +203,10 @@ class DummyModelsLimeExplainerTest {
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
-
+        System.out.println(outputs.get(0).getOutputs());
         LimeConfig limeConfig = new LimeConfig()
-                .withSamples(100).withPerturbationContext(new PerturbationContext(seed, random, 1));
+                .withProximityThreshold(.7)
+                .withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model).toCompletableFuture()
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
