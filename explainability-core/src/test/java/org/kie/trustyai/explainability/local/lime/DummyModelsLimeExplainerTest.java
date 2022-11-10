@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
@@ -31,6 +32,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Disabled("FAI-870")
 class DummyModelsLimeExplainerTest {
 
     @ParameterizedTest

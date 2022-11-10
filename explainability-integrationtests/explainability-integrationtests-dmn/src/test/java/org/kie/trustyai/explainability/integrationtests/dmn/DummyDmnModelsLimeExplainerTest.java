@@ -25,6 +25,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.kie.dmn.api.core.DMNRuntime;
 import org.kie.kogito.decision.DecisionModel;
@@ -52,6 +53,7 @@ import org.kie.trustyai.explainability.utils.ValidationUtils;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
+@Disabled("FAI-870")
 class DummyDmnModelsLimeExplainerTest {
 
     @Test
