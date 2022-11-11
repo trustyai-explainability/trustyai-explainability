@@ -5,6 +5,7 @@ target/
 
 # Repository wide ignore mac DS_Store files
 .DS_Store
+dependency-reduced-pom.xml
 
 # Eclipse, Netbeans and IntelliJ files
 !.gitignore

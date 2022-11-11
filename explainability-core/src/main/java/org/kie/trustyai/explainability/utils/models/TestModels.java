@@ -86,6 +86,7 @@ public class TestModels {
                 }
                 PredictionOutput predictionOutput = new PredictionOutput(
                         List.of(new Output("linear-sum", Type.NUMBER, new Value(result), 1d)));
+
                 predictionOutputs.add(predictionOutput);
             }
             return predictionOutputs;

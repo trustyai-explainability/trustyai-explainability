@@ -215,6 +215,7 @@
     <modules>
         <module>explainability-core</module>
         <module>explainability-integrationtests</module>
+        <module>explainability-arrow</module>
     </modules>
 
 
