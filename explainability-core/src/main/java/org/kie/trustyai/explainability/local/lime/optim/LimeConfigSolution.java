@@ -29,7 +29,7 @@ import org.optaplanner.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalS
 @PlanningSolution
 public class LimeConfigSolution {
 
-    private LimeConfig config = new LimeConfig().withUseWLRLinearModel(false);
+    private LimeConfig config = new LimeConfig();
 
     private List<Prediction> predictions;
 

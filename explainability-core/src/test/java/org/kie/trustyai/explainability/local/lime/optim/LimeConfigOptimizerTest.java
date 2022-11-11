@@ -180,7 +180,7 @@ class LimeConfigOptimizerTest {
     }
 
     private void assertConfigOptimized(LimeConfigOptimizer limeConfigOptimizer) throws InterruptedException, java.util.concurrent.ExecutionException {
-        LimeConfig initialConfig = new LimeConfig().withSamples(10);
+        LimeConfig initialConfig = new LimeConfig().withSamples(10).withUseWLRLinearModel(false);
         PredictionProvider model = TestModels.getSumSkipModel(1);
         Random random = new Random();
         random.setSeed(4);
