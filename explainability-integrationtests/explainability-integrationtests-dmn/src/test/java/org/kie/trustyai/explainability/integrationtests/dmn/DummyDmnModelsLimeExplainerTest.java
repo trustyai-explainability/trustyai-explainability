@@ -77,7 +77,6 @@ class DummyDmnModelsLimeExplainerTest {
         Random random = new Random();
         PerturbationContext perturbationContext = new PerturbationContext(0L, random, 1);
         LimeConfig limeConfig = new LimeConfig()
-                .withSamples(10)
                 .withPerturbationContext(perturbationContext);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
@@ -202,7 +201,6 @@ class DummyDmnModelsLimeExplainerTest {
         Random random = new Random();
         PerturbationContext perturbationContext = new PerturbationContext(0L, random, 3);
         LimeConfig limeConfig = new LimeConfig()
-                .withSamples(10)
                 .withPerturbationContext(perturbationContext);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
