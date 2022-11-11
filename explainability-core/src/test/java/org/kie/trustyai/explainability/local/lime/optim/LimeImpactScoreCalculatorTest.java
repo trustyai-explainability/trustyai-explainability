@@ -49,7 +49,7 @@ class LimeImpactScoreCalculatorTest {
     void testNonZeroScore() throws ExecutionException, InterruptedException, TimeoutException {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         LimeImpactScoreCalculator scoreCalculator = new LimeImpactScoreCalculator();
-        LimeConfig config = new LimeConfig();
+        LimeConfig config = new LimeConfig().withProximityThreshold(.7);
         List<Feature> features = List.of(FeatureFactory.newFulltextFeature("text", "money so they say is the root of all evil today"));
         PredictionInput input = new PredictionInput(features);
         List<PredictionOutput> predictionOutputs = model.predictAsync(List.of(input))

@@ -203,7 +203,6 @@ class DummyModelsLimeExplainerTest {
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
-        System.out.println(outputs.get(0).getOutputs());
         LimeConfig limeConfig = new LimeConfig()
                 .withProximityThreshold(.7)
                 .withPerturbationContext(new PerturbationContext(seed, random, 1));

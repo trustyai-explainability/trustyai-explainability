@@ -17,10 +17,14 @@ package org.kie.trustyai.explainability.utils;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +58,33 @@ public class LinearModel {
         double[] sampleWeights = new double[trainingSet.size()];
         Arrays.fill(sampleWeights, 1);
         return fit(trainingSet, sampleWeights);
+    }
+
+    public double fitWLRR(Collection<Pair<double[], Double>> trainingSet, double[] sampleWeights) {
+
+        Optional<Pair<double[], Double>> first = trainingSet.stream().findFirst();
+        if (first.isPresent()) {
+            double[][] x = new double[trainingSet.size()][first.get().getLeft().length];
+            double[] y = new double[trainingSet.size()];
+            int idx = 0;
+            for (Pair<double[], Double> datapoint : trainingSet) {
+                x[idx] = datapoint.getLeft();
+                y[idx] = datapoint.getRight();
+                idx++;
+            }
+
+            RealMatrix xMat = MatrixUtils.createRealMatrix(x);
+            RealVector yVect = MatrixUtils.createRealVector(y);
+            RealVector sampleVect = MatrixUtils.createRealVector(sampleWeights).getSubVector(0, yVect.getDimension());
+
+            WeightedLinearRegressionResults wlrr = WeightedLinearRegression.fit(xMat, yVect, sampleVect, false, false);
+            System.arraycopy(wlrr.getCoefficients().toArray(), 0, weights, 0, weights.length);
+            return wlrr.getMSE();
+        } else {
+            logger.warn("fitting an empty training set");
+            Arrays.fill(weights, 0);
+            return Double.NaN;
+        }
     }
 
     public double fit(Collection<Pair<double[], Double>> trainingSet, double[] sampleWeights) {
@@ -108,6 +139,7 @@ public class LinearModel {
                 lossNotDecreasingIterations++;
             }
             e++;
+
             logger.debug("epoch {}, loss: {}", e, loss);
             if (lossNotDecreasingIterations > PATIENCE) {
                 logger.debug("early stopping at iteration {}", e);

@@ -56,6 +56,7 @@ class ProximityFilter {
         }
         List<Integer> toRemove = new ArrayList<>();
         for (int i = trainingSet.size() - 1; i >= 0; i--) {
+            //System.out.println(Arrays.toString(trainingSet.get(i).getLeft()) + ": " + sampleWeights[i] + ":" + (sampleWeights[i] < proximityThreshold));
             if (sampleWeights[i] < proximityThreshold) {
                 toRemove.add(i);
             }
