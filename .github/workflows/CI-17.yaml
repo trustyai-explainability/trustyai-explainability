@@ -2,9 +2,10 @@
 name: TrustyAI Explainability - CI - JDK 17
 
 on:
-  issues:
-    types:
-      - labeled
+  label:
+    types: [created, deleted]
+  pull_request:
+
   event-connect-build:
     env:
       MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
