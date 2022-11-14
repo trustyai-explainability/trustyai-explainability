@@ -1,5 +1,6 @@
+# Temporary independent job to test JDK 17 compatibility. To be removed as soon as JDK 17 is fixed. Add jdk17 label to run it
 name: TrustyAI Explainability - CI - JDK 17
-description: Temporary independent job to test JDK 17 compatibility. To be removed as soon as JDK 17 is fixed. Add jdk17 label to run it
+
 on: [ push, pull_request ]
 jobs:
   event-connect-build:
