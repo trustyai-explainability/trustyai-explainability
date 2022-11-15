@@ -77,7 +77,6 @@ class DummyDmnModelsLimeExplainerTest {
         Random random = new Random();
         PerturbationContext perturbationContext = new PerturbationContext(0L, random, 1);
         LimeConfig limeConfig = new LimeConfig()
-                .withSamples(10)
                 .withPerturbationContext(perturbationContext);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
@@ -202,12 +201,15 @@ class DummyDmnModelsLimeExplainerTest {
         Random random = new Random();
         PerturbationContext perturbationContext = new PerturbationContext(0L, random, 3);
         LimeConfig limeConfig = new LimeConfig()
-                .withSamples(10)
+                .withSamples(1000)
+                .withProximityThreshold(.6)
+                .withProximityFilter(false)
                 .withPerturbationContext(perturbationContext);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit()).getSaliencies();
         ;
+
         for (Saliency saliency : saliencyMap.values()) {
             assertThat(saliency).isNotNull();
         }

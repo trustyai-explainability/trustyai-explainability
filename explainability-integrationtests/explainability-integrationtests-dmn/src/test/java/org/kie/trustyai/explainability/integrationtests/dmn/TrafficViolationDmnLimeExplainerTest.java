@@ -69,8 +69,11 @@ class TrafficViolationDmnLimeExplainerTest {
         Prediction prediction = new SimplePrediction(predictionInput, predictionOutputs.get(0));
         Random random = new Random();
         PerturbationContext perturbationContext = new PerturbationContext(0L, random, 1);
+
+        // this might be hardcoded to the perceptron results?
         LimeConfig limeConfig = new LimeConfig()
                 .withSamples(10)
+                .withUseWLRLinearModel(false)
                 .withPerturbationContext(perturbationContext);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         Map<String, Saliency> saliencyMap = limeExplainer.explainAsync(prediction, model)

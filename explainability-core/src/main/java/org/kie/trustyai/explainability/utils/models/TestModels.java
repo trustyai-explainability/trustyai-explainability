@@ -93,6 +93,23 @@ public class TestModels {
         });
     }
 
+    public static PredictionProvider getLinearThresholdModel(double[] weights, double threshold) {
+        return inputs -> supplyAsync(() -> {
+            List<PredictionOutput> predictionOutputs = new LinkedList<>();
+            for (PredictionInput predictionInput : inputs) {
+                List<Feature> features = predictionInput.getFeatures();
+                double result = 0;
+                for (int i = 0; i < features.size(); i++) {
+                    result += features.get(i).getValue().asNumber() * weights[i];
+                }
+                PredictionOutput predictionOutput = new PredictionOutput(
+                        List.of(new Output("linear-sum-above-thresh", Type.BOOLEAN, new Value(result > threshold), 1d)));
+                predictionOutputs.add(predictionOutput);
+            }
+            return predictionOutputs;
+        });
+    }
+
     public static PredictionProvider getSumSkipTwoOutputModel(int skipFeatureIndex) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
@@ -156,21 +173,6 @@ public class TestModels {
                     }
                 }
                 PredictionOutput predictionOutput = new PredictionOutput(outputs);
-                predictionOutputs.add(predictionOutput);
-            }
-            return predictionOutputs;
-        });
-    }
-
-    public static PredictionProvider getEvenFeatureModel(int featureIndex) {
-        return inputs -> supplyAsync(() -> {
-            List<PredictionOutput> predictionOutputs = new LinkedList<>();
-            for (PredictionInput predictionInput : inputs) {
-                List<Feature> features = predictionInput.getFeatures();
-                Feature feature = features.get(featureIndex);
-                double v = feature.getValue().asNumber();
-                PredictionOutput predictionOutput = new PredictionOutput(
-                        List.of(new Output("feature-" + featureIndex, Type.BOOLEAN, new Value(v % 2 == 0), 1d)));
                 predictionOutputs.add(predictionOutput);
             }
             return predictionOutputs;

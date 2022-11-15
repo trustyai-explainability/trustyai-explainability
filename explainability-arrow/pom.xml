@@ -17,6 +17,7 @@
     <version.org.apache.arrow>7.0.0</version.org.apache.arrow>
     <version.io.netty>4.1.68.Final</version.io.netty>
     <version.com.google.flatbuffers>2.0.3</version.com.google.flatbuffers>
+    <version.com.fasterxml.jackson.core>2.13.4</version.com.fasterxml.jackson.core> <!-- sync this with the databind version -->
   </properties>
 
   <dependencyManagement>
@@ -52,6 +53,11 @@
         <artifactId>flatbuffers-java</artifactId>
         <version>${version.com.google.flatbuffers}</version>
       </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -85,6 +91,15 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
     </dependency>
   </dependencies>
 

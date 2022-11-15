@@ -68,6 +68,7 @@ class PrequalificationDmnLimeExplainerTest {
 
         PerturbationContext perturbationContext = new PerturbationContext(0L, random, 1);
         LimeConfig limeConfig = new LimeConfig()
+                .withSamples(-1)
                 .withPerturbationContext(perturbationContext);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
 
