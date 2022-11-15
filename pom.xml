@@ -144,7 +144,7 @@
                         <dependency>
                             <artifactId>kogito-ide-config</artifactId>
                             <groupId>org.kie.kogito</groupId>
-                            <version>1.29.0.Final</version>
+                            <version>${kogito.formatter.version}</version>
                         </dependency>
                     </dependencies>
                     <configuration>
