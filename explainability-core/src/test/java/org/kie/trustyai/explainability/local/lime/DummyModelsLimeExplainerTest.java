@@ -143,18 +143,17 @@ class DummyModelsLimeExplainerTest {
     @ValueSource(longs = { 0 })
     void testMapOneFeatureToOutputClassification(long seed) throws Exception {
         Random random = new Random();
-        int idx = 1;
         List<Feature> features = new LinkedList<>();
-        features.add(FeatureFactory.newNumericalFeature("f1", 1));
+        features.add(FeatureFactory.newNumericalFeature("f1", 5));
         features.add(FeatureFactory.newNumericalFeature("f2", 1));
         features.add(FeatureFactory.newNumericalFeature("f3", 3));
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getEvenFeatureModel(idx);
+        PredictionProvider model = TestModels.getLinearThresholdModel(new double[] { 100., 0., 0. }, 450);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
 
-        LimeConfig limeConfig = new LimeConfig();
+        LimeConfig limeConfig = new LimeConfig().withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
@@ -165,7 +164,7 @@ class DummyModelsLimeExplainerTest {
             assertEquals(1d, ExplainabilityMetrics.impactScore(model, prediction, topFeatures));
         }
         double minimumPositiveStabilityRate = 0.5;
-        double minimumNegativeStabilityRate = 0.8;
+        double minimumNegativeStabilityRate = 0.5;
         int topK = 1;
         TestUtils.assertLimeStability(model, prediction, limeExplainer, topK, minimumPositiveStabilityRate,
                 minimumNegativeStabilityRate);
@@ -181,7 +180,7 @@ class DummyModelsLimeExplainerTest {
         DataDistribution distribution = new PredictionInputsDataDistribution(inputs);
         int k = 2;
         int chunkSize = 10;
-        String decision = "feature-" + idx;
+        String decision = "linear-sum-above-thresh";
         double precision =
                 ExplainabilityMetrics.getLocalSaliencyPrecision(decision, model, limeExplainer, distribution, k, chunkSize);
         assertThat(precision).isEqualTo(1);
@@ -206,9 +205,9 @@ class DummyModelsLimeExplainerTest {
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
-
         LimeConfig limeConfig = new LimeConfig()
-                .withSamples(100).withPerturbationContext(new PerturbationContext(seed, random, 1));
+                .withProximityThreshold(.7)
+                .withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model).toCompletableFuture()
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
@@ -220,7 +219,7 @@ class DummyModelsLimeExplainerTest {
         }
         int topK = 1;
         double minimumPositiveStabilityRate = 0.9;
-        double minimumNegativeStabilityRate = 0.9;
+        double minimumNegativeStabilityRate = 0.4;
         TestUtils.assertLimeStability(model, prediction, limeExplainer, topK, minimumPositiveStabilityRate,
                 minimumNegativeStabilityRate);
 
@@ -250,17 +249,17 @@ class DummyModelsLimeExplainerTest {
     @ValueSource(longs = { 0 })
     void testUnusedFeatureClassification(long seed) throws Exception {
         Random random = new Random();
-        int idx = 2;
         List<Feature> features = new LinkedList<>();
-        features.add(FeatureFactory.newNumericalFeature("f1", 6));
-        features.add(FeatureFactory.newNumericalFeature("f2", 3));
-        features.add(FeatureFactory.newNumericalFeature("f3", 5));
-        PredictionProvider model = TestModels.getEvenSumModel(idx);
+        features.add(FeatureFactory.newNumericalFeature("f1", 5));
+        features.add(FeatureFactory.newNumericalFeature("f2", 4));
+        features.add(FeatureFactory.newNumericalFeature("f3", 3));
+        PredictionProvider model = TestModels.getLinearThresholdModel(new double[] { 100., 10., 0. }, 400);
         PredictionInput input = new PredictionInput(features);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
-        LimeConfig limeConfig = new LimeConfig();
+        LimeConfig limeConfig = new LimeConfig()
+                .withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         SaliencyResults saliencyMap = limeExplainer.explainAsync(prediction, model)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
@@ -287,7 +286,8 @@ class DummyModelsLimeExplainerTest {
         DataDistribution distribution = new PredictionInputsDataDistribution(inputs);
         int k = 2;
         int chunkSize = 10;
-        String decision = "sum-even-but" + idx;
+        String decision = "linear-sum-above-thresh";
+        ;
         double precision =
                 ExplainabilityMetrics.getLocalSaliencyPrecision(decision, model, limeExplainer, distribution, k, chunkSize);
         assertThat(precision).isEqualTo(1);
