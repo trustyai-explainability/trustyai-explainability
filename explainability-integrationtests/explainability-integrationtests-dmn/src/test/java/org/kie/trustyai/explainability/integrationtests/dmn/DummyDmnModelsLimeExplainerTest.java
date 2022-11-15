@@ -53,7 +53,7 @@ import org.kie.trustyai.explainability.utils.ValidationUtils;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
-@Disabled("FAI-870")
+
 class DummyDmnModelsLimeExplainerTest {
 
     @Test
