@@ -3,7 +3,7 @@ on: [ push, pull_request ]
 jobs:
   event-connect-build:
     env:
-      MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+      MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true --add-opens=java.base/java.nio=ALL-UNNAMED"
       MAVEN_ARGS: "-nsu -fae -e"
     concurrency:
       group: pull_request-${{ github.event_name }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.java-version }}
