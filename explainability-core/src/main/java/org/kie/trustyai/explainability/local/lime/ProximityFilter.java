@@ -48,36 +48,34 @@ class ProximityFilter {
     void apply(List<Pair<double[], Double>> trainingSet, double[] sampleWeights) {
         if (trainingSet == null || sampleWeights == null) {
             LOGGER.error("applied filter on null training set / weights");
-            return;
-        }
-        if (trainingSet.size() != sampleWeights.length) {
+        } else if (trainingSet.size() != sampleWeights.length) {
             LOGGER.warn("training set size {} ≠ weights size {}, not filtering", trainingSet.size(), sampleWeights.length);
             return;
-        }
-        List<Integer> toRemove = new ArrayList<>();
-        for (int i = trainingSet.size() - 1; i >= 0; i--) {
-            //System.out.println(Arrays.toString(trainingSet.get(i).getLeft()) + ": " + sampleWeights[i] + ":" + (sampleWeights[i] < proximityThreshold));
-            if (sampleWeights[i] < proximityThreshold) {
-                toRemove.add(i);
-            }
-        }
-        boolean enoughSamples;
-        double v = proximityFilteredDatasetMinimum;
-        if (v % 1 == 0) {
-            enoughSamples = trainingSet.size() - toRemove.size() > v;
         } else {
-            if (v > 1) {
-                LOGGER.warn("unexpected value for 'Minimum dataset cut' {}, not filtering", v);
-                enoughSamples = false;
+            List<Integer> toRemove = new ArrayList<>();
+            for (int i = trainingSet.size() - 1; i >= 0; i--) {
+                if (sampleWeights[i] < proximityThreshold) {
+                    toRemove.add(i);
+                }
+            }
+            boolean enoughSamples;
+            double v = proximityFilteredDatasetMinimum;
+            if (v % 1 == 0) {
+                enoughSamples = trainingSet.size() - toRemove.size() > v;
             } else {
-                enoughSamples = (double) toRemove.size() / (double) trainingSet.size() >= v;
+                if (v > 1) {
+                    LOGGER.warn("unexpected value for 'Minimum dataset cut' {}, not filtering", v);
+                    enoughSamples = false;
+                } else {
+                    enoughSamples = (double) toRemove.size() / (double) trainingSet.size() >= v;
+                }
             }
-        }
-        if (!toRemove.isEmpty() && enoughSamples) {
-            for (Integer r : toRemove) {
-                trainingSet.remove(r.intValue());
+            if (!toRemove.isEmpty() && enoughSamples) {
+                for (Integer r : toRemove) {
+                    trainingSet.remove(r.intValue());
+                }
+                Arrays.fill(sampleWeights, 1);
             }
-            Arrays.fill(sampleWeights, 1);
         }
     }
 }
