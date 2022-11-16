@@ -18,9 +18,11 @@ package org.kie.trustyai.explainability.local.lime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.utils.DataUtils;
 
 /**
@@ -40,7 +42,7 @@ class SampleWeighter {
      * @param kernelWidth the width of the kernel used to calculate the proximity
      * @return a weight for each sample in the training set
      */
-    static double[] getSampleWeights(List<Feature> targetInputFeatures, Collection<Pair<double[], Double>> training,
+    static double[] getSampleWeightsInterpretable(List<Feature> targetInputFeatures, Collection<Pair<double[], Double>> training,
             double kernelWidth) {
         int noOfFeatures = targetInputFeatures.size();
         double[] x = new double[noOfFeatures];
@@ -50,5 +52,35 @@ class SampleWeighter {
                 .map(d -> DataUtils.euclideanDistance(x, d)) // calculate euclidean distance between target and sample points
                 .map(d -> DataUtils.exponentialSmoothingKernel(d, kernelWidth)) // transform distance into proximity using an exponential smoothing kernel
                 .mapToDouble(Double::doubleValue).toArray(); // output to an array
+    }
+
+    /**
+     * Obtain sample weights for a training set, given a list of target input features to compare with.
+     *
+     * @param originalFeatures target input features
+     * @param perturbedFeatures the perturbed inputs' features
+     * @param kernelWidth the width of the kernel used to calculate the proximity
+     * @return a weight for each sample in the training set
+     */
+    static double[] getSampleWeightsOriginal(List<Feature> originalFeatures, Collection<List<Feature>> perturbedFeatures,
+            double kernelWidth) {
+        return perturbedFeatures.stream().mapToDouble(lf -> distance(lf, originalFeatures))
+                .map(d -> DataUtils.exponentialSmoothingKernel(d, kernelWidth)).toArray();
+    }
+
+    static double distance(List<Feature> f1, List<Feature> f2) {
+        assert f1.size() == f2.size() : "cannot calculate the distance between feature sets of different sizes";
+
+        double distance;
+        if (f1.stream().allMatch(f -> Type.NUMBER.equals(f.getType())) && f2.stream().allMatch(f -> Type.NUMBER.equals(f.getType()))) {
+            distance = DataUtils.euclideanDistance(f1.stream().mapToDouble(f -> f.getValue().asNumber()).toArray(),
+                    f2.stream().mapToDouble(f -> f.getValue().asNumber()).toArray());
+        } else if (f1.stream().allMatch(f -> Type.TEXT.equals(f.getType())) && f2.stream().allMatch(f -> Type.TEXT.equals(f.getType()))) {
+            distance = DataUtils.hammingDistance(f1.stream().map(f -> f.getValue().asString()).collect(Collectors.joining(" ")),
+                    f2.stream().map(f -> f.getValue().asString()).collect(Collectors.joining(" ")));
+        } else {
+            distance = DataUtils.gowerDistance(f1, f2, 0.5);
+        }
+        return distance;
     }
 }

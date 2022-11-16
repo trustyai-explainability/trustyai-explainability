@@ -47,6 +47,7 @@ public class LimeConfig {
     private static final int DEFAULT_NO_OF_FEATURES = 6;
     private static final boolean DEFAULT_TRACK_COUNTERFACTUALS = false;
     private static final boolean DEFAULT_USE_WLR_LINEAR_MODEL = true;
+    private static final boolean DEFAULT_FILTER_INTERPRETABLE = true;
 
     private double separableDatasetRatio = DEFAULT_SEPARABLE_DATASET_RATIO;
 
@@ -81,6 +82,11 @@ public class LimeConfig {
      * Whether to operate feature selection
      */
     private boolean featureSelection = DEFAULT_FEATURE_SELECTION;
+
+    /**
+     * Whether to run proximity filter in the interprertable space
+     */
+    private boolean filterInterpretable = DEFAULT_FILTER_INTERPRETABLE;
 
     public LimeConfig withFeatureSelection(boolean featureSelection) {
         this.featureSelection = featureSelection;
@@ -378,5 +384,9 @@ public class LimeConfig {
         return Objects.hash(separableDatasetRatio, noOfSamples, noOfRetries, perturbationContext, adaptDatasetVariance, dataDistribution, highScoreFeatureZones, penalizeBalanceSparse, proximityFilter,
                 proximityThreshold, proximityFilteredDatasetMinimum, proximityKernelWidth, encodingParams, normalizeWeights, boostrapInputs, featureSelection, noOfFeatures, trackCounterfactuals,
                 useWLRLinearModel);
+    }
+
+    public boolean isFilterInterpretable() {
+        return this.filterInterpretable;
     }
 }

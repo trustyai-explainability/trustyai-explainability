@@ -25,11 +25,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -344,7 +345,15 @@ public class DataUtils {
      */
     public static double hammingDistance(String x, String y) {
         if (x.length() != y.length()) {
-            return Double.NaN;
+            List<String> xTokens = Arrays.stream(x.split(" ")).collect(Collectors.toList());
+            List<String> yTokens = Arrays.stream(y.split(" ")).collect(Collectors.toList());
+            double h = 0;
+            for (int i = 0; i < xTokens.size(); i++) {
+                if (yTokens.size() >= i && !xTokens.get(i).equals(yTokens.get(i))) {
+                    h++;
+                }
+            }
+            return h + Math.abs(xTokens.size() - yTokens.size());
         } else {
             double h = 0;
             for (int i = 0; i < x.length(); i++) {
@@ -354,6 +363,25 @@ public class DataUtils {
             }
             return h;
         }
+    }
+
+    /**
+     * Calculate the Jaccard distance between two text strings.
+     * <p>
+     * see https://en.wikipedia.org/wiki/Jaccard_index
+     *
+     * @param x first string
+     * @param y second string
+     * @return the Jaccard distance
+     */
+    public static double jaccardDistance(String x, String y) {
+        Set<String> xTokens = Arrays.stream(x.split(" ")).collect(Collectors.toSet());
+        Set<String> yTokens = Arrays.stream(y.split(" ")).collect(Collectors.toSet());
+        Set<String> intersection = new HashSet<>(xTokens);
+        intersection.retainAll(yTokens);
+        Set<String> union = new HashSet<>(xTokens);
+        xTokens.addAll(yTokens);
+        return 1 - (double) intersection.size() / (double) union.size();
     }
 
     /**
@@ -406,7 +434,7 @@ public class DataUtils {
      * @return a data distribution
      */
     public static DataDistribution generateRandomDataDistribution(int noOfFeatures, int distributionSize, Random random) {
-        List<FeatureDistribution> featureDistributions = new LinkedList<>();
+        List<FeatureDistribution> featureDistributions = new ArrayList<>();
         for (int i = 0; i < noOfFeatures; i++) {
             double[] doubles = generateData(random.nextDouble(), random.nextDouble(), distributionSize, random);
             Feature feature = FeatureFactory.newNumericalFeature("f_" + i, Double.NaN);
@@ -423,11 +451,9 @@ public class DataUtils {
      * @return a list of prediction inputs with linearized features
      */
     public static List<PredictionInput> linearizeInputs(List<PredictionInput> predictionInputs) {
-        List<PredictionInput> newInputs = new LinkedList<>();
+        List<PredictionInput> newInputs = new ArrayList<>();
         for (PredictionInput predictionInput : predictionInputs) {
-            List<Feature> originalFeatures = predictionInput.getFeatures();
-            List<Feature> flattenedFeatures = getLinearizedFeatures(originalFeatures);
-            newInputs.add(new PredictionInput(flattenedFeatures));
+            newInputs.add(new PredictionInput(getLinearizedFeatures(predictionInput.getFeatures())));
         }
         return newInputs;
     }
@@ -439,7 +465,7 @@ public class DataUtils {
      * @return a flat list of features
      */
     public static List<Feature> getLinearizedFeatures(List<Feature> originalFeatures) {
-        List<Feature> flattenedFeatures = new LinkedList<>();
+        List<Feature> flattenedFeatures = new ArrayList<>();
         for (Feature f : originalFeatures) {
             linearizeFeature(flattenedFeatures, f);
         }
@@ -700,4 +726,14 @@ public class DataUtils {
         }
         return text.toString();
     }
+
+    public static double gowerDistance(List<Feature> x, List<Feature> y, double lambda) {
+        double[] xNum = x.stream().filter(f -> Type.NUMBER.equals(f.getType())).mapToDouble(f -> f.getValue().asNumber()).toArray();
+        double[] yNum = y.stream().filter(f -> Type.NUMBER.equals(f.getType())).mapToDouble(f -> f.getValue().asNumber()).toArray();
+
+        String xStr = x.stream().filter(f -> Type.TEXT.equals(f.getType())).map(f -> f.getValue().asString()).collect(Collectors.joining(" "));
+        String yStr = y.stream().filter(f -> Type.TEXT.equals(f.getType())).map(f -> f.getValue().asString()).collect(Collectors.joining(" "));
+        return euclideanDistance(xNum, yNum) + lambda * hammingDistance(xStr, yStr);
+    }
+
 }

@@ -34,7 +34,7 @@ class SampleWeighterTest {
     void testSamplingEmptyDataset() {
         Collection<Pair<double[], Double>> trainingSet = new LinkedList<>();
         List<Feature> features = new LinkedList<>();
-        double[] sampleWeights = SampleWeighter.getSampleWeights(features, trainingSet, 0.5);
+        double[] sampleWeights = SampleWeighter.getSampleWeightsInterpretable(features, trainingSet, 0.5);
         assertEquals(0, sampleWeights.length);
     }
 
@@ -52,7 +52,7 @@ class SampleWeighterTest {
             Pair<double[], Double> doubles = Pair.of(vector, 0d);
             trainingSet.add(doubles);
         }
-        double[] weights = SampleWeighter.getSampleWeights(features, trainingSet, 0.5);
+        double[] weights = SampleWeighter.getSampleWeightsInterpretable(features, trainingSet, 0.5);
         // check that weights decrease with the distance from the 1 vector (the target instance)
         for (int i = 0; i < weights.length - 1; i++) {
             assertTrue(weights[i] > weights[i + 1]);
