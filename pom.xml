@@ -8,7 +8,7 @@
     <version>${revision}</version>
     <name>TrustyAI Explainability</name>
     <description>TrustyAI is a java library for Explainable AI.</description>
-    <url>https://repository.jboss.org/nexus/content/repositories/trustyai-explainability/</url>
+    <url>https://github.com/trustyai-explainability/trustyai-explainability</url>
     <packaging>pom</packaging>
 
     <licenses>
@@ -16,7 +16,6 @@
             <name>Apache License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
-            <comments>At least one license must be present. Here is an example of ASL v. 2.0</comments>
         </license>
     </licenses>
 
