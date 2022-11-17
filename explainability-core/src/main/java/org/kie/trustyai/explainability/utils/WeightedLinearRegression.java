@@ -54,6 +54,12 @@ public class WeightedLinearRegression {
     public static WeightedLinearRegressionResults fit(
             RealMatrix features, RealVector observations, RealVector sampleWeights, boolean intercept)
             throws IllegalArgumentException, ArithmeticException {
+        return fit(features, observations, sampleWeights, intercept, true);
+    }
+
+    public static WeightedLinearRegressionResults fit(
+            RealMatrix features, RealVector observations, RealVector sampleWeights, boolean intercept, boolean needVariance)
+            throws IllegalArgumentException, ArithmeticException {
         // if we want to compute an intercept, add a dummy feature at last column.
         int nfeatures = intercept ? features.getColumnDimension() + 1 : features.getColumnDimension();
         int nsamples = observations.getDimension();
@@ -81,7 +87,7 @@ public class WeightedLinearRegression {
         RealVector coefficients = xtWXInv.operate(xtWY);
 
         ModelSquareSums mss = WeightedLinearRegression.getRSSandTSS(features, observations,
-                sampleWeights, weightSum, coefficients, true);
+                sampleWeights, weightSum, coefficients, needVariance);
         double mse = mss.residualSquareSum / weightSum;
         RealVector stdErrors = WeightedLinearRegression.getVarianceMatrix(dof, nfeatures, xtWXInv, mss);
         RealVector pvalues = WeightedLinearRegression.getPValues(dof, nfeatures, stdErrors, coefficients);

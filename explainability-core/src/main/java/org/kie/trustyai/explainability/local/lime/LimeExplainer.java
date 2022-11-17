@@ -63,7 +63,6 @@ import static java.util.concurrent.CompletableFuture.completedFuture;
  * - numerical features are max-min scaled and clustered via a gaussian kernel
  */
 public class LimeExplainer implements LocalExplainer<SaliencyResults> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(LimeExplainer.class);
 
     private final LimeConfig limeConfig;
@@ -108,6 +107,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
             noOfSamples = (int) Math.pow(2, linearizedTargetInputFeatures.size());
             LOGGER.debug("using 2^|features| samples ({})", noOfSamples);
             executionConfig = executionConfig.withSamples(noOfSamples);
+
         }
 
         return explainRetryCycle(model, originalInput, linearizedTargetInputFeatures, actualOutputs, executionConfig);
@@ -250,7 +250,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
         LinearModel linearModel = new LinearModel(linearizedTargetInputFeatures.size(), limeInputs.isClassification(),
                 executionConfig.getPerturbationContext().getRandom());
 
-        double loss = linearModel.fit(trainingSet, sampleWeights);
+        double loss = executionConfig.isUseWLRLinearModel() ? linearModel.fitWLRR(trainingSet, sampleWeights) : linearModel.fit(trainingSet, sampleWeights);
         if (!Double.isNaN(loss)) {
             // create the output saliency
             double[] weights = linearModel.getWeights();
@@ -289,7 +289,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
         if (linearizedTargetInputFeatures.size() > 6) {
             // highest weights
             LinearModel linearModel = new LinearModel(linearizedTargetInputFeatures.size(), limeInputs.isClassification(), perturbationContext.getRandom());
-            double loss = linearModel.fit(trainingSet, sampleWeights);
+            double loss = executionConfig.isUseWLRLinearModel() ? linearModel.fitWLRR(trainingSet, sampleWeights) : linearModel.fit(trainingSet, sampleWeights);
             LOGGER.trace("Feature selection loss: {}", loss);
             double[] weights = linearModel.getWeights();
             List<FeatureImportance> fis = new ArrayList<>();
@@ -326,7 +326,8 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
 
                     // 2. train the model
                     LinearModel currentLinearModel = new LinearModel(currentFeatures.size(), limeInputs.isClassification(), perturbationContext.getRandom());
-                    double candidateLoss = currentLinearModel.fit(currentTrainingSet, currentSampleWeights);
+
+                    double candidateLoss = executionConfig.isUseWLRLinearModel() ? currentLinearModel.fitWLRR(trainingSet, sampleWeights) : currentLinearModel.fit(trainingSet, sampleWeights);
 
                     // 3. record its score
                     scores.put(candidateFeature, candidateLoss);
@@ -387,7 +388,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
                     throw new DatasetNotSeparableException(currentOutput, rawClassesBalance);
                 }
             } else {
-                LOGGER.warn("Using an hardly separable dataset for output '{}' of type '{}' with value '{}' ({})",
+                LOGGER.warn("Using a hardly separable dataset for output '{}' of type '{}' with value '{}' ({})",
                         currentOutput.getName(), currentOutput.getType(), currentOutput.getValue(), rawClassesBalance);
                 return new LimeInputs(classification, linearizedTargetInputFeatures, currentOutput, perturbedInputs, preservationMasks, perturbedOutputs, outputs);
             }
