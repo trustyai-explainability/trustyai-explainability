@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.kie.trustyai</groupId>
     <artifactId>trustyaiexplainability</artifactId>
-    <version>0.3.0</version>
+    <version>${revision}</version>
     <name>TrustyAI Explainability</name>
     <description>TrustyAI is a java library for Explainable AI.</description>
     <url>https://repository.jboss.org/nexus/content/repositories/trustyai-explainability/</url>
@@ -50,6 +50,7 @@
     </developers>
 
     <properties>
+        <revision>0.3.0</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>11</maven.compiler.source>
