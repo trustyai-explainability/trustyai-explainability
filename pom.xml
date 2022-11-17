@@ -27,26 +27,6 @@
 
     <developers>
         <developer>
-            <id>ruivieira</id>
-            <name>Rui Vieira</name>
-            <organization>Red Hat</organization>
-        </developer>
-        <developer>
-            <id>tteofili</id>
-            <name>Tommaso Teofili</name>
-            <organization>Red Hat</organization>
-        </developer>
-        <developer>
-            <id>RobGeada</id>
-            <name>Rob Geada</name>
-            <organization>Red Hat</organization>
-        </developer>
-        <developer>
-            <id>danielezonca</id>
-            <name>Daniele Zonca</name>
-            <organization>Red Hat</organization>
-        </developer>
-        <developer>
             <name>TrustyAI Explainability team</name>
             <url>https://github.com/orgs/trustyai-explainability/people</url>
         </developer>
