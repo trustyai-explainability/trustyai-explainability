@@ -47,6 +47,10 @@
             <name>Daniele Zonca</name>
             <organization>Red Hat</organization>
         </developer>
+        <developer>
+            <name>TrustyAI Explainability team</name>
+            <url>https://github.com/orgs/trustyai-explainability/people</url>
+        </developer>
     </developers>
 
     <properties>
