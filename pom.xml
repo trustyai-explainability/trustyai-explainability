@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.kie.trustyai</groupId>
     <artifactId>trustyaiexplainability</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>0.3.0</version>
     <name>TrustyAI Explainability</name>
     <description>TrustyAI is a java library for Explainable AI.</description>
     <url>https://repository.jboss.org/nexus/content/repositories/trustyai-explainability/</url>
@@ -30,6 +30,21 @@
         <developer>
             <id>ruivieira</id>
             <name>Rui Vieira</name>
+            <organization>Red Hat</organization>
+        </developer>
+        <developer>
+            <id>tteofili</id>
+            <name>Tommaso Teofili</name>
+            <organization>Red Hat</organization>
+        </developer>
+        <developer>
+            <id>RobGeada</id>
+            <name>Rob Geada</name>
+            <organization>Red Hat</organization>
+        </developer>
+        <developer>
+            <id>danielezonca</id>
+            <name>Daniele Zonca</name>
             <organization>Red Hat</organization>
         </developer>
     </developers>
