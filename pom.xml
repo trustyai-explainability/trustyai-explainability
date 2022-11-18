@@ -254,6 +254,8 @@
                         <developmentVersion>2.0.0-SNAPSHOT</developmentVersion>
                         <preparationGoals>clean verify</preparationGoals>
                         <tagNameFormat>release-@{project.version}</tagNameFormat>
+                        <updateWorkingCopyVersions>false</updateWorkingCopyVersions>
+                        <updateBranchVersions>true</updateBranchVersions>
                     </configuration>
                 </plugin>
             </plugins>
