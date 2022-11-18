@@ -21,6 +21,7 @@
         <connection>scm:git:git@github.com:ruivieira/trustyai-explainability.git</connection>
         <url>scm:git:git@github.com:ruivieir/trustyai-explainability.git</url>
         <developerConnection>scm:git:git@github.com:ruivieira/trustyai-explainability.git</developerConnection>
+    <tag>releases/0.3.0</tag>
   </scm>
 
     <developers>
