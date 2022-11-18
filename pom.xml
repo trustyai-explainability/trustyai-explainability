@@ -18,9 +18,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:ruivieira/trustyai-explainability.git</connection>
-        <url>scm:git:git@github.com:ruivieir/trustyai-explainability.git</url>
-        <developerConnection>scm:git:git@github.com:ruivieira/trustyai-explainability.git</developerConnection>
+        <connection>scm:git:git@github.com:trustyai-explainability/trustyai-explainability.git</connection>
+        <url>scm:git:git@github.com:trustyai-explainability/trustyai-explainability.git</url>
+        <developerConnection>scm:git:git@github.com:trustyai-explainability/trustyai-explainability.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -252,6 +252,8 @@
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <developmentVersion>2.0.0-SNAPSHOT</developmentVersion>
+                        <preparationGoals>clean verify</preparationGoals>
+                        <tagNameFormat>release-@{project.version}</tagNameFormat>
                     </configuration>
                 </plugin>
             </plugins>
