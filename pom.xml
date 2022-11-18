@@ -186,7 +186,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${version.surefire.plugin}</version>
                     <configuration>
-                        <argLine>-Xmx1024m -Dfile.encoding=UTF-8</argLine>
+                        <argLine>-Xmx2048m -Dfile.encoding=UTF-8 --add-opens java.base/java.nio=ALL-UNNAMED</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
