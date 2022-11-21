@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.model.Feature;
@@ -48,10 +49,10 @@ class SampleWeighter {
         double[] x = new double[noOfFeatures];
         Arrays.fill(x, 1);
 
-        return training.stream().map(Pair::getLeft)
+        return checkNonZero(training.stream().map(Pair::getLeft)
                 .map(d -> DataUtils.euclideanDistance(x, d)) // calculate euclidean distance between target and sample points
                 .map(d -> DataUtils.exponentialSmoothingKernel(d, kernelWidth)) // transform distance into proximity using an exponential smoothing kernel
-                .mapToDouble(Double::doubleValue).toArray(); // output to an array
+                .mapToDouble(Double::doubleValue).toArray()); // output to an array
     }
 
     /**
@@ -64,8 +65,8 @@ class SampleWeighter {
      */
     static double[] getSampleWeightsOriginal(List<Feature> originalFeatures, Collection<List<Feature>> perturbedFeatures,
             double kernelWidth) {
-        return perturbedFeatures.stream().mapToDouble(lf -> distance(lf, originalFeatures))
-                .map(d -> DataUtils.exponentialSmoothingKernel(d, kernelWidth)).toArray();
+        return checkNonZero(perturbedFeatures.stream().mapToDouble(lf -> distance(lf, originalFeatures))
+                .map(d -> DataUtils.exponentialSmoothingKernel(d, kernelWidth)).toArray());
     }
 
     static double distance(List<Feature> f1, List<Feature> f2) {
@@ -82,5 +83,15 @@ class SampleWeighter {
             distance = DataUtils.gowerDistance(f1, f2, 0.5);
         }
         return distance;
+    }
+
+    static double[] checkNonZero(double[] sampleWeights) {
+        if (DoubleStream.of(sampleWeights).allMatch(v -> v == 0)) {
+            double[] doubles = new double[sampleWeights.length];
+            Arrays.fill(doubles, 1);
+            return doubles;
+        } else {
+            return sampleWeights;
+        }
     }
 }

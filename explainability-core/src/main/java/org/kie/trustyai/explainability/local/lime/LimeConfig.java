@@ -47,7 +47,7 @@ public class LimeConfig {
     private static final int DEFAULT_NO_OF_FEATURES = 6;
     private static final boolean DEFAULT_TRACK_COUNTERFACTUALS = false;
     private static final boolean DEFAULT_USE_WLR_LINEAR_MODEL = true;
-    private static final boolean DEFAULT_FILTER_INTERPRETABLE = true;
+    private static final boolean DEFAULT_FILTER_INTERPRETABLE = false;
 
     private double separableDatasetRatio = DEFAULT_SEPARABLE_DATASET_RATIO;
 

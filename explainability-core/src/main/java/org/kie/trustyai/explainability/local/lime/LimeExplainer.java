@@ -212,13 +212,16 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
                 SaliencyResults.SourceExplainer.LIME);
     }
 
-    private void getSaliency(List<Feature> linearizedTargetInputFeatures, Map<String, Saliency> result,
+    private void getSaliency(List<Feature> targetInputFeatures, Map<String, Saliency> result,
             LimeInputs limeInputs, Output originalOutput, LimeConfig executionConfig) {
         List<FeatureImportance> featureImportanceList = new ArrayList<>();
 
-        if (executionConfig.isFeatureSelection() && linearizedTargetInputFeatures.size() > executionConfig.getNoOfFeatures()) {
-            linearizedTargetInputFeatures = selectFeatures(executionConfig, limeInputs, linearizedTargetInputFeatures,
+        List<Feature> linearizedTargetInputFeatures;
+        if (executionConfig.isFeatureSelection() && targetInputFeatures.size() > executionConfig.getNoOfFeatures()) {
+            linearizedTargetInputFeatures = selectFeatures(executionConfig, limeInputs, targetInputFeatures,
                     originalOutput, executionConfig.getPerturbationContext());
+        } else {
+            linearizedTargetInputFeatures = targetInputFeatures;
         }
 
         // encode the training data so that it can be fed into the linear model
@@ -234,7 +237,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
         } else {
             List<List<Feature>> featureLists =
                     limeInputs.getPerturbedInputs().stream().map(PredictionInput::getFeatures).map(DataUtils::getLinearizedFeatures).collect(Collectors.toList());
-            sampleWeights = SampleWeighter.getSampleWeightsOriginal(linearizedTargetInputFeatures, featureLists, kernelWidth);
+            sampleWeights = SampleWeighter.getSampleWeightsOriginal(targetInputFeatures, featureLists, kernelWidth);
         }
 
         int ts = linearizedTargetInputFeatures.size();
@@ -282,7 +285,14 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
 
         // weight the training samples based on the proximity to the target input to explain
         double kernelWidth = executionConfig.getProximityKernelWidth() * Math.sqrt(linearizedTargetInputFeatures.size());
-        double[] sampleWeights = SampleWeighter.getSampleWeightsInterpretable(linearizedTargetInputFeatures, trainingSet, kernelWidth);
+        double[] sampleWeights;
+        if (executionConfig.isFilterInterpretable()) {
+            sampleWeights = SampleWeighter.getSampleWeightsInterpretable(linearizedTargetInputFeatures, trainingSet, kernelWidth);
+        } else {
+            List<List<Feature>> featureLists =
+                    limeInputs.getPerturbedInputs().stream().map(PredictionInput::getFeatures).map(DataUtils::getLinearizedFeatures).collect(Collectors.toList());
+            sampleWeights = SampleWeighter.getSampleWeightsOriginal(linearizedTargetInputFeatures, featureLists, kernelWidth);
+        }
 
         List<Feature> selectedFeatures;
         if (executionConfig.isProximityFilter()) {
