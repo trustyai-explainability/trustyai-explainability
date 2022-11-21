@@ -23,3 +23,8 @@ dependency-reduced-pom.xml
 .checkstyle
 
 *.log
+release.properties
+*.releaseBackup
+pom.xml.tag
+pom.xml.next
+release-pom.xml
