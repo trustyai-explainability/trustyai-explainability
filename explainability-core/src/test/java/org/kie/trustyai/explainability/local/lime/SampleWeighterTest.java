@@ -26,9 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.Feature;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class SampleWeighterTest {
 
@@ -72,7 +72,7 @@ class SampleWeighterTest {
         Collection<List<Feature>> featureList = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             List<Feature> perturbedFeatures = new ArrayList<>(features);
-            perturbedFeatures.set(i%5, TestUtils.getMockedNumericFeature(i));
+            perturbedFeatures.set(i % 5, TestUtils.getMockedNumericFeature(i));
             featureList.add(perturbedFeatures);
         }
         double[] weights = SampleWeighter.getSampleWeightsOriginal(features, featureList, 0.5);
