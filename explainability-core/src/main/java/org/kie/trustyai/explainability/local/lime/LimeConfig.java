@@ -47,7 +47,7 @@ public class LimeConfig {
     private static final int DEFAULT_NO_OF_FEATURES = 6;
     private static final boolean DEFAULT_TRACK_COUNTERFACTUALS = false;
     private static final boolean DEFAULT_USE_WLR_LINEAR_MODEL = true;
-    private static final boolean DEFAULT_FILTER_INTERPRETABLE = false;
+    private static final boolean DEFAULT_FILTER_INTERPRETABLE = true;
 
     private double separableDatasetRatio = DEFAULT_SEPARABLE_DATASET_RATIO;
 
@@ -315,6 +315,10 @@ public class LimeConfig {
         return useWLRLinearModel;
     }
 
+    public boolean isFilterInterpretable() {
+        return this.filterInterpretable;
+    }
+
     public LimeConfig copy() {
         return new LimeConfig()
                 .withSeparableDatasetRatio(separableDatasetRatio)
@@ -333,7 +337,13 @@ public class LimeConfig {
                 .withFeatureSelection(featureSelection)
                 .withNoOfFeatures(noOfFeatures)
                 .withTrackCounterfactuals(trackCounterfactuals)
-                .withUseWLRLinearModel(useWLRLinearModel);
+                .withUseWLRLinearModel(useWLRLinearModel)
+                .withFilterInterpretable(filterInterpretable);
+    }
+
+    public LimeConfig withFilterInterpretable(boolean filterInterpretable) {
+        this.filterInterpretable = filterInterpretable;
+        return this;
     }
 
     @Override
@@ -386,7 +396,4 @@ public class LimeConfig {
                 useWLRLinearModel);
     }
 
-    public boolean isFilterInterpretable() {
-        return this.filterInterpretable;
-    }
 }
