@@ -279,6 +279,14 @@
 
     <profiles>
         <profile>
+            <!-- Use only for Nexus deployment. -->
+            <id>deployment</id>
+            <modules>
+                <module>explainability-core</module>
+                <module>explainability-arrow</module>
+            </modules>
+        </profile>
+        <profile>
             <!-- Fail the build if code does not follow the standards. -->
             <id>validate-formatting</id>
             <activation>
