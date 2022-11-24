@@ -120,4 +120,44 @@ class CounterfactualGeneratorTest {
         assertEquals(1, seeds.size());
         assertEquals(N_COUNTERFACTUALS_TO_GENERATE, background.size());
     }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testChaining2Per(int seed) throws ExecutionException, InterruptedException, TimeoutException {
+        List<PredictionInput> seeds = new ArrayList<>();
+        Random rn = new Random(seed);
+
+        // generate a single seed point
+        List<Feature> features = new ArrayList<>();
+        for (int j = 0; j < 5; j++) {
+            features.add(new Feature(String.valueOf(j),
+                    Type.NUMBER,
+                    new Value(0.),
+                    false,
+                    NumericalFeatureDomain.create(-5, 5)));
+        }
+        seeds.add(new PredictionInput(features));
+
+        // given some arbitrary linear model
+        PredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
+
+        // generate a background such that f(bg) == 0 for all bg in the backgrounds
+        List<PredictionOutput> goals = new ArrayList<>();
+        for (int i = 0; i < N_COUNTERFACTUALS_TO_GENERATE; i++) {
+            goals.add(new PredictionOutput(
+                    List.of(new Output("linear-sum", Type.NUMBER, new Value(i / 10.), 0d))));
+        }
+        List<PredictionInput> background = CounterfactualGenerator.builder()
+                .withModel(model)
+                .withTimeoutSeconds(5)
+                .withStepCount(30_000L)
+                .withGoalThreshold(0.01)
+                .withRandom(rn)
+                .withKSeeds(5)
+                .withMaxAttemptCount(10)
+                .build()
+                .generateRange(seeds, goals, 2, true);
+        assertEquals(1, seeds.size());
+        assertEquals(N_COUNTERFACTUALS_TO_GENERATE * 2, background.size());
+    }
 }
