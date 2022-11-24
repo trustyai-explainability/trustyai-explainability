@@ -246,14 +246,13 @@
                     <version>${version.shade.plugin}</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.0-M6</version>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.13.0</version>
                     <configuration>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <developmentVersion>999-SNAPSHOT</developmentVersion>
-                        <preparationGoals>clean verify</preparationGoals>
-                        <tagNameFormat>release-@{project.version}</tagNameFormat>
+                        <generateBackupPoms>false</generateBackupPoms>
+                        <processAllModules>true</processAllModules>
+                        <processDependencies>false</processDependencies>
                     </configuration>
                 </plugin>
             </plugins>
@@ -279,6 +278,14 @@
 
 
     <profiles>
+        <profile>
+            <!-- Use only for Nexus deployment. -->
+            <id>deployment</id>
+            <modules>
+                <module>explainability-core</module>
+                <module>explainability-arrow</module>
+            </modules>
+        </profile>
         <profile>
             <!-- Fail the build if code does not follow the standards. -->
             <id>validate-formatting</id>
