@@ -116,7 +116,7 @@ class CounterfactualGeneratorTest {
                 .withKSeeds(5)
                 .withMaxAttemptCount(10)
                 .build()
-                .generateRange(seeds, goals, true);
+                .generateRange(seeds, goals, 1, true);
         assertEquals(1, seeds.size());
         assertEquals(N_COUNTERFACTUALS_TO_GENERATE, background.size());
     }
