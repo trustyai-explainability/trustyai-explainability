@@ -321,7 +321,7 @@ class DummyModelsLimeExplainerTest {
         }
         int topK = 1;
         double minimumPositiveStabilityRate = 0.9;
-        double minimumNegativeStabilityRate = 0.9;
+        double minimumNegativeStabilityRate = 0.5;
         TestUtils.assertLimeStability(model, prediction, limeExplainer, topK, minimumPositiveStabilityRate,
                 minimumNegativeStabilityRate);
 
