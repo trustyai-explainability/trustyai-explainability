@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.kie.trustyai</groupId>
     <artifactId>trustyaiexplainability</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>999-SNAPSHOT</version>
     <name>TrustyAI Explainability</name>
+    <description>TrustyAI is a java library for Explainable AI.</description>
+    <url>https://github.com/trustyai-explainability/trustyai-explainability</url>
     <packaging>pom</packaging>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:trustyai-explainability/trustyai-explainability.git</connection>
+        <url>scm:git:git@github.com:trustyai-explainability/trustyai-explainability.git</url>
+        <developerConnection>scm:git:git@github.com:trustyai-explainability/trustyai-explainability.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
+    <developers>
+        <developer>
+            <name>TrustyAI Explainability team</name>
+            <url>https://github.com/orgs/trustyai-explainability/people</url>
+        </developer>
+    </developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,6 +56,8 @@
         <kogito.formatter.version>${version.org.kie.kogito}</kogito.formatter.version>
         <formatter.plugin.version>2.13.0</formatter.plugin.version>
         <impsort.plugin.version>1.5.0</impsort.plugin.version>
+
+        <nexus.staging.plugin.version>1.6.6</nexus.staging.plugin.version>
 
         <formatter.skip>false</formatter.skip>
         <formatter.goal>format</formatter.goal>
@@ -137,6 +161,31 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>net.revelc.code.formatter</groupId>
                     <artifactId>formatter-maven-plugin</artifactId>
                     <version>${formatter.plugin.version}</version>
@@ -181,12 +230,11 @@
                         </execution>
                     </executions>
                 </plugin>
-
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${version.surefire.plugin}</version>
                     <configuration>
-                        <argLine>-Xmx1024m -Dfile.encoding=UTF-8</argLine>
+                        <argLine>-Xmx2048m -Dfile.encoding=UTF-8 --add-opens java.base/java.nio=ALL-UNNAMED</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -196,6 +244,16 @@
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>${version.shade.plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>2.13.0</version>
+                    <configuration>
+                        <generateBackupPoms>false</generateBackupPoms>
+                        <processAllModules>true</processAllModules>
+                        <processDependencies>false</processDependencies>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -220,6 +278,14 @@
 
 
     <profiles>
+        <profile>
+            <!-- Use only for Nexus deployment. -->
+            <id>deployment</id>
+            <modules>
+                <module>explainability-core</module>
+                <module>explainability-arrow</module>
+            </modules>
+        </profile>
         <profile>
             <!-- Fail the build if code does not follow the standards. -->
             <id>validate-formatting</id>
@@ -248,5 +314,12 @@
             </properties>
         </profile>
     </profiles>
+
+    <distributionManagement>
+        <repository>
+            <id>jboss.staging</id>
+            <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
 
 </project>
