@@ -13,11 +13,17 @@ import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
 
 public class Dataframe {
 
-    private List<List<Value>> data = new ArrayList<>();
-    private Metadata metadata = new Metadata();
+    private final List<List<Value>> data;
+    private final Metadata metadata;
 
     private Dataframe() {
+        this.data = new ArrayList<>();
+        this.metadata = new Metadata();
+    }
 
+    private Dataframe(List<List<Value>> data, Metadata metadata) {
+        this.data = data;
+        this.metadata = metadata;
     }
 
     /**
@@ -465,11 +471,9 @@ public class Dataframe {
      * @return A {@link Dataframe}
      */
     public Dataframe copy() {
-        final Dataframe dataframe = new Dataframe();
-
-        dataframe.data = this.data.stream().map(ArrayList::new).collect(Collectors.toList());
-        dataframe.metadata = metadata.copy();
-        return dataframe;
+        return new Dataframe(
+                this.data.stream().map(ArrayList::new).collect(Collectors.toList()),
+                metadata.copy());
     }
 
     /**
@@ -512,15 +516,15 @@ public class Dataframe {
      * @return A filtered {@link Dataframe}.
      */
     public Dataframe filterByRowIndex(List<Integer> rows) {
-        final Dataframe dataframe = new Dataframe();
-        dataframe.metadata = metadata.copy();
 
-        dataframe.data = columnIndexStream().mapToObj(col -> {
+        final Metadata metadataCopy = metadata.copy();
+
+        final List<List<Value>> dataCopy = columnIndexStream().mapToObj(col -> {
             final List<Value> column = data.get(col);
             return rows.stream().map(column::get).collect(Collectors.toList());
         }).collect(Collectors.toList());
 
-        return dataframe;
+        return new Dataframe(dataCopy, metadataCopy);
     }
 
     /**
@@ -660,11 +664,23 @@ public class Dataframe {
     }
 
     private class Metadata {
-        private List<String> names = new ArrayList<>();
-        private List<Type> types = new ArrayList<>();
-        private List<Boolean> constrained = new ArrayList<>();
-        private List<FeatureDomain> domains = new ArrayList<>();
-        private List<Boolean> inputs = new ArrayList<>();
+        private final List<String> names;
+        private final List<Type> types;
+        private final List<Boolean> constrained;
+        private final List<FeatureDomain> domains;
+        private final List<Boolean> inputs;
+
+        private Metadata() {
+            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        }
+
+        private Metadata(List<String> names, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains, List<Boolean> inputs) {
+            this.names = names;
+            this.types = types;
+            this.constrained = constrained;
+            this.domains = domains;
+            this.inputs = inputs;
+        }
 
         public void remove(int column) {
             names.remove(column);
@@ -675,13 +691,12 @@ public class Dataframe {
         }
 
         public Metadata copy() {
-            final Metadata copy = new Metadata();
-            copy.names = new ArrayList<>(this.names);
-            copy.types = new ArrayList<>(this.types);
-            copy.constrained = new ArrayList<>(this.constrained);
-            copy.domains = new ArrayList<>(this.domains);
-            copy.inputs = new ArrayList<>(this.inputs);
-            return copy;
+            return new Metadata(
+                    new ArrayList<>(this.names),
+                    new ArrayList<>(this.types),
+                    new ArrayList<>(this.constrained),
+                    new ArrayList<>(this.domains),
+                    new ArrayList<>(this.inputs));
         }
 
     }
