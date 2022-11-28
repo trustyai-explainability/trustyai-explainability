@@ -1,14 +1,14 @@
 package org.kie.trustyai.explainability.model;
 
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.domain.FeatureDomain;
-import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
-import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.domain.FeatureDomain;
+import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,7 +61,6 @@ class DataframeTest {
         assertEquals(Type.BOOLEAN, df.getType(2));
 
     }
-
 
     @Test
     void getInputDataframe() {
@@ -220,7 +219,6 @@ class DataframeTest {
         assertTrue(df.getOutputsIndices().isEmpty());
     }
 
-
     @Test
     void copy() {
         final Dataframe original = createTestDataframe();
@@ -236,7 +234,6 @@ class DataframeTest {
         assertNotEquals(original.getDomain(0), copy.getDomain(0));
 
     }
-
 
     @Test
     void filterByRowIndex() {
@@ -289,7 +286,6 @@ class DataframeTest {
 
         assertEquals(original.stream().mapToDouble(Value::asNumber).sum() / 2.0, df.getRow(100).stream().mapToDouble(Value::asNumber).sum());
     }
-
 
     @Test
     void sortRowsByColumn() {

@@ -1,15 +1,15 @@
 package org.kie.trustyai.explainability.model;
 
-import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
-import org.kie.trustyai.explainability.model.domain.FeatureDomain;
-import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
-import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.FeatureDomain;
+import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
 
 public class Dataframe {
 
@@ -206,7 +206,7 @@ public class Dataframe {
      * Set the column's type.
      *
      * @param column The column index
-     * @param type   The column's {@link Type}
+     * @param type The column's {@link Type}
      */
     public void setType(int column, Type type) {
         validateColumnIndex(column);
@@ -375,9 +375,9 @@ public class Dataframe {
     /**
      * Set the {@link Value} at row and column.
      *
-     * @param row    Row to set the value.
+     * @param row Row to set the value.
      * @param column Column to set the value.
-     * @param value  The {@link Value} to set.
+     * @param value The {@link Value} to set.
      */
     public void setValue(int row, int column, Value value) {
         validateColumnIndex(column);
@@ -388,9 +388,9 @@ public class Dataframe {
     /**
      * Get the {@link Value} at row and column.
      *
-     * @param row    Row to get the value.
+     * @param row Row to get the value.
      * @param column Column to get the value.
-     * @return value  The {@link Value}.
+     * @return value The {@link Value}.
      */
     public Value getValue(int row, int column) {
         validateColumnIndex(column);
@@ -483,9 +483,11 @@ public class Dataframe {
 
         final Type type = metadata.types.get(column);
         if (type.equals(Type.NUMBER)) {
-            return data.get(column).stream().map(v -> FeatureFactory.newNumericalFeature(metadata.names.get(column), (Number) v.getUnderlyingObject(), metadata.domains.get(column))).collect(Collectors.toList());
+            return data.get(column).stream().map(v -> FeatureFactory.newNumericalFeature(metadata.names.get(column), (Number) v.getUnderlyingObject(), metadata.domains.get(column)))
+                    .collect(Collectors.toList());
         } else if (type.equals(Type.BOOLEAN)) {
-            return data.get(column).stream().map(v -> FeatureFactory.newBooleanFeature(metadata.names.get(column), (Boolean) v.getUnderlyingObject(), metadata.domains.get(column))).collect(Collectors.toList());
+            return data.get(column).stream().map(v -> FeatureFactory.newBooleanFeature(metadata.names.get(column), (Boolean) v.getUnderlyingObject(), metadata.domains.get(column)))
+                    .collect(Collectors.toList());
         } else {
             return new ArrayList<>();
         }
@@ -524,7 +526,7 @@ public class Dataframe {
     /**
      * Return a new {@link Dataframe} for which only the rows where the specified column satisfy the {@link Predicate<Value>}.
      *
-     * @param column    Column to use for filtering
+     * @param column Column to use for filtering
      * @param predicate {@link Predicate<Value>} to select rows
      * @return A new {@link Dataframe}
      */
@@ -543,7 +545,7 @@ public class Dataframe {
      * Apply a {@link Function<Value,Value>} to all the values in a column.
      *
      * @param column The column to apply the function.
-     * @param fn     {@link Function<Value,Value>} to apply.
+     * @param fn {@link Function<Value,Value>} to apply.
      */
     public void transformColumn(int column, Function<Value, Value> fn) {
         validateColumnIndex(column);
@@ -554,7 +556,7 @@ public class Dataframe {
     /**
      * Sort all rows according to a supplied {@link Comparator} applied to a column.
      *
-     * @param column     The column to sort by
+     * @param column The column to sort by
      * @param comparator A supplied {@link Comparator}
      */
     public void sortRowsByColumn(int column, Comparator<Value> comparator) {
@@ -574,7 +576,7 @@ public class Dataframe {
      * Apply a {@link Function<Value,Value>} to all the values in a row.
      *
      * @param row Row to apply the function.
-     * @param fn  {@link Function<Value,Value>} to apply.
+     * @param fn {@link Function<Value,Value>} to apply.
      */
     public void transformRow(int row, Function<Value, Value> fn) {
         validateRowIndex(row);
@@ -586,7 +588,7 @@ public class Dataframe {
      * Combine all the {@link Value} in a row into a single one and return it.
      *
      * @param row Row to apply the reduce function.
-     * @param fn  Reduce {@link Function<List<Value>,Value>} to apply.
+     * @param fn Reduce {@link Function<List<Value>,Value>} to apply.
      * @return Resulting {@link Value}.
      */
     public Value reduceRow(int row, Function<List<Value>, Value> fn) {
@@ -614,7 +616,6 @@ public class Dataframe {
         metadata.domains.add(EmptyFeatureDomain.create());
         metadata.inputs.add(false);
     }
-
 
     public List<Prediction> asPredictions() {
         final List<Integer> inputIndices = getInputsIndices();
@@ -685,4 +686,3 @@ public class Dataframe {
 
     }
 }
-
