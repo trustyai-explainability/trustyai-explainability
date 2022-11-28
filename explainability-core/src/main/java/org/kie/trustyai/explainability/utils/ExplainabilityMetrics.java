@@ -44,6 +44,8 @@ import org.kie.trustyai.explainability.model.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.kie.trustyai.explainability.utils.DataUtils.sortPredictionsByScore;
+
 /**
  * Utility class providing different methods to evaluate explainability.
  */
@@ -273,6 +275,38 @@ public class ExplainabilityMetrics {
         // get all samples from the data distribution
         List<Prediction> sorted = DataUtils.getScoreSortedPredictions(outputName, predictionProvider, dataDistribution);
 
+        return calculateLocalSaliencyRecall(outputName, predictionProvider, localExplainer, k, chunkSize, sorted);
+    }
+
+    /**
+     * Evaluate the recall of a local saliency explainer on a given model.
+     * Get the predictions having outputs with the highest score for the given decision and pair them with predictions
+     * whose outputs have the lowest score for the same decision.
+     * Get the top k (most important) features (according to the saliency) for the most important outputs and
+     * "paste" them on each paired input corresponding to an output with low score (for the target decision).
+     * Perform prediction on the "masked" input, if the output on the masked input is equals to the output for the
+     * input the mask features were take from, that's considered a true positive, otherwise it's a false positive.
+     * see Section 3.2.1 of https://openreview.net/attachment?id=B1xBAA4FwH&name=original_pdf
+     *
+     * @param outputName decision to evaluate recall for
+     * @param predictionProvider the prediction provider to test
+     * @param localExplainer the explainer to evaluate
+     * @param predictions a list of predictions used to calculate the recall
+     * @param k the no. of features to extract
+     * @param chunkSize the size of the chunk of predictions to use for evaluation
+     * @return the saliency recall
+     */
+    public static double getLocalSaliencyRecall(String outputName, PredictionProvider predictionProvider,
+            LocalExplainer<SaliencyResults> localExplainer,
+            List<Prediction> predictions, int k, int chunkSize)
+            throws InterruptedException, ExecutionException, TimeoutException {
+
+        return calculateLocalSaliencyRecall(outputName, predictionProvider, localExplainer, k, chunkSize,
+                sortPredictionsByScore(outputName, predictions));
+    }
+
+    private static double calculateLocalSaliencyRecall(String outputName, PredictionProvider predictionProvider, LocalExplainer<SaliencyResults> localExplainer, int k, int chunkSize,
+            List<Prediction> sorted) throws InterruptedException, ExecutionException, TimeoutException {
         // get the top and bottom 'chunkSize' predictions
         List<Prediction> topChunk = new ArrayList<>(sorted.subList(0, chunkSize));
         List<Prediction> bottomChunk = new ArrayList<>(sorted.subList(sorted.size() - chunkSize, sorted.size()));
@@ -355,6 +389,12 @@ public class ExplainabilityMetrics {
             throws InterruptedException, ExecutionException, TimeoutException {
         List<Prediction> sorted = DataUtils.getScoreSortedPredictions(outputName, predictionProvider, dataDistribution);
 
+        return calculateLocalSaliencyPrecision(outputName, predictionProvider, localExplainer, k, chunkSize, sorted);
+    }
+
+    private static double calculateLocalSaliencyPrecision(String outputName, PredictionProvider predictionProvider,
+            LocalExplainer<SaliencyResults> localExplainer, int k, int chunkSize,
+            List<Prediction> sorted) throws InterruptedException, ExecutionException, TimeoutException {
         // get the top and bottom 'chunkSize' predictions
         List<Prediction> topChunk = new ArrayList<>(sorted.subList(0, chunkSize));
         List<Prediction> bottomChunk = new ArrayList<>(sorted.subList(sorted.size() - chunkSize, sorted.size()));
@@ -405,8 +445,34 @@ public class ExplainabilityMetrics {
     }
 
     /**
-     * Get local saliency F1 score.
+     * Evaluate the precision of a local saliency explainer on a given model.
+     * Get the predictions having outputs with the lowest score for the given decision and pair them with predictions
+     * whose outputs have the highest score for the same decision.
+     * Get the bottom k (less important) features (according to the saliency) for the less important outputs and
+     * "paste" them on each paired input corresponding to an output with high score (for the target decision).
+     * Perform prediction on the "masked" input, if the output changes that's considered a false negative, otherwise
+     * it's a true positive.
+     * see Section 3.2.1 of https://openreview.net/attachment?id=B1xBAA4FwH&name=original_pdf
      *
+     * @param outputName decision to evaluate recall for
+     * @param predictionProvider the prediction provider to test
+     * @param localExplainer the explainer to evaluate
+     * @param predictions a list of predictions used to calculate the precision
+     * @param k the no. of features to extract
+     * @param chunkSize the size of the chunk of predictions to use for evaluation
+     * @return the saliency precision
+     */
+    public static double getLocalSaliencyPrecision(String outputName, PredictionProvider predictionProvider,
+            LocalExplainer<SaliencyResults> localExplainer,
+            List<Prediction> predictions, int k, int chunkSize)
+            throws ExecutionException, InterruptedException, TimeoutException {
+        return calculateLocalSaliencyPrecision(outputName, predictionProvider, localExplainer, k, chunkSize,
+                sortPredictionsByScore(outputName, predictions));
+    }
+
+    /**
+     * Get local saliency F1 score.
+     * <p>
      * see <a href="https://en.wikipedia.org/wiki/F-score"/>
      * See {@link #getLocalSaliencyPrecision(String, PredictionProvider, LocalExplainer, DataDistribution, int, int)}
      * See {@link #getLocalSaliencyRecall(String, PredictionProvider, LocalExplainer, DataDistribution, int, int)}
@@ -439,5 +505,4 @@ public class ExplainabilityMetrics {
         }
         return new PredictionInput(features);
     }
-
 }
