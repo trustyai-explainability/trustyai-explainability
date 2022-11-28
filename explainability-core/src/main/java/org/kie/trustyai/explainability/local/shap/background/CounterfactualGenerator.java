@@ -207,13 +207,13 @@ public class CounterfactualGenerator {
      * will be added to the counterfactual seeds.
      */
     public List<PredictionInput> generateRange(
-            List<PredictionInput> seeds, List<PredictionOutput> goals, boolean chain)
+            List<PredictionInput> seeds, List<PredictionOutput> goals, int kPerGoal, boolean chain)
             throws ExecutionException, InterruptedException, TimeoutException {
         List<PredictionInput> rangeSeeds = new ArrayList<>(seeds);
         List<PredictionInput> generatedBackground = new ArrayList<>();
 
         for (int i = 0; i < goals.size(); i++) {
-            List<PredictionInput> generated = generate(rangeSeeds, goals.get(i), 1);
+            List<PredictionInput> generated = generate(rangeSeeds, goals.get(i), kPerGoal);
             if (!generated.isEmpty()) {
                 if (chain) {
                     rangeSeeds.addAll(generated);
