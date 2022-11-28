@@ -175,14 +175,16 @@ public class Dataframe {
     }
 
     private void validateColumnIndex(int i) {
-        if (i < 0 || i >= data.size()) {
-            throw new IllegalArgumentException("Column " + i + " outside dataframe bounds.");
+        final int size = getColumnDimension();
+        if (i < 0 || i >= size) {
+            throw new IllegalArgumentException("Column " + i + " outside dataframe bounds (0, " + size + ").");
         }
     }
 
     private void validateRowIndex(int row) {
-        if (row < 0 || row >= getRowDimension()) {
-            throw new IllegalArgumentException("Row " + row + " outside dataframe bounds.");
+        final int size = getRowDimension();
+        if (row < 0 || row >= size) {
+            throw new IllegalArgumentException("Row " + row + " outside dataframe bounds (0, " + size + ").");
         }
     }
 
