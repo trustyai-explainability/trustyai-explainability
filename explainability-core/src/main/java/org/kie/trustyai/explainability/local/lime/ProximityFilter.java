@@ -50,7 +50,6 @@ class ProximityFilter {
             LOGGER.error("applied filter on null training set / weights");
         } else if (trainingSet.size() != sampleWeights.length) {
             LOGGER.warn("training set size {} ≠ weights size {}, not filtering", trainingSet.size(), sampleWeights.length);
-            return;
         } else {
             List<Integer> toRemove = new ArrayList<>();
             for (int i = trainingSet.size() - 1; i >= 0; i--) {

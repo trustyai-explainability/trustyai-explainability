@@ -149,7 +149,7 @@ public enum Type {
             double normalDistributionSample = perturbationContext.getRandom().nextGaussian();
             if (originalFeatureValue != 0d) {
                 double stDev = originalFeatureValue * 0.01; // set std dev at 1% of feature value
-                normalDistributionSample = normalDistributionSample * originalFeatureValue + stDev;
+                normalDistributionSample = perturbationContext.getRandom().nextGaussian() * stDev + originalFeatureValue;
             }
             if (intValue) {
                 normalDistributionSample = (int) normalDistributionSample;

@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -143,7 +144,7 @@ class DataUtilsTest {
         double distance = DataUtils.hammingDistance(x, y);
         assertEquals(1, distance, 1e-1);
 
-        assertTrue(Double.isNaN(DataUtils.hammingDistance(x, "testTooLong")));
+        assertThat(DataUtils.hammingDistance(x, "test too long")).isCloseTo(3, Offset.offset(0.01));
     }
 
     @Test

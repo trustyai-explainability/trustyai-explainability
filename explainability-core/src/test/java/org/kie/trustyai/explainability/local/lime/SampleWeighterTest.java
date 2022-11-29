@@ -15,6 +15,7 @@
  */
 package org.kie.trustyai.explainability.local.lime;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.Feature;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,12 +36,12 @@ class SampleWeighterTest {
     void testSamplingEmptyDataset() {
         Collection<Pair<double[], Double>> trainingSet = new LinkedList<>();
         List<Feature> features = new LinkedList<>();
-        double[] sampleWeights = SampleWeighter.getSampleWeights(features, trainingSet, 0.5);
+        double[] sampleWeights = SampleWeighter.getSampleWeightsInterpretable(features, trainingSet, 0.5);
         assertEquals(0, sampleWeights.length);
     }
 
     @Test
-    void testSamplingNonEmptyDataset() {
+    void testSamplingInterpretableNonEmptyDataset() {
         Collection<Pair<double[], Double>> trainingSet = new LinkedList<>();
         List<Feature> features = new LinkedList<>();
         for (int i = 0; i < 5; i++) {
@@ -52,10 +54,28 @@ class SampleWeighterTest {
             Pair<double[], Double> doubles = Pair.of(vector, 0d);
             trainingSet.add(doubles);
         }
-        double[] weights = SampleWeighter.getSampleWeights(features, trainingSet, 0.5);
+        double[] weights = SampleWeighter.getSampleWeightsInterpretable(features, trainingSet, 0.5);
+        assertThat(weights).doesNotContain(0);
         // check that weights decrease with the distance from the 1 vector (the target instance)
         for (int i = 0; i < weights.length - 1; i++) {
             assertTrue(weights[i] > weights[i + 1]);
         }
+    }
+
+    @Test
+    void testSamplingOriginalNonEmptyDataset() {
+        List<Feature> features = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            features.add(TestUtils.getMockedNumericFeature(i));
+        }
+
+        Collection<List<Feature>> featureList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            List<Feature> perturbedFeatures = new ArrayList<>(features);
+            perturbedFeatures.set(i % 5, TestUtils.getMockedNumericFeature(i));
+            featureList.add(perturbedFeatures);
+        }
+        double[] weights = SampleWeighter.getSampleWeightsOriginal(features, featureList, 0.5);
+        assertThat(weights).doesNotContain(0);
     }
 }

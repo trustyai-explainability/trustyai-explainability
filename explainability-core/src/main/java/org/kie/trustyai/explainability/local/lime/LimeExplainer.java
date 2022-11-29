@@ -87,8 +87,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
                 (originalInput.getFeatures() != null && originalInput.getFeatures().isEmpty())) {
             throw new LocalExplanationException("cannot explain a prediction whose input is empty");
         }
-        List<PredictionInput> linearizedInputs = DataUtils.linearizeInputs(List.of(originalInput));
-        PredictionInput targetInput = linearizedInputs.get(0);
+        PredictionInput targetInput = DataUtils.linearizeInputs(List.of(originalInput)).get(0);
         List<Feature> linearizedTargetInputFeatures = targetInput.getFeatures();
         if (linearizedTargetInputFeatures.isEmpty()) {
             throw new LocalExplanationException("input features linearization failed");
@@ -107,7 +106,6 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
             noOfSamples = (int) Math.pow(2, linearizedTargetInputFeatures.size());
             LOGGER.debug("using 2^|features| samples ({})", noOfSamples);
             executionConfig = executionConfig.withSamples(noOfSamples);
-
         }
 
         return explainRetryCycle(model, originalInput, linearizedTargetInputFeatures, actualOutputs, executionConfig);
@@ -182,9 +180,8 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
             List<PredictionInput> perturbedInputs, List<boolean[]> preservationMasks, List<PredictionOutput> predictionOutputs, boolean strict) {
         List<LimeInputs> limeInputsList = new ArrayList<>();
         for (int o = 0; o < actualOutputs.size(); o++) {
-            Output currentOutput = actualOutputs.get(o);
             LimeInputs limeInputs = prepareInputs(perturbedInputs, preservationMasks, predictionOutputs, linearizedTargetInputFeatures,
-                    o, currentOutput, strict);
+                    o, actualOutputs.get(o), strict);
             limeInputsList.add(limeInputs);
         }
         return limeInputsList;
@@ -215,13 +212,16 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
                 SaliencyResults.SourceExplainer.LIME);
     }
 
-    private void getSaliency(List<Feature> linearizedTargetInputFeatures, Map<String, Saliency> result,
+    private void getSaliency(List<Feature> targetInputFeatures, Map<String, Saliency> result,
             LimeInputs limeInputs, Output originalOutput, LimeConfig executionConfig) {
         List<FeatureImportance> featureImportanceList = new ArrayList<>();
 
-        if (executionConfig.isFeatureSelection() && linearizedTargetInputFeatures.size() > executionConfig.getNoOfFeatures()) {
-            linearizedTargetInputFeatures = selectFeatures(executionConfig, limeInputs, linearizedTargetInputFeatures,
+        List<Feature> linearizedTargetInputFeatures;
+        if (executionConfig.isFeatureSelection() && targetInputFeatures.size() > executionConfig.getNoOfFeatures()) {
+            linearizedTargetInputFeatures = selectFeatures(executionConfig, limeInputs, targetInputFeatures,
                     originalOutput, executionConfig.getPerturbationContext());
+        } else {
+            linearizedTargetInputFeatures = targetInputFeatures;
         }
 
         // encode the training data so that it can be fed into the linear model
@@ -231,7 +231,14 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
 
         // weight the training samples based on the proximity to the target input to explain
         double kernelWidth = executionConfig.getProximityKernelWidth() * Math.sqrt(linearizedTargetInputFeatures.size());
-        double[] sampleWeights = SampleWeighter.getSampleWeights(linearizedTargetInputFeatures, trainingSet, kernelWidth);
+        double[] sampleWeights;
+        if (executionConfig.isFilterInterpretable()) {
+            sampleWeights = SampleWeighter.getSampleWeightsInterpretable(linearizedTargetInputFeatures, trainingSet, kernelWidth);
+        } else {
+            List<List<Feature>> featureLists =
+                    limeInputs.getPerturbedInputs().stream().map(PredictionInput::getFeatures).map(DataUtils::getLinearizedFeatures).collect(Collectors.toList());
+            sampleWeights = SampleWeighter.getSampleWeightsOriginal(targetInputFeatures, featureLists, kernelWidth);
+        }
 
         int ts = linearizedTargetInputFeatures.size();
         double[] featureWeights = new double[ts];
@@ -278,7 +285,14 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
 
         // weight the training samples based on the proximity to the target input to explain
         double kernelWidth = executionConfig.getProximityKernelWidth() * Math.sqrt(linearizedTargetInputFeatures.size());
-        double[] sampleWeights = SampleWeighter.getSampleWeights(linearizedTargetInputFeatures, trainingSet, kernelWidth);
+        double[] sampleWeights;
+        if (executionConfig.isFilterInterpretable()) {
+            sampleWeights = SampleWeighter.getSampleWeightsInterpretable(linearizedTargetInputFeatures, trainingSet, kernelWidth);
+        } else {
+            List<List<Feature>> featureLists =
+                    limeInputs.getPerturbedInputs().stream().map(PredictionInput::getFeatures).map(DataUtils::getLinearizedFeatures).collect(Collectors.toList());
+            sampleWeights = SampleWeighter.getSampleWeightsOriginal(linearizedTargetInputFeatures, featureLists, kernelWidth);
+        }
 
         List<Feature> selectedFeatures;
         if (executionConfig.isProximityFilter()) {
@@ -316,7 +330,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
 
                     // weight the training samples based on the proximity to the target input to explain
                     double currentKernelWidth = executionConfig.getProximityKernelWidth() * Math.sqrt(currentFeatures.size());
-                    double[] currentSampleWeights = SampleWeighter.getSampleWeights(currentFeatures, currentTrainingSet, currentKernelWidth);
+                    double[] currentSampleWeights = SampleWeighter.getSampleWeightsInterpretable(currentFeatures, currentTrainingSet, currentKernelWidth);
 
                     if (executionConfig.isProximityFilter()) {
                         ProximityFilter proximityFilter = new ProximityFilter(executionConfig.getProximityThreshold(),
