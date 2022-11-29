@@ -654,7 +654,17 @@ public class DataUtils {
                 .get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT);
         List<Prediction> predictions = DataUtils.getPredictions(inputs, predictionOutputs);
 
-        // sort the predictions by Output#getScore, in descending order
+        return sortPredictionsByScore(outputName, predictions);
+    }
+
+    /**
+     * Sort the predictions by Output#getScore, in descending order.
+     *
+     * @param outputName name of the output score used for sorting
+     * @param predictions list of predictions to sort
+     * @return the score-sorted list of predictions
+     */
+    static List<Prediction> sortPredictionsByScore(String outputName, List<Prediction> predictions) {
         return predictions.stream().sorted((p1, p2) -> {
             Optional<Output> optionalOutput1 = p1.getOutput().getByName(outputName);
             Optional<Output> optionalOutput2 = p2.getOutput().getByName(outputName);

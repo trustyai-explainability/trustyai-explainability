@@ -15,6 +15,7 @@
  */
 package org.kie.trustyai.explainability.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +28,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.TestUtils;
+import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.Feature;
@@ -37,6 +40,7 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
+import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
@@ -164,5 +168,80 @@ class ExplainabilityMetricsTest {
             Config.INSTANCE.setAsyncTimeout(Config.DEFAULT_ASYNC_TIMEOUT);
             Config.INSTANCE.setAsyncTimeUnit(Config.DEFAULT_ASYNC_TIMEUNIT);
         }
+    }
+
+    @Test
+    void testGetLocalSaliencyStability() throws ExecutionException, InterruptedException, TimeoutException {
+        PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
+        List<Feature> features = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            features.add(TestUtils.getMockedNumericFeature(i * 0.1));
+        }
+        PredictionInput input = new PredictionInput(features);
+        Prediction prediction = new SimplePrediction(input, model.predictAsync(List.of(input)).get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT).get(0));
+        LocalExplainer<SaliencyResults> explainer = new LimeExplainer();
+        int topK = 2;
+        int runs = 10;
+        LocalSaliencyStability localSaliencyStability = ExplainabilityMetrics.getLocalSaliencyStability(model, prediction, explainer, topK, runs);
+        assertThat(localSaliencyStability).isNotNull();
+        assertThat(localSaliencyStability.getDecisions()).isNotNull().isNotEmpty();
+        assertThat(localSaliencyStability.getPositiveStabilityScore("inside", 1)).isEqualTo(1);
+        assertThat(localSaliencyStability.getNegativeStabilityScore("inside", 1)).isEqualTo(1);
+        assertThat(localSaliencyStability.getPositiveStabilityScore("inside", 2)).isEqualTo(1);
+        assertThat(localSaliencyStability.getNegativeStabilityScore("inside", 2)).isEqualTo(1);
+    }
+
+    @Test
+    void testGetLocalSaliencyRecall() throws ExecutionException, InterruptedException, TimeoutException {
+        PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
+        List<Prediction> predictions = new ArrayList<>();
+        for (int j = 0; j < 10; j++) {
+            List<Feature> features = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                features.add(TestUtils.getMockedNumericFeature(j + i * 0.1));
+            }
+            PredictionInput input = new PredictionInput(features);
+            Prediction prediction = new SimplePrediction(input, model.predictAsync(List.of(input)).get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT).get(0));
+            predictions.add(prediction);
+        }
+        LocalExplainer<SaliencyResults> explainer = new LimeExplainer();
+        double recall = ExplainabilityMetrics.getLocalSaliencyRecall("inside", model, explainer, predictions, 2, 5);
+        assertThat(recall).isEqualTo(1);
+    }
+
+    @Test
+    void testGetLocalSaliencyPrecision() throws ExecutionException, InterruptedException, TimeoutException {
+        PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
+        List<Prediction> predictions = new ArrayList<>();
+        for (int j = 0; j < 10; j++) {
+            List<Feature> features = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                features.add(TestUtils.getMockedNumericFeature(j + i * 0.1));
+            }
+            PredictionInput input = new PredictionInput(features);
+            Prediction prediction = new SimplePrediction(input, model.predictAsync(List.of(input)).get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT).get(0));
+            predictions.add(prediction);
+        }
+        LocalExplainer<SaliencyResults> explainer = new LimeExplainer();
+        double recall = ExplainabilityMetrics.getLocalSaliencyPrecision("inside", model, explainer, predictions, 2, 5);
+        assertThat(recall).isEqualTo(1);
+    }
+
+    @Test
+    void testGetLocalSaliencyF1() throws ExecutionException, InterruptedException, TimeoutException {
+        PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
+        List<Prediction> predictions = new ArrayList<>();
+        for (int j = 0; j < 10; j++) {
+            List<Feature> features = new ArrayList<>();
+            for (int i = 0; i < 4; i++) {
+                features.add(TestUtils.getMockedNumericFeature(j + i * 0.1));
+            }
+            PredictionInput input = new PredictionInput(features);
+            Prediction prediction = new SimplePrediction(input, model.predictAsync(List.of(input)).get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT).get(0));
+            predictions.add(prediction);
+        }
+        LocalExplainer<SaliencyResults> explainer = new LimeExplainer();
+        double recall = ExplainabilityMetrics.getLocalSaliencyF1("inside", model, explainer, predictions, 2, 5);
+        assertThat(recall).isEqualTo(1);
     }
 }
