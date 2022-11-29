@@ -185,10 +185,10 @@ class ExplainabilityMetricsTest {
         LocalSaliencyStability localSaliencyStability = ExplainabilityMetrics.getLocalSaliencyStability(model, prediction, explainer, topK, runs);
         assertThat(localSaliencyStability).isNotNull();
         assertThat(localSaliencyStability.getDecisions()).isNotNull().isNotEmpty();
-        assertThat(localSaliencyStability.getPositiveStabilityScore("inside", 1)).isEqualTo(1);
-        assertThat(localSaliencyStability.getNegativeStabilityScore("inside", 1)).isEqualTo(1);
-        assertThat(localSaliencyStability.getPositiveStabilityScore("inside", 2)).isEqualTo(1);
-        assertThat(localSaliencyStability.getNegativeStabilityScore("inside", 2)).isEqualTo(1);
+        assertThat(localSaliencyStability.getPositiveStabilityScore("distance", 1)).isEqualTo(1);
+        assertThat(localSaliencyStability.getNegativeStabilityScore("distance", 1)).isEqualTo(1);
+        assertThat(localSaliencyStability.getPositiveStabilityScore("distance", 2)).isEqualTo(1);
+        assertThat(localSaliencyStability.getNegativeStabilityScore("distance", 2)).isEqualTo(1);
     }
 
     @Test
