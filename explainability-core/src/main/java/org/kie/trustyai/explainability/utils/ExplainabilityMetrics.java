@@ -498,6 +498,34 @@ public class ExplainabilityMetrics {
         }
     }
 
+    /**
+     * Get local saliency F1 score.
+     * <p>
+     * see <a href="https://en.wikipedia.org/wiki/F-score"/>
+     * See {@link #getLocalSaliencyPrecision(String, PredictionProvider, LocalExplainer, DataDistribution, int, int)}
+     * See {@link #getLocalSaliencyRecall(String, PredictionProvider, LocalExplainer, DataDistribution, int, int)}
+     *
+     * @param outputName decision to evaluate recall for
+     * @param predictionProvider the prediction provider to test
+     * @param localExplainer the explainer to evaluate
+     * @param predictions a list of predictions
+     * @param k the no. of features to extract
+     * @param chunkSize the size of the chunk of predictions to use for evaluation
+     * @return the saliency F1
+     */
+    public static double getLocalSaliencyF1(String outputName, PredictionProvider predictionProvider,
+            LocalExplainer<SaliencyResults> localExplainer,
+            List<Prediction> predictions, int k, int chunkSize)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        double precision = getLocalSaliencyPrecision(outputName, predictionProvider, localExplainer, predictions, k, chunkSize);
+        double recall = getLocalSaliencyRecall(outputName, predictionProvider, localExplainer, predictions, k, chunkSize);
+        if (Double.isFinite(precision + recall) && (precision + recall) > 0) {
+            return 2 * precision * recall / (precision + recall);
+        } else {
+            return Double.NaN;
+        }
+    }
+
     private static PredictionInput replaceAllFeatures(List<Feature> importantFeatures, PredictionInput input) {
         List<Feature> features = List.copyOf(input.getFeatures());
         for (Feature f : importantFeatures) {
