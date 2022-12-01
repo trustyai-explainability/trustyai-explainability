@@ -356,4 +356,25 @@ public class TestModels {
         });
     }
 
+    public static PredictionProvider getSimpleBiasedClassifier(int biasedFeature,
+            Value biasedValue,
+            double threshold) {
+        final Random random = new Random();
+        return inputs -> supplyAsync(() -> {
+            final List<PredictionOutput> outputs = new ArrayList<>();
+            for (PredictionInput input : inputs) {
+
+                boolean approved;
+                if (input.getFeatures().get(biasedFeature).getValue().equals(biasedValue)) {
+                    approved = random.nextDouble() < threshold;
+                } else {
+                    approved = random.nextDouble() < 0.5;
+                }
+                final Output output = new Output("approved", Type.BOOLEAN, new Value(approved), 1.0);
+                outputs.add(new PredictionOutput(List.of(output)));
+            }
+            return outputs;
+        });
+    }
+
 }

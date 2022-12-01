@@ -1,7 +1,6 @@
 package org.kie.trustyai.explainability.model;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -18,12 +17,12 @@ public class Dataframe {
     private final Metadata metadata;
 
     private Dataframe() {
-        this.data = new CopyOnWriteArrayList<>(new CopyOnWriteArrayList<>());
+        this.data = new ArrayList<>(new ArrayList<>());
         this.metadata = new Metadata();
     }
 
     private Dataframe(List<List<Value>> data, Metadata metadata) {
-        this.data = new CopyOnWriteArrayList<>(data);
+        this.data = new ArrayList<>(data);
         this.metadata = metadata;
     }
 
@@ -43,7 +42,7 @@ public class Dataframe {
             df.metadata.constrained.add(feature.isConstrained());
             df.metadata.domains.add(feature.getDomain());
             df.metadata.inputs.add(true);
-            df.data.add(new CopyOnWriteArrayList<>());
+            df.data.add(new ArrayList<>());
         }
         // Process outputs metadata
         for (Output output : prediction.getOutput().getOutputs()) {
@@ -52,7 +51,7 @@ public class Dataframe {
             df.metadata.constrained.add(true);
             df.metadata.domains.add(EmptyFeatureDomain.create());
             df.metadata.inputs.add(false);
-            df.data.add(new CopyOnWriteArrayList<>());
+            df.data.add(new ArrayList<>());
         }
 
         // Copy data
@@ -81,8 +80,53 @@ public class Dataframe {
         final Prediction prediction = predictions.get(0);
         final Dataframe df = Dataframe.createFrom(prediction);
 
-        predictions.remove(0);
-        df.addPredictions(predictions);
+        final List<Prediction> rest = predictions.subList(1, predictions.size());
+        df.addPredictions(rest);
+
+        return df;
+    }
+
+    public static Dataframe createFromInputs(List<PredictionInput> inputs) {
+        final Dataframe df = new Dataframe();
+
+        // Process inputs metadata
+        for (Feature feature : inputs.get(0).getFeatures()) {
+            df.metadata.names.add(feature.getName());
+            df.metadata.types.add(feature.getType());
+            df.metadata.constrained.add(feature.isConstrained());
+            df.metadata.domains.add(feature.getDomain());
+            df.metadata.inputs.add(true);
+            df.data.add(new ArrayList<>());
+        }
+
+        final int inputsSize = df.getInputsCount();
+
+        IntStream.range(0, inputs.size()).forEach(i -> {
+            final List<Feature> currentInputs = inputs.get(i).getFeatures();
+            // Copy data
+            for (int col = 0; col < inputsSize; col++) {
+                df.data.get(col).add(currentInputs.get(col).getValue());
+            }
+        });
+
+        return df;
+    }
+
+    public static Dataframe createFrom(List<PredictionInput> inputs, List<PredictionOutput> outputs) {
+        if (inputs.size() != outputs.size()) {
+            throw new IllegalArgumentException("Inputs and outputs have different dimensions (" + inputs.size() + " and " + outputs.size() + ")");
+        }
+        if (inputs.isEmpty()) {
+            throw new IllegalArgumentException("Must supply at least one input and output.");
+        }
+
+        final List<Prediction> predictions = IntStream.range(0, inputs.size()).mapToObj(i -> new SimplePrediction(inputs.get(i), outputs.get(i))).collect(Collectors.toList());
+
+        final Prediction prediction = predictions.get(0);
+        final Dataframe df = Dataframe.createFrom(prediction);
+
+        final List<Prediction> rest = predictions.subList(1, predictions.size());
+        df.addPredictions(rest);
 
         return df;
     }
@@ -364,6 +408,7 @@ public class Dataframe {
     public List<List<Value>> getRows() {
 
         return rowIndexStream()
+                .parallel()
                 .mapToObj(row -> columnIndexStream()
                         .mapToObj(column -> safeGetValue(row, column))
                         .collect(Collectors.toCollection(ArrayList::new)))
@@ -591,6 +636,7 @@ public class Dataframe {
         final List<Integer> inputColumns = getInputsIndices();
 
         return rowIndexStream()
+                .parallel()
                 .mapToObj(row -> inputColumns.stream()
                         .map(column -> safeGetValue(row, column))
                         .collect(Collectors.toCollection(ArrayList::new)))
@@ -608,6 +654,7 @@ public class Dataframe {
         final List<Integer> outputColumns = getOutputsIndices();
 
         return rowIndexStream()
+                .parallel()
                 .mapToObj(row -> outputColumns.stream()
                         .map(column -> safeGetValue(row, column))
                         .collect(Collectors.toCollection(ArrayList::new)))
@@ -622,7 +669,7 @@ public class Dataframe {
      */
     public Dataframe copy() {
         return new Dataframe(
-                this.data.stream().map(CopyOnWriteArrayList::new).collect(Collectors.toCollection(CopyOnWriteArrayList::new)),
+                this.data.stream().map(ArrayList::new).collect(Collectors.toCollection(ArrayList::new)),
                 metadata.copy());
     }
 
@@ -637,13 +684,17 @@ public class Dataframe {
 
         final Type type = metadata.types.get(column);
         if (type.equals(Type.NUMBER)) {
-            return data.get(column).stream().map(v -> FeatureFactory.newNumericalFeature(metadata.names.get(column), (Number) v.getUnderlyingObject(), metadata.domains.get(column)))
+            return data.get(column).stream()
+                    .parallel()
+                    .map(v -> FeatureFactory.newNumericalFeature(metadata.names.get(column), (Number) v.getUnderlyingObject(), metadata.domains.get(column)))
                     .collect(Collectors.toCollection(ArrayList::new));
         } else if (type.equals(Type.BOOLEAN)) {
-            return data.get(column).stream().map(v -> FeatureFactory.newBooleanFeature(metadata.names.get(column), (Boolean) v.getUnderlyingObject(), metadata.domains.get(column)))
+            return data.get(column).stream()
+                    .parallel()
+                    .map(v -> FeatureFactory.newBooleanFeature(metadata.names.get(column), (Boolean) v.getUnderlyingObject(), metadata.domains.get(column)))
                     .collect(Collectors.toCollection(ArrayList::new));
         } else {
-            return new CopyOnWriteArrayList<>();
+            return new ArrayList<>();
         }
     }
 
@@ -674,8 +725,8 @@ public class Dataframe {
 
         final List<List<Value>> dataCopy = columnIndexStream().mapToObj(col -> {
             final List<Value> column = data.get(col);
-            return rows.stream().map(column::get).collect(Collectors.toCollection(CopyOnWriteArrayList::new));
-        }).collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+            return rows.stream().parallel().map(column::get).collect(Collectors.toCollection(ArrayList::new));
+        }).collect(Collectors.toCollection(ArrayList::new));
 
         return new Dataframe(dataCopy, metadataCopy);
     }
@@ -693,6 +744,7 @@ public class Dataframe {
         final List<Value> values = data.get(column);
 
         final List<Integer> rowIndices = rowIndexStream()
+                .parallel()
                 .filter(i -> predicate.test(values.get(i))).boxed()
                 .collect(Collectors.toUnmodifiableList());
 
@@ -711,6 +763,7 @@ public class Dataframe {
 
     private Dataframe filterRowsByColumnRole(final List<List<Value>> roleRows, final Predicate<List<Value>> predicate) {
         final List<Integer> filteredRowIndices = rowIndexStream()
+                .parallel()
                 .filter(rowNumber -> predicate.test(roleRows.get(rowNumber)))
                 .boxed()
                 .collect(Collectors.toList());
@@ -728,8 +781,9 @@ public class Dataframe {
     public void transformColumn(int column, Function<Value, Value> fn) {
         validateColumnIndex(column);
         final List<Value> transformedColumn = data.get(column).stream()
+                .parallel()
                 .map(fn)
-                .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+                .collect(Collectors.toCollection(ArrayList::new));
         data.set(column, transformedColumn);
     }
 
@@ -743,13 +797,13 @@ public class Dataframe {
         validateColumnIndex(column);
         final List<Value> columnValues = data.get(column);
         // Calculate sort indices
-        final int[] sortedIndices = rowIndexStream().boxed().sorted((i, j) -> comparator.compare(columnValues.get(i), columnValues.get(j))).mapToInt(n -> n).toArray();
+        final int[] sortedIndices = rowIndexStream().parallel().boxed().sorted((i, j) -> comparator.compare(columnValues.get(i), columnValues.get(j))).mapToInt(n -> n).toArray();
         // Apply new indices to all columns
         columnIndexStream().forEach(c -> {
             final List<Value> columnValuesUnsorted = data.get(c);
             final List<Value> columnValuesSorted = Arrays.stream(sortedIndices)
                     .mapToObj(columnValuesUnsorted::get)
-                    .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
+                    .collect(Collectors.toCollection(ArrayList::new));
             data.set(c, columnValuesSorted);
         });
     }
@@ -790,12 +844,13 @@ public class Dataframe {
      */
     public List<Value> reduceRows(Function<List<Value>, Value> fn) {
         return rowIndexStream()
+                .parallel()
                 .mapToObj(row -> fn.apply(getRow(row)))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public void addColumn(String name, Type type, List<Value> values) {
-        data.add(new CopyOnWriteArrayList<>(values));
+        data.add(new ArrayList<>(values));
 
         metadata.names.add(name);
         metadata.types.add(type);
@@ -823,6 +878,22 @@ public class Dataframe {
             final PredictionInput input = new PredictionInput(features);
             final PredictionOutput output = new PredictionOutput(outputs);
             predictions.add(new SimplePrediction(input, output));
+        }
+        return predictions;
+    }
+
+    public List<PredictionInput> asPredictionInputs() {
+        final List<Integer> inputIndices = getInputsIndices();
+        final List<List<Feature>> allInputs = getInputsIndices().stream().map(this::columnAsFeatures).collect(Collectors.toUnmodifiableList());
+
+        final List<PredictionInput> predictions = new ArrayList<>();
+        for (int row = 0; row < this.getRowDimension(); row++) {
+            List<Feature> features = new ArrayList<>();
+            for (int col = 0; col < inputIndices.size(); col++) {
+                features.add(allInputs.get(col).get(row));
+            }
+            final PredictionInput input = new PredictionInput(features);
+            predictions.add(input);
         }
         return predictions;
     }
@@ -855,15 +926,15 @@ public class Dataframe {
         private final List<Boolean> inputs;
 
         private Metadata() {
-            this(new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>(), new CopyOnWriteArrayList<>());
+            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         }
 
         private Metadata(List<String> names, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains, List<Boolean> inputs) {
-            this.names = new CopyOnWriteArrayList<>(names);
-            this.types = new CopyOnWriteArrayList<>(types);
-            this.constrained = new CopyOnWriteArrayList<>(constrained);
-            this.domains = new CopyOnWriteArrayList<>(domains);
-            this.inputs = new CopyOnWriteArrayList<>(inputs);
+            this.names = new ArrayList<>(names);
+            this.types = new ArrayList<>(types);
+            this.constrained = new ArrayList<>(constrained);
+            this.domains = new ArrayList<>(domains);
+            this.inputs = new ArrayList<>(inputs);
         }
 
         public void remove(int column) {
@@ -876,11 +947,11 @@ public class Dataframe {
 
         public Metadata copy() {
             return new Metadata(
-                    new CopyOnWriteArrayList<>(this.names),
-                    new CopyOnWriteArrayList<>(this.types),
-                    new CopyOnWriteArrayList<>(this.constrained),
-                    new CopyOnWriteArrayList<>(this.domains),
-                    new CopyOnWriteArrayList<>(this.inputs));
+                    new ArrayList<>(this.names),
+                    new ArrayList<>(this.types),
+                    new ArrayList<>(this.constrained),
+                    new ArrayList<>(this.domains),
+                    new ArrayList<>(this.inputs));
         }
 
     }
