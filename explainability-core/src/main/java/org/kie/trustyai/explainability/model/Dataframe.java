@@ -223,6 +223,17 @@ public class Dataframe {
     }
 
     /**
+     * Set whether this column is an input or not
+     *
+     * @param column The column index
+     * @param isInput If the column is an input or not
+     */
+    public void setInput(int column, boolean isInput) {
+        validateColumnIndex(column);
+        metadata.inputs.set(column, isInput);
+    }
+
+    /**
      * Get a column's {@link FeatureDomain}.
      *
      * @param column The column's index.
@@ -345,6 +356,20 @@ public class Dataframe {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    /**
+     * Returns all rows as a {@link List} of {@link List<Value>}.
+     *
+     * @return A {@link List} of {@link List<Value>} rows.
+     */
+    public List<List<Value>> getRows() {
+
+        return rowIndexStream()
+                .mapToObj(row -> columnIndexStream()
+                        .mapToObj(column -> safeGetValue(row, column))
+                        .collect(Collectors.toCollection(ArrayList::new)))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
     public List<Integer> getInputsIndices() {
         return columnIndexStream()
                 .filter(metadata.inputs::get)
@@ -415,6 +440,10 @@ public class Dataframe {
     public Value getValue(int row, int column) {
         validateColumnIndex(column);
         validateRowIndex(row);
+        return safeGetValue(row, column);
+    }
+
+    private Value safeGetValue(int row, int column) {
         return data.get(column).get(row);
     }
 
@@ -477,6 +506,113 @@ public class Dataframe {
         } else {
             return (int) columnIndexStream().filter(i -> !metadata.inputs.get(i)).count();
         }
+    }
+
+    /**
+     * Return the outputs in a specific row
+     * 
+     * @param row The specified row
+     * @return A {@link List} of {@link Output}
+     */
+    public List<Output> getOutputRow(int row) {
+        validateRowIndex(row);
+
+        final List<Value> rowValues = getRow(row);
+        final List<Integer> outputIndices = getOutputsIndices();
+        return outputIndices.stream()
+                .map(i -> new Output(metadata.names.get(i), metadata.types.get(i), rowValues.get(i), 0.0))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * Return the input features in a specific row
+     *
+     * @param row The specified row
+     * @return A {@link List} of {@link Feature}
+     */
+    public List<Feature> getInputRowAsFeature(int row) {
+        validateRowIndex(row);
+
+        final List<Value> rowValues = getRow(row);
+        final List<Integer> inputIndices = getInputsIndices();
+        return inputIndices.stream()
+                .map(i -> {
+                    if (metadata.constrained.get(i)) {
+                        return new Feature(metadata.names.get(i), metadata.types.get(i), rowValues.get(i));
+                    } else {
+                        return new Feature(metadata.names.get(i), metadata.types.get(i), rowValues.get(i), metadata.constrained.get(i), metadata.domains.get(i));
+                    }
+
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * Return the outputs in a specific row
+     *
+     * @param row The specified row
+     * @return A {@link List} of {@link Output}
+     */
+    public List<Output> getOutputRowAsOutput(int row) {
+        validateRowIndex(row);
+
+        final List<Value> rowValues = getRow(row);
+        final List<Integer> outputIndices = getOutputsIndices();
+        return outputIndices.stream()
+                .map(i -> {
+                    return new Output(metadata.names.get(i), metadata.types.get(i), rowValues.get(i), 0.0);
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * Return the input values in a specific row
+     *
+     * @param row The specified row
+     * @return A {@link List} of {@link Feature}
+     */
+    public List<Value> getInputRow(int row) {
+        validateRowIndex(row);
+
+        final List<Value> rowValues = getRow(row);
+        final List<Integer> inputIndices = getInputsIndices();
+        return inputIndices.stream()
+                .map(rowValues::get)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * Return the input values for all rows
+     *
+     * @return A {@link List} of {@link List<Value>}
+     */
+    public List<List<Value>> getInputRows() {
+
+        final List<Integer> inputColumns = getInputsIndices();
+
+        return rowIndexStream()
+                .mapToObj(row -> inputColumns.stream()
+                        .map(column -> safeGetValue(row, column))
+                        .collect(Collectors.toCollection(ArrayList::new)))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+    }
+
+    /**
+     * Return the output values for all rows
+     *
+     * @return A {@link List} of {@link List<Value>}
+     */
+    public List<List<Value>> getOutputRows() {
+
+        final List<Integer> outputColumns = getOutputsIndices();
+
+        return rowIndexStream()
+                .mapToObj(row -> outputColumns.stream()
+                        .map(column -> safeGetValue(row, column))
+                        .collect(Collectors.toCollection(ArrayList::new)))
+                .collect(Collectors.toCollection(ArrayList::new));
+
     }
 
     /**
@@ -561,6 +697,26 @@ public class Dataframe {
                 .collect(Collectors.toUnmodifiableList());
 
         return filterByRowIndex(rowIndices);
+    }
+
+    public Dataframe filterRowsByInputs(Predicate<List<Value>> predicate) {
+        final List<List<Value>> inputRows = getInputRows();
+        return filterRowsByColumnRole(inputRows, predicate);
+    }
+
+    public Dataframe filterRowsByOutputs(Predicate<List<Value>> predicate) {
+        final List<List<Value>> outputRows = getOutputRows();
+        return filterRowsByColumnRole(outputRows, predicate);
+    }
+
+    private Dataframe filterRowsByColumnRole(final List<List<Value>> roleRows, final Predicate<List<Value>> predicate) {
+        final List<Integer> filteredRowIndices = rowIndexStream()
+                .filter(rowNumber -> predicate.test(roleRows.get(rowNumber)))
+                .boxed()
+                .collect(Collectors.toList());
+
+        return filterByRowIndex(filteredRowIndices);
+
     }
 
     /**
@@ -686,6 +842,7 @@ public class Dataframe {
                 builder.append(domain.prettyPrint());
             }
             builder.append("\n");
+            builder.append("\t\tInput: ").append(metadata.inputs.get(i) ? "yes" : "no").append("\n");
         }
         return builder.toString();
     }

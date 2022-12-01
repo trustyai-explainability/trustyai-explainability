@@ -2,10 +2,13 @@ package org.kie.trustyai.explainability.model;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
@@ -403,6 +406,137 @@ class DataframeTest {
 
         assertEquals(List.of("bool-2", "num-3"), df.getColumnNames(List.of(1, 2)));
 
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 3, 4, 5 })
+    void getOutputRow(int seed) {
+        final Random random = new Random(seed);
+        final Dataframe df = createTestDataframe();
+
+        final List<Output> rowOutput = df.getOutputRow(random.nextInt(N));
+        assertEquals(1, rowOutput.size());
+        assertEquals("pred-1", rowOutput.get(0).getName());
+        assertEquals(Type.NUMBER, rowOutput.get(0).getType());
+
+        final List<Value> newValues = IntStream.range(0, N).mapToObj(Value::new).collect(Collectors.toList());
+        df.addColumn("pred-2", Type.NUMBER, newValues);
+        df.setInput(4, false);
+
+        final List<Output> newRowOutput = df.getOutputRow(random.nextInt(N));
+        assertEquals(2, newRowOutput.size());
+        assertEquals(List.of("pred-1", "pred-2"), newRowOutput.stream().map(Output::getName).collect(Collectors.toList()));
+        assertEquals(List.of(Type.NUMBER, Type.NUMBER), newRowOutput.stream().map(Output::getType).collect(Collectors.toList()));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 3, 4, 5 })
+    void getInputRowAsFeature(int seed) {
+        final Random random = new Random(seed);
+        final Dataframe df = createTestDataframe();
+
+        final List<Feature> rowInput = df.getInputRowAsFeature(random.nextInt(N));
+        assertEquals(3, rowInput.size());
+        assertEquals(List.of("num-1", "bool-2", "num-3"), rowInput.stream().map(Feature::getName).collect(Collectors.toList()));
+        assertEquals(List.of(Type.NUMBER, Type.BOOLEAN, Type.NUMBER), rowInput.stream().map(Feature::getType).collect(Collectors.toList()));
+
+        df.dropColumn(1);
+
+        final List<Feature> newRowInput = df.getInputRowAsFeature(random.nextInt(N));
+        assertEquals(2, newRowInput.size());
+        assertEquals(List.of("num-1", "num-3"), newRowInput.stream().map(Feature::getName).collect(Collectors.toList()));
+        assertEquals(List.of(Type.NUMBER, Type.NUMBER), newRowInput.stream().map(Feature::getType).collect(Collectors.toList()));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 3, 4, 5 })
+    void getInputRow(int seed) {
+        final Random random = new Random(seed);
+        final Dataframe df = createTestDataframe();
+
+        final List<Value> rowInput = df.getInputRow(random.nextInt(N));
+        assertEquals(3, rowInput.size());
+
+        df.dropColumn(1);
+
+        final List<Value> newRowInput = df.getInputRow(random.nextInt(N));
+        assertEquals(2, newRowInput.size());
+    }
+
+    @Test
+    void getInputRows() {
+        final Dataframe df = createTestDataframe();
+
+        final List<List<Value>> inputRows = df.getInputRows();
+
+        assertEquals(N, inputRows.size());
+        assertEquals(3, inputRows.get(0).size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 3, 4, 5 })
+    void columnAsFeatures(int seed) {
+        final Dataframe df = createTestDataframe();
+
+        final Random random = new Random(seed);
+        final int column = random.nextInt(4);
+        final List<Feature> features = df.columnAsFeatures(column);
+        assertTrue(features.stream().map(Feature::getType).allMatch(t -> t.equals(df.getType(column))));
+        assertTrue(features.stream().map(Feature::getName).allMatch(t -> t.equals(df.getColumnNames().get(column))));
+    }
+
+    @Test
+    void filterRowsByInputs() {
+        final Dataframe df = createTestDataframe();
+
+        final Predicate<List<Value>> filter = values -> values.get(0).asNumber() < 50 && !(boolean) values.get(1).getUnderlyingObject();
+
+        final Dataframe filtered = df.filterRowsByInputs(filter);
+
+        assertEquals(4, filtered.getColumnDimension());
+        assertTrue(filtered.getRowDimension() < df.getRowDimension());
+        assertTrue(filtered.getColumn(1).stream().noneMatch(v -> (boolean) v.getUnderlyingObject()));
+        assertTrue(filtered.getColumn(0).stream().noneMatch(v -> v.asNumber() > 50));
+    }
+
+    @Test
+    void filterRowsByOutputs() {
+        final Dataframe df = createTestDataframe();
+
+        final Predicate<List<Value>> filter = values -> values.get(0).asNumber() > 50;
+
+        final Dataframe filtered = df.filterRowsByOutputs(filter);
+
+        assertEquals(4, filtered.getColumnDimension());
+        assertTrue(filtered.getRowDimension() < df.getRowDimension());
+        assertTrue(filtered.getColumn(3).stream().noneMatch(v -> v.asNumber() < 50));
+    }
+
+    @Test
+    void getOutputRows() {
+        final Dataframe df = createTestDataframe();
+
+        final List<List<Value>> outputRows = df.getOutputRows();
+
+        assertEquals(N, outputRows.size());
+        assertEquals(1, outputRows.get(0).size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = { 3, 4, 5 })
+    void getOutputRowAsOutput(int seed) {
+        final Random random = new Random(seed);
+        final Dataframe df = createTestDataframe();
+
+        final int row = random.nextInt(N);
+        final List<Output> outputRow = df.getOutputRowAsOutput(row);
+
+        assertEquals(1, outputRow.size());
+        assertEquals(df.getType(3), outputRow.get(0).getType());
+        assertEquals(df.getOutputNames().get(0), outputRow.get(0).getName());
+        assertEquals(df.getValue(row, 3), outputRow.get(0).getValue());
     }
 
 }
