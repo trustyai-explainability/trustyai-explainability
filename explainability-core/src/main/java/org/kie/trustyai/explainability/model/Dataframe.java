@@ -408,7 +408,6 @@ public class Dataframe {
     public List<List<Value>> getRows() {
 
         return rowIndexStream()
-                .parallel()
                 .mapToObj(row -> columnIndexStream()
                         .mapToObj(column -> safeGetValue(row, column))
                         .collect(Collectors.toCollection(ArrayList::new)))
@@ -636,7 +635,6 @@ public class Dataframe {
         final List<Integer> inputColumns = getInputsIndices();
 
         return rowIndexStream()
-                .parallel()
                 .mapToObj(row -> inputColumns.stream()
                         .map(column -> safeGetValue(row, column))
                         .collect(Collectors.toCollection(ArrayList::new)))
@@ -654,7 +652,6 @@ public class Dataframe {
         final List<Integer> outputColumns = getOutputsIndices();
 
         return rowIndexStream()
-                .parallel()
                 .mapToObj(row -> outputColumns.stream()
                         .map(column -> safeGetValue(row, column))
                         .collect(Collectors.toCollection(ArrayList::new)))
@@ -685,12 +682,10 @@ public class Dataframe {
         final Type type = metadata.types.get(column);
         if (type.equals(Type.NUMBER)) {
             return data.get(column).stream()
-                    .parallel()
                     .map(v -> FeatureFactory.newNumericalFeature(metadata.names.get(column), (Number) v.getUnderlyingObject(), metadata.domains.get(column)))
                     .collect(Collectors.toCollection(ArrayList::new));
         } else if (type.equals(Type.BOOLEAN)) {
             return data.get(column).stream()
-                    .parallel()
                     .map(v -> FeatureFactory.newBooleanFeature(metadata.names.get(column), (Boolean) v.getUnderlyingObject(), metadata.domains.get(column)))
                     .collect(Collectors.toCollection(ArrayList::new));
         } else {
@@ -725,7 +720,7 @@ public class Dataframe {
 
         final List<List<Value>> dataCopy = columnIndexStream().mapToObj(col -> {
             final List<Value> column = data.get(col);
-            return rows.stream().parallel().map(column::get).collect(Collectors.toCollection(ArrayList::new));
+            return rows.stream().map(column::get).collect(Collectors.toCollection(ArrayList::new));
         }).collect(Collectors.toCollection(ArrayList::new));
 
         return new Dataframe(dataCopy, metadataCopy);
@@ -744,7 +739,6 @@ public class Dataframe {
         final List<Value> values = data.get(column);
 
         final List<Integer> rowIndices = rowIndexStream()
-                .parallel()
                 .filter(i -> predicate.test(values.get(i))).boxed()
                 .collect(Collectors.toUnmodifiableList());
 
@@ -763,7 +757,6 @@ public class Dataframe {
 
     private Dataframe filterRowsByColumnRole(final List<List<Value>> roleRows, final Predicate<List<Value>> predicate) {
         final List<Integer> filteredRowIndices = rowIndexStream()
-                .parallel()
                 .filter(rowNumber -> predicate.test(roleRows.get(rowNumber)))
                 .boxed()
                 .collect(Collectors.toList());
@@ -781,7 +774,6 @@ public class Dataframe {
     public void transformColumn(int column, Function<Value, Value> fn) {
         validateColumnIndex(column);
         final List<Value> transformedColumn = data.get(column).stream()
-                .parallel()
                 .map(fn)
                 .collect(Collectors.toCollection(ArrayList::new));
         data.set(column, transformedColumn);
@@ -797,7 +789,7 @@ public class Dataframe {
         validateColumnIndex(column);
         final List<Value> columnValues = data.get(column);
         // Calculate sort indices
-        final int[] sortedIndices = rowIndexStream().parallel().boxed().sorted((i, j) -> comparator.compare(columnValues.get(i), columnValues.get(j))).mapToInt(n -> n).toArray();
+        final int[] sortedIndices = rowIndexStream().boxed().sorted((i, j) -> comparator.compare(columnValues.get(i), columnValues.get(j))).mapToInt(n -> n).toArray();
         // Apply new indices to all columns
         columnIndexStream().forEach(c -> {
             final List<Value> columnValuesUnsorted = data.get(c);
@@ -844,7 +836,6 @@ public class Dataframe {
      */
     public List<Value> reduceRows(Function<List<Value>, Value> fn) {
         return rowIndexStream()
-                .parallel()
                 .mapToObj(row -> fn.apply(getRow(row)))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
