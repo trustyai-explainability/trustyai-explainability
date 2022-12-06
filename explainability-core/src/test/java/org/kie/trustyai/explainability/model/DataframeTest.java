@@ -38,6 +38,20 @@ class DataframeTest {
         return Dataframe.createFrom(predictions);
     }
 
+    public static Dataframe createTestInputDataframe() {
+
+        final List<PredictionInput> inputs = new ArrayList<>();
+        for (int i = 0; i < N; i++) {
+            final List<Feature> features = new ArrayList<>();
+            features.add(FeatureFactory.newNumericalFeature("num-1", Math.random() * 100, NumericalFeatureDomain.create(0, 100)));
+            features.add(FeatureFactory.newBooleanFeature("bool-2", new Random().nextBoolean(), ObjectFeatureDomain.create(Set.of(true, false))));
+            features.add(FeatureFactory.newNumericalFeature("num-3", 1000.0 + Math.random() * 20.0));
+            final PredictionInput input = new PredictionInput(features);
+            inputs.add(input);
+        }
+        return Dataframe.createFromInputs(inputs);
+    }
+
     @Test
     void createFromPrediction() {
 
@@ -62,6 +76,19 @@ class DataframeTest {
         assertEquals(Type.NUMBER, df.getType(0));
         assertEquals(Type.BOOLEAN, df.getType(1));
         assertEquals(Type.BOOLEAN, df.getType(2));
+
+    }
+
+    @Test
+    void createFromInputs() {
+        final Dataframe df = createTestInputDataframe();
+
+        assertTrue(df.getOutputNames().isEmpty());
+        assertEquals(3, df.getInputNames().size());
+        assertEquals(3, df.getColumnDimension());
+        assertEquals(N, df.getOutputRows().size());
+        assertEquals(3, df.getInputsCount());
+        assertEquals(0, df.getOutputsCount());
 
     }
 
@@ -164,6 +191,26 @@ class DataframeTest {
         final Dataframe df = createTestDataframe();
 
         assertEquals(N, df.getRowDimension());
+    }
+
+    /**
+     * Check if getRows preserves row order.
+     * 
+     * @param seed
+     */
+    @ParameterizedTest
+    @ValueSource(ints = { 3, 4, 5 })
+    void getRowsPreserveOrder(int seed) {
+        final List<Prediction> predictions = IntStream.range(0, N * 10)
+                .mapToObj(i -> new Feature("i", Type.NUMBER, new Value(i)))
+                .map(List::of)
+                .map(PredictionInput::new)
+                .map(input -> new SimplePrediction(input, new PredictionOutput(List.of(new Output("dummy", Type.NUMBER, new Value(0.0), 1.0)))))
+                .collect(Collectors.toList());
+        final Dataframe dataframe = Dataframe.createFrom(predictions);
+
+        List<Double> values = dataframe.getRows().get(0).stream().mapToDouble(Value::asNumber).boxed().collect(Collectors.toList());
+        assertTrue(values.stream().sorted().collect(Collectors.toList()).equals(values));
     }
 
     @Test

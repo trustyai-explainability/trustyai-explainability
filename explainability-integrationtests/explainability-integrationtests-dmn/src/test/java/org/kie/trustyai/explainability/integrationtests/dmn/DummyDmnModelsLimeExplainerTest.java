@@ -30,7 +30,7 @@ import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.DataUtils;
-import org.kie.trustyai.explainability.utils.ExplainabilityMetrics;
+import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.ValidationUtils;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;

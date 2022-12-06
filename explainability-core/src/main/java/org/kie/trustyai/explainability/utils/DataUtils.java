@@ -690,7 +690,7 @@ public class DataUtils {
      * @param predictions list of predictions to sort
      * @return the score-sorted list of predictions
      */
-    static List<Prediction> sortPredictionsByScore(String outputName, List<Prediction> predictions) {
+    public static List<Prediction> sortPredictionsByScore(String outputName, List<Prediction> predictions) {
         return predictions.stream().sorted((p1, p2) -> {
             Optional<Output> optionalOutput1 = p1.getOutput().getByName(outputName);
             Optional<Output> optionalOutput2 = p2.getOutput().getByName(outputName);
