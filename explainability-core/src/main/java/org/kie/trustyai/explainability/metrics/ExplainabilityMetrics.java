@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.explainability.utils;
+package org.kie.trustyai.explainability.metrics;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +41,8 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.utils.DataUtils;
+import org.kie.trustyai.explainability.utils.LocalSaliencyStability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

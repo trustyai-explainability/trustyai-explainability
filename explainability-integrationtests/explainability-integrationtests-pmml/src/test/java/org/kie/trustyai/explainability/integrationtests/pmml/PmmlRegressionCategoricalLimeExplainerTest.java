@@ -49,7 +49,7 @@ import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
-import org.kie.trustyai.explainability.utils.ExplainabilityMetrics;
+import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.ValidationUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,9 +58,9 @@ import static org.kie.pmml.evaluator.assembler.factories.PMMLRuntimeFactoryInter
 
 class PmmlRegressionCategoricalLimeExplainerTest {
 
-    private static PMMLRuntime categoricalVariableRegressionRuntime;
     private static final String[] CATEGORY_ONE = new String[] { "red", "blue", "green", "yellow", "orange" };
     private static final String[] CATEGORY_TWO = new String[] { "classA", "classB", "classC" };
+    private static PMMLRuntime categoricalVariableRegressionRuntime;
 
     @BeforeAll
     static void setUpBefore() throws URISyntaxException {

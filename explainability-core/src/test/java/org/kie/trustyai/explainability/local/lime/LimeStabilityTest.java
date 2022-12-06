@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.explainability.utils.ExplainabilityMetrics;
+import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.LocalSaliencyStability;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 

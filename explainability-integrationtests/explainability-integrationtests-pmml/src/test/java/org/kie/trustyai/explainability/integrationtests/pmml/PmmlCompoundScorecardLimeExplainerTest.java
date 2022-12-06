@@ -49,7 +49,7 @@ import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
-import org.kie.trustyai.explainability.utils.ExplainabilityMetrics;
+import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.ValidationUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,8 +59,8 @@ import static org.kie.pmml.evaluator.assembler.factories.PMMLRuntimeFactoryInter
 @Disabled
 class PmmlCompoundScorecardLimeExplainerTest {
 
-    private static PMMLRuntime compoundScoreCardRuntime;
     private static final String[] CATEGORY_TWO = new String[] { "classA", "classB", "classC", "NA" };
+    private static PMMLRuntime compoundScoreCardRuntime;
 
     @BeforeAll
     static void setUpBefore() throws URISyntaxException {
