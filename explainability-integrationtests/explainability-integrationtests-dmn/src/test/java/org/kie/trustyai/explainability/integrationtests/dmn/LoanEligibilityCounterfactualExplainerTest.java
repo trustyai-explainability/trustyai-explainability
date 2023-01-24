@@ -44,7 +44,7 @@ import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -63,7 +63,7 @@ class LoanEligibilityDmnCounterfactualExplainerTest {
 
     @Test
     void testLoanEligibilityDMNExplanation() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         final List<Output> goal = List.of(
                 new Output("Is Enought?", Type.NUMBER, new Value(100), 0.0d),
@@ -101,7 +101,7 @@ class LoanEligibilityDmnCounterfactualExplainerTest {
         assertTrue((Boolean) decideOutput.getValue().getUnderlyingObject());
     }
 
-    private PredictionProvider getModel() {
+    private AsyncPredictionProvider getModel() {
         DMNRuntime dmnRuntime = DMNKogito.createGenericDMNRuntime(new InputStreamReader(
                 Objects.requireNonNull(getClass().getResourceAsStream("/dmn/LoanEligibility.dmn"))));
         assertEquals(1, dmnRuntime.getModels().size());

@@ -22,7 +22,7 @@ import org.kie.trustyai.explainability.local.counterfactual.entities.Counterfact
 import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
@@ -31,7 +31,7 @@ import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDeci
 /**
  * Represents an OptaPlanner {@link PlanningSolution}.
  * This solution stores all the features as {@link CounterfactualEntity}, as well as a reference to the
- * {@link PredictionProvider} model.
+ * {@link AsyncPredictionProvider} model.
  */
 @PlanningSolution
 public class CounterfactualSolution {
@@ -41,7 +41,7 @@ public class CounterfactualSolution {
 
     private double goalThreshold;
 
-    private PredictionProvider model;
+    private AsyncPredictionProvider model;
 
     private BendableBigDecimalScore score;
 
@@ -57,7 +57,7 @@ public class CounterfactualSolution {
     public CounterfactualSolution(
             List<CounterfactualEntity> entities,
             List<Feature> originalFeatures,
-            PredictionProvider model,
+            AsyncPredictionProvider model,
             UUID solutionId,
             UUID executionId,
             CounterfactualGoalCriteria goalCriteria,
@@ -80,7 +80,7 @@ public class CounterfactualSolution {
         this.score = score;
     }
 
-    public PredictionProvider getModel() {
+    public AsyncPredictionProvider getModel() {
         return model;
     }
 

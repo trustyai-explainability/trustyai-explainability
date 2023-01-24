@@ -38,7 +38,7 @@ class RecordingLimeExplainerTest {
     void testRecordedPredictions() {
         RecordingLimeExplainer recordingLimeExplainer = new RecordingLimeExplainer(10);
         List<Prediction> allPredictions = new ArrayList<>();
-        PredictionProvider model = mock(PredictionProvider.class);
+        AsyncPredictionProvider model = mock(AsyncPredictionProvider.class);
         for (int i = 0; i < 15; i++) {
             Prediction prediction = mock(Prediction.class);
             allPredictions.add(prediction);
@@ -60,7 +60,7 @@ class RecordingLimeExplainerTest {
     void testParallel() throws InterruptedException, ExecutionException, TimeoutException {
         int capacity = 10;
         RecordingLimeExplainer recordingLimeExplainer = new RecordingLimeExplainer(capacity);
-        PredictionProvider model = mock(PredictionProvider.class);
+        AsyncPredictionProvider model = mock(AsyncPredictionProvider.class);
 
         Callable<?> callable = () -> {
             for (int i = 0; i < 10000; i++) {
@@ -98,7 +98,7 @@ class RecordingLimeExplainerTest {
     @ParameterizedTest
     @ValueSource(longs = { 0 })
     void testAutomaticConfigOptimization(long seed) throws Exception {
-        PredictionProvider model = TestModels.getSumThresholdModel(10, 10);
+        AsyncPredictionProvider model = TestModels.getSumThresholdModel(10, 10);
         PerturbationContext pc = new PerturbationContext(seed, new Random(), 1);
         LimeConfig config = new LimeConfig().withPerturbationContext(pc);
         RecordingLimeExplainer limeExplainer = new RecordingLimeExplainer(2);
@@ -125,7 +125,7 @@ class RecordingLimeExplainerTest {
     @Test
     void testEmptyInput() {
         RecordingLimeExplainer recordingLimeExplainer = new RecordingLimeExplainer(10);
-        PredictionProvider model = mock(PredictionProvider.class);
+        AsyncPredictionProvider model = mock(AsyncPredictionProvider.class);
         Prediction prediction = mock(Prediction.class);
         assertThatCode(() -> recordingLimeExplainer.explainAsync(prediction, model)).hasMessage("cannot explain a prediction whose input is empty");
     }
@@ -138,7 +138,7 @@ class RecordingLimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getSumSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);

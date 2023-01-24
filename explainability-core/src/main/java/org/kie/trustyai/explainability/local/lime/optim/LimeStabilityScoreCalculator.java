@@ -24,7 +24,7 @@ import java.util.concurrent.TimeoutException;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.LocalSaliencyStability;
 import org.optaplanner.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalScore;
@@ -63,7 +63,7 @@ public class LimeStabilityScoreCalculator implements EasyScoreCalculator<LimeCon
         return SimpleBigDecimalScore.of(stabilityScore);
     }
 
-    private BigDecimal getStabilityScore(PredictionProvider model, LimeConfig config, List<Prediction> predictions) {
+    private BigDecimal getStabilityScore(AsyncPredictionProvider model, LimeConfig config, List<Prediction> predictions) {
         double succeededEvaluations = 0;
         int topK = 2;
         BigDecimal stabilityScore = BigDecimal.ZERO;

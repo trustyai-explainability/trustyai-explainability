@@ -48,7 +48,7 @@ class LimeExplainerTest {
                 .withSamples(10);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         PredictionInput input = new PredictionInput(Collections.emptyList());
-        PredictionProvider model = TestModels.getSumSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -70,7 +70,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getSumSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -97,7 +97,7 @@ class LimeExplainerTest {
                 features.add(TestUtils.getMockedNumericFeature(i));
             }
             PredictionInput input = new PredictionInput(features);
-            PredictionProvider model = TestModels.getSumSkipModel(0);
+            AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
             PredictionOutput output = model.predictAsync(List.of(input))
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                     .get(0);
@@ -144,7 +144,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getSumSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -187,7 +187,7 @@ class LimeExplainerTest {
                 .withSamples(10);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getSumThresholdModel(random.nextDouble(), random.nextDouble());
+        AsyncPredictionProvider model = TestModels.getSumThresholdModel(random.nextDouble(), random.nextDouble());
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -212,7 +212,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getSumSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -237,7 +237,7 @@ class LimeExplainerTest {
                 features.add(TestUtils.getMockedNumericFeature(i));
             }
             PredictionInput input = new PredictionInput(features);
-            PredictionProvider model = TestModels.getSumSkipModel(0);
+            AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
             PredictionOutput output = model.predictAsync(List.of(input))
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                     .get(0);
@@ -255,7 +255,7 @@ class LimeExplainerTest {
     @Test
     void testEmptyInput() {
         LimeExplainer recordingLimeExplainer = new LimeExplainer();
-        PredictionProvider model = mock(PredictionProvider.class);
+        AsyncPredictionProvider model = mock(AsyncPredictionProvider.class);
         Prediction prediction = mock(Prediction.class);
         assertThatCode(() -> recordingLimeExplainer.explainAsync(prediction, model)).hasMessage("cannot explain a prediction whose input is empty");
     }
@@ -267,7 +267,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getSumSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -300,7 +300,7 @@ class LimeExplainerTest {
             features.add(TestUtils.getMockedNumericFeature(i));
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getSumSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -347,7 +347,7 @@ class LimeExplainerTest {
             }
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getTwoOutputSemiCategoricalModel(2);
+        AsyncPredictionProvider model = TestModels.getTwoOutputSemiCategoricalModel(2);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -378,7 +378,7 @@ class LimeExplainerTest {
                 features.add(TestUtils.getMockedNumericFeature(i));
             }
             PredictionInput input = new PredictionInput(features);
-            PredictionProvider model = TestModels.getSumSkipModel(0);
+            AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
             PredictionOutput output = model.predictAsync(List.of(input))
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                     .get(0);
@@ -409,7 +409,7 @@ class LimeExplainerTest {
                 features.add(TestUtils.getMockedNumericFeature(i));
             }
             PredictionInput input = new PredictionInput(features);
-            PredictionProvider model = TestModels.getSumSkipModel(0);
+            AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
             PredictionOutput output = model.predictAsync(List.of(input))
                     .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                     .get(0);

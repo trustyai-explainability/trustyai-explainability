@@ -35,7 +35,7 @@ import org.kie.trustyai.explainability.model.PartialDependenceGraph;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.PredictionProviderMetadata;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
@@ -83,7 +83,7 @@ class PartialDependencePlotExplainerTest {
     void testPdpNumericClassifier(int seed) throws Exception {
         Random random = new Random();
         random.setSeed(seed);
-        PredictionProvider modelInfo = TestModels.getSumSkipModel(0);
+        AsyncPredictionProvider modelInfo = TestModels.getSumSkipModel(0);
         PartialDependencePlotExplainer partialDependencePlotProvider = new PartialDependencePlotExplainer();
         List<PartialDependenceGraph> pdps = partialDependencePlotProvider.explainFromMetadata(modelInfo, getMetadata(random));
         assertNotNull(pdps);
@@ -120,7 +120,7 @@ class PartialDependencePlotExplainerTest {
         Config.INSTANCE.setAsyncTimeout(1);
         Config.INSTANCE.setAsyncTimeUnit(TimeUnit.MILLISECONDS);
         PartialDependencePlotExplainer partialDependencePlotProvider = new PartialDependencePlotExplainer();
-        PredictionProvider brokenProvider = inputs -> supplyAsync(
+        AsyncPredictionProvider brokenProvider = inputs -> supplyAsync(
                 () -> {
                     await().atLeast(1, TimeUnit.SECONDS).until(() -> false);
                     throw new RuntimeException("this should never happen");
@@ -142,7 +142,7 @@ class PartialDependencePlotExplainerTest {
         Random random = new Random();
         random.setSeed(seed);
         PartialDependencePlotExplainer partialDependencePlotExplainer = new PartialDependencePlotExplainer();
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         Collection<Prediction> predictions = new ArrayList<>(3);
 
         List<String> texts = List.of("we want your money", "please reply quickly", "you are the lucky winner",

@@ -32,7 +32,7 @@ import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.PredictionProviderMetadata;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.Type;
@@ -52,7 +52,7 @@ class AggregatedLimeExplainerTest {
     void testExplainWithMetadata(int seed) throws ExecutionException, InterruptedException {
         Random random = new Random();
         random.setSeed(seed);
-        PredictionProvider sumSkipModel = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider sumSkipModel = TestModels.getSumSkipModel(1);
         PredictionProviderMetadata metadata = new PredictionProviderMetadata() {
             @Override
             public DataDistribution getDataDistribution() {
@@ -93,7 +93,7 @@ class AggregatedLimeExplainerTest {
     void testExplainWithPredictions(int seed) throws ExecutionException, InterruptedException {
         Random random = new Random();
         random.setSeed(seed);
-        PredictionProvider sumSkipModel = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider sumSkipModel = TestModels.getSumSkipModel(1);
         DataDistribution dataDistribution = DataUtils.generateRandomDataDistribution(3, 100, random);
         List<PredictionInput> samples = dataDistribution.sample(10);
         List<PredictionOutput> predictionOutputs = sumSkipModel.predictAsync(samples).get();

@@ -30,14 +30,14 @@ import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PerturbationContext;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provider for {@link HighScoreNumericFeatureZones} to be used to retain numeric feature points the {@link PredictionProvider}
+ * Provider for {@link HighScoreNumericFeatureZones} to be used to retain numeric feature points the {@link AsyncPredictionProvider}
  * is more confident with, to calculate feature intervals for perturbing numeric features (with boostrap).
  * <p>
  * see also {@link DataUtils#boostrapFeatureDistributions(DataDistribution, PerturbationContext, int, int, int, Map)}
@@ -62,7 +62,7 @@ public class HighScoreNumericFeatureZonesProvider {
      * @return a map feature name -> high score numeric feature zones
      */
     public static Map<String, HighScoreNumericFeatureZones> getHighScoreFeatureZones(DataDistribution dataDistribution,
-            PredictionProvider predictionProvider, List<Feature> features, int maxNoOfSamples) {
+                                                                                     AsyncPredictionProvider predictionProvider, List<Feature> features, int maxNoOfSamples) {
         Map<String, HighScoreNumericFeatureZones> numericFeatureZonesMap = new HashMap<>();
 
         List<Prediction> scoreSortedPredictions = new ArrayList<>();

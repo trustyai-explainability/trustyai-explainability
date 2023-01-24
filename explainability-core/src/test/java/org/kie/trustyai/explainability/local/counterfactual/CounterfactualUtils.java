@@ -28,7 +28,7 @@ import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.optaplanner.core.config.solver.EnvironmentMode;
 import org.optaplanner.core.config.solver.SolverConfig;
 import org.optaplanner.core.config.solver.termination.TerminationConfig;
@@ -43,14 +43,14 @@ public class CounterfactualUtils {
 
     public static CounterfactualResult runCounterfactualSearch(Long randomSeed, List<Output> goal,
             List<Feature> features,
-            PredictionProvider model,
+            AsyncPredictionProvider model,
             double goalThresold) throws InterruptedException, ExecutionException, TimeoutException {
         return runCounterfactualSearch(randomSeed, goal, features, model, goalThresold, CounterfactualUtils.DEFAULT_STEPS);
     }
 
     public static CounterfactualResult runCounterfactualSearch(Long randomSeed, List<Output> goal,
             List<Feature> features,
-            PredictionProvider model,
+            AsyncPredictionProvider model,
             double goalThreshold,
             long steps) throws InterruptedException, ExecutionException, TimeoutException {
         final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
@@ -76,7 +76,7 @@ public class CounterfactualUtils {
 
     public static CounterfactualResult runCounterfactualSearch(Long randomSeed,
             List<Feature> features,
-            PredictionProvider model,
+            AsyncPredictionProvider model,
             double goalThreshold,
             CounterfactualGoalCriteria goalCriteria,
             long steps) throws InterruptedException, ExecutionException, TimeoutException {

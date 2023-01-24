@@ -158,8 +158,8 @@ class ShapKernelExplainerTest {
      * given a specific model, config, background, explanations, and expected shap values,
      * test that the computed shape values match expected shap values
      */
-    private void shapTestCase(PredictionProvider model, ShapConfig skConfig,
-            double[][] toExplainRaw, double[][][] expected)
+    private void shapTestCase(AsyncPredictionProvider model, ShapConfig skConfig,
+                              double[][] toExplainRaw, double[][][] expected)
             throws InterruptedException, TimeoutException, ExecutionException {
 
         // establish background data and desired data to explain
@@ -190,8 +190,8 @@ class ShapKernelExplainerTest {
      * given a specific model, config, background, explanations, ske, and expected shap values,
      * test that the computed shape values match expected shap values
      */
-    private void shapTestCase(PredictionProvider model, ShapKernelExplainer ske,
-            double[][] toExplainRaw, double[][][] expected)
+    private void shapTestCase(AsyncPredictionProvider model, ShapKernelExplainer ske,
+                              double[][] toExplainRaw, double[][][] expected)
             throws InterruptedException, TimeoutException, ExecutionException {
 
         // establish background data and desired data to explain
@@ -220,7 +220,7 @@ class ShapKernelExplainerTest {
     // test a single output model with no varying features
     @Test
     void testNoVarianceOneOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundNoVariance);
         ShapConfig skConfig = testConfig.withBackground(background).withNSamples(100).build();
         shapTestCase(model, skConfig, toExplainZeroVariance, zeroVarianceOneOutputSHAP);
@@ -229,7 +229,7 @@ class ShapKernelExplainerTest {
     // test a single output model with one varying feature
     @Test
     void testOneVarianceOneOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundNoVariance);
         ShapConfig skConfig = testConfig.withBackground(background).withNSamples(100).build();
         shapTestCase(model, skConfig, toExplainOneVariance, oneVarianceOneOutputSHAP);
@@ -238,7 +238,7 @@ class ShapKernelExplainerTest {
     // test a single output model with many varying features
     @Test
     void testMultiVarianceOneOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundRaw);
         ShapConfig skConfig = testConfig.withBackground(background).withNSamples(35).build();
         shapTestCase(model, skConfig, toExplainRaw, multiVarianceOneOutputSHAP);
@@ -247,7 +247,7 @@ class ShapKernelExplainerTest {
     // test a single output model with many varying features and logit link
     @Test
     void testMultiVarianceOneOutputLogit() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundLogit);
         ShapConfig skConfig = ShapConfig.builder()
                 .withBackground(background)
@@ -262,7 +262,7 @@ class ShapKernelExplainerTest {
     // test a multi-output model with no varying features
     @Test
     void testNoVarianceMultiOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundNoVariance);
         ShapConfig skConfig = testConfig.withBackground(background).build();
         shapTestCase(model, skConfig, toExplainZeroVariance, zeroVarianceMultiOutputSHAP);
@@ -271,7 +271,7 @@ class ShapKernelExplainerTest {
     // test a multi-output model with one varying feature
     @Test
     void testOneVarianceMultiOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundNoVariance);
         ShapConfig skConfig = testConfig.withBackground(background).build();
         shapTestCase(model, skConfig, toExplainOneVariance, oneVarianceMultiOutputSHAP);
@@ -280,7 +280,7 @@ class ShapKernelExplainerTest {
     // test a multi-output model with many varying features
     @Test
     void testMultiVarianceMultiOutput() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundRaw);
         ShapConfig skConfig = testConfig.withBackground(background).build();
         shapTestCase(model, skConfig, toExplainRaw, multiVarianceMultiOutputSHAP);
@@ -289,7 +289,7 @@ class ShapKernelExplainerTest {
     // test that the last saliency is always the background
     @Test
     void testLastSaliencyIsBackground() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipTwoOutputModel(1);
         List<PredictionInput> background = createPIFromMatrix(backgroundRaw);
         ShapConfig skConfig = testConfig.withBackground(background).build();
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainRaw);
@@ -336,7 +336,7 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(largeBackground);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainLargeBackground);
 
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         ShapConfig skConfig = testConfig.withBackground(background).build();
 
         //initialize explainer
@@ -381,7 +381,7 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(largeBackground);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainLargeBackground);
 
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         ShapConfig skConfig = testConfig.withBackground(background).withNSamples(1000).build();
 
         //initialize explainer
@@ -426,7 +426,7 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(largeBackground);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainLargeBackground);
 
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         ShapConfig skConfig = testConfig.withBackground(background).build();
 
         //initialize explainer
@@ -465,7 +465,7 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(tooLargeBackground);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainTooSmall);
 
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         ShapConfig skConfig = testConfig.withBackground(background).build();
 
         //initialize explainer
@@ -500,8 +500,8 @@ class ShapKernelExplainerTest {
         List<PredictionInput> background = createPIFromMatrix(backgroundMat);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainTooSmall);
 
-        PredictionProvider modelForPredictions = TestModels.getSumSkipTwoOutputModel(1);
-        PredictionProvider modelForShap = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider modelForPredictions = TestModels.getSumSkipTwoOutputModel(1);
+        AsyncPredictionProvider modelForShap = TestModels.getSumSkipModel(1);
         ShapConfig skConfig = testConfig.withBackground(background).build();
 
         //initialize explainer
@@ -523,7 +523,7 @@ class ShapKernelExplainerTest {
     // See if using the same explainer multiple times causes issues ====================================================
     @Test
     void testStateless() throws InterruptedException, TimeoutException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         ShapConfig skConfig1 = testConfig
                 .withBackground(createPIFromMatrix(backgroundNoVariance))
                 .withNSamples(100)
@@ -559,7 +559,7 @@ class ShapKernelExplainerTest {
         for (double interval : new double[] { .95, .975, .99 }) {
             int[] testResults = new int[600];
             SplittableRandom rn = new SplittableRandom();
-            PredictionProvider model = TestModels.getNoisySumModel(rn, noise, 64 * 100);
+            AsyncPredictionProvider model = TestModels.getNoisySumModel(rn, noise, 64 * 100);
             for (int test = 0; test < 100; test++) {
                 ShapConfig skConfig = testConfig
                         .withBackground(createPIFromMatrix(backgroundAllZeros))
@@ -632,7 +632,7 @@ class ShapKernelExplainerTest {
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2, 3 })
     void testRegularizations(int config) throws InterruptedException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainRegTests);
         RealMatrix toExplainMatrix = MatrixUtils.createRealMatrix(toExplainRegTests);
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
@@ -671,7 +671,7 @@ class ShapKernelExplainerTest {
     @Test
     void testManyFeatureRegularization() throws ExecutionException, InterruptedException {
         RealVector modelWeights = MatrixUtils.createRealMatrix(generateN(1, 25, "5021")).getRowVector(0);
-        PredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
+        AsyncPredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
         RealMatrix data = MatrixUtils.createRealMatrix(generateN(101, 25, "8629"));
         List<PredictionInput> toExplain = createPIFromMatrix(data.getRowMatrix(100).getData());
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
@@ -708,7 +708,7 @@ class ShapKernelExplainerTest {
     @Test
     void testManyFeatureRegularization2() throws ExecutionException, InterruptedException {
         RealVector modelWeights = MatrixUtils.createRealMatrix(generateN(1, 25, "5021")).getRowVector(0);
-        PredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
+        AsyncPredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
         RealMatrix data = MatrixUtils.createRealMatrix(generateN(101, 25, "8629"));
         List<PredictionInput> toExplain = createPIFromMatrix(data.getRowMatrix(100).getData());
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
@@ -738,7 +738,7 @@ class ShapKernelExplainerTest {
     @Test
     void testExceedSubsetSamplerRange() throws ExecutionException, InterruptedException {
         RealVector modelWeights = MatrixUtils.createRealMatrix(generateN(1, 50, "5021")).getRowVector(0);
-        PredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
+        AsyncPredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
         RealMatrix data = MatrixUtils.createRealMatrix(generateN(101, 50, "8629"));
         List<PredictionInput> toExplain = createPIFromMatrix(data.getRowMatrix(100).getData());
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
@@ -759,7 +759,7 @@ class ShapKernelExplainerTest {
     @Test
     void testBatched() throws ExecutionException, InterruptedException {
         RealVector modelWeights = MatrixUtils.createRealMatrix(generateN(1, 10, "5021")).getRowVector(0);
-        PredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
+        AsyncPredictionProvider model = TestModels.getLinearModel(modelWeights.toArray());
         RealMatrix data = MatrixUtils.createRealMatrix(generateN(101, 10, "8629"));
         List<PredictionInput> toExplain = createPIFromMatrix(data.getRowMatrix(100).getData());
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
@@ -809,7 +809,7 @@ class ShapKernelExplainerTest {
         nulldata.add(new PredictionInput(fs));
         List<PredictionInput> bg = nulldata;
         List<PredictionInput> toExplain = data.subList(100, 101);
-        PredictionProvider model = TestModels.getCategoricalRegressor();
+        AsyncPredictionProvider model = TestModels.getCategoricalRegressor();
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
         Prediction p = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
         ShapConfig sk = testConfig.copy()
@@ -856,7 +856,7 @@ class ShapKernelExplainerTest {
         nulldata.add(new PredictionInput(fs));
         List<PredictionInput> bg = nulldata;
         List<PredictionInput> toExplain = data.subList(100, 101);
-        PredictionProvider model = TestModels.getCategoricalRegressor();
+        AsyncPredictionProvider model = TestModels.getCategoricalRegressor();
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
         Prediction p = new SimplePrediction(toExplain.get(0), predictionOutputs.get(0));
         ShapConfig sk = testConfig.copy()
@@ -911,7 +911,7 @@ class ShapKernelExplainerTest {
             }
         }
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getTwoOutputSemiCategoricalModel(2);
+        AsyncPredictionProvider model = TestModels.getTwoOutputSemiCategoricalModel(2);
         PredictionOutput output = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit())
                 .get(0);
@@ -926,7 +926,7 @@ class ShapKernelExplainerTest {
 
     @Test
     void testNoByproductCounterfactuals() throws InterruptedException, ExecutionException {
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         List<PredictionInput> toExplain = createPIFromMatrix(toExplainRaw);
         List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
 
@@ -948,7 +948,7 @@ class ShapKernelExplainerTest {
     void testByproductCounterfactuals() throws InterruptedException, ExecutionException {
         // this has to be run many times to ensure there's no race condition issues
         for (long i = 0; i < 100; i++) {
-            PredictionProvider model = TestModels.getSumSkipModel(1);
+            AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
             List<PredictionInput> toExplain = createPIFromMatrix(toExplainRaw);
             List<PredictionOutput> predictionOutputs = model.predictAsync(toExplain).get();
 

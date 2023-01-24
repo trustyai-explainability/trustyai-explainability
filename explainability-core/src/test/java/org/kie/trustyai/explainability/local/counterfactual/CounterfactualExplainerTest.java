@@ -53,7 +53,7 @@ import org.kie.trustyai.explainability.model.PerturbationContext;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
@@ -122,7 +122,7 @@ class CounterfactualExplainerTest {
         final CounterfactualExplainer counterfactualExplainer =
                 new CounterfactualExplainer(counterfactualConfig);
 
-        PredictionProvider model = TestModels.getSumSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
 
         PredictionInput input = new PredictionInput(features);
         PredictionOutput output = new PredictionOutput(goal);
@@ -390,7 +390,7 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("x-2", 40.0, NumericalFeatureDomain.create(0.0, 100.0)));
         features.add(FeatureFactory.newCategoricalFeature("operand", "*", CategoricalFeatureDomain.create("+", "-", "/", "*")));
 
-        final PredictionProvider model = TestModels.getSymbolicArithmeticModel();
+        final AsyncPredictionProvider model = TestModels.getSymbolicArithmeticModel();
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, features, model, 0.01, DefaultCounterfactualGoalCriteria.create(goal, 0.01), 100_000);
 
@@ -453,7 +453,7 @@ class CounterfactualExplainerTest {
         final double center = 500.0;
         final double epsilon = 10.0;
 
-        final PredictionProvider model = TestModels.getSumThresholdModel(center, epsilon);
+        final AsyncPredictionProvider model = TestModels.getSumThresholdModel(center, epsilon);
 
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
@@ -501,7 +501,7 @@ class CounterfactualExplainerTest {
         final double center = 500.0;
         final double epsilon = 10.0;
 
-        final PredictionProvider model = TestModels.getSumThresholdModel(center, epsilon);
+        final AsyncPredictionProvider model = TestModels.getSumThresholdModel(center, epsilon);
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         model,
@@ -602,7 +602,7 @@ class CounterfactualExplainerTest {
         final double center = 500.0;
         final double epsilon = 10.0;
 
-        final PredictionProvider model = TestModels.getSumThresholdModel(center, epsilon);
+        final AsyncPredictionProvider model = TestModels.getSumThresholdModel(center, epsilon);
 
         PredictionOutput output = new PredictionOutput(goal);
         Prediction prediction = new CounterfactualPrediction(input,
@@ -663,7 +663,7 @@ class CounterfactualExplainerTest {
         List<Feature> features = List.of(FeatureFactory.newNumericalFeature("f-num1", 10.0,
                 NumericalFeatureDomain.create(0, 20)));
 
-        PredictionProvider model = TestModels.getFeaturePassModel(0);
+        AsyncPredictionProvider model = TestModels.getFeaturePassModel(0);
 
         final TerminationConfig terminationConfig =
                 new TerminationConfig().withScoreCalculationCountLimit(100_000L);
@@ -725,7 +725,7 @@ class CounterfactualExplainerTest {
                 FeatureFactory.newNumericalFeature("f-num1", 10.0,
                         NumericalFeatureDomain.create(0, 20)));
 
-        PredictionProvider model = TestModels.getFeaturePassModel(0);
+        AsyncPredictionProvider model = TestModels.getFeaturePassModel(0);
 
         final TerminationConfig terminationConfig =
                 new TerminationConfig().withScoreCalculationCountLimit(100_000L);
@@ -871,7 +871,7 @@ class CounterfactualExplainerTest {
                 maxRunningTimeSeconds);
 
         return counterfactualExplainer.explainAsync(prediction,
-                (List<PredictionInput> inputs) -> CompletableFuture.completedFuture(Collections.emptyList()),
+                        (AsyncPredictionProvider) (List<PredictionInput> inputs) -> CompletableFuture.completedFuture(Collections.emptyList()),
                 intermediateResultsConsumer)
                 .get(Config.INSTANCE.getAsyncTimeout(),
                         Config.INSTANCE.getAsyncTimeUnit());
@@ -901,7 +901,7 @@ class CounterfactualExplainerTest {
                                 NumericalFeatureDomain.create(-5, 5)));
             }
         }
-        PredictionProvider model = TestModels.getTwoOutputSemiCategoricalModel(2);
+        AsyncPredictionProvider model = TestModels.getTwoOutputSemiCategoricalModel(2);
 
         final List<Output> goal = List.of(
                 new Output("Semi-Categorical", Type.NUMBER, new Value(1), 0.0),
@@ -930,7 +930,7 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newCategoricalNumericalFeature("f-num4", 0,
                 CategoricalNumericalFeatureDomain.create(5, 6, 7)));
 
-        final PredictionProvider model = TestModels.getSumSkipModel(1);
+        final AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         final CounterfactualResult result =
                 CounterfactualUtils.runCounterfactualSearch((long) seed, goal, features,
                         model,
@@ -958,7 +958,7 @@ class CounterfactualExplainerTest {
             fs.add(new Feature(String.valueOf(i), Type.NUMBER, new Value(featureValues[i]), false, NumericalFeatureDomain.create(-5, 5)));
         }
 
-        final PredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
+        final AsyncPredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
 
         final List<Output> goal = List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 1d));
 
@@ -982,7 +982,7 @@ class CounterfactualExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("f-num3", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
         features.add(FeatureFactory.newNumericalFeature("f-num4", 100.0, NumericalFeatureDomain.create(0.0, 1000.0)));
 
-        final PredictionProvider model = TestModels.getSumSkipModel(1);
+        final AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
 
         CounterfactualGoalCriteria goalFunction = (outputs) -> {
             double sum = outputs.stream().mapToDouble(o -> o.getValue().asNumber()).sum();

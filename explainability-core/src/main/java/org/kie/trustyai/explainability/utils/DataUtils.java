@@ -56,7 +56,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
@@ -672,7 +672,7 @@ public class DataUtils {
         return featureDistributions;
     }
 
-    public static List<Prediction> getScoreSortedPredictions(String outputName, PredictionProvider predictionProvider,
+    public static List<Prediction> getScoreSortedPredictions(String outputName, AsyncPredictionProvider predictionProvider,
             DataDistribution dataDistribution)
             throws InterruptedException, ExecutionException, TimeoutException {
         List<PredictionInput> inputs = dataDistribution.getAllSamples();
@@ -704,8 +704,8 @@ public class DataUtils {
         }).collect(Collectors.toList());
     }
 
-    public static List<Prediction> getScoreSortedPredictions(PredictionProvider predictionProvider,
-            DataDistribution dataDistribution)
+    public static List<Prediction> getScoreSortedPredictions(AsyncPredictionProvider predictionProvider,
+                                                             DataDistribution dataDistribution)
             throws InterruptedException, ExecutionException, TimeoutException {
         List<PredictionInput> inputs = dataDistribution.getAllSamples();
         List<PredictionOutput> predictionOutputs = predictionProvider.predictAsync(inputs)

@@ -16,7 +16,7 @@
 package org.kie.trustyai.explainability.model;
 
 /**
- * Metadata about a given {@link PredictionProvider}.
+ * Metadata about a given {@link AsyncPredictionProvider}.
  */
 public interface PredictionProviderMetadata {
 

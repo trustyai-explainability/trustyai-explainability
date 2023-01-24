@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -42,7 +42,7 @@ class CountingOptimizationStrategyTest {
         LimeOptimizationService optimizationService = mock(LimeOptimizationService.class);
         CountingOptimizationStrategy strategy = new CountingOptimizationStrategy(10, optimizationService);
         List<Prediction> recordedPredictions = Collections.emptyList();
-        PredictionProvider model = mock(PredictionProvider.class);
+        AsyncPredictionProvider model = mock(AsyncPredictionProvider.class);
         LimeExplainer explaier = new LimeExplainer();
         LimeConfig config = new LimeConfig();
         assertThatCode(() -> strategy.maybeOptimize(recordedPredictions, model, explaier, config)).doesNotThrowAnyException();

@@ -42,7 +42,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
@@ -74,7 +74,7 @@ class PmmlRegressionLimeExplainerTest {
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
         PredictionInput input = getTestInput();
 
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
         List<PredictionOutput> predictionOutputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         assertThat(predictionOutputs).isNotNull();
@@ -103,7 +103,7 @@ class PmmlRegressionLimeExplainerTest {
 
     @Test
     void testExplanationStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = getSamples();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
@@ -128,7 +128,7 @@ class PmmlRegressionLimeExplainerTest {
 
     @Test
     void testExplanationWeightedStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = getSamples();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
@@ -153,7 +153,7 @@ class PmmlRegressionLimeExplainerTest {
 
     @Test
     void testExplanationImpactScoreWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = getSamples();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
@@ -181,7 +181,7 @@ class PmmlRegressionLimeExplainerTest {
         return inputs;
     }
 
-    private PredictionProvider getModel() {
+    private AsyncPredictionProvider getModel() {
         return inputs -> CompletableFuture.supplyAsync(() -> {
             List<PredictionOutput> outputs = new ArrayList<>();
             for (PredictionInput input1 : inputs) {

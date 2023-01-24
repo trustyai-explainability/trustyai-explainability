@@ -34,7 +34,7 @@ import org.kie.trustyai.explainability.model.PartialDependenceGraph;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,7 +50,7 @@ class TrafficViolationDmnPDPExplainerTest {
         final String TRAFFIC_VIOLATION_NAME = "Traffic Violation";
         DecisionModel decisionModel = new DmnDecisionModel(dmnRuntime, TRAFFIC_VIOLATION_NS, TRAFFIC_VIOLATION_NAME);
 
-        PredictionProvider model = new DecisionModelWrapper(decisionModel);
+        AsyncPredictionProvider model = new DecisionModelWrapper(decisionModel);
         List<PredictionInput> inputs = DmnTestUtils.randomTrafficViolationInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(inputs)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());

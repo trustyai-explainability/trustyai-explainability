@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.optaplanner.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalScore;
 import org.optaplanner.core.api.score.calculator.EasyScoreCalculator;
 import org.optaplanner.core.api.solver.SolverJob;
@@ -121,7 +121,7 @@ public class LimeConfigOptimizer {
         return this;
     }
 
-    public LimeConfig optimize(LimeConfig config, List<Prediction> predictions, PredictionProvider model) {
+    public LimeConfig optimize(LimeConfig config, List<Prediction> predictions, AsyncPredictionProvider model) {
         List<LimeConfigEntity> entities = new ArrayList<>();
         if (samplingEntities) {
             entities.addAll(LimeConfigEntityFactory.createSamplingEntities(config));

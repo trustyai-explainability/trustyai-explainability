@@ -21,7 +21,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.ValidationUtils;
@@ -68,8 +68,8 @@ public class TestUtils {
         return f;
     }
 
-    public static void assertLimeStability(PredictionProvider model, Prediction prediction, LimeExplainer limeExplainer,
-            int topK, double minimumPositiveStabilityRate, double minimumNegativeStabilityRate) {
+    public static void assertLimeStability(AsyncPredictionProvider model, Prediction prediction, LimeExplainer limeExplainer,
+                                           int topK, double minimumPositiveStabilityRate, double minimumNegativeStabilityRate) {
         assertDoesNotThrow(() -> ValidationUtils.validateLocalSaliencyStability(model, prediction, limeExplainer, topK,
                 minimumPositiveStabilityRate, minimumNegativeStabilityRate));
     }

@@ -34,7 +34,7 @@ import org.kie.trustyai.explainability.model.PartialDependenceGraph;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,7 +50,7 @@ class PrequalificationDmnPDPExplainerTest {
         final String NAME = "Prequalification";
         DecisionModel decisionModel = new DmnDecisionModel(dmnRuntime, NS, NAME);
 
-        PredictionProvider model = new DecisionModelWrapper(decisionModel);
+        AsyncPredictionProvider model = new DecisionModelWrapper(decisionModel);
 
         List<PredictionInput> inputs = DmnTestUtils.randomPrequalificationInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(inputs)

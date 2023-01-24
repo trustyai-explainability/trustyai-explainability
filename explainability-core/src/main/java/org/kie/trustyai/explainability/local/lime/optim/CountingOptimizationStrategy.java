@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 
 /**
  * Simple count based {@link LimeConfigOptimizationStrategy}.
@@ -39,7 +39,7 @@ public class CountingOptimizationStrategy implements LimeConfigOptimizationStrat
 
     @Override
     public void maybeOptimize(
-            List<Prediction> recordedPredictions, PredictionProvider model, LimeExplainer limeExplainer,
+            List<Prediction> recordedPredictions, AsyncPredictionProvider model, LimeExplainer limeExplainer,
             LimeConfig executionConfig) {
         if (this.explanationCount.incrementAndGet() > epochLength) {
             this.explanationCount.set(0);

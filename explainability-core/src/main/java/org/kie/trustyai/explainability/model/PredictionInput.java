@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * The inputs to a {@link PredictionProvider}.
+ * The inputs to a {@link AsyncPredictionProvider}.
  * A prediction input is composed by one or more {@link Feature}s.
  */
 public class PredictionInput {

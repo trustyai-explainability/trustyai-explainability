@@ -29,7 +29,7 @@ import org.kie.trustyai.explainability.model.PartialDependenceGraph;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
@@ -50,7 +50,7 @@ class OpenNLPPDPExplainerTest {
         LanguageDetectorModel languageDetectorModel = new LanguageDetectorModel(is);
         LanguageDetector languageDetector = new LanguageDetectorME(languageDetectorModel);
 
-        PredictionProvider model = inputs -> CompletableFuture.supplyAsync(() -> {
+        AsyncPredictionProvider model = inputs -> CompletableFuture.supplyAsync(() -> {
             List<PredictionOutput> results = new ArrayList<>();
             for (PredictionInput predictionInput : inputs) {
                 StringBuilder builder = new StringBuilder();

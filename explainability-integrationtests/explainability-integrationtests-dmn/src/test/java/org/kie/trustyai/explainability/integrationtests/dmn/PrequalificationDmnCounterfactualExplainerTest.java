@@ -43,7 +43,7 @@ import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -63,7 +63,7 @@ class PrequalificationDmnCounterfactualExplainerTest {
 
     @Test
     void testValidCounterfactual() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         final List<Output> goal = List.of(
                 new Output("Qualified?", Type.BOOLEAN, new Value(true), 0.0d));
@@ -138,7 +138,7 @@ class PrequalificationDmnCounterfactualExplainerTest {
         return new PredictionInput(features);
     }
 
-    private PredictionProvider getModel() {
+    private AsyncPredictionProvider getModel() {
         DMNRuntime dmnRuntime = DMNKogito.createGenericDMNRuntime(new InputStreamReader(getClass().getResourceAsStream("/dmn/Prequalification-1.dmn")));
         assertEquals(1, dmnRuntime.getModels().size());
 

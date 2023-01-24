@@ -33,7 +33,7 @@ import org.kie.trustyai.explainability.model.PartialDependenceGraph;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -50,7 +50,7 @@ class LoanEligibilityDmnPDPExplainerTest {
         final String FRAUD_NAME = "LoanEligibility";
         DecisionModel decisionModel = new DmnDecisionModel(dmnRuntime, FRAUD_NS, FRAUD_NAME);
 
-        PredictionProvider model = new DecisionModelWrapper(decisionModel);
+        AsyncPredictionProvider model = new DecisionModelWrapper(decisionModel);
         List<PredictionInput> inputs = DmnTestUtils.randomLoanEligibilityInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(inputs)
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());

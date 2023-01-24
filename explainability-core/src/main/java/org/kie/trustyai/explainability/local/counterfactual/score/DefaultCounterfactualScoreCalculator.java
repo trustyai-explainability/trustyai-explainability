@@ -31,7 +31,7 @@ import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.utils.CompositeFeatureUtils;
 import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
 import org.slf4j.Logger;
@@ -111,7 +111,7 @@ public class DefaultCounterfactualScoreCalculator implements CounterfactualScore
 
     /**
      * Calculates the counterfactual score for each proposed solution.
-     * This method assumes that each model used as {@link PredictionProvider} is
+     * This method assumes that each model used as {@link AsyncPredictionProvider} is
      * consistent, in the sense that for repeated operations, the size of the returned collection of
      * {@link PredictionOutput} is the same, if the size of {@link PredictionInput} doesn't change.
      *

@@ -26,11 +26,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.linear.RealVector;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 
 public class ShapDataCarrier {
-    private PredictionProvider model;
+    private AsyncPredictionProvider model;
     private CompletableFuture<RealVector> linkNull;
     private CompletableFuture<RealVector> fnull;
     private CompletableFuture<Map<String, Double>> nullOutput;
@@ -73,11 +73,11 @@ public class ShapDataCarrier {
 
     // model information ========================================================
 
-    public PredictionProvider getModel() {
+    public AsyncPredictionProvider getModel() {
         return model;
     }
 
-    public void setModel(PredictionProvider model) {
+    public void setModel(AsyncPredictionProvider model) {
         this.model = model;
     }
 

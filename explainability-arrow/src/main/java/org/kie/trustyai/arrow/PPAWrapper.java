@@ -23,11 +23,11 @@ import org.apache.arrow.memory.RootAllocator;
 import org.apache.arrow.vector.types.pojo.Schema;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 
 // wrap a PredictionProviderArrow into a PredictionProvider
 // this should perform equivalently to a normal PredictionProvider, provided that it is initialized correctly
-public class PPAWrapper implements PredictionProvider {
+public class PPAWrapper implements AsyncPredictionProvider {
     PredictionProviderArrow ppa;
     RootAllocator allocator;
     Schema inputSchema;

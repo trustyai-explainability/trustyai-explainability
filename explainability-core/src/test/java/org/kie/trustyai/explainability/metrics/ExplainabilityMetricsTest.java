@@ -32,14 +32,13 @@ import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
-import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.FeatureImportance;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.SimplePrediction;
@@ -103,7 +102,7 @@ class ExplainabilityMetricsTest {
         LimeConfig limeConfig = new LimeConfig()
                 .withSamples(10);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         List<Feature> features = new LinkedList<>();
         features.add(FeatureFactory.newFulltextFeature("f-0", "brown fox", s -> Arrays.asList(s.split(" "))));
         features.add(FeatureFactory.newTextFeature("f-1", "money"));
@@ -130,7 +129,7 @@ class ExplainabilityMetricsTest {
                 .withSamples(10);
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
 
-        PredictionProvider model = TestModels.getEvenSumModel(1);
+        AsyncPredictionProvider model = TestModels.getEvenSumModel(1);
         List<Feature> features = new LinkedList<>();
         features.add(FeatureFactory.newNumericalFeature("f-1", 1));
         features.add(FeatureFactory.newNumericalFeature("f-2", 2));
@@ -156,7 +155,7 @@ class ExplainabilityMetricsTest {
         Config.INSTANCE.setAsyncTimeout(1);
         Config.INSTANCE.setAsyncTimeUnit(TimeUnit.MILLISECONDS);
         Prediction emptyPrediction = new SimplePrediction(new PredictionInput(emptyList()), new PredictionOutput(emptyList()));
-        PredictionProvider brokenProvider = inputs -> supplyAsync(
+        AsyncPredictionProvider brokenProvider = inputs -> supplyAsync(
                 () -> {
                     await().atLeast(1, TimeUnit.SECONDS).until(() -> false);
                     throw new RuntimeException("this should never happen");
@@ -174,7 +173,7 @@ class ExplainabilityMetricsTest {
 
     @Test
     void testGetLocalSaliencyStability() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
+        AsyncPredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
         List<Feature> features = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             features.add(TestUtils.getMockedNumericFeature(i * 0.1));
@@ -195,7 +194,7 @@ class ExplainabilityMetricsTest {
 
     @Test
     void testGetLocalSaliencyRecall() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
+        AsyncPredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
         List<Prediction> predictions = new ArrayList<>();
         for (int j = 0; j < 10; j++) {
             List<Feature> features = new ArrayList<>();
@@ -213,7 +212,7 @@ class ExplainabilityMetricsTest {
 
     @Test
     void testGetLocalSaliencyPrecision() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
+        AsyncPredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
         List<Prediction> predictions = new ArrayList<>();
         for (int j = 0; j < 10; j++) {
             List<Feature> features = new ArrayList<>();
@@ -231,7 +230,7 @@ class ExplainabilityMetricsTest {
 
     @Test
     void testGetLocalSaliencyF1() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
+        AsyncPredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
         List<Prediction> predictions = new ArrayList<>();
         for (int j = 0; j < 10; j++) {
             List<Feature> features = new ArrayList<>();

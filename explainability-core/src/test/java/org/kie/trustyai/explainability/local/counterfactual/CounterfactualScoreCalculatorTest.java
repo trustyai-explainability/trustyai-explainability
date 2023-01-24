@@ -42,7 +42,7 @@ import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionFeatureDomain;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
@@ -1070,7 +1070,7 @@ class CounterfactualScoreCalculatorTest {
     void testGoalSizeMatch() throws ExecutionException, InterruptedException {
         final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
-        PredictionProvider model = TestModels.getFeatureSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getFeatureSkipModel(0);
 
         List<Feature> features = List.of(
                 // f-1
@@ -1122,7 +1122,7 @@ class CounterfactualScoreCalculatorTest {
     void testGoalSizeSmaller() throws ExecutionException, InterruptedException {
         final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
-        PredictionProvider model = TestModels.getFeatureSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getFeatureSkipModel(0);
 
         List<Feature> features = new ArrayList<>();
         List<FeatureDomain> featureDomains = new ArrayList<>();
@@ -1176,7 +1176,7 @@ class CounterfactualScoreCalculatorTest {
     void testGoalSizeLarger() throws ExecutionException, InterruptedException {
         final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
-        PredictionProvider model = TestModels.getFeatureSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getFeatureSkipModel(0);
 
         List<Feature> features = List.of(
                 // f-1
@@ -1217,7 +1217,7 @@ class CounterfactualScoreCalculatorTest {
     void testNullBooleanInput() throws ExecutionException, InterruptedException {
         final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
 
-        PredictionProvider model = TestModels.getFeatureSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getFeatureSkipModel(0);
 
         List<Feature> features = new ArrayList<>();
 
@@ -1357,7 +1357,7 @@ class CounterfactualScoreCalculatorTest {
 
         // Create score calculator and model
         final DefaultCounterfactualScoreCalculator scoreCalculator = new DefaultCounterfactualScoreCalculator();
-        PredictionProvider model = TestModels.getFeatureSkipModel(0);
+        AsyncPredictionProvider model = TestModels.getFeatureSkipModel(0);
 
         // Create goal
         final List<Output> goal = new ArrayList<>();
