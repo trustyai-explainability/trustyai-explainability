@@ -87,11 +87,13 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
                 (originalInput.getFeatures() != null && originalInput.getFeatures().isEmpty())) {
             throw new LocalExplanationException("cannot explain a prediction whose input is empty");
         }
+        // transform a possibly complex / nested input into a flat input with "linearized" features
         PredictionInput targetInput = DataUtils.linearizeInputs(List.of(originalInput)).get(0);
         List<Feature> linearizedTargetInputFeatures = targetInput.getFeatures();
         if (linearizedTargetInputFeatures.isEmpty()) {
             throw new LocalExplanationException("input features linearization failed");
         }
+        // get the actual output of the model
         List<Output> actualOutputs = prediction.getOutput().getOutputs();
 
         LimeConfig executionConfig = limeConfig.copy();
@@ -118,6 +120,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
             List<Output> actualOutputs,
             LimeConfig executionConfig) {
 
+        // perturb the original input many times and produce a list of perturbed inputs and their respective preservation masks
         Pair<List<PredictionInput>, List<boolean[]>> perturbedInputsAndPreservationMask =
                 getPerturbedInputs(originalInput.getFeatures(), executionConfig, model);
 
@@ -225,7 +228,11 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
         }
 
         // encode the training data so that it can be fed into the linear model
-        DatasetEncoder datasetEncoder = new DatasetEncoder(limeInputs.getPerturbedInputs(), limeInputs.getPerturbedOutputs(),
+        List<PredictionInput> datasetInputs = limeInputs.getPerturbedInputs();
+        datasetInputs.add(new PredictionInput(targetInputFeatures));
+        List<Output> datasetOutputs = limeInputs.getPerturbedOutputs();
+        datasetOutputs.add(originalOutput);
+        DatasetEncoder datasetEncoder = new DatasetEncoder(datasetInputs, datasetOutputs,
                 linearizedTargetInputFeatures, originalOutput, executionConfig.getEncodingParams());
         List<Pair<double[], Double>> trainingSet = datasetEncoder.getEncodedTrainingSet();
 
@@ -328,10 +335,6 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
                             currentFeatures, originalOutput, executionConfig.getEncodingParams());
                     List<Pair<double[], Double>> currentTrainingSet = currentDatasetEncoder.getEncodedTrainingSet();
 
-                    // weight the training samples based on the proximity to the target input to explain
-                    double currentKernelWidth = executionConfig.getProximityKernelWidth() * Math.sqrt(currentFeatures.size());
-                    double[] currentSampleWeights = SampleWeighter.getSampleWeightsInterpretable(currentFeatures, currentTrainingSet, currentKernelWidth);
-
                     if (executionConfig.isProximityFilter()) {
                         ProximityFilter proximityFilter = new ProximityFilter(executionConfig.getProximityThreshold(),
                                 executionConfig.getProximityFilteredDatasetMinimum().doubleValue());
@@ -341,7 +344,8 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
                     // 2. train the model
                     LinearModel currentLinearModel = new LinearModel(currentFeatures.size(), limeInputs.isClassification(), perturbationContext.getRandom());
 
-                    double candidateLoss = executionConfig.isUseWLRLinearModel() ? currentLinearModel.fitWLRR(trainingSet, sampleWeights) : currentLinearModel.fit(trainingSet, sampleWeights);
+                    double candidateLoss =
+                            executionConfig.isUseWLRLinearModel() ? currentLinearModel.fitWLRR(currentTrainingSet, sampleWeights) : currentLinearModel.fit(currentTrainingSet, sampleWeights);
 
                     // 3. record its score
                     scores.put(candidateFeature, candidateLoss);
@@ -446,10 +450,12 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
 
         Map<String, FeatureDistribution> featureDistributionsMap;
         PerturbationContext perturbationContext = executionConfig.getPerturbationContext();
+        // if an existing distribution is present, use it to bootstrap numeric feature distributions
         if (!dataDistribution.isEmpty()) {
             Map<String, HighScoreNumericFeatureZones> numericFeatureZonesMap;
             int max = executionConfig.getBoostrapInputs();
             if (executionConfig.isHighScoreFeatureZones()) {
+                // identify high score feature zones, if possible
                 numericFeatureZonesMap = HighScoreNumericFeatureZonesProvider
                         .getHighScoreFeatureZones(dataDistribution, predictionProvider, features, max);
             } else {
