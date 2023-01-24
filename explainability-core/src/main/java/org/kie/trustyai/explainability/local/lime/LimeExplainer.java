@@ -229,9 +229,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
 
         // encode the training data so that it can be fed into the linear model
         List<PredictionInput> datasetInputs = limeInputs.getPerturbedInputs();
-        datasetInputs.add(new PredictionInput(targetInputFeatures));
         List<Output> datasetOutputs = limeInputs.getPerturbedOutputs();
-        datasetOutputs.add(originalOutput);
         DatasetEncoder datasetEncoder = new DatasetEncoder(datasetInputs, datasetOutputs,
                 linearizedTargetInputFeatures, originalOutput, executionConfig.getEncodingParams());
         List<Pair<double[], Double>> trainingSet = datasetEncoder.getEncodedTrainingSet();
