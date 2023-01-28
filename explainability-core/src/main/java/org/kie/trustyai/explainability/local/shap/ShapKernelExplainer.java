@@ -35,15 +35,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.kie.trustyai.explainability.local.LocalExplainer;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SaliencyResults;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.LarsPath;
 import org.kie.trustyai.explainability.utils.LassoLarsIC;
 import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
@@ -75,7 +67,7 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
         this.config = shapConfig;
     }
 
-    private ShapDataCarrier initialize(PredictionProvider model) {
+    private ShapDataCarrier initialize(AsyncPredictionProvider model) {
         // get shapes of input and output data
         int rows = this.config.getBackgroundMatrix().getRowDimension();
         int cols = this.config.getBackgroundMatrix().getColumnDimension();
@@ -318,7 +310,9 @@ public class ShapKernelExplainer implements LocalExplainer<SaliencyResults> {
      * @return the shap values for this prediction, of shape [n_model_outputs x n_features]
      */
     private CompletableFuture<SaliencyResults> explain(Prediction prediction, PredictionProvider model) {
-        ShapDataCarrier sdc = this.initialize(model);
+        final AsyncPredictionProvider asyncModel = AsyncPredictionProviderWrapper.from(model);
+
+        ShapDataCarrier sdc = this.initialize(asyncModel);
         sdc.setSamplesAdded(new ArrayList<>());
         PredictionInput pi = prediction.getInput();
         PredictionOutput po = prediction.getOutput();

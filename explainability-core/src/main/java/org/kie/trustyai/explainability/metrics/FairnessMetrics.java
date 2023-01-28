@@ -44,7 +44,7 @@ public class FairnessMetrics {
      * @throws InterruptedException if timeout or other interruption issues occur during model prediction
      */
     public static double individualConsistency(BiFunction<PredictionInput, List<PredictionInput>, List<PredictionInput>> proximityFunction,
-            List<PredictionInput> samples, PredictionProvider predictionProvider) throws ExecutionException, InterruptedException {
+            List<PredictionInput> samples, AsyncPredictionProvider predictionProvider) throws ExecutionException, InterruptedException {
         double consistency = 1;
         for (PredictionInput input : samples) {
             List<PredictionOutput> predictionOutputs = predictionProvider.predictAsync(List.of(input)).get();
@@ -76,7 +76,7 @@ public class FairnessMetrics {
      * @throws InterruptedException if timeout or other interruption issues occur during model prediction
      */
     public static double groupStatisticalParityDifference(Predicate<PredictionInput> groupSelector, List<PredictionInput> samples,
-            PredictionProvider model, Output favorableOutput)
+                                                          AsyncPredictionProvider model, Output favorableOutput)
             throws ExecutionException, InterruptedException {
 
         double probabilityUnprivileged = getFavorableLabelProbability(groupSelector.negate(), samples, model, favorableOutput);
@@ -89,7 +89,7 @@ public class FairnessMetrics {
      * Calculate statistical/demographic parity difference (SPD)
      *
      * @param samples A dataframe of inputs to be used for testing fairness
-     * @param model A model as a {@link PredictionProvider} to be tested for fairness
+     * @param model A model as a {@link AsyncPredictionProvider} to be tested for fairness
      * @param priviledgeColumns A {@link List} of integers specifying the privileged columns
      * @param priviledgeValues A {@link List} of {@link Value} specifying the privileged values
      * @param favorableOutput The favorable output
@@ -97,8 +97,8 @@ public class FairnessMetrics {
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    public static double groupStatisticalParityDifference(Dataframe samples, PredictionProvider model, List<Integer> priviledgeColumns,
-            List<Value> priviledgeValues, List<Output> favorableOutput) throws ExecutionException, InterruptedException {
+    public static double groupStatisticalParityDifference(Dataframe samples, AsyncPredictionProvider model, List<Integer> priviledgeColumns,
+                                                          List<Value> priviledgeValues, List<Output> favorableOutput) throws ExecutionException, InterruptedException {
 
         final List<PredictionInput> inputs = samples.asPredictionInputs();
         final List<PredictionOutput> outputs = model.predictAsync(inputs).get();
@@ -148,7 +148,7 @@ public class FairnessMetrics {
      * @throws InterruptedException if timeout or other interruption issues occur during model prediction
      */
     public static double groupDisparateImpactRatio(Predicate<PredictionInput> groupSelector, List<PredictionInput> samples,
-            PredictionProvider model, Output favorableOutput)
+                                                   AsyncPredictionProvider model, Output favorableOutput)
             throws ExecutionException, InterruptedException {
 
         double probabilityUnprivileged = getFavorableLabelProbability(groupSelector.negate(), samples, model, favorableOutput);
@@ -161,7 +161,7 @@ public class FairnessMetrics {
      * Calculate disparate impact ratio (DIR).
      *
      * @param samples A dataframe of inputs to be used for testing fairness
-     * @param model A model as a {@link PredictionProvider} to be tested for fairness
+     * @param model A model as a {@link AsyncPredictionProvider} to be tested for fairness
      * @param priviledgeColumns A {@link List} of integers specifying the privileged columns
      * @param priviledgeValues A {@link List} of {@link Value} specifying the privileged values
      * @param favorableOutput The favorable output
@@ -169,8 +169,8 @@ public class FairnessMetrics {
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    public static double groupDisparateImpactRatio(Dataframe samples, PredictionProvider model, List<Integer> priviledgeColumns,
-            List<Value> priviledgeValues, List<Output> favorableOutput) throws ExecutionException, InterruptedException {
+    public static double groupDisparateImpactRatio(Dataframe samples, AsyncPredictionProvider model, List<Integer> priviledgeColumns,
+                                                   List<Value> priviledgeValues, List<Output> favorableOutput) throws ExecutionException, InterruptedException {
 
         final List<PredictionInput> inputs = samples.asPredictionInputs();
         final List<PredictionOutput> outputs = model.predictAsync(inputs).get();
@@ -207,7 +207,7 @@ public class FairnessMetrics {
     }
 
     private static double getFavorableLabelProbability(Predicate<PredictionInput> groupSelector, List<PredictionInput> samples,
-            PredictionProvider model, Output favorableOutput) throws ExecutionException, InterruptedException {
+                                                       AsyncPredictionProvider model, Output favorableOutput) throws ExecutionException, InterruptedException {
         String outputName = favorableOutput.getName();
         Value outputValue = favorableOutput.getValue();
 
@@ -220,7 +220,7 @@ public class FairnessMetrics {
         return numFavorableSelected / numSelected;
     }
 
-    private static List<PredictionOutput> getSelectedPredictionOutputs(Predicate<PredictionInput> groupSelector, List<PredictionInput> samples, PredictionProvider model)
+    private static List<PredictionOutput> getSelectedPredictionOutputs(Predicate<PredictionInput> groupSelector, List<PredictionInput> samples, AsyncPredictionProvider model)
             throws InterruptedException, ExecutionException {
         List<PredictionInput> selected = samples.stream().filter(groupSelector).collect(Collectors.toList());
 
@@ -240,7 +240,7 @@ public class FairnessMetrics {
      */
     public static double groupAverageOddsDifference(Predicate<PredictionInput> inputSelector,
             Predicate<PredictionOutput> outputSelector, Dataset dataset,
-            PredictionProvider model)
+            AsyncPredictionProvider model)
             throws ExecutionException, InterruptedException {
 
         Dataset privileged = dataset.filterByInput(inputSelector);
@@ -303,7 +303,7 @@ public class FairnessMetrics {
     }
 
     public static double groupAverageOddsDifference(final Dataframe samples,
-            PredictionProvider model,
+            AsyncPredictionProvider model,
             final List<Integer> priviledgeColumns,
             final List<Value> priviledgeValues,
             final List<Value> positiveClass) throws ExecutionException, InterruptedException {
@@ -406,7 +406,7 @@ public class FairnessMetrics {
      */
     public static double groupAveragePredictiveValueDifference(Predicate<PredictionInput> inputSelector,
             Predicate<PredictionOutput> outputSelector, Dataset dataset,
-            PredictionProvider model)
+            AsyncPredictionProvider model)
             throws ExecutionException, InterruptedException {
 
         Dataset privileged = dataset.filterByInput(inputSelector);
@@ -429,7 +429,7 @@ public class FairnessMetrics {
     }
 
     public static double groupAveragePredictiveValueDifference(final Dataframe samples,
-            PredictionProvider model,
+            AsyncPredictionProvider model,
             final List<Integer> priviledgeColumns,
             final List<Value> priviledgeValues,
             final List<Value> positiveClass) throws ExecutionException, InterruptedException {

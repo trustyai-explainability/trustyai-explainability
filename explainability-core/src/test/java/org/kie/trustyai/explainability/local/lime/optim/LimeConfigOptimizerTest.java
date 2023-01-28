@@ -147,7 +147,7 @@ class LimeConfigOptimizerTest {
         long seed = 0;
         List<LimeConfig> optimizedConfigs = new ArrayList<>();
 
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         DataDistribution dataDistribution = DataUtils.generateRandomDataDistribution(5, 100, new Random());
         List<PredictionInput> samples = dataDistribution.sample(3);
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples).get();
@@ -181,7 +181,7 @@ class LimeConfigOptimizerTest {
 
     private void assertConfigOptimized(LimeConfigOptimizer limeConfigOptimizer) throws InterruptedException, java.util.concurrent.ExecutionException {
         LimeConfig initialConfig = new LimeConfig().withSamples(10).withUseWLRLinearModel(false);
-        PredictionProvider model = TestModels.getSumSkipModel(1);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(1);
         Random random = new Random();
         random.setSeed(4);
         DataDistribution dataDistribution = DataUtils.generateRandomDataDistribution(5, 100, random);

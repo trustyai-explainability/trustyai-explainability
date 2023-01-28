@@ -42,7 +42,7 @@ import org.kie.trustyai.explainability.model.PerturbationContext;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
@@ -52,7 +52,7 @@ import org.optaplanner.core.config.solver.termination.TerminationConfig;
 
 public class CounterfactualGenerator {
     private final Integer kSeeds;
-    private final PredictionProvider model;
+    private final AsyncPredictionProvider model;
     private final CounterfactualConfig counterfactualConfig;
     private final PerturbationContext pc;
     private final long timeoutSeconds;
@@ -66,13 +66,13 @@ public class CounterfactualGenerator {
      *        * If {@param kSeeds} = {@param n}, each background point will be generated from a unique seed {@link PredictionInput}
      *        * If {@param kSeeds} = 1, each background point will be generated from the same seed {@link PredictionInput}, whichever is closest to the given {@param goal}
      *        * If {@param kSeeds} = null, will automatically be chosen as min({@param seeds}.sizeb(), {@param n}) during generation
-     * @param model: The {@link PredictionProvider} being explained
+     * @param model: The {@link AsyncPredictionProvider} being explained
      * @param counterfactualConfig: The {@link CounterfactualConfig} to be used in the counterfactual search
      * @param pc: The {@link PerturbationContext} to be used in the counterfactual search
      * @param timeoutSeconds: The number of seconds before the counterfactual search times out.
      */
-    protected CounterfactualGenerator(Integer kSeeds, PredictionProvider model, double goalThreshold, CounterfactualConfig counterfactualConfig,
-            PerturbationContext pc, long timeoutSeconds, int maxAttemptCount) {
+    protected CounterfactualGenerator(Integer kSeeds, AsyncPredictionProvider model, double goalThreshold, CounterfactualConfig counterfactualConfig,
+                                      PerturbationContext pc, long timeoutSeconds, int maxAttemptCount) {
         this.kSeeds = kSeeds;
         this.model = model;
         this.goalThreshold = goalThreshold;
@@ -83,8 +83,8 @@ public class CounterfactualGenerator {
     }
 
     // search utils ====================================================================================================
-    private static List<PredictionInput> findNClosestSeeds(PredictionProvider model, List<PredictionInput> seeds,
-            PredictionOutput goal, int n)
+    private static List<PredictionInput> findNClosestSeeds(AsyncPredictionProvider model, List<PredictionInput> seeds,
+                                                           PredictionOutput goal, int n)
             throws ExecutionException, InterruptedException {
         List<PredictionOutput> seedOutputs = model.predictAsync(seeds).get();
         RealVector goalVector = MatrixUtilsExtensions.vectorFromPredictionOutput(goal);
@@ -231,7 +231,7 @@ public class CounterfactualGenerator {
 
     public static class Builder {
         private Integer kSeeds = null;
-        private PredictionProvider model;
+        private AsyncPredictionProvider model;
         private CounterfactualConfig counterfactualConfig;
         private PerturbationContext pc = new PerturbationContext(new Random(), Integer.MAX_VALUE);
         private long timeoutSeconds = 30;
@@ -242,7 +242,7 @@ public class CounterfactualGenerator {
         private Builder() {
         }
 
-        public Builder withModel(PredictionProvider model) {
+        public Builder withModel(AsyncPredictionProvider model) {
             this.model = model;
             return this;
         }

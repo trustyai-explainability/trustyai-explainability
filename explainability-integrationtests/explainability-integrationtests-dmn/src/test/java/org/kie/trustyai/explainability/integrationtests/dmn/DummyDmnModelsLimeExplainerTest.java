@@ -47,7 +47,7 @@ class DummyDmnModelsLimeExplainerTest {
         final String name = "functionalTest1";
         DecisionModel decisionModel = new DmnDecisionModel(dmnRuntime, namespace, name);
 
-        PredictionProvider model = new DecisionModelWrapper(decisionModel);
+        AsyncPredictionProvider model = new DecisionModelWrapper(decisionModel);
         Map<String, Object> context = new HashMap<>();
         context.put("booleanInput", true);
         context.put("notUsedInput", 1);
@@ -99,7 +99,7 @@ class DummyDmnModelsLimeExplainerTest {
         final String name = "new-file";
         DecisionModel decisionModel = new DmnDecisionModel(dmnRuntime, namespace, name);
 
-        PredictionProvider model = new DecisionModelWrapper(decisionModel);
+        AsyncPredictionProvider model = new DecisionModelWrapper(decisionModel);
         Map<String, Object> context = new HashMap<>();
         context.put("numberInput", 1);
         context.put("notUsedInput", 1);
@@ -152,7 +152,7 @@ class DummyDmnModelsLimeExplainerTest {
         final String name = "new-file";
         DecisionModel decisionModel = new DmnDecisionModel(dmnRuntime, namespace, name);
 
-        PredictionProvider model = new DecisionModelWrapper(decisionModel);
+        AsyncPredictionProvider model = new DecisionModelWrapper(decisionModel);
 
         Map<String, Object> context = new HashMap<>();
         context.put("stringInput", "test");

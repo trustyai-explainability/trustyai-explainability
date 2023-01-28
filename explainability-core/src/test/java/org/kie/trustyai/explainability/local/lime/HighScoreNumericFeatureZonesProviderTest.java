@@ -31,7 +31,7 @@ class HighScoreNumericFeatureZonesProviderTest {
     @Test
     void testEmptyData() {
         List<Feature> features = new ArrayList<>();
-        PredictionProvider predictionProvider = TestModels.getSumThresholdModel(0.1, 0.1);
+        AsyncPredictionProvider predictionProvider = TestModels.getSumThresholdModel(0.1, 0.1);
         List<FeatureDistribution> featureDistributions = new ArrayList<>();
         DataDistribution dataDistribution = new IndependentFeaturesDataDistribution(featureDistributions);
         Map<String, HighScoreNumericFeatureZones> highScoreFeatureZones =
@@ -46,7 +46,7 @@ class HighScoreNumericFeatureZonesProviderTest {
         random.setSeed(0);
         PerturbationContext perturbationContext = new PerturbationContext(random, 1);
         List<Feature> features = new ArrayList<>();
-        PredictionProvider predictionProvider = TestModels.getSumThresholdModel(0.1, 0.1);
+        AsyncPredictionProvider predictionProvider = TestModels.getSumThresholdModel(0.1, 0.1);
         List<FeatureDistribution> featureDistributions = new ArrayList<>();
         int nf = 4;
         for (int i = 0; i < nf; i++) {

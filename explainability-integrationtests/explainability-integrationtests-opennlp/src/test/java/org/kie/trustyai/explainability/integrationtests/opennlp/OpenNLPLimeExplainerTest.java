@@ -45,7 +45,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
@@ -75,7 +75,7 @@ class OpenNLPLimeExplainerTest {
                 .withSamples(10)
                 .withPerturbationContext(new PerturbationContext(seed, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         Function<String, List<String>> tokenizer = getTokenizer();
         PredictionInput testInput = getTestInput(tokenizer);
@@ -116,7 +116,7 @@ class OpenNLPLimeExplainerTest {
         return s -> Arrays.asList(s.split("\\W"));
     }
 
-    private PredictionProvider getModel() throws IOException {
+    private AsyncPredictionProvider getModel() throws IOException {
         InputStream is = getClass().getResourceAsStream("/opennlp/langdetect-183.bin");
         LanguageDetectorModel languageDetectorModel = new LanguageDetectorModel(is);
         LanguageDetector languageDetector = new LanguageDetectorME(languageDetectorModel);
@@ -159,7 +159,7 @@ class OpenNLPLimeExplainerTest {
 
     @Test
     void testExplanationStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException, IOException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = getSamples(getTokenizer());
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
@@ -186,7 +186,7 @@ class OpenNLPLimeExplainerTest {
 
     @Test
     void testExplanationImpactScoreWithOptimization() throws ExecutionException, InterruptedException, IOException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
         List<PredictionInput> samples = getSamples(getTokenizer());
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
         List<Prediction> predictions = DataUtils.getPredictions(samples, predictionOutputs);
@@ -203,7 +203,7 @@ class OpenNLPLimeExplainerTest {
 
     @Test
     void testExplanationWeightedStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException, IOException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = getSamples(getTokenizer());
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();

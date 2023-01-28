@@ -37,7 +37,7 @@ import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.Type;
@@ -90,7 +90,7 @@ public class ExplainabilityMetrics {
      * @param topFeatures the list of important features that should be dropped
      * @return the saliency impact
      */
-    public static double impactScore(PredictionProvider model, Prediction prediction, List<FeatureImportance> topFeatures) throws InterruptedException, ExecutionException, TimeoutException {
+    public static double impactScore(AsyncPredictionProvider model, Prediction prediction, List<FeatureImportance> topFeatures) throws InterruptedException, ExecutionException, TimeoutException {
         List<Feature> copy = List.copyOf(prediction.getInput().getFeatures());
         for (FeatureImportance featureImportance : topFeatures) {
             copy = DataUtils.dropFeature(copy, featureImportance.getFeature());
@@ -163,9 +163,9 @@ public class ExplainabilityMetrics {
      * @param runs no. of times the saliency for each prediction needs to be generated
      * @return a report about stability of all the decisions/predictions (and for each {@code k < topK})
      */
-    public static LocalSaliencyStability getLocalSaliencyStability(PredictionProvider model, Prediction prediction,
-            LocalExplainer<SaliencyResults> saliencyLocalExplainer,
-            int topK, int runs)
+    public static LocalSaliencyStability getLocalSaliencyStability(AsyncPredictionProvider model, Prediction prediction,
+                                                                   LocalExplainer<SaliencyResults> saliencyLocalExplainer,
+                                                                   int topK, int runs)
             throws InterruptedException, ExecutionException, TimeoutException {
         Map<String, List<Saliency>> saliencies = getMultipleSaliencies(model, prediction, saliencyLocalExplainer, runs);
 
@@ -206,9 +206,9 @@ public class ExplainabilityMetrics {
      * @param runs the no. of explanations to be generated
      * @return the generated saliencies, aggregated by decision name, across the different runs
      */
-    private static Map<String, List<Saliency>> getMultipleSaliencies(PredictionProvider model, Prediction prediction,
-            LocalExplainer<SaliencyResults> saliencyLocalExplainer,
-            int runs)
+    private static Map<String, List<Saliency>> getMultipleSaliencies(AsyncPredictionProvider model, Prediction prediction,
+                                                                     LocalExplainer<SaliencyResults> saliencyLocalExplainer,
+                                                                     int runs)
             throws InterruptedException, ExecutionException, TimeoutException {
         Map<String, List<Saliency>> saliencies = new HashMap<>();
         int skipped = 0;
@@ -269,7 +269,7 @@ public class ExplainabilityMetrics {
      * @param chunkSize the size of the chunk of predictions to use for evaluation
      * @return the saliency recall
      */
-    public static double getLocalSaliencyRecall(String outputName, PredictionProvider predictionProvider,
+    public static double getLocalSaliencyRecall(String outputName, AsyncPredictionProvider predictionProvider,
             LocalExplainer<SaliencyResults> localExplainer,
             DataDistribution dataDistribution, int k, int chunkSize)
             throws InterruptedException, ExecutionException, TimeoutException {
@@ -298,7 +298,7 @@ public class ExplainabilityMetrics {
      * @param chunkSize the size of the chunk of predictions to use for evaluation
      * @return the saliency recall
      */
-    public static double getLocalSaliencyRecall(String outputName, PredictionProvider predictionProvider,
+    public static double getLocalSaliencyRecall(String outputName, AsyncPredictionProvider predictionProvider,
             LocalExplainer<SaliencyResults> localExplainer,
             List<Prediction> predictions, int k, int chunkSize)
             throws InterruptedException, ExecutionException, TimeoutException {
@@ -307,8 +307,8 @@ public class ExplainabilityMetrics {
                 sortPredictionsByScore(outputName, predictions));
     }
 
-    private static double calculateLocalSaliencyRecall(String outputName, PredictionProvider predictionProvider, LocalExplainer<SaliencyResults> localExplainer, int k, int chunkSize,
-            List<Prediction> sorted) throws InterruptedException, ExecutionException, TimeoutException {
+    private static double calculateLocalSaliencyRecall(String outputName, AsyncPredictionProvider predictionProvider, LocalExplainer<SaliencyResults> localExplainer, int k, int chunkSize,
+                                                       List<Prediction> sorted) throws InterruptedException, ExecutionException, TimeoutException {
         // get the top and bottom 'chunkSize' predictions
         List<Prediction> topChunk = new ArrayList<>(sorted.subList(0, chunkSize));
         List<Prediction> bottomChunk = new ArrayList<>(sorted.subList(sorted.size() - chunkSize, sorted.size()));
@@ -385,7 +385,7 @@ public class ExplainabilityMetrics {
      * @param chunkSize the size of the chunk of predictions to use for evaluation
      * @return the saliency precision
      */
-    public static double getLocalSaliencyPrecision(String outputName, PredictionProvider predictionProvider,
+    public static double getLocalSaliencyPrecision(String outputName, AsyncPredictionProvider predictionProvider,
             LocalExplainer<SaliencyResults> localExplainer,
             DataDistribution dataDistribution, int k, int chunkSize)
             throws InterruptedException, ExecutionException, TimeoutException {
@@ -394,7 +394,7 @@ public class ExplainabilityMetrics {
         return calculateLocalSaliencyPrecision(outputName, predictionProvider, localExplainer, k, chunkSize, sorted);
     }
 
-    private static double calculateLocalSaliencyPrecision(String outputName, PredictionProvider predictionProvider,
+    private static double calculateLocalSaliencyPrecision(String outputName, AsyncPredictionProvider predictionProvider,
             LocalExplainer<SaliencyResults> localExplainer, int k, int chunkSize,
             List<Prediction> sorted) throws InterruptedException, ExecutionException, TimeoutException {
         // get the top and bottom 'chunkSize' predictions
@@ -464,7 +464,7 @@ public class ExplainabilityMetrics {
      * @param chunkSize the size of the chunk of predictions to use for evaluation
      * @return the saliency precision
      */
-    public static double getLocalSaliencyPrecision(String outputName, PredictionProvider predictionProvider,
+    public static double getLocalSaliencyPrecision(String outputName, AsyncPredictionProvider predictionProvider,
             LocalExplainer<SaliencyResults> localExplainer,
             List<Prediction> predictions, int k, int chunkSize)
             throws ExecutionException, InterruptedException, TimeoutException {
@@ -476,8 +476,8 @@ public class ExplainabilityMetrics {
      * Get local saliency F1 score.
      * <p>
      * see <a href="https://en.wikipedia.org/wiki/F-score"/>
-     * See {@link #getLocalSaliencyPrecision(String, PredictionProvider, LocalExplainer, DataDistribution, int, int)}
-     * See {@link #getLocalSaliencyRecall(String, PredictionProvider, LocalExplainer, DataDistribution, int, int)}
+     * See {@link #getLocalSaliencyPrecision(String, AsyncPredictionProvider, LocalExplainer, DataDistribution, int, int)}
+     * See {@link #getLocalSaliencyRecall(String, AsyncPredictionProvider, LocalExplainer, DataDistribution, int, int)}
      *
      * @param outputName decision to evaluate recall for
      * @param predictionProvider the prediction provider to test
@@ -487,7 +487,7 @@ public class ExplainabilityMetrics {
      * @param chunkSize the size of the chunk of predictions to use for evaluation
      * @return the saliency F1
      */
-    public static double getLocalSaliencyF1(String outputName, PredictionProvider predictionProvider,
+    public static double getLocalSaliencyF1(String outputName, AsyncPredictionProvider predictionProvider,
             LocalExplainer<SaliencyResults> localExplainer,
             DataDistribution dataDistribution, int k, int chunkSize)
             throws InterruptedException, ExecutionException, TimeoutException {
@@ -504,8 +504,8 @@ public class ExplainabilityMetrics {
      * Get local saliency F1 score.
      * <p>
      * see <a href="https://en.wikipedia.org/wiki/F-score"/>
-     * See {@link #getLocalSaliencyPrecision(String, PredictionProvider, LocalExplainer, DataDistribution, int, int)}
-     * See {@link #getLocalSaliencyRecall(String, PredictionProvider, LocalExplainer, DataDistribution, int, int)}
+     * See {@link #getLocalSaliencyPrecision(String, AsyncPredictionProvider, LocalExplainer, DataDistribution, int, int)}
+     * See {@link #getLocalSaliencyRecall(String, AsyncPredictionProvider, LocalExplainer, DataDistribution, int, int)}
      *
      * @param outputName decision to evaluate recall for
      * @param predictionProvider the prediction provider to test
@@ -515,7 +515,7 @@ public class ExplainabilityMetrics {
      * @param chunkSize the size of the chunk of predictions to use for evaluation
      * @return the saliency F1
      */
-    public static double getLocalSaliencyF1(String outputName, PredictionProvider predictionProvider,
+    public static double getLocalSaliencyF1(String outputName, AsyncPredictionProvider predictionProvider,
             LocalExplainer<SaliencyResults> localExplainer,
             List<Prediction> predictions, int k, int chunkSize)
             throws InterruptedException, ExecutionException, TimeoutException {

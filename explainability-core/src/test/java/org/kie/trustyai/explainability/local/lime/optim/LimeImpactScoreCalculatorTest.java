@@ -38,7 +38,7 @@ class LimeImpactScoreCalculatorTest {
         LimeConfig config = new LimeConfig();
         List<Prediction> predictions = Collections.emptyList();
         List<LimeConfigEntity> entities = Collections.emptyList();
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         LimeConfigSolution solution = new LimeConfigSolution(config, predictions, entities, model);
         SimpleBigDecimalScore score = scoreCalculator.calculateScore(solution);
         assertThat(score).isNotNull();
@@ -47,7 +47,7 @@ class LimeImpactScoreCalculatorTest {
 
     @Test
     void testNonZeroScore() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         LimeImpactScoreCalculator scoreCalculator = new LimeImpactScoreCalculator();
         LimeConfig config = new LimeConfig().withProximityThreshold(.7);
         List<Feature> features = List.of(FeatureFactory.newFulltextFeature("text", "money so they say is the root of all evil today"));

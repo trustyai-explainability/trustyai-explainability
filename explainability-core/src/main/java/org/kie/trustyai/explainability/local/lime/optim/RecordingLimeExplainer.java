@@ -24,13 +24,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SaliencyResults;
+import org.kie.trustyai.explainability.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,14 +64,17 @@ public class RecordingLimeExplainer extends LimeExplainer {
         if (!recordedPredictions.offer(prediction)) {
             LOGGER.debug("Prediction {} not recorded", prediction);
         }
-        strategy.maybeOptimize(getRecordedPredictions(), model, this, executionConfig);
+
+        final AsyncPredictionProvider asyncModel = AsyncPredictionProviderWrapper.from(model);
+
+        strategy.maybeOptimize(getRecordedPredictions(), asyncModel, this, executionConfig);
 
         return super.explainAsync(prediction, model);
     }
 
     @Override
-    protected CompletableFuture<SaliencyResults> explainWithExecutionConfig(PredictionProvider model, PredictionInput originalInput, List<Feature> linearizedTargetInputFeatures,
-            List<Output> actualOutputs, LimeConfig config) {
+    protected CompletableFuture<SaliencyResults> explainWithExecutionConfig(AsyncPredictionProvider model, PredictionInput originalInput, List<Feature> linearizedTargetInputFeatures,
+                                                                            List<Output> actualOutputs, LimeConfig config) {
         LimeConfig optimizedConfig = strategy.bestConfigFor(this);
         if (optimizedConfig != null) {
             executionConfig = optimizedConfig;

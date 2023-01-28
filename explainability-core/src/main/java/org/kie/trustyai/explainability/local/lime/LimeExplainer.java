@@ -30,21 +30,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.local.LocalExplanationException;
-import org.kie.trustyai.explainability.model.DataDistribution;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureDistribution;
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.PerturbationContext;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SaliencyResults;
-import org.kie.trustyai.explainability.model.SimplePrediction;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.LinearModel;
 import org.slf4j.Logger;
@@ -97,11 +83,11 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
         List<Output> actualOutputs = prediction.getOutput().getOutputs();
 
         LimeConfig executionConfig = limeConfig.copy();
-        return explainWithExecutionConfig(model, originalInput, linearizedTargetInputFeatures, actualOutputs, executionConfig);
+        return explainWithExecutionConfig(AsyncPredictionProviderWrapper.from(model), originalInput, linearizedTargetInputFeatures, actualOutputs, executionConfig);
     }
 
-    protected CompletableFuture<SaliencyResults> explainWithExecutionConfig(PredictionProvider model, PredictionInput originalInput, List<Feature> linearizedTargetInputFeatures,
-            List<Output> actualOutputs, LimeConfig executionConfig) {
+    protected CompletableFuture<SaliencyResults> explainWithExecutionConfig(AsyncPredictionProvider model, PredictionInput originalInput, List<Feature> linearizedTargetInputFeatures,
+                                                                            List<Output> actualOutputs, LimeConfig executionConfig) {
         int noOfSamples = executionConfig.getNoOfSamples();
 
         if (noOfSamples <= 0) {
@@ -114,7 +100,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
     }
 
     protected CompletableFuture<SaliencyResults> explainRetryCycle(
-            PredictionProvider model,
+            AsyncPredictionProvider model,
             PredictionInput originalInput,
             List<Feature> linearizedTargetInputFeatures,
             List<Output> actualOutputs,
@@ -140,9 +126,9 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
                 });
     }
 
-    private CompletableFuture<SaliencyResults> adjustAndRetry(PredictionProvider model, PredictionInput originalInput,
-            List<Feature> linearizedTargetInputFeatures, List<Output> actualOutputs,
-            LimeConfig executionConfig) {
+    private CompletableFuture<SaliencyResults> adjustAndRetry(AsyncPredictionProvider model, PredictionInput originalInput,
+                                                              List<Feature> linearizedTargetInputFeatures, List<Output> actualOutputs,
+                                                              LimeConfig executionConfig) {
         if (executionConfig.isAdaptDatasetVariance()) {
             PerturbationContext newPerturbationContext = getNewPerturbationContext(linearizedTargetInputFeatures, executionConfig.getNoOfRetries(), executionConfig.getPerturbationContext());
             int newNoOfSamples = executionConfig.getNoOfSamples() + executionConfig.getNoOfSamples() / executionConfig.getNoOfRetries();
@@ -440,7 +426,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
     }
 
     private Pair<List<PredictionInput>, List<boolean[]>> getPerturbedInputs(List<Feature> features, LimeConfig executionConfig,
-            PredictionProvider predictionProvider) {
+            AsyncPredictionProvider predictionProvider) {
         List<PredictionInput> perturbedInputs = new ArrayList<>();
         List<boolean[]> preservationMask = new ArrayList<>();
         int size = executionConfig.getNoOfSamples();

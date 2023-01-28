@@ -42,7 +42,7 @@ import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -59,7 +59,7 @@ class ComplexEligibilityDmnCounterfactualExplainerTest {
     @Disabled("https://github.com/trustyai-explainability/trustyai-explainability/pull/19")
     @Test
     void testDMNValidCounterfactualExplanation() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         final List<Output> goal = generateGoal(true, true, 0.6);
 
@@ -113,7 +113,7 @@ class ComplexEligibilityDmnCounterfactualExplainerTest {
     @Disabled("https://github.com/trustyai-explainability/trustyai-explainability/pull/19")
     @Test
     void testDMNScoringFunction() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         final List<Output> goal = generateGoal(true, true, 1.0);
 
@@ -172,7 +172,7 @@ class ComplexEligibilityDmnCounterfactualExplainerTest {
 
     @Test
     void testDMNInvalidCounterfactualExplanation() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         final List<Output> goal = generateGoal(true, true, 0.6);
 
@@ -208,7 +208,7 @@ class ComplexEligibilityDmnCounterfactualExplainerTest {
         assertFalse(counterfactualResult.isValid());
     }
 
-    private PredictionProvider getModel() {
+    private AsyncPredictionProvider getModel() {
         DMNRuntime dmnRuntime = DMNKogito.createGenericDMNRuntime(new InputStreamReader(getClass().getResourceAsStream(
                 "/dmn/ComplexEligibility.dmn")));
         assertEquals(1, dmnRuntime.getModels().size());

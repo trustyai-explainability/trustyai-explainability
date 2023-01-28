@@ -44,7 +44,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.utils.DataUtils;
@@ -60,7 +60,7 @@ class PrequalificationDmnLimeExplainerTest {
 
     @Test
     void testPrequalificationDMNExplanation() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         PredictionInput predictionInput = getTestInput();
 
@@ -104,7 +104,7 @@ class PrequalificationDmnLimeExplainerTest {
 
     @Test
     void testExplanationStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = DmnTestUtils.randomPrequalificationInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 10)).get();
@@ -130,7 +130,7 @@ class PrequalificationDmnLimeExplainerTest {
 
     @Test
     void testExplanationImpactScoreWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = DmnTestUtils.randomPrequalificationInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 10)).get();
@@ -151,7 +151,7 @@ class PrequalificationDmnLimeExplainerTest {
 
     @Test
     void testExplanationWeightedStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = DmnTestUtils.randomPrequalificationInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 10)).get();
@@ -190,7 +190,7 @@ class PrequalificationDmnLimeExplainerTest {
         return new PredictionInput(features);
     }
 
-    private PredictionProvider getModel() {
+    private AsyncPredictionProvider getModel() {
         DMNRuntime dmnRuntime = DMNKogito.createGenericDMNRuntime(new InputStreamReader(getClass().getResourceAsStream("/dmn/Prequalification-1.dmn")));
         assertEquals(1, dmnRuntime.getModels().size());
 

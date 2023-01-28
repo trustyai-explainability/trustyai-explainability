@@ -44,7 +44,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.utils.DataUtils;
@@ -60,7 +60,7 @@ class FraudScoringDmnLimeExplainerTest {
 
     @Test
     void testFraudScoringDMNExplanation() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         PredictionInput predictionInput = getTestInput();
         List<PredictionOutput> predictionOutputs = model.predictAsync(List.of(predictionInput))
@@ -99,7 +99,7 @@ class FraudScoringDmnLimeExplainerTest {
         AssertionsForClassTypes.assertThat(f1).isBetween(0.5d, 1d);
     }
 
-    private PredictionProvider getModel() {
+    private AsyncPredictionProvider getModel() {
         DMNRuntime dmnRuntime = DMNKogito.createGenericDMNRuntime(new InputStreamReader(getClass().getResourceAsStream("/dmn/fraud.dmn")));
         assertEquals(1, dmnRuntime.getModels().size());
         final String FRAUD_NS = "http://www.redhat.com/dmn/definitions/_81556584-7d78-4f8c-9d5f-b3cddb9b5c73";
@@ -132,7 +132,7 @@ class FraudScoringDmnLimeExplainerTest {
 
     @Test
     void testExplanationStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = DmnTestUtils.randomFraudScoringInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
@@ -160,7 +160,7 @@ class FraudScoringDmnLimeExplainerTest {
 
     @Test
     void testExplanationWithDataDistribution() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = DmnTestUtils.randomFraudScoringInputs();
         List<PredictionInput> inputs = samples.subList(0, 10);
@@ -184,7 +184,7 @@ class FraudScoringDmnLimeExplainerTest {
 
     @Test
     void testExplanationImpactScoreWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = DmnTestUtils.randomFraudScoringInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 10)).get();
@@ -206,7 +206,7 @@ class FraudScoringDmnLimeExplainerTest {
 
     @Test
     void testExplanationWeightedStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = DmnTestUtils.randomFraudScoringInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();

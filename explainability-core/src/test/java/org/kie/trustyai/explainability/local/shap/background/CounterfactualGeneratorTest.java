@@ -28,7 +28,7 @@ import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -59,7 +59,7 @@ class CounterfactualGeneratorTest {
         }
 
         // given some arbitrary linear model
-        PredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
+        AsyncPredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
 
         // generate a background such that f(bg) == 0 for all bg in the backgrounds
         PredictionOutput goal = new PredictionOutput(
@@ -99,7 +99,7 @@ class CounterfactualGeneratorTest {
         seeds.add(new PredictionInput(features));
 
         // given some arbitrary linear model
-        PredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
+        AsyncPredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
 
         // generate a background such that f(bg) == 0 for all bg in the backgrounds
         List<PredictionOutput> goals = new ArrayList<>();
@@ -139,7 +139,7 @@ class CounterfactualGeneratorTest {
         seeds.add(new PredictionInput(features));
 
         // given some arbitrary linear model
-        PredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
+        AsyncPredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
 
         // generate a background such that f(bg) == 0 for all bg in the backgrounds
         List<PredictionOutput> goals = new ArrayList<>();

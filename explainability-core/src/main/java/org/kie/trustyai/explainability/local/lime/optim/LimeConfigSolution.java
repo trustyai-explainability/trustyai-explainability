@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningScore;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
@@ -36,7 +36,7 @@ public class LimeConfigSolution {
     @PlanningEntityCollectionProperty
     private List<LimeConfigEntity> entities = new ArrayList<>();
 
-    private PredictionProvider model;
+    private AsyncPredictionProvider model;
 
     @PlanningScore
     private SimpleBigDecimalScore score;
@@ -45,7 +45,7 @@ public class LimeConfigSolution {
     }
 
     public LimeConfigSolution(LimeConfig config, List<Prediction> predictions,
-            List<LimeConfigEntity> entities, PredictionProvider model) {
+            List<LimeConfigEntity> entities, AsyncPredictionProvider model) {
         this.config = config;
         this.predictions = predictions;
         this.entities = entities;
@@ -60,7 +60,7 @@ public class LimeConfigSolution {
         this.config = config;
     }
 
-    public PredictionProvider getModel() {
+    public AsyncPredictionProvider getModel() {
         return model;
     }
 

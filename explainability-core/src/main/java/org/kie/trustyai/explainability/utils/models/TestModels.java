@@ -23,7 +23,7 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 public class TestModels {
 
-    public static PredictionProvider getFeaturePassModel(int featureIndex) {
+    public static AsyncPredictionProvider getFeaturePassModel(int featureIndex) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
@@ -38,7 +38,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getSumSkipModel(int skipFeatureIndex) {
+    public static AsyncPredictionProvider getSumSkipModel(int skipFeatureIndex) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
@@ -57,7 +57,26 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getNoisySumModel(SplittableRandom rn, double noiseMagnitude, long noiseSamples) {
+    public static SyncPredictionProvider getSumSkipModelSync(int skipFeatureIndex) {
+        return inputs -> {
+            List<PredictionOutput> predictionOutputs = new LinkedList<>();
+            for (PredictionInput predictionInput : inputs) {
+                List<Feature> features = predictionInput.getFeatures();
+                double result = 0;
+                for (int i = 0; i < features.size(); i++) {
+                    if (skipFeatureIndex != i) {
+                        result += features.get(i).getValue().asNumber();
+                    }
+                }
+                PredictionOutput predictionOutput = new PredictionOutput(
+                        List.of(new Output("sum-but" + skipFeatureIndex, Type.NUMBER, new Value(result), 1d)));
+                predictionOutputs.add(predictionOutput);
+            }
+            return predictionOutputs;
+        };
+    }
+
+    public static AsyncPredictionProvider getNoisySumModel(SplittableRandom rn, double noiseMagnitude, long noiseSamples) {
         return inputs -> supplyAsync(() -> {
             Iterator<Double> noiseStream = rn.doubles(noiseSamples).iterator();
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
@@ -75,7 +94,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getLinearModel(double[] weights) {
+    public static AsyncPredictionProvider getLinearModel(double[] weights) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
@@ -93,7 +112,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getLinearThresholdModel(double[] weights, double threshold) {
+    public static AsyncPredictionProvider getLinearThresholdModel(double[] weights, double threshold) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
@@ -110,7 +129,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getSumSkipTwoOutputModel(int skipFeatureIndex) {
+    public static AsyncPredictionProvider getSumSkipTwoOutputModel(int skipFeatureIndex) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
@@ -131,7 +150,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getTwoOutputSemiCategoricalModel(int categoricalIndex) {
+    public static AsyncPredictionProvider getTwoOutputSemiCategoricalModel(int categoricalIndex) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
@@ -158,9 +177,9 @@ public class TestModels {
      * Test model which returns the inputs as outputs, except for a single specified feature
      *
      * @param featureIndex Index of the input feature to omit from output
-     * @return A {@link PredictionProvider} model
+     * @return A {@link AsyncPredictionProvider} model
      */
-    public static PredictionProvider getFeatureSkipModel(int featureIndex) {
+    public static AsyncPredictionProvider getFeatureSkipModel(int featureIndex) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
@@ -179,7 +198,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getEvenSumModel(int skipFeatureIndex) {
+    public static AsyncPredictionProvider getEvenSumModel(int skipFeatureIndex) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
@@ -199,7 +218,27 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getSumThresholdModel(double center, double epsilon) {
+    public static SyncPredictionProvider getEvenSumModelSync(int skipFeatureIndex) {
+        return inputs -> {
+            List<PredictionOutput> predictionOutputs = new LinkedList<>();
+            for (PredictionInput predictionInput : inputs) {
+                List<Feature> features = predictionInput.getFeatures();
+                double result = 0;
+                for (int i = 0; i < features.size(); i++) {
+                    if (skipFeatureIndex != i) {
+                        result += features.get(i).getValue().asNumber();
+                    }
+                }
+                PredictionOutput predictionOutput = new PredictionOutput(
+                        List.of(new Output("sum-even-but" + skipFeatureIndex, Type.BOOLEAN, new Value(((int) result) % 2 == 0),
+                                1d)));
+                predictionOutputs.add(predictionOutput);
+            }
+            return predictionOutputs;
+        };
+    }
+
+    public static AsyncPredictionProvider getSumThresholdModel(double center, double epsilon) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
@@ -217,7 +256,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getSumThresholdDifferentiableModel(double center, double epsilon) {
+    public static AsyncPredictionProvider getSumThresholdDifferentiableModel(double center, double epsilon) {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             for (PredictionInput predictionInput : inputs) {
@@ -239,7 +278,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getDummyTextClassifier() {
+    public static AsyncPredictionProvider getDummyTextClassifier() {
         List<String> blackList = Arrays.asList("money", "$", "£", "bitcoin");
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> outputs = new LinkedList<>();
@@ -264,7 +303,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getCategoricalRegressor() {
+    public static AsyncPredictionProvider getCategoricalRegressor() {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> outputs = new LinkedList<>();
             for (PredictionInput input : inputs) {
@@ -303,7 +342,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getSymbolicArithmeticModel() {
+    public static AsyncPredictionProvider getSymbolicArithmeticModel() {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> predictionOutputs = new LinkedList<>();
             final String OPERAND_FEATURE_NAME = "operand";
@@ -345,7 +384,7 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getFixedOutputClassifier() {
+    public static AsyncPredictionProvider getFixedOutputClassifier() {
         return inputs -> supplyAsync(() -> {
             List<PredictionOutput> outputs = new LinkedList<>();
             for (PredictionInput ignored : inputs) {
@@ -356,9 +395,9 @@ public class TestModels {
         });
     }
 
-    public static PredictionProvider getSimpleBiasedClassifier(int biasedFeature,
-            Value biasedValue,
-            double threshold) {
+    public static AsyncPredictionProvider getSimpleBiasedClassifier(int biasedFeature,
+                                                                    Value biasedValue,
+                                                                    double threshold) {
         final Random random = new Random();
         return inputs -> supplyAsync(() -> {
             final List<PredictionOutput> outputs = new ArrayList<>();

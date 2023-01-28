@@ -44,7 +44,7 @@ class FairnessMetricsTest {
                     .collect(Collectors.toList()).subList(1, 3);
         };
         List<PredictionInput> testInputs = getTestInputs();
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         double individualConsistency = FairnessMetrics.individualConsistency(proximityFunction, testInputs, model);
         assertThat(individualConsistency).isBetween(0d, 1d);
     }
@@ -52,7 +52,7 @@ class FairnessMetricsTest {
     @Test
     void testGroupSPDTextClassifier() throws ExecutionException, InterruptedException {
         List<PredictionInput> testInputs = getTestInputs();
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
         double spd = FairnessMetrics.groupStatisticalParityDifference(selector, testInputs, model, output);
@@ -62,7 +62,7 @@ class FairnessMetricsTest {
     @Test
     void testGroupSPDTextClassifierDataframe() throws ExecutionException, InterruptedException {
         final List<PredictionInput> testInputs = getTestInputs();
-        final PredictionProvider model = TestModels.getDummyTextClassifier();
+        final AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         final List<PredictionOutput> testOutputs = model.predictAsync(testInputs).get();
 
         final Dataframe dataframe = Dataframe.createFrom(testInputs, testOutputs);
@@ -79,7 +79,7 @@ class FairnessMetricsTest {
     @Test
     void testGroupDIRTextClassifier() throws ExecutionException, InterruptedException {
         List<PredictionInput> testInputs = getTestInputs();
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
         double dir = FairnessMetrics.groupDisparateImpactRatio(selector, testInputs, model, output);
@@ -89,7 +89,7 @@ class FairnessMetricsTest {
     @Test
     void testGroupDIRTextClassifierDataframe() throws ExecutionException, InterruptedException {
         final List<PredictionInput> testInputs = getTestInputs();
-        final PredictionProvider model = TestModels.getDummyTextClassifier();
+        final AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         final List<PredictionOutput> testOutputs = model.predictAsync(testInputs).get();
 
         final Dataframe dataframe = Dataframe.createFrom(testInputs, testOutputs);
@@ -107,7 +107,7 @@ class FairnessMetricsTest {
     void testGroupAODTextClassifier() throws ExecutionException, InterruptedException {
         List<Prediction> predictions = getTestData();
         Dataset dataset = new Dataset(predictions);
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> inputSelector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Predicate<PredictionOutput> outputSelector = predictionOutput -> predictionOutput.getByName("spam").get().getValue().asNumber() == 0;
         double aod = FairnessMetrics.groupAverageOddsDifference(inputSelector, outputSelector, dataset, model);
@@ -132,7 +132,7 @@ class FairnessMetricsTest {
         }
 
         Dataset dataset = new Dataset(predictions);
-        PredictionProvider model = TestModels.getSimpleBiasedClassifier(2, new Value("M"), 0.75);
+        AsyncPredictionProvider model = TestModels.getSimpleBiasedClassifier(2, new Value("M"), 0.75);
         Predicate<PredictionInput> inputSelector = predictionInput -> predictionInput.getFeatures().get(2).getValue().asString().equals("M");
         Predicate<PredictionOutput> outputSelector = predictionOutput -> (boolean) predictionOutput.getOutputs().get(0).getValue().getUnderlyingObject();
         double aod = FairnessMetrics.groupAverageOddsDifference(inputSelector, outputSelector, dataset, model);
@@ -160,7 +160,7 @@ class FairnessMetricsTest {
         }
 
         final Dataframe test = Dataframe.createFrom(inputs, outputs);
-        PredictionProvider model = TestModels.getSimpleBiasedClassifier(2, new Value("M"), 0.75);
+        AsyncPredictionProvider model = TestModels.getSimpleBiasedClassifier(2, new Value("M"), 0.75);
         final List<PredictionOutput> predictedOutputs = model.predictAsync(inputs).get();
         final Dataframe truth = Dataframe.createFrom(inputs, predictedOutputs);
         double aod = FairnessMetrics.groupAverageOddsDifference(test, truth, List.of(2), List.of(new Value("M")), List.of(new Value(true)));
@@ -188,7 +188,7 @@ class FairnessMetricsTest {
         }
 
         final Dataframe test = Dataframe.createFrom(inputs, outputs);
-        PredictionProvider model = TestModels.getSimpleBiasedClassifier(2, new Value("M"), 0.75);
+        AsyncPredictionProvider model = TestModels.getSimpleBiasedClassifier(2, new Value("M"), 0.75);
         final List<PredictionOutput> predictedOutputs = model.predictAsync(inputs).get();
         final Dataframe truth = Dataframe.createFrom(inputs, predictedOutputs);
         double aod = FairnessMetrics.groupAveragePredictiveValueDifference(test, truth, List.of(2), List.of(new Value("M")), List.of(new Value(true)));
@@ -200,7 +200,7 @@ class FairnessMetricsTest {
     void testGroupAPVDTextClassifier() throws ExecutionException, InterruptedException {
         List<Prediction> predictions = getTestData();
         Dataset dataset = new Dataset(predictions);
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> inputSelector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Predicate<PredictionOutput> outputSelector = predictionOutput -> predictionOutput.getByName("spam").get().getValue().asNumber() == 0;
         double apvd = FairnessMetrics.groupAveragePredictiveValueDifference(inputSelector, outputSelector, dataset, model);

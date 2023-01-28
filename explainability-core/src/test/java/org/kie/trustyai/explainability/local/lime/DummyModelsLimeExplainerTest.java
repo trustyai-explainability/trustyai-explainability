@@ -43,7 +43,7 @@ class DummyModelsLimeExplainerTest {
         features.add(TestUtils.getMockedNumericFeature(20));
         features.add(TestUtils.getMockedNumericFeature(0.1));
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getFeaturePassModel(idx);
+        AsyncPredictionProvider model = TestModels.getFeaturePassModel(idx);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
@@ -94,7 +94,7 @@ class DummyModelsLimeExplainerTest {
         features.add(TestUtils.getMockedNumericFeature(100));
         features.add(TestUtils.getMockedNumericFeature(20));
         features.add(TestUtils.getMockedNumericFeature(10));
-        PredictionProvider model = TestModels.getSumSkipModel(idx);
+        AsyncPredictionProvider model = TestModels.getSumSkipModel(idx);
         PredictionInput input = new PredictionInput(features);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
@@ -146,7 +146,7 @@ class DummyModelsLimeExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("f2", 1));
         features.add(FeatureFactory.newNumericalFeature("f3", 3));
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getLinearThresholdModel(new double[] { 100., 0., 0. }, 450);
+        AsyncPredictionProvider model = TestModels.getLinearThresholdModel(new double[] { 100., 0., 0. }, 450);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
@@ -199,7 +199,7 @@ class DummyModelsLimeExplainerTest {
         features.add(FeatureFactory.newFulltextFeature("f2", "please give me some money", tokenizer));
         features.add(FeatureFactory.newFulltextFeature("f3", "dear friend, please reply", tokenizer));
         PredictionInput input = new PredictionInput(features);
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(input, outputs.get(0));
@@ -251,7 +251,7 @@ class DummyModelsLimeExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("f1", 5));
         features.add(FeatureFactory.newNumericalFeature("f2", 4));
         features.add(FeatureFactory.newNumericalFeature("f3", 3));
-        PredictionProvider model = TestModels.getLinearThresholdModel(new double[] { 100., 10., 0. }, 400);
+        AsyncPredictionProvider model = TestModels.getLinearThresholdModel(new double[] { 100., 10., 0. }, 400);
         PredictionInput input = new PredictionInput(features);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
@@ -304,7 +304,7 @@ class DummyModelsLimeExplainerTest {
         features.add(FeatureFactory.newNumericalFeature("f1", 6));
         features.add(FeatureFactory.newNumericalFeature("f2", 3));
         features.add(FeatureFactory.newNumericalFeature("f3", 5));
-        PredictionProvider model = TestModels.getFixedOutputClassifier();
+        AsyncPredictionProvider model = TestModels.getFixedOutputClassifier();
         PredictionInput input = new PredictionInput(features);
         List<PredictionOutput> outputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());

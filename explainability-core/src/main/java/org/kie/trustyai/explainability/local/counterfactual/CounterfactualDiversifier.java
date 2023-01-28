@@ -34,7 +34,7 @@ import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
@@ -46,7 +46,7 @@ import org.kie.trustyai.explainability.model.Value;
  */
 public class CounterfactualDiversifier {
 
-    private final PredictionProvider model;
+    private final AsyncPredictionProvider model;
     private final List<Feature> original;
     private final CounterfactualResult result;
 
@@ -104,15 +104,15 @@ public class CounterfactualDiversifier {
     /**
      * Instantiate a diverse counterfactual generator.
      *
-     * @param model The {@link PredictionProvider} required for predicting new counterfactuals
+     * @param model The {@link AsyncPredictionProvider} required for predicting new counterfactuals
      * @param original The original reference list of {@link Feature}
      * @param result The original {@link CounterfactualResult}
      * @param nSamples The number of samples to create
      * @param goal The counterfactual's goal as a {@link List<Output>}
      */
-    public CounterfactualDiversifier(PredictionProvider model,
-            List<Feature> original, CounterfactualResult result, int nSamples, List<Output> goal,
-            BiFunction<List<Feature>, Prediction, Double> distanceCriteria) {
+    public CounterfactualDiversifier(AsyncPredictionProvider model,
+                                     List<Feature> original, CounterfactualResult result, int nSamples, List<Output> goal,
+                                     BiFunction<List<Feature>, Prediction, Double> distanceCriteria) {
         this.model = model;
         this.original = original;
         this.nFeatures = original.size();
@@ -196,23 +196,23 @@ public class CounterfactualDiversifier {
         return new Dataset(predictions);
     }
 
-    public static CounterfactualDiversifier.Builder builder(PredictionProvider model,
-            List<Feature> original, CounterfactualResult result, List<Output> goal) {
+    public static CounterfactualDiversifier.Builder builder(AsyncPredictionProvider model,
+                                                            List<Feature> original, CounterfactualResult result, List<Output> goal) {
         return new CounterfactualDiversifier.Builder(model, original, result, goal);
     }
 
     public static class Builder {
         public static final int DEFAULT_NSAMPLES = 100;
         private int nSamples = DEFAULT_NSAMPLES;
-        private final PredictionProvider model;
+        private final AsyncPredictionProvider model;
         private final List<Feature> original;
         private final CounterfactualResult result;
         private final List<Output> goal;
 
         private BiFunction<List<Feature>, Prediction, Double> distanceCriteria = DEFAULT_DISTANCE_CRITERIA;
 
-        private Builder(PredictionProvider model,
-                List<Feature> original, CounterfactualResult result, List<Output> goal) {
+        private Builder(AsyncPredictionProvider model,
+                        List<Feature> original, CounterfactualResult result, List<Output> goal) {
             this.model = model;
             this.original = original;
             this.result = result;

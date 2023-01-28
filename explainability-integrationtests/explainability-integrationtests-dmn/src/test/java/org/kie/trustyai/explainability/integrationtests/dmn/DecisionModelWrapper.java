@@ -31,16 +31,16 @@ import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
 /**
- * {@link PredictionProvider} implementation based on a Kogito {@link DecisionModel}.
+ * {@link AsyncPredictionProvider} implementation based on a Kogito {@link DecisionModel}.
  */
-class DecisionModelWrapper implements PredictionProvider {
+class DecisionModelWrapper implements AsyncPredictionProvider {
 
     private final DecisionModel decisionModel;
     private final List<String> skippedDecisions;

@@ -39,7 +39,7 @@ class LimeStabilityTest {
     @ValueSource(longs = { 0 })
     void testStabilityWithNumericData(long seed) throws Exception {
         Random random = new Random();
-        PredictionProvider sumSkipModel = TestModels.getSumSkipModel(0);
+        AsyncPredictionProvider sumSkipModel = TestModels.getSumSkipModel(0);
         List<Feature> featureList = new LinkedList<>();
         for (int i = 0; i < 5; i++) {
             featureList.add(TestUtils.getMockedNumericFeature(i));
@@ -53,7 +53,7 @@ class LimeStabilityTest {
     @ValueSource(longs = { 0 })
     void testStabilityWithTextData(long seed) throws Exception {
         Random random = new Random();
-        PredictionProvider sumSkipModel = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider sumSkipModel = TestModels.getDummyTextClassifier();
         List<Feature> featureList = new LinkedList<>();
         for (int i = 0; i < 4; i++) {
             featureList.add(TestUtils.getMockedTextFeature("foo " + i));
@@ -85,11 +85,11 @@ class LimeStabilityTest {
         for (int i = 0; i < 4; i++) {
             features.add(FeatureFactory.newNumericalFeature("f-" + i, 2));
         }
-        PredictionProvider model = TestModels.getEvenSumModel(0);
+        AsyncPredictionProvider model = TestModels.getEvenSumModel(0);
         assertStable(adaptiveVarianceLE, model, features);
     }
 
-    private void assertStable(LimeExplainer limeExplainer, PredictionProvider model, List<Feature> featureList)
+    private void assertStable(LimeExplainer limeExplainer, AsyncPredictionProvider model, List<Feature> featureList)
             throws Exception {
         PredictionInput input = new PredictionInput(featureList);
         List<PredictionOutput> predictionOutputs = model.predictAsync(List.of(input))
@@ -142,7 +142,7 @@ class LimeStabilityTest {
         List<LocalSaliencyStability> stabilities = new ArrayList<>();
         for (int j = 0; j < 2; j++) {
             Random random = new Random();
-            PredictionProvider model = TestModels.getSumSkipModel(0);
+            AsyncPredictionProvider model = TestModels.getSumSkipModel(0);
             List<Feature> featureList = new LinkedList<>();
             for (int i = 0; i < 5; i++) {
                 featureList.add(TestUtils.getMockedNumericFeature(i));

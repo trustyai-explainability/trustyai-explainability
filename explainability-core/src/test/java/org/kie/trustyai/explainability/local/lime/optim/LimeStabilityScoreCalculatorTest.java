@@ -22,7 +22,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 import org.optaplanner.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalScore;
 
@@ -36,7 +36,7 @@ class LimeStabilityScoreCalculatorTest {
         LimeConfig config = new LimeConfig();
         List<Prediction> predictions = Collections.emptyList();
         List<LimeConfigEntity> entities = Collections.emptyList();
-        PredictionProvider model = TestModels.getDummyTextClassifier();
+        AsyncPredictionProvider model = TestModels.getDummyTextClassifier();
         LimeConfigSolution solution = new LimeConfigSolution(config, predictions, entities, model);
         SimpleBigDecimalScore score = scoreCalculator.calculateScore(solution);
         assertThat(score).isNotNull();

@@ -20,7 +20,7 @@ import java.util.List;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 
 /**
  * Strategy used to decide when and how to perform LIME hyperparameter optimization.
@@ -38,7 +38,7 @@ public interface LimeConfigOptimizationStrategy {
      * @param limeExplainer the LIME explainer used to produce explanations
      * @param executionConfig the execution config used in LIME explainer
      */
-    void maybeOptimize(List<Prediction> recordedPredictions, PredictionProvider model,
+    void maybeOptimize(List<Prediction> recordedPredictions, AsyncPredictionProvider model,
             LimeExplainer limeExplainer, LimeConfig executionConfig);
 
     /**

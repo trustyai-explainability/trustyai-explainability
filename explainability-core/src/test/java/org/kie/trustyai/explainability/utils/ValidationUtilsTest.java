@@ -37,7 +37,7 @@ class ValidationUtilsTest {
             PerturbationContext perturbationContext = new PerturbationContext(4L, random, 1);
             LimeConfig config = new LimeConfig().withPerturbationContext(perturbationContext);
             LimeExplainer explainer = new LimeExplainer(config);
-            PredictionProvider model = TestModels.getSumThresholdModel(0.1, 0.1);
+            AsyncPredictionProvider model = TestModels.getSumThresholdModel(0.1, 0.1);
             List<Feature> features = new ArrayList<>();
             for (int i = 0; i < 4; i++) {
                 features.add(FeatureFactory.newNumericalFeature("f-" + i, Type.NUMBER.randomValue(perturbationContext).asNumber()));

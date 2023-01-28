@@ -44,7 +44,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.utils.DataUtils;
@@ -61,7 +61,7 @@ class TrafficViolationDmnLimeExplainerTest {
 
     @Test
     void testTrafficViolationDMNExplanation() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         PredictionInput predictionInput = getTestInput();
         List<PredictionOutput> predictionOutputs = model.predictAsync(List.of(predictionInput))
@@ -101,7 +101,7 @@ class TrafficViolationDmnLimeExplainerTest {
 
     @Test
     void testExplanationStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = DmnTestUtils.randomTrafficViolationInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
@@ -129,7 +129,7 @@ class TrafficViolationDmnLimeExplainerTest {
 
     @Test
     void testExplanationImpactScoreWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = DmnTestUtils.randomTrafficViolationInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 10)).get();
@@ -149,7 +149,7 @@ class TrafficViolationDmnLimeExplainerTest {
 
     @Test
     void testExplanationWeightedStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = DmnTestUtils.randomTrafficViolationInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
@@ -178,7 +178,7 @@ class TrafficViolationDmnLimeExplainerTest {
                 0.4, 0.6));
     }
 
-    private PredictionProvider getModel() {
+    private AsyncPredictionProvider getModel() {
         DMNRuntime dmnRuntime = DMNKogito.createGenericDMNRuntime(new InputStreamReader(getClass().getResourceAsStream("/dmn/TrafficViolation.dmn")));
         assertEquals(1, dmnRuntime.getModels().size());
 

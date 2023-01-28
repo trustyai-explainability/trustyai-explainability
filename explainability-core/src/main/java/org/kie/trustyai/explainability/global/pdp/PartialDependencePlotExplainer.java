@@ -27,25 +27,12 @@ import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.global.GlobalExplainer;
-import org.kie.trustyai.explainability.model.DataDistribution;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureDistribution;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.PartialDependenceGraph;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.PredictionProviderMetadata;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generates the partial dependence plot for the features of a {@link PredictionProvider}.
+ * Generates the partial dependence plot for the features of a {@link AsyncPredictionProvider}.
  * <p>
  * see also https://christophm.github.io/interpretable-ml-book/pdp.html
  */
@@ -74,6 +61,7 @@ public class PartialDependencePlotExplainer implements GlobalExplainer<List<Part
     @Override
     public List<PartialDependenceGraph> explainFromMetadata(PredictionProvider model, PredictionProviderMetadata metadata)
             throws InterruptedException, ExecutionException, TimeoutException {
+        final AsyncPredictionProvider asyncModel = AsyncPredictionProviderWrapper.from(model);
         return explainFromDataDistribution(model, metadata.getOutputShape().getOutputs().size(), metadata.getDataDistribution());
     }
 
@@ -86,8 +74,9 @@ public class PartialDependencePlotExplainer implements GlobalExplainer<List<Part
     }
 
     private List<PartialDependenceGraph> explainFromDataDistribution(PredictionProvider model, int outputSize,
-            DataDistribution dataDistribution)
+                                                                     DataDistribution dataDistribution)
             throws InterruptedException, ExecutionException, TimeoutException {
+        final AsyncPredictionProvider asyncModel = AsyncPredictionProviderWrapper.from(model);
         long start = System.currentTimeMillis();
         List<PartialDependenceGraph> pdps = new ArrayList<>();
         List<FeatureDistribution> featureDistributions = dataDistribution.asFeatureDistributions();
@@ -109,7 +98,7 @@ public class PartialDependencePlotExplainer implements GlobalExplainer<List<Part
 
             // create a PDP for each feature and each output
             for (int outputIndex = 0; outputIndex < outputSize; outputIndex++) {
-                PartialDependenceGraph partialDependenceGraph = getPartialDependenceGraph(model, trainingData, xsValues,
+                PartialDependenceGraph partialDependenceGraph = getPartialDependenceGraph(asyncModel, trainingData, xsValues,
                         featureXSvalues, outputIndex);
                 pdps.add(partialDependenceGraph);
             }
@@ -119,10 +108,10 @@ public class PartialDependencePlotExplainer implements GlobalExplainer<List<Part
         return pdps;
     }
 
-    private PartialDependenceGraph getPartialDependenceGraph(PredictionProvider model,
-            List<PredictionInput> trainingData,
-            List<Value> xsValues,
-            List<Feature> featureXSvalues, int outputIndex)
+    private PartialDependenceGraph getPartialDependenceGraph(AsyncPredictionProvider model,
+                                                             List<PredictionInput> trainingData,
+                                                             List<Value> xsValues,
+                                                             List<Feature> featureXSvalues, int outputIndex)
             throws InterruptedException, ExecutionException, TimeoutException {
         Output outputDecision = null;
         Feature feature = null;
@@ -211,7 +200,7 @@ public class PartialDependencePlotExplainer implements GlobalExplainer<List<Part
      * @param predictionInputs a batch of inputs
      * @return a batch of outputs
      */
-    private List<PredictionOutput> getOutputs(PredictionProvider model, List<PredictionInput> predictionInputs)
+    private List<PredictionOutput> getOutputs(AsyncPredictionProvider model, List<PredictionInput> predictionInputs)
             throws InterruptedException, ExecutionException, TimeoutException {
         List<PredictionOutput> predictionOutputs;
         predictionOutputs = model.predictAsync(predictionInputs).get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());

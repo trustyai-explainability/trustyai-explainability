@@ -43,7 +43,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
@@ -77,7 +77,7 @@ class PmmlScorecardCategoricalLimeExplainerTest {
                 .withSamples(10)
                 .withPerturbationContext(new PerturbationContext(0L, random, 1));
         LimeExplainer limeExplainer = new LimeExplainer(limeConfig);
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionOutput> predictionOutputs = model.predictAsync(List.of(input))
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
@@ -108,7 +108,7 @@ class PmmlScorecardCategoricalLimeExplainerTest {
 
     @Test
     void testExplanationStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = getSamples();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
@@ -134,7 +134,7 @@ class PmmlScorecardCategoricalLimeExplainerTest {
 
     @Test
     void testExplanationImpactScoreWithOptimization() throws ExecutionException, InterruptedException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = getSamples();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
@@ -152,7 +152,7 @@ class PmmlScorecardCategoricalLimeExplainerTest {
 
     @Test
     void testExplanationWeightedStabilityWithOptimization() throws ExecutionException, InterruptedException, TimeoutException {
-        PredictionProvider model = getModel();
+        AsyncPredictionProvider model = getModel();
 
         List<PredictionInput> samples = getSamples();
         List<PredictionOutput> predictionOutputs = model.predictAsync(samples.subList(0, 5)).get();
@@ -188,7 +188,7 @@ class PmmlScorecardCategoricalLimeExplainerTest {
         return inputs;
     }
 
-    private PredictionProvider getModel() {
+    private AsyncPredictionProvider getModel() {
         return inputs -> CompletableFuture.supplyAsync(() -> {
             List<PredictionOutput> outputs = new ArrayList<>();
             for (PredictionInput input1 : inputs) {

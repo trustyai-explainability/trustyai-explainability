@@ -33,7 +33,7 @@ import org.kie.trustyai.explainability.model.PartialDependenceGraph;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -49,7 +49,7 @@ class FraudScoringDmnPDPExplainerTest {
         final String FRAUD_NS = "http://www.redhat.com/dmn/definitions/_81556584-7d78-4f8c-9d5f-b3cddb9b5c73";
         final String FRAUD_NAME = "fraud-scoring";
         DecisionModel decisionModel = new DmnDecisionModel(dmnRuntime, FRAUD_NS, FRAUD_NAME);
-        PredictionProvider model = new DecisionModelWrapper(decisionModel);
+        AsyncPredictionProvider model = new DecisionModelWrapper(decisionModel);
 
         List<PredictionInput> inputs = DmnTestUtils.randomFraudScoringInputs();
         List<PredictionOutput> predictionOutputs = model.predictAsync(inputs)

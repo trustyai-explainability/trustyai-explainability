@@ -18,8 +18,7 @@ package org.kie.trustyai.explainability.local;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.*;
 
 /**
  * A local explainability method.

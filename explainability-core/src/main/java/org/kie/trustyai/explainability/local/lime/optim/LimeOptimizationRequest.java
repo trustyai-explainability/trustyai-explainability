@@ -20,7 +20,7 @@ import java.util.List;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 
 /**
  * A request for LIME hyperparameter optimization.
@@ -28,11 +28,11 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 public class LimeOptimizationRequest {
 
     private final LimeConfig limeConfig;
-    private final PredictionProvider predictionProvider;
+    private final AsyncPredictionProvider predictionProvider;
     private final List<Prediction> predictions;
     private final LimeExplainer explainer;
 
-    public LimeOptimizationRequest(LimeConfig limeConfig, PredictionProvider predictionProvider, List<Prediction> predictions, LimeExplainer explainer) {
+    public LimeOptimizationRequest(LimeConfig limeConfig, AsyncPredictionProvider predictionProvider, List<Prediction> predictions, LimeExplainer explainer) {
         this.limeConfig = limeConfig;
         this.predictionProvider = predictionProvider;
         this.predictions = predictions;
@@ -47,7 +47,7 @@ public class LimeOptimizationRequest {
         return predictions;
     }
 
-    public PredictionProvider getPredictionProvider() {
+    public AsyncPredictionProvider getPredictionProvider() {
         return predictionProvider;
     }
 

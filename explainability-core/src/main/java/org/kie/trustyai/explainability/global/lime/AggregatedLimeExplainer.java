@@ -22,12 +22,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.kie.trustyai.explainability.global.GlobalExplainer;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.PredictionProviderMetadata;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SaliencyResults;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.DataUtils;
 
 /**
@@ -50,13 +45,16 @@ public class AggregatedLimeExplainer implements GlobalExplainer<CompletableFutur
     public CompletableFuture<SaliencyResults> explainFromMetadata(PredictionProvider model, PredictionProviderMetadata metadata) {
         List<PredictionInput> inputs = metadata.getDataDistribution().sample(limeExplainer.getLimeConfig().getNoOfSamples()); // sample inputs from the data distribution
 
-        return model.predictAsync(inputs) // execute the model on the inputs
+        final AsyncPredictionProvider asyncModel = AsyncPredictionProviderWrapper.from(model);
+
+        return asyncModel.predictAsync(inputs) // execute the model on the inputs
                 .thenApply(os -> DataUtils.getPredictions(inputs, os)) // generate predictions from inputs and outputs
-                .thenCompose(ps -> explainFromPredictions(model, ps)); // explain predictions
+                .thenCompose(ps -> explainFromPredictions(asyncModel, ps)); // explain predictions
     }
 
     @Override
     public CompletableFuture<SaliencyResults> explainFromPredictions(PredictionProvider model, Collection<Prediction> predictions) {
+        final AsyncPredictionProvider asyncModel = AsyncPredictionProviderWrapper.from(model);
         return CompletableFuture.completedFuture(predictions)
                 .thenApply(p -> p.stream().map(prediction -> limeExplainer.explainAsync(prediction, model)) // extract saliency for each input
                         .map(CompletableFuture::join) // aggregate all the saliencies

@@ -32,12 +32,7 @@ import org.kie.trustyai.explainability.local.counterfactual.entities.Counterfact
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntityFactory;
 import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
 import org.kie.trustyai.explainability.local.counterfactual.score.DefaultCounterfactualScoreCalculator;
-import org.kie.trustyai.explainability.model.CounterfactualPrediction;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.CompositeFeatureUtils;
 import org.optaplanner.core.api.solver.SolverJob;
 import org.optaplanner.core.api.solver.SolverManager;
@@ -122,7 +117,7 @@ public class CounterfactualExplainer implements LocalExplainer<CounterfactualRes
 
     private CompletableFuture<CounterfactualResult> search(final List<CounterfactualEntity> entities,
             final List<Feature> originalFeatures,
-            final PredictionProvider model,
+            final AsyncPredictionProvider model,
             final UUID executionId,
             final CounterfactualGoalCriteria goalCriteria,
             final Long maxRunningTimeSeconds,
@@ -196,7 +191,8 @@ public class CounterfactualExplainer implements LocalExplainer<CounterfactualRes
         final CounterfactualGoalCriteria goalCriteria = cfPrediction.getGoalCriteria();
         final Long maxRunningTimeSeconds = cfPrediction.getMaxRunningTimeSeconds();
 
-        return search(entities, originalFeatures, model, executionId, goalCriteria, maxRunningTimeSeconds, intermediateResultsConsumer);
+
+        return search(entities, originalFeatures, AsyncPredictionProviderWrapper.from(model), executionId, goalCriteria, maxRunningTimeSeconds, intermediateResultsConsumer);
     }
 
 }

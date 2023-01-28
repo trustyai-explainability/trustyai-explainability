@@ -21,7 +21,7 @@ import java.util.concurrent.TimeoutException;
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.AsyncPredictionProvider;
 import org.kie.trustyai.explainability.model.SaliencyResults;
 
 /**
@@ -44,10 +44,10 @@ public class ValidationUtils {
      * @param minimumNegativeStabilityScore minimum negative stability score
      * @throws ValidationException if either positive or negative stability scores are lower than minimum for any decision
      */
-    public static void validateLocalSaliencyStability(PredictionProvider model, Prediction prediction,
-            LocalExplainer<SaliencyResults> explainer,
-            int topK, double minimumPositiveStabilityScore,
-            double minimumNegativeStabilityScore)
+    public static void validateLocalSaliencyStability(AsyncPredictionProvider model, Prediction prediction,
+                                                      LocalExplainer<SaliencyResults> explainer,
+                                                      int topK, double minimumPositiveStabilityScore,
+                                                      double minimumNegativeStabilityScore)
             throws ValidationException, InterruptedException, ExecutionException, TimeoutException {
         LocalSaliencyStability stability = ExplainabilityMetrics.getLocalSaliencyStability(model, prediction, explainer,
                 topK, 10);
