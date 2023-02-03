@@ -274,6 +274,7 @@
         <module>explainability-core</module>
         <module>explainability-integrationtests</module>
         <module>explainability-arrow</module>
+        <module>explainability-connectors</module>
     </modules>
 
 
