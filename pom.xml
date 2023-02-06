@@ -200,6 +200,9 @@
                         <configFile>eclipse-format.xml</configFile>
                         <lineEnding>LF</lineEnding>
                         <skip>${formatter.skip}</skip>
+                        <excludes>
+                            <exclude>org/kie/trustyai/connectors/kserve/v2/grpc/</exclude>
+                        </excludes>
                     </configuration>
                     <executions>
                         <execution>
