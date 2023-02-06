@@ -1,8 +1,10 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
@@ -10,10 +12,10 @@ import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.connectors.utils.ListenableFutureUtils;
 import org.kie.trustyai.explainability.model.*;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 
 /**
  * Wraps a KServe v2-compatible model server as a TrustyAI {@link PredictionProvider}
@@ -40,7 +42,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * Create a {@link KServeV2GRPCPredictionProvider} for a model with an endpoint at {@code target} and named {@code modelName}.
      * In this case, the output names will be generated as {@code output-0}, {@code output-1}, ...
      *
-     * @param target    The remote KServe v2 model server
+     * @param target The remote KServe v2 model server
      * @param modelName The model's name
      * @return A {@link PredictionProvider}
      */
@@ -52,8 +54,8 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * Create a {@link KServeV2GRPCPredictionProvider} with an endpoint at {@code target} and named {@code modelName}.
      * In this case, the output names are specified with {@code outputNames}.
      *
-     * @param target      The remote KServe v2 model server
-     * @param modelName   The model's name
+     * @param target The remote KServe v2 model server
+     * @param modelName The model's name
      * @param outputNames A {@link List} of output names to be used
      * @return A {@link PredictionProvider}
      */

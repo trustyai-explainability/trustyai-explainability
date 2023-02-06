@@ -1,11 +1,11 @@
 package org.kie.trustyai.connectors.utils;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
 
 /**
  * Convert a {@link ListenableFuture} into a {@link CompletableFuture}
