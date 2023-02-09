@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.kie.trustyai</groupId>
             <artifactId>explainability-core</artifactId>
-            <version>999-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
