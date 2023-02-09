@@ -23,8 +23,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.TestUtils;
-import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
