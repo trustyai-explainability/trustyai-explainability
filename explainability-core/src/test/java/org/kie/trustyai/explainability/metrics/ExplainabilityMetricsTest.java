@@ -32,7 +32,6 @@ import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
-import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.FeatureImportance;

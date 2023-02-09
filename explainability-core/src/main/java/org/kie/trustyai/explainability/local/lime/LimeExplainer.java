@@ -162,7 +162,7 @@ public class LimeExplainer implements LocalExplainer<SaliencyResults> {
         if (optionalSeed.isPresent()) {
             Long seed = optionalSeed.get();
             newPerturbationContext = new PerturbationContext(seed, perturbationContext.getRandom(),
-                                                             nextPerturbationSize, newStandardDeviation);
+                    nextPerturbationSize, newStandardDeviation);
         } else {
             newPerturbationContext = new PerturbationContext(perturbationContext.getRandom(),
                     nextPerturbationSize, newStandardDeviation);
