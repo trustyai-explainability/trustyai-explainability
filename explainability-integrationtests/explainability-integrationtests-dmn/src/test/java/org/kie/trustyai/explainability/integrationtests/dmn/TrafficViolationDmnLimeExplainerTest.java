@@ -36,6 +36,7 @@ import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.local.lime.optim.LimeConfigOptimizer;
+import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.model.DataDistribution;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
@@ -48,7 +49,6 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.utils.DataUtils;
-import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.ValidationUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,7 +68,7 @@ class TrafficViolationDmnLimeExplainerTest {
                 .get(Config.INSTANCE.getAsyncTimeout(), Config.INSTANCE.getAsyncTimeUnit());
         Prediction prediction = new SimplePrediction(predictionInput, predictionOutputs.get(0));
         Random random = new Random();
-        PerturbationContext perturbationContext = new PerturbationContext(0L, random, 1);
+        PerturbationContext perturbationContext = new PerturbationContext(0L, random, 1, 1);
 
         // this might be hardcoded to the perceptron results?
         LimeConfig limeConfig = new LimeConfig()
@@ -110,7 +110,7 @@ class TrafficViolationDmnLimeExplainerTest {
         LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withDeterministicExecution(true)
                 .withSampling(false).withStepCountLimit(30);
         Random random = new Random();
-        PerturbationContext perturbationContext = new PerturbationContext(seed, random, 1);
+        PerturbationContext perturbationContext = new PerturbationContext(seed, random, 1, 1);
         LimeConfig initialConfig = new LimeConfig()
                 .withSamples(10)
                 .withPerturbationContext(perturbationContext);
@@ -139,7 +139,7 @@ class TrafficViolationDmnLimeExplainerTest {
                 .forImpactScore().withSampling(false).withStepCountLimit(20);
 
         Random random = new Random();
-        PerturbationContext perturbationContext = new PerturbationContext(seed, random, 1);
+        PerturbationContext perturbationContext = new PerturbationContext(seed, random, 1, 1);
         LimeConfig initialConfig = new LimeConfig()
                 .withSamples(10)
                 .withPerturbationContext(perturbationContext);
@@ -161,7 +161,7 @@ class TrafficViolationDmnLimeExplainerTest {
                 .withDeterministicExecution(true).withWeightedStability(0.4, 0.6)
                 .withStepCountLimit(20);
 
-        PerturbationContext perturbationContext = new PerturbationContext(seed, random, 2);
+        PerturbationContext perturbationContext = new PerturbationContext(seed, random, 2, 1);
         LimeConfig initialConfig = new LimeConfig()
                 .withSamples(10)
                 .withPerturbationContext(perturbationContext);

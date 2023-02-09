@@ -35,6 +35,7 @@ import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.local.lime.optim.LimeConfigOptimizer;
+import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.model.DataDistribution;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
@@ -48,7 +49,6 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.utils.DataUtils;
-import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.utils.ValidationUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,7 +66,7 @@ class PrequalificationDmnLimeExplainerTest {
 
         Random random = new Random();
 
-        PerturbationContext perturbationContext = new PerturbationContext(0L, random, 1);
+        PerturbationContext perturbationContext = new PerturbationContext(0L, random, 1, 1);
         LimeConfig limeConfig = new LimeConfig()
                 .withSamples(-1)
                 .withPerturbationContext(perturbationContext);
@@ -140,7 +140,7 @@ class PrequalificationDmnLimeExplainerTest {
         LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withDeterministicExecution(true)
                 .forImpactScore().withSampling(false).withStepCountLimit(20);
         Random random = new Random();
-        PerturbationContext perturbationContext = new PerturbationContext(seed, random, 1);
+        PerturbationContext perturbationContext = new PerturbationContext(seed, random, 1, 1);
         LimeConfig initialConfig = new LimeConfig()
                 .withSamples(10)
                 .withPerturbationContext(perturbationContext);
@@ -162,7 +162,7 @@ class PrequalificationDmnLimeExplainerTest {
                 .withWeightedStability(0.4, 0.6).withSampling(false).withStepCountLimit(20);
         Random random = new Random();
         LimeConfig initialConfig = new LimeConfig()
-                .withPerturbationContext(new PerturbationContext(seed, random, 1));
+                .withPerturbationContext(new PerturbationContext(seed, random, 1, 1));
         LimeConfig optimizedConfig = limeConfigOptimizer.optimize(initialConfig, predictions, model);
         assertThat(optimizedConfig).isNotSameAs(initialConfig);
 
