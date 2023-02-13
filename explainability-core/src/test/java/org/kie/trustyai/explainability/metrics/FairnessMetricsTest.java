@@ -31,6 +31,7 @@ import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FairnessMetricsTest {
 
@@ -57,6 +58,20 @@ class FairnessMetricsTest {
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
         double spd = FairnessMetrics.groupStatisticalParityDifference(selector, testInputs, model, output);
         assertThat(spd).isBetween(0.1, 0.2);
+    }
+
+    @Test
+    void testGroupSPDTextClassifierDefinitions() throws ExecutionException, InterruptedException {
+        List<PredictionInput> testInputs = getTestInputs();
+        PredictionProvider model = TestModels.getDummyTextClassifier();
+        Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
+        Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
+        double spd = FairnessMetrics.groupStatisticalParityDifference(selector, testInputs, model, output);
+        String generalDefinition = FairnessMetrics.defineGroupStatisticalParityDifference();
+        String specificDefinition = FairnessMetrics.defineGroupStatisticalParityDifference(output, spd);
+
+        assertTrue(generalDefinition.contains("SPD"));
+        assertTrue(specificDefinition.contains("higher than that of the unselected group"));
     }
 
     @Test
@@ -101,6 +116,29 @@ class FairnessMetricsTest {
         final Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
         double dir = FairnessMetrics.groupDisparateImpactRatio(priviledged, unpriviledged, List.of(output));
         assertThat(dir).isBetween(1.0, 2.0);
+    }
+
+    @Test
+    void testGroupDIRTextClassifierDataframeDefinition() throws ExecutionException, InterruptedException {
+        final List<PredictionInput> testInputs = getTestInputs();
+        final PredictionProvider model = TestModels.getDummyTextClassifier();
+        final List<PredictionOutput> testOutputs = model.predictAsync(testInputs).get();
+
+        final Dataframe dataframe = Dataframe.createFrom(testInputs, testOutputs);
+
+        final Predicate<List<Value>> priviledgedFilter = values -> values.stream().anyMatch(v -> v.asString().contains("please"));
+        final Dataframe priviledged = dataframe.filterRowsByInputs(priviledgedFilter);
+        final Dataframe unpriviledged = dataframe.filterRowsByInputs(priviledgedFilter.negate());
+
+        final Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
+        double dir = FairnessMetrics.groupDisparateImpactRatio(priviledged, unpriviledged, List.of(output));
+
+        String generalDefinition = FairnessMetrics.defineGroupDisparateImpactRatio();
+        String specificDefinition = FairnessMetrics.defineGroupDisparateImpactRatio(output, dir);
+        assertTrue(generalDefinition.contains("DIR"));
+        System.out.println(generalDefinition);
+        System.out.println(specificDefinition);
+        assertTrue(specificDefinition.contains("times that of the unselected group"));
     }
 
     @Test
