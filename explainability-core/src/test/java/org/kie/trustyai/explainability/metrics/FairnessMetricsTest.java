@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.kie.trustyai.explainability.metrics.utils.FairnessDefinitions;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.models.TestModels;
@@ -67,13 +68,13 @@ class FairnessMetricsTest {
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
         double spd = FairnessMetrics.groupStatisticalParityDifference(selector, testInputs, model, output);
-        String generalDefinition = FairnessMetrics.defineGroupStatisticalParityDifference();
-        String specificDefinition = FairnessMetrics.defineGroupStatisticalParityDifference(output, spd);
+        String generalDefinition = FairnessDefinitions.defineGroupStatisticalParityDifference();
+        String specificDefinition = FairnessDefinitions.defineGroupStatisticalParityDifference(output, spd);
 
         assertTrue(generalDefinition.contains("SPD"));
         assertTrue(specificDefinition.contains("higher than that of the unselected group"));
 
-        String specificNamedDefinition = FairnessMetrics.defineGroupStatisticalParityDifference("text-contains",
+        String specificNamedDefinition = FairnessDefinitions.defineGroupStatisticalParityDifference("text-contains",
                 "please", "not-please", "spam", new Value(false), spd);
         assertTrue(specificNamedDefinition.contains("higher than that of Group:text-contains=not-please"));
     }
@@ -137,12 +138,12 @@ class FairnessMetricsTest {
         final Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
         double dir = FairnessMetrics.groupDisparateImpactRatio(priviledged, unpriviledged, List.of(output));
 
-        String generalDefinition = FairnessMetrics.defineGroupDisparateImpactRatio();
-        String specificDefinition = FairnessMetrics.defineGroupDisparateImpactRatio(output, dir);
+        String generalDefinition = FairnessDefinitions.defineGroupDisparateImpactRatio();
+        String specificDefinition = FairnessDefinitions.defineGroupDisparateImpactRatio(output, dir);
         assertTrue(generalDefinition.contains("DIR"));
         assertTrue(specificDefinition.contains("times that of the unselected group"));
 
-        String specificNamedDefinition = FairnessMetrics.defineGroupDisparateImpactRatio("text-contains",
+        String specificNamedDefinition = FairnessDefinitions.defineGroupDisparateImpactRatio("text-contains",
                 "please", "not-please", "spam", new Value(false), dir);
         assertTrue(specificNamedDefinition.contains("times that of Group:text-contains=not-please"));
     }
