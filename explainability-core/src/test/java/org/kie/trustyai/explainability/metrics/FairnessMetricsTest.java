@@ -72,6 +72,10 @@ class FairnessMetricsTest {
 
         assertTrue(generalDefinition.contains("SPD"));
         assertTrue(specificDefinition.contains("higher than that of the unselected group"));
+
+        String specificNamedDefinition = FairnessMetrics.defineGroupStatisticalParityDifference("text-contains",
+                "please", "not-please", "spam", new Value(false), spd);
+        assertTrue(specificNamedDefinition.contains("higher than that of Group:text-contains=not-please"));
     }
 
     @Test
@@ -136,9 +140,11 @@ class FairnessMetricsTest {
         String generalDefinition = FairnessMetrics.defineGroupDisparateImpactRatio();
         String specificDefinition = FairnessMetrics.defineGroupDisparateImpactRatio(output, dir);
         assertTrue(generalDefinition.contains("DIR"));
-        System.out.println(generalDefinition);
-        System.out.println(specificDefinition);
         assertTrue(specificDefinition.contains("times that of the unselected group"));
+
+        String specificNamedDefinition = FairnessMetrics.defineGroupDisparateImpactRatio("text-contains",
+                "please", "not-please", "spam", new Value(false), dir);
+        assertTrue(specificNamedDefinition.contains("times that of Group:text-contains=not-please"));
     }
 
     @Test

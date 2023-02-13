@@ -151,9 +151,34 @@ public class FairnessMetrics {
      * Produce a specific explanation of Group Statistical Parity Difference for the chosen output and
      * computed metric value
      */
+    public static String defineGroupStatisticalParityDifference(
+            String protectedAttribute, String privileged, String unprivileged,
+            String outputName, Value favourableOutputValue, double metricValue) {
+        String specificExample = "The SPD of %f indicates that the likelihood of " +
+                "Group:%s=%s receiving Outcome:%s=%s ";
+        if (metricValue > 0) {
+            specificExample += "was %f percentage points higher than that of Group:%s=%s.";
+        } else if (metricValue < 0) {
+            specificExample += "was %f percentage points lower than that of Group:%s=%s.";
+        } else {
+            specificExample += "was equivalent to that of group:%s=%s.";
+        }
+
+        return String.format(specificExample,
+                metricValue,
+                protectedAttribute, privileged.toString(),
+                outputName, favourableOutputValue.toString(),
+                metricValue * 100,
+                protectedAttribute, unprivileged.toString());
+    }
+
+    /**
+     * Produce a specific explanation of Group Statistical Parity Difference for the chosen output and
+     * computed metric value
+     */
     public static String defineGroupStatisticalParityDifference(Output favorableOutput, double metricValue) {
         String specificExample = "The SPD of %f indicates that the likelihood of the " +
-                "selected group receiving %s=%s ";
+                "selected group receiving Outcome:%s=%s ";
         if (metricValue > 0) {
             specificExample += "was %f percentage points higher than that of the unselected group.";
         } else if (metricValue < 0) {
@@ -250,13 +275,29 @@ public class FairnessMetrics {
                 "equal to 1 indicates a perfectly fair model for the groups and outcomes in question.";
     }
 
+    public static String defineGroupDisparateImpactRatio(String protectedAttribute, String privileged, String unprivileged, String outputName, Value favourableOutputValue, double metricValue) {
+        String specificExample = "The DIR of %f indicates that the likelihood of Group:%s=%s receiving Outcome:%s=%s ";
+        if (metricValue != 0) {
+            specificExample += "is %f times that of Group:%s=%s.";
+        } else {
+            specificExample += "is equivalent to that of Group:%s=s.";
+        }
+
+        return String.format(specificExample,
+                metricValue,
+                protectedAttribute, privileged,
+                outputName, favourableOutputValue.toString(),
+                metricValue,
+                protectedAttribute, unprivileged);
+    }
+
     /**
      * Produce a specific explanation of Group Disparate Impact Ratio for the chosen output and
      * computed metric value
      */
     public static String defineGroupDisparateImpactRatio(Output favorableOutput, double metricValue) {
         String specificExample = "The DIR of %f indicates that the likelihood of the " +
-                "selected group receiving %s=%s ";
+                "selected group receiving outcome:%s=%s ";
         if (metricValue != 0) {
             specificExample += "is %f times that of the unselected group.";
         } else {
