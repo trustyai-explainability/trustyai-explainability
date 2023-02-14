@@ -3,22 +3,19 @@ Content-Type: application/json
 
 {
   "protectedAttribute": "gender",
-  "favorableOutcome": 1,
+  "favorableOutcome": {
+    "type": "INT32",
+    "value": 1
+  },
   "outcomeName": "income",
-  "privilegedAttribute": 1,
-  "unprivilegedAttribute": 0
-}
-
-###
-POST http://{{host}}:8080/metrics/spd/evaluate
-Content-Type: application/json
-
-{
-  "protectedAttribute": "gender",
-  "favorableOutcome": 1,
-  "outcomeName": "income",
-  "privilegedAttribute": 1,
-  "unprivilegedAttribute": 0
+  "privilegedAttribute": {
+    "type": "INT32",
+    "value": 1
+  },
+  "unprivilegedAttribute": {
+    "type": "INT32",
+    "value": 0
+  }
 }
 
 ###
@@ -27,10 +24,19 @@ Content-Type: application/json
 
 {
   "protectedAttribute": "gender",
-  "favorableOutcome": 1,
+  "favorableOutcome": {
+    "type": "INT32",
+    "value": 1
+  },
   "outcomeName": "income",
-  "privilegedAttribute": 1,
-  "unprivilegedAttribute": 0
+  "privilegedAttribute": {
+    "type": "INT32",
+    "value": 1
+  },
+  "unprivilegedAttribute": {
+    "type": "INT32",
+    "value": 0
+  }
 }
 
 ###
@@ -47,10 +53,19 @@ Content-Type: application/json
 
 {
   "protectedAttribute": "gender",
-  "favorableOutcome": 1,
+  "favorableOutcome": {
+    "type": "INT32",
+    "value": 1
+  },
   "outcomeName": "income",
-  "privilegedAttribute": 1,
-  "unprivilegedAttribute": 0
+  "privilegedAttribute": {
+    "type": "INT32",
+    "value": 1
+  },
+  "unprivilegedAttribute": {
+    "type": "INT32",
+    "value": 0
+  }
 }
 
 ###
@@ -59,10 +74,19 @@ Content-Type: application/json
 
 {
   "protectedAttribute": "gender",
-  "favorableOutcome": 1,
+  "favorableOutcome": {
+    "type": "INT32",
+    "value": 1
+  },
   "outcomeName": "income",
-  "privilegedAttribute": 1,
-  "unprivilegedAttribute": 0
+  "privilegedAttribute": {
+    "type": "INT32",
+    "value": 1
+  },
+  "unprivilegedAttribute": {
+    "type": "INT32",
+    "value": 0
+  }
 }
 
 ###
@@ -79,10 +103,19 @@ Content-Type: application/json
 
 {
   "protectedAttribute": "gender",
-  "favorableOutcome": 1,
+  "favorableOutcome": {
+    "type": "INT32",
+    "value": 1
+  },
   "outcomeName": "income",
-  "privilegedAttribute": 1,
-  "unprivilegedAttribute": 0
+  "privilegedAttribute": {
+    "type": "INT32",
+    "value": 1
+  },
+  "unprivilegedAttribute": {
+    "type": "INT32",
+    "value": 0
+  }
 }
 
 ###
