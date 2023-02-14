@@ -45,7 +45,7 @@ public class DataSource {
             throw new DataframeCreateException(e.getMessage());
         }
 
-        final Dataframe dataframe = parser.parse(inputsBuffer, outputsBuffer);
+        final Dataframe dataframe = parser.toDataframe(inputsBuffer, outputsBuffer);
         if (serviceConfig.batchSize().isPresent()) {
             final int batchSize = serviceConfig.batchSize().getAsInt();
             final int rows = dataframe.getRowDimension();

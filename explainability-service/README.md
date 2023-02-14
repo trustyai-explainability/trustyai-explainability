@@ -359,14 +359,30 @@ The data can be batched into the latest `n` observations by using the configurat
 `SERVICE_BATCH_SIZE=n`. This behaves like a `n`-size tail and its optional.
 If not specified, the entire dataset is used.
 
-## Explainers
-
-An explainer can be linked to the service using the environment
-variables `SERVICE_KSERVE_TARGET` and `SERVICE_MODEL_NAME`.
-These will be used by the service's gRPC client which can natively
-query KServe and ModelMesh using that endpoint.
-
 # Deployment
+
+## Building the image
+
+Build the JAR using
+
+```shell
+mvnw clean package
+```
+
+And build the image with:
+
+```shell
+docker build -f ./Dockerfile \
+    -t trustyai/trustyai-service:999-SNAPSHOT .
+```
+
+And test the image with:
+
+```shell
+docker run -i --rm -p 8080:8080 trustyai/trustyai-service:999-SNAPSHOT
+```
+
+## OpenShift
 
 To deploy in Kubernetes or OpenShift, the connection information
 can be passed in the manifest as environment variables:

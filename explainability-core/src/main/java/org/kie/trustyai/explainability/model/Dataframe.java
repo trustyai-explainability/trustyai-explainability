@@ -143,6 +143,17 @@ public class Dataframe {
     }
 
     /**
+     * Return a copy of the dataframe containing only output columns
+     *
+     * @return A @link{Dataframe}
+     */
+    public Dataframe getOutputDataframe() {
+        final Dataframe df = this.copy();
+        df.dropColumns(getInputsIndices());
+        return df;
+    }
+
+    /**
      * Add a single prediction (as a row) to the @link{Dataframe}
      *
      * @param prediction The @link{Prediction} to add.

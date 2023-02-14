@@ -7,5 +7,9 @@ import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 
 public interface DataParser {
 
-    Dataframe parse(ByteBuffer inputs, ByteBuffer outputs) throws DataframeCreateException;
+    Dataframe toDataframe(ByteBuffer inputs, ByteBuffer outputs) throws DataframeCreateException;
+
+    ByteBuffer toInputByteBuffer(Dataframe dataframe);
+
+    ByteBuffer toOutputByteBuffer(Dataframe dataframe);
 }
