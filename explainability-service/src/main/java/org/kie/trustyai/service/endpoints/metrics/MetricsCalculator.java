@@ -18,9 +18,7 @@ public class MetricsCalculator {
 
     public double calculateSPD(Dataframe dataframe, BaseMetricRequest request) {
         final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
-
         final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
-
         final Dataframe privileged = dataframe.filterByColumnValue(protectedIndex,
                 value -> value.equals(privilegedAttr));
         final Value unprivilegedAttr = PayloadConverter.convertToValue(request.getUnprivilegedAttribute());
@@ -37,6 +35,7 @@ public class MetricsCalculator {
         final String protectedAttribute = request.getProtectedAttribute();
         final String priviliged = PayloadConverter.convertToValue(request.getPrivilegedAttribute()).toString();
         final String unpriviliged = PayloadConverter.convertToValue(request.getUnprivilegedAttribute()).toString();
+
         return FairnessDefinitions.defineGroupStatisticalParityDifference(
                 protectedAttribute,
                 priviliged,

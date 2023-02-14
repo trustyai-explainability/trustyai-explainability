@@ -161,6 +161,7 @@ Content-Type: application/json;charset=UTF-8
   "type": "metric",
   "name": "SPD",
   "value": -0.2531969309462916,
+  "specificDefinition":"The SPD of -0.253196 indicates that the likelihood of Group:gender=1 receiving Outcome:income=1 was -25.3196 percentage points lower than that of Group:gender=0."
   "timestamp": 1675850601910,
   "thresholds": {
     "lowerBound": -0.1,
@@ -198,11 +199,11 @@ curl -X POST --location "http://{{host}}:8080/metrics/dir" \
 HTTP/1.1 200 OK
 content-length: 197
 Content-Type: application/json;charset=UTF-8
-
 {
   "type": "metric",
   "name": "DIR",
   "value": 0.3333333333333333,
+  "specificDefinition":"The DIR of 0.33333 indicates that the likelihood of Group:gender=1 receiving Outcome:income=1 is 0.33333 times that of Group:gender=0."
   "id": "15f87802-30ae-424b-9937-1589489d6b4b",
   "timestamp": 1675850775317,
   "thresholds": {
@@ -217,7 +218,7 @@ Content-Type: application/json;charset=UTF-8
 
 In order to generate period measurements for a certain metric, you can send a request to
 the `/metrics/$METRIC/schedule`.
-Looking at the SPD example abov,e if we wanted the metric to be calculated periodically we would request:
+Looking at the SPD example above if we wanted the metric to be calculated periodically we would request:
 
 ```shell
 curl -X POST --location "http://{{host}}:8080/metrics/spd/request" \
@@ -270,6 +271,45 @@ curl -X DELETE --location "http://{{host}}:8080/metrics/spd/request" \
           \"requestId\": \"3281c891-e2a5-4eb3-b05d-7f3831acbb56\"
         }"
 ```
+
+### Metric Definitions
+To get a _general_ definition of a metric, you can issue an HTTP `GET` request to the `/metrics/$METRIC/definition` endpoint:
+```shell
+curl -X GET http://{{host}}:8080/metrics/{{metric}}/definition
+```
+returns
+```
+Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the difference between the proportion of the majority and protected classes getting a particular outcome. Typically, -0.1 < SPD < 0.1 indicates a fair model, while a value outside those bounds indicates an unfair model for the groups and outcomes in question"
+```
+To get a _specific_ definition of what a particular value means in the context of a specific computed metric, 
+you can issue an HTTP `POST` request to the `/metrics/$METRIC/definition` endpoint. The body of this request will
+look identical to a normal metric request, except you will specify the metric value of interest within the `metricValue` field:
+```shell
+curl -X POST --location "http://{{host}}:8080/metrics/{metric}/definition" \
+    -H "Content-Type: application/json" \
+    -d "{
+          \"protectedAttribute\": \"gender\",
+          \"favorableOutcome\": {
+            \"type\": \"INT32\",
+            \"value\": 1
+          },
+          \"outcomeName\": \"income\",
+          \"privilegedAttribute\": {
+            \"type\": \"INT32\",
+            \"value\": 1
+          },
+          \"unprivilegedAttribute\": {
+            \"type\": \"INT32\",
+            \"value\": 0
+          },
+          \"metricValue\": 0.25
+        }"
+```
+returns
+```
+The SPD of 0.250000 indicates that the likelihood of Group:gender=1 receiving Outcome:income=1 was 25.000000 percentage points higher than that of Group:gender=0.%
+```
+
 
 ### Prometheus
 
