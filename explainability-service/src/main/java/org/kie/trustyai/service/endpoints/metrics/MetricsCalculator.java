@@ -26,8 +26,9 @@ public class MetricsCalculator {
         final Dataframe unprivileged = dataframe.filterByColumnValue(protectedIndex,
                 value -> value.equals(unprivilegedAttr));
         final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
+        final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
         return FairnessMetrics.groupStatisticalParityDifference(privileged, unprivileged,
-                List.of(new Output(request.getOutcomeName(), Type.NUMBER, favorableOutcomeAttr, 1.0)));
+                List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
     }
 
     public double calculateDIR(Dataframe dataframe, GroupStatisticalParityDifferenceRequest request) {
@@ -41,7 +42,8 @@ public class MetricsCalculator {
         final Dataframe unprivileged = dataframe.filterByColumnValue(protectedIndex,
                 value -> value.equals(unprivilegedAttr));
         final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
+        final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
         return FairnessMetrics.groupDisparateImpactRatio(privileged, unprivileged,
-                List.of(new Output(request.getOutcomeName(), Type.NUMBER, favorableOutcomeAttr, 1.0)));
+                List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
     }
 }

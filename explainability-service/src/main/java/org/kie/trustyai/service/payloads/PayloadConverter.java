@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.payloads;
 
+import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.payloads.values.TypedValue;
 import org.kie.trustyai.service.payloads.values.Values;
@@ -24,6 +25,19 @@ public class PayloadConverter {
             return new Value(node.getValue().asText());
         } else {
             return new Value(null);
+        }
+    }
+
+    public static Type convertToType(String payloadType) {
+        final Values type = Values.valueOf(payloadType);
+        if (type == BOOL) {
+            return Type.BOOLEAN;
+        } else if (type == FLOAT || type == DOUBLE || type == INT32 || type == INT64) {
+            return Type.NUMBER;
+        } else if (type == STRING) {
+            return Type.CATEGORICAL;
+        } else {
+            return Type.UNDEFINED;
         }
     }
 
