@@ -283,7 +283,8 @@ Statistical Parity Difference (SPD) measures imbalances in classifications by ca
 ```
 To get a _specific_ definition of what a particular value means in the context of a specific computed metric, 
 you can issue an HTTP `POST` request to the `/metrics/$METRIC/definition` endpoint. The body of this request will
-look identical to a normal metric request, except you will specify the metric value of interest within the `metricValue` field:
+look identical to a normal metric request, except you will specify the metric value of interest within the `metricValue` field.
+This is equivalent to asking "If I computed this metric in this configuration, what would a value of $x mean?":
 ```shell
 curl -X POST --location "http://{{host}}:8080/metrics/{metric}/definition" \
     -H "Content-Type: application/json" \
