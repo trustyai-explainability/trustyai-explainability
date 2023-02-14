@@ -64,6 +64,7 @@ public class FairnessMetrics {
         return consistency;
     }
 
+    // ==== SPD ========================================================================================================
     /**
      * Calculate statistical/demographic parity difference (SPD).
      *
@@ -136,6 +137,7 @@ public class FairnessMetrics {
         return probabilityUnprivileged - probabilityPrivileged;
     }
 
+    // === DIR =========================================================================================================
     /**
      * Calculate disparate impact ratio (DIR).
      *
