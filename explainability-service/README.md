@@ -58,7 +58,7 @@ docker run -p 8080:8080 \
     --env MINIO_SECRET_KEY="minioadmin" \
     --env MINIO_ACCESS_KEY="minioadmin" \
     --env SERVICE_METRICS_SCHEDULE="5s" \
-    trustyai/trustyai-service:1.0.0-SNAPSHOT -d 
+    trustyai/trustyai-service:999-SNAPSHOT -d 
 ```
 
 ### S3 (MinIO)
@@ -319,7 +319,7 @@ spec:
               value: RANDOM_TEST
             - name: MODEL_NAME
               value: example
-          image: trustyai/trustyai-service:1.0.0-SNAPSHOT
+          image: trustyai/trustyai-service:999-SNAPSHOT
           name: trustyai-service
           ports:
             - containerPort: 8080
