@@ -1,6 +1,6 @@
 services:
   trustyai:
-    image: trustyai/trustyai-service:1.0.0-SNAPSHOT
+    image: trustyai/trustyai-service:999-SNAPSHOT
     container_name: trustyai-service
     ports:
       - "8080:8080"
