@@ -5,21 +5,20 @@ import java.util.List;
 import javax.inject.Singleton;
 
 import org.kie.trustyai.explainability.metrics.FairnessMetrics;
+import org.kie.trustyai.explainability.metrics.utils.FairnessDefinitions;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.PayloadConverter;
-import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceRequest;
 
 @Singleton
 public class MetricsCalculator {
 
-    public double calculateSPD(Dataframe dataframe, GroupStatisticalParityDifferenceRequest request) {
+    public double calculateSPD(Dataframe dataframe, BaseMetricRequest request) {
         final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
-
         final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
-
         final Dataframe privileged = dataframe.filterByColumnValue(protectedIndex,
                 value -> value.equals(privilegedAttr));
         final Value unprivilegedAttr = PayloadConverter.convertToValue(request.getUnprivilegedAttribute());
@@ -31,7 +30,23 @@ public class MetricsCalculator {
                 List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
     }
 
-    public double calculateDIR(Dataframe dataframe, GroupStatisticalParityDifferenceRequest request) {
+    public String getSPDDefinition(double spd, BaseMetricRequest request) {
+        final String outcomeName = request.getOutcomeName();
+        final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
+        final String protectedAttribute = request.getProtectedAttribute();
+        final String priviliged = PayloadConverter.convertToValue(request.getPrivilegedAttribute()).toString();
+        final String unpriviliged = PayloadConverter.convertToValue(request.getUnprivilegedAttribute()).toString();
+
+        return FairnessDefinitions.defineGroupStatisticalParityDifference(
+                protectedAttribute,
+                priviliged,
+                unpriviliged,
+                outcomeName,
+                favorableOutcomeAttr,
+                spd);
+    }
+
+    public double calculateDIR(Dataframe dataframe, BaseMetricRequest request) {
         final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
 
         final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
@@ -45,5 +60,20 @@ public class MetricsCalculator {
         final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
         return FairnessMetrics.groupDisparateImpactRatio(privileged, unprivileged,
                 List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+    }
+
+    public String getDIRDefinition(double dir, BaseMetricRequest request) {
+        final String outcomeName = request.getOutcomeName();
+        final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
+        final String protectedAttribute = request.getProtectedAttribute();
+        final String priviliged = PayloadConverter.convertToValue(request.getPrivilegedAttribute()).toString();
+        final String unpriviliged = PayloadConverter.convertToValue(request.getUnprivilegedAttribute()).toString();
+        return FairnessDefinitions.defineGroupDisparateImpactRatio(
+                protectedAttribute,
+                priviliged,
+                unpriviliged,
+                outcomeName,
+                favorableOutcomeAttr,
+                dir);
     }
 }

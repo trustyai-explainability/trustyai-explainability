@@ -1,11 +1,11 @@
-package org.kie.trustyai.service.payloads.spd;
+package org.kie.trustyai.service.payloads;
 
 import org.kie.trustyai.service.payloads.values.TypedValue;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({ "protected", "favorable" })
-public class GroupStatisticalParityDifferenceRequest {
+public class BaseMetricRequest {
 
     private String protectedAttribute;
 
@@ -14,7 +14,7 @@ public class GroupStatisticalParityDifferenceRequest {
     private TypedValue privilegedAttribute;
     private TypedValue unprivilegedAttribute;
 
-    public GroupStatisticalParityDifferenceRequest() {
+    public BaseMetricRequest() {
 
     }
 

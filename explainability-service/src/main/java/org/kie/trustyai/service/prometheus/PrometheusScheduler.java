@@ -13,7 +13,7 @@ import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.endpoints.metrics.MetricsCalculator;
-import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceRequest;
+import org.kie.trustyai.service.payloads.BaseMetricRequest;
 
 import io.quarkus.scheduler.Scheduled;
 
@@ -21,8 +21,8 @@ import io.quarkus.scheduler.Scheduled;
 public class PrometheusScheduler {
 
     private static final Logger LOG = Logger.getLogger(PrometheusScheduler.class);
-    private final Map<UUID, GroupStatisticalParityDifferenceRequest> spdRequests = new HashMap<>();
-    private final Map<UUID, GroupStatisticalParityDifferenceRequest> dirRequests = new HashMap<>();
+    private final Map<UUID, BaseMetricRequest> spdRequests = new HashMap<>();
+    private final Map<UUID, BaseMetricRequest> dirRequests = new HashMap<>();
     @Inject
     DataSource dataSource;
     @Inject
@@ -32,11 +32,11 @@ public class PrometheusScheduler {
     @Inject
     MetricsCalculator calculator;
 
-    public Map<UUID, GroupStatisticalParityDifferenceRequest> getDirRequests() {
+    public Map<UUID, BaseMetricRequest> getDirRequests() {
         return dirRequests;
     }
 
-    public Map<UUID, GroupStatisticalParityDifferenceRequest> getSpdRequests() {
+    public Map<UUID, BaseMetricRequest> getSpdRequests() {
         return spdRequests;
     }
 
@@ -52,7 +52,6 @@ public class PrometheusScheduler {
                     spdRequests.forEach((uuid, request) -> {
 
                         final double spd = calculator.calculateSPD(df, request);
-
                         publisher.gaugeSPD(request, serviceConfig.modelName(), uuid, spd);
                     });
                 }
@@ -71,11 +70,15 @@ public class PrometheusScheduler {
         }
     }
 
-    public void registerSPD(UUID id, GroupStatisticalParityDifferenceRequest request) {
+    public PrometheusPublisher getPublisher() {
+        return publisher;
+    }
+
+    public void registerSPD(UUID id, BaseMetricRequest request) {
         spdRequests.put(id, request);
     }
 
-    public void registerDIR(UUID id, GroupStatisticalParityDifferenceRequest request) {
+    public void registerDIR(UUID id, BaseMetricRequest request) {
         dirRequests.put(id, request);
     }
 

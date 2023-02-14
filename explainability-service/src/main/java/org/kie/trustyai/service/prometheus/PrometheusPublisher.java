@@ -7,7 +7,7 @@ import java.util.UUID;
 import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceRequest;
+import org.kie.trustyai.service.payloads.BaseMetricRequest;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -37,7 +37,7 @@ public class PrometheusPublisher {
 
     }
 
-    private Iterable<Tag> generateSPDTags(String modelName, UUID id, GroupStatisticalParityDifferenceRequest request) {
+    private Iterable<Tag> generateSPDTags(String modelName, UUID id, BaseMetricRequest request) {
         return Tags.of(
                 Tag.of("model", modelName),
                 Tag.of("outcome", request.getOutcomeName()),
@@ -48,7 +48,7 @@ public class PrometheusPublisher {
                 Tag.of("request", id.toString()));
     }
 
-    public void gaugeSPD(GroupStatisticalParityDifferenceRequest request, String modelName, UUID id, double value) {
+    public void gaugeSPD(BaseMetricRequest request, String modelName, UUID id, double value) {
 
         values.put(id, new AtomicDouble(value));
 
@@ -59,7 +59,7 @@ public class PrometheusPublisher {
         LOG.info("Scheduled request for SPD id=" + id + ", value=" + value);
     }
 
-    public void gaugeDIR(GroupStatisticalParityDifferenceRequest request, String modelName, UUID id, double value) {
+    public void gaugeDIR(BaseMetricRequest request, String modelName, UUID id, double value) {
 
         values.put(id, new AtomicDouble(value));
 
