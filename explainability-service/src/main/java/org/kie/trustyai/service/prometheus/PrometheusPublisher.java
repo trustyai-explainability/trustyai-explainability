@@ -1,0 +1,72 @@
+package org.kie.trustyai.service.prometheus;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.inject.Singleton;
+
+import org.jboss.logging.Logger;
+import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceRequest;
+
+import com.google.common.util.concurrent.AtomicDouble;
+
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Tags;
+
+@Singleton
+public class PrometheusPublisher {
+    private static final Logger LOG = Logger.getLogger(PrometheusPublisher.class);
+    private final MeterRegistry registry;
+    private final Map<UUID, AtomicDouble> values;
+
+    public PrometheusPublisher(MeterRegistry registry) {
+        this.registry = registry;
+        this.values = new HashMap<>();
+    }
+
+    private AtomicDouble getValue(UUID id) {
+        return values.get(id);
+    }
+
+    private void createOrUpdateGauge(String name, Iterable<Tag> tags, UUID id) {
+        Gauge.builder(name, new AtomicDouble(), value -> values.get(id).doubleValue())
+                .tags(tags).strongReference(true).register(registry);
+
+    }
+
+    private Iterable<Tag> generateSPDTags(String modelName, UUID id, GroupStatisticalParityDifferenceRequest request) {
+        return Tags.of(
+                Tag.of("model", modelName),
+                Tag.of("outcome", request.getOutcomeName()),
+                Tag.of("favorable_value", request.getFavorableOutcome().toString()),
+                Tag.of("protected", request.getProtectedAttribute()),
+                Tag.of("privileged", request.getPrivilegedAttribute().toString()),
+                Tag.of("unprivileged", request.getUnprivilegedAttribute().toString()),
+                Tag.of("request", id.toString()));
+    }
+
+    public void gaugeSPD(GroupStatisticalParityDifferenceRequest request, String modelName, UUID id, double value) {
+
+        values.put(id, new AtomicDouble(value));
+
+        final Iterable<Tag> tags = generateSPDTags(modelName, id, request);
+
+        createOrUpdateGauge("trustyai_spd", tags, id);
+
+        LOG.info("Scheduled request for SPD id=" + id + ", value=" + value);
+    }
+
+    public void gaugeDIR(GroupStatisticalParityDifferenceRequest request, String modelName, UUID id, double value) {
+
+        values.put(id, new AtomicDouble(value));
+
+        final Iterable<Tag> tags = generateSPDTags(modelName, id, request);
+
+        createOrUpdateGauge("trustyai_dir", tags, id);
+
+        LOG.info("Scheduled request for DIR id=" + id + ", value=" + value);
+    }
+}
