@@ -58,7 +58,7 @@ docker run -p 8080:8080 \
     --env MINIO_SECRET_KEY="minioadmin" \
     --env MINIO_ACCESS_KEY="minioadmin" \
     --env SERVICE_METRICS_SCHEDULE="5s" \
-    trustyai/trustyai-service:1.0.0-SNAPSHOT -d 
+    trustyai/trustyai-service:999-SNAPSHOT -d 
 ```
 
 ### S3 (MinIO)
@@ -130,14 +130,23 @@ the corresponding environment variable, e.g.
 Get statistical parity difference at `/metrics/spd`
 
 ```shell
-curl -X POST --location "http://localhost:8080/metrics/spd" \
+curl -X POST --location "http://{{host}}:8080/metrics/spd" \
     -H "Content-Type: application/json" \
     -d "{
           \"protectedAttribute\": \"gender\",
-          \"favorableOutcome\": 1,
+          \"favorableOutcome\": {
+            \"type\": \"INT32\",
+            \"value\": 1
+          },
           \"outcomeName\": \"income\",
-          \"privilegedAttribute\": 1,
-          \"unprivilegedAttribute\": 0
+          \"privilegedAttribute\": {
+            \"type\": \"INT32\",
+            \"value\": 1
+          },
+          \"unprivilegedAttribute\": {
+            \"type\": \"INT32\",
+            \"value\": 0
+          }
         }"
 ```
 
@@ -165,14 +174,23 @@ Content-Type: application/json;charset=UTF-8
 #### Disparate Impact Ratio
 
 ```shell
-curl -X POST --location "http://localhost:8080/metrics/dir" \
+curl -X POST --location "http://{{host}}:8080/metrics/dir" \
     -H "Content-Type: application/json" \
     -d "{
           \"protectedAttribute\": \"gender\",
-          \"favorableOutcome\": 1,
+          \"favorableOutcome\": {
+            \"type\": \"INT32\",
+            \"value\": 1
+          },
           \"outcomeName\": \"income\",
-          \"privilegedAttribute\": 1,
-          \"unprivilegedAttribute\": 0
+          \"privilegedAttribute\": {
+            \"type\": \"INT32\",
+            \"value\": 1
+          },
+          \"unprivilegedAttribute\": {
+            \"type\": \"INT32\",
+            \"value\": 0
+          }
         }"
 ```
 
@@ -197,18 +215,28 @@ Content-Type: application/json;charset=UTF-8
 
 #### Scheduled metrics
 
-In order to generate period measurements for a certain metric, you can send a request to the `/metrics/$METRIC/schedule`.
+In order to generate period measurements for a certain metric, you can send a request to
+the `/metrics/$METRIC/schedule`.
 Looking at the SPD example abov,e if we wanted the metric to be calculated periodically we would request:
 
 ```shell
-curl -X POST --location "http://localhost:8080/metrics/spd/request" \
+curl -X POST --location "http://{{host}}:8080/metrics/spd/request" \
     -H "Content-Type: application/json" \
     -d "{
           \"protectedAttribute\": \"gender\",
-          \"favorableOutcome\": 1,
+          \"favorableOutcome\": {
+            \"type\": \"INT32\",
+            \"value\": 1
+          },
           \"outcomeName\": \"income\",
-          \"privilegedAttribute\": 1,
-          \"unprivilegedAttribute\": 0
+          \"privilegedAttribute\": {
+            \"type\": \"INT32\",
+            \"value\": 1
+          },
+          \"unprivilegedAttribute\": {
+            \"type\": \"INT32\",
+            \"value\": 0
+          }
         }"
 ```
 
@@ -229,7 +257,8 @@ The metrics will now be pushed to Prometheus with the runtime provided `SERVICE_
 e.g. `SERVICE_METRICS_SCHEDULE=10s`)
 which follows the [Quarkus syntax](https://quarkus.io/guides/scheduler-reference).
 
-To stop the periodic calculation you can issue an HTTP `DELETE` request to the `/metrics/$METRIC/request` endpoint, with the id
+To stop the periodic calculation you can issue an HTTP `DELETE` request to the `/metrics/$METRIC/request` endpoint, with
+the id
 of periodic task we want to cancel
 in the payload.
 For instance:
@@ -319,7 +348,7 @@ spec:
               value: RANDOM_TEST
             - name: MODEL_NAME
               value: example
-          image: trustyai/trustyai-service:1.0.0-SNAPSHOT
+          image: trustyai/trustyai-service:999-SNAPSHOT
           name: trustyai-service
           ports:
             - containerPort: 8080
