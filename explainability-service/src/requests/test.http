@@ -1,0 +1,95 @@
+POST http://{{host}}:8080/metrics/spd
+Content-Type: application/json
+
+{
+  "protectedAttribute": "gender",
+  "favorableOutcome": 1,
+  "outcomeName": "income",
+  "privilegedAttribute": 1,
+  "unprivilegedAttribute": 0
+}
+
+###
+POST http://{{host}}:8080/metrics/spd/evaluate
+Content-Type: application/json
+
+{
+  "protectedAttribute": "gender",
+  "favorableOutcome": 1,
+  "outcomeName": "income",
+  "privilegedAttribute": 1,
+  "unprivilegedAttribute": 0
+}
+
+###
+POST http://{{host}}:8080/metrics/spd/request
+Content-Type: application/json
+
+{
+  "protectedAttribute": "gender",
+  "favorableOutcome": 1,
+  "outcomeName": "income",
+  "privilegedAttribute": 1,
+  "unprivilegedAttribute": 0
+}
+
+###
+DELETE http://{{host}}:8080/metrics/spd/request
+Content-Type: application/json
+
+{
+  "requestId": "a7b5cd3b-3d38-41b0-b165-ce594d6fef31"
+}
+
+###
+POST http://{{host}}:8080/metrics/dir
+Content-Type: application/json
+
+{
+  "protectedAttribute": "gender",
+  "favorableOutcome": 1,
+  "outcomeName": "income",
+  "privilegedAttribute": 1,
+  "unprivilegedAttribute": 0
+}
+
+###
+POST http://{{host}}:8080/metrics/dir/request
+Content-Type: application/json
+
+{
+  "protectedAttribute": "gender",
+  "favorableOutcome": 1,
+  "outcomeName": "income",
+  "privilegedAttribute": 1,
+  "unprivilegedAttribute": 0
+}
+
+###
+DELETE http://{{host}}:8080/metrics/dir/request
+Content-Type: application/json
+
+{
+  "requestId": "f3297e6f-7a24-4de0-ad2c-b8aa9a03b5a1"
+}
+
+###
+POST http://{{host}}:8080/metrics/dir
+Content-Type: application/json
+
+{
+  "protectedAttribute": "gender",
+  "favorableOutcome": 1,
+  "outcomeName": "income",
+  "privilegedAttribute": 1,
+  "unprivilegedAttribute": 0
+}
+
+###
+GET http://{{host}}:8080/q/openapi
+
+###
+GET http://{{host}}:8080/metrics/spd/metrics/spd/prometheus
+
+###
+GET http://{{host}}:8080/q/metrics
