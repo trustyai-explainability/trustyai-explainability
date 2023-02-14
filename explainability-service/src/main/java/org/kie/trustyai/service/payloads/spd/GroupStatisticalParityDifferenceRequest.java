@@ -1,17 +1,18 @@
 package org.kie.trustyai.service.payloads.spd;
 
+import org.kie.trustyai.service.payloads.values.TypedValue;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.JsonNode;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 public class GroupStatisticalParityDifferenceRequest {
 
     private String protectedAttribute;
 
-    private JsonNode favorableOutcome;
+    private TypedValue favorableOutcome;
     private String outcomeName;
-    private JsonNode privilegedAttribute;
-    private JsonNode unprivilegedAttribute;
+    private TypedValue privilegedAttribute;
+    private TypedValue unprivilegedAttribute;
 
     public GroupStatisticalParityDifferenceRequest() {
 
@@ -25,11 +26,11 @@ public class GroupStatisticalParityDifferenceRequest {
         this.protectedAttribute = protectedAttribute;
     }
 
-    public JsonNode getFavorableOutcome() {
+    public TypedValue getFavorableOutcome() {
         return favorableOutcome;
     }
 
-    public void setFavorableOutcome(JsonNode favorableOutcome) {
+    public void setFavorableOutcome(TypedValue favorableOutcome) {
         this.favorableOutcome = favorableOutcome;
     }
 
@@ -41,19 +42,19 @@ public class GroupStatisticalParityDifferenceRequest {
         this.outcomeName = outcomeName;
     }
 
-    public JsonNode getPrivilegedAttribute() {
+    public TypedValue getPrivilegedAttribute() {
         return privilegedAttribute;
     }
 
-    public void setPrivilegedAttribute(JsonNode privilegedAttribute) {
+    public void setPrivilegedAttribute(TypedValue privilegedAttribute) {
         this.privilegedAttribute = privilegedAttribute;
     }
 
-    public JsonNode getUnprivilegedAttribute() {
+    public TypedValue getUnprivilegedAttribute() {
         return unprivilegedAttribute;
     }
 
-    public void setUnprivilegedAttribute(JsonNode unprivilegedAttribute) {
+    public void setUnprivilegedAttribute(TypedValue unprivilegedAttribute) {
         this.unprivilegedAttribute = unprivilegedAttribute;
     }
 }
