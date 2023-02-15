@@ -63,9 +63,6 @@ public class DataSource {
         } else {
             LOG.info("No batching. Passing all of " + dataframe.getRowDimension() + " rows");
             return dataframe;
-
         }
-
     }
-
 }
