@@ -23,7 +23,7 @@ import io.quarkus.arc.lookup.LookupIfProperty;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "MINIO")
 @ApplicationScoped
-public class MinioStorage implements Storage {
+public class MinioStorage extends Storage {
 
     private static final Logger LOG = Logger.getLogger(MinioStorage.class);
 
@@ -33,19 +33,50 @@ public class MinioStorage implements Storage {
 
     private final String inputFilename;
     private final String outputFilename;
+    private final String endpoint;
+    private final String accessKey;
+    private final String secretKey;
 
     public MinioStorage(MinioConfig config) {
-        LOG.info("Starting MinIO storage reader");
-        this.bucketName = config.bucketName();
-        this.inputFilename = config.inputFilename();
-        this.outputFilename = config.outputFilename();
+        LOG.info("Starting MinIO storage consumer");
+        if (config.bucketName().isEmpty()) {
+            throw new IllegalArgumentException("Missing MinIO bucket");
+        } else {
+            this.bucketName = config.bucketName().get();
+        }
+        if (config.inputFilename().isEmpty()) {
+            throw new IllegalArgumentException("Missing MinIO input filename");
+        } else {
+            this.inputFilename = config.inputFilename().get();
+        }
+        if (config.outputFilename().isEmpty()) {
+            throw new IllegalArgumentException("Missing MinIO output filename");
+        } else {
+            this.outputFilename = config.outputFilename().get();
+        }
+        if (config.endpoint().isEmpty()) {
+            throw new IllegalArgumentException("Missing MinIO endpoint");
+        } else {
+            this.endpoint = config.endpoint().get();
+        }
+        if (config.accessKey().isEmpty()) {
+            throw new IllegalArgumentException("Missing MinIO access key");
+        } else {
+            this.accessKey = config.accessKey().get();
+        }
+        if (config.secretKey().isEmpty()) {
+            throw new IllegalArgumentException("Missing MinIO secret key");
+        } else {
+            this.secretKey = config.secretKey().get();
+        }
+
         LOG.info("MinIO data location: endpoint=" + config.endpoint() + ", bucket=" + bucketName + ", input file="
                 + inputFilename
                 + ", output filename=" + outputFilename);
         this.minioClient =
                 MinioClient.builder()
-                        .endpoint(config.endpoint())
-                        .credentials(config.accessKey(), config.secretKey())
+                        .endpoint(this.endpoint)
+                        .credentials(this.accessKey, this.secretKey)
                         .build();
     }
 
