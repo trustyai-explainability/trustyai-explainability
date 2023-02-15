@@ -17,13 +17,16 @@ import org.kie.trustyai.service.config.readers.MinioConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
-import io.minio.*;
+import io.minio.GetObjectArgs;
+import io.minio.MinioClient;
+import io.minio.StatObjectArgs;
+import io.minio.StatObjectResponse;
 import io.minio.errors.*;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "MINIO")
 @ApplicationScoped
-public class MinioStorage implements Storage {
+public class MinioStorage extends Storage {
 
     private static final Logger LOG = Logger.getLogger(MinioStorage.class);
 

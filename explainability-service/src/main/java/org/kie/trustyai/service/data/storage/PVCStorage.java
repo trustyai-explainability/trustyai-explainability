@@ -16,7 +16,7 @@ import io.quarkus.arc.lookup.LookupIfProperty;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "PVC")
 @ApplicationScoped
-public class PVCStorage implements Storage {
+public class PVCStorage extends Storage {
 
     private static final Logger LOG = Logger.getLogger(PVCStorage.class);
 

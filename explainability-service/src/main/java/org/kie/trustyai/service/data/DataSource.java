@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -21,7 +22,7 @@ public class DataSource {
     private static final Logger LOG = Logger.getLogger(DataSource.class);
 
     @Inject
-    Storage storage;
+    Instance<Storage> storage;
 
     @Inject
     DataParser parser;
@@ -33,14 +34,14 @@ public class DataSource {
 
         final ByteBuffer inputsBuffer;
         try {
-            inputsBuffer = storage.getInputData();
+            inputsBuffer = storage.get().getInputData();
         } catch (StorageReadException e) {
             throw new DataframeCreateException(e.getMessage());
         }
 
         final ByteBuffer outputsBuffer;
         try {
-            outputsBuffer = storage.getOutputData();
+            outputsBuffer = storage.get().getOutputData();
         } catch (StorageReadException e) {
             throw new DataframeCreateException(e.getMessage());
         }
