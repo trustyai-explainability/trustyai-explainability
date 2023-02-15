@@ -25,8 +25,17 @@ public class PVCStorage extends Storage {
 
     public PVCStorage(PVCConfig config) {
         LOG.info("Starting PVC storage consumer");
-        this.inputFilename = config.inputFilename();
-        this.outputFilename = config.outputFilename();
+        if (config.inputFilename().isEmpty()) {
+            throw new IllegalArgumentException("Missing PVC input filename");
+        } else {
+            this.inputFilename = config.inputFilename().get();
+        }
+        if (config.outputFilename().isEmpty()) {
+            throw new IllegalArgumentException("Missing PVC output filename");
+        } else {
+            this.outputFilename = config.outputFilename().get();
+        }
+
         LOG.info("PVC data location: input file="
                 + inputFilename
                 + ", output filename=" + outputFilename);

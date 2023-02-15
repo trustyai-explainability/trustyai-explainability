@@ -1,19 +1,21 @@
 package org.kie.trustyai.service.config.readers;
 
+import java.util.Optional;
+
 import io.smallrye.config.ConfigMapping;
 
 @ConfigMapping(prefix = "minio", namingStrategy = ConfigMapping.NamingStrategy.KEBAB_CASE)
 public interface MinioConfig {
 
-    String bucketName();
+    Optional<String> bucketName();
 
-    String endpoint();
+    Optional<String> endpoint();
 
-    String inputFilename();
+    Optional<String> inputFilename();
 
-    String outputFilename();
+    Optional<String> outputFilename();
 
-    String secretKey();
+    Optional<String> secretKey();
 
-    String accessKey();
+    Optional<String> accessKey();
 }
