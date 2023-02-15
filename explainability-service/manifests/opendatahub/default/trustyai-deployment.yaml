@@ -1,0 +1,118 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    app.openshift.io/vcs-url: <<unknown>>
+    app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
+    app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /q/metrics
+    prometheus.io/port: "8080"
+    prometheus.io/scheme: http
+  labels:
+    app.kubernetes.io/name: trustyai-service
+    app.kubernetes.io/version: 999-SNAPSHOT
+    app.openshift.io/runtime: quarkus
+  name: trustyai-service
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: trustyai-service
+    app.kubernetes.io/version: 999-SNAPSHOT
+  type: ClusterIP
+
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  annotations:
+    app.openshift.io/vcs-url: <<unknown>>
+    app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
+    app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
+  labels:
+    app.kubernetes.io/name: trustyai-service
+    app.kubernetes.io/version: 999-SNAPSHOT
+    app.openshift.io/runtime: quarkus
+  name: trustyai-service
+spec:
+  dockerImageRepository: quay.io/ruimvieira/trustyai-service
+
+---
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    app.openshift.io/vcs-url: <<unknown>>
+    app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
+    app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /q/metrics
+    prometheus.io/port: "8080"
+    prometheus.io/scheme: http
+  labels:
+    app.kubernetes.io/name: trustyai-service
+    app.kubernetes.io/version: 999-SNAPSHOT
+    app.openshift.io/runtime: quarkus
+  name: trustyai-service
+spec:
+  replicas: 1
+  selector:
+    app.kubernetes.io/name: trustyai-service
+    app.kubernetes.io/version: 999-SNAPSHOT
+  template:
+    metadata:
+      annotations:
+        app.openshift.io/vcs-url: <<unknown>>
+        app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
+        app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /q/metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scheme: http
+      labels:
+        app.openshift.io/runtime: quarkus
+        app.kubernetes.io/name: trustyai-service
+        app.kubernetes.io/version: 999-SNAPSHOT
+    spec:
+      containers:
+        - env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: SERVICE_MODEL_NAME
+              value: "localhost"
+            - name: SERVICE_KSERVE_TARGET
+              value: "localhost"
+            - name: SERVICE_STORAGE_FORMAT
+              value: "PVC"
+            - name: SERVICE_DATA_FORMAT
+              value: "CSV"
+            - name: MINIO_INPUT_FILENAME
+              value: "/inputs/income-biased-inputs.csv"
+            - name: MINIO_OUTPUT_FILENAME
+              value: "/inputs/income-biased-outputs.csv"
+            - name: SERVICE_METRICS_SCHEDULE
+              value: "5s"
+            - name: SERVICE_BATCH_SIZE
+              value: "5000"
+          image: trustyai-service:999-SNAPSHOT
+          imagePullPolicy: Always
+          name: trustyai-service
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+  triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - trustyai-service
+        from:
+          kind: ImageStreamTag
+          name: trustyai-service:999-SNAPSHOT
+      type: ImageChange
