@@ -126,7 +126,7 @@ public class MinioStorage implements Storage {
         }
     }
 
-    private void appendData(ByteBuffer byteBuffer, String bucketName, String filename) throws StorageWriteException {
+    private synchronized void appendData(ByteBuffer byteBuffer, String bucketName, String filename) throws StorageWriteException {
         final String tempFilename = "tmp-" + UUID.randomUUID();
         final List<ComposeSource> sources = List.of(
                 ComposeSource.builder().bucket(bucketName).object(filename).build(),
