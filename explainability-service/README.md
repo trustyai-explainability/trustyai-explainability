@@ -273,18 +273,26 @@ curl -X DELETE --location "http://{{host}}:8080/metrics/spd/request" \
 ```
 
 ### Metric Definitions
-To get a _general_ definition of a metric, you can issue an HTTP `GET` request to the `/metrics/$METRIC/definition` endpoint:
+
+To get a _general_ definition of a metric, you can issue an HTTP `GET` request to the `/metrics/$METRIC/definition`
+endpoint:
+
 ```shell
 curl -X GET http://{{host}}:8080/metrics/{{metric}}/definition
 ```
+
 returns
+
 ```
 Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the difference between the proportion of the majority and protected classes getting a particular outcome. Typically, -0.1 < SPD < 0.1 indicates a fair model, while a value outside those bounds indicates an unfair model for the groups and outcomes in question"
 ```
-To get a _specific_ definition of what a particular value means in the context of a specific computed metric, 
+
+To get a _specific_ definition of what a particular value means in the context of a specific computed metric,
 you can issue an HTTP `POST` request to the `/metrics/$METRIC/definition` endpoint. The body of this request will
-look identical to a normal metric request, except you will specify the metric value of interest within the `metricValue` field.
+look identical to a normal metric request, except you will specify the metric value of interest within the `metricValue`
+field.
 This is equivalent to asking "If I computed this metric in this configuration, what would a value of $x mean?":
+
 ```shell
 curl -X POST --location "http://{{host}}:8080/metrics/{metric}/definition" \
     -H "Content-Type: application/json" \
@@ -306,11 +314,12 @@ curl -X POST --location "http://{{host}}:8080/metrics/{metric}/definition" \
           \"metricValue\": 0.25
         }"
 ```
+
 returns
+
 ```
 The SPD of 0.250000 indicates that the likelihood of Group:gender=1 receiving Outcome:income=1 was 25.000000 percentage points higher than that of Group:gender=0.%
 ```
-
 
 ### Prometheus
 
@@ -360,27 +369,6 @@ The data can be batched into the latest `n` observations by using the configurat
 If not specified, the entire dataset is used.
 
 # Deployment
-
-## Building the image
-
-Build the JAR using
-
-```shell
-mvnw clean package
-```
-
-And build the image with:
-
-```shell
-docker build -f ./Dockerfile \
-    -t trustyai/trustyai-service:999-SNAPSHOT .
-```
-
-And test the image with:
-
-```shell
-docker run -i --rm -p 8080:8080 trustyai/trustyai-service:999-SNAPSHOT
-```
 
 ## OpenShift
 
