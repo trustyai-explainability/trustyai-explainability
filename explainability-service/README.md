@@ -273,18 +273,26 @@ curl -X DELETE --location "http://{{host}}:8080/metrics/spd/request" \
 ```
 
 ### Metric Definitions
-To get a _general_ definition of a metric, you can issue an HTTP `GET` request to the `/metrics/$METRIC/definition` endpoint:
+
+To get a _general_ definition of a metric, you can issue an HTTP `GET` request to the `/metrics/$METRIC/definition`
+endpoint:
+
 ```shell
 curl -X GET http://{{host}}:8080/metrics/{{metric}}/definition
 ```
+
 returns
+
 ```
 Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the difference between the proportion of the majority and protected classes getting a particular outcome. Typically, -0.1 < SPD < 0.1 indicates a fair model, while a value outside those bounds indicates an unfair model for the groups and outcomes in question"
 ```
-To get a _specific_ definition of what a particular value means in the context of a specific computed metric, 
+
+To get a _specific_ definition of what a particular value means in the context of a specific computed metric,
 you can issue an HTTP `POST` request to the `/metrics/$METRIC/definition` endpoint. The body of this request will
-look identical to a normal metric request, except you will specify the metric value of interest within the `metricValue` field.
+look identical to a normal metric request, except you will specify the metric value of interest within the `metricValue`
+field.
 This is equivalent to asking "If I computed this metric in this configuration, what would a value of $x mean?":
+
 ```shell
 curl -X POST --location "http://{{host}}:8080/metrics/{metric}/definition" \
     -H "Content-Type: application/json" \
@@ -306,11 +314,12 @@ curl -X POST --location "http://{{host}}:8080/metrics/{metric}/definition" \
           \"metricValue\": 0.25
         }"
 ```
+
 returns
+
 ```
 The SPD of 0.250000 indicates that the likelihood of Group:gender=1 receiving Outcome:income=1 was 25.000000 percentage points higher than that of Group:gender=0.%
 ```
-
 
 ### Prometheus
 
@@ -359,14 +368,9 @@ The data can be batched into the latest `n` observations by using the configurat
 `SERVICE_BATCH_SIZE=n`. This behaves like a `n`-size tail and its optional.
 If not specified, the entire dataset is used.
 
-## Explainers
-
-An explainer can be linked to the service using the environment
-variables `SERVICE_KSERVE_TARGET` and `SERVICE_MODEL_NAME`.
-These will be used by the service's gRPC client which can natively
-query KServe and ModelMesh using that endpoint.
-
 # Deployment
+
+## OpenShift
 
 To deploy in Kubernetes or OpenShift, the connection information
 can be passed in the manifest as environment variables:

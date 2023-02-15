@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -24,7 +25,7 @@ public class CSVParser implements DataParser {
     private static final Charset UTF8 = StandardCharsets.UTF_8;
 
     @Override
-    public Dataframe parse(ByteBuffer inputs, ByteBuffer outputs) throws DataframeCreateException {
+    public Dataframe toDataframe(ByteBuffer inputs, ByteBuffer outputs) throws DataframeCreateException {
         final String inputData = UTF8.decode(inputs).toString();
         final String outputData = UTF8.decode(outputs).toString();
 
@@ -44,4 +45,41 @@ public class CSVParser implements DataParser {
         LOG.info("Creating dataframe from CSV data");
         return Dataframe.createFrom(predictionInputs, predictionOutputs);
     }
+
+    private String convertToString(Dataframe dataframe) {
+        final StringBuilder output = new StringBuilder();
+        output
+                .append(
+                        String.join(",",
+                                dataframe.getColumnNames().stream().map(name -> "\"" + name + "\"").collect(Collectors.toList())))
+                .append("\n");
+        dataframe.getRows().forEach(values -> {
+            final String rowStr = String.join(",", values.stream().map(value -> {
+                final Object obj = value.getUnderlyingObject();
+                if (obj instanceof String) {
+                    return "\"" + obj + "\"";
+                } else {
+                    return obj.toString();
+                }
+            }).collect(Collectors.toList()));
+            output.append(rowStr).append("\n");
+        });
+        return output.toString();
+    }
+
+    private ByteBuffer convertToByteBuffer(Dataframe dataframe) {
+        final String inputsStr = convertToString(dataframe);
+        return ByteBuffer.wrap(inputsStr.getBytes(UTF8));
+    }
+
+    @Override
+    public ByteBuffer toInputByteBuffer(Dataframe dataframe) {
+        return convertToByteBuffer(dataframe.getInputDataframe());
+    }
+
+    @Override
+    public ByteBuffer toOutputByteBuffer(Dataframe dataframe) {
+        return convertToByteBuffer(dataframe.getOutputDataframe());
+    }
+
 }
