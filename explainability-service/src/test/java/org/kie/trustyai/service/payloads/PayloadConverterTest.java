@@ -30,6 +30,7 @@ class PayloadConverterTest {
         final Value value = PayloadConverter.convertToValue(typedValue);
 
         assertTrue(value.getUnderlyingObject() instanceof Boolean);
+        assertTrue((Boolean) value.getUnderlyingObject());
     }
 
     @Test
@@ -44,6 +45,7 @@ class PayloadConverterTest {
         final Value value = PayloadConverter.convertToValue(typedValue);
 
         assertTrue(value.getUnderlyingObject() instanceof Double);
+        assertEquals(1.2, value.getUnderlyingObject());
     }
 
     @Test
@@ -58,6 +60,7 @@ class PayloadConverterTest {
         final Value value = PayloadConverter.convertToValue(typedValue);
 
         assertTrue(value.getUnderlyingObject() instanceof Double);
+        assertEquals(1.0, value.getUnderlyingObject());
     }
 
     @Test
@@ -72,6 +75,7 @@ class PayloadConverterTest {
         final Value value = PayloadConverter.convertToValue(typedValue);
 
         assertTrue(value.getUnderlyingObject() instanceof Integer);
+        assertEquals(1, value.getUnderlyingObject());
     }
 
     @Test
@@ -86,6 +90,7 @@ class PayloadConverterTest {
         final Value value = PayloadConverter.convertToValue(typedValue);
 
         assertTrue(value.getUnderlyingObject() instanceof Long);
+        assertEquals(2L, value.getUnderlyingObject());
     }
 
     @Test
@@ -100,6 +105,7 @@ class PayloadConverterTest {
         final Value value = PayloadConverter.convertToValue(typedValue);
 
         assertTrue(value.getUnderlyingObject() instanceof String);
+        assertEquals("string", value.getUnderlyingObject());
     }
 
     @Test
