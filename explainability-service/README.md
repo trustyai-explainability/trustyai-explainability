@@ -348,6 +348,14 @@ trustyai_spd{
 }
 ```
 
+### Health checks
+
+The service provides an health check endpoint at `/q/health`:
+
+```shell
+curl {{host}}:8080/q/health
+```
+
 # Data sources
 
 ## Metrics
