@@ -129,6 +129,3 @@ GET http://{{host}}:8080/q/metrics
 
 ###
 GET http://{{host}}:8080/q/health
-
-###
-GET http://{{host}}:8080/q/health
