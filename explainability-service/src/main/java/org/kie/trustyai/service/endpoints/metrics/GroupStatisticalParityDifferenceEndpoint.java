@@ -65,7 +65,7 @@ public class GroupStatisticalParityDifferenceEndpoint extends AbstractMetricsEnd
         try {
             spd = calculator.calculateSPD(df, request);
         } catch (MetricCalculationException e) {
-            LOG.error("Error calculating metric: " + e.getMessage());
+            LOG.error("Error calculating metric: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
         final String definition = calculator.getSPDDefinition(spd, request);

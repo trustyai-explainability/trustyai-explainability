@@ -31,7 +31,7 @@ public class MetricsCalculator {
             return FairnessMetrics.groupStatisticalParityDifference(privileged, unprivileged,
                     List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
         } catch (Exception e) {
-            throw new MetricCalculationException(e.getMessage());
+            throw new MetricCalculationException(e.getMessage(), e);
         }
     }
 
