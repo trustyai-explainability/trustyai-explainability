@@ -10,24 +10,29 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 
 @Singleton
 public class MetricsCalculator {
 
-    public double calculateSPD(Dataframe dataframe, BaseMetricRequest request) {
-        final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
-        final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
-        final Dataframe privileged = dataframe.filterByColumnValue(protectedIndex,
-                value -> value.equals(privilegedAttr));
-        final Value unprivilegedAttr = PayloadConverter.convertToValue(request.getUnprivilegedAttribute());
-        final Dataframe unprivileged = dataframe.filterByColumnValue(protectedIndex,
-                value -> value.equals(unprivilegedAttr));
-        final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
-        final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
-        return FairnessMetrics.groupStatisticalParityDifference(privileged, unprivileged,
-                List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+    public double calculateSPD(Dataframe dataframe, BaseMetricRequest request) throws MetricCalculationException {
+        try {
+            final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
+            final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
+            final Dataframe privileged = dataframe.filterByColumnValue(protectedIndex,
+                    value -> value.equals(privilegedAttr));
+            final Value unprivilegedAttr = PayloadConverter.convertToValue(request.getUnprivilegedAttribute());
+            final Dataframe unprivileged = dataframe.filterByColumnValue(protectedIndex,
+                    value -> value.equals(unprivilegedAttr));
+            final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
+            final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
+            return FairnessMetrics.groupStatisticalParityDifference(privileged, unprivileged,
+                    List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+        } catch (Exception e) {
+            throw new MetricCalculationException(e.getMessage());
+        }
     }
 
     public String getSPDDefinition(double spd, BaseMetricRequest request) {
