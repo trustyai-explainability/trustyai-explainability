@@ -40,7 +40,7 @@ public class PrometheusScheduler {
         return spdRequests;
     }
 
-    @Scheduled(every = "{SERVICE_METRICS_SCHEDULE}")
+    @Scheduled(every = "{service.metrics-schedule}")
     void calculate() {
 
         if (hasRequests()) {
