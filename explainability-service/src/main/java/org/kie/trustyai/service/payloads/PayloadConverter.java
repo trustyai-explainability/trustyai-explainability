@@ -29,14 +29,18 @@ public class PayloadConverter {
     }
 
     public static Type convertToType(String payloadType) {
-        final Values type = Values.valueOf(payloadType);
-        if (type == BOOL) {
-            return Type.BOOLEAN;
-        } else if (type == FLOAT || type == DOUBLE || type == INT32 || type == INT64) {
-            return Type.NUMBER;
-        } else if (type == STRING) {
-            return Type.CATEGORICAL;
-        } else {
+        try {
+            final Values type = Values.valueOf(payloadType);
+            if (type == BOOL) {
+                return Type.BOOLEAN;
+            } else if (type == FLOAT || type == DOUBLE || type == INT32 || type == INT64) {
+                return Type.NUMBER;
+            } else if (type == STRING) {
+                return Type.CATEGORICAL;
+            } else {
+                return Type.UNDEFINED;
+            }
+        } catch (IllegalArgumentException e) {
             return Type.UNDEFINED;
         }
     }
