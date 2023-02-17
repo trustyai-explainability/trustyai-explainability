@@ -3,12 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics;
 import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -20,6 +15,7 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
+import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.MetricThreshold;
@@ -66,7 +62,13 @@ public class DisparateImpactRatioEndpoint extends AbstractMetricsEndpoint {
 
         final Dataframe df = dataSource.getDataframe();
 
-        final double dir = calculator.calculateDIR(df, request);
+        final double dir;
+        try {
+            dir = calculator.calculateDIR(df, request);
+        } catch (MetricCalculationException e) {
+            LOG.error("Error calculating metric: " + e.getMessage(), e);
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
         final String dirDefinition = calculator.getDIRDefinition(dir, request);
 
         final MetricThreshold thresholds =

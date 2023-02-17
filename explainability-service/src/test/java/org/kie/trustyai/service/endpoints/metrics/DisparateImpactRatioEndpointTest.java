@@ -13,16 +13,15 @@ import io.restassured.http.ContentType;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(EndpointTestProfile.class)
-@TestHTTPEndpoint(GroupStatisticalParityDifferenceEndpoint.class)
-class GroupStatisticalParityDifferenceEndpointTest {
+@TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
+class DisparateImpactRatioEndpointTest {
 
     @Test
-    void spdGet() {
+    void dirGet() {
         when().get()
                 .then()
                 .statusCode(405)
@@ -30,7 +29,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
     }
 
     @Test
-    void spdPostCorrect() {
+    void dirPostCorrect() {
         final Map<String, Object> payload = PayloadGenerator.correct();
 
         final GroupStatisticalParityDifferenceResponse response = given()
@@ -43,12 +42,12 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .body().as(GroupStatisticalParityDifferenceResponse.class);
 
         assertEquals("metric", response.type);
-        assertEquals("SPD", response.name);
+        assertEquals("DIR", response.name);
         assertFalse(Double.isNaN(response.value));
     }
 
     @Test
-    void spdPostIncorrectType() {
+    void dirPostIncorrectType() {
         final Map<String, Object> payload = PayloadGenerator.incorrectType();
 
         final GroupStatisticalParityDifferenceResponse response = given()
@@ -61,12 +60,12 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .body().as(GroupStatisticalParityDifferenceResponse.class);
 
         assertEquals("metric", response.type);
-        assertEquals("SPD", response.name);
-        assertEquals(0.0, response.value);
+        assertEquals("DIR", response.name);
+        assertTrue(Double.isNaN(response.value));
     }
 
     @Test
-    void spdPostIncorrectInput() {
+    void dirPostIncorrectInput() {
         final Map<String, Object> payload = PayloadGenerator.incorrectInput();
 
         given()
@@ -78,5 +77,4 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .body(is(""));
 
     }
-
 }

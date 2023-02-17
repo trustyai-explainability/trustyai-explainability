@@ -52,19 +52,23 @@ public class MetricsCalculator {
     }
 
     public double calculateDIR(Dataframe dataframe, BaseMetricRequest request) {
-        final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
+        try {
+            final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
 
-        final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
+            final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
 
-        final Dataframe privileged = dataframe.filterByColumnValue(protectedIndex,
-                value -> value.equals(privilegedAttr));
-        final Value unprivilegedAttr = PayloadConverter.convertToValue(request.getUnprivilegedAttribute());
-        final Dataframe unprivileged = dataframe.filterByColumnValue(protectedIndex,
-                value -> value.equals(unprivilegedAttr));
-        final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
-        final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
-        return FairnessMetrics.groupDisparateImpactRatio(privileged, unprivileged,
-                List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+            final Dataframe privileged = dataframe.filterByColumnValue(protectedIndex,
+                    value -> value.equals(privilegedAttr));
+            final Value unprivilegedAttr = PayloadConverter.convertToValue(request.getUnprivilegedAttribute());
+            final Dataframe unprivileged = dataframe.filterByColumnValue(protectedIndex,
+                    value -> value.equals(unprivilegedAttr));
+            final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
+            final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
+            return FairnessMetrics.groupDisparateImpactRatio(privileged, unprivileged,
+                    List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+        } catch (Exception e) {
+            throw new MetricCalculationException(e.getMessage(), e);
+        }
     }
 
     public String getDIRDefinition(double dir, BaseMetricRequest request) {
