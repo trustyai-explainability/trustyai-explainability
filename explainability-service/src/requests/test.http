@@ -129,3 +129,12 @@ GET http://{{host}}:8080/q/metrics
 
 ###
 GET http://{{host}}:8080/q/health
+
+###
+POST http://{{host}}:8080/consumer
+Content-Type: application/json
+
+{
+  "input": "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKiUKBWlucHV0EgRGUDY0GgIBAyoSOhAAAAAAAABUQAAAAAAAABBA",
+  "output": "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKh0KBWlucHV0EgRGUDY0GgIBASoKOggAAAAAAAAAAA=="
+}
