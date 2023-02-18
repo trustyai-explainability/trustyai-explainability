@@ -46,13 +46,15 @@ public class CSVParser implements DataParser {
         return Dataframe.createFrom(predictionInputs, predictionOutputs);
     }
 
-    private String convertToString(Dataframe dataframe) {
+    private String convertToString(Dataframe dataframe, boolean includeHeader) {
         final StringBuilder output = new StringBuilder();
-        output
-                .append(
-                        String.join(",",
-                                dataframe.getColumnNames().stream().map(name -> "\"" + name + "\"").collect(Collectors.toList())))
-                .append("\n");
+        if (includeHeader) {
+            output
+                    .append(
+                            String.join(",",
+                                    dataframe.getColumnNames().stream().map(name -> "\"" + name + "\"").collect(Collectors.toList())))
+                    .append("\n");
+        }
         dataframe.getRows().forEach(values -> {
             final String rowStr = String.join(",", values.stream().map(value -> {
                 final Object obj = value.getUnderlyingObject();
@@ -67,19 +69,19 @@ public class CSVParser implements DataParser {
         return output.toString();
     }
 
-    private ByteBuffer convertToByteBuffer(Dataframe dataframe) {
-        final String inputsStr = convertToString(dataframe);
+    private ByteBuffer convertToByteBuffer(Dataframe dataframe, boolean includeHeader) {
+        final String inputsStr = convertToString(dataframe, includeHeader);
         return ByteBuffer.wrap(inputsStr.getBytes(UTF8));
     }
 
     @Override
-    public ByteBuffer toInputByteBuffer(Dataframe dataframe) {
-        return convertToByteBuffer(dataframe.getInputDataframe());
+    public ByteBuffer toInputByteBuffer(Dataframe dataframe, boolean includeHeader) {
+        return convertToByteBuffer(dataframe.getInputDataframe(), includeHeader);
     }
 
     @Override
-    public ByteBuffer toOutputByteBuffer(Dataframe dataframe) {
-        return convertToByteBuffer(dataframe.getOutputDataframe());
+    public ByteBuffer toOutputByteBuffer(Dataframe dataframe, boolean includeHeader) {
+        return convertToByteBuffer(dataframe.getOutputDataframe(), includeHeader);
     }
 
 }

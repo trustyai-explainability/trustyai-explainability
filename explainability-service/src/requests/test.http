@@ -19,6 +19,27 @@ Content-Type: application/json
 }
 
 ###
+POST http://{{host}}:8080/metrics/spd
+Content-Type: application/json
+
+{
+  "protectedAttribute": "input-2",
+  "favorableOutcome": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "outcomeName": "output-0",
+  "privilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "unprivilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 0.0
+  }
+}
+
+###
 POST http://{{host}}:8080/metrics/spd/request
 Content-Type: application/json
 
@@ -36,6 +57,27 @@ Content-Type: application/json
   "unprivilegedAttribute": {
     "type": "INT32",
     "value": 0
+  }
+}
+
+###
+POST http://{{host}}:8080/metrics/spd/request
+Content-Type: application/json
+
+{
+  "protectedAttribute": "input-2",
+  "favorableOutcome": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "outcomeName": "output-0",
+  "privilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "unprivilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 0.0
   }
 }
 

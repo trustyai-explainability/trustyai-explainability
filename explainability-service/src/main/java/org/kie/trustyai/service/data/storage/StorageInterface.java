@@ -14,4 +14,12 @@ public interface StorageInterface {
 
     void saveOutputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException;
 
+    void appendInputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException;
+
+    void appendOutputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException;
+
+    boolean inputExists() throws StorageReadException;
+
+    boolean outputExists() throws StorageReadException;
+
 }

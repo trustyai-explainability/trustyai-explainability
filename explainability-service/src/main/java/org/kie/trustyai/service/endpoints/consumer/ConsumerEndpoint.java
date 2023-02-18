@@ -2,6 +2,7 @@ package org.kie.trustyai.service.endpoints.consumer;
 
 import java.util.Base64;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -13,8 +14,8 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.connectors.kserve.v2.PayloadParser;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 
@@ -24,6 +25,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 public class ConsumerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(ConsumerEndpoint.class);
+    @Inject
+    DataSource dataSource;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -31,14 +34,22 @@ public class ConsumerEndpoint {
     public Response consume(InferencePayload request) throws DataframeCreateException {
         LOG.info("Got payload on the consumer");
         try {
-            byte[] inputBytes = Base64.getDecoder().decode(request.input.getBytes());
-            ModelInferRequest input = ModelInferRequest.parseFrom(inputBytes);
-            PredictionInput predictionInput = PayloadParser.inputTensorToPredictionInput(input.getInputs(0), null);
+            final byte[] inputBytes = Base64.getDecoder().decode(request.input.getBytes());
+            final ModelInferRequest input = ModelInferRequest.parseFrom(inputBytes);
+            final PredictionInput predictionInput = PayloadParser.inputTensorToPredictionInput(input.getInputs(0), null);
             LOG.info(predictionInput.getFeatures());
-            byte[] outputBytes = Base64.getDecoder().decode(request.output.getBytes());
-            ModelInferResponse output = ModelInferResponse.parseFrom(outputBytes);
-            PredictionOutput predictionOutput = PayloadParser.outputTensorToPredictionOutput(output.getOutputs(0), null);
+
+            final byte[] outputBytes = Base64.getDecoder().decode(request.output.getBytes());
+            final ModelInferResponse output = ModelInferResponse.parseFrom(outputBytes);
+            final PredictionOutput predictionOutput = PayloadParser.outputTensorToPredictionOutput(output.getOutputs(0), null);
             LOG.info(predictionOutput.getOutputs());
+
+            final Prediction prediction = new SimplePrediction(predictionInput, predictionOutput);
+
+            final Dataframe dataframe = Dataframe.createFrom(prediction);
+
+            dataSource.appendDataframe(dataframe);
+
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }

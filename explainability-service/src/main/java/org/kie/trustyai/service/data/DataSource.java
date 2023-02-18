@@ -65,4 +65,18 @@ public class DataSource {
             return dataframe;
         }
     }
+
+    public void appendDataframe(Dataframe dataframe) {
+        if (!storage.get().inputExists()) {
+            storage.get().saveInputData(parser.toInputByteBuffer(dataframe, true));
+        } else {
+            storage.get().appendInputData(parser.toInputByteBuffer(dataframe, false));
+        }
+
+        if (!storage.get().outputExists()) {
+            storage.get().saveOutputData(parser.toOutputByteBuffer(dataframe, true));
+        } else {
+            storage.get().appendOutputData(parser.toOutputByteBuffer(dataframe, false));
+        }
+    }
 }

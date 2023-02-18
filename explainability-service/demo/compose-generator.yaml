@@ -14,7 +14,7 @@ services:
       SERVICE_METRICS_SCHEDULE: "5s"
       SERVICE_BATCH_SIZE: 5000
     volumes:
-      - /home/rui/volumes/pvc/inputs:/inputs
+      - ~/volumes/pvc/inputs:/inputs
   prometheus:
     image: prom/prometheus
     container_name: prometheus
