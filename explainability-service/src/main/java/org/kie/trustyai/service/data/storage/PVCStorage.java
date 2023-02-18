@@ -70,7 +70,7 @@ public class PVCStorage extends Storage {
         }
     }
 
-    private void writeData(ByteBuffer byteBuffer, String filename, boolean append) throws StorageWriteException, StorageReadException {
+    private synchronized void writeData(ByteBuffer byteBuffer, String filename, boolean append) throws StorageWriteException, StorageReadException {
         try (FileChannel channel = new FileOutputStream(filename, append).getChannel()) {
             channel.write(byteBuffer);
         } catch (IOException e) {
