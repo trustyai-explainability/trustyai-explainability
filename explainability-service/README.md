@@ -1,5 +1,30 @@
 # trustyai-service
 
+<!-- TOC -->
+
+* [trustyai-service](#trustyai-service)
+* [Running](#running)
+    * [Locally](#locally)
+        * [Using data in storage only](#using-data-in-storage-only)
+            * [Own data in MinIO](#own-data-in-minio)
+        * [Consuming KServe v2 data](#consuming-kserve-v2-data)
+    * [S3 (MinIO)](#s3--minio-)
+* [Endpoints](#endpoints)
+    * [Metrics](#metrics)
+        * [Statistical Parity Difference](#statistical-parity-difference)
+        * [Disparate Impact Ratio](#disparate-impact-ratio)
+        * [Scheduled metrics](#scheduled-metrics)
+    * [Metric Definitions](#metric-definitions)
+    * [Prometheus](#prometheus)
+    * [Health checks](#health-checks)
+    * [Consuming KServe v2 payloads](#consuming-kserve-v2-payloads)
+* [Data sources](#data-sources)
+    * [Metrics](#metrics-1)
+* [Deployment](#deployment)
+    * [OpenShift](#openshift)
+
+<!-- TOC -->
+
 # Running
 
 ## Locally
@@ -162,7 +187,7 @@ Which should produce:
 [2023-02-09 23:01:49 GMT]  68KiB income-biased-inputs.csv
 ```
 
-## Endpoints
+# Endpoints
 
 The OpenAPI schema can be displayed using
 
@@ -170,7 +195,7 @@ The OpenAPI schema can be displayed using
 curl -X GET --location "http://localhost:8080/q/openapi"
 ```
 
-### Metrics
+## Metrics
 
 Each of the metrics default bounds can be overridden with
 the corresponding environment variable, e.g.
@@ -180,7 +205,7 @@ the corresponding environment variable, e.g.
 - `METRICS_DIR_THRESHOLD_LOWER`
 - _etc_
 
-#### Statistical Parity Difference
+### Statistical Parity Difference
 
 Get statistical parity difference at `/metrics/spd`
 
@@ -227,7 +252,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-#### Disparate Impact Ratio
+### Disparate Impact Ratio
 
 ```shell
 curl -X POST --location "http://{{host}}:8080/metrics/dir" \
@@ -269,7 +294,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-#### Scheduled metrics
+### Scheduled metrics
 
 In order to generate period measurements for a certain metric, you can send a request to
 the `/metrics/$METRIC/schedule`.
@@ -327,7 +352,7 @@ curl -X DELETE --location "http://{{host}}:8080/metrics/spd/request" \
         }"
 ```
 
-### Metric Definitions
+## Metric Definitions
 
 To get a _general_ definition of a metric, you can issue an HTTP `GET` request to the `/metrics/$METRIC/definition`
 endpoint:
@@ -376,7 +401,7 @@ returns
 The SPD of 0.250000 indicates that the likelihood of Group:gender=1 receiving Outcome:income=1 was 25.000000 percentage points higher than that of Group:gender=0.%
 ```
 
-### Prometheus
+## Prometheus
 
 Whenever a metric endpoint is called with a HTTP request, the service also updates
 the corresponding Prometheus metric.
@@ -403,12 +428,30 @@ trustyai_spd{
 }
 ```
 
-### Health checks
+## Health checks
 
 The service provides an health check endpoint at `/q/health`:
 
 ```shell
 curl {{host}}:8080/q/health
+```
+
+## Consuming KServe v2 payloads
+
+The TrustyAI service provides an endpoint to consume KServe v2 inference payloads.
+When received, these will be persisted to the configured storage and used,
+for instance, in the calculation of metrics.
+
+The payload consists of a JSON object with an `input` and `output` fields, which
+contain the Base64 encoded raw bytes of the gRPC Protocol payload. As an example:
+
+```json
+curl -X POST --location "http://{{host}}:8080/consumer" \
+-H "Content-Type: application/json" \
+-d "{
+\"input\": \"CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKiUKBWlucHV0EgRGUDY0GgIBAyoSOhAAAAAAAABUQAAAAAAAABBA\",
+\"output\": \"CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKh0KBWlucHV0EgRGUDY0GgIBASoKOggAAAAAAAAAAA==\"
+}"
 ```
 
 # Data sources
