@@ -1,23 +1,30 @@
 # trustyai-service
 
-## Running
+# Running
 
-### Locally
+## Locally
 
-The demo consists of a "data logger", which writes data inputs and outputs to
-a MinIO bucket, the TrustyAI service, Prometheus and Grafana.
+The TrustyAI service includes two demos.
 
-Build the TrustyAI service container image with:
+- generating data into storage, which can be monitored by the service
+- or, having a process simulating sending KServe gRPC data to a consumer endpoint
+
+With either of these demos, the TrustyAI service will monitor the payloads and produce fairness metrics.
+
+The first step to run the demos locally, is to build the TrustyAI service container image.
+This can be done by running (on `$PROJECT/explainability-service`):
 
 ```shell
 mvn clean install
 ```
 
-Build the remaining images using:
+### Using data in storage only
+
+To run this demo, first build the remaining images using:
 
 ```shell
 $ cd demo
-$ docker compose build
+$ docker compose -f compose.yml build
 ```
 
 Finally, run the demo using:
@@ -42,6 +49,8 @@ curl -X POST --location "http://localhost:8080/metrics/spd/request" \
 
 And observe the `trustyai_spd` metric in Prometheus: http://localhost:9090
 
+#### Own data in MinIO
+
 To use your own provided data, configure the MinIO container (by pre-populating it with data, according to
 the [steps below](#s3-minio))
 and run the container using (either `docker`, `podman`):
@@ -61,7 +70,53 @@ docker run -p 8080:8080 \
     trustyai/trustyai-service:999-SNAPSHOT -d 
 ```
 
-### S3 (MinIO)
+When using the metrics HTTP request, remember to adjust the feature names and values to what makes sense for your own
+data.
+
+### Consuming KServe v2 data
+
+Another demo includes a process with simulates sending gRPC encoded KServe v2 data to a `consumer` endpoint in the
+service.
+The service then parses the data and saves it into storage.
+
+To run it, start by building the necessary images with:
+
+```shell
+$ cd demo
+$ docker compose -f compose-generator.yml build
+```
+
+This demo uses a Docker bind mount, which on the host can be created with:
+
+```shell
+mkdir -p ~/volumes/pvc/inputs
+```
+
+> Note:
+>
+> If you are having permission errors from the service, while saving the data to the volume, change the permissions
+> with `cmhod 777 ~/volume/pvc/inputs`
+
+The demo can then be started with:
+
+```shell
+docker compose -f compose-generator.yml up
+```
+
+After a few seconds, you will start seeing the logs showing both the payload sent
+
+```text
+generator         | Sending data
+trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) Got payload on the consumer
+trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) [Feature{name='input-0', type=number, value=22.0}, Feature{name='input-1', type=number, value=5.0}, Feature{name='input-2', type=number, value=1.0}]
+trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) [Output{value=1.0, type=number, score=1.0, name='output-0'}]
+trustyai-service  | 2023-02-18 12:22:18,001 INFO  [org.kie.tru.ser.dat.par.CSVParser] (executor-thread-1) Creating dataframe from CSV data
+trustyai-service  | 2023-02-18 12:22:18,001 INFO  [org.kie.tru.ser.dat.DataSource] (executor-thread-1) Batching with 5000 rows. Passing 73 rows
+```
+
+You can also inspect the data `~/volumes/pvc/inputs` in order to see what data is being serialised.
+
+## S3 (MinIO)
 
 In order to set up MinIO for local development, first install the [MinIO client](https://github.com/minio/mc) `mc`.
 Run the MinIO server with
