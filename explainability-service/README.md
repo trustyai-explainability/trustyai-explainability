@@ -445,8 +445,8 @@ for instance, in the calculation of metrics.
 The payload consists of a JSON object with an `input` and `output` fields, which
 contain the Base64 encoded raw bytes of the gRPC Protocol payload. As an example:
 
-```json
-curl -X POST --location "http://{{host}}:8080/consumer" \
+```shell
+curl -X POST --location "http://{{host}}:8080/consumer/kserve/v2" \
 -H "Content-Type: application/json" \
 -d "{
 \"input\": \"CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKiUKBWlucHV0EgRGUDY0GgIBAyoSOhAAAAAAAABUQAAAAAAAABBA\",

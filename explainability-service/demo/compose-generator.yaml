@@ -33,7 +33,7 @@ services:
       context: ./logger
       dockerfile: ./generator.Dockerfile
     environment:
-      SERVICE_ENDPOINT: "http://trustyai:8080/consumer"
+      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
       PYTHONUNBUFFERED: "1"
 
 volumes:

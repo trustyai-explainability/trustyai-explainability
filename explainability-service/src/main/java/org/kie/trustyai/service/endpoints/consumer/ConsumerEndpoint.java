@@ -21,7 +21,7 @@ import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-@Path("/consumer")
+@Path("/consumer/kserve/v2")
 public class ConsumerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(ConsumerEndpoint.class);

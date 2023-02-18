@@ -173,7 +173,7 @@ GET http://{{host}}:8080/q/metrics
 GET http://{{host}}:8080/q/health
 
 ###
-POST http://{{host}}:8080/consumer
+POST http://{{host}}:8080/consumer/kserve/v2
 Content-Type: application/json
 
 {
