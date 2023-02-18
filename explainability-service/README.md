@@ -425,7 +425,10 @@ The type of datasource is passed with the environment variable `SERVICE_STORAGE_
 
 The supported data sources are:
 
-- MinIO
+| Type                                      | Storage property |
+|-------------------------------------------|------------------|
+| MinIO                                     | `MINIO`          |
+| Kubernetes Persistent Volume Claims (PVC) | `PVC`            |
 
 The data can be batched into the latest `n` observations by using the configuration key
 `SERVICE_BATCH_SIZE=n`. This behaves like a `n`-size tail and its optional.

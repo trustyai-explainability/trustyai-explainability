@@ -51,7 +51,8 @@ public class ConsumerEndpoint {
             dataSource.appendDataframe(dataframe);
 
         } catch (InvalidProtocolBufferException e) {
-            throw new RuntimeException(e);
+            LOG.error("Error parsing protobuf message: " + e.getMessage());
+            return Response.serverError().status(500).build();
         }
 
         return Response.ok().build();

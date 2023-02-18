@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @QuarkusTest
-@TestProfile(EndpointTestProfile.class)
+@TestProfile(MetricsEndpointTestProfile.class)
 @TestHTTPEndpoint(GroupStatisticalParityDifferenceEndpoint.class)
 class GroupStatisticalParityDifferenceEndpointTest {
 
@@ -31,7 +31,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
 
     @Test
     void spdPostCorrect() {
-        final Map<String, Object> payload = PayloadGenerator.correct();
+        final Map<String, Object> payload = RequestPayloadGenerator.correct();
 
         final GroupStatisticalParityDifferenceResponse response = given()
                 .contentType(ContentType.JSON)
@@ -49,7 +49,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
 
     @Test
     void spdPostIncorrectType() {
-        final Map<String, Object> payload = PayloadGenerator.incorrectType();
+        final Map<String, Object> payload = RequestPayloadGenerator.incorrectType();
 
         final GroupStatisticalParityDifferenceResponse response = given()
                 .contentType(ContentType.JSON)
@@ -67,7 +67,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
 
     @Test
     void spdPostIncorrectInput() {
-        final Map<String, Object> payload = PayloadGenerator.incorrectInput();
+        final Map<String, Object> payload = RequestPayloadGenerator.incorrectInput();
 
         given()
                 .contentType(ContentType.JSON)

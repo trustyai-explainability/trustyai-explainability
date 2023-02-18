@@ -3,7 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PayloadGenerator {
+public class RequestPayloadGenerator {
 
     public static Map<String, Object> correct() {
         final Map<String, Object> payload = new HashMap<>();

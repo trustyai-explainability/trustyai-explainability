@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Alternative;
 
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
@@ -13,8 +14,9 @@ import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import io.quarkus.test.Mock;
 
 @Mock
+@Alternative
 @ApplicationScoped
-public class MockDatasource extends DataSource {
+public class MockMetricsDatasource extends DataSource {
 
     @Override
     public Dataframe getDataframe() throws DataframeCreateException {
@@ -33,6 +35,11 @@ public class MockDatasource extends DataSource {
             predictions.add(new SimplePrediction(predictionInput, predictionOutput));
         }
         return Dataframe.createFrom(predictions);
+    }
+
+    @Override
+    public void appendDataframe(Dataframe dataframe) {
+
     }
 
 }
