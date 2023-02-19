@@ -491,6 +491,56 @@ curl -X POST --location "http://{{host}}:8080/consumer/kserve/v2" \
 }"
 ```
 
+## Service info
+
+To retrieve service info, you can issue a `GET /info`. This is will return currently registered scheduled metrics,
+number of
+observations in the dataset and dataset schema.
+
+```shell
+curl -X GET --location "http://{{host}}:8080/info"
+```
+
+Will return, for instance
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+content-length: 243
+
+{
+"metrics": {
+"scheduledMetadata": {
+"spd": 1,
+"dir": 0
+}
+},
+"data": {
+"observations": 318,
+"inputs": [
+{
+"type": "DOUBLE",
+"name": "input-0"
+},
+{
+"type": "DOUBLE",
+"name": "input-1"
+},
+{
+"type": "DOUBLE",
+"name": "input-2"
+}
+],
+"outputs": [
+{
+"type": "DOUBLE",
+"name": "output-0"
+}
+]
+}
+}
+```
+
 # Data sources
 
 ## Metrics
