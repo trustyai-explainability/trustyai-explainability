@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.endpoints.metrics;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -21,6 +22,8 @@ import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.MetricThreshold;
 import org.kie.trustyai.service.payloads.definitions.DefinitionRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceResponse;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 
@@ -52,6 +55,18 @@ public class GroupStatisticalParityDifferenceEndpoint extends AbstractMetricsEnd
     @Override
     public String getMetricName() {
         return "spd";
+    }
+
+    @Override
+    @GET
+    @Path("/requests")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listRequests() {
+        final ScheduleList scheduleList = new ScheduleList();
+        for (Map.Entry<UUID, BaseMetricRequest> entry : scheduler.getSpdRequests().entrySet()) {
+            scheduleList.requests.add(new ScheduleRequest(entry.getKey(), entry.getValue()));
+        }
+        return Response.ok(scheduleList).build();
     }
 
     @POST

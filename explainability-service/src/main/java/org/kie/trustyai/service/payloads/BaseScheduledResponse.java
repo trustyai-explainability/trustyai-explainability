@@ -6,9 +6,14 @@ import java.util.UUID;
 public class BaseScheduledResponse {
 
     public UUID requestId;
-    public Date timestamp = new Date();
+    public Date timestamp;
+
+    public BaseScheduledResponse() {
+
+    }
 
     public BaseScheduledResponse(UUID uuid) {
         this.requestId = uuid;
+        this.timestamp = new Date();
     }
 }
