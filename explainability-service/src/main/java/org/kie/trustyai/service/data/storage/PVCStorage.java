@@ -78,6 +78,11 @@ public class PVCStorage extends Storage {
         }
     }
 
+    @Override
+    public long getLastModified() {
+        return new File(inputFilename).lastModified();
+    }
+
     private void saveData(ByteBuffer byteBuffer, String filename) throws StorageWriteException, StorageReadException {
         writeData(byteBuffer, filename, false);
     }

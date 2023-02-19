@@ -203,4 +203,9 @@ public class MinioStorage extends Storage {
     public boolean outputExists() throws StorageReadException {
         return false;
     }
+
+    @Override
+    public long getLastModified() {
+        return isObjectAvailable(bucketName, inputFilename).lastModified().toInstant().toEpochMilli();
+    }
 }

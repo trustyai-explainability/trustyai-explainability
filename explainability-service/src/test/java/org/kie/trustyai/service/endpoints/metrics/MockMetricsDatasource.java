@@ -6,10 +6,13 @@ import java.util.Random;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
+import org.kie.trustyai.service.endpoints.consumer.MockConsumerDatasource;
 
 import io.quarkus.test.Mock;
 
@@ -17,6 +20,9 @@ import io.quarkus.test.Mock;
 @Alternative
 @ApplicationScoped
 public class MockMetricsDatasource extends DataSource {
+
+    @Inject
+    Instance<MockConsumerDatasource> datasource;
 
     @Override
     public Dataframe getDataframe() throws DataframeCreateException {

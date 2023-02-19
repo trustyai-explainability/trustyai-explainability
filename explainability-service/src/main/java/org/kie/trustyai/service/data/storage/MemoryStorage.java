@@ -63,4 +63,9 @@ public class MemoryStorage extends Storage {
     public boolean outputExists() throws StorageReadException {
         return data.containsKey(config.outputFilename().get());
     }
+
+    @Override
+    public long getLastModified() {
+        return data.get(config.inputFilename().get()).hashCode();
+    }
 }

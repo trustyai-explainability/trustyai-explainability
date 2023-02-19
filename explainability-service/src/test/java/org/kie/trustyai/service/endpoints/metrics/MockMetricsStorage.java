@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.consumer;
+package org.kie.trustyai.service.endpoints.metrics;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -15,7 +15,7 @@ import io.quarkus.test.Mock;
 @Mock
 @Alternative
 @ApplicationScoped
-public class MockConsumerStorage extends Storage {
+public class MockMetricsStorage extends Storage {
     @Override
     public ByteBuffer getInputData() throws StorageReadException {
         return null;

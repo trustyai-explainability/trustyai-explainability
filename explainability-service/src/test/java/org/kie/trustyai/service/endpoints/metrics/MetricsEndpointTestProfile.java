@@ -19,7 +19,7 @@ public class MetricsEndpointTestProfile implements QuarkusTestProfile {
 
     @Override
     public Set<Class<?>> getEnabledAlternatives() {
-        return Set.of(MockMetricsDatasource.class);
+        return Set.of(MockMetricsDatasource.class, MockMetricsStorage.class);
 
     }
 

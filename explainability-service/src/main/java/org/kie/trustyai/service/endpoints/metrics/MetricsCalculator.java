@@ -10,13 +10,17 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.service.data.cache.DataframeKeyGen;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 
+import io.quarkus.cache.CacheResult;
+
 @Singleton
 public class MetricsCalculator {
 
+    @CacheResult(cacheName = "dataframe", keyGenerator = DataframeKeyGen.class)
     public double calculateSPD(Dataframe dataframe, BaseMetricRequest request) throws MetricCalculationException {
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
@@ -51,6 +55,7 @@ public class MetricsCalculator {
                 spd);
     }
 
+    @CacheResult(cacheName = "dataframe", keyGenerator = DataframeKeyGen.class)
     public double calculateDIR(Dataframe dataframe, BaseMetricRequest request) {
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());

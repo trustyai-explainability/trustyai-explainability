@@ -22,4 +22,6 @@ public interface StorageInterface {
 
     boolean outputExists() throws StorageReadException;
 
+    long getLastModified();
+
 }
