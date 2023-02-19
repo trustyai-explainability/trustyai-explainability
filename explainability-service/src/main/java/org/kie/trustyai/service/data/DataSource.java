@@ -12,10 +12,13 @@ import javax.inject.Singleton;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
+import org.kie.trustyai.service.data.cache.DataframeCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.parsers.DataParser;
 import org.kie.trustyai.service.data.storage.Storage;
+
+import io.quarkus.cache.CacheResult;
 
 @Singleton
 public class DataSource {
@@ -30,7 +33,10 @@ public class DataSource {
     @Inject
     ServiceConfig serviceConfig;
 
+    @CacheResult(cacheName = "dataframe", keyGenerator = DataframeCacheKeyGen.class)
     public Dataframe getDataframe() throws DataframeCreateException {
+
+        LOG.info("Cache miss! Reading dataframe");
 
         final ByteBuffer inputsBuffer;
         try {

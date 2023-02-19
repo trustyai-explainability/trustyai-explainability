@@ -12,7 +12,7 @@ import io.quarkus.cache.CacheKeyGenerator;
 import io.quarkus.cache.CompositeCacheKey;
 
 @ApplicationScoped
-public class DataframeKeyGen implements CacheKeyGenerator {
+public class DataframeCacheKeyGen implements CacheKeyGenerator {
 
     @Inject
     Instance<Storage> storage;

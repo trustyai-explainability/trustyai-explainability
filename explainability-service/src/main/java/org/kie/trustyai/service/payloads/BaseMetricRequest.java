@@ -1,5 +1,7 @@
 package org.kie.trustyai.service.payloads;
 
+import java.util.Objects;
+
 import org.kie.trustyai.service.payloads.values.TypedValue;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -56,5 +58,21 @@ public class BaseMetricRequest {
 
     public void setUnprivilegedAttribute(TypedValue unprivilegedAttribute) {
         this.unprivilegedAttribute = unprivilegedAttribute;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        BaseMetricRequest that = (BaseMetricRequest) o;
+        return protectedAttribute.equals(that.protectedAttribute) && favorableOutcome.equals(that.favorableOutcome) && outcomeName.equals(that.outcomeName)
+                && privilegedAttribute.equals(that.privilegedAttribute) && unprivilegedAttribute.equals(that.unprivilegedAttribute);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(protectedAttribute, favorableOutcome, outcomeName, privilegedAttribute, unprivilegedAttribute);
     }
 }
