@@ -9,7 +9,7 @@ public interface DataParser {
 
     Dataframe toDataframe(ByteBuffer inputs, ByteBuffer outputs) throws DataframeCreateException;
 
-    ByteBuffer toInputByteBuffer(Dataframe dataframe);
+    ByteBuffer toInputByteBuffer(Dataframe dataframe, boolean includeHeader);
 
-    ByteBuffer toOutputByteBuffer(Dataframe dataframe);
+    ByteBuffer toOutputByteBuffer(Dataframe dataframe, boolean includeHeader);
 }

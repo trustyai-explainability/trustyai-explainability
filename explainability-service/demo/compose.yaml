@@ -61,7 +61,7 @@ services:
     image: trustyai/trustyai-service-logger
     build:
       context: ./logger
-      dockerfile: ./Dockerfile
+      dockerfile: ./logger.Dockerfile
     environment:
       MINIO_BUCKET_NAME: "inputs"
       MINIO_ENDPOINT: "minio:9000"

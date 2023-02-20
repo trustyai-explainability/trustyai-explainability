@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-@TestProfile(EndpointTestProfile.class)
+@TestProfile(MetricsEndpointTestProfile.class)
 @TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
 class DisparateImpactRatioEndpointTest {
 
@@ -30,7 +30,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void dirPostCorrect() {
-        final Map<String, Object> payload = PayloadGenerator.correct();
+        final Map<String, Object> payload = RequestPayloadGenerator.correct();
 
         final GroupStatisticalParityDifferenceResponse response = given()
                 .contentType(ContentType.JSON)
@@ -48,7 +48,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void dirPostIncorrectType() {
-        final Map<String, Object> payload = PayloadGenerator.incorrectType();
+        final Map<String, Object> payload = RequestPayloadGenerator.incorrectType();
 
         final GroupStatisticalParityDifferenceResponse response = given()
                 .contentType(ContentType.JSON)
@@ -66,7 +66,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void dirPostIncorrectInput() {
-        final Map<String, Object> payload = PayloadGenerator.incorrectInput();
+        final Map<String, Object> payload = RequestPayloadGenerator.incorrectInput();
 
         given()
                 .contentType(ContentType.JSON)

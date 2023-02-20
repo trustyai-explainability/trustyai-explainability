@@ -1,23 +1,55 @@
 # trustyai-service
 
-## Running
+<!-- TOC -->
 
-### Locally
+* [trustyai-service](#trustyai-service)
+* [Running](#running)
+    * [Locally](#locally)
+        * [Using data in storage only](#using-data-in-storage-only)
+            * [Own data in MinIO](#own-data-in-minio)
+        * [Consuming KServe v2 data](#consuming-kserve-v2-data)
+    * [S3 (MinIO)](#s3--minio-)
+* [Endpoints](#endpoints)
+    * [Metrics](#metrics)
+        * [Statistical Parity Difference](#statistical-parity-difference)
+        * [Disparate Impact Ratio](#disparate-impact-ratio)
+        * [Scheduled metrics](#scheduled-metrics)
+    * [Metric Definitions](#metric-definitions)
+    * [Prometheus](#prometheus)
+    * [Health checks](#health-checks)
+    * [Consuming KServe v2 payloads](#consuming-kserve-v2-payloads)
+* [Data sources](#data-sources)
+    * [Metrics](#metrics-1)
+* [Deployment](#deployment)
+    * [OpenShift](#openshift)
 
-The demo consists of a "data logger", which writes data inputs and outputs to
-a MinIO bucket, the TrustyAI service, Prometheus and Grafana.
+<!-- TOC -->
 
-Build the TrustyAI service container image with:
+# Running
+
+## Locally
+
+The TrustyAI service includes two demos.
+
+- generating data into storage, which can be monitored by the service
+- or, having a process simulating sending KServe gRPC data to a consumer endpoint
+
+With either of these demos, the TrustyAI service will monitor the payloads and produce fairness metrics.
+
+The first step to run the demos locally, is to build the TrustyAI service container image.
+This can be done by running (on `$PROJECT/explainability-service`):
 
 ```shell
 mvn clean install
 ```
 
-Build the remaining images using:
+### Using data in storage only
+
+To run this demo, first build the remaining images using:
 
 ```shell
 $ cd demo
-$ docker compose build
+$ docker compose -f compose.yml build
 ```
 
 Finally, run the demo using:
@@ -42,6 +74,8 @@ curl -X POST --location "http://localhost:8080/metrics/spd/request" \
 
 And observe the `trustyai_spd` metric in Prometheus: http://localhost:9090
 
+#### Own data in MinIO
+
 To use your own provided data, configure the MinIO container (by pre-populating it with data, according to
 the [steps below](#s3-minio))
 and run the container using (either `docker`, `podman`):
@@ -61,7 +95,53 @@ docker run -p 8080:8080 \
     trustyai/trustyai-service:999-SNAPSHOT -d 
 ```
 
-### S3 (MinIO)
+When using the metrics HTTP request, remember to adjust the feature names and values to what makes sense for your own
+data.
+
+### Consuming KServe v2 data
+
+Another demo includes a process with simulates sending gRPC encoded KServe v2 data to a `consumer` endpoint in the
+service.
+The service then parses the data and saves it into storage.
+
+To run it, start by building the necessary images with:
+
+```shell
+$ cd demo
+$ docker compose -f compose-generator.yml build
+```
+
+This demo uses a Docker bind mount, which on the host can be created with:
+
+```shell
+mkdir -p ~/volumes/pvc/inputs
+```
+
+> Note:
+>
+> If you are having permission errors from the service, while saving the data to the volume, change the permissions
+> with `cmhod 777 ~/volume/pvc/inputs`
+
+The demo can then be started with:
+
+```shell
+docker compose -f compose-generator.yml up
+```
+
+After a few seconds, you will start seeing the logs showing both the payload sent
+
+```text
+generator         | Sending data
+trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) Got payload on the consumer
+trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) [Feature{name='input-0', type=number, value=22.0}, Feature{name='input-1', type=number, value=5.0}, Feature{name='input-2', type=number, value=1.0}]
+trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) [Output{value=1.0, type=number, score=1.0, name='output-0'}]
+trustyai-service  | 2023-02-18 12:22:18,001 INFO  [org.kie.tru.ser.dat.par.CSVParser] (executor-thread-1) Creating dataframe from CSV data
+trustyai-service  | 2023-02-18 12:22:18,001 INFO  [org.kie.tru.ser.dat.DataSource] (executor-thread-1) Batching with 5000 rows. Passing 73 rows
+```
+
+You can also inspect the data `~/volumes/pvc/inputs` in order to see what data is being serialised.
+
+## S3 (MinIO)
 
 In order to set up MinIO for local development, first install the [MinIO client](https://github.com/minio/mc) `mc`.
 Run the MinIO server with
@@ -107,7 +187,7 @@ Which should produce:
 [2023-02-09 23:01:49 GMT]  68KiB income-biased-inputs.csv
 ```
 
-## Endpoints
+# Endpoints
 
 The OpenAPI schema can be displayed using
 
@@ -115,7 +195,7 @@ The OpenAPI schema can be displayed using
 curl -X GET --location "http://localhost:8080/q/openapi"
 ```
 
-### Metrics
+## Metrics
 
 Each of the metrics default bounds can be overridden with
 the corresponding environment variable, e.g.
@@ -125,7 +205,7 @@ the corresponding environment variable, e.g.
 - `METRICS_DIR_THRESHOLD_LOWER`
 - _etc_
 
-#### Statistical Parity Difference
+### Statistical Parity Difference
 
 Get statistical parity difference at `/metrics/spd`
 
@@ -172,7 +252,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-#### Disparate Impact Ratio
+### Disparate Impact Ratio
 
 ```shell
 curl -X POST --location "http://{{host}}:8080/metrics/dir" \
@@ -214,7 +294,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-#### Scheduled metrics
+### Scheduled metrics
 
 In order to generate period measurements for a certain metric, you can send a request to
 the `/metrics/$METRIC/schedule`.
@@ -272,7 +352,7 @@ curl -X DELETE --location "http://{{host}}:8080/metrics/spd/request" \
         }"
 ```
 
-### Metric Definitions
+## Metric Definitions
 
 To get a _general_ definition of a metric, you can issue an HTTP `GET` request to the `/metrics/$METRIC/definition`
 endpoint:
@@ -321,7 +401,7 @@ returns
 The SPD of 0.250000 indicates that the likelihood of Group:gender=1 receiving Outcome:income=1 was 25.000000 percentage points higher than that of Group:gender=0.%
 ```
 
-### Prometheus
+## Prometheus
 
 Whenever a metric endpoint is called with a HTTP request, the service also updates
 the corresponding Prometheus metric.
@@ -348,12 +428,30 @@ trustyai_spd{
 }
 ```
 
-### Health checks
+## Health checks
 
 The service provides an health check endpoint at `/q/health`:
 
 ```shell
 curl {{host}}:8080/q/health
+```
+
+## Consuming KServe v2 payloads
+
+The TrustyAI service provides an endpoint to consume KServe v2 inference payloads.
+When received, these will be persisted to the configured storage and used,
+for instance, in the calculation of metrics.
+
+The payload consists of a JSON object with an `input` and `output` fields, which
+contain the Base64 encoded raw bytes of the gRPC Protocol payload. As an example:
+
+```shell
+curl -X POST --location "http://{{host}}:8080/consumer/kserve/v2" \
+-H "Content-Type: application/json" \
+-d "{
+\"input\": \"CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKiUKBWlucHV0EgRGUDY0GgIBAyoSOhAAAAAAAABUQAAAAAAAABBA\",
+\"output\": \"CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKh0KBWlucHV0EgRGUDY0GgIBASoKOggAAAAAAAAAAA==\"
+}"
 ```
 
 # Data sources
@@ -370,7 +468,10 @@ The type of datasource is passed with the environment variable `SERVICE_STORAGE_
 
 The supported data sources are:
 
-- MinIO
+| Type                                      | Storage property |
+|-------------------------------------------|------------------|
+| MinIO                                     | `MINIO`          |
+| Kubernetes Persistent Volume Claims (PVC) | `PVC`            |
 
 The data can be batched into the latest `n` observations by using the configuration key
 `SERVICE_BATCH_SIZE=n`. This behaves like a `n`-size tail and its optional.

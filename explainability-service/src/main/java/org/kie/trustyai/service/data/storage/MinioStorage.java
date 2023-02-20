@@ -183,4 +183,24 @@ public class MinioStorage extends Storage {
     public void saveOutputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
         saveData(byteBuffer, bucketName, outputFilename);
     }
+
+    @Override
+    public void appendInputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
+        // TODO: Append data on MinIO
+    }
+
+    @Override
+    public void appendOutputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
+        // TODO: Append data on MinIO
+    }
+
+    @Override
+    public boolean inputExists() throws StorageReadException {
+        return false;
+    }
+
+    @Override
+    public boolean outputExists() throws StorageReadException {
+        return false;
+    }
 }
