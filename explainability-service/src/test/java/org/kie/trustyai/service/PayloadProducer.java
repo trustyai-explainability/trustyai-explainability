@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.consumer;
+package org.kie.trustyai.service;
 
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 

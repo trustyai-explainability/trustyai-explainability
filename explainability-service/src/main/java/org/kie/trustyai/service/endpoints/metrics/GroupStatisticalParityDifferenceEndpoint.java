@@ -74,11 +74,17 @@ public class GroupStatisticalParityDifferenceEndpoint extends AbstractMetricsEnd
     @Produces(MediaType.APPLICATION_JSON)
     public Response spd(BaseMetricRequest request) throws DataframeCreateException {
 
-        final Dataframe df = dataSource.getDataframe();
+        final Dataframe dataframe;
+        try {
+            dataframe = dataSource.getDataframe();
+        } catch (DataframeCreateException e) {
+            LOG.error("No data available: " + e.getMessage(), e);
+            return Response.serverError().build();
+        }
 
         final double spd;
         try {
-            spd = calculator.calculateSPD(df, request);
+            spd = calculator.calculateSPD(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
