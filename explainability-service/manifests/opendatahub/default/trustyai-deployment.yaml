@@ -24,7 +24,6 @@ spec:
     app.kubernetes.io/name: trustyai-service
     app.kubernetes.io/version: 999-SNAPSHOT
   type: ClusterIP
-
 ---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
@@ -40,7 +39,6 @@ metadata:
   name: trustyai-service
 spec:
   dockerImageRepository: quay.io/ruimvieira/trustyai-service
-
 ---
 apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
@@ -92,14 +90,17 @@ spec:
               value: "PVC"
             - name: SERVICE_DATA_FORMAT
               value: "CSV"
-            - name: MINIO_INPUT_FILENAME
+            - name: PVC_INPUT_FILENAME
               value: "/inputs/income-biased-inputs.csv"
-            - name: MINIO_OUTPUT_FILENAME
+            - name: PVC_OUTPUT_FILENAME
               value: "/inputs/income-biased-outputs.csv"
             - name: SERVICE_METRICS_SCHEDULE
               value: "5s"
             - name: SERVICE_BATCH_SIZE
               value: "5000"
+          volumeMounts:
+            - mountPath: /inputs
+              name: volume
           image: trustyai-service:999-SNAPSHOT
           imagePullPolicy: Always
           name: trustyai-service
@@ -107,6 +108,10 @@ spec:
             - containerPort: 8080
               name: http
               protocol: TCP
+      volumes:
+        - name: volume
+          persistentVolumeClaim:
+            claimName: trustyai-service-pvc
   triggers:
     - imageChangeParams:
         automatic: true
