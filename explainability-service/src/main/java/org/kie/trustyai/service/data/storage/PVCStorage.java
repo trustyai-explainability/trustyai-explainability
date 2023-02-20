@@ -70,7 +70,22 @@ public class PVCStorage extends Storage {
         }
     }
 
+    private boolean pathExists(Path path) {
+        return (path.toFile().exists() && path.toFile().isDirectory());
+    }
+
+    private boolean createPath(Path path) {
+        return path.toFile().mkdirs();
+    }
+
     private synchronized void writeData(ByteBuffer byteBuffer, String filename, boolean append) throws StorageWriteException, StorageReadException {
+        final File file = new File(filename);
+        final Path parent = file.toPath().getParent();
+        final boolean exists = pathExists(parent);
+        if (!exists) {
+            createPath(parent);
+        }
+
         try (FileChannel channel = new FileOutputStream(filename, append).getChannel()) {
             channel.write(byteBuffer);
         } catch (IOException e) {
