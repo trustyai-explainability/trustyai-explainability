@@ -1,4 +1,4 @@
-POST http://{{host}}:8080/metrics/spd
+POST {{host}}/metrics/spd
 Content-Type: application/json
 
 {
@@ -19,7 +19,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://{{host}}:8080/metrics/spd
+POST {{host}}/metrics/spd
 Content-Type: application/json
 
 {
@@ -40,7 +40,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://{{host}}:8080/metrics/spd/request
+POST {{host}}/metrics/spd/request
 Content-Type: application/json
 
 {
@@ -61,7 +61,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://{{host}}:8080/metrics/spd/request
+POST {{host}}/metrics/spd/request
 Content-Type: application/json
 
 {
@@ -82,10 +82,10 @@ Content-Type: application/json
 }
 
 ###
-GET http://{{host}}:8080/metrics/spd/requests
+GET {{host}}/metrics/spd/requests
 
 ###
-DELETE http://{{host}}:8080/metrics/spd/request
+DELETE {{host}}/metrics/spd/request
 Content-Type: application/json
 
 {
@@ -93,7 +93,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://{{host}}:8080/metrics/dir
+POST {{host}}/metrics/dir
 Content-Type: application/json
 
 {
@@ -114,7 +114,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://{{host}}:8080/metrics/dir/request
+POST {{host}}/metrics/dir/request
 Content-Type: application/json
 
 {
@@ -135,7 +135,7 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://{{host}}:8080/metrics/dir/request
+DELETE {{host}}/metrics/dir/request
 Content-Type: application/json
 
 {
@@ -143,7 +143,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://{{host}}:8080/metrics/dir
+POST {{host}}/metrics/dir
 Content-Type: application/json
 
 {
@@ -164,25 +164,25 @@ Content-Type: application/json
 }
 
 ###
-GET http://{{host}}:8080/metrics/dir/requests
+GET {{host}}/metrics/dir/requests
 
 ###
-GET http://{{host}}:8080/info
+GET {{host}}/info
 
 ###
-GET http://{{host}}:8080/q/openapi
+GET {{host}}/q/openapi
 
 ###
-GET http://{{host}}:8080/metrics/spd/metrics/spd/prometheus
+GET {{host}}/metrics/spd/metrics/spd/prometheus
 
 ###
-GET http://{{host}}:8080/q/metrics
+GET {{host}}/q/metrics
 
 ###
-GET http://{{host}}:8080/q/health
+GET {{host}}/q/health
 
 ###
-POST http://{{host}}:8080/consumer/kserve/v2
+POST {{host}}/consumer/kserve/v2
 Content-Type: application/json
 
 {
