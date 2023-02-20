@@ -167,6 +167,9 @@ Content-Type: application/json
 GET http://{{host}}:8080/metrics/dir/requests
 
 ###
+GET http://{{host}}:8080/info
+
+###
 GET http://{{host}}:8080/q/openapi
 
 ###
