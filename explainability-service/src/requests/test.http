@@ -82,6 +82,9 @@ Content-Type: application/json
 }
 
 ###
+GET http://{{host}}:8080/metrics/spd/requests
+
+###
 DELETE http://{{host}}:8080/metrics/spd/request
 Content-Type: application/json
 
@@ -159,6 +162,9 @@ Content-Type: application/json
     "value": 0
   }
 }
+
+###
+GET http://{{host}}:8080/metrics/dir/requests
 
 ###
 GET http://{{host}}:8080/q/openapi

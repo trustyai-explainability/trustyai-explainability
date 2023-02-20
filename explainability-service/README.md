@@ -339,9 +339,7 @@ e.g. `SERVICE_METRICS_SCHEDULE=10s`)
 which follows the [Quarkus syntax](https://quarkus.io/guides/scheduler-reference).
 
 To stop the periodic calculation you can issue an HTTP `DELETE` request to the `/metrics/$METRIC/request` endpoint, with
-the id
-of periodic task we want to cancel
-in the payload.
+the id of periodic task we want to cancel in the payload.
 For instance:
 
 ```shell
@@ -350,6 +348,45 @@ curl -X DELETE --location "http://{{host}}:8080/metrics/spd/request" \
     -d "{
           \"requestId\": \"3281c891-e2a5-4eb3-b05d-7f3831acbb56\"
         }"
+```
+
+To list all currently active requests for a certain metric, use `GET /metrics/{{metric}}/requests`.
+For instance, to get all current scheduled SPD metrics use:
+
+```shell
+curl -X GET --location "http://{{host}}:8080/metrics/spd/requests"
+```
+
+This will return, as an example:
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+content-length: 271
+
+{
+"requests": [
+{
+"id": "8abd816e-3379-4315-b932-c5b848fd36b4",
+"request": {
+"protectedAttribute": "gender",
+"favorableOutcome": {
+"type": "INT32",
+"value": 1
+},
+"outcomeName": "income",
+"privilegedAttribute": {
+"type": "INT32",
+"value": 1
+},
+"unprivilegedAttribute": {
+"type": "INT32",
+"value": 0
+}
+}
+}
+]
+}
 ```
 
 ## Metric Definitions

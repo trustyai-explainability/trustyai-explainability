@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.endpoints.metrics;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -22,6 +23,8 @@ import org.kie.trustyai.service.payloads.MetricThreshold;
 import org.kie.trustyai.service.payloads.definitions.DefinitionRequest;
 import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponse;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -127,4 +130,15 @@ public class DisparateImpactRatioEndpoint extends AbstractMetricsEndpoint {
         }
     }
 
+    @Override
+    @GET
+    @Path("/requests")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listRequests() {
+        final ScheduleList scheduleList = new ScheduleList();
+        for (Map.Entry<UUID, BaseMetricRequest> entry : scheduler.getDirRequests().entrySet()) {
+            scheduleList.requests.add(new ScheduleRequest(entry.getKey(), entry.getValue()));
+        }
+        return Response.ok(scheduleList).build();
+    }
 }
