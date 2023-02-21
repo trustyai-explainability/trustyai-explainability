@@ -3,6 +3,7 @@ package org.kie.trustyai.service.endpoints.service;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -25,7 +26,7 @@ public class ServiceMetadataEndpoint {
 
     private static final Logger LOG = Logger.getLogger(ServiceMetadataEndpoint.class);
     @Inject
-    DataSource dataSource;
+    Instance<DataSource> dataSource;
 
     @Inject
     PrometheusScheduler scheduler;
@@ -46,7 +47,7 @@ public class ServiceMetadataEndpoint {
         metadata.metrics.scheduledMetadata.spd = scheduler.getSpdRequests().size();
 
         try {
-            final Dataframe dataframe = dataSource.getDataframe();
+            final Dataframe dataframe = dataSource.get().getDataframe();
             final int observations = dataframe.getRowDimension();
             if (observations > 0) {
 
