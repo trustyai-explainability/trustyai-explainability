@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.consumer;
+package org.kie.trustyai.service.scenarios.nodata;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.PayloadProducer;
+import org.kie.trustyai.service.endpoints.consumer.ConsumerEndpoint;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
@@ -18,7 +19,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
-@TestProfile(ConsumerTestProfile.class)
+@TestProfile(NoDataTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
 class ConsumerEndpointTest {
 

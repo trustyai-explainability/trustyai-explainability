@@ -63,11 +63,17 @@ public class DisparateImpactRatioEndpoint extends AbstractMetricsEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response dir(BaseMetricRequest request) throws DataframeCreateException {
 
-        final Dataframe df = dataSource.getDataframe();
+        final Dataframe dataframe;
+        try {
+            dataframe = dataSource.getDataframe();
+        } catch (DataframeCreateException e) {
+            LOG.error("No data available: " + e.getMessage(), e);
+            return Response.serverError().build();
+        }
 
         final double dir;
         try {
-            dir = calculator.calculateDIR(df, request);
+            dir = calculator.calculateDIR(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
