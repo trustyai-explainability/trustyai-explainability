@@ -68,13 +68,12 @@ public class ServiceMetadataEndpoint {
                     schemaItem.name = dataframe.getColumnNames().get(i);
                     return schemaItem;
                 };
+                metadata.data.observations = observations;
 
                 metadata.data.inputs = dataframe.getInputsIndices().stream().map(extractRowSchema).collect(Collectors.toList());
                 metadata.data.outputs = dataframe.getOutputsIndices().stream().map(extractRowSchema).collect(Collectors.toList());
-
             }
-
-        } catch (DataframeCreateException e) {
+        } catch (DataframeCreateException | NullPointerException e) {
             LOG.warn("Problem creating dataframe: " + e.getMessage(), e);
         }
         return Response.ok(metadata).build();
