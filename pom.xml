@@ -292,6 +292,15 @@
             </modules>
         </profile>
         <profile>
+            <!-- Use for CPaaS builds. -->
+            <id>service-minimal</id>
+            <modules>
+                <module>explainability-core</module>
+                <module>explainability-connectors</module>
+                <module>explainability-service</module>
+            </modules>
+        </profile>
+        <profile>
             <!-- Fail the build if code does not follow the standards. -->
             <id>validate-formatting</id>
             <activation>
