@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -37,6 +38,9 @@ class TestBatching {
         final List<String> lines = BatchReader.readEntries(stream, batchSize);
         assertEquals(N + 1, lines.size());
         assertEquals(makeHeader(names), lines.get(0));
+        final List<Integer> expected = IntStream.range(0, N).boxed().collect(Collectors.toList());
+        final List<Integer> actual = IntStream.range(1, N + 1).mapToObj(i -> (int) Math.floor(Double.parseDouble(lines.get(i).split(",")[0]))).collect(Collectors.toList());
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -51,6 +55,9 @@ class TestBatching {
         final List<String> lines = BatchReader.readEntries(stream, batchSize);
         assertEquals(batchSize + 1, lines.size());
         assertEquals(makeHeader(names), lines.get(0));
+        final List<Integer> expected = IntStream.range(N - batchSize, N).boxed().collect(Collectors.toList());
+        final List<Integer> actual = IntStream.range(1, batchSize + 1).mapToObj(i -> (int) Math.floor(Double.parseDouble(lines.get(i).split(",")[0]))).collect(Collectors.toList());
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -76,6 +83,10 @@ class TestBatching {
         assertEquals(names, dataframe.getInputDataframe().getColumnNames());
         assertEquals(names, dataframe.getOutputDataframe().getColumnNames());
         assertEquals(2, dataframe.getColumnDimension());
+        final List<Integer> expected = IntStream.range(N - batchSize, N).boxed().collect(Collectors.toList());
+        final List<Integer> actual = dataframe.getColumn(0).stream().map(v -> (int) Math.floor(v.asNumber())).collect(Collectors.toList());
+        assertEquals(expected, actual);
+
     }
 
     @Test
@@ -101,6 +112,9 @@ class TestBatching {
         assertEquals(names, dataframe.getInputDataframe().getColumnNames());
         assertEquals(names, dataframe.getOutputDataframe().getColumnNames());
         assertEquals(4, dataframe.getColumnDimension());
+        final List<Integer> expected = IntStream.range(0, N).boxed().collect(Collectors.toList());
+        final List<Integer> actual = dataframe.getColumn(0).stream().map(v -> (int) Math.floor(v.asNumber())).collect(Collectors.toList());
+        assertEquals(expected, actual);
     }
 
     @Test
