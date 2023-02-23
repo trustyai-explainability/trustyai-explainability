@@ -3,6 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -38,7 +39,7 @@ public class DisparateImpactRatioEndpoint extends AbstractMetricsEndpoint {
 
     private static final Logger LOG = Logger.getLogger(DisparateImpactRatioEndpoint.class);
     @Inject
-    DataSource dataSource;
+    Instance<DataSource> dataSource;
 
     @Inject
     MetricsConfig metricsConfig;
@@ -65,7 +66,7 @@ public class DisparateImpactRatioEndpoint extends AbstractMetricsEndpoint {
 
         final Dataframe dataframe;
         try {
-            dataframe = dataSource.getDataframe();
+            dataframe = dataSource.get().getDataframe();
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
             return Response.serverError().build();

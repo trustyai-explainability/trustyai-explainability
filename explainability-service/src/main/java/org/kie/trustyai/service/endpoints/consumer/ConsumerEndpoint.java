@@ -2,6 +2,7 @@ package org.kie.trustyai.service.endpoints.consumer;
 
 import java.util.Base64;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -26,7 +27,7 @@ public class ConsumerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(ConsumerEndpoint.class);
     @Inject
-    DataSource dataSource;
+    Instance<DataSource> dataSource;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -48,7 +49,7 @@ public class ConsumerEndpoint {
 
             final Dataframe dataframe = Dataframe.createFrom(prediction);
 
-            dataSource.appendDataframe(dataframe);
+            dataSource.get().appendDataframe(dataframe);
 
         } catch (InvalidProtocolBufferException e) {
             LOG.error("Error parsing protobuf message: " + e.getMessage());
