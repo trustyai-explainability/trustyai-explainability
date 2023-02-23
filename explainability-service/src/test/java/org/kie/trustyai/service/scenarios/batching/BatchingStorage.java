@@ -33,7 +33,6 @@ public class BatchingStorage {
 
     public InputStream getDataInputStream(String filename) throws FileNotFoundException {
         final String lines = generateLines(names, observations);
-        System.out.println(lines);
         return new ByteArrayInputStream(lines.getBytes());
     }
 

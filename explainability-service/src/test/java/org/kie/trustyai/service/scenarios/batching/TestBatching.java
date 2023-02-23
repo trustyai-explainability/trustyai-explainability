@@ -35,7 +35,6 @@ class TestBatching {
         batchStorage.setObservations(N);
         final InputStream stream = batchStorage.getDataInputStream("inputs.csv");
         final List<String> lines = BatchReader.readEntries(stream, batchSize);
-        System.out.println(lines);
         assertEquals(N + 1, lines.size());
         assertEquals(makeHeader(names), lines.get(0));
     }
@@ -50,7 +49,6 @@ class TestBatching {
         batchStorage.setObservations(N);
         final InputStream stream = batchStorage.getDataInputStream("inputs.csv");
         final List<String> lines = BatchReader.readEntries(stream, batchSize);
-        System.out.println(lines);
         assertEquals(batchSize + 1, lines.size());
         assertEquals(makeHeader(names), lines.get(0));
     }
