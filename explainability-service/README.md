@@ -40,7 +40,7 @@ The first step to run the demos locally, is to build the TrustyAI service contai
 This can be done by running (on `$PROJECT/explainability-service`):
 
 ```shell
-mvn clean install
+mvn clean install -Dquarkus.container-image.build=true
 ```
 
 ### Using data in storage only
