@@ -3,6 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -37,7 +38,7 @@ public class GroupStatisticalParityDifferenceEndpoint extends AbstractMetricsEnd
 
     private static final Logger LOG = Logger.getLogger(GroupStatisticalParityDifferenceEndpoint.class);
     @Inject
-    DataSource dataSource;
+    Instance<DataSource> dataSource;
 
     @Inject
     PrometheusScheduler scheduler;
@@ -74,11 +75,17 @@ public class GroupStatisticalParityDifferenceEndpoint extends AbstractMetricsEnd
     @Produces(MediaType.APPLICATION_JSON)
     public Response spd(BaseMetricRequest request) throws DataframeCreateException {
 
-        final Dataframe df = dataSource.getDataframe();
+        final Dataframe dataframe;
+        try {
+            dataframe = dataSource.get().getDataframe();
+        } catch (DataframeCreateException e) {
+            LOG.error("No data available: " + e.getMessage(), e);
+            return Response.serverError().build();
+        }
 
         final double spd;
         try {
-            spd = calculator.calculateSPD(df, request);
+            spd = calculator.calculateSPD(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();

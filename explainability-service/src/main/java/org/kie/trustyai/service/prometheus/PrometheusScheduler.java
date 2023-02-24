@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -24,7 +25,7 @@ public class PrometheusScheduler {
     private final Map<UUID, BaseMetricRequest> spdRequests = new HashMap<>();
     private final Map<UUID, BaseMetricRequest> dirRequests = new HashMap<>();
     @Inject
-    DataSource dataSource;
+    Instance<DataSource> dataSource;
     @Inject
     PrometheusPublisher publisher;
     @Inject
@@ -45,7 +46,7 @@ public class PrometheusScheduler {
 
         if (hasRequests()) {
             try {
-                final Dataframe df = dataSource.getDataframe();
+                final Dataframe df = dataSource.get().getDataframe();
 
                 // SPD requests
                 if (!spdRequests.isEmpty()) {

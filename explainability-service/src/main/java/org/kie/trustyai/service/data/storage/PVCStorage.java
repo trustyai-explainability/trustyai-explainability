@@ -5,13 +5,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.logging.Logger;
+import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.readers.PVCConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
@@ -26,18 +25,30 @@ public class PVCStorage extends Storage {
 
     private final String inputFilename;
     private final String outputFilename;
+    private final int batchSize;
 
-    public PVCStorage(PVCConfig config) {
+    public PVCStorage(PVCConfig config, ServiceConfig serviceConfig) {
         LOG.info("Starting PVC storage consumer");
-        if (config.inputFilename().isEmpty()) {
-            throw new IllegalArgumentException("Missing PVC input filename");
-        } else {
+        if (config.inputFilename().isPresent()) {
             this.inputFilename = config.inputFilename().get();
-        }
-        if (config.outputFilename().isEmpty()) {
-            throw new IllegalArgumentException("Missing PVC output filename");
         } else {
+            final String message = "Missing PVC input filename";
+            LOG.error(message);
+            throw new IllegalArgumentException(message);
+        }
+        if (config.outputFilename().isPresent()) {
             this.outputFilename = config.outputFilename().get();
+        } else {
+            final String message = "Missing PVC output filename";
+            LOG.error(message);
+            throw new IllegalArgumentException(message);
+        }
+        if (serviceConfig.batchSize().isPresent()) {
+            this.batchSize = serviceConfig.batchSize().getAsInt();
+        } else {
+            final String message = "Missing data batch size";
+            LOG.error(message);
+            throw new IllegalArgumentException(message);
         }
 
         LOG.info("PVC data location: input file="
@@ -45,15 +56,10 @@ public class PVCStorage extends Storage {
                 + ", output filename=" + outputFilename);
     }
 
-    private byte[] readFile(String filename) throws IOException {
-        final Path path = Paths.get(filename);
-        return Files.readAllBytes(path);
-    }
-
     @Override
     public ByteBuffer getInputData() throws StorageReadException {
         try {
-            return ByteBuffer.wrap(readFile(this.inputFilename));
+            return ByteBuffer.wrap(BatchReader.linesToBytes(BatchReader.readEntries(BatchReader.getDataInputStream(this.inputFilename), this.batchSize)));
         } catch (IOException e) {
             LOG.error("Error reading input file");
             throw new StorageReadException(e.getMessage());
@@ -63,7 +69,7 @@ public class PVCStorage extends Storage {
     @Override
     public ByteBuffer getOutputData() throws StorageReadException {
         try {
-            return ByteBuffer.wrap(readFile(this.outputFilename));
+            return ByteBuffer.wrap(BatchReader.linesToBytes(BatchReader.readEntries(BatchReader.getDataInputStream(this.outputFilename), this.batchSize)));
         } catch (IOException e) {
             LOG.error("Error reading output file");
             throw new StorageReadException(e.getMessage());
