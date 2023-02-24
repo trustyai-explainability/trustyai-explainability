@@ -36,14 +36,14 @@ class ConsumerEndpointTest {
     }
 
     @Test
-    void consumePostCorrectModelA() {
+    void consumeFullPostCorrectModelA() {
         datasource.get().empty();
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(0);
 
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post()
+                .when().post("/full")
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
 
@@ -57,7 +57,7 @@ class ConsumerEndpointTest {
     }
 
     @Test
-    void consumePostIncorrectModelA() {
+    void consumeFullPostIncorrectModelA() {
         datasource.get().empty();
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
         // Mangle inputs
@@ -65,7 +65,7 @@ class ConsumerEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post()
+                .when().post("/full")
                 .then()
                 .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
 
@@ -73,13 +73,13 @@ class ConsumerEndpointTest {
     }
 
     @Test
-    void consumePostCorrectModelB() {
+    void consumeFullPostCorrectModelB() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadB(0);
 
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post()
+                .when().post("/full")
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
 
@@ -93,14 +93,14 @@ class ConsumerEndpointTest {
     }
 
     @Test
-    void consumePostIncorrectModelB() {
+    void consumeFullPostIncorrectModelB() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
         // Mangle inputs
         payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post()
+                .when().post("/full")
                 .then()
                 .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
 
