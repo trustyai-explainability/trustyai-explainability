@@ -1,0 +1,13 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: trustyai-config
+data:
+  service_model_name: "example-model"
+  service_kserve_target: "localhost:8008"
+  service_storage_format: "PVC"
+  service_data_format: "CSV"
+  pvc_input_filename: "/inputs/inputs.csv"
+  pvc_output_filename: "/inputs/outputs.csv"
+  service_metrics_schedule: "5s"
+  service_batch_size: "5000"
