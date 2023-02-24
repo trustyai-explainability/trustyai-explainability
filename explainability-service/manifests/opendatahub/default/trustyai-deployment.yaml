@@ -96,7 +96,7 @@ spec:
                 configMapKeyRef:
                   key: service_kserve_target
                   name: trustyai-config
-          image: quay.io/trustyai/trustyai-service:999-SNAPSHOT
+          image: quay.io/trustyai/odh-trustyai-service:odh-1.24-prerelease-0
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
