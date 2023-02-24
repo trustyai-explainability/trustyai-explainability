@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.config.readers;
+package org.kie.trustyai.service.config.storage;
 
 import java.util.Optional;
 
@@ -10,10 +10,6 @@ public interface MinioConfig {
     Optional<String> bucketName();
 
     Optional<String> endpoint();
-
-    Optional<String> inputFilename();
-
-    Optional<String> outputFilename();
 
     Optional<String> secretKey();
 

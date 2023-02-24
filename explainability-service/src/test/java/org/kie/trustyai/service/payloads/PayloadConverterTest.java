@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.payloads.values.TypedValue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,7 +25,7 @@ class PayloadConverterTest {
         final JsonNode actualObj = mapper.readTree(jsonValues);
 
         final TypedValue typedValue = new TypedValue();
-        typedValue.type = "BOOL";
+        typedValue.type = DataType.BOOL;
         typedValue.value = actualObj.get("bool");
 
         final Value value = PayloadConverter.convertToValue(typedValue);
@@ -39,7 +40,7 @@ class PayloadConverterTest {
         final JsonNode actualObj = mapper.readTree(jsonValues);
 
         final TypedValue typedValue = new TypedValue();
-        typedValue.type = "FLOAT";
+        typedValue.type = DataType.FLOAT;
         typedValue.value = actualObj.get("float");
 
         final Value value = PayloadConverter.convertToValue(typedValue);
@@ -54,7 +55,7 @@ class PayloadConverterTest {
         final JsonNode actualObj = mapper.readTree(jsonValues);
 
         final TypedValue typedValue = new TypedValue();
-        typedValue.type = "DOUBLE";
+        typedValue.type = DataType.DOUBLE;
         typedValue.value = actualObj.get("double");
 
         final Value value = PayloadConverter.convertToValue(typedValue);
@@ -69,7 +70,7 @@ class PayloadConverterTest {
         final JsonNode actualObj = mapper.readTree(jsonValues);
 
         final TypedValue typedValue = new TypedValue();
-        typedValue.type = "INT32";
+        typedValue.type = DataType.INT32;
         typedValue.value = actualObj.get("int");
 
         final Value value = PayloadConverter.convertToValue(typedValue);
@@ -84,7 +85,7 @@ class PayloadConverterTest {
         final JsonNode actualObj = mapper.readTree(jsonValues);
 
         final TypedValue typedValue = new TypedValue();
-        typedValue.type = "INT64";
+        typedValue.type = DataType.INT64;
         typedValue.value = actualObj.get("long");
 
         final Value value = PayloadConverter.convertToValue(typedValue);
@@ -99,7 +100,7 @@ class PayloadConverterTest {
         final JsonNode actualObj = mapper.readTree(jsonValues);
 
         final TypedValue typedValue = new TypedValue();
-        typedValue.type = "STRING";
+        typedValue.type = DataType.STRING;
         typedValue.value = actualObj.get("string");
 
         final Value value = PayloadConverter.convertToValue(typedValue);
@@ -110,12 +111,11 @@ class PayloadConverterTest {
 
     @Test
     void convertToType() {
-        assertEquals(Type.BOOLEAN, PayloadConverter.convertToType("BOOL"));
-        assertEquals(Type.NUMBER, PayloadConverter.convertToType("FLOAT"));
-        assertEquals(Type.NUMBER, PayloadConverter.convertToType("DOUBLE"));
-        assertEquals(Type.NUMBER, PayloadConverter.convertToType("INT32"));
-        assertEquals(Type.NUMBER, PayloadConverter.convertToType("INT64"));
-        assertEquals(Type.CATEGORICAL, PayloadConverter.convertToType("STRING"));
-        assertEquals(Type.UNDEFINED, PayloadConverter.convertToType("FOO"));
+        assertEquals(Type.BOOLEAN, PayloadConverter.convertToType(DataType.BOOL));
+        assertEquals(Type.NUMBER, PayloadConverter.convertToType(DataType.FLOAT));
+        assertEquals(Type.NUMBER, PayloadConverter.convertToType(DataType.DOUBLE));
+        assertEquals(Type.NUMBER, PayloadConverter.convertToType(DataType.INT32));
+        assertEquals(Type.NUMBER, PayloadConverter.convertToType(DataType.INT64));
+        assertEquals(Type.CATEGORICAL, PayloadConverter.convertToType(DataType.STRING));
     }
 }

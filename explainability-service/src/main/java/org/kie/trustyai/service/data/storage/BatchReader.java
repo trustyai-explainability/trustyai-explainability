@@ -18,28 +18,16 @@ public class BatchReader {
 
     public static List<String> readEntries(InputStream stream, int batchSize) throws IOException {
         final CircularFifoQueue<String> queue = new CircularFifoQueue<>(batchSize);
-        String header = "";
         try (Scanner sc = new Scanner(stream, StandardCharsets.UTF_8)) {
-            boolean capturedHeader = false;
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
-                if (capturedHeader) {
-                    queue.add(line);
-                } else {
-                    header = line;
-                    capturedHeader = true;
-                }
-
+                queue.add(line);
             }
             if (sc.ioException() != null) {
                 throw sc.ioException();
             }
         }
-
-        final List<String> entries = new ArrayList<>();
-        entries.add(header);
-        entries.addAll(new ArrayList<>(queue));
-        return entries;
+        return new ArrayList<>(queue);
     }
 
     public static InputStream getDataInputStream(String filename) throws FileNotFoundException {

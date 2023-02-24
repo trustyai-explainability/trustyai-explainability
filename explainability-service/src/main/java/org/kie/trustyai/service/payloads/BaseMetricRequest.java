@@ -15,7 +15,7 @@ public class BaseMetricRequest {
     private TypedValue unprivilegedAttribute;
 
     public BaseMetricRequest() {
-
+        // Public default no-argument constructor
     }
 
     public String getProtectedAttribute() {

@@ -2,17 +2,17 @@ package org.kie.trustyai.service.payloads;
 
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.payloads.values.TypedValue;
-import org.kie.trustyai.service.payloads.values.Values;
 
-import static org.kie.trustyai.service.payloads.values.Values.*;
+import static org.kie.trustyai.service.payloads.values.DataType.*;
 
 public class PayloadConverter {
     private PayloadConverter() {
     }
 
     public static Value convertToValue(TypedValue node) {
-        final Values type = Values.valueOf(node.getType());
+        final DataType type = node.getType();
         if (type == BOOL) {
             return new Value(node.getValue().asBoolean());
         } else if (type == FLOAT || type == DOUBLE) {
@@ -28,9 +28,8 @@ public class PayloadConverter {
         }
     }
 
-    public static Type convertToType(String payloadType) {
+    public static Type convertToType(DataType type) {
         try {
-            final Values type = Values.valueOf(payloadType);
             if (type == BOOL) {
                 return Type.BOOLEAN;
             } else if (type == FLOAT || type == DOUBLE || type == INT32 || type == INT64) {

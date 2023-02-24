@@ -22,8 +22,8 @@ public class PayloadProducer {
 
     public static InferencePayload getInferencePayload(int number) {
         InferencePayload payload = new InferencePayload();
-        payload.input = encondedInputPayloads[number];
-        payload.output = encondedOutputPayloads[number];
+        payload.setInput(encondedInputPayloads[number]);
+        payload.setOutput(encondedOutputPayloads[number]);
         return payload;
     }
 

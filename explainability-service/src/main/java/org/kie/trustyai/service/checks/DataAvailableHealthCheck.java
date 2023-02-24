@@ -20,7 +20,7 @@ public class DataAvailableHealthCheck implements HealthCheck {
     @Override
     public HealthCheckResponse call() {
         HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named("Data").up();
-        if (storage.get().inputExists() && storage.get().outputExists()) {
+        if (storage.get().dataExists()) {
             responseBuilder.withData("available", "data available");
         } else {
             responseBuilder.withData("available", "data not yet available");
