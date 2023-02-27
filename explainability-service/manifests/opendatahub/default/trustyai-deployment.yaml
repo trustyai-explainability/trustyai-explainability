@@ -4,8 +4,8 @@ kind: Service
 metadata:
   annotations:
     app.openshift.io/vcs-url: <<unknown>>
-    app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
-    app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
+    app.quarkus.io/commit-id: 0acbb40970b5c0dd7e5a50966d6b3d68e137be10
+    app.quarkus.io/build-timestamp: 2023-02-24 - 13:56:14 +0000
     prometheus.io/scrape: "true"
     prometheus.io/path: /q/metrics
     prometheus.io/port: "8080"
@@ -24,95 +24,111 @@ spec:
     app.kubernetes.io/name: trustyai-service
     app.kubernetes.io/version: 999-SNAPSHOT
   type: ClusterIP
-
 ---
-apiVersion: image.openshift.io/v1
-kind: ImageStream
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   annotations:
     app.openshift.io/vcs-url: <<unknown>>
-    app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
-    app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
-  labels:
-    app.kubernetes.io/name: trustyai-service
-    app.kubernetes.io/version: 999-SNAPSHOT
-    app.openshift.io/runtime: quarkus
-  name: trustyai-service
-spec:
-  dockerImageRepository: quay.io/ruimvieira/trustyai-service
-
----
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
-metadata:
-  annotations:
-    app.openshift.io/vcs-url: <<unknown>>
-    app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
-    app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
+    app.quarkus.io/commit-id: 0acbb40970b5c0dd7e5a50966d6b3d68e137be10
+    app.quarkus.io/build-timestamp: 2023-02-24 - 13:56:14 +0000
     prometheus.io/scrape: "true"
     prometheus.io/path: /q/metrics
     prometheus.io/port: "8080"
     prometheus.io/scheme: http
   labels:
-    app.kubernetes.io/name: trustyai-service
-    app.kubernetes.io/version: 999-SNAPSHOT
     app.openshift.io/runtime: quarkus
+    app.kubernetes.io/version: 999-SNAPSHOT
+    app.kubernetes.io/name: trustyai-service
   name: trustyai-service
 spec:
   replicas: 1
   selector:
-    app.kubernetes.io/name: trustyai-service
-    app.kubernetes.io/version: 999-SNAPSHOT
+    matchLabels:
+      app.kubernetes.io/version: 999-SNAPSHOT
+      app.kubernetes.io/name: trustyai-service
   template:
     metadata:
-      annotations:
-        app.openshift.io/vcs-url: <<unknown>>
-        app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
-        app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
-        prometheus.io/scrape: "true"
-        prometheus.io/path: /q/metrics
-        prometheus.io/port: "8080"
-        prometheus.io/scheme: http
       labels:
         app.openshift.io/runtime: quarkus
-        app.kubernetes.io/name: trustyai-service
         app.kubernetes.io/version: 999-SNAPSHOT
+        app.kubernetes.io/name: trustyai-service
     spec:
       containers:
         - env:
-            - name: KUBERNETES_NAMESPACE
+            - name: STORAGE_DATA_FILENAME
               valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: SERVICE_MODEL_NAME
-              value: "localhost"
-            - name: SERVICE_KSERVE_TARGET
-              value: "localhost"
+                configMapKeyRef:
+                  key: storage_data_filename
+                  name: trustyai-config
             - name: SERVICE_STORAGE_FORMAT
-              value: "PVC"
-            - name: SERVICE_DATA_FORMAT
-              value: "CSV"
-            - name: MINIO_INPUT_FILENAME
-              value: "/inputs/income-biased-inputs.csv"
-            - name: MINIO_OUTPUT_FILENAME
-              value: "/inputs/income-biased-outputs.csv"
-            - name: SERVICE_METRICS_SCHEDULE
-              value: "5s"
+              valueFrom:
+                configMapKeyRef:
+                  key: service_storage_format
+                  name: trustyai-config
+            - name: STORAGE_DATA_FOLDER
+              valueFrom:
+                configMapKeyRef:
+                  key: storage_data_folder
+                  name: trustyai-config
             - name: SERVICE_BATCH_SIZE
-              value: "5000"
-          image: trustyai-service:999-SNAPSHOT
+              valueFrom:
+                configMapKeyRef:
+                  key: service_batch_size
+                  name: trustyai-config
+            - name: SERVICE_DATA_FORMAT
+              valueFrom:
+                configMapKeyRef:
+                  key: service_data_format
+                  name: trustyai-config
+            - name: SERVICE_MODEL_NAME
+              valueFrom:
+                configMapKeyRef:
+                  key: service_model_name
+                  name: trustyai-config
+            - name: SERVICE_METRICS_SCHEDULE
+              valueFrom:
+                configMapKeyRef:
+                  key: service_metrics_schedule
+                  name: trustyai-config
+            - name: SERVICE_KSERVE_TARGET
+              valueFrom:
+                configMapKeyRef:
+                  key: service_kserve_target
+                  name: trustyai-config
+          image: quay.io/ruimvieira/trustyai-service:999-SNAPSHOT
           imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
           name: trustyai-service
           ports:
             - containerPort: 8080
               name: http
               protocol: TCP
-  triggers:
-    - imageChangeParams:
-        automatic: true
-        containerNames:
-          - trustyai-service
-        from:
-          kind: ImageStreamTag
-          name: trustyai-service:999-SNAPSHOT
-      type: ImageChange
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 10
+          volumeMounts:
+            - mountPath: /inputs
+              name: volume
+              readOnly: false
+      volumes:
+        - name: volume
+          persistentVolumeClaim:
+            claimName: trustyai-service-pvc
+            readOnly: false
