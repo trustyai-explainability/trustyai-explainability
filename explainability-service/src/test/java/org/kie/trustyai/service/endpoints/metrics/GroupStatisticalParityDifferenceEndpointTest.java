@@ -36,9 +36,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestHTTPEndpoint(GroupStatisticalParityDifferenceEndpoint.class)
 class GroupStatisticalParityDifferenceEndpointTest {
 
+    private static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
-
     @Inject
     Instance<MockMemoryStorage> storage;
 
@@ -46,8 +46,8 @@ class GroupStatisticalParityDifferenceEndpointTest {
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
         final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
-        datasource.get().saveDataframe(dataframe);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe));
+        datasource.get().saveDataframe(dataframe, MODEL_ID);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }
 
     @Test

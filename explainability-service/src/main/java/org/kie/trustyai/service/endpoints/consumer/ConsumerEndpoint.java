@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.RestResponse;
 import org.kie.trustyai.connectors.kserve.v2.PayloadParser;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
@@ -42,6 +43,8 @@ public class ConsumerEndpoint {
     public Response consume(InferencePayload request) throws DataframeCreateException {
         LOG.info("Got payload on the consumer");
         try {
+            final String modelId = request.getModelId();
+
             final byte[] inputBytes = Base64.getDecoder().decode(request.getInput().getBytes());
             final ModelInferRequest input = ModelInferRequest.parseFrom(inputBytes);
             final PredictionInput predictionInput = PayloadParser
@@ -74,35 +77,37 @@ public class ConsumerEndpoint {
             final Dataframe dataframe = Dataframe.createFrom(prediction);
 
             // Save data
-            dataSource.get().saveDataframe(dataframe);
+            dataSource.get().saveDataframe(dataframe, modelId);
 
             // Save metadata if it doesn't exist
             final Metadata metadata;
-            if (!dataSource.get().hasMetadata()) {
+            if (!dataSource.get().hasMetadata(modelId)) {
 
                 metadata = new Metadata();
 
                 metadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
                 metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
+                metadata.setModelId(modelId);
+
             } else {
                 try {
-                    metadata = dataSource.get().getMetadata();
+                    metadata = dataSource.get().getMetadata(modelId);
                 } catch (JsonProcessingException e) {
-                    throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+                    throw new DataframeCreateException("Could not parse metadata for model " + modelId + ": " + e.getMessage());
                 }
             }
             metadata.incrementObservations(dataframe.getRowDimension());
 
             try {
-                dataSource.get().saveMetadata(metadata);
+                dataSource.get().saveMetadata(metadata, modelId);
             } catch (JsonProcessingException e) {
-                LOG.error("Error parsing metadata: " + e.getMessage());
-                return Response.serverError().status(500).build();
+                LOG.error("Error parsing metadata for model " + modelId + ": " + e.getMessage());
+                return Response.serverError().status(RestResponse.StatusCode.INTERNAL_SERVER_ERROR).build();
             }
 
         } catch (InvalidProtocolBufferException e) {
             LOG.error("Error parsing protobuf message: " + e.getMessage());
-            return Response.serverError().status(500).build();
+            return Response.serverError().status(RestResponse.StatusCode.INTERNAL_SERVER_ERROR).build();
         }
 
         return Response.ok().build();

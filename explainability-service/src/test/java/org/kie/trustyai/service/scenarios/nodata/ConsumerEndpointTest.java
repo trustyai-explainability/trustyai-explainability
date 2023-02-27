@@ -4,13 +4,13 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.jboss.resteasy.reactive.RestResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.endpoints.consumer.ConsumerEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
@@ -30,12 +30,15 @@ class ConsumerEndpointTest {
     @Inject
     Instance<MockDatasource> datasource;
 
-    @Inject
-    Instance<MockMemoryStorage> storage;
+    @BeforeEach
+    void emptyStorage() {
+        datasource.get().empty();
+    }
 
     @Test
-    void consumePostCorrect() {
-        final InferencePayload payload = PayloadProducer.getInferencePayload(0);
+    void consumePostCorrectModelA() {
+        datasource.get().empty();
+        final InferencePayload payload = PayloadProducer.getInferencePayloadA(0);
 
         given()
                 .contentType(ContentType.JSON)
@@ -46,7 +49,7 @@ class ConsumerEndpointTest {
 
                 .body(is(""));
 
-        final Dataframe dataframe = datasource.get().getDataframe();
+        final Dataframe dataframe = datasource.get().getDataframe(payload.getModelId());
         assertEquals(1, dataframe.getRowDimension());
         assertEquals(4, dataframe.getColumnDimension());
         assertEquals(3, dataframe.getInputsCount());
@@ -54,8 +57,44 @@ class ConsumerEndpointTest {
     }
 
     @Test
-    void consumePostIncorrect() {
-        final InferencePayload payload = PayloadProducer.getInferencePayload(1);
+    void consumePostIncorrectModelA() {
+        datasource.get().empty();
+        final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
+        // Mangle inputs
+        payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
+
+                .body(is(""));
+    }
+
+    @Test
+    void consumePostCorrectModelB() {
+        final InferencePayload payload = PayloadProducer.getInferencePayloadB(0);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+
+                .body(is(""));
+
+        final Dataframe dataframe = datasource.get().getDataframe(payload.getModelId());
+        assertEquals(1, dataframe.getRowDimension());
+        assertEquals(5, dataframe.getColumnDimension());
+        assertEquals(3, dataframe.getInputsCount());
+        assertEquals(2, dataframe.getOutputsCount());
+    }
+
+    @Test
+    void consumePostIncorrectModelB() {
+        final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
         // Mangle inputs
         payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
         given()

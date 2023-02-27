@@ -4,6 +4,15 @@ public class InferencePayload {
 
     private String input;
     private String output;
+    private String modelId;
+
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
 
     public String getInput() {
         return input;

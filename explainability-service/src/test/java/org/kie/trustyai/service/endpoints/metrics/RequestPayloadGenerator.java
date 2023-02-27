@@ -13,6 +13,8 @@ import static org.kie.trustyai.service.payloads.values.DataType.STRING;
 
 public class RequestPayloadGenerator {
 
+    private static final String MODEL_ID = "example1";
+
     public static BaseMetricRequest correct() {
         BaseMetricRequest request = new BaseMetricRequest();
         request.setProtectedAttribute("gender");
@@ -33,6 +35,8 @@ public class RequestPayloadGenerator {
         unprivilegedAttribute.setType(INT32);
         unprivilegedAttribute.setValue(JsonNodeFactory.instance.numberNode(0));
         request.setUnprivilegedAttribute(unprivilegedAttribute);
+
+        request.setModelId(MODEL_ID);
 
         return request;
     }
@@ -58,6 +62,8 @@ public class RequestPayloadGenerator {
         unprivilegedAttribute.setValue(JsonNodeFactory.instance.numberNode(0));
         request.setUnprivilegedAttribute(unprivilegedAttribute);
 
+        request.setModelId(MODEL_ID);
+
         return request;
     }
 
@@ -77,6 +83,9 @@ public class RequestPayloadGenerator {
         unprivilegedAttribute.put("type", "INT32");
         unprivilegedAttribute.put("value", 0);
         payload.put("unprivilegedAttribute", unprivilegedAttribute);
+
+        payload.put("modelId", MODEL_ID);
+
         return payload;
     }
 
@@ -96,6 +105,9 @@ public class RequestPayloadGenerator {
         unprivilegedAttribute.put("type", "INT32");
         unprivilegedAttribute.put("value", 0);
         payload.put("unprivilegedAttribute", unprivilegedAttribute);
+
+        payload.put("modelId", MODEL_ID);
+
         return payload;
     }
 }

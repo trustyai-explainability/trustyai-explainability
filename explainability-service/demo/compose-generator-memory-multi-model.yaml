@@ -5,7 +5,6 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SERVICE_MODEL_NAME: "example"
       SERVICE_KSERVE_TARGET: "localhost"
       SERVICE_STORAGE_FORMAT: "MEMORY"
       SERVICE_DATA_FORMAT: "CSV"
@@ -26,15 +25,39 @@ services:
     volumes:
       - ./prometheus:/etc/prometheus
       - prom_data:/prometheus
-  generator:
-    container_name: generator
+  generator-1:
+    container_name: generator-1
     image: trustyai/trustyai-service-generator
     build:
       context: ./logger
       dockerfile: ./generator.Dockerfile
     environment:
+      MODEL_NAME: "example-model-1"
       SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
       PYTHONUNBUFFERED: "1"
+  generator-2:
+    container_name: generator-2
+    image: trustyai/trustyai-service-generator
+    build:
+      context: ./logger
+      dockerfile: ./generator.Dockerfile
+    environment:
+      MODEL_NAME: "example-model-2"
+      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
+      PYTHONUNBUFFERED: "1"
+  generator-3:
+    container_name: generator-3
+    image: trustyai/trustyai-service-generator
+    build:
+      context: ./logger
+      dockerfile: ./generator.Dockerfile
+    environment:
+      MODEL_NAME: "example-model-3"
+      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
+      INPUT_FILE: "inputs-2.b64"
+      OUTPUT_FILE: "outputs-2.b64"
+      PYTHONUNBUFFERED: "1"
+
 
 volumes:
   prom_data:

@@ -2,6 +2,7 @@ package org.kie.trustyai.service.data.storage;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,18 +27,19 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
-    public ByteBuffer getData() throws StorageReadException {
-        if (data.containsKey(this.dataFilename)) {
-            return ByteBuffer.wrap(data.get(this.dataFilename).getBytes());
+    public ByteBuffer getData(final String modelId) throws StorageReadException {
+        final String key = getDataFilename(modelId);
+        if (data.containsKey(key)) {
+            return ByteBuffer.wrap(data.get(key).getBytes());
         } else {
-            throw new StorageReadException("Data file not found");
+            throw new StorageReadException("Data file '" + key + "' not found");
         }
 
     }
 
     @Override
-    public boolean dataExists() throws StorageReadException {
-        return data.containsKey(this.dataFilename);
+    public boolean dataExists(String modelId) throws StorageReadException {
+        return data.containsKey(getDataFilename(modelId));
     }
 
     @Override
@@ -59,8 +61,8 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
-    public void appendData(ByteBuffer data) throws StorageWriteException {
-        append(data, this.dataFilename);
+    public void appendData(ByteBuffer data, String modelId) throws StorageWriteException {
+        append(data, getDataFilename(modelId));
     }
 
     @Override
@@ -74,13 +76,28 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
-    public void saveData(ByteBuffer data) throws StorageWriteException {
-        save(data, this.dataFilename);
+    public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
+        save(data, getDataFilename(modelId));
     }
 
     @Override
     public boolean fileExists(String location) throws StorageReadException {
         return data.containsKey(location);
+    }
+
+    @Override
+    public String getDataFilename(String modelId) {
+        return modelId + "-" + this.dataFilename;
+    }
+
+    @Override
+    public Path buildDataPath(String modelId) {
+        return Path.of(getDataFilename(modelId));
+    }
+
+    @Override
+    public String buildMetadataFilename(String modelId) {
+        return null;
     }
 
 }

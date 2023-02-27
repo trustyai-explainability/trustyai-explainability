@@ -66,9 +66,9 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
 
         final Dataframe dataframe;
         try {
-            dataframe = dataSource.get().getDataframe();
+            dataframe = dataSource.get().getDataframe(request.getModelId());
         } catch (DataframeCreateException e) {
-            LOG.error("No data available: " + e.getMessage(), e);
+            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
@@ -76,7 +76,7 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
         try {
             dir = calculator.calculateDIR(dataframe, request);
         } catch (MetricCalculationException e) {
-            LOG.error("Error calculating metric: " + e.getMessage(), e);
+            LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
         final String dirDefinition = calculator.getDIRDefinition(dir, request);

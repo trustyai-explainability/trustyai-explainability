@@ -14,8 +14,6 @@ public interface ServiceConfig {
 
     OptionalInt batchSize();
 
-    String modelName();
-
     @WithName("optional.string")
     Optional<String> kserveTarget();
 

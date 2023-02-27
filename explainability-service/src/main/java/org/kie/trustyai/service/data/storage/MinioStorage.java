@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -105,7 +106,7 @@ public class MinioStorage extends Storage {
     }
 
     @Override
-    public ByteBuffer getData() throws StorageReadException {
+    public ByteBuffer getData(String modelId) throws StorageReadException {
         isObjectAvailable(this.bucketName, this.dataFilename);
         try {
             return ByteBuffer.wrap(readFile(this.bucketName, this.dataFilename));
@@ -154,7 +155,7 @@ public class MinioStorage extends Storage {
     }
 
     @Override
-    public boolean dataExists() throws StorageReadException {
+    public boolean dataExists(String modelId) throws StorageReadException {
         try {
             isObjectAvailable(this.bucketName, this.dataFilename);
             return true;
@@ -174,7 +175,7 @@ public class MinioStorage extends Storage {
     }
 
     @Override
-    public void appendData(ByteBuffer data) throws StorageWriteException {
+    public void appendData(ByteBuffer data, String modelId) throws StorageWriteException {
         append(data, this.dataFilename);
     }
 
@@ -188,7 +189,7 @@ public class MinioStorage extends Storage {
     }
 
     @Override
-    public void saveData(ByteBuffer data) throws StorageWriteException {
+    public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
         save(data, this.dataFilename);
     }
 
@@ -201,4 +202,20 @@ public class MinioStorage extends Storage {
             return false;
         }
     }
+
+    @Override
+    public String getDataFilename(String modelId) {
+        return this.dataFilename;
+    }
+
+    @Override
+    public Path buildDataPath(String modelId) {
+        return Path.of(this.bucketName, getDataFilename(modelId));
+    }
+
+    @Override
+    public String buildMetadataFilename(String modelId) {
+        return null;
+    }
+
 }

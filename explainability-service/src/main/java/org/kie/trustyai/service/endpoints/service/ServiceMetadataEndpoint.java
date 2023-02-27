@@ -1,5 +1,8 @@
 package org.kie.trustyai.service.endpoints.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -39,18 +42,27 @@ public class ServiceMetadataEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response serviceInfo() throws JsonProcessingException {
-        final ServiceMetadata serviceMetadata = new ServiceMetadata();
 
-        serviceMetadata.getMetrics().scheduledMetadata.dir = scheduler.getDirRequests().size();
-        serviceMetadata.getMetrics().scheduledMetadata.spd = scheduler.getSpdRequests().size();
+        final List<ServiceMetadata> serviceMetadataList = new ArrayList<>();
 
-        try {
-            final Metadata metadata = dataSource.get().getMetadata();
-            serviceMetadata.setData(metadata);
-        } catch (DataframeCreateException | StorageReadException | NullPointerException e) {
-            LOG.warn("Problem creating dataframe: " + e.getMessage(), e);
+        for (String modelId : dataSource.get().getKnownModels()) {
+            final ServiceMetadata serviceMetadata = new ServiceMetadata();
+
+            serviceMetadata.getMetrics().scheduledMetadata.dir = scheduler.getDirRequests().size();
+            serviceMetadata.getMetrics().scheduledMetadata.spd = scheduler.getSpdRequests().size();
+
+            try {
+                final Metadata metadata = dataSource.get().getMetadata(modelId);
+                serviceMetadata.setData(metadata);
+            } catch (DataframeCreateException | StorageReadException | NullPointerException e) {
+                LOG.warn("Problem creating dataframe: " + e.getMessage(), e);
+            }
+
+            serviceMetadataList.add(serviceMetadata);
+
         }
-        return Response.ok(serviceMetadata).build();
+
+        return Response.ok(serviceMetadataList).build();
 
     }
 
