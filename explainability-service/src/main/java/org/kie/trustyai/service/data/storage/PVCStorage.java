@@ -30,6 +30,7 @@ public class PVCStorage extends Storage {
 
     private final Path metadataPath;
     private final Path dataPath;
+    private final String dataFilename;
 
     private final Path dataFolder;
 
@@ -44,6 +45,7 @@ public class PVCStorage extends Storage {
         }
 
         this.metadataPath = Paths.get(storageConfig.dataFolder(), DataSource.METADATA_FILENAME);
+        this.dataFilename = storageConfig.dataFilename();
         this.dataPath = Paths.get(storageConfig.dataFolder(), storageConfig.dataFilename());
         this.dataFolder = Path.of(storageConfig.dataFolder());
 
@@ -53,15 +55,20 @@ public class PVCStorage extends Storage {
             throw new IllegalArgumentException(message);
         }
 
-        LOG.info("PVC data locations: data=" + this.dataPath + ", metadata=" + this.metadataPath);
+        LOG.info("PVC data locations: data=*-" + this.dataPath + ", metadata=*-" + this.metadataPath);
     }
 
     @Override
-    public ByteBuffer getData() throws StorageReadException {
+    public ByteBuffer getData(String modelId) throws StorageReadException {
         try {
-            return ByteBuffer.wrap(BatchReader.linesToBytes(BatchReader.readEntries(BatchReader.getDataInputStream(this.dataPath.toString()), this.batchSize)));
+            return ByteBuffer.wrap(
+                    BatchReader.linesToBytes(
+                            BatchReader.readEntries(
+                                    BatchReader.getDataInputStream(
+                                            buildDataPath(modelId).toString()),
+                                    this.batchSize)));
         } catch (IOException e) {
-            LOG.error("Error reading input file");
+            LOG.error("Error reading input file for model " + modelId);
             throw new StorageReadException(e.getMessage());
         }
     }
@@ -117,13 +124,13 @@ public class PVCStorage extends Storage {
     }
 
     @Override
-    public void saveData(ByteBuffer data) throws StorageWriteException {
-        save(data, this.dataPath.getFileName().toString());
+    public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
+        save(data, getDataFilename(modelId));
     }
 
     @Override
-    public void appendData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
-        append(byteBuffer, this.dataPath.getFileName().toString());
+    public void appendData(ByteBuffer byteBuffer, String modelId) throws StorageWriteException, StorageReadException {
+        append(byteBuffer, getDataFilename(modelId));
     }
 
     @Override
@@ -133,8 +140,22 @@ public class PVCStorage extends Storage {
     }
 
     @Override
-    public boolean dataExists() throws StorageReadException {
-        return fileExists(this.dataPath.getFileName().toString());
+    public boolean dataExists(String modelId) throws StorageReadException {
+        return fileExists(getDataFilename(modelId));
     }
 
+    @Override
+    public String getDataFilename(String modelId) {
+        return modelId + "-" + this.dataFilename;
+    }
+
+    @Override
+    public Path buildDataPath(String modelId) {
+        return Path.of(this.dataFolder.toString(), getDataFilename(modelId));
+    }
+
+    @Override
+    public String buildMetadataFilename(String modelId) {
+        return null;
+    }
 }

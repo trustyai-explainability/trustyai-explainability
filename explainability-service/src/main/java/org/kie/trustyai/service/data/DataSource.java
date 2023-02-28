@@ -2,6 +2,8 @@ package org.kie.trustyai.service.data;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -23,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DataSource {
     public static final String METADATA_FILENAME = "metadata.json";
     private static final Logger LOG = Logger.getLogger(DataSource.class);
+    protected final Set<String> knownModels = new HashSet<>();
     @Inject
     Instance<Storage> storage;
     @Inject
@@ -30,27 +33,28 @@ public class DataSource {
     @Inject
     ServiceConfig serviceConfig;
 
-    private Metadata metadata = null;
+    public Set<String> getKnownModels() {
+        return knownModels;
+    }
 
-    public Dataframe getDataframe() throws DataframeCreateException {
+    public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
 
         final ByteBuffer byteBuffer;
         try {
-            byteBuffer = storage.get().getData();
+            byteBuffer = storage.get().getData(modelId);
         } catch (StorageReadException e) {
             throw new DataframeCreateException(e.getMessage());
         }
 
         // Fetch metadata, if not yet read
-        if (this.metadata == null) {
-            try {
-                this.metadata = getMetadata();
-            } catch (JsonProcessingException e) {
-                throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
-            }
+        final Metadata metadata;
+        try {
+            metadata = getMetadata(modelId);
+        } catch (JsonProcessingException e) {
+            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
         }
 
-        final Dataframe dataframe = parser.toDataframe(byteBuffer, this.metadata);
+        final Dataframe dataframe = parser.toDataframe(byteBuffer, metadata);
 
         if (serviceConfig.batchSize().isPresent()) {
             final int batchSize = serviceConfig.batchSize().getAsInt();
@@ -62,29 +66,33 @@ public class DataSource {
         }
     }
 
-    public void saveDataframe(Dataframe dataframe) {
-        if (!storage.get().dataExists()) {
-            storage.get().saveData(parser.toByteBuffer(dataframe, false));
+    public void saveDataframe(Dataframe dataframe, String modelId) {
+
+        // Add to known models
+        this.knownModels.add(modelId);
+
+        if (!storage.get().dataExists(modelId)) {
+            storage.get().saveData(parser.toByteBuffer(dataframe, false), modelId);
         } else {
-            storage.get().appendData(parser.toByteBuffer(dataframe, false));
+            storage.get().appendData(parser.toByteBuffer(dataframe, false), modelId);
         }
     }
 
-    public void saveMetadata(Metadata metadata) throws JsonProcessingException {
+    public void saveMetadata(Metadata metadata, String modelId) throws JsonProcessingException {
         final ObjectMapper mapper = new ObjectMapper();
         final ByteBuffer byteBuffer = ByteBuffer.wrap(mapper.writeValueAsString(metadata).getBytes());
-        storage.get().save(byteBuffer, METADATA_FILENAME);
+        storage.get().save(byteBuffer, modelId + "-" + METADATA_FILENAME);
     }
 
-    public Metadata getMetadata() throws StorageReadException, JsonProcessingException {
+    public Metadata getMetadata(String modelId) throws StorageReadException, JsonProcessingException {
         final ObjectMapper mapper = new ObjectMapper();
-        final ByteBuffer metadataBytes = storage.get().read(METADATA_FILENAME);
+        final ByteBuffer metadataBytes = storage.get().read(modelId + "-" + METADATA_FILENAME);
         return mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), Metadata.class);
 
     }
 
-    public boolean hasMetadata() {
-        return storage.get().fileExists(METADATA_FILENAME);
+    public boolean hasMetadata(String modelId) {
+        return storage.get().fileExists(modelId + "-" + METADATA_FILENAME);
     }
 
 }

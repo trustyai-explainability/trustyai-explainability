@@ -2,19 +2,20 @@ POST {{host}}/metrics/spd
 Content-Type: application/json
 
 {
-  "protectedAttribute": "gender",
+  "modelId": "example-model-1",
+  "protectedAttribute": "input-2",
   "favorableOutcome": {
-    "type": "INT32",
-    "value": 1
+    "type": "DOUBLE",
+    "value": 1.0
   },
-  "outcomeName": "income",
+  "outcomeName": "output-0",
   "privilegedAttribute": {
-    "type": "INT32",
-    "value": 1
+    "type": "DOUBLE",
+    "value": 1.0
   },
   "unprivilegedAttribute": {
-    "type": "INT32",
-    "value": 0
+    "type": "DOUBLE",
+    "value": 0.0
   }
 }
 
@@ -44,19 +45,19 @@ POST {{host}}/metrics/spd/request
 Content-Type: application/json
 
 {
-  "protectedAttribute": "gender",
+  "protectedAttribute": "input-2",
   "favorableOutcome": {
-    "type": "INT32",
-    "value": 1
+    "type": "DOUBLE",
+    "value": 1.0
   },
-  "outcomeName": "income",
+  "outcomeName": "output-0",
   "privilegedAttribute": {
-    "type": "INT32",
-    "value": 1
+    "type": "DOUBLE",
+    "value": 1.0
   },
   "unprivilegedAttribute": {
-    "type": "INT32",
-    "value": 0
+    "type": "DOUBLE",
+    "value": 0.0
   }
 }
 
@@ -97,19 +98,20 @@ POST {{host}}/metrics/dir
 Content-Type: application/json
 
 {
-  "protectedAttribute": "gender",
+  "modelId": "example-model-1",
+  "protectedAttribute": "input-2",
   "favorableOutcome": {
-    "type": "INT32",
-    "value": 1
+    "type": "DOUBLE",
+    "value": 1.0
   },
-  "outcomeName": "income",
+  "outcomeName": "output-0",
   "privilegedAttribute": {
-    "type": "INT32",
-    "value": 1
+    "type": "DOUBLE",
+    "value": 1.0
   },
   "unprivilegedAttribute": {
-    "type": "INT32",
-    "value": 0
+    "type": "DOUBLE",
+    "value": 0.0
   }
 }
 

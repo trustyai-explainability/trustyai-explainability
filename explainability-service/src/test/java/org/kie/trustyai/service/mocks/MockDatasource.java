@@ -25,6 +25,7 @@ import io.quarkus.test.Mock;
 @ApplicationScoped
 public class MockDatasource extends DataSource {
 
+    private static final String MODEL_ID = "example1";
     @Inject
     Instance<MockMemoryStorage> storage;
 
@@ -64,9 +65,15 @@ public class MockDatasource extends DataSource {
     }
 
     public void reset() throws JsonProcessingException {
-        storage.get().emptyStorage();
+        this.empty();
         final Dataframe dataframe = generateRandomDataframe(1000);
-        saveDataframe(dataframe);
-        saveMetadata(createMetadata(dataframe));
+        saveDataframe(dataframe, MODEL_ID);
+        saveMetadata(createMetadata(dataframe), MODEL_ID);
     }
+
+    public void empty() {
+        storage.get().emptyStorage();
+        this.knownModels.clear();
+    }
+
 }

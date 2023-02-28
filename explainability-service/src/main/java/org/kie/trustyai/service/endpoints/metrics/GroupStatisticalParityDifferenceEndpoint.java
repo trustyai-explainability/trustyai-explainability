@@ -77,7 +77,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
 
         final Dataframe dataframe;
         try {
-            dataframe = dataSource.get().getDataframe();
+            dataframe = dataSource.get().getDataframe(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();

@@ -12,6 +12,8 @@ public class Metadata {
 
     private int observations = 0;
 
+    private String modelId;
+
     public Metadata() {
 
     }
@@ -42,5 +44,13 @@ public class Metadata {
 
     public void incrementObservations(int observations) {
         this.observations += observations;
+    }
+
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
 }

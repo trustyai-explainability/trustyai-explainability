@@ -3,8 +3,8 @@ package org.kie.trustyai.service.endpoints.consumer;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.jboss.resteasy.reactive.RestResponse;
+import org.junit.jupiter.api.*;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @QuarkusTest
 @TestProfile(BaseTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ConsumerEndpointTest {
 
     @Inject
@@ -37,32 +38,35 @@ class ConsumerEndpointTest {
      */
     @BeforeEach
     void emptyStorage() {
+        datasource.get().empty();
         storage.get().emptyStorage();
     }
 
+    @Order(1)
     @Test
-    void consumePostCorrect() {
-        final InferencePayload payload = PayloadProducer.getInferencePayload(0);
+    void consumePostCorrectModelA() {
+        final InferencePayload payload = PayloadProducer.getInferencePayloadA(0);
 
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
-                .statusCode(200)
+                .statusCode(RestResponse.StatusCode.OK)
 
                 .body(is(""));
 
-        final Dataframe dataframe = datasource.get().getDataframe();
+        final Dataframe dataframe = datasource.get().getDataframe(payload.getModelId());
         assertEquals(1, dataframe.getRowDimension());
         assertEquals(4, dataframe.getColumnDimension());
         assertEquals(3, dataframe.getInputsCount());
         assertEquals(1, dataframe.getOutputsCount());
     }
 
+    @Order(3)
     @Test
-    void consumePostIncorrect() {
-        final InferencePayload payload = PayloadProducer.getInferencePayload(1);
+    void consumePostIncorrectModelA() {
+        final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
         // Mangle inputs
         payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
         given()
@@ -70,7 +74,44 @@ class ConsumerEndpointTest {
                 .body(payload)
                 .when().post()
                 .then()
-                .statusCode(500)
+                .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
+
+                .body(is(""));
+    }
+
+    @Order(2)
+    @Test
+    void consumePostCorrectModelB() {
+        final InferencePayload payload = PayloadProducer.getInferencePayloadB(1);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+
+                .body(is(""));
+
+        final Dataframe dataframe = datasource.get().getDataframe(PayloadProducer.MODEL_B_ID);
+        assertEquals(1, dataframe.getRowDimension());
+        assertEquals(5, dataframe.getColumnDimension());
+        assertEquals(3, dataframe.getInputsCount());
+        assertEquals(2, dataframe.getOutputsCount());
+    }
+
+    @Order(4)
+    @Test
+    void consumePostIncorrectModelB() {
+        final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
+        // Mangle inputs
+        payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
 
                 .body(is(""));
     }

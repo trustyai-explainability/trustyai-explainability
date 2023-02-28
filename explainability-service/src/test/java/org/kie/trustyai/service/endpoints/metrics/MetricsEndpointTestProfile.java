@@ -17,7 +17,6 @@ public class MetricsEndpointTestProfile implements QuarkusTestProfile {
     public Map<String, String> getConfigOverrides() {
         final Map<String, String> overrides = new HashMap<>();
         overrides.put("service.storage-format", String.valueOf(MEMORY));
-        overrides.put("service.model-name", "example");
         overrides.put("service.data-format", String.valueOf(CSV));
         overrides.put("service.metrics-schedule", "5s");
         overrides.put("storage.data-filename", "data.csv");
