@@ -3,9 +3,13 @@ package org.kie.trustyai.service.endpoints.consumer;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
+import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
@@ -18,12 +22,23 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
-@TestProfile(ConsumerTestProfile.class)
+@TestProfile(BaseTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
 class ConsumerEndpointTest {
 
     @Inject
-    Instance<MockConsumerDatasource> datasource;
+    Instance<MockDatasource> datasource;
+
+    @Inject
+    Instance<MockMemoryStorage> storage;
+
+    /**
+     * Empty the storage before each test.
+     */
+    @BeforeEach
+    void emptyStorage() {
+        storage.get().emptyStorage();
+    }
 
     @Test
     void consumePostCorrect() {
@@ -38,7 +53,7 @@ class ConsumerEndpointTest {
 
                 .body(is(""));
 
-        final Dataframe dataframe = datasource.get().getCurrent();
+        final Dataframe dataframe = datasource.get().getDataframe();
         assertEquals(1, dataframe.getRowDimension());
         assertEquals(4, dataframe.getColumnDimension());
         assertEquals(3, dataframe.getInputsCount());
@@ -49,7 +64,7 @@ class ConsumerEndpointTest {
     void consumePostIncorrect() {
         final InferencePayload payload = PayloadProducer.getInferencePayload(1);
         // Mangle inputs
-        payload.input = payload.input.substring(0, 10) + "X" + payload.input.substring(11);
+        payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)

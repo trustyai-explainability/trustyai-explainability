@@ -1,8 +1,5 @@
 package org.kie.trustyai.service.endpoints.service;
 
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -12,14 +9,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.payloads.service.SchemaItem;
+import org.kie.trustyai.service.data.exceptions.StorageReadException;
+import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @Path("/info")
 public class ServiceMetadataEndpoint {
@@ -40,43 +38,19 @@ public class ServiceMetadataEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response serviceInfo() {
-        final ServiceMetadata metadata = new ServiceMetadata();
+    public Response serviceInfo() throws JsonProcessingException {
+        final ServiceMetadata serviceMetadata = new ServiceMetadata();
 
-        metadata.metrics.scheduledMetadata.dir = scheduler.getDirRequests().size();
-        metadata.metrics.scheduledMetadata.spd = scheduler.getSpdRequests().size();
+        serviceMetadata.getMetrics().scheduledMetadata.dir = scheduler.getDirRequests().size();
+        serviceMetadata.getMetrics().scheduledMetadata.spd = scheduler.getSpdRequests().size();
 
         try {
-            final Dataframe dataframe = dataSource.get().getDataframe();
-            final int observations = dataframe.getRowDimension();
-            if (observations > 0) {
-
-                Function<Integer, SchemaItem> extractRowSchema = i -> {
-                    final Value value = dataframe.getValue(0, i);
-                    final SchemaItem schemaItem = new SchemaItem();
-                    if (value.getUnderlyingObject() instanceof Integer) {
-                        schemaItem.type = "INT32";
-                    } else if (value.getUnderlyingObject() instanceof Double) {
-                        schemaItem.type = "DOUBLE";
-                    } else if (value.getUnderlyingObject() instanceof Long) {
-                        schemaItem.type = "INT64";
-                    } else if (value.getUnderlyingObject() instanceof Boolean) {
-                        schemaItem.type = "BOOL";
-                    } else if (value.getUnderlyingObject() instanceof String) {
-                        schemaItem.type = "STRING";
-                    }
-                    schemaItem.name = dataframe.getColumnNames().get(i);
-                    return schemaItem;
-                };
-                metadata.data.observations = observations;
-
-                metadata.data.inputs = dataframe.getInputsIndices().stream().map(extractRowSchema).collect(Collectors.toList());
-                metadata.data.outputs = dataframe.getOutputsIndices().stream().map(extractRowSchema).collect(Collectors.toList());
-            }
-        } catch (DataframeCreateException | NullPointerException e) {
+            final Metadata metadata = dataSource.get().getMetadata();
+            serviceMetadata.setData(metadata);
+        } catch (DataframeCreateException | StorageReadException | NullPointerException e) {
             LOG.warn("Problem creating dataframe: " + e.getMessage(), e);
         }
-        return Response.ok(metadata).build();
+        return Response.ok(serviceMetadata).build();
 
     }
 

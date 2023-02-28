@@ -1,6 +1,6 @@
 package org.kie.trustyai.service.payloads.values;
 
-public enum Values {
+public enum DataType {
     BOOL,
     FLOAT,
     DOUBLE,

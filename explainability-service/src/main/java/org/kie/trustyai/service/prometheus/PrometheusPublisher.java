@@ -27,10 +27,6 @@ public class PrometheusPublisher {
         this.values = new HashMap<>();
     }
 
-    private AtomicDouble getValue(UUID id) {
-        return values.get(id);
-    }
-
     private void createOrUpdateGauge(String name, Iterable<Tag> tags, UUID id) {
         Gauge.builder(name, new AtomicDouble(), value -> values.get(id).doubleValue())
                 .tags(tags).strongReference(true).register(registry);

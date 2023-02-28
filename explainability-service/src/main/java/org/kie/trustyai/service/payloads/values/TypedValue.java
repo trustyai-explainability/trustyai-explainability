@@ -3,14 +3,14 @@ package org.kie.trustyai.service.payloads.values;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class TypedValue {
-    public String type;
+    public DataType type;
     public JsonNode value;
 
-    public String getType() {
+    public DataType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(DataType type) {
         this.type = type;
     }
 

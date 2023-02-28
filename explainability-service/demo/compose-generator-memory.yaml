@@ -7,12 +7,12 @@ services:
     environment:
       SERVICE_MODEL_NAME: "example"
       SERVICE_KSERVE_TARGET: "localhost"
-      SERVICE_STORAGE_FORMAT: "PVC"
+      SERVICE_STORAGE_FORMAT: "MEMORY"
       SERVICE_DATA_FORMAT: "CSV"
-      PVC_INPUT_FILENAME: "/inputs/income-biased-inputs.csv"
-      PVC_OUTPUT_FILENAME: "/inputs/income-biased-outputs.csv"
       SERVICE_METRICS_SCHEDULE: "5s"
       SERVICE_BATCH_SIZE: 5000
+      STORAGE_DATA_FILENAME: "data.csv"
+      STORAGE_DATA_FOLDER: "/inputs"
     volumes:
       - ~/volumes/pvc/inputs:/inputs
   prometheus:

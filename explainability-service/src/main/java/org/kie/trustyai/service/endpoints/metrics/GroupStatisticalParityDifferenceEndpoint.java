@@ -34,7 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Tag(name = "Statistical Parity Difference Endpoint", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
         "difference between the proportion of the majority and protected classes getting a particular outcome.")
 @Path("/metrics/spd")
-public class GroupStatisticalParityDifferenceEndpoint extends AbstractMetricsEndpoint {
+public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint {
 
     private static final Logger LOG = Logger.getLogger(GroupStatisticalParityDifferenceEndpoint.class);
     @Inject
@@ -80,7 +80,7 @@ public class GroupStatisticalParityDifferenceEndpoint extends AbstractMetricsEnd
             dataframe = dataSource.get().getDataframe();
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
-            return Response.serverError().build();
+            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
         final double spd;
@@ -88,7 +88,7 @@ public class GroupStatisticalParityDifferenceEndpoint extends AbstractMetricsEnd
             spd = calculator.calculateSPD(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric: " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
         final String definition = calculator.getSPDDefinition(spd, request);
 

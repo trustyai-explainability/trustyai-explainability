@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.data.storage;
+package org.kie.trustyai.service.mocks;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -6,23 +6,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Alternative;
 
-import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
+import org.kie.trustyai.service.data.storage.Storage;
 
-import io.quarkus.arc.lookup.LookupIfProperty;
-import io.quarkus.logging.Log;
+import io.quarkus.test.Mock;
 
-@LookupIfProperty(name = "service.storage.format", stringValue = "MEMORY")
+@Mock
+@Alternative
 @ApplicationScoped
-public class MemoryStorage extends Storage {
+public class MockMemoryStorage extends Storage {
 
-    private final Map<String, String> data = new HashMap<>();
     private final String dataFilename;
+    private Map<String, String> data = new HashMap<>();
 
-    public MemoryStorage(StorageConfig config) {
-        this.dataFilename = config.dataFilename();
+    public MockMemoryStorage() {
+        this.dataFilename = "data.csv";
     }
 
     @Override
@@ -43,7 +44,6 @@ public class MemoryStorage extends Storage {
     @Override
     public void save(ByteBuffer data, String location) throws StorageWriteException {
         final String stringData = new String(data.array(), StandardCharsets.UTF_8);
-        Log.info("Saving " + stringData + " to " + location);
         this.data.put(location, stringData);
     }
 
@@ -83,4 +83,11 @@ public class MemoryStorage extends Storage {
         return data.containsKey(location);
     }
 
+    public void emptyStorage() {
+        this.data = new HashMap<>();
+    }
+
+    public void reset() {
+        this.data = new HashMap<>();
+    }
 }

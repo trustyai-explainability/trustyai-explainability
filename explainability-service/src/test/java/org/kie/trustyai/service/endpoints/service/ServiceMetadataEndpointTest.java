@@ -5,8 +5,17 @@ import java.util.stream.Collectors;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.BaseTestProfile;
+import org.kie.trustyai.service.data.utils.MetadataUtils;
+import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -16,35 +25,27 @@ import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-@TestProfile(ServiceTestProfile.class)
+@TestProfile(BaseTestProfile.class)
 @TestHTTPEndpoint(ServiceMetadataEndpoint.class)
 class ServiceMetadataEndpointTest {
 
     @Inject
-    Instance<ServiceDatasource> datasource;
+    Instance<MockDatasource> datasource;
 
-    @Test
-    void getTwoObservation() {
-        datasource.get().generateRandomDataframe(2);
-        final ServiceMetadata serviceMetadata = given()
-                .when().get()
-                .then()
-                .statusCode(200)
-                .extract()
-                .body().as(ServiceMetadata.class);
+    @Inject
+    Instance<MockMemoryStorage> storage;
 
-        assertEquals(0, serviceMetadata.metrics.scheduledMetadata.dir);
-        assertEquals(0, serviceMetadata.metrics.scheduledMetadata.spd);
-        assertEquals(2, serviceMetadata.data.observations);
-        assertFalse(serviceMetadata.data.outputs.isEmpty());
-        assertFalse(serviceMetadata.data.inputs.isEmpty());
-        assertEquals(ServiceDatasource.inputNames, serviceMetadata.data.inputs.stream().map(schemaItem -> schemaItem.name).collect(Collectors.toList()));
-        assertEquals(ServiceDatasource.outputNames, serviceMetadata.data.outputs.stream().map(schemaItem -> schemaItem.name).collect(Collectors.toList()));
+    @BeforeEach
+    void clearStorage() {
+        storage.get().emptyStorage();
     }
 
     @Test
-    void getThousandObservation() {
-        datasource.get().generateRandomDataframe(1000);
+    void getTwoObservations() throws JsonProcessingException {
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(2);
+        datasource.get().saveDataframe(dataframe);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe));
+
         final ServiceMetadata serviceMetadata = given()
                 .when().get()
                 .then()
@@ -52,16 +53,25 @@ class ServiceMetadataEndpointTest {
                 .extract()
                 .body().as(ServiceMetadata.class);
 
-        assertEquals(0, serviceMetadata.metrics.scheduledMetadata.dir);
-        assertEquals(0, serviceMetadata.metrics.scheduledMetadata.spd);
-        assertEquals(1000, serviceMetadata.data.observations);
-        assertFalse(serviceMetadata.data.outputs.isEmpty());
-        assertFalse(serviceMetadata.data.inputs.isEmpty());
+        assertEquals(0, serviceMetadata.getMetrics().scheduledMetadata.dir);
+        assertEquals(0, serviceMetadata.getMetrics().scheduledMetadata.spd);
+        assertEquals(2, serviceMetadata.getData().getObservations());
+        assertFalse(serviceMetadata.getData().getOutputSchema().isEmpty());
+        assertFalse(serviceMetadata.getData().getInputSchema().isEmpty());
+        assertEquals(dataframe.getInputNames()
+                .stream()
+                .filter(name -> !name.equals(MetadataUtils.ID_FIELD))
+                .filter(name -> !name.equals(MetadataUtils.TIMESTAMP_FIELD)).collect(Collectors.toList()),
+                serviceMetadata.getData().getInputSchema().stream().map(SchemaItem::getName).collect(Collectors.toList()));
+        assertEquals(dataframe.getOutputNames(), serviceMetadata.getData().getOutputSchema().stream().map(SchemaItem::getName).collect(Collectors.toList()));
     }
 
     @Test
-    void getTNoObservation() {
-        datasource.get().setDataframe(null);
+    void getThousandObservations() throws JsonProcessingException {
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        datasource.get().saveDataframe(dataframe);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe));
+
         final ServiceMetadata serviceMetadata = given()
                 .when().get()
                 .then()
@@ -69,11 +79,28 @@ class ServiceMetadataEndpointTest {
                 .extract()
                 .body().as(ServiceMetadata.class);
 
-        assertEquals(0, serviceMetadata.metrics.scheduledMetadata.dir);
-        assertEquals(0, serviceMetadata.metrics.scheduledMetadata.spd);
-        assertEquals(0, serviceMetadata.data.observations);
-        assertTrue(serviceMetadata.data.outputs.isEmpty());
-        assertTrue(serviceMetadata.data.inputs.isEmpty());
+        assertEquals(0, serviceMetadata.getMetrics().scheduledMetadata.dir);
+        assertEquals(0, serviceMetadata.getMetrics().scheduledMetadata.spd);
+        assertEquals(1000, serviceMetadata.getData().getObservations());
+        assertFalse(serviceMetadata.getData().getOutputSchema().isEmpty());
+        assertFalse(serviceMetadata.getData().getInputSchema().isEmpty());
+    }
+
+    @Test
+    void getNoObservations() {
+
+        final ServiceMetadata serviceMetadata = given()
+                .when().get()
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().as(ServiceMetadata.class);
+
+        assertEquals(0, serviceMetadata.getMetrics().scheduledMetadata.dir);
+        assertEquals(0, serviceMetadata.getMetrics().scheduledMetadata.spd);
+        assertEquals(0, serviceMetadata.getData().getObservations());
+        assertTrue(serviceMetadata.getData().getOutputSchema().isEmpty());
+        assertTrue(serviceMetadata.getData().getInputSchema().isEmpty());
     }
 
 }
