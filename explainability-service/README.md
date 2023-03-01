@@ -36,11 +36,15 @@ The TrustyAI service includes several demos.
 
 With either of these demos, the TrustyAI service will monitor the payloads and produce fairness metrics.
 
-The first step to run the demos locally, is to build the TrustyAI service container image.
-This can be done by running (on `$PROJECT/explainability-service`):
+The first step to running the demos locally is to build the TrustyAI service container image.
+This can be done by running (from the main `trustyai-explainability` directory):
 
 ```shell
-mvn clean install -Dquarkus.container-image.build=true
+mvn clean install -P service-minimal -Dquarkus.container-image.build=true -DskipTests
+```
+or
+```shell
+[docker/podman] build -t trustyai/trustyai-service:999-SNAPSHOT .
 ```
 
 ### Using data in storage only
