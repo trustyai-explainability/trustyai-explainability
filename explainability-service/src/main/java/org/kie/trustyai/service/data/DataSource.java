@@ -17,6 +17,7 @@ import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.data.parsers.DataParser;
 import org.kie.trustyai.service.data.storage.Storage;
+import org.kie.trustyai.service.data.utils.MetadataUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,10 +73,28 @@ public class DataSource {
         this.knownModels.add(modelId);
 
         if (!storage.get().dataExists(modelId)) {
+            if (!hasMetadata(modelId)) {
+                final Metadata metadata = new Metadata();
+                metadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
+                metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
+                metadata.setModelId(modelId);
+                try {
+                    saveMetadata(metadata, modelId);
+                } catch (JsonProcessingException e) {
+                    throw new DataframeCreateException(e.getMessage());
+                }
+            }
+
             storage.get().saveData(parser.toByteBuffer(dataframe, false), modelId);
         } else {
             storage.get().appendData(parser.toByteBuffer(dataframe, false), modelId);
         }
+    }
+
+    public void updateMetadataObservations(int number, String modelId) throws JsonProcessingException {
+        final Metadata metadata = getMetadata(modelId);
+        metadata.incrementObservations(number);
+        saveMetadata(metadata, modelId);
     }
 
     public void saveMetadata(Metadata metadata, String modelId) throws JsonProcessingException {
