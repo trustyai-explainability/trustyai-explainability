@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-export SERVICE_MODEL_NAME="example"
-export SERVICE_KSERVE_TARGET="localhost:8033"
+
 export SERVICE_STORAGE_FORMAT="MEMORY"
 export SERVICE_DATA_FORMAT="CSV"
 export SERVICE_METRICS_SCHEDULE="5s"

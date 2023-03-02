@@ -12,7 +12,7 @@ metadata:
     prometheus.io/scheme: http
   labels:
     app.kubernetes.io/name: trustyai-service
-    app.kubernetes.io/version: 999-SNAPSHOT
+    app.kubernetes.io/version: 0.1.0
     app.openshift.io/runtime: quarkus
   name: trustyai-service
 spec:
@@ -22,7 +22,7 @@ spec:
       targetPort: 8080
   selector:
     app.kubernetes.io/name: trustyai-service
-    app.kubernetes.io/version: 999-SNAPSHOT
+    app.kubernetes.io/version: 0.1.0
   type: ClusterIP
 ---
 apiVersion: apps/v1
@@ -38,16 +38,16 @@ metadata:
     prometheus.io/scheme: http
   labels:
     app.openshift.io/runtime: quarkus
-    app.kubernetes.io/version: 999-SNAPSHOT
+    app.kubernetes.io/version: 0.1.0
     app.kubernetes.io/name: trustyai-service
-    app.kubernetes.io/version: 999-SNAPSHOT
+    app.kubernetes.io/version: 0.1.0
     app.openshift.io/runtime: quarkus
   name: trustyai-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/version: 999-SNAPSHOT
+      app.kubernetes.io/version: 0.1.0
       app.kubernetes.io/name: trustyai-service
   template:
     metadata:
@@ -61,7 +61,7 @@ spec:
         prometheus.io/scheme: http
       labels:
         app.openshift.io/runtime: quarkus
-        app.kubernetes.io/version: 999-SNAPSHOT
+        app.kubernetes.io/version: 0.1.0
         app.kubernetes.io/name: trustyai-service
     spec:
       containers:
@@ -91,22 +91,12 @@ spec:
                 configMapKeyRef:
                   key: service_data_format
                   name: trustyai-config
-            - name: SERVICE_MODEL_NAME
-              valueFrom:
-                configMapKeyRef:
-                  key: service_model_name
-                  name: trustyai-config
             - name: SERVICE_METRICS_SCHEDULE
               valueFrom:
                 configMapKeyRef:
                   key: service_metrics_schedule
                   name: trustyai-config
-            - name: SERVICE_KSERVE_TARGET
-              valueFrom:
-                configMapKeyRef:
-                  key: service_kserve_target
-                  name: trustyai-config
-          image: quay.io/ruimvieira/trustyai-service:999-SNAPSHOT
+          image: quay.io/trustyai/trustyai-service:0.1.0
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
