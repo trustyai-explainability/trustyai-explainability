@@ -11,9 +11,9 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
+import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.data.utils.CSVUtils;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -25,25 +25,18 @@ public class CSVParser implements DataParser {
     private static final Charset UTF8 = StandardCharsets.UTF_8;
 
     @Override
-    public Dataframe toDataframe(ByteBuffer inputs, ByteBuffer outputs) throws DataframeCreateException {
-        final String inputData = UTF8.decode(inputs).toString();
-        final String outputData = UTF8.decode(outputs).toString();
+    public Dataframe toDataframe(ByteBuffer byteBuffer, Metadata metadata) throws DataframeCreateException {
+        final String data = UTF8.decode(byteBuffer).toString();
 
-        final List<PredictionInput> predictionInputs;
+        final List<Prediction> predictions;
         try {
-            predictionInputs = CSVUtils.parseInputs(inputData);
+            predictions = CSVUtils.parse(data, metadata);
         } catch (IOException e) {
             throw new DataframeCreateException(e.getMessage());
         }
 
-        final List<PredictionOutput> predictionOutputs;
-        try {
-            predictionOutputs = CSVUtils.parseOutputs(outputData);
-        } catch (IOException e) {
-            throw new DataframeCreateException(e.getMessage());
-        }
         LOG.info("Creating dataframe from CSV data");
-        return Dataframe.createFrom(predictionInputs, predictionOutputs);
+        return Dataframe.createFrom(predictions);
     }
 
     private String convertToString(Dataframe dataframe, boolean includeHeader) {
@@ -75,13 +68,8 @@ public class CSVParser implements DataParser {
     }
 
     @Override
-    public ByteBuffer toInputByteBuffer(Dataframe dataframe, boolean includeHeader) {
-        return convertToByteBuffer(dataframe.getInputDataframe(), includeHeader);
-    }
-
-    @Override
-    public ByteBuffer toOutputByteBuffer(Dataframe dataframe, boolean includeHeader) {
-        return convertToByteBuffer(dataframe.getOutputDataframe(), includeHeader);
+    public ByteBuffer toByteBuffer(Dataframe dataframe, boolean includeHeader) {
+        return convertToByteBuffer(dataframe, includeHeader);
     }
 
 }

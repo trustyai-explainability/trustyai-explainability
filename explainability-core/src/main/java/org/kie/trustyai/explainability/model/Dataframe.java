@@ -80,8 +80,10 @@ public class Dataframe {
         final Prediction prediction = predictions.get(0);
         final Dataframe df = Dataframe.createFrom(prediction);
 
-        final List<Prediction> rest = predictions.subList(1, predictions.size());
-        df.addPredictions(rest);
+        if (predictions.size() > 1) {
+            final List<Prediction> rest = predictions.subList(1, predictions.size());
+            df.addPredictions(rest);
+        }
 
         return df;
     }

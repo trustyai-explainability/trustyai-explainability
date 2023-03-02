@@ -1,17 +1,20 @@
 package org.kie.trustyai.service.data.storage;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
-import org.kie.trustyai.service.config.readers.PVCConfig;
+import org.kie.trustyai.service.config.storage.StorageConfig;
+import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
@@ -23,26 +26,16 @@ public class PVCStorage extends Storage {
 
     private static final Logger LOG = Logger.getLogger(PVCStorage.class);
 
-    private final String inputFilename;
-    private final String outputFilename;
     private final int batchSize;
 
-    public PVCStorage(PVCConfig config, ServiceConfig serviceConfig) {
+    private final Path metadataPath;
+    private final Path dataPath;
+    private final String dataFilename;
+
+    private final Path dataFolder;
+
+    public PVCStorage(ServiceConfig serviceConfig, StorageConfig storageConfig) {
         LOG.info("Starting PVC storage consumer");
-        if (config.inputFilename().isPresent()) {
-            this.inputFilename = config.inputFilename().get();
-        } else {
-            final String message = "Missing PVC input filename";
-            LOG.error(message);
-            throw new IllegalArgumentException(message);
-        }
-        if (config.outputFilename().isPresent()) {
-            this.outputFilename = config.outputFilename().get();
-        } else {
-            final String message = "Missing PVC output filename";
-            LOG.error(message);
-            throw new IllegalArgumentException(message);
-        }
         if (serviceConfig.batchSize().isPresent()) {
             this.batchSize = serviceConfig.batchSize().getAsInt();
         } else {
@@ -51,27 +44,31 @@ public class PVCStorage extends Storage {
             throw new IllegalArgumentException(message);
         }
 
-        LOG.info("PVC data location: input file="
-                + inputFilename
-                + ", output filename=" + outputFilename);
-    }
+        this.metadataPath = Paths.get(storageConfig.dataFolder(), DataSource.METADATA_FILENAME);
+        this.dataFilename = storageConfig.dataFilename();
+        this.dataPath = Paths.get(storageConfig.dataFolder(), storageConfig.dataFilename());
+        this.dataFolder = Path.of(storageConfig.dataFolder());
 
-    @Override
-    public ByteBuffer getInputData() throws StorageReadException {
-        try {
-            return ByteBuffer.wrap(BatchReader.linesToBytes(BatchReader.readEntries(BatchReader.getDataInputStream(this.inputFilename), this.batchSize)));
-        } catch (IOException e) {
-            LOG.error("Error reading input file");
-            throw new StorageReadException(e.getMessage());
+        if (metadataPath.equals(dataPath)) {
+            final String message = "Data file and metadata file cannot have the same name (" + this.dataPath + ")";
+            LOG.error(message);
+            throw new IllegalArgumentException(message);
         }
+
+        LOG.info("PVC data locations: data=*-" + this.dataPath + ", metadata=*-" + this.metadataPath);
     }
 
     @Override
-    public ByteBuffer getOutputData() throws StorageReadException {
+    public ByteBuffer getData(String modelId) throws StorageReadException {
         try {
-            return ByteBuffer.wrap(BatchReader.linesToBytes(BatchReader.readEntries(BatchReader.getDataInputStream(this.outputFilename), this.batchSize)));
+            return ByteBuffer.wrap(
+                    BatchReader.linesToBytes(
+                            BatchReader.readEntries(
+                                    BatchReader.getDataInputStream(
+                                            buildDataPath(modelId).toString()),
+                                    this.batchSize)));
         } catch (IOException e) {
-            LOG.error("Error reading output file");
+            LOG.error("Error reading input file for model " + modelId);
             throw new StorageReadException(e.getMessage());
         }
     }
@@ -84,61 +81,81 @@ public class PVCStorage extends Storage {
         return path.toFile().mkdirs();
     }
 
-    private synchronized void writeData(ByteBuffer byteBuffer, String filename, boolean append) throws StorageWriteException, StorageReadException {
-        final File file = new File(filename);
-        final Path parent = file.toPath().getParent();
-        final boolean exists = pathExists(parent);
+    private synchronized void writeData(ByteBuffer byteBuffer, Path path, boolean append) throws StorageWriteException, StorageReadException {
+        final File file = path.toFile();
+        final boolean exists = pathExists(path.getParent());
         if (!exists) {
-            createPath(parent);
+            createPath(path.getParent());
         }
 
-        try (FileChannel channel = new FileOutputStream(filename, append).getChannel()) {
+        try (FileChannel channel = new FileOutputStream(file, append).getChannel()) {
             channel.write(byteBuffer);
         } catch (IOException e) {
             throw new StorageWriteException(e.getMessage());
         }
     }
 
-    private void saveData(ByteBuffer byteBuffer, String filename) throws StorageWriteException, StorageReadException {
-        writeData(byteBuffer, filename, false);
-    }
-
-    private void appendData(ByteBuffer byteBuffer, String filename) throws StorageWriteException, StorageReadException {
-        writeData(byteBuffer, filename, true);
+    @Override
+    public void save(ByteBuffer byteBuffer, String filename) throws StorageWriteException, StorageReadException {
+        final Path filepath = Paths.get(this.dataFolder.toString(), filename);
+        writeData(byteBuffer, filepath, false);
     }
 
     @Override
-    public void saveInputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
-        saveData(byteBuffer, inputFilename);
+    public void append(ByteBuffer data, String location) throws StorageWriteException {
+        final Path filepath = Paths.get(this.dataFolder.toString(), location);
+        writeData(data, filepath, true);
     }
 
     @Override
-    public void saveOutputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
-        saveData(byteBuffer, outputFilename);
+    public ByteBuffer read(String filename) throws StorageReadException {
+        final Path path = Paths.get(this.dataFolder.toString(), filename);
+        final File file = path.toFile();
+
+        try {
+            final FileInputStream stream = new FileInputStream(path.toFile());
+            byte[] arr = new byte[(int) file.length()];
+            stream.read(arr);
+            stream.close();
+            return ByteBuffer.wrap(arr);
+        } catch (IOException e) {
+            throw new StorageWriteException(e.getMessage());
+        }
     }
 
     @Override
-    public void appendInputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
-        appendData(byteBuffer, inputFilename);
+    public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
+        save(data, getDataFilename(modelId));
     }
 
     @Override
-    public void appendOutputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
-        appendData(byteBuffer, outputFilename);
+    public void appendData(ByteBuffer byteBuffer, String modelId) throws StorageWriteException, StorageReadException {
+        append(byteBuffer, getDataFilename(modelId));
     }
 
-    private boolean fileExists(String filename) {
-        final File f = new File(filename);
+    @Override
+    public boolean fileExists(String location) {
+        final File f = Paths.get(this.dataFolder.toString(), location).toFile();
         return (f.exists() && !f.isDirectory());
     }
 
     @Override
-    public boolean inputExists() throws StorageReadException {
-        return fileExists(inputFilename);
+    public boolean dataExists(String modelId) throws StorageReadException {
+        return fileExists(getDataFilename(modelId));
     }
 
     @Override
-    public boolean outputExists() throws StorageReadException {
-        return fileExists(outputFilename);
+    public String getDataFilename(String modelId) {
+        return modelId + "-" + this.dataFilename;
+    }
+
+    @Override
+    public Path buildDataPath(String modelId) {
+        return Path.of(this.dataFolder.toString(), getDataFilename(modelId));
+    }
+
+    @Override
+    public String buildMetadataFilename(String modelId) {
+        return null;
     }
 }

@@ -30,8 +30,8 @@ kind: Deployment
 metadata:
   annotations:
     app.openshift.io/vcs-url: <<unknown>>
-    app.quarkus.io/commit-id: 0acbb40970b5c0dd7e5a50966d6b3d68e137be10
-    app.quarkus.io/build-timestamp: 2023-02-24 - 13:56:14 +0000
+    app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
+    app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
     prometheus.io/scrape: "true"
     prometheus.io/path: /q/metrics
     prometheus.io/port: "8080"
@@ -40,6 +40,8 @@ metadata:
     app.openshift.io/runtime: quarkus
     app.kubernetes.io/version: 999-SNAPSHOT
     app.kubernetes.io/name: trustyai-service
+    app.kubernetes.io/version: 999-SNAPSHOT
+    app.openshift.io/runtime: quarkus
   name: trustyai-service
 spec:
   replicas: 1
@@ -49,6 +51,14 @@ spec:
       app.kubernetes.io/name: trustyai-service
   template:
     metadata:
+      annotations:
+        app.openshift.io/vcs-url: <<unknown>>
+        app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
+        app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /q/metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scheme: http
       labels:
         app.openshift.io/runtime: quarkus
         app.kubernetes.io/version: 999-SNAPSHOT
@@ -56,20 +66,20 @@ spec:
     spec:
       containers:
         - env:
-            - name: PVC_INPUT_FILENAME
+            - name: STORAGE_DATA_FILENAME
               valueFrom:
                 configMapKeyRef:
-                  key: pvc_input_filename
+                  key: storage_data_filename
                   name: trustyai-config
             - name: SERVICE_STORAGE_FORMAT
               valueFrom:
                 configMapKeyRef:
                   key: service_storage_format
                   name: trustyai-config
-            - name: PVC_OUTPUT_FILENAME
+            - name: STORAGE_DATA_FOLDER
               valueFrom:
                 configMapKeyRef:
-                  key: pvc_output_filename
+                  key: storage_data_folder
                   name: trustyai-config
             - name: SERVICE_BATCH_SIZE
               valueFrom:
@@ -96,7 +106,7 @@ spec:
                 configMapKeyRef:
                   key: service_kserve_target
                   name: trustyai-config
-          image: quay.io/trustyai/odh-trustyai-service:odh-1.24-prerelease-0
+          image: quay.io/ruimvieira/trustyai-service:999-SNAPSHOT
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3

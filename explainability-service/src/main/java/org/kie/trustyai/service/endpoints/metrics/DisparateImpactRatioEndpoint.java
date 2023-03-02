@@ -35,7 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
         "classifications by calculating the ratio between the proportion of the majority and protected classes getting" +
         " a particular outcome.")
 @Path("/metrics/dir")
-public class DisparateImpactRatioEndpoint extends AbstractMetricsEndpoint {
+public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
 
     private static final Logger LOG = Logger.getLogger(DisparateImpactRatioEndpoint.class);
     @Inject
@@ -66,23 +66,26 @@ public class DisparateImpactRatioEndpoint extends AbstractMetricsEndpoint {
 
         final Dataframe dataframe;
         try {
-            dataframe = dataSource.get().getDataframe();
+            dataframe = dataSource.get().getDataframe(request.getModelId());
         } catch (DataframeCreateException e) {
-            LOG.error("No data available: " + e.getMessage(), e);
-            return Response.serverError().build();
+            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
+            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
         final double dir;
         try {
             dir = calculator.calculateDIR(dataframe, request);
         } catch (MetricCalculationException e) {
-            LOG.error("Error calculating metric: " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
+            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
         final String dirDefinition = calculator.getDIRDefinition(dir, request);
 
         final MetricThreshold thresholds =
-                new MetricThreshold(metricsConfig.dir().thresholdLower(), metricsConfig.dir().thresholdUpper(), dir);
+                new MetricThreshold(
+                        metricsConfig.dir().thresholdLower(),
+                        metricsConfig.dir().thresholdUpper(),
+                        dir);
         final DisparateImpactRatioResponse dirObj = new DisparateImpactRatioResponse(dir, dirDefinition, thresholds);
         return Response.ok(dirObj).build();
     }

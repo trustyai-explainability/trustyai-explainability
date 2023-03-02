@@ -3,6 +3,9 @@ package org.kie.trustyai.service.config;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import org.kie.trustyai.service.data.storage.DataFormat;
+import org.kie.trustyai.service.data.storage.StorageFormat;
+
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithName;
 
@@ -11,14 +14,12 @@ public interface ServiceConfig {
 
     OptionalInt batchSize();
 
-    String modelName();
-
     @WithName("optional.string")
     Optional<String> kserveTarget();
 
-    String storageFormat();
+    StorageFormat storageFormat();
 
-    String dataFormat();
+    DataFormat dataFormat();
 
     String metricsSchedule();
 

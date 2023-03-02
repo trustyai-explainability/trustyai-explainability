@@ -1,31 +1,15 @@
 package org.kie.trustyai.service.scenarios.batching;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-import org.kie.trustyai.service.endpoints.consumer.MockConsumerDatasource;
+import org.kie.trustyai.service.BaseTestProfile;
 
-import io.quarkus.test.junit.QuarkusTestProfile;
-
-public class BatchingTestProfile implements QuarkusTestProfile {
+public class BatchingTestProfile extends BaseTestProfile {
     @Override
     public Map<String, String> getConfigOverrides() {
-        final Map<String, String> overrides = new HashMap<>();
-        overrides.put("service.storage-format", "PVC");
-        overrides.put("service.model-name", "example");
-        overrides.put("service.data-format", "CSV");
-        overrides.put("service.metrics-schedule", "5s");
+        final Map<String, String> overrides = super.getConfigOverrides();
         overrides.put("service.batch-size", "50");
-        overrides.put("pvc.input-filename", "input.csv");
-        overrides.put("pvc.output-filename", "output.csv");
         return overrides;
-    }
-
-    @Override
-    public Set<Class<?>> getEnabledAlternatives() {
-        return Set.of(MockConsumerDatasource.class);
-
     }
 
 }

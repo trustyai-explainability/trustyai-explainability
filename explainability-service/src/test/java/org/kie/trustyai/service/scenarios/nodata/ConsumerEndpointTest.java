@@ -3,10 +3,14 @@ package org.kie.trustyai.service.scenarios.nodata;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.jboss.resteasy.reactive.RestResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.endpoints.consumer.ConsumerEndpoint;
+import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
@@ -19,27 +23,33 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
-@TestProfile(NoDataTestProfile.class)
+@TestProfile(BaseTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
 class ConsumerEndpointTest {
 
     @Inject
-    Instance<MockConsumerDatasource> datasource;
+    Instance<MockDatasource> datasource;
+
+    @BeforeEach
+    void emptyStorage() {
+        datasource.get().empty();
+    }
 
     @Test
-    void consumePostCorrect() {
-        final InferencePayload payload = PayloadProducer.getInferencePayload(0);
+    void consumeFullPostCorrectModelA() {
+        datasource.get().empty();
+        final InferencePayload payload = PayloadProducer.getInferencePayloadA(0);
 
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post()
+                .when().post("/full")
                 .then()
-                .statusCode(200)
+                .statusCode(RestResponse.StatusCode.OK)
 
                 .body(is(""));
 
-        final Dataframe dataframe = datasource.get().getCurrent();
+        final Dataframe dataframe = datasource.get().getDataframe(payload.getModelId());
         assertEquals(1, dataframe.getRowDimension());
         assertEquals(4, dataframe.getColumnDimension());
         assertEquals(3, dataframe.getInputsCount());
@@ -47,16 +57,52 @@ class ConsumerEndpointTest {
     }
 
     @Test
-    void consumePostIncorrect() {
-        final InferencePayload payload = PayloadProducer.getInferencePayload(1);
+    void consumeFullPostIncorrectModelA() {
+        datasource.get().empty();
+        final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
         // Mangle inputs
-        payload.input = payload.input.substring(0, 10) + "X" + payload.input.substring(11);
+        payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post()
+                .when().post("/full")
                 .then()
-                .statusCode(500)
+                .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
+
+                .body(is(""));
+    }
+
+    @Test
+    void consumeFullPostCorrectModelB() {
+        final InferencePayload payload = PayloadProducer.getInferencePayloadB(0);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/full")
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+
+                .body(is(""));
+
+        final Dataframe dataframe = datasource.get().getDataframe(payload.getModelId());
+        assertEquals(1, dataframe.getRowDimension());
+        assertEquals(5, dataframe.getColumnDimension());
+        assertEquals(3, dataframe.getInputsCount());
+        assertEquals(2, dataframe.getOutputsCount());
+    }
+
+    @Test
+    void consumeFullPostIncorrectModelB() {
+        final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
+        // Mangle inputs
+        payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/full")
+                .then()
+                .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
 
                 .body(is(""));
     }

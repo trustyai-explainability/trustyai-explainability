@@ -13,9 +13,18 @@ public class BaseMetricRequest {
     private String outcomeName;
     private TypedValue privilegedAttribute;
     private TypedValue unprivilegedAttribute;
+    private String modelId;
 
     public BaseMetricRequest() {
+        // Public default no-argument constructor
+    }
 
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
 
     public String getProtectedAttribute() {
