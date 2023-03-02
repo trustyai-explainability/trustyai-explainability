@@ -25,6 +25,7 @@ public class PayloadParser {
             case INT64:
                 return inputFromContentList(responseInputContents.getInt64ContentsList(), Type.NUMBER, inputNames);
             case FP32:
+                return inputFromContentList(responseInputContents.getFp32ContentsList(), Type.NUMBER, inputNames);
             case FP64:
                 return inputFromContentList(responseInputContents.getFp64ContentsList(), Type.NUMBER, inputNames);
             default:
@@ -48,6 +49,7 @@ public class PayloadParser {
             case INT64:
                 return outputFromContentList(responseOutputContents.getInt64ContentsList(), Type.NUMBER, outputNames);
             case FP32:
+                return outputFromContentList(responseOutputContents.getFp32ContentsList(), Type.NUMBER, outputNames);
             case FP64:
                 return outputFromContentList(responseOutputContents.getFp64ContentsList(), Type.NUMBER, outputNames);
             default:
