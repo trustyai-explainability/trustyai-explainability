@@ -1,7 +1,5 @@
 package org.kie.trustyai.service.payloads.consumer;
 
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InferencePartialPayload {
@@ -12,14 +10,13 @@ public class InferencePartialPayload {
 
     private String kind;
 
-    @JsonProperty("uuid")
-    private UUID id;
+    private String id;
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

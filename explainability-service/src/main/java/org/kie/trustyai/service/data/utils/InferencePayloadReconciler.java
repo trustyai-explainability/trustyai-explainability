@@ -18,32 +18,49 @@ import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+/**
+ * Reconcile partial input and output inference payloads in the KServe v2 protobuf format.
+ */
 @Singleton
 public class InferencePayloadReconciler {
     private static final Logger LOG = Logger.getLogger(InferencePayloadReconciler.class);
-    private final Map<UUID, InferencePartialPayload> unreconciledInputs = new HashMap<>();
-    private final Map<UUID, InferencePartialPayload> unreconciledOutputs = new HashMap<>();
+    private final Map<String, InferencePartialPayload> unreconciledInputs = new HashMap<>();
+    private final Map<String, InferencePartialPayload> unreconciledOutputs = new HashMap<>();
 
     @Inject
     Instance<DataSource> datasource;
 
+    /**
+     * Add a {@link InferencePartialPayload} input to the (yet) unreconciled mapping.
+     * If there is a corresponding (based on unique id) output {@link InferencePartialPayload},
+     * both are saved to storage and removed from the unreconciled mapping.
+     * 
+     * @param input
+     */
     public void addUnreconciledInput(InferencePartialPayload input) {
-        final UUID id = input.getId();
+        final String id = input.getId();
         unreconciledInputs.put(id, input);
         if (unreconciledOutputs.containsKey(id)) {
             save(id, input.getModelId());
         }
     }
 
+    /**
+     * Add a {@link InferencePartialPayload} output to the (yet) unreconciled mapping.
+     * If there is a corresponding (based on unique id) input {@link InferencePartialPayload},
+     * both are saved to storage and removed from the unreconciled mapping.
+     * 
+     * @param output
+     */
     public void addUnreconciledOutput(InferencePartialPayload output) {
-        final UUID id = output.getId();
+        final String id = output.getId();
         unreconciledOutputs.put(id, output);
         if (unreconciledInputs.containsKey(id)) {
             save(id, output.getModelId());
         }
     }
 
-    private void save(UUID id, String modelId) {
+    private void save(String id, String modelId) {
         final InferencePartialPayload output = unreconciledOutputs.get(id);
         final InferencePartialPayload input = unreconciledInputs.get(id);
         LOG.info("Saving: " + output + " and " + input);
@@ -52,7 +69,7 @@ public class InferencePayloadReconciler {
         final byte[] inputBytes = Base64.getDecoder().decode(input.getData().getBytes());
         final byte[] outputBytes = Base64.getDecoder().decode(output.getData().getBytes());
 
-        final Prediction prediction = save(inputBytes, outputBytes);
+        final Prediction prediction = payloadToPrediction(inputBytes, outputBytes);
         final Dataframe dataframe = Dataframe.createFrom(prediction);
 
         datasource.get().saveDataframe(dataframe, modelId);
@@ -62,7 +79,15 @@ public class InferencePayloadReconciler {
 
     }
 
-    public Prediction save(byte[] inputs, byte[] outputs) throws DataframeCreateException {
+    /**
+     * Convert both input and output {@link InferencePartialPayload} to a TrustyAI {@link Prediction}.
+     * 
+     * @param inputs KServe v2 protobuf raw bytes
+     * @param outputs KServe v2 protobuf raw bytes
+     * @return A {@link Prediction}
+     * @throws DataframeCreateException
+     */
+    public Prediction payloadToPrediction(byte[] inputs, byte[] outputs) throws DataframeCreateException {
         final ModelInferRequest input;
         try {
             input = ModelInferRequest.parseFrom(inputs);

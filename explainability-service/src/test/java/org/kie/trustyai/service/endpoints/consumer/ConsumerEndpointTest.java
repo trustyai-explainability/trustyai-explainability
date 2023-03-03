@@ -127,7 +127,7 @@ class ConsumerEndpointTest {
 
     @Test
     void consumePartialPostInputsOnly() {
-        final UUID id = UUID.randomUUID();
+        final String id = UUID.randomUUID().toString();
         for (int i = 0; i < 5; i++) {
             final InferencePartialPayload payload = PayloadProducer.getInferencePartialPayloadInput(id, i);
             given()
@@ -147,7 +147,7 @@ class ConsumerEndpointTest {
 
     @Test
     void consumePartialPostOutputsOnly() {
-        final UUID id = UUID.randomUUID();
+        final String id = UUID.randomUUID().toString();
         for (int i = 0; i < 5; i++) {
             final InferencePartialPayload payload = PayloadProducer.getInferencePartialPayloadOutput(id, i);
             given()
@@ -167,7 +167,7 @@ class ConsumerEndpointTest {
 
     @Test
     void consumePartialPostSome() {
-        final List<UUID> ids = IntStream.range(0, 5).mapToObj(i -> UUID.randomUUID()).collect(Collectors.toList());
+        final List<String> ids = IntStream.range(0, 5).mapToObj(i -> UUID.randomUUID().toString()).collect(Collectors.toList());
         for (int i = 0; i < 5; i++) {
             final InferencePartialPayload payload = PayloadProducer.getInferencePartialPayloadInput(ids.get(i), i);
             given()
@@ -196,7 +196,7 @@ class ConsumerEndpointTest {
 
     @Test
     void consumePartialPostAll() {
-        final List<UUID> ids = IntStream.range(0, 5).mapToObj(i -> UUID.randomUUID()).collect(Collectors.toList());
+        final List<String> ids = IntStream.range(0, 5).mapToObj(i -> UUID.randomUUID().toString()).collect(Collectors.toList());
         for (int i = 0; i < 5; i++) {
             final InferencePartialPayload payload = PayloadProducer.getInferencePartialPayloadInput(ids.get(i), i);
             given()

@@ -1,7 +1,5 @@
 package org.kie.trustyai.service;
 
-import java.util.UUID;
-
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 
@@ -58,7 +56,7 @@ public class PayloadProducer {
         return payload;
     }
 
-    public static InferencePartialPayload getInferencePartialPayloadInput(UUID id, int number) {
+    public static InferencePartialPayload getInferencePartialPayloadInput(String id, int number) {
         final InferencePartialPayload payload = new InferencePartialPayload();
         payload.setData(encondedInputPayloadsA[number]);
         payload.setId(id);
@@ -67,7 +65,7 @@ public class PayloadProducer {
         return payload;
     }
 
-    public static InferencePartialPayload getInferencePartialPayloadOutput(UUID id, int number) {
+    public static InferencePartialPayload getInferencePartialPayloadOutput(String id, int number) {
         final InferencePartialPayload payload = new InferencePartialPayload();
         payload.setData(encondedOutputPayloadsA[number]);
         payload.setId(id);
