@@ -27,7 +27,7 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
-    public ByteBuffer getData(final String modelId) throws StorageReadException {
+    public ByteBuffer readData(final String modelId) throws StorageReadException {
         final String key = getDataFilename(modelId);
         if (data.containsKey(key)) {
             return ByteBuffer.wrap(data.get(key).getBytes());
@@ -94,10 +94,4 @@ public class MemoryStorage extends Storage {
     public Path buildDataPath(String modelId) {
         return Path.of(getDataFilename(modelId));
     }
-
-    @Override
-    public String buildMetadataFilename(String modelId) {
-        return null;
-    }
-
 }
