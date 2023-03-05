@@ -1,14 +1,11 @@
 package org.kie.trustyai.service.data.metadata;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.kie.trustyai.service.payloads.service.SchemaItem;
+import org.kie.trustyai.service.payloads.service.Schema;
 
 public class Metadata {
 
-    private List<SchemaItem> inputSchema = new ArrayList<>();
-    private List<SchemaItem> outputSchema = new ArrayList<>();
+    private Schema inputSchema = new Schema();
+    private Schema outputSchema = new Schema();
 
     private int observations = 0;
 
@@ -18,19 +15,19 @@ public class Metadata {
 
     }
 
-    public List<SchemaItem> getOutputSchema() {
+    public Schema getOutputSchema() {
         return outputSchema;
     }
 
-    public void setOutputSchema(List<SchemaItem> outputSchema) {
+    public void setOutputSchema(Schema outputSchema) {
         this.outputSchema = outputSchema;
     }
 
-    public List<SchemaItem> getInputSchema() {
+    public Schema getInputSchema() {
         return inputSchema;
     }
 
-    public void setInputSchema(List<SchemaItem> inputSchema) {
+    public void setInputSchema(Schema inputSchema) {
         this.inputSchema = inputSchema;
     }
 

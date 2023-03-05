@@ -1,10 +1,10 @@
 package org.kie.trustyai.service.data.utils;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
 
@@ -36,17 +36,17 @@ public class MetadataUtils {
         return schemaItem;
     }
 
-    public static List<SchemaItem> getInputSchema(Dataframe dataframe) {
-        return dataframe
+    public static Schema getInputSchema(Dataframe dataframe) {
+        return Schema.from(dataframe
                 .getInputsIndices()
                 .stream()
                 .filter(i -> !dataframe.getColumnNames().get(i).equals(ID_FIELD))
                 .filter(i -> !dataframe.getColumnNames().get(i).equals(TIMESTAMP_FIELD))
-                .map(i -> extractRowSchema(dataframe, i)).collect(Collectors.toList());
+                .map(i -> extractRowSchema(dataframe, i)).collect(Collectors.toList()));
     }
 
-    public static List<SchemaItem> getOutputSchema(Dataframe dataframe) {
-        return dataframe.getOutputsIndices().stream().map(i -> extractRowSchema(dataframe, i)).collect(Collectors.toList());
+    public static Schema getOutputSchema(Dataframe dataframe) {
+        return Schema.from(dataframe.getOutputsIndices().stream().map(i -> extractRowSchema(dataframe, i)).collect(Collectors.toList()));
     }
 
 }
