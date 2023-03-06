@@ -106,7 +106,7 @@ public class MinioStorage extends Storage {
     }
 
     @Override
-    public ByteBuffer getData(String modelId) throws StorageReadException {
+    public ByteBuffer readData(String modelId) throws StorageReadException {
         isObjectAvailable(this.bucketName, this.dataFilename);
         try {
             return ByteBuffer.wrap(readFile(this.bucketName, this.dataFilename));
@@ -211,11 +211,6 @@ public class MinioStorage extends Storage {
     @Override
     public Path buildDataPath(String modelId) {
         return Path.of(this.bucketName, getDataFilename(modelId));
-    }
-
-    @Override
-    public String buildMetadataFilename(String modelId) {
-        return null;
     }
 
 }

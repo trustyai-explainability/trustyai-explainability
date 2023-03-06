@@ -35,9 +35,9 @@ class StorageTest {
     }
 
     @Test
-    void getData() {
+    void readData() {
         Exception exception = assertThrows(StorageReadException.class, () -> {
-            storage.get().getData(MODEL_ID);
+            storage.get().readData(MODEL_ID);
         });
         assertEquals("Data file not found", exception.getMessage());
 
@@ -97,7 +97,7 @@ class StorageTest {
         // Check file exists
         assertTrue(storage.get().dataExists(MODEL_ID));
 
-        final ByteBuffer result = storage.get().getData(MODEL_ID);
+        final ByteBuffer result = storage.get().readData(MODEL_ID);
         assertEquals("data and more", new String(result.array(), StandardCharsets.UTF_8));
     }
 

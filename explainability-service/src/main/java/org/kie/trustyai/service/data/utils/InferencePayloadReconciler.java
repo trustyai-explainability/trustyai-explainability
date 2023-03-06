@@ -2,6 +2,7 @@ package org.kie.trustyai.service.data.utils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
+import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -24,8 +26,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 @Singleton
 public class InferencePayloadReconciler {
     private static final Logger LOG = Logger.getLogger(InferencePayloadReconciler.class);
-    private final Map<String, InferencePartialPayload> unreconciledInputs = new HashMap<>();
-    private final Map<String, InferencePartialPayload> unreconciledOutputs = new HashMap<>();
+    private final Map<String, InferencePartialPayload> unreconciledInputs = new ConcurrentHashMap<>();
+    private final Map<String, InferencePartialPayload> unreconciledOutputs = new ConcurrentHashMap<>();
 
     @Inject
     Instance<DataSource> datasource;
@@ -37,7 +39,7 @@ public class InferencePayloadReconciler {
      * 
      * @param input
      */
-    public void addUnreconciledInput(InferencePartialPayload input) {
+    public synchronized void addUnreconciledInput(InferencePartialPayload input) throws InvalidSchemaException {
         final String id = input.getId();
         unreconciledInputs.put(id, input);
         if (unreconciledOutputs.containsKey(id)) {
@@ -52,7 +54,7 @@ public class InferencePayloadReconciler {
      * 
      * @param output
      */
-    public void addUnreconciledOutput(InferencePartialPayload output) {
+    public synchronized void addUnreconciledOutput(InferencePartialPayload output) throws InvalidSchemaException {
         final String id = output.getId();
         unreconciledOutputs.put(id, output);
         if (unreconciledInputs.containsKey(id)) {
@@ -60,10 +62,10 @@ public class InferencePayloadReconciler {
         }
     }
 
-    private void save(String id, String modelId) {
+    private synchronized void save(String id, String modelId) throws InvalidSchemaException {
         final InferencePartialPayload output = unreconciledOutputs.get(id);
         final InferencePartialPayload input = unreconciledInputs.get(id);
-        LOG.info("Saving: " + output + " and " + input);
+        LOG.debug("Reconciling partial input and output, id=" + id);
 
         // save
         final byte[] inputBytes = Base64.getDecoder().decode(input.getData().getBytes());
@@ -96,7 +98,7 @@ public class InferencePayloadReconciler {
         }
         final PredictionInput predictionInput = PayloadParser
                 .inputTensorToPredictionInput(input.getInputs(0), null);
-        LOG.info(predictionInput.getFeatures());
+        LOG.debug("Prediction input: " + predictionInput.getFeatures());
 
         // Check for dataframe metadata name conflicts
         if (predictionInput.getFeatures()
@@ -122,10 +124,9 @@ public class InferencePayloadReconciler {
         }
         final PredictionOutput predictionOutput = PayloadParser
                 .outputTensorToPredictionOutput(output.getOutputs(0), null);
-        LOG.info(predictionOutput.getOutputs());
+        LOG.debug("Prediction output: " + predictionOutput.getOutputs());
 
         return new SimplePrediction(new PredictionInput(features), predictionOutput);
-
     }
 
 }

@@ -8,7 +8,7 @@ public class InferencePartialPayload {
     private String modelId;
     private String data;
 
-    private String kind;
+    private PartialKind kind;
 
     private String id;
 
@@ -36,11 +36,11 @@ public class InferencePartialPayload {
         this.modelId = modelId;
     }
 
-    public String getKind() {
+    public PartialKind getKind() {
         return this.kind;
     }
 
-    public void setKind(String kind) {
+    public void setKind(PartialKind kind) {
         this.kind = kind;
     }
 }
