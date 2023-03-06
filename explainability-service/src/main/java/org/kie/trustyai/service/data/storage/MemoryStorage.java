@@ -3,8 +3,8 @@ package org.kie.trustyai.service.data.storage;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -19,7 +19,7 @@ import io.quarkus.logging.Log;
 @ApplicationScoped
 public class MemoryStorage extends Storage {
 
-    private final Map<String, String> data = new HashMap<>();
+    protected final Map<String, String> data = new ConcurrentHashMap<>();
     private final String dataFilename;
 
     public MemoryStorage(StorageConfig config) {
@@ -51,13 +51,10 @@ public class MemoryStorage extends Storage {
 
     @Override
     public void append(ByteBuffer data, String location) throws StorageWriteException {
-        if (this.data.containsKey(location)) {
-            final String existing = this.data.get(location);
-            this.data.put(location, existing + new String(data.array(), StandardCharsets.UTF_8));
-        } else {
+        final String value = this.data.computeIfPresent(location, (key, existing) -> existing + new String(data.array(), StandardCharsets.UTF_8));
+        if (value == null) {
             throw new StorageWriteException("Destination does not exist: " + location);
         }
-
     }
 
     @Override
