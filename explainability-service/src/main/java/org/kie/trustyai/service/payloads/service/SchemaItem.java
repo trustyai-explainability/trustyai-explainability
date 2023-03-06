@@ -1,5 +1,7 @@
 package org.kie.trustyai.service.payloads.service;
 
+import java.util.Objects;
+
 import org.kie.trustyai.service.payloads.values.DataType;
 
 public class SchemaItem {
@@ -39,5 +41,20 @@ public class SchemaItem {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        SchemaItem that = (SchemaItem) o;
+        return index == that.index && type == that.type && Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, name, index);
     }
 }

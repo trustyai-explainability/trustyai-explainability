@@ -62,14 +62,14 @@ class ServiceMetadataEndpointTest {
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.dir);
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.spd);
         assertEquals(2, serviceMetadata.get(0).getData().getObservations());
-        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().isEmpty());
-        assertFalse(serviceMetadata.get(0).getData().getInputSchema().isEmpty());
+        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
         assertEquals(dataframe.getInputNames()
                 .stream()
                 .filter(name -> !name.equals(MetadataUtils.ID_FIELD))
                 .filter(name -> !name.equals(MetadataUtils.TIMESTAMP_FIELD)).collect(Collectors.toList()),
-                serviceMetadata.get(0).getData().getInputSchema().stream().map(SchemaItem::getName).collect(Collectors.toList()));
-        assertEquals(dataframe.getOutputNames(), serviceMetadata.get(0).getData().getOutputSchema().stream().map(SchemaItem::getName).collect(Collectors.toList()));
+                serviceMetadata.get(0).getData().getInputSchema().getItems().stream().map(SchemaItem::getName).collect(Collectors.toList()));
+        assertEquals(dataframe.getOutputNames(), serviceMetadata.get(0).getData().getOutputSchema().getItems().stream().map(SchemaItem::getName).collect(Collectors.toList()));
     }
 
     @Test
@@ -90,8 +90,8 @@ class ServiceMetadataEndpointTest {
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.dir);
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.spd);
         assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
-        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().isEmpty());
-        assertFalse(serviceMetadata.get(0).getData().getInputSchema().isEmpty());
+        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
     }
 
     @Test
