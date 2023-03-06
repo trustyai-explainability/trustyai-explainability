@@ -59,7 +59,7 @@ public class PVCStorage extends Storage {
     }
 
     @Override
-    public ByteBuffer getData(String modelId) throws StorageReadException {
+    public ByteBuffer readData(String modelId) throws StorageReadException {
         try {
             return ByteBuffer.wrap(
                     BatchReader.linesToBytes(
@@ -104,7 +104,13 @@ public class PVCStorage extends Storage {
     @Override
     public void append(ByteBuffer data, String location) throws StorageWriteException {
         final Path filepath = Paths.get(this.dataFolder.toString(), location);
-        writeData(data, filepath, true);
+        if (!filepath.toFile().exists()) {
+            final String message = "Cannot append to non-existing file " + location;
+            LOG.error(message);
+            throw new StorageWriteException(message);
+        } else {
+            writeData(data, filepath, true);
+        }
     }
 
     @Override
@@ -152,10 +158,5 @@ public class PVCStorage extends Storage {
     @Override
     public Path buildDataPath(String modelId) {
         return Path.of(this.dataFolder.toString(), getDataFilename(modelId));
-    }
-
-    @Override
-    public String buildMetadataFilename(String modelId) {
-        return null;
     }
 }

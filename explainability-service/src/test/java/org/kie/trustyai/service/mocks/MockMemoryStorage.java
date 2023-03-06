@@ -29,7 +29,7 @@ public class MockMemoryStorage extends Storage {
     }
 
     @Override
-    public ByteBuffer getData(String modelId) throws StorageReadException {
+    public ByteBuffer readData(String modelId) throws StorageReadException {
         final String key = buildDataPath(modelId).toString();
         if (data.containsKey(key)) {
             return ByteBuffer.wrap(data.get(key).getBytes());
@@ -95,11 +95,6 @@ public class MockMemoryStorage extends Storage {
     @Override
     public Path buildDataPath(String modelId) {
         return Path.of(getDataFilename(modelId));
-    }
-
-    @Override
-    public String buildMetadataFilename(String modelId) {
-        return null;
     }
 
     public void emptyStorage() {
