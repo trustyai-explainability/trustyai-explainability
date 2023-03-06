@@ -44,7 +44,7 @@ public class DataSource {
 
         final ByteBuffer byteBuffer;
         try {
-            byteBuffer = storage.get().getData(modelId);
+            byteBuffer = storage.get().readData(modelId);
         } catch (StorageReadException e) {
             throw new DataframeCreateException(e.getMessage());
         }

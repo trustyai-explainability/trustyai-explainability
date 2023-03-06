@@ -8,5 +8,4 @@ public abstract class Storage implements StorageInterface {
 
     public abstract Path buildDataPath(String modelId);
 
-    public abstract String buildMetadataFilename(String modelId);
 }

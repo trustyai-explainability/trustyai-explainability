@@ -6,7 +6,7 @@ import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
 public interface StorageInterface {
-    ByteBuffer getData(String modelId) throws StorageReadException;
+    ByteBuffer readData(String modelId) throws StorageReadException;
 
     boolean dataExists(String modelId) throws StorageReadException;
 
