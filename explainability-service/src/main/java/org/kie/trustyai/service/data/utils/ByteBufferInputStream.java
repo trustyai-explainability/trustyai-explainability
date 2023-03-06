@@ -18,6 +18,7 @@ public class ByteBufferInputStream extends InputStream {
         return byteBuffer.get() & 0xFF;
     }
 
+    @Override
     public int read(byte[] bytes, int off, int len) {
         if (!byteBuffer.hasRemaining()) {
             return -1;
