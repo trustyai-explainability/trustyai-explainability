@@ -80,8 +80,10 @@ public class Dataframe {
         final Prediction prediction = predictions.get(0);
         final Dataframe df = Dataframe.createFrom(prediction);
 
-        final List<Prediction> rest = predictions.subList(1, predictions.size());
-        df.addPredictions(rest);
+        if (predictions.size() > 1) {
+            final List<Prediction> rest = predictions.subList(1, predictions.size());
+            df.addPredictions(rest);
+        }
 
         return df;
     }
@@ -139,6 +141,17 @@ public class Dataframe {
     public Dataframe getInputDataframe() {
         final Dataframe df = this.copy();
         df.dropColumns(getOutputsIndices());
+        return df;
+    }
+
+    /**
+     * Return a copy of the dataframe containing only output columns
+     *
+     * @return A @link{Dataframe}
+     */
+    public Dataframe getOutputDataframe() {
+        final Dataframe df = this.copy();
+        df.dropColumns(getInputsIndices());
         return df;
     }
 

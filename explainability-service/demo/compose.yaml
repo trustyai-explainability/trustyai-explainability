@@ -1,0 +1,75 @@
+services:
+  trustyai:
+    image: trustyai/trustyai-service:999-SNAPSHOT
+    container_name: trustyai-service
+    ports:
+      - "8080:8080"
+    environment:
+      SERVICE_MODEL_NAME: "example"
+      SERVICE_KSERVE_TARGET: "localhost"
+      SERVICE_STORAGE_FORMAT: "MINIO"
+      SERVICE_DATA_FORMAT: "CSV"
+      MINIO_BUCKET_NAME: "inputs"
+      MINIO_ENDPOINT: "http://minio:9000"
+      MINIO_INPUT_FILENAME: "income-biased-inputs.csv"
+      MINIO_OUTPUT_FILENAME: "income-biased-outputs.csv"
+      MINIO_SECRET_KEY: "minioadmin"
+      MINIO_ACCESS_KEY: "minioadmin"
+      SERVICE_METRICS_SCHEDULE: "5s"
+      SERVICE_BATCH_SIZE: 5000
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+  minio:
+    image: quay.io/minio/minio:RELEASE.2023-02-09T05-16-53Z
+    container_name: minio
+    command: server --console-address ":9001" /data
+    ports:
+      - 9000:9001
+      - 9001:9002
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    #    healthcheck:
+    #      test: ["CMD", "curl", "-f", "http://localhost:9001/minio/health/live"]
+    #      interval: 30s
+    #      timeout: 20s
+    #      retries: 3
+    volumes:
+      - ~/minio/trustyai-service/data:/data
+  logger:
+    container_name: logger
+    image: trustyai/trustyai-service-logger
+    build:
+      context: ./logger
+      dockerfile: ./logger.Dockerfile
+    environment:
+      MINIO_BUCKET_NAME: "inputs"
+      MINIO_ENDPOINT: "minio:9000"
+      MINIO_INPUT_FILENAME: "income-biased-inputs.csv"
+      MINIO_OUTPUT_FILENAME: "income-biased-outputs.csv"
+      MINIO_SECRET_KEY: "minioadmin"
+      MINIO_ACCESS_KEY: "minioadmin"
+      BIAS_RATE: "0.5"
+      PYTHONUNBUFFERED: "1"
+volumes:
+  prom_data:

@@ -3,14 +3,15 @@ package org.kie.trustyai.connectors.kserve.v2;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.connectors.utils.ListenableFutureUtils;
-import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.PredictionProvider;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -63,36 +64,6 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
         return new KServeV2GRPCPredictionProvider(target, modelName, outputNames);
     }
 
-    private void addFeature(InferTensorContents.Builder content, Feature feature) {
-        final Object object = feature.getValue().getUnderlyingObject();
-        final Type type = feature.getType();
-
-        switch (type) {
-            case NUMBER:
-                if (object instanceof Integer) {
-                    content.addIntContents((Integer) object);
-                } else if (object instanceof Double) {
-                    content.addFp64Contents((Double) object);
-                }
-                break;
-            case BOOLEAN:
-                content.addBoolContents((Boolean) object);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported feature type: " + type);
-        }
-    }
-
-    private InferTensorContents.Builder buildTensorContents(List<PredictionInput> inputs) {
-        final InferTensorContents.Builder contents = InferTensorContents.newBuilder();
-
-        inputs.stream()
-                .map(PredictionInput::getFeatures)
-                .forEach(features -> features.forEach(feature -> addFeature(contents, feature)));
-
-        return contents;
-    }
-
     private ModelInferRequest.InferInputTensor.Builder buildTensor(InferTensorContents.Builder contents, int nSamples, int nFeatures) {
 
         final ModelInferRequest.InferInputTensor.Builder tensor = ModelInferRequest.InferInputTensor
@@ -114,45 +85,14 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
         return request;
     }
 
-    private PredictionOutput fromContentList(List<?> values, Type type) {
-        final int size = values.size();
-        List<String> names = this.outputNames == null ? IntStream.range(0, size).mapToObj(i -> "output-" + i).collect(Collectors.toList()) : this.outputNames;
-        if (names.size() != size) {
-            throw new IllegalArgumentException("Output names list has an incorrect size (" + names.size() + ", when it should be " + size + ")");
-        }
-        return new PredictionOutput(IntStream
-                .range(0, size)
-                .mapToObj(i -> new Output(names.get(i), type, new Value(values.get(i)), 1.0))
-                .collect(Collectors.toUnmodifiableList()));
-    }
-
-    private PredictionOutput responseOutputToPredictionOutput(ModelInferResponse.InferOutputTensor tensor) {
-        final InferTensorContents responseOutputContents = tensor.getContents();
-
-        final KServeDatatype type = KServeDatatype.valueOf(tensor.getDatatype());
-
-        switch (type) {
-            case BOOL:
-                return fromContentList(responseOutputContents.getBoolContentsList(), Type.BOOLEAN);
-            case INT8:
-            case INT16:
-            case INT32:
-                return fromContentList(responseOutputContents.getIntContentsList(), Type.NUMBER);
-            case INT64:
-                return fromContentList(responseOutputContents.getInt64ContentsList(), Type.NUMBER);
-            case FP32:
-            case FP64:
-                return fromContentList(responseOutputContents.getFp64ContentsList(), Type.NUMBER);
-            default:
-                throw new IllegalArgumentException("Currently unsupported type for Tensor output.");
-        }
-    }
-
     private List<PredictionOutput> responseToPredictionOutput(ModelInferResponse response) {
 
         final List<ModelInferResponse.InferOutputTensor> responseOutputs = response.getOutputsList();
 
-        return responseOutputs.stream().map(this::responseOutputToPredictionOutput).collect(Collectors.toList());
+        return responseOutputs
+                .stream()
+                .map(tensor -> PayloadParser.outputTensorToPredictionOutput(tensor, this.outputNames))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -168,7 +108,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
             throw new IllegalArgumentException("Prediction inputs must have at least one feature.");
         }
 
-        final InferTensorContents.Builder contents = buildTensorContents(inputs);
+        final InferTensorContents.Builder contents = PayloadParser.predictionInputToTensorContents(inputs);
 
         final ModelInferRequest.InferInputTensor.Builder tensor = buildTensor(contents, inputs.size(), nFeatures);
 

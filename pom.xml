@@ -278,6 +278,7 @@
         <module>explainability-integrationtests</module>
         <module>explainability-arrow</module>
         <module>explainability-connectors</module>
+        <module>explainability-service</module>
     </modules>
 
 
@@ -288,6 +289,15 @@
             <modules>
                 <module>explainability-core</module>
                 <module>explainability-arrow</module>
+            </modules>
+        </profile>
+        <profile>
+            <!-- Use for CPaaS builds. -->
+            <id>service-minimal</id>
+            <modules>
+                <module>explainability-core</module>
+                <module>explainability-connectors</module>
+                <module>explainability-service</module>
             </modules>
         </profile>
         <profile>

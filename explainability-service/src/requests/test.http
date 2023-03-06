@@ -1,0 +1,193 @@
+POST {{host}}/metrics/spd
+Content-Type: application/json
+
+{
+  "modelId": "example-model-1",
+  "protectedAttribute": "input-2",
+  "favorableOutcome": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "outcomeName": "output-0",
+  "privilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "unprivilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 0.0
+  }
+}
+
+###
+POST {{host}}/metrics/spd
+Content-Type: application/json
+
+{
+  "protectedAttribute": "input-2",
+  "favorableOutcome": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "outcomeName": "output-0",
+  "privilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "unprivilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 0.0
+  }
+}
+
+###
+POST {{host}}/metrics/spd/request
+Content-Type: application/json
+
+{
+  "protectedAttribute": "input-2",
+  "favorableOutcome": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "outcomeName": "output-0",
+  "privilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "unprivilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 0.0
+  }
+}
+
+###
+POST {{host}}/metrics/spd/request
+Content-Type: application/json
+
+{
+  "protectedAttribute": "input-2",
+  "favorableOutcome": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "outcomeName": "output-0",
+  "privilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "unprivilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 0.0
+  }
+}
+
+###
+GET {{host}}/metrics/spd/requests
+
+###
+DELETE {{host}}/metrics/spd/request
+Content-Type: application/json
+
+{
+  "requestId": "a7b5cd3b-3d38-41b0-b165-ce594d6fef31"
+}
+
+###
+POST {{host}}/metrics/dir
+Content-Type: application/json
+
+{
+  "modelId": "example-model-1",
+  "protectedAttribute": "input-2",
+  "favorableOutcome": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "outcomeName": "output-0",
+  "privilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "unprivilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 0.0
+  }
+}
+
+###
+POST {{host}}/metrics/dir/request
+Content-Type: application/json
+
+{
+  "protectedAttribute": "gender",
+  "favorableOutcome": {
+    "type": "INT32",
+    "value": 1
+  },
+  "outcomeName": "income",
+  "privilegedAttribute": {
+    "type": "INT32",
+    "value": 1
+  },
+  "unprivilegedAttribute": {
+    "type": "INT32",
+    "value": 0
+  }
+}
+
+###
+DELETE {{host}}/metrics/dir/request
+Content-Type: application/json
+
+{
+  "requestId": "f3297e6f-7a24-4de0-ad2c-b8aa9a03b5a1"
+}
+
+###
+POST {{host}}/metrics/dir
+Content-Type: application/json
+
+{
+  "protectedAttribute": "gender",
+  "favorableOutcome": {
+    "type": "INT32",
+    "value": 1
+  },
+  "outcomeName": "income",
+  "privilegedAttribute": {
+    "type": "INT32",
+    "value": 1
+  },
+  "unprivilegedAttribute": {
+    "type": "INT32",
+    "value": 0
+  }
+}
+
+###
+GET {{host}}/metrics/dir/requests
+
+###
+GET {{host}}/info
+
+###
+GET {{host}}/q/openapi
+
+###
+GET {{host}}/metrics/spd/metrics/spd/prometheus
+
+###
+GET {{host}}/q/metrics
+
+###
+GET {{host}}/q/health
+
+###
+POST {{host}}/consumer/kserve/v2
+Content-Type: application/json
+
+{
+  "input": "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKiUKBWlucHV0EgRGUDY0GgIBAyoSOhAAAAAAAABUQAAAAAAAABBA",
+  "output": "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKh0KBWlucHV0EgRGUDY0GgIBASoKOggAAAAAAAAAAA=="
+}
