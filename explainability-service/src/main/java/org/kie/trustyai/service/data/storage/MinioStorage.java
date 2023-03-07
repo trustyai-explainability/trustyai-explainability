@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -215,6 +216,10 @@ public class MinioStorage extends Storage {
 
     @Override
     public long getLastModified(final String modelId) {
-        return isObjectAvailable(bucketName, getDataFilename(modelId)).lastModified().toInstant().toEpochMilli();
+        try {
+            return isObjectAvailable(bucketName, getDataFilename(modelId)).lastModified().toInstant().toEpochMilli();
+        } catch (StorageReadException e) {
+            return new Random().nextLong();
+        }
     }
 }
