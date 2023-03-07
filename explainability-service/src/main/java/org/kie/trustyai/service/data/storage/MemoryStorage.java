@@ -3,8 +3,10 @@ package org.kie.trustyai.service.data.storage;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -19,7 +21,7 @@ import io.quarkus.logging.Log;
 @ApplicationScoped
 public class MemoryStorage extends Storage {
 
-    private final Map<String, String> data = new HashMap<>();
+    protected final Map<String, String> data = new ConcurrentHashMap<>();
     private final String dataFilename;
 
     public MemoryStorage(StorageConfig config) {
@@ -27,7 +29,7 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
-    public ByteBuffer getData(final String modelId) throws StorageReadException {
+    public ByteBuffer readData(final String modelId) throws StorageReadException {
         final String key = getDataFilename(modelId);
         if (data.containsKey(key)) {
             return ByteBuffer.wrap(data.get(key).getBytes());
@@ -45,19 +47,16 @@ public class MemoryStorage extends Storage {
     @Override
     public void save(ByteBuffer data, String location) throws StorageWriteException {
         final String stringData = new String(data.array(), StandardCharsets.UTF_8);
-        Log.info("Saving " + stringData + " to " + location);
+        Log.debug("Saving data to " + location);
         this.data.put(location, stringData);
     }
 
     @Override
     public void append(ByteBuffer data, String location) throws StorageWriteException {
-        if (this.data.containsKey(location)) {
-            final String existing = this.data.get(location);
-            this.data.put(location, existing + new String(data.array(), StandardCharsets.UTF_8));
-        } else {
+        final String value = this.data.computeIfPresent(location, (key, existing) -> existing + new String(data.array(), StandardCharsets.UTF_8));
+        if (value == null) {
             throw new StorageWriteException("Destination does not exist: " + location);
         }
-
     }
 
     @Override
@@ -96,8 +95,9 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
-    public String buildMetadataFilename(String modelId) {
-        return null;
+    public long getLastModified(final String modelId) {
+        final Checksum crc32 = new CRC32();
+        crc32.update(readData(modelId));
+        return crc32.getValue();
     }
-
 }

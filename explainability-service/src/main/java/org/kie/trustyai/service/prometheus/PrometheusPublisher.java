@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
+import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -22,6 +24,9 @@ public class PrometheusPublisher {
     private final MeterRegistry registry;
     private final Map<UUID, AtomicDouble> values;
 
+    @Inject
+    ServiceConfig serviceConfig;
+
     public PrometheusPublisher(MeterRegistry registry) {
         this.registry = registry;
         this.values = new HashMap<>();
@@ -33,7 +38,7 @@ public class PrometheusPublisher {
 
     }
 
-    private Iterable<Tag> generateSPDTags(String modelName, UUID id, BaseMetricRequest request) {
+    private Iterable<Tag> generateTags(String modelName, UUID id, BaseMetricRequest request) {
         return Tags.of(
                 Tag.of("model", modelName),
                 Tag.of("outcome", request.getOutcomeName()),
@@ -41,6 +46,7 @@ public class PrometheusPublisher {
                 Tag.of("protected", request.getProtectedAttribute()),
                 Tag.of("privileged", request.getPrivilegedAttribute().toString()),
                 Tag.of("unprivileged", request.getUnprivilegedAttribute().toString()),
+                Tag.of("batch_size", String.valueOf(serviceConfig.batchSize().orElse(-1))),
                 Tag.of("request", id.toString()));
     }
 
@@ -48,7 +54,7 @@ public class PrometheusPublisher {
 
         values.put(id, new AtomicDouble(value));
 
-        final Iterable<Tag> tags = generateSPDTags(modelName, id, request);
+        final Iterable<Tag> tags = generateTags(modelName, id, request);
 
         createOrUpdateGauge("trustyai_spd", tags, id);
 
@@ -59,7 +65,7 @@ public class PrometheusPublisher {
 
         values.put(id, new AtomicDouble(value));
 
-        final Iterable<Tag> tags = generateSPDTags(modelName, id, request);
+        final Iterable<Tag> tags = generateTags(modelName, id, request);
 
         createOrUpdateGauge("trustyai_dir", tags, id);
 

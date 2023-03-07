@@ -1,9 +1,8 @@
 import os
 import random
+import requests
 import uuid
 from time import sleep
-
-import requests
 
 SERVICE_ENDPOINT = os.getenv("SERVICE_ENDPOINT")
 MODEL_NAME = os.getenv("MODEL_NAME", "example-model-1")
@@ -28,14 +27,14 @@ for i in range(len(inputs)):
     id = uuid.uuid4()
     request = {
         "modelid": MODEL_NAME,
-        "uuid": str(id),
+        "id": str(id),
         "data": inputs[i],
         "kind": "request"
     }
     partial_requests.append(request)
     response = {
         "modelid": MODEL_NAME,
-        "uuid": str(id),
+        "id": str(id),
         "data": outputs[i],
         "kind": "response"
     }
@@ -47,10 +46,9 @@ response_indices = list(range(len(inputs)))
 random.shuffle(response_indices)
 
 for index in range(len(inputs)):
-    print("=" * 80)
-
-    print("Sending data")
+    print(f"🚀 Sending partial request to {SERVICE_ENDPOINT}")
     req = requests.post(SERVICE_ENDPOINT, json=partial_requests[request_indices[index]])
     sleep(random.randint(1, 3))
     # use same indices, for now
+    print(f"🎲 Sending partial response to {SERVICE_ENDPOINT}")
     req = requests.post(SERVICE_ENDPOINT, json=partial_responses[request_indices[index]])

@@ -13,6 +13,7 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.storage.BatchReader;
+import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
 
@@ -37,8 +38,8 @@ class TestBatching {
         List<SchemaItem> inputSchema = IntStream.range(0, s).mapToObj(i -> new SchemaItem(DataType.DOUBLE, inputNames.get(i), i)).collect(Collectors.toList());
         List<SchemaItem> outputSchema = IntStream.range(s, s + outputNames.size()).mapToObj(i -> new SchemaItem(DataType.DOUBLE, outputNames.get(i - s), i)).collect(Collectors.toList());
 
-        metadata.setInputSchema(inputSchema);
-        metadata.setOutputSchema(outputSchema);
+        metadata.setInputSchema(Schema.from(inputSchema));
+        metadata.setOutputSchema(Schema.from(outputSchema));
 
         return metadata;
     }

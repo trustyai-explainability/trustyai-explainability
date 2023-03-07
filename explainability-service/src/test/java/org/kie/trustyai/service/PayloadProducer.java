@@ -1,9 +1,8 @@
 package org.kie.trustyai.service;
 
-import java.util.UUID;
-
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
+import org.kie.trustyai.service.payloads.consumer.PartialKind;
 
 public class PayloadProducer {
 
@@ -35,11 +34,11 @@ public class PayloadProducer {
     };
 
     private final static String[] encondedOutputPayloadsB = new String[] {
-            "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKhkKBm91dHB1dBIFSU5UMzIaAgECKgQSAgAA",
-            "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKhkKBm91dHB1dBIFSU5UMzIaAgECKgQSAgIA",
-            "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKhkKBm91dHB1dBIFSU5UMzIaAgECKgQSAgIA",
+            "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKhkKBm91dHB1dBIFSU5UMzIaAgECKgQSAgAB",
             "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKhkKBm91dHB1dBIFSU5UMzIaAgECKgQSAgEA",
-            "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKhkKBm91dHB1dBIFSU5UMzIaAgECKgQSAgEA"
+            "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKhkKBm91dHB1dBIFSU5UMzIaAgECKgQSAgEA",
+            "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKhkKBm91dHB1dBIFSU5UMzIaAgECKgQSAgEB",
+            "CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKhkKBm91dHB1dBIFSU5UMzIaAgECKgQSAgAA"
     };
 
     public static InferencePayload getInferencePayloadA(int number) {
@@ -58,20 +57,20 @@ public class PayloadProducer {
         return payload;
     }
 
-    public static InferencePartialPayload getInferencePartialPayloadInput(UUID id, int number) {
+    public static InferencePartialPayload getInferencePartialPayloadInput(String id, int number) {
         final InferencePartialPayload payload = new InferencePartialPayload();
         payload.setData(encondedInputPayloadsA[number]);
         payload.setId(id);
-        payload.setKind("request");
+        payload.setKind(PartialKind.request);
         payload.setModelId(MODEL_A_ID);
         return payload;
     }
 
-    public static InferencePartialPayload getInferencePartialPayloadOutput(UUID id, int number) {
+    public static InferencePartialPayload getInferencePartialPayloadOutput(String id, int number) {
         final InferencePartialPayload payload = new InferencePartialPayload();
         payload.setData(encondedOutputPayloadsA[number]);
         payload.setId(id);
-        payload.setKind("response");
+        payload.setKind(PartialKind.response);
         payload.setModelId(MODEL_A_ID);
         return payload;
     }

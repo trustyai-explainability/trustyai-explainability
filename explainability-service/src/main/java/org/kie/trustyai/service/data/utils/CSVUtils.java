@@ -23,11 +23,11 @@ public class CSVUtils {
     public static List<Prediction> parse(String in, Metadata metadata) throws IOException {
         CSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(in));
 
-        final List<Integer> inputIndices = metadata.getInputSchema()
+        final List<Integer> inputIndices = metadata.getInputSchema().getItems()
                 .stream()
                 .map(SchemaItem::getIndex)
                 .collect(Collectors.toList());
-        final List<Integer> outputIndices = metadata.getOutputSchema()
+        final List<Integer> outputIndices = metadata.getOutputSchema().getItems()
                 .stream()
                 .map(SchemaItem::getIndex)
                 .collect(Collectors.toList());
@@ -35,7 +35,7 @@ public class CSVUtils {
         return parser.stream().map(entry -> {
 
             final List<Feature> inputFeatures = IntStream.range(0, inputIndices.size()).mapToObj(index -> {
-                final SchemaItem schemaItem = metadata.getInputSchema().get(index);
+                final SchemaItem schemaItem = metadata.getInputSchema().getItems().get(index);
                 final int inputIndex = schemaItem.getIndex();
                 final String name = schemaItem.getName();
                 final String valueString = entry.get(inputIndex);
@@ -54,7 +54,7 @@ public class CSVUtils {
             }).collect(Collectors.toList());
 
             final List<Output> outputs = IntStream.range(0, outputIndices.size()).mapToObj(index -> {
-                final SchemaItem schemaItem = metadata.getOutputSchema().get(index);
+                final SchemaItem schemaItem = metadata.getOutputSchema().getItems().get(index);
                 final int inputIndex = schemaItem.getIndex();
                 final String name = schemaItem.getName();
                 final DataType vtypes = schemaItem.getType();
