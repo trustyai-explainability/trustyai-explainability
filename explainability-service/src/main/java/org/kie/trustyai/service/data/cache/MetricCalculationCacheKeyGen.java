@@ -20,6 +20,16 @@ public class MetricCalculationCacheKeyGen implements CacheKeyGenerator {
     @Inject
     Instance<Storage> storage;
 
+    /**
+     * Generates a cache key for metric calculations.
+     * If (for a specific model id) the data file is not modified and the metric request
+     * was already calculated, this will result in a cache hit for that metric.
+     * If either the data or the request are new, the metric will fully calculated.
+     * 
+     * @param method This refers to the calculation methods in {@link org.kie.trustyai.service.endpoints.metrics.MetricsCalculator}.
+     * @param methodParams Metric calculation parameters. Only {@link BaseMetricRequest} is used.
+     * @return A composite cache key.
+     */
     @Override
     public Object generate(Method method, Object... methodParams) {
 

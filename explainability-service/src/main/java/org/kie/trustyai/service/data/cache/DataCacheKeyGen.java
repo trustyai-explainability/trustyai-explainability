@@ -18,6 +18,14 @@ public class DataCacheKeyGen implements CacheKeyGenerator {
     @Inject
     Instance<Storage> storage;
 
+    /**
+     * Generates a cache key based on a data file's last modified status.
+     * If the data file for a certain model id has not changed, return the cached data.
+     * 
+     * @param method The method is {@link Storage#readData(String)}
+     * @param methodParams The model id as a {@link String}
+     * @return A key cache based on the model id's data file last modified attribute
+     */
     @Override
     public Object generate(Method method, Object... methodParams) {
         final String modelId = (String) methodParams[0];
