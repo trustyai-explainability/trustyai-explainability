@@ -60,7 +60,7 @@ public class PVCStorage extends Storage {
 
     @Override
     public ByteBuffer readData(String modelId) throws StorageReadException {
-        LOG.info("Cache miss! Reading data for " + modelId);
+        LOG.debug("Cache miss. Reading data for " + modelId);
         try {
             return ByteBuffer.wrap(
                     BatchReader.linesToBytes(
