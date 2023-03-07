@@ -4,5 +4,6 @@ commonLabels:
   app: trustyai
   app.kubernetes.io/part-of: trustyai
 resources:
-- ../default
-- trustyai-configmap.yaml
+  - ../default
+  - trustyai-configmap.yaml
+  - model-serving-config.yaml
