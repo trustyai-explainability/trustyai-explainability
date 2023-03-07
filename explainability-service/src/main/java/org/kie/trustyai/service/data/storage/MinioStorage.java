@@ -213,9 +213,8 @@ public class MinioStorage extends Storage {
         return Path.of(this.bucketName, getDataFilename(modelId));
     }
 
-
     @Override
-    public long getLastModified() {
-        return isObjectAvailable(bucketName, inputFilename).lastModified().toInstant().toEpochMilli();
+    public long getLastModified(final String modelId) {
+        return isObjectAvailable(bucketName, getDataFilename(modelId)).lastModified().toInstant().toEpochMilli();
     }
 }

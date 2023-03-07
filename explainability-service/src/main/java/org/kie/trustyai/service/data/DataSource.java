@@ -12,7 +12,6 @@ import javax.inject.Singleton;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
-import org.kie.trustyai.service.data.cache.DataframeCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
@@ -24,8 +23,6 @@ import org.kie.trustyai.service.data.utils.MetadataUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.quarkus.cache.CacheResult;
 
 @Singleton
 public class DataSource {
@@ -42,10 +39,8 @@ public class DataSource {
     public Set<String> getKnownModels() {
         return knownModels;
     }
-    @CacheResult(cacheName = "dataframe", keyGenerator = DataframeCacheKeyGen.class)
-    public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
 
-        LOG.info("Cache miss! Reading dataframe");
+    public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
 
         final ByteBuffer byteBuffer;
         try {

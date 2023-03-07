@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -45,7 +47,7 @@ public class MemoryStorage extends Storage {
     @Override
     public void save(ByteBuffer data, String location) throws StorageWriteException {
         final String stringData = new String(data.array(), StandardCharsets.UTF_8);
-        Log.info("Saving " + stringData + " to " + location);
+        Log.debug("Saving data to " + location);
         this.data.put(location, stringData);
     }
 
@@ -93,7 +95,9 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
-    public long getLastModified() {
-        return data.get(config.inputFilename().get()).hashCode();
+    public long getLastModified(final String modelId) {
+        final Checksum crc32 = new CRC32();
+        crc32.update(readData(modelId));
+        return crc32.getValue();
     }
 }
