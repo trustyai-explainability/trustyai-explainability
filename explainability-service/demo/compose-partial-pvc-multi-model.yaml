@@ -1,0 +1,50 @@
+services:
+  trustyai:
+    image: trustyai/trustyai-service:999-SNAPSHOT
+    container_name: trustyai-service
+    ports:
+      - "8080:8080"
+    environment:
+      SERVICE_STORAGE_FORMAT: "PVC"
+      SERVICE_DATA_FORMAT: "CSV"
+      SERVICE_METRICS_SCHEDULE: "5s"
+      SERVICE_BATCH_SIZE: 5000
+      STORAGE_DATA_FILENAME: "data.csv"
+      STORAGE_DATA_FOLDER: "/inputs"
+      LOG_LEVEL: "DEBUG"
+    volumes:
+      - ~/volumes/pvc/inputs:/inputs
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+  generator-1:
+    container_name: generator-1
+    image: trustyai/trustyai-service-partial
+    build:
+      context: ./logger
+      dockerfile: ./partial.Dockerfile
+    environment:
+      MODEL_NAME: "example-model-1"
+      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
+      PYTHONUNBUFFERED: "1"
+  generator-2:
+    container_name: generator-2
+    image: trustyai/trustyai-service-partial
+    build:
+      context: ./logger
+      dockerfile: ./partial.Dockerfile
+    environment:
+      MODEL_NAME: "example-model-2"
+      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
+      PYTHONUNBUFFERED: "1"
+
+volumes:
+  prom_data:
