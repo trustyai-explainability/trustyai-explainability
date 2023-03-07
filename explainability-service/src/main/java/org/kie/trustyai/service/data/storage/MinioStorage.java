@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -13,7 +14,8 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.service.config.readers.MinioConfig;
+import org.kie.trustyai.service.config.storage.MinioConfig;
+import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
@@ -31,28 +33,17 @@ public class MinioStorage extends Storage {
 
     private final String bucketName;
 
-    private final String inputFilename;
-    private final String outputFilename;
+    private final String dataFilename;
     private final String endpoint;
     private final String accessKey;
     private final String secretKey;
 
-    public MinioStorage(MinioConfig config) {
+    public MinioStorage(MinioConfig config, StorageConfig storageConfig) {
         LOG.info("Starting MinIO storage consumer");
         if (config.bucketName().isEmpty()) {
             throw new IllegalArgumentException("Missing MinIO bucket");
         } else {
             this.bucketName = config.bucketName().get();
-        }
-        if (config.inputFilename().isEmpty()) {
-            throw new IllegalArgumentException("Missing MinIO input filename");
-        } else {
-            this.inputFilename = config.inputFilename().get();
-        }
-        if (config.outputFilename().isEmpty()) {
-            throw new IllegalArgumentException("Missing MinIO output filename");
-        } else {
-            this.outputFilename = config.outputFilename().get();
         }
         if (config.endpoint().isEmpty()) {
             throw new IllegalArgumentException("Missing MinIO endpoint");
@@ -69,10 +60,10 @@ public class MinioStorage extends Storage {
         } else {
             this.secretKey = config.secretKey().get();
         }
+        this.dataFilename = storageConfig.dataFilename();
 
-        LOG.info("MinIO data location: endpoint=" + config.endpoint() + ", bucket=" + bucketName + ", input file="
-                + inputFilename
-                + ", output filename=" + outputFilename);
+        LOG.info("MinIO data location: endpoint=" + config.endpoint() + ", bucket=" + bucketName + ", data file="
+                + this.dataFilename);
         this.minioClient =
                 MinioClient.builder()
                         .endpoint(this.endpoint)
@@ -115,23 +106,12 @@ public class MinioStorage extends Storage {
     }
 
     @Override
-    public ByteBuffer getInputData() throws StorageReadException {
-        isObjectAvailable(this.bucketName, this.inputFilename);
+    public ByteBuffer readData(String modelId) throws StorageReadException {
+        isObjectAvailable(this.bucketName, this.dataFilename);
         try {
-            return ByteBuffer.wrap(readFile(this.bucketName, this.inputFilename));
+            return ByteBuffer.wrap(readFile(this.bucketName, this.dataFilename));
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
             LOG.error("Error reading input file");
-            throw new StorageReadException(e.getMessage());
-        }
-    }
-
-    @Override
-    public ByteBuffer getOutputData() throws StorageReadException {
-        isObjectAvailable(this.bucketName, this.outputFilename);
-        try {
-            return ByteBuffer.wrap(readFile(this.bucketName, this.outputFilename));
-        } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
-            LOG.error("Error reading output file");
             throw new StorageReadException(e.getMessage());
         }
     }
@@ -175,34 +155,64 @@ public class MinioStorage extends Storage {
     }
 
     @Override
-    public void saveInputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
-        saveData(byteBuffer, bucketName, inputFilename);
+    public boolean dataExists(String modelId) throws StorageReadException {
+        try {
+            isObjectAvailable(this.bucketName, this.dataFilename);
+            return true;
+        } catch (StorageReadException e) {
+            return false;
+        }
     }
 
     @Override
-    public void saveOutputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
-        saveData(byteBuffer, bucketName, outputFilename);
+    public void save(ByteBuffer data, String location) throws StorageWriteException {
+        saveData(data, this.bucketName, location);
     }
 
     @Override
-    public void appendInputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
-        // TODO: Append data on MinIO
+    public void append(ByteBuffer data, String location) throws StorageWriteException {
+        appendData(data, this.bucketName, location);
     }
 
     @Override
-    public void appendOutputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException {
-        // TODO: Append data on MinIO
+    public void appendData(ByteBuffer data, String modelId) throws StorageWriteException {
+        append(data, this.dataFilename);
     }
 
     @Override
-    public boolean inputExists() throws StorageReadException {
-        return false;
+    public ByteBuffer read(String location) throws StorageReadException {
+        try {
+            return ByteBuffer.wrap(readFile(this.bucketName, location));
+        } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new StorageReadException("Could not read file: " + e.getMessage());
+        }
     }
 
     @Override
-    public boolean outputExists() throws StorageReadException {
-        return false;
+    public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
+        save(data, this.dataFilename);
     }
+
+    @Override
+    public boolean fileExists(String location) throws StorageReadException {
+        try {
+            isObjectAvailable(this.bucketName, location);
+            return true;
+        } catch (StorageReadException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public String getDataFilename(String modelId) {
+        return this.dataFilename;
+    }
+
+    @Override
+    public Path buildDataPath(String modelId) {
+        return Path.of(this.bucketName, getDataFilename(modelId));
+    }
+
 
     @Override
     public long getLastModified() {

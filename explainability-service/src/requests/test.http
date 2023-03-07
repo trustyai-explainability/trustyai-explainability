@@ -1,25 +1,26 @@
-POST http://{{host}}:8080/metrics/spd
+POST {{host}}/metrics/spd
 Content-Type: application/json
 
 {
-  "protectedAttribute": "gender",
+  "modelId": "example-model-1",
+  "protectedAttribute": "input-2",
   "favorableOutcome": {
-    "type": "INT32",
-    "value": 1
+    "type": "DOUBLE",
+    "value": 1.0
   },
-  "outcomeName": "income",
+  "outcomeName": "output-0",
   "privilegedAttribute": {
-    "type": "INT32",
-    "value": 1
+    "type": "DOUBLE",
+    "value": 1.0
   },
   "unprivilegedAttribute": {
-    "type": "INT32",
-    "value": 0
+    "type": "DOUBLE",
+    "value": 0.0
   }
 }
 
 ###
-POST http://{{host}}:8080/metrics/spd
+POST {{host}}/metrics/spd
 Content-Type: application/json
 
 {
@@ -40,28 +41,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://{{host}}:8080/metrics/spd/request
-Content-Type: application/json
-
-{
-  "protectedAttribute": "gender",
-  "favorableOutcome": {
-    "type": "INT32",
-    "value": 1
-  },
-  "outcomeName": "income",
-  "privilegedAttribute": {
-    "type": "INT32",
-    "value": 1
-  },
-  "unprivilegedAttribute": {
-    "type": "INT32",
-    "value": 0
-  }
-}
-
-###
-POST http://{{host}}:8080/metrics/spd/request
+POST {{host}}/metrics/spd/request
 Content-Type: application/json
 
 {
@@ -82,10 +62,31 @@ Content-Type: application/json
 }
 
 ###
-GET http://{{host}}:8080/metrics/spd/requests
+POST {{host}}/metrics/spd/request
+Content-Type: application/json
+
+{
+  "protectedAttribute": "input-2",
+  "favorableOutcome": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "outcomeName": "output-0",
+  "privilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "unprivilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 0.0
+  }
+}
 
 ###
-DELETE http://{{host}}:8080/metrics/spd/request
+GET {{host}}/metrics/spd/requests
+
+###
+DELETE {{host}}/metrics/spd/request
 Content-Type: application/json
 
 {
@@ -93,7 +94,29 @@ Content-Type: application/json
 }
 
 ###
-POST http://{{host}}:8080/metrics/dir
+POST {{host}}/metrics/dir
+Content-Type: application/json
+
+{
+  "modelId": "example-model-1",
+  "protectedAttribute": "input-2",
+  "favorableOutcome": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "outcomeName": "output-0",
+  "privilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 1.0
+  },
+  "unprivilegedAttribute": {
+    "type": "DOUBLE",
+    "value": 0.0
+  }
+}
+
+###
+POST {{host}}/metrics/dir/request
 Content-Type: application/json
 
 {
@@ -114,28 +137,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://{{host}}:8080/metrics/dir/request
-Content-Type: application/json
-
-{
-  "protectedAttribute": "gender",
-  "favorableOutcome": {
-    "type": "INT32",
-    "value": 1
-  },
-  "outcomeName": "income",
-  "privilegedAttribute": {
-    "type": "INT32",
-    "value": 1
-  },
-  "unprivilegedAttribute": {
-    "type": "INT32",
-    "value": 0
-  }
-}
-
-###
-DELETE http://{{host}}:8080/metrics/dir/request
+DELETE {{host}}/metrics/dir/request
 Content-Type: application/json
 
 {
@@ -143,7 +145,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://{{host}}:8080/metrics/dir
+POST {{host}}/metrics/dir
 Content-Type: application/json
 
 {
@@ -164,25 +166,25 @@ Content-Type: application/json
 }
 
 ###
-GET http://{{host}}:8080/metrics/dir/requests
+GET {{host}}/metrics/dir/requests
 
 ###
-GET http://{{host}}:8080/info
+GET {{host}}/info
 
 ###
-GET http://{{host}}:8080/q/openapi
+GET {{host}}/q/openapi
 
 ###
-GET http://{{host}}:8080/metrics/spd/metrics/spd/prometheus
+GET {{host}}/metrics/spd/metrics/spd/prometheus
 
 ###
-GET http://{{host}}:8080/q/metrics
+GET {{host}}/q/metrics
 
 ###
-GET http://{{host}}:8080/q/health
+GET {{host}}/q/health
 
 ###
-POST http://{{host}}:8080/consumer/kserve/v2
+POST {{host}}/consumer/kserve/v2
 Content-Type: application/json
 
 {

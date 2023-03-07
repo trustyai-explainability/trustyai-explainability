@@ -6,67 +6,61 @@ jobs:
       MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
       MAVEN_ARGS: "-nsu -fae -e"
     concurrency:
-      group: pull_request-${{ github.event_name }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.java-version }}
+      group: pull_request-${{ github.event_name }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.java-version }}-${{ matrix.maven-version }}
       cancel-in-progress: true
     timeout-minutes: 45
     strategy:
       matrix:
         # configure with [ 'ubuntu-latest', 'windows-latest' ] to enable Windows builds
-        os: [ 'ubuntu-latest' ]
+        include:
+          - {os: ubuntu-latest, shell: bash }
+        #  - {os: windows-latest, shell: cmd }
         java-version: [ 11, 17 ]
-        maven-version: [ '3.8.6' ]
+        maven-version: [ '3.6.3', '3.8.6' ]
       fail-fast: false
+    # https://docs.github.com/en/actions/using-jobs/setting-default-values-for-jobs#setting-default-shell-and-working-directory
+    defaults:
+      run:
+        shell: ${{ matrix.shell }} {0}
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }} - Java ${{ matrix.java-version }} - Build and Test
+    name: ${{ matrix.os }} - Java ${{ matrix.java-version }} - Maven ${{ matrix.maven-version }}- Build and Test
     steps:
       - name: Disk space report before modification
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        shell: bash
         run: |
           echo "Available storage:"
           df -h
       # Inspired to maximize-build-space action https://github.com/easimon/maximize-build-space
       - name: Free disk space (remove dotnet, android and haskell)
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        shell: bash
         run: |
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
       - name: Disk space report after modification
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        shell: bash
         run: |
           echo "Available storage:"
           df -h
       - name: Support long paths
+        # set to use cmd for windows not pwsh
         if: ${{ matrix.os == 'windows-latest' }}
-        shell: bash
         run: git config --system core.longpaths true
       - name: Set up JDK + Maven version
-        uses: s4u/setup-maven-action@v1.4.0
+        # include actions/checkout, actions/setup-java, actions/cache, see https://github.com/s4u/setup-maven-action/blob/main/action.yml
+        uses: s4u/setup-maven-action@v1.7.0
         with:
           java-version: ${{ matrix.java-version }}
           maven-version: ${{ matrix.maven-version }}
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Cache Maven Packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-${{ matrix.java-version }}-maven${{ matrix.maven-version }}
-      - name: Compile
-        shell: bash
-        run: mvn -Dmaven.test.skip=true package -Dformatter.skip=true
+      - name: Run mvn package
+        run: mvn package -Dmaven.test.skip=true -Dformatter.skip=true
       - name: Validate Formatting
         # execute formatting validation only on Ubuntu to avoid issues with CR LF
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        shell: bash
         run: mvn net.revelc.code.formatter:formatter-maven-plugin:validate
       - name: Run Test Suite
-        shell: bash
         run: mvn verify
-      - name: Publish Test Report
+      - name: Check Test Report without publishing
         if: ${{ always() }}
         uses: scacap/action-surefire-report@v1.0.10
         with:

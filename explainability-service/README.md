@@ -29,7 +29,7 @@
 
 ## Locally
 
-The TrustyAI service includes two demos.
+The TrustyAI service includes several demos.
 
 - generating data into storage, which can be monitored by the service
 - or, having a process simulating sending KServe gRPC data to a consumer endpoint
@@ -40,7 +40,7 @@ The first step to run the demos locally, is to build the TrustyAI service contai
 This can be done by running (on `$PROJECT/explainability-service`):
 
 ```shell
-mvn clean install
+mvn clean install -Dquarkus.container-image.build=true
 ```
 
 ### Using data in storage only
@@ -49,13 +49,13 @@ To run this demo, first build the remaining images using:
 
 ```shell
 $ cd demo
-$ docker compose -f compose.yml build
+$ docker compose -f compose-generator-memory-single-model.yaml build
 ```
 
 Finally, run the demo using:
 
 ```shell
-$ docker compose up
+$ docker compose -f compose-generator-memory-single-model.yaml up
 ```
 
 Issue a metric request to, for instance:
@@ -64,11 +64,21 @@ Issue a metric request to, for instance:
 curl -X POST --location "http://localhost:8080/metrics/spd/request" \
     -H "Content-Type: application/json" \
     -d "{
-          \"protectedAttribute\": \"gender\",
-          \"favorableOutcome\": 1,
-          \"outcomeName\": \"income\",
-          \"privilegedAttribute\": 1,
-          \"unprivilegedAttribute\": 0
+            \"modelId\": \"example-1\",
+            \"protectedAttribute\": \"input-2\",
+            \"favorableOutcome\": {
+                \"type\": \"DOUBLE\",
+                \"value\": 1.0
+            },
+            \"outcomeName\": \"output-0\",
+            \"privilegedAttribute\": {
+                \"type\": \"DOUBLE\",
+                \"value\": 1.0
+            },
+            \"unprivilegedAttribute\": {
+                \"type\": \"DOUBLE\",
+                \"value\": 0.0
+            } 
         }"
 ```
 
@@ -83,12 +93,11 @@ and run the container using (either `docker`, `podman`):
 ```shell
 docker run -p 8080:8080 \
     --env SERVICE_DATA_FORMAT=CSV \
-    --env SERVICE_MODEL_NAME=example \
     --env SERVICE_STORAGE_FORMAT="MINIO" \
     --env MINIO_BUCKET_NAME="inputs" \
     --env MINIO_ENDPOINT="http://localhost:9000" \
-    --env MINIO_INPUT_FILENAME="income-biased-inputs.csv" \
-    --env MINIO_OUTPUT_FILENAME="income-biased-outputs.csv" \
+    --env STORAGE_DATA_FILENAME="income-biased-inputs.csv" \
+    --env STORAGE_DATA_FOLDER="/inputs" \
     --env MINIO_SECRET_KEY="minioadmin" \
     --env MINIO_ACCESS_KEY="minioadmin" \
     --env SERVICE_METRICS_SCHEDULE="5s" \
@@ -108,7 +117,7 @@ To run it, start by building the necessary images with:
 
 ```shell
 $ cd demo
-$ docker compose -f compose-generator.yml build
+$ docker compose -f compose-generator-pvc-multi-model.yaml build
 ```
 
 This demo uses a Docker bind mount, which on the host can be created with:
@@ -125,7 +134,7 @@ mkdir -p ~/volumes/pvc/inputs
 The demo can then be started with:
 
 ```shell
-docker compose -f compose-generator.yml up
+docker compose -f compose-generator-pvc-multi-model.yaml.yml up
 ```
 
 After a few seconds, you will start seeing the logs showing both the payload sent
@@ -210,22 +219,23 @@ the corresponding environment variable, e.g.
 Get statistical parity difference at `/metrics/spd`
 
 ```shell
-curl -X POST --location "http://{{host}}:8080/metrics/spd" \
+curl -X POST --location "http://{{host}}/metrics/spd" \
     -H "Content-Type: application/json" \
     -d "{
-          \"protectedAttribute\": \"gender\",
+          \"modelId\": \"example-model-1\",
+          \"protectedAttribute\": \"input-2\",
           \"favorableOutcome\": {
-            \"type\": \"INT32\",
-            \"value\": 1
+            \"type\": \"DOUBLE\",
+            \"value\": 1.0
           },
-          \"outcomeName\": \"income\",
+          \"outcomeName\": \"output-0\",
           \"privilegedAttribute\": {
-            \"type\": \"INT32\",
-            \"value\": 1
+            \"type\": \"DOUBLE\",
+            \"value\": 1.0
           },
           \"unprivilegedAttribute\": {
-            \"type\": \"INT32\",
-            \"value\": 0
+            \"type\": \"DOUBLE\",
+            \"value\": 0.0
           }
         }"
 ```
@@ -255,22 +265,23 @@ Content-Type: application/json;charset=UTF-8
 ### Disparate Impact Ratio
 
 ```shell
-curl -X POST --location "http://{{host}}:8080/metrics/dir" \
+curl -X POST --location "http://{{host}}/metrics/dir" \
     -H "Content-Type: application/json" \
     -d "{
-          \"protectedAttribute\": \"gender\",
+          \"modelId\": \"example-model-1\",
+          \"protectedAttribute\": \"input-2\",
           \"favorableOutcome\": {
-            \"type\": \"INT32\",
-            \"value\": 1
+            \"type\": \"DOUBLE\",
+            \"value\": 1.0
           },
-          \"outcomeName\": \"income\",
+          \"outcomeName\": \"output-0\",
           \"privilegedAttribute\": {
-            \"type\": \"INT32\",
-            \"value\": 1
+            \"type\": \"DOUBLE\",
+            \"value\": 1.0
           },
           \"unprivilegedAttribute\": {
-            \"type\": \"INT32\",
-            \"value\": 0
+            \"type\": \"DOUBLE\",
+            \"value\": 0.0
           }
         }"
 ```
@@ -301,22 +312,22 @@ the `/metrics/$METRIC/schedule`.
 Looking at the SPD example above if we wanted the metric to be calculated periodically we would request:
 
 ```shell
-curl -X POST --location "http://{{host}}:8080/metrics/spd/request" \
+curl -X POST --location "http://{{host}}/metrics/spd/request" \
     -H "Content-Type: application/json" \
     -d "{
-          \"protectedAttribute\": \"gender\",
+          \"protectedAttribute\": \"input-2\",
           \"favorableOutcome\": {
-            \"type\": \"INT32\",
-            \"value\": 1
+            \"type\": \"DOUBLE\",
+            \"value\": 1.0
           },
-          \"outcomeName\": \"income\",
+          \"outcomeName\": \"output-0\",
           \"privilegedAttribute\": {
-            \"type\": \"INT32\",
-            \"value\": 1
+            \"type\": \"DOUBLE\",
+            \"value\": 1.0
           },
           \"unprivilegedAttribute\": {
-            \"type\": \"INT32\",
-            \"value\": 0
+            \"type\": \"DOUBLE\",
+            \"value\": 0.0
           }
         }"
 ```
@@ -359,32 +370,33 @@ curl -X GET --location "http://{{host}}:8080/metrics/spd/requests"
 
 This will return, as an example:
 
-```json
+```text
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
 content-length: 271
 
 {
-"requests": [
-{
-"id": "8abd816e-3379-4315-b932-c5b848fd36b4",
-"request": {
-"protectedAttribute": "gender",
-"favorableOutcome": {
-"type": "INT32",
-"value": 1
-},
-"outcomeName": "income",
-"privilegedAttribute": {
-"type": "INT32",
-"value": 1
-},
-"unprivilegedAttribute": {
-"type": "INT32",
-"value": 0
-}
-}
-}
+  "requests": [
+    {
+      "id": "ab46d639-6567-438b-a0aa-44ee9fd423a3",
+      "request": {
+        "protectedAttribute": "input-2",
+        "favorableOutcome": {
+          "type": "DOUBLE",
+          "value": 1.0
+      },
+      "outcomeName": "output-0",
+      "privilegedAttribute": {
+        "type": "DOUBLE",
+        "value": 1.0
+      },
+      "unprivilegedAttribute": {
+      "type": "DOUBLE",
+      "value": 0.0
+      },
+      "modelId": null
+    }
+  }
 ]
 }
 ```
@@ -486,8 +498,9 @@ contain the Base64 encoded raw bytes of the gRPC Protocol payload. As an example
 curl -X POST --location "http://{{host}}:8080/consumer/kserve/v2" \
 -H "Content-Type: application/json" \
 -d "{
-\"input\": \"CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKiUKBWlucHV0EgRGUDY0GgIBAyoSOhAAAAAAAABUQAAAAAAAABBA\",
-\"output\": \"CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKh0KBWlucHV0EgRGUDY0GgIBASoKOggAAAAAAAAAAA==\"
+  \"modelId\": \"example-2\",
+  \"input\": \"CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKiUKBWlucHV0EgRGUDY0GgIBAyoSOhAAAAAAAABUQAAAAAAAABBA\",
+  \"output\": \"CgdleGFtcGxlGg1teSByZXF1ZXN0IGlkKh0KBWlucHV0EgRGUDY0GgIBASoKOggAAAAAAAAAAA==\"
 }"
 ```
 
@@ -503,42 +516,122 @@ curl -X GET --location "http://{{host}}:8080/info"
 
 Will return, for instance
 
-```json
-HTTP/1.1 200 OK
-Content-Type: application/json;charset=UTF-8
-content-length: 243
-
-{
-"metrics": {
-"scheduledMetadata": {
-"spd": 1,
-"dir": 0
-}
-},
-"data": {
-"observations": 318,
-"inputs": [
-{
-"type": "DOUBLE",
-"name": "input-0"
-},
-{
-"type": "DOUBLE",
-"name": "input-1"
-},
-{
-"type": "DOUBLE",
-"name": "input-2"
-}
-],
-"outputs": [
-{
-"type": "DOUBLE",
-"name": "output-0"
-}
+```text
+[
+    {
+        "metrics": {
+            "scheduledMetadata": {
+                "spd": 1,
+                "dir": 0
+            }
+        },
+        "data": {
+            "inputSchema": [
+                {
+                    "type": "DOUBLE",
+                    "name": "input-0",
+                    "index": 2
+                },
+                {
+                    "type": "DOUBLE",
+                    "name": "input-1",
+                    "index": 3
+                },
+                {
+                    "type": "DOUBLE",
+                    "name": "input-2",
+                    "index": 4
+                }
+            ],
+            "outputSchema": [
+                {
+                    "type": "DOUBLE",
+                    "name": "output-0",
+                    "index": 5
+                }
+            ],
+            "observations": 83,
+            "modelId": "example-model-1"
+        }
+    },
+    {
+        "metrics": {
+            "scheduledMetadata": {
+                "spd": 1,
+                "dir": 0
+            }
+        },
+        "data": {
+            "inputSchema": [
+                {
+                    "type": "DOUBLE",
+                    "name": "input-0",
+                    "index": 2
+                },
+                {
+                    "type": "DOUBLE",
+                    "name": "input-1",
+                    "index": 3
+                },
+                {
+                    "type": "DOUBLE",
+                    "name": "input-2",
+                    "index": 4
+                }
+            ],
+            "outputSchema": [
+                {
+                    "type": "DOUBLE",
+                    "name": "output-0",
+                    "index": 5
+                }
+            ],
+            "observations": 83,
+            "modelId": "example-model-2"
+        }
+    },
+    {
+        "metrics": {
+            "scheduledMetadata": {
+                "spd": 1,
+                "dir": 0
+            }
+        },
+        "data": {
+            "inputSchema": [
+                {
+                    "type": "DOUBLE",
+                    "name": "input-0",
+                    "index": 2
+                },
+                {
+                    "type": "DOUBLE",
+                    "name": "input-1",
+                    "index": 3
+                },
+                {
+                    "type": "DOUBLE",
+                    "name": "input-2",
+                    "index": 4
+                }
+            ],
+            "outputSchema": [
+                {
+                    "type": "INT32",
+                    "name": "output-0",
+                    "index": 5
+                },
+                {
+                    "type": "INT32",
+                    "name": "output-1",
+                    "index": 6
+                }
+            ],
+            "observations": 85,
+            "modelId": "example-model-3"
+        }
+    }
 ]
-}
-}
 ```
 
 # Data sources
@@ -559,6 +652,7 @@ The supported data sources are:
 |-------------------------------------------|------------------|
 | MinIO                                     | `MINIO`          |
 | Kubernetes Persistent Volume Claims (PVC) | `PVC`            |
+| Memory                                    | `MEMORY`         |
 
 The data can be batched into the latest `n` observations by using the configuration key
 `SERVICE_BATCH_SIZE=n`. This behaves like a `n`-size tail and its optional.
@@ -569,31 +663,7 @@ If not specified, the entire dataset is used.
 ## OpenShift
 
 To deploy in Kubernetes or OpenShift, the connection information
-can be passed in the manifest as environment variables:
+can be passed into the manifest using the `ConfigMap` in [here](manifests/opendatahub/base/trustyai-configmap.yaml).
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-spec:
-  template:
-    spec:
-      containers:
-        - env:
-            - name: KUBERNETES_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: KSERVE_TARGET
-              value: localhost
-            - name: STORAGE_FORMAT
-              value: RANDOM_TEST
-            - name: MODEL_NAME
-              value: example
-          image: trustyai/trustyai-service:999-SNAPSHOT
-          name: trustyai-service
-          ports:
-            - containerPort: 8080
-              name: http
-              protocol: TCP
-```
+The main manifest is available [here](manifests/opendatahub/default/trustyai-deployment.yaml).
 

@@ -13,8 +13,6 @@ services:
       PVC_OUTPUT_FILENAME: "/inputs/income-biased-outputs.csv"
       SERVICE_METRICS_SCHEDULE: "5s"
       SERVICE_BATCH_SIZE: 5000
-    volumes:
-      - ~/volumes/pvc/inputs:/inputs
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -26,15 +24,5 @@ services:
     volumes:
       - ./prometheus:/etc/prometheus
       - prom_data:/prometheus
-  generator:
-    container_name: generator
-    image: trustyai/trustyai-service-generator
-    build:
-      context: ./logger
-      dockerfile: ./generator.Dockerfile
-    environment:
-      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
-      PYTHONUNBUFFERED: "1"
-
 volumes:
   prom_data:

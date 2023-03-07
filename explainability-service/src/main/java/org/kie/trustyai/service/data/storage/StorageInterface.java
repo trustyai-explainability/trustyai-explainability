@@ -6,21 +6,21 @@ import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
 public interface StorageInterface {
-    ByteBuffer getInputData() throws StorageReadException;
+    ByteBuffer readData(String modelId) throws StorageReadException;
 
-    ByteBuffer getOutputData() throws StorageReadException;
+    boolean dataExists(String modelId) throws StorageReadException;
 
-    void saveInputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException;
+    void save(ByteBuffer data, String location) throws StorageWriteException;
 
-    void saveOutputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException;
+    void append(ByteBuffer data, String location) throws StorageWriteException;
 
-    void appendInputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException;
+    void appendData(ByteBuffer data, String modelId) throws StorageWriteException;
 
-    void appendOutputData(ByteBuffer byteBuffer) throws StorageWriteException, StorageReadException;
+    ByteBuffer read(String location) throws StorageReadException;
 
-    boolean inputExists() throws StorageReadException;
+    void saveData(ByteBuffer data, String modelId) throws StorageWriteException;
 
-    boolean outputExists() throws StorageReadException;
+    boolean fileExists(String location) throws StorageReadException;
 
     long getLastModified();
 
