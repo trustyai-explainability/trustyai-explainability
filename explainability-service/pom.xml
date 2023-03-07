@@ -104,6 +104,10 @@
             <artifactId>commons-collections4</artifactId>
             <version>${apache.commons.collections.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-cache</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

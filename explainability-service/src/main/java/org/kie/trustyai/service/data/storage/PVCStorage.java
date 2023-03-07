@@ -60,6 +60,7 @@ public class PVCStorage extends Storage {
 
     @Override
     public ByteBuffer readData(String modelId) throws StorageReadException {
+        LOG.debug("Cache miss. Reading data for " + modelId);
         try {
             return ByteBuffer.wrap(
                     BatchReader.linesToBytes(
@@ -93,6 +94,12 @@ public class PVCStorage extends Storage {
         } catch (IOException e) {
             throw new StorageWriteException(e.getMessage());
         }
+    }
+
+    @Override
+    public long getLastModified(final String modelId) {
+        final Path filepath = Paths.get(this.dataFolder.toString(), getDataFilename(modelId));
+        return filepath.toFile().lastModified();
     }
 
     @Override
