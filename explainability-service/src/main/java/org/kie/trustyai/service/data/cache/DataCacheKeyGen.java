@@ -31,6 +31,6 @@ public class DataCacheKeyGen implements CacheKeyGenerator {
         final String modelId = (String) methodParams[0];
         LOG.debug("Cache hit for " + modelId + " data");
 
-        return new CompositeCacheKey(storage.get().getLastModified(modelId));
+        return new CompositeCacheKey(modelId, storage.get().getLastModified(modelId));
     }
 }
