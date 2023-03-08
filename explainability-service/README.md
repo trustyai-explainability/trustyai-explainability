@@ -667,3 +667,8 @@ can be passed into the manifest using the `ConfigMap` in [here](manifests/openda
 
 The main manifest is available [here](manifests/opendatahub/default/trustyai-deployment.yaml).
 
+The configuration variables include:
+
+| Environment variable    | Values         | Default | Purpose                                                                   |
+|-------------------------|----------------|---------|---------------------------------------------------------------------------|
+| `QUARKUS_CACHE_ENABLED` | `true`/`false` | `true`  | Enables data fetching and metric calculation caching. Enabled by default. | 

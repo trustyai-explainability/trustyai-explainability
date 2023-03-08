@@ -35,7 +35,7 @@ public class MetricCalculationCacheKeyGen implements CacheKeyGenerator {
 
         final BaseMetricRequest request = (BaseMetricRequest) methodParams[1];
         final String modelId = request.getModelId();
-        LOG.debug("Cache hit for metric for model " + modelId);
+        LOG.debug("Creating cache key for model " + modelId);
         return new CompositeCacheKey(modelId, storage.get().getLastModified(modelId), request.hashCode());
     }
 }

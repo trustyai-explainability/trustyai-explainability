@@ -30,6 +30,7 @@ public class MemoryStorage extends Storage {
 
     @Override
     public ByteBuffer readData(final String modelId) throws StorageReadException {
+        Log.debug("Cache miss. Reading data for " + modelId);
         final String key = getDataFilename(modelId);
         if (data.containsKey(key)) {
             return ByteBuffer.wrap(data.get(key).getBytes());
