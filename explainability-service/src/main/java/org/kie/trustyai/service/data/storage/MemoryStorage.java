@@ -10,16 +10,18 @@ import java.util.zip.Checksum;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
-import io.quarkus.logging.Log;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "MEMORY")
 @ApplicationScoped
 public class MemoryStorage extends Storage {
+
+    private static final Logger LOG = Logger.getLogger(MemoryStorage.class);
 
     protected final Map<String, String> data = new ConcurrentHashMap<>();
     private final String dataFilename;
@@ -30,7 +32,7 @@ public class MemoryStorage extends Storage {
 
     @Override
     public ByteBuffer readData(final String modelId) throws StorageReadException {
-        Log.debug("Cache miss. Reading data for " + modelId);
+        LOG.debug("Cache miss. Reading data for " + modelId);
         final String key = getDataFilename(modelId);
         if (data.containsKey(key)) {
             return ByteBuffer.wrap(data.get(key).getBytes());
@@ -48,7 +50,7 @@ public class MemoryStorage extends Storage {
     @Override
     public void save(ByteBuffer data, String location) throws StorageWriteException {
         final String stringData = new String(data.array(), StandardCharsets.UTF_8);
-        Log.debug("Saving data to " + location);
+        LOG.debug("Saving data to " + location);
         this.data.put(location, stringData);
     }
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.metrics.FairnessMetrics;
 import org.kie.trustyai.explainability.metrics.utils.FairnessDefinitions;
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -16,14 +17,15 @@ import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 
 import io.quarkus.cache.CacheResult;
-import io.quarkus.logging.Log;
 
 @ApplicationScoped
 public class MetricsCalculator {
 
+    private static final Logger LOG = Logger.getLogger(MetricsCalculator.class);
+
     @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
     public double calculateSPD(Dataframe dataframe, BaseMetricRequest request) throws MetricCalculationException {
-        Log.debug("Cache miss. Calculating metric for " + request.getModelId());
+        LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
             final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
@@ -59,7 +61,7 @@ public class MetricsCalculator {
 
     @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
     public double calculateDIR(Dataframe dataframe, BaseMetricRequest request) {
-        Log.debug("Cache miss. Calculating metric for " + request.getModelId());
+        LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
 
