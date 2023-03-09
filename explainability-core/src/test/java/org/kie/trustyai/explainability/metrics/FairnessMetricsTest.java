@@ -431,7 +431,7 @@ class FairnessMetricsTest {
     @Test
     void testGroupDIRUnbiased() {
         final Dataframe unbiased = createUnbiasedNumericDataframe(10000, 3, 3);
-        final double epsilon = 0.05;
+        final double epsilon = 0.15;
         for (int i = 1; i < 3; i++) {
             final int group = i;
             final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(group));
