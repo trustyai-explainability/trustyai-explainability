@@ -64,6 +64,26 @@ spec:
         app.kubernetes.io/version: 0.1.0
         app.kubernetes.io/name: trustyai-service
     spec:
+      initContainers:
+        - name: config-map-overrider
+          image: registry.redhat.io/openshift4/ose-cli@sha256:25fef269ac6e7491cb8340119a9b473acbeb53bc6970ad029fdaae59c3d0ca61
+          command: [ "/bin/bash", "-c", "--" ]
+          args:
+            - |
+              # ugly hack: write a configmap that knows its own namespace
+              echo "apiVersion: v1" > /tmp/model-serving-config.yaml
+              echo "kind: ConfigMap" >> /tmp/model-serving-config.yaml
+              echo "metadata:" >> /tmp/model-serving-config.yaml
+              echo "  name: model-serving-config" >> /tmp/model-serving-config.yaml
+              echo "data:" >> /tmp/model-serving-config.yaml
+              echo "  config.yaml: |" >> /tmp/model-serving-config.yaml
+              
+              current_namespace=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+              
+              echo "    payloadProcessors: "http://trustyai-service.$current_namespace/consumer/kserve/v2"" >> /tmp/model-serving-config.yaml
+              cat /tmp/model-serving-config.yaml
+              oc apply -f /tmp/model-serving-config.yaml
+              exit 0
       containers:
         - env:
             - name: STORAGE_DATA_FILENAME
@@ -127,8 +147,44 @@ spec:
             - mountPath: /inputs
               name: volume
               readOnly: false
+      serviceAccountName: trustyai-serviceaccount
       volumes:
         - name: volume
           persistentVolumeClaim:
             claimName: trustyai-service-pvc
             readOnly: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: trustyai-serviceaccount
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: trustyai-role
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: trustyai-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: trustyai-role
+subjects:
+  - kind: ServiceAccount
+    name: trustyai-serviceaccount
