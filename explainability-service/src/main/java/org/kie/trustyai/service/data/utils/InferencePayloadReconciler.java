@@ -39,7 +39,7 @@ public class InferencePayloadReconciler {
      * 
      * @param input
      */
-    public synchronized void addUnreconciledInput(InferencePartialPayload input) throws InvalidSchemaException {
+    public synchronized void addUnreconciledInput(InferencePartialPayload input) throws InvalidSchemaException, DataframeCreateException {
         final String id = input.getId();
         unreconciledInputs.put(id, input);
         if (unreconciledOutputs.containsKey(id)) {
@@ -54,7 +54,7 @@ public class InferencePayloadReconciler {
      * 
      * @param output
      */
-    public synchronized void addUnreconciledOutput(InferencePartialPayload output) throws InvalidSchemaException {
+    public synchronized void addUnreconciledOutput(InferencePartialPayload output) throws InvalidSchemaException, DataframeCreateException {
         final String id = output.getId();
         unreconciledOutputs.put(id, output);
         if (unreconciledInputs.containsKey(id)) {
@@ -62,7 +62,7 @@ public class InferencePayloadReconciler {
         }
     }
 
-    private synchronized void save(String id, String modelId) throws InvalidSchemaException {
+    private synchronized void save(String id, String modelId) throws InvalidSchemaException, DataframeCreateException {
         final InferencePartialPayload output = unreconciledOutputs.get(id);
         final InferencePartialPayload input = unreconciledInputs.get(id);
         LOG.debug("Reconciling partial input and output, id=" + id);
@@ -96,8 +96,13 @@ public class InferencePayloadReconciler {
         } catch (InvalidProtocolBufferException e) {
             throw new DataframeCreateException(e.getMessage());
         }
-        final PredictionInput predictionInput = PayloadParser
-                .inputTensorToPredictionInput(input.getInputs(0), null);
+        final PredictionInput predictionInput;
+        try {
+            predictionInput = PayloadParser
+                    .inputTensorToPredictionInput(input.getInputs(0), null);
+        } catch (IllegalArgumentException e) {
+            throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
+        }
         LOG.debug("Prediction input: " + predictionInput.getFeatures());
 
         // Check for dataframe metadata name conflicts
@@ -122,8 +127,13 @@ public class InferencePayloadReconciler {
         } catch (InvalidProtocolBufferException e) {
             throw new DataframeCreateException(e.getMessage());
         }
-        final PredictionOutput predictionOutput = PayloadParser
-                .outputTensorToPredictionOutput(output.getOutputs(0), null);
+        final PredictionOutput predictionOutput;
+        try {
+            predictionOutput = PayloadParser
+                    .outputTensorToPredictionOutput(output.getOutputs(0), null);
+        } catch (IllegalArgumentException e) {
+            throw new DataframeCreateException("Error parsing output payload: " + e.getMessage());
+        }
         LOG.debug("Prediction output: " + predictionOutput.getOutputs());
 
         return new SimplePrediction(new PredictionInput(features), predictionOutput);

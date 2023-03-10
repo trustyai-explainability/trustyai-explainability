@@ -31,6 +31,8 @@ public class MetadataUtils {
         } else if (value.getUnderlyingObject() instanceof String) {
             schemaItem.setType(DataType.STRING);
         }
+        System.out.println("Got schema type:");
+        System.out.println(schemaItem.getType());
         schemaItem.setName(dataframe.getColumnNames().get(i));
         schemaItem.setIndex(i);
         return schemaItem;
