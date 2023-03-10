@@ -141,7 +141,6 @@ echo "Data generator is still running. Hit enter to kill generator and begin tes
 # clean up =============================================================================================================
 [ -d "odh-manifests" ] && rm -Rf odh-manifests
 [ -d "logger" ] && rm -Rf logger
-[ -f "odh-mlserver-0.x.yaml" ] && rm odh-mlserver-0.x.yaml
 [ -f "trustyai.yaml" ] && rm trustyai.yaml
 [ -f "nohup.out" ] && rm nohup.out
 kill -9 $GENERATOR_PID
