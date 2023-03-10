@@ -11,6 +11,7 @@ This script tests:
 ## Setup
 1) Ensure you are logged into the desired cluster: `oc login ...`
 2) Install the OpenDataHub operator from OperatorHub into your cluster
+3) `python3 -m pip install requests`
 
 ## Usage
 1) Select a particular fork of odh-manifests, e.g. https://github.com/$(REPO_OWNER)/odh-manifests

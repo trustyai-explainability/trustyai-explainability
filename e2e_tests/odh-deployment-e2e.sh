@@ -63,6 +63,7 @@ do
   echo "Waiting on modelserving runtime pods to spin up"
   sleep 5
 done
+sleep 10
 
 # get + send data to model route  ======================================================================================
 oc project $MM_NAMESPACE
@@ -72,8 +73,9 @@ do
   curl -k https://$INFER_ROUTE/infer -d @data.json
 done
 
-echo "\n Waiting for requests to appear in TrustyAI pod logs..."
-sleep 30
+echo
+echo "Waiting for requests to appear in TrustyAI pod logs..."
+sleep 10
 
 # see if payloads are in logs  =========================================================================================
 oc project $ODH_NAMESPACE
@@ -87,11 +89,25 @@ fi
 [ -d "logger" ] && rm -Rf logger
 cp -r ../explainability-service/demo/logger logger
 TRUSTY_ROUTE=$(oc get route/trustyai-service-route --template={{.spec.host}})
+echo "TrustyAI Route at $TRUSTY_ROUTE"
 cd logger
 
 sed "s/sleep(random.randint(1, 3))/sleep(0.01)/" partial.py > partial-fast-gen.py
-SERVICE_ENDPOINT=http://$TRUSTY_ROUTE/consumer/kserve/v2 python3 partial-fast-gen.py & sleep 60 ; kill $!
-echo "\n"
+SERVICE_ENDPOINT=http://$TRUSTY_ROUTE/consumer/kserve/v2 nohup python3 partial-fast-gen.py &
+GENERATOR_PID=$!
+echo "Data Generator (PID $GENERATOR_PID) is running; waiting 60 seconds to generate some data..."
+echo
+cd ..
+sleep 60
+
+# see if example model payloads are in logs ============================================================================
+oc project $ODH_NAMESPACE
+if [[ -z "$(oc logs $(oc get pods -o name | grep trustyai-service) | grep "Received partial input payload")" ]];
+then
+  echo "ERROR: No payload communication between Data Generator + TrustyAI"
+  exit
+fi
+
 
 # setup a metric  chedule===============================================================================================
 curl --location http://$TRUSTY_ROUTE/metrics/spd/request \
@@ -116,12 +132,16 @@ curl --location http://$TRUSTY_ROUTE/metrics/spd/request \
 
 
 # print out prometheus route ===========================================================================================
+echo
+echo
 echo "Go to https://$(oc get route odh-model-monitoring --template={{.spec.host}}) and see if 'trusty_spd' is present"
 echo "If so, e2e is successful!"
-
+echo "Data generator is still running. Hit enter to kill generator and begin test cleanup:" && read -n 1
 
 # clean up =============================================================================================================
 [ -d "odh-manifests" ] && rm -Rf odh-manifests
 [ -d "logger" ] && rm -Rf logger
 [ -f "odh-mlserver-0.x.yaml" ] && rm odh-mlserver-0.x.yaml
 [ -f "trustyai.yaml" ] && rm trustyai.yaml
+[ -f "nohup.out" ] && rm nohup.out
+kill -9 $GENERATOR_PID
