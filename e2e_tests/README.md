@@ -38,4 +38,4 @@ This script tests:
 # Testing Alternate Images
 To test alternate versions of ModelMesh or ModelMesh-Serving, create a new branch of ODH-Manifests, and update 
 the [params.env](https://github.com/RobGeada/odh-manifests/blob/trustyai-pr-images/model-mesh/base/params.env) file to
-point at the new images. Then, point the `trustyai-pr-images-manifests` in `e2e_tests/odh-minimal.yaml` to your branch.
+point at the new images. Then, point the [trustyai-pr-images-manifests uri](https://github.com/trustyai-explainability/trustyai-explainability/blob/406cb7e8967e9b60be4d82eb3a250d35b17f2825/e2e_tests/odh-minimal.yaml#L48) in `e2e_tests/odh-minimal.yaml`] to your branch.
