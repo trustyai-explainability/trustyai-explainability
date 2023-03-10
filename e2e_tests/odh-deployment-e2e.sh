@@ -1,7 +1,12 @@
 #! /bin/bash
 
-# cleanup
-for PROJECT in trustyai-e2e trustyai-e2e-modelmesh
+# init =================================================================================================================
+ODH_NAMESPACE=trustyai-e2e
+MM_NAMESPACE=trustyai-e2e-modelmesh
+oc new-project $ODH_NAMESPACE
+oc new-project $MM_NAMESPACE
+
+for PROJECT in $ODH_NAMESPACE $MM_NAMESPACE
 do
   oc project $PROJECT
   oc delete $(oc get kfdef -o name)
@@ -15,10 +20,6 @@ do
   oc delete $(oc get secrets -o name)
 done
 
-# init =================================================================================================================
-ODH_NAMESPACE=trustyai-e2e
-MM_NAMESPACE=trustyai-e2e-modelmesh
-oc new-project $ODH_NAMESPACE
 oc project $ODH_NAMESPACE
 
 # clone the target branch
@@ -49,7 +50,6 @@ done
 
 
 ## deploy ModelMesh ====================================================================================================
-oc new-project $MM_NAMESPACE
 oc label namespace $MM_NAMESPACE "modelmesh-enabled=true" --overwrite=true || echo "Failed to apply modelmesh-enabled label."
 oc project $MM_NAMESPACE
 
