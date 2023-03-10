@@ -16,6 +16,10 @@ spec:
         key: ""
       targetPort: 8080
       scheme: http
+      params:
+        'match[]':
+          - '{__name__= "trusty_spd"}'
+          - '{__name__= "trusty_dir"}'
   selector:
     matchLabels:
       app.kubernetes.io/name: trustyai-service
