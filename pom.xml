@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.kie.trustyai</groupId>
     <artifactId>trustyaiexplainability</artifactId>
@@ -20,9 +21,10 @@
     <scm>
         <connection>scm:git:git@github.com:trustyai-explainability/trustyai-explainability.git</connection>
         <url>scm:git:git@github.com:trustyai-explainability/trustyai-explainability.git</url>
-        <developerConnection>scm:git:git@github.com:trustyai-explainability/trustyai-explainability.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
+        <developerConnection>scm:git:git@github.com:trustyai-explainability/trustyai-explainability.git
+        </developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <developers>
         <developer>
@@ -275,7 +277,6 @@
 
     <modules>
         <module>explainability-core</module>
-        <module>explainability-integrationtests</module>
         <module>explainability-arrow</module>
         <module>explainability-connectors</module>
         <module>explainability-service</module>
@@ -298,6 +299,12 @@
                 <module>explainability-core</module>
                 <module>explainability-connectors</module>
                 <module>explainability-service</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>integration-tests</id>
+            <modules>
+                <module>explainability-integrationtests</module>
             </modules>
         </profile>
         <profile>
