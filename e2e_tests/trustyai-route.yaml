@@ -2,7 +2,6 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: trustyai-service-route
-  namespace: trustyai-e2e-modelmesh
   labels:
     app: trustyai
     app.kubernetes.io/name: trustyai-service

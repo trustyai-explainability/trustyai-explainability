@@ -38,7 +38,7 @@ cat odh-manifests/trustyai-service/README.md |\
   > trustyai.yaml
 
 oc apply -f trustyai.yaml
-oc apply -f trustyai-route.yaml
+oc apply -f trustyai-route.yaml -n $ODH_NAMESPACE
 oc apply -f trusty-pvc.yaml
 
 # wait for TrustyAI to spin up
@@ -63,11 +63,16 @@ do
   echo "Waiting on modelserving runtime pods to spin up"
   sleep 5
 done
-sleep 10
 
-# get + send data to model route  ======================================================================================
 oc project $MM_NAMESPACE
 INFER_ROUTE=$(oc get route example-sklearn-isvc --template={{.spec.host}}{{.spec.path}})
+while [[ -z "$(curl -k https://$INFER_ROUTE/infer -d @data.json | grep example-sklearn-isvc)" ]]
+do
+  echo "Wait for modelserving endpoint to begin serving..."
+  sleep 5
+done
+
+# get + send data to model route  ======================================================================================
 for i in {1..5};
 do
   curl -k https://$INFER_ROUTE/infer -d @data.json
