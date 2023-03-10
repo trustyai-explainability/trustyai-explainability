@@ -10,4 +10,4 @@ spec:
       modelFormat:
         name: sklearn
       runtime: mlserver-0.x
-      storageUri: "https://github.com/ruivieira/kserve-trustyai-explainer/blob/predictor-model/predictor/model.joblib?raw=true"
+      storageUri: "https://github.com/trustyai-explainability/trustyai-explainability/raw/main/explainability-service/demo/models/model.joblib?raw=true"
