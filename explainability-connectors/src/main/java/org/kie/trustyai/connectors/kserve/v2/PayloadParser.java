@@ -16,7 +16,6 @@ public class PayloadParser {
         final InferTensorContents responseInputContents = tensor.getContents();
         final KServeDatatype type;
         try {
-            System.out.println(tensor.getDatatype());
             type = KServeDatatype.valueOf(tensor.getDatatype());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
