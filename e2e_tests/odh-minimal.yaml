@@ -1,0 +1,52 @@
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  name: odh-minimal
+spec:
+  applications:
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: odh-common
+    name: odh-common
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: odh-dashboard
+    name: odh-dashboard
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: prometheus/cluster
+    name: prometheus-cluster
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: prometheus/operator
+    name: prometheus-operator
+  - kustomizeConfig:
+      parameters:
+      - name: monitoring-namespace
+        value: trustyai-e2e
+      overlays:
+        - odh-model-controller
+      repoRef:
+        name: trustyai-pr-images-manifests
+        path: model-mesh
+    name: model-mesh
+  - kustomizeConfig:
+      parameters:
+      - name: deployment-namespace
+        value: trustyai-e2e
+      repoRef:
+        name: manifests
+        path: modelmesh-monitoring
+    name: modelmesh-monitoring
+  repos:
+  - name: trustyai-pr-images-manifests
+    #uri: https://github.com/opendatahub-io/odh-manifests/tarball/master
+    uri: https://github.com/robgeada/odh-manifests/tarball/trustyai-pr-images
+  - name: manifests
+    uri: https://github.com/opendatahub-io/odh-manifests/tarball/master
+  version: master
+

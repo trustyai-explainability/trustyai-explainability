@@ -1,0 +1,17 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: trustyai-service-route
+  labels:
+    app: trustyai
+    app.kubernetes.io/name: trustyai-service
+    app.kubernetes.io/part-of: trustyai
+    app.kubernetes.io/version: 0.1.0
+    app.openshift.io/runtime: quarkus
+spec:
+  to:
+    kind: Service
+    name: trustyai-service
+  tls: null
+  port:
+    targetPort: http
