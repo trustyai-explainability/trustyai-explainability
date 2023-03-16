@@ -51,14 +51,13 @@ public class MemoryStorage extends Storage {
     public void save(ByteBuffer data, String location) throws StorageWriteException {
         final String stringData = new String(data.array(), StandardCharsets.UTF_8);
         LOG.debug("Saving data to " + location);
-        LOG.debug("Saving: " + new String(data.array()));
         this.data.put(location, stringData);
     }
 
     @Override
     public void append(ByteBuffer data, String location) throws StorageWriteException {
         final String value = this.data.computeIfPresent(location, (key, existing) -> existing + new String(data.array(), StandardCharsets.UTF_8));
-        LOG.debug("Saving: " + value);
+        LOG.debug("Appending data to " + location);
         if (value == null) {
             throw new StorageWriteException("Destination does not exist: " + location);
         }
