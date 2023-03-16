@@ -1,3 +1,4 @@
+
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -18,8 +19,13 @@ spec:
       scheme: http
       params:
         'match[]':
-          - '{__name__= "trusty_spd"}'
-          - '{__name__= "trusty_dir"}'
+          - '{__name__= "trustyai_spd"}'
+          - '{__name__= "trustyai_dir"}'
+      metricRelabelings:
+        - action: keep
+          regex: trustyai_.*
+          sourceLabels:
+            - __name__
   selector:
     matchLabels:
       app.kubernetes.io/name: trustyai-service
