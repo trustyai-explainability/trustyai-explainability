@@ -282,7 +282,7 @@ class ConsumerEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload response id=" + newId));
+                .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
     }
 
 }
