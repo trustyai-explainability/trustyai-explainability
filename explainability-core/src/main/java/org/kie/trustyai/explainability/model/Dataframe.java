@@ -16,12 +16,12 @@ public class Dataframe {
     private final List<List<Value>> data;
     private final Metadata metadata;
 
-    private Dataframe() {
+    Dataframe() {
         this.data = new ArrayList<>(new ArrayList<>());
         this.metadata = new Metadata();
     }
 
-    private Dataframe(List<List<Value>> data, Metadata metadata) {
+    Dataframe(List<List<Value>> data, Metadata metadata) {
         this.data = new ArrayList<>(data);
         this.metadata = metadata;
     }
@@ -922,7 +922,7 @@ public class Dataframe {
         return builder.toString();
     }
 
-    private class Metadata {
+    class Metadata {
         private final List<String> names;
         private final List<Type> types;
         private final List<Boolean> constrained;

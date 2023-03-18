@@ -98,8 +98,8 @@ public class InferencePayloadReconciler {
         }
         final PredictionInput predictionInput;
         try {
-            predictionInput = PayloadParser
-                    .inputTensorToPredictionInput(input.getInputs(0), null);
+            predictionInput = new PredictionInput(PayloadParser
+                    .inputTensorToFeatures(input.getInputs(0), null));
         } catch (IllegalArgumentException e) {
             throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
         }
@@ -129,8 +129,8 @@ public class InferencePayloadReconciler {
         }
         final PredictionOutput predictionOutput;
         try {
-            predictionOutput = PayloadParser
-                    .outputTensorToPredictionOutput(output.getOutputs(0), null);
+            predictionOutput = new PredictionOutput(PayloadParser
+                    .outputTensorToOutputs(output.getOutputs(0), null));
         } catch (IllegalArgumentException e) {
             throw new DataframeCreateException("Error parsing output payload: " + e.getMessage());
         }

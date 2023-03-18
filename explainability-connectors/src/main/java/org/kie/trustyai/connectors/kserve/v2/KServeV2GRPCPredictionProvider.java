@@ -1,19 +1,17 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
-import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
+import org.kie.trustyai.connectors.kserve.v2.grpc.*;
 import org.kie.trustyai.connectors.utils.ListenableFutureUtils;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.*;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.protobuf.ByteString;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -23,20 +21,19 @@ import io.grpc.ManagedChannelBuilder;
  */
 public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
+    public static final KServeDatatype DEFAULT_DATATYPE = KServeDatatype.FP64;
     private static final String DEFAULT_TENSOR_NAME = "predict";
-    private static final KServeDatatype DEFAULT_DATATYPE = KServeDatatype.FP64;
-    private final String modelName;
+    private final KServeTarget kServeTarget;
     private final ManagedChannel channel;
     private final List<String> outputNames;
 
-    private KServeV2GRPCPredictionProvider(String target, String modelName, List<String> outputNames) {
+    private KServeV2GRPCPredictionProvider(KServeTarget kServeTarget, List<String> outputNames) {
 
-        this.modelName = modelName;
-        this.channel = ManagedChannelBuilder.forTarget(target)
+        this.kServeTarget = kServeTarget;
+        this.channel = ManagedChannelBuilder.forTarget(kServeTarget.getTarget())
                 .usePlaintext()
                 .build();
         this.outputNames = outputNames;
-
     }
 
     /**
@@ -47,8 +44,8 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @param modelName The model's name
      * @return A {@link PredictionProvider}
      */
-    public static KServeV2GRPCPredictionProvider forTarget(String target, String modelName) {
-        return KServeV2GRPCPredictionProvider.forTarget(target, modelName, null);
+    public static KServeV2GRPCPredictionProvider forTarget(KServeTarget kServeTarget) {
+        return KServeV2GRPCPredictionProvider.forTarget(kServeTarget, null);
     }
 
     /**
@@ -60,39 +57,29 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @param outputNames A {@link List} of output names to be used
      * @return A {@link PredictionProvider}
      */
-    public static KServeV2GRPCPredictionProvider forTarget(String target, String modelName, List<String> outputNames) {
-        return new KServeV2GRPCPredictionProvider(target, modelName, outputNames);
-    }
-
-    private ModelInferRequest.InferInputTensor.Builder buildTensor(InferTensorContents.Builder contents, int nSamples, int nFeatures) {
-
-        final ModelInferRequest.InferInputTensor.Builder tensor = ModelInferRequest.InferInputTensor
-                .newBuilder();
-        tensor.setName(DEFAULT_TENSOR_NAME)
-                .addShape(nSamples)
-                .addShape(nFeatures)
-                .setDatatype(DEFAULT_DATATYPE.toString())
-                .setContents(contents);
-        return tensor;
-    }
-
-    private ModelInferRequest.Builder buildRequest(ModelInferRequest.InferInputTensor.Builder tensor) {
-        final ModelInferRequest.Builder request = ModelInferRequest
-                .newBuilder()
-                .setModelName(this.modelName);
-
-        request.addInputs(tensor);
-        return request;
+    public static KServeV2GRPCPredictionProvider forTarget(KServeTarget kServeTarget, List<String> outputNames) {
+        return new KServeV2GRPCPredictionProvider(kServeTarget, outputNames);
     }
 
     private List<PredictionOutput> responseToPredictionOutput(ModelInferResponse response) {
 
         final List<ModelInferResponse.InferOutputTensor> responseOutputs = response.getOutputsList();
 
-        return responseOutputs
-                .stream()
-                .map(tensor -> PayloadParser.outputTensorToPredictionOutput(tensor, this.outputNames))
-                .collect(Collectors.toList());
+        final List<List<Output>> shapedOutputs = new ArrayList<>();
+
+        final int columns = (int) responseOutputs.get(0).getShape(1);
+        final AtomicInteger counter = new AtomicInteger();
+        final ModelInferResponse.InferOutputTensor tensor = responseOutputs.get(0);
+        final List<Output> outputs = PayloadParser.outputTensorToOutputs(tensor, null);
+
+        for (Output output : outputs) {
+            if (counter.getAndIncrement() % columns == 0) {
+                shapedOutputs.add(new ArrayList<>());
+            }
+            shapedOutputs.get(shapedOutputs.size() - 1).add(output);
+        }
+
+        return shapedOutputs.stream().map(PredictionOutput::new).collect(Collectors.toList());
     }
 
     @Override
@@ -108,11 +95,22 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
             throw new IllegalArgumentException("Prediction inputs must have at least one feature.");
         }
 
-        final InferTensorContents.Builder contents = PayloadParser.predictionInputToTensorContents(inputs);
+        final TensorDataframe tdf = TensorDataframe.createFromInputs(inputs);
 
-        final ModelInferRequest.InferInputTensor.Builder tensor = buildTensor(contents, inputs.size(), nFeatures);
+        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
 
-        final ModelInferRequest.Builder request = buildRequest(tensor);
+        if (this.kServeTarget.getCodec() == CodecParameter.NUMPY) {
+
+            request.addInputs(tdf.rowAsSingleArrayInputTensor(0, DEFAULT_TENSOR_NAME));
+
+        } else {
+
+            tdf.asBatchDataframeInputTensor().forEach(request::addInputs);
+
+            request.putParameters("content_type", InferParameter.newBuilder().setStringParam("pd").build());
+        }
+        request.setModelNameBytes(ByteString.copyFromUtf8(this.kServeTarget.getModelId()));
+        request.setModelVersionBytes(ByteString.copyFromUtf8(this.kServeTarget.getVersion()));
 
         final GRPCInferenceServiceGrpc.GRPCInferenceServiceFutureStub futureStub = GRPCInferenceServiceGrpc.newFutureStub(channel);
 
@@ -121,6 +119,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
         final CompletableFuture<ModelInferResponse> futureResponse = ListenableFutureUtils.asCompletableFuture(listenableResponse);
 
         return futureResponse.thenApply(this::responseToPredictionOutput);
+
     }
 
 }
