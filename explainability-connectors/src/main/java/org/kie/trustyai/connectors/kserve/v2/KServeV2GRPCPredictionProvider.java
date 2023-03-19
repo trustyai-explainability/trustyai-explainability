@@ -6,7 +6,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.connectors.kserve.v2.grpc.*;
+import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
+import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
+import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
+import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.connectors.utils.ListenableFutureUtils;
 import org.kie.trustyai.explainability.model.*;
 
@@ -21,7 +24,6 @@ import io.grpc.ManagedChannelBuilder;
  */
 public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
-    public static final KServeDatatype DEFAULT_DATATYPE = KServeDatatype.FP64;
     private static final String DEFAULT_TENSOR_NAME = "predict";
     private final KServeTarget kServeTarget;
     private final ManagedChannel channel;

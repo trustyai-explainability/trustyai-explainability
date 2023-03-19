@@ -5,7 +5,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.kie.trustyai.connectors.kserve.v2.grpc.KServeTarget;
 import org.kie.trustyai.explainability.model.*;
 
 public class PayloadUtils {
