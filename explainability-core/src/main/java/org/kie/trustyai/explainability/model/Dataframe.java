@@ -72,11 +72,15 @@ public class Dataframe {
 
     /**
      * Create a dataframe from a list of @link{Prediction}
+     * Creating dataframes from an empty list of predictions is not allowed.
      *
      * @param predictions The original @link{Prediction} list
      * @return A @link{Dataframe}
      */
     public static Dataframe createFrom(List<Prediction> predictions) {
+        if (predictions.isEmpty()) {
+            throw new IllegalArgumentException("Cannot create a dataframe from an empy list of predictions.");
+        }
         final Prediction prediction = predictions.get(0);
         final Dataframe df = Dataframe.createFrom(prediction);
 
