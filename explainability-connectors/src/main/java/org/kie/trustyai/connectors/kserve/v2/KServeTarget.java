@@ -3,10 +3,10 @@ package org.kie.trustyai.connectors.kserve.v2;
 public class KServeTarget {
 
     private static final CodecParameter DEFAULT_CODEC = CodecParameter.NUMPY;
-    private String target;
-    private String modelId;
-    private String version;
-    private CodecParameter codec;
+    private final String target;
+    private final String modelId;
+    private final String version;
+    private final CodecParameter codec;
 
     private KServeTarget(String target, String modelId, String version, CodecParameter codec) {
         this.target = target;
@@ -27,24 +27,12 @@ public class KServeTarget {
         return target;
     }
 
-    public void setTarget(String target) {
-        this.target = target;
-    }
-
     public String getModelId() {
         return modelId;
     }
 
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
-    }
-
     public String getVersion() {
         return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     public CodecParameter getCodec() {
