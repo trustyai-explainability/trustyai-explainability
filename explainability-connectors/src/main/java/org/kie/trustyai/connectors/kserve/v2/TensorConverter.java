@@ -13,7 +13,8 @@ import static org.kie.trustyai.explainability.model.Type.*;
 
 public class TensorConverter {
 
-    public static KServeDatatype trustyToKserveType(Type type, Object object) throws IllegalArgumentException {
+    public static KServeDatatype trustyToKserveType(Type type, Value value) throws IllegalArgumentException {
+        final Object object = value.getUnderlyingObject();
         if (type == NUMBER) {
             if (object instanceof Integer) {
                 return KServeDatatype.INT32;
