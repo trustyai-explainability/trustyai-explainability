@@ -14,7 +14,7 @@ import org.kie.trustyai.explainability.model.Value;
 
 import static org.kie.trustyai.explainability.model.Type.*;
 
-public class PayloadParser {
+public class TensorConverter {
 
     public static KServeDatatype trustyToKserveType(Type type, Object object) throws IllegalArgumentException {
         if (type == NUMBER) {

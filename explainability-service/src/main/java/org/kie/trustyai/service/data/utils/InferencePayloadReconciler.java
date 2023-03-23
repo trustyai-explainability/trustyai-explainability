@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.connectors.kserve.v2.PayloadParser;
+import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
@@ -98,7 +98,7 @@ public class InferencePayloadReconciler {
         }
         final PredictionInput predictionInput;
         try {
-            predictionInput = new PredictionInput(PayloadParser
+            predictionInput = new PredictionInput(TensorConverter
                     .inputTensorToFeatures(input.getInputs(0), null));
         } catch (IllegalArgumentException e) {
             throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
@@ -129,7 +129,7 @@ public class InferencePayloadReconciler {
         }
         final PredictionOutput predictionOutput;
         try {
-            predictionOutput = new PredictionOutput(PayloadParser
+            predictionOutput = new PredictionOutput(TensorConverter
                     .outputTensorToOutputs(output.getOutputs(0), null));
         } catch (IllegalArgumentException e) {
             throw new DataframeCreateException("Error parsing output payload: " + e.getMessage());

@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -10,7 +11,9 @@ import javax.inject.Inject;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.*;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
+import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -34,7 +37,6 @@ import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 @QuarkusTest
 @TestProfile(BaseTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ConsumerEndpointTest {
 
     @Inject
@@ -52,7 +54,6 @@ class ConsumerEndpointTest {
         storage.get().emptyStorage();
     }
 
-    @Order(1)
     @Test
     void consumeFullPostCorrectModelA() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(0);
@@ -73,7 +74,6 @@ class ConsumerEndpointTest {
         assertEquals(1, dataframe.getOutputsCount());
     }
 
-    @Order(3)
     @Test
     void consumeFullPostIncorrectModelA() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
@@ -89,7 +89,6 @@ class ConsumerEndpointTest {
                 .body(is(""));
     }
 
-    @Order(2)
     @Test
     void consumeFullPostCorrectModelB() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadB(1);
@@ -110,7 +109,6 @@ class ConsumerEndpointTest {
         assertEquals(2, dataframe.getOutputsCount());
     }
 
-    @Order(4)
     @Test
     void consumeFullPostIncorrectModelB() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
@@ -283,6 +281,75 @@ class ConsumerEndpointTest {
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
+    }
+
+    @Test
+    void consumeSingleInputMultiOutput() {
+        final Prediction prediction = new SimplePrediction(
+                new PredictionInput(
+                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))
+                ),
+                new PredictionOutput(
+                        List.of(
+                                new Output("output-1", Type.NUMBER, new Value(1.0), 1.0),
+                                new Output("output-2", Type.NUMBER, new Value(2.0), 1.0)
+                        )
+                )
+        );
+
+        final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
+        final String modelId = "example-1";
+
+        ModelInferRequest.InferInputTensor.Builder requestTensor = df.rowAsSingleArrayInputTensor(0, "input");
+        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
+        request.addInputs(requestTensor);
+        request.setModelName(modelId);
+        request.setModelVersion("0.0.1");
+
+        final String id = UUID.randomUUID().toString();
+
+        InferencePartialPayload requestPayload = new InferencePartialPayload();
+        requestPayload.setData(Base64.getEncoder().encodeToString(request.build().toByteArray()));
+        requestPayload.setId(id);
+        requestPayload.setKind(PartialKind.request);
+        requestPayload.setModelId("");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestPayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+        final ModelInferResponse.InferOutputTensor.Builder responseTensor = df.rowAsSingleArrayOutputTensor(0, "input");
+        final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
+        response.addOutputs(responseTensor);
+        response.setModelName(modelId);
+        response.setModelVersion("0.0.1");
+
+        InferencePartialPayload responsePayload = new InferencePartialPayload();
+        responsePayload.setData(Base64.getEncoder().encodeToString(response.build().toByteArray()));
+        responsePayload.setId(id);
+        responsePayload.setKind(PartialKind.response);
+        responsePayload.setModelId(modelId);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(responsePayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+
+        final Dataframe storedDf = datasource.get().getDataframe(modelId);
+        assertEquals(prediction.getInput().getFeatures().size(), storedDf.getInputsCount());
+        assertEquals(prediction.getOutput().getOutputs().size(), storedDf.getOutputsCount());
+        assertEquals(1, storedDf.getRowDimension());
+        assertEquals(prediction.getInput().getFeatures().get(0).getValue().asNumber(), storedDf.getValue(0, 0).asNumber());
+        assertEquals(prediction.getOutput().getOutputs().get(0).getValue().asNumber(), storedDf.getValue(0, 1).asNumber());
+        assertEquals(prediction.getOutput().getOutputs().get(1).getValue().asNumber(), storedDf.getValue(0, 2).asNumber());
     }
 
 }

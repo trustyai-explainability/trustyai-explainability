@@ -12,7 +12,7 @@ import org.kie.trustyai.explainability.model.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class PayloadParserTest {
+class TensorConverterTest {
 
     @Test
     void modelInferResponseToPredictionOutputSingle() {
@@ -27,7 +27,7 @@ class PayloadParserTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(1).setContents(contents).build();
 
-        PredictionOutput predictionOutput = new PredictionOutput(PayloadParser.outputTensorToOutputs(outputTensor, null));
+        PredictionOutput predictionOutput = new PredictionOutput(TensorConverter.outputTensorToOutputs(outputTensor, null));
 
         assertEquals(1, predictionOutput.getOutputs().size());
         assertEquals(value, predictionOutput.getOutputs().get(0).getValue().asNumber());
@@ -47,7 +47,7 @@ class PayloadParserTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Output> predictionOutput = PayloadParser.outputTensorToOutputs(outputTensor, null);
+        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null);
 
         assertEquals(3, predictionOutput.size());
         for (int i = 0; i < 3; i++) {
@@ -69,7 +69,7 @@ class PayloadParserTest {
                 .setDatatype("FP32")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Output> predictionOutput = PayloadParser.outputTensorToOutputs(outputTensor, null);
+        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null);
 
         assertEquals(3, predictionOutput.size());
         for (int i = 0; i < 3; i++) {
@@ -91,7 +91,7 @@ class PayloadParserTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Output> predictionOutput = PayloadParser.outputTensorToOutputs(outputTensor, null);
+        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null);
 
         assertEquals(3, predictionOutput.size());
         for (int i = 0; i < 3; i++) {
@@ -113,7 +113,7 @@ class PayloadParserTest {
                 .setDatatype("FP32")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Feature> predictionInput = PayloadParser.inputTensorToFeatures(tensor, null);
+        final List<Feature> predictionInput = TensorConverter.inputTensorToFeatures(tensor, null);
 
         assertEquals(3, predictionInput.size());
         for (int i = 0; i < 3; i++) {
@@ -135,7 +135,7 @@ class PayloadParserTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Feature> predictionInput = PayloadParser.inputTensorToFeatures(tensor, null);
+        final List<Feature> predictionInput = TensorConverter.inputTensorToFeatures(tensor, null);
 
         assertEquals(3, predictionInput.size());
         for (int i = 0; i < 3; i++) {

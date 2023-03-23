@@ -11,17 +11,17 @@ public class PayloadUtils {
     private static final Random random = new Random();
 
     public static PredictionProvider getDummy2Provider() {
-        final KServeTarget target = KServeTarget.create("0.0.0.0:8081", "dummy2", "v0.0.1", CodecParameter.PANDAS);
+        final KServeConfig target = KServeConfig.create("0.0.0.0:8081", "dummy2", "v0.0.1", CodecParameter.PD);
         return KServeV2GRPCPredictionProvider.forTarget(target);
     }
 
     public static PredictionProvider getDummy3Provider() {
-        final KServeTarget target = KServeTarget.create("0.0.0.0:8081", "dummy3", "v0.0.1", CodecParameter.PANDAS);
+        final KServeConfig target = KServeConfig.create("0.0.0.0:8081", "dummy3", "v0.0.1", CodecParameter.PD);
         return KServeV2GRPCPredictionProvider.forTarget(target);
     }
 
     public static PredictionProvider getDummy4Provider() {
-        final KServeTarget target = KServeTarget.create("0.0.0.0:8081", "dummy4", "v0.0.1", CodecParameter.PANDAS);
+        final KServeConfig target = KServeConfig.create("0.0.0.0:8081", "dummy4", "v0.0.1", CodecParameter.PD);
         return KServeV2GRPCPredictionProvider.forTarget(target);
     }
 

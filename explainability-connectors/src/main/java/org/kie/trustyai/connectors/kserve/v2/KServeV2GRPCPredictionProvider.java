@@ -25,14 +25,14 @@ import io.grpc.ManagedChannelBuilder;
 public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
     private static final String DEFAULT_TENSOR_NAME = "predict";
-    private final KServeTarget kServeTarget;
+    private final KServeConfig kServeConfig;
     private final ManagedChannel channel;
     private final List<String> outputNames;
 
-    private KServeV2GRPCPredictionProvider(KServeTarget kServeTarget, List<String> outputNames) {
+    private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, List<String> outputNames) {
 
-        this.kServeTarget = kServeTarget;
-        this.channel = ManagedChannelBuilder.forTarget(kServeTarget.getTarget())
+        this.kServeConfig = kServeConfig;
+        this.channel = ManagedChannelBuilder.forTarget(kServeConfig.getTarget())
                 .usePlaintext()
                 .build();
         this.outputNames = outputNames;
@@ -46,8 +46,8 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @param modelName The model's name
      * @return A {@link PredictionProvider}
      */
-    public static KServeV2GRPCPredictionProvider forTarget(KServeTarget kServeTarget) {
-        return KServeV2GRPCPredictionProvider.forTarget(kServeTarget, null);
+    public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig) {
+        return KServeV2GRPCPredictionProvider.forTarget(kServeConfig, null);
     }
 
     /**
@@ -59,8 +59,8 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @param outputNames A {@link List} of output names to be used
      * @return A {@link PredictionProvider}
      */
-    public static KServeV2GRPCPredictionProvider forTarget(KServeTarget kServeTarget, List<String> outputNames) {
-        return new KServeV2GRPCPredictionProvider(kServeTarget, outputNames);
+    public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, List<String> outputNames) {
+        return new KServeV2GRPCPredictionProvider(kServeConfig, outputNames);
     }
 
     private List<PredictionOutput> responseToPredictionOutput(ModelInferResponse response) {
@@ -72,7 +72,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
         final int columns = (int) responseOutputs.get(0).getShape(1);
         final AtomicInteger counter = new AtomicInteger();
         final ModelInferResponse.InferOutputTensor tensor = responseOutputs.get(0);
-        final List<Output> outputs = PayloadParser.outputTensorToOutputs(tensor, null);
+        final List<Output> outputs = TensorConverter.outputTensorToOutputs(tensor, null);
 
         for (Output output : outputs) {
             if (counter.getAndIncrement() % columns == 0) {
@@ -101,7 +101,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
         final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
 
-        if (this.kServeTarget.getCodec() == CodecParameter.NUMPY) {
+        if (this.kServeConfig.getCodec() == CodecParameter.NP) {
 
             request.addInputs(tdf.rowAsSingleArrayInputTensor(0, DEFAULT_TENSOR_NAME));
 
@@ -111,8 +111,8 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
             request.putParameters("content_type", InferParameter.newBuilder().setStringParam("pd").build());
         }
-        request.setModelNameBytes(ByteString.copyFromUtf8(this.kServeTarget.getModelId()));
-        request.setModelVersionBytes(ByteString.copyFromUtf8(this.kServeTarget.getVersion()));
+        request.setModelNameBytes(ByteString.copyFromUtf8(this.kServeConfig.getModelId()));
+        request.setModelVersionBytes(ByteString.copyFromUtf8(this.kServeConfig.getVersion()));
 
         final GRPCInferenceServiceGrpc.GRPCInferenceServiceFutureStub futureStub = GRPCInferenceServiceGrpc.newFutureStub(channel);
 
