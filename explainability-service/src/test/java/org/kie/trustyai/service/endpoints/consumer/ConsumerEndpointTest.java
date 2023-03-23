@@ -10,7 +10,8 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.jboss.resteasy.reactive.RestResponse;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
@@ -287,15 +288,11 @@ class ConsumerEndpointTest {
     void consumeSingleInputMultiOutputNPCodecNoBatch() {
         final Prediction prediction = new SimplePrediction(
                 new PredictionInput(
-                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))
-                ),
+                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))),
                 new PredictionOutput(
                         List.of(
                                 new Output("output-1", Type.NUMBER, new Value(1.0), 1.0),
-                                new Output("output-2", Type.NUMBER, new Value(2.0), 1.0)
-                        )
-                )
-        );
+                                new Output("output-2", Type.NUMBER, new Value(2.0), 1.0))));
 
         final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
         final String modelId = "example-1";
@@ -341,7 +338,6 @@ class ConsumerEndpointTest {
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .body(is(""));
-
 
         final Dataframe storedDf = datasource.get().getDataframe(modelId);
         assertEquals(prediction.getInput().getFeatures().size(), storedDf.getInputsCount());
@@ -357,14 +353,10 @@ class ConsumerEndpointTest {
         final Prediction prediction = new SimplePrediction(
                 new PredictionInput(
                         List.of(FeatureFactory.newNumericalFeature("f-1", 10.0),
-                        FeatureFactory.newNumericalFeature("f-2", 20.0))
-                ),
+                                FeatureFactory.newNumericalFeature("f-2", 20.0))),
                 new PredictionOutput(
                         List.of(
-                                new Output("output-1", Type.NUMBER, new Value(2.0), 1.0)
-                        )
-                )
-        );
+                                new Output("output-1", Type.NUMBER, new Value(2.0), 1.0))));
 
         final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
         final String modelId = "example-1";
@@ -411,7 +403,6 @@ class ConsumerEndpointTest {
                 .statusCode(RestResponse.StatusCode.OK)
                 .body(is(""));
 
-
         final Dataframe storedDf = datasource.get().getDataframe(modelId);
         assertEquals(prediction.getInput().getFeatures().size(), storedDf.getInputsCount());
         assertEquals(prediction.getOutput().getOutputs().size(), storedDf.getOutputsCount());
@@ -425,15 +416,11 @@ class ConsumerEndpointTest {
     void consumeSingleInputMultiOutputPDCodecNoBatch() {
         final Prediction prediction = new SimplePrediction(
                 new PredictionInput(
-                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))
-                ),
+                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))),
                 new PredictionOutput(
                         List.of(
                                 new Output("output-1", Type.NUMBER, new Value(1.0), 1.0),
-                                new Output("output-2", Type.NUMBER, new Value(2.0), 1.0)
-                        )
-                )
-        );
+                                new Output("output-2", Type.NUMBER, new Value(2.0), 1.0))));
 
         final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
         final String modelId = "example-1";
@@ -479,7 +466,6 @@ class ConsumerEndpointTest {
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .body(is(""));
-
 
         final Dataframe storedDf = datasource.get().getDataframe(modelId);
         assertEquals(prediction.getInput().getFeatures().size(), storedDf.getInputsCount());
@@ -495,14 +481,10 @@ class ConsumerEndpointTest {
         final Prediction prediction = new SimplePrediction(
                 new PredictionInput(
                         List.of(FeatureFactory.newNumericalFeature("f-1", 10.0),
-                                FeatureFactory.newNumericalFeature("f-2", 20.0))
-                ),
+                                FeatureFactory.newNumericalFeature("f-2", 20.0))),
                 new PredictionOutput(
                         List.of(
-                                new Output("output-1", Type.NUMBER, new Value(2.0), 1.0)
-                        )
-                )
-        );
+                                new Output("output-1", Type.NUMBER, new Value(2.0), 1.0))));
 
         final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
         final String modelId = "example-1";
@@ -548,7 +530,6 @@ class ConsumerEndpointTest {
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .body(is(""));
-
 
         final Dataframe storedDf = datasource.get().getDataframe(modelId);
         assertEquals(prediction.getInput().getFeatures().size(), storedDf.getInputsCount());
