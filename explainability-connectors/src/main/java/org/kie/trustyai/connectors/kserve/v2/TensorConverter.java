@@ -17,8 +17,12 @@ public class TensorConverter {
         if (type == NUMBER) {
             if (object instanceof Integer) {
                 return KServeDatatype.INT32;
-            } else {
+            } else if (object instanceof Double) {
                 return KServeDatatype.FP64;
+            } else if (object instanceof Long) {
+                return KServeDatatype.INT64;
+            } else {
+                throw new IllegalArgumentException("Unsupported object type: " + object.getClass().getName());
             }
         } else if (type == BOOLEAN) {
             return KServeDatatype.BOOL;
@@ -127,7 +131,6 @@ public class TensorConverter {
             }).collect(Collectors.toList());
         }
     }
-
 
     public static List<Output> outputTensorToOutputs(ModelInferResponse.InferOutputTensor tensor,
             List<String> outputNames) throws IllegalArgumentException {

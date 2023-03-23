@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
+import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 
 import com.google.protobuf.ByteString;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 
 public class TensorDataframe {
 
@@ -35,6 +35,8 @@ public class TensorDataframe {
                     content.addIntContents((Integer) object);
                 } else if (object instanceof Double) {
                     content.addFp64Contents((Double) object);
+                } else if (object instanceof Long) {
+                    content.addInt64Contents((Long) object);
                 }
                 break;
             case BOOLEAN:
@@ -111,7 +113,7 @@ public class TensorDataframe {
             addValue(contents, value, type);
 
             final ModelInferRequest.InferInputTensor.Builder tensor = ModelInferRequest.InferInputTensor.newBuilder();
-            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, value));
+            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, value.getUnderlyingObject()));
             tensor.setDatatypeBytes(ByteString.copyFromUtf8(kserveType));
             tensor.setNameBytes(ByteString.copyFromUtf8(featureName));
             tensor.addShape(1);
@@ -130,7 +132,7 @@ public class TensorDataframe {
             addValue(contents, value, type);
 
             final ModelInferResponse.InferOutputTensor.Builder tensor = ModelInferResponse.InferOutputTensor.newBuilder();
-            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, value));
+            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, value.getUnderlyingObject()));
             tensor.setDatatypeBytes(ByteString.copyFromUtf8(kserveType));
             tensor.setNameBytes(ByteString.copyFromUtf8(featureName));
             tensor.addShape(1);
@@ -148,7 +150,7 @@ public class TensorDataframe {
             this.df.getColumn(column).forEach(value -> addValue(contents, value, type));
 
             final ModelInferRequest.InferInputTensor.Builder tensor = ModelInferRequest.InferInputTensor.newBuilder();
-            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, this.df.getValue(0, column)));
+            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, this.df.getValue(0, column).getUnderlyingObject()));
             tensor.setDatatypeBytes(ByteString.copyFromUtf8(kserveType));
             tensor.setNameBytes(ByteString.copyFromUtf8(featureName));
             tensor.addShape(1);

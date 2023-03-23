@@ -147,17 +147,19 @@ class TensorConverterTest {
     void singlePredictionInputToModelInferRequestArrayCodec() {
         final Prediction prediction = PayloadUtils.createDummy1PredictionAllNumeric();
         final TensorDataframe tdf = TensorDataframe.createFromInputs(List.of(prediction.getInput()));
-        final ModelInferRequest.Builder modelInferRequest = ModelInferRequest.newBuilder();
-        modelInferRequest.addInputs(tdf.rowAsSingleArrayInputTensor(0, "predict"));
-        System.out.println(modelInferRequest.build().toString());
+
+        ModelInferRequest.InferInputTensor.Builder tensor = tdf.rowAsSingleArrayInputTensor(0, "predict");
+        final List<Feature> features = TensorConverter.inputTensorToFeatures(List.of(tensor.build()));
+        assertEquals(prediction.getInput().getFeatures().size(), features.size());
     }
 
     @Test
     void singlePredictionInputToModelInferRequestDataframeCodec() {
         final Prediction prediction = PayloadUtils.createDummy1PredictionMixedTypes();
         final TensorDataframe tdf = TensorDataframe.createFromInputs(List.of(prediction.getInput()));
-        final ModelInferRequest.Builder modelInferRequest = ModelInferRequest.newBuilder();
-        tdf.rowAsSingleDataframeInputTensor(0).forEach(modelInferRequest::addInputs);
-        System.out.println(modelInferRequest.build().toString());
+
+        final List<ModelInferRequest.InferInputTensor> tensors = tdf.rowAsSingleDataframeInputTensor(0).stream().map(ModelInferRequest.InferInputTensor.Builder::build).collect(Collectors.toList());
+        final List<Feature> features = TensorConverter.inputTensorToFeatures(tensors);
+        assertEquals(prediction.getInput().getFeatures().size(), features.size());
     }
 }
