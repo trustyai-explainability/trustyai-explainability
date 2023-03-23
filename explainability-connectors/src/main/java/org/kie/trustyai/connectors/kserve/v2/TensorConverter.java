@@ -7,10 +7,7 @@ import java.util.stream.IntStream;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 
 import static org.kie.trustyai.explainability.model.Type.*;
 
@@ -29,6 +26,41 @@ public class TensorConverter {
             return KServeDatatype.BYTES;
         } else {
             throw new IllegalArgumentException("Unsupported TrustyAI type: " + type);
+        }
+    }
+
+    public static List<Feature> inputTensorToFeatures(List<ModelInferRequest.InferInputTensor> tensors) {
+        if (tensors.size() == 1) { // NP codec
+            final ModelInferRequest.InferInputTensor tensor = tensors.get(0);
+            return inputTensorToFeatures(tensor, null);
+        } else { // PD codec
+            return tensors.stream().map(tensor -> {
+                final InferTensorContents responseInputContents = tensor.getContents();
+                final KServeDatatype type;
+                try {
+                    type = KServeDatatype.valueOf(tensor.getDatatype());
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+                }
+                switch (type) {
+                    case BOOL:
+                        return FeatureFactory.newBooleanFeature(tensor.getName(), responseInputContents.getBoolContents(0));
+                    case INT8:
+                    case INT16:
+                    case INT32:
+                        return FeatureFactory.newNumericalFeature(tensor.getName(), responseInputContents.getIntContents(0));
+                    case INT64:
+                        return FeatureFactory.newNumericalFeature(tensor.getName(), responseInputContents.getInt64Contents(0));
+                    case FP32:
+                        return FeatureFactory.newNumericalFeature(tensor.getName(), responseInputContents.getFp32Contents(0));
+                    case FP64:
+                        return FeatureFactory.newNumericalFeature(tensor.getName(), responseInputContents.getFp64Contents(0));
+                    case BYTES:
+                        return FeatureFactory.newCategoricalFeature(tensor.getName(), String.valueOf(responseInputContents.getBytesContents(0)));
+                    default:
+                        throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+                }
+            }).collect(Collectors.toList());
         }
     }
 
@@ -60,6 +92,42 @@ public class TensorConverter {
                 throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
         }
     }
+
+    public static List<Output> outputTensorToOutputs(List<ModelInferResponse.InferOutputTensor> tensors) {
+        if (tensors.size() == 1) { // NP codec
+            final ModelInferResponse.InferOutputTensor tensor = tensors.get(0);
+            return outputTensorToOutputs(tensor, null);
+        } else { // PD codec
+            return tensors.stream().map(tensor -> {
+                final InferTensorContents contents = tensor.getContents();
+                final KServeDatatype type;
+                try {
+                    type = KServeDatatype.valueOf(tensor.getDatatype());
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Currently unsupported type for Tensor output, type=" + tensor.getDatatype());
+                }
+                switch (type) {
+                    case BOOL:
+                        return new Output(tensor.getName(), Type.BOOLEAN, new Value(contents.getBoolContents(0)), 1.0);
+                    case INT8:
+                    case INT16:
+                    case INT32:
+                        return new Output(tensor.getName(), NUMBER, new Value(contents.getIntContents(0)), 1.0);
+                    case INT64:
+                        return new Output(tensor.getName(), NUMBER, new Value(contents.getInt64Contents(0)), 1.0);
+                    case FP32:
+                        return new Output(tensor.getName(), NUMBER, new Value(contents.getFp32Contents(0)), 1.0);
+                    case FP64:
+                        return new Output(tensor.getName(), NUMBER, new Value(contents.getFp64Contents(0)), 1.0);
+                    case BYTES:
+                        return new Output(tensor.getName(), CATEGORICAL, new Value(contents.getBytesContents(0)), 1.0);
+                    default:
+                        throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+                }
+            }).collect(Collectors.toList());
+        }
+    }
+
 
     public static List<Output> outputTensorToOutputs(ModelInferResponse.InferOutputTensor tensor,
             List<String> outputNames) throws IllegalArgumentException {

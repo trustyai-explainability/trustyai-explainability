@@ -120,6 +120,25 @@ public class TensorDataframe {
         }).collect(Collectors.toUnmodifiableList());
     }
 
+    public List<ModelInferResponse.InferOutputTensor.Builder> rowAsSingleDataframeOutputTensor(int row) {
+
+        return this.df.getOutputsIndices().stream().map(column -> {
+            final InferTensorContents.Builder contents = InferTensorContents.newBuilder();
+            final Value value = this.df.getValue(row, column);
+            final Type type = this.df.getType(column);
+            final String featureName = this.df.getColumnNames().get(column);
+            addValue(contents, value, type);
+
+            final ModelInferResponse.InferOutputTensor.Builder tensor = ModelInferResponse.InferOutputTensor.newBuilder();
+            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, value));
+            tensor.setDatatypeBytes(ByteString.copyFromUtf8(kserveType));
+            tensor.setNameBytes(ByteString.copyFromUtf8(featureName));
+            tensor.addShape(1);
+            tensor.setContents(contents);
+            return tensor;
+        }).collect(Collectors.toUnmodifiableList());
+    }
+
     public List<ModelInferRequest.InferInputTensor.Builder> asBatchDataframeInputTensor() {
 
         return this.df.getInputsIndices().stream().map(column -> {

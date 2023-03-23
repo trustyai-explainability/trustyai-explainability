@@ -284,7 +284,7 @@ class ConsumerEndpointTest {
     }
 
     @Test
-    void consumeSingleInputMultiOutput() {
+    void consumeSingleInputMultiOutputNPCodecNoBatch() {
         final Prediction prediction = new SimplePrediction(
                 new PredictionInput(
                         List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))
@@ -352,4 +352,210 @@ class ConsumerEndpointTest {
         assertEquals(prediction.getOutput().getOutputs().get(1).getValue().asNumber(), storedDf.getValue(0, 2).asNumber());
     }
 
+    @Test
+    void consumeMultiInputSingleOutputNPCodecNoBatch() {
+        final Prediction prediction = new SimplePrediction(
+                new PredictionInput(
+                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0),
+                        FeatureFactory.newNumericalFeature("f-2", 20.0))
+                ),
+                new PredictionOutput(
+                        List.of(
+                                new Output("output-1", Type.NUMBER, new Value(2.0), 1.0)
+                        )
+                )
+        );
+
+        final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
+        final String modelId = "example-1";
+
+        ModelInferRequest.InferInputTensor.Builder requestTensor = df.rowAsSingleArrayInputTensor(0, "input");
+        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
+        request.addInputs(requestTensor);
+        request.setModelName(modelId);
+        request.setModelVersion("0.0.1");
+
+        final String id = UUID.randomUUID().toString();
+
+        InferencePartialPayload requestPayload = new InferencePartialPayload();
+        requestPayload.setData(Base64.getEncoder().encodeToString(request.build().toByteArray()));
+        requestPayload.setId(id);
+        requestPayload.setKind(PartialKind.request);
+        requestPayload.setModelId("");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestPayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+        final ModelInferResponse.InferOutputTensor.Builder responseTensor = df.rowAsSingleArrayOutputTensor(0, "input");
+        final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
+        response.addOutputs(responseTensor);
+        response.setModelName(modelId);
+        response.setModelVersion("0.0.1");
+
+        InferencePartialPayload responsePayload = new InferencePartialPayload();
+        responsePayload.setData(Base64.getEncoder().encodeToString(response.build().toByteArray()));
+        responsePayload.setId(id);
+        responsePayload.setKind(PartialKind.response);
+        responsePayload.setModelId(modelId);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(responsePayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+
+        final Dataframe storedDf = datasource.get().getDataframe(modelId);
+        assertEquals(prediction.getInput().getFeatures().size(), storedDf.getInputsCount());
+        assertEquals(prediction.getOutput().getOutputs().size(), storedDf.getOutputsCount());
+        assertEquals(1, storedDf.getRowDimension());
+        assertEquals(prediction.getInput().getFeatures().get(0).getValue().asNumber(), storedDf.getValue(0, 0).asNumber());
+        assertEquals(prediction.getInput().getFeatures().get(1).getValue().asNumber(), storedDf.getValue(0, 1).asNumber());
+        assertEquals(prediction.getOutput().getOutputs().get(0).getValue().asNumber(), storedDf.getValue(0, 2).asNumber());
+    }
+
+    @Test
+    void consumeSingleInputMultiOutputPDCodecNoBatch() {
+        final Prediction prediction = new SimplePrediction(
+                new PredictionInput(
+                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))
+                ),
+                new PredictionOutput(
+                        List.of(
+                                new Output("output-1", Type.NUMBER, new Value(1.0), 1.0),
+                                new Output("output-2", Type.NUMBER, new Value(2.0), 1.0)
+                        )
+                )
+        );
+
+        final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
+        final String modelId = "example-1";
+
+        List<ModelInferRequest.InferInputTensor.Builder> requestTensors = df.rowAsSingleDataframeInputTensor(0);
+        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
+        requestTensors.forEach(request::addInputs);
+        request.setModelName(modelId);
+        request.setModelVersion("0.0.1");
+
+        final String id = UUID.randomUUID().toString();
+
+        InferencePartialPayload requestPayload = new InferencePartialPayload();
+        requestPayload.setData(Base64.getEncoder().encodeToString(request.build().toByteArray()));
+        requestPayload.setId(id);
+        requestPayload.setKind(PartialKind.request);
+        requestPayload.setModelId("");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestPayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+        final List<ModelInferResponse.InferOutputTensor.Builder> responseTensors = df.rowAsSingleDataframeOutputTensor(0);
+        final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
+        responseTensors.forEach(response::addOutputs);
+        response.setModelName(modelId);
+        response.setModelVersion("0.0.1");
+
+        InferencePartialPayload responsePayload = new InferencePartialPayload();
+        responsePayload.setData(Base64.getEncoder().encodeToString(response.build().toByteArray()));
+        responsePayload.setId(id);
+        responsePayload.setKind(PartialKind.response);
+        responsePayload.setModelId(modelId);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(responsePayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+
+        final Dataframe storedDf = datasource.get().getDataframe(modelId);
+        assertEquals(prediction.getInput().getFeatures().size(), storedDf.getInputsCount());
+        assertEquals(prediction.getOutput().getOutputs().size(), storedDf.getOutputsCount());
+        assertEquals(1, storedDf.getRowDimension());
+        assertEquals(prediction.getInput().getFeatures().get(0).getValue().asNumber(), storedDf.getValue(0, 0).asNumber());
+        assertEquals(prediction.getOutput().getOutputs().get(0).getValue().asNumber(), storedDf.getValue(0, 1).asNumber());
+        assertEquals(prediction.getOutput().getOutputs().get(1).getValue().asNumber(), storedDf.getValue(0, 2).asNumber());
+    }
+
+    @Test
+    void consumeMultiInputSingleOutputPDCodecNoBatch() {
+        final Prediction prediction = new SimplePrediction(
+                new PredictionInput(
+                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0),
+                                FeatureFactory.newNumericalFeature("f-2", 20.0))
+                ),
+                new PredictionOutput(
+                        List.of(
+                                new Output("output-1", Type.NUMBER, new Value(2.0), 1.0)
+                        )
+                )
+        );
+
+        final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
+        final String modelId = "example-1";
+
+        List<ModelInferRequest.InferInputTensor.Builder> requestTensors = df.rowAsSingleDataframeInputTensor(0);
+        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
+        requestTensors.forEach(request::addInputs);
+        request.setModelName(modelId);
+        request.setModelVersion("0.0.1");
+
+        final String id = UUID.randomUUID().toString();
+
+        InferencePartialPayload requestPayload = new InferencePartialPayload();
+        requestPayload.setData(Base64.getEncoder().encodeToString(request.build().toByteArray()));
+        requestPayload.setId(id);
+        requestPayload.setKind(PartialKind.request);
+        requestPayload.setModelId("");
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestPayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+        final List<ModelInferResponse.InferOutputTensor.Builder> responseTensors = df.rowAsSingleDataframeOutputTensor(0);
+        final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
+        responseTensors.forEach(response::addOutputs);
+        response.setModelName(modelId);
+        response.setModelVersion("0.0.1");
+
+        InferencePartialPayload responsePayload = new InferencePartialPayload();
+        responsePayload.setData(Base64.getEncoder().encodeToString(response.build().toByteArray()));
+        responsePayload.setId(id);
+        responsePayload.setKind(PartialKind.response);
+        responsePayload.setModelId(modelId);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(responsePayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+
+        final Dataframe storedDf = datasource.get().getDataframe(modelId);
+        assertEquals(prediction.getInput().getFeatures().size(), storedDf.getInputsCount());
+        assertEquals(prediction.getOutput().getOutputs().size(), storedDf.getOutputsCount());
+        assertEquals(1, storedDf.getRowDimension());
+        assertEquals(prediction.getInput().getFeatures().get(0).getValue().asNumber(), storedDf.getValue(0, 0).asNumber());
+        assertEquals(prediction.getInput().getFeatures().get(1).getValue().asNumber(), storedDf.getValue(0, 1).asNumber());
+        assertEquals(prediction.getOutput().getOutputs().get(0).getValue().asNumber(), storedDf.getValue(0, 2).asNumber());
+    }
 }
