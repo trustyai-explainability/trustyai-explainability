@@ -17,7 +17,6 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
@@ -28,6 +27,7 @@ import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceResponse;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
+import org.kie.trustyai.service.validators.ValidBaseMetricRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -118,16 +118,9 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
-    public Response createaRequest(BaseMetricRequest request) throws JsonProcessingException {
+    public Response createaRequest(@ValidBaseMetricRequest BaseMetricRequest request) throws JsonProcessingException {
 
         final UUID id = UUID.randomUUID();
-
-        try {
-            scheduler.validateRequest(request);
-        } catch (InvalidSchemaException e) {
-            LOG.error(e.getMessage());
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
 
         scheduler.registerSPD(id, request);
 

@@ -27,8 +27,7 @@ import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
-import static org.hamcrest.Matchers.any;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -232,7 +231,8 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .body(wrongPayload)
                 .when()
                 .post("/request")
-                .then().statusCode(RestResponse.StatusCode.BAD_REQUEST).body(is("Invalid type for outcome. Got 'STRING', expected 'INT32'"));
+                .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("Invalid type for outcome. Got 'STRING', expected 'INT32'"));
 
         ScheduleList scheduleList = given()
                 .when()
