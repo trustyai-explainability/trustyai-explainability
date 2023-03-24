@@ -17,6 +17,7 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
+import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
@@ -29,7 +30,6 @@ import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Tag(name = "Disparate Impact Ratio Endpoint", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
         "classifications by calculating the ratio between the proportion of the majority and protected classes getting" +
@@ -109,17 +109,23 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
-    public String createRequest(BaseMetricRequest request) throws JsonProcessingException {
+    public Response createRequest(BaseMetricRequest request) throws JsonProcessingException {
 
         final UUID id = UUID.randomUUID();
+
+        try {
+            scheduler.validateRequest(request);
+        } catch (InvalidSchemaException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
 
         scheduler.registerDIR(id, request);
 
         final BaseScheduledResponse response =
                 new BaseScheduledResponse(id);
 
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(response);
+        return Response.ok().entity(response).build();
     }
 
     @DELETE

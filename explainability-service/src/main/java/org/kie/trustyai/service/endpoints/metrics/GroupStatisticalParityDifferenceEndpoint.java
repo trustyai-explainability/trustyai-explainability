@@ -30,7 +30,6 @@ import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceRes
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Tag(name = "Statistical Parity Difference Endpoint", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
         "difference between the proportion of the majority and protected classes getting a particular outcome.")
@@ -135,8 +134,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
         final BaseScheduledResponse response =
                 new BaseScheduledResponse(id);
 
-        ObjectMapper mapper = new ObjectMapper();
-        return Response.ok().entity(mapper.writeValueAsString(response)).build();
+        return Response.ok().entity(response).build();
     }
 
     @DELETE

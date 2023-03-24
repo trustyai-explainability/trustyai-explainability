@@ -7,7 +7,9 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.reactive.RestResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
@@ -34,11 +36,20 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
 class DisparateImpactRatioEndpointTest {
 
+    private static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
 
     @Inject
     Instance<MockMemoryStorage> storage;
+
+    @BeforeEach
+    void populateStorage() throws JsonProcessingException {
+        storage.get().emptyStorage();
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        datasource.get().saveDataframe(dataframe, MODEL_ID);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+    }
 
     @Test
     void get() {
@@ -202,4 +213,113 @@ class DisparateImpactRatioEndpointTest {
         // Correct number of active requests
         assertEquals(0, scheduleList.requests.size());
     }
+
+    @Test
+    void requestWrongType() {
+
+        // No schedule request made yet
+        final ScheduleList emptyList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        assertEquals(0, emptyList.requests.size());
+
+        // Perform multiple schedule requests
+        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseScheduledResponse firstRequest = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/request")
+                .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
+
+        assertNotNull(firstRequest.getRequestId());
+
+        final BaseMetricRequest wrongPayload = RequestPayloadGenerator.incorrectType();
+        given()
+                .contentType(ContentType.JSON)
+                .body(wrongPayload)
+                .when()
+                .post("/request")
+                .then().statusCode(RestResponse.StatusCode.BAD_REQUEST).body(is("Invalid type for outcome. Got 'STRING', expected 'INT32'"));
+
+        ScheduleList scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(1, scheduleList.requests.size());
+
+        // Remove one request
+        final ScheduleId firstRequestId = new ScheduleId();
+        firstRequestId.requestId = firstRequest.getRequestId();
+        given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
+                .then().statusCode(200).body(is("Removed"));
+
+        scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(0, scheduleList.requests.size());
+
+    }
+
+    @Test
+    void requestUnknowType() {
+
+        // No schedule request made yet
+        final ScheduleList emptyList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        assertEquals(0, emptyList.requests.size());
+
+        // Perform multiple schedule requests
+        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseScheduledResponse firstRequest = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/request")
+                .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
+
+        assertNotNull(firstRequest.getRequestId());
+
+        final Map<String, Object> unknownPayload = RequestPayloadGenerator.unknownType();
+        given()
+                .contentType(ContentType.JSON)
+                .body(unknownPayload)
+                .when()
+                .post("/request")
+                .then().statusCode(RestResponse.StatusCode.BAD_REQUEST);
+
+        ScheduleList scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(1, scheduleList.requests.size());
+
+        // Remove one request
+        final ScheduleId firstRequestId = new ScheduleId();
+        firstRequestId.requestId = firstRequest.getRequestId();
+        given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
+                .then().statusCode(200).body(is("Removed"));
+
+        scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(0, scheduleList.requests.size());
+
+    }
+
 }
