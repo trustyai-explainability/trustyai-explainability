@@ -16,6 +16,8 @@
 ARG SOURCE_CODE=.
 ARG CI_CONTAINER_VERSION="unknown"
 
+## CPaaS CODE BEGIN ##
+## CPaaS CODE END ##
 
 ## Livebuilder CODE BEGIN ##
 FROM registry.access.redhat.com/ubi8/openjdk-17:1.14-3.1661798365 AS build
@@ -38,10 +40,13 @@ COPY ${SOURCE_CODE}/explainability-integrationtests ./explainability-integration
 COPY ${SOURCE_CODE}/pom.xml ./pom.xml
 
 # build and clean up everything we don't need
+RUN mvn dependency:resolve
 RUN mvn -B clean package --file pom.xml -P service-minimal -DskipTests; rm -Rf explainability-core explainability-connectors explainability-arrow explainability-integrationtests
 
 ## Livebuilder CODE END ##
 
+## CPaaS CODE BEGIN ##
+## CPaaS CODE END ##
 
 ###############################################################################
 FROM registry.redhat.io/ubi8/openjdk-17-runtime:1.14 as runtime
@@ -55,6 +60,8 @@ COPY --from=build /build/explainability-service/target/quarkus-app/app/ /deploym
 COPY --from=build /build/explainability-service/target/quarkus-app/quarkus/ /deployments/quarkus/
 ## Livebuilder CODE END ##
 
+## CPaaS CODE BEGIN ##
+## CPaaS CODE END ##
 
 ## Build args to be used at this step
 ARG CI_CONTAINER_VERSION
@@ -62,7 +69,7 @@ ARG USER=185
 ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.zutil.logging.manager=org.jboss.logmanager.LogManager"
 ENV JAVA_APP_JAR="/deployments/quarkus-run.jar"
 
-LABEL com.redhat.component="odh-trustyai-service" \
+LABEL com.redhat.component="odh-trustyai-service-container" \
       name="managed-open-data-hub/odh-trustyai-service-rhel8" \
       version="${CI_CONTAINER_VERSION}" \
       summary="odh-trustyai-service" \
