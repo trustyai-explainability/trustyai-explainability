@@ -27,7 +27,7 @@ class TensorConverterTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(1).setContents(contents).build();
 
-        PredictionOutput predictionOutput = new PredictionOutput(TensorConverter.outputTensorToOutputs(outputTensor, null));
+        PredictionOutput predictionOutput = new PredictionOutput(TensorConverter.outputTensorToOutputs(outputTensor, null,null));
 
         assertEquals(1, predictionOutput.getOutputs().size());
         assertEquals(value, predictionOutput.getOutputs().get(0).getValue().asNumber());
@@ -47,7 +47,7 @@ class TensorConverterTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null);
+        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null,null);
 
         assertEquals(3, predictionOutput.size());
         for (int i = 0; i < 3; i++) {
@@ -69,7 +69,7 @@ class TensorConverterTest {
                 .setDatatype("FP32")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null);
+        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null,null);
 
         assertEquals(3, predictionOutput.size());
         for (int i = 0; i < 3; i++) {
@@ -91,7 +91,7 @@ class TensorConverterTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null);
+        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null,null);
 
         assertEquals(3, predictionOutput.size());
         for (int i = 0; i < 3; i++) {

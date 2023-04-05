@@ -72,7 +72,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
         final int columns = (int) responseOutputs.get(0).getShape(1);
         final AtomicInteger counter = new AtomicInteger();
         final ModelInferResponse.InferOutputTensor tensor = responseOutputs.get(0);
-        final List<Output> outputs = TensorConverter.outputTensorToOutputs(tensor, null);
+        final List<Output> outputs = TensorConverter.outputTensorToOutputs(tensor, null,  null);
 
         for (Output output : outputs) {
             if (counter.getAndIncrement() % columns == 0) {

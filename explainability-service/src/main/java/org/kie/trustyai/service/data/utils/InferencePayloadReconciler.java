@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
+import org.kie.trustyai.connectors.kserve.v2.FallbackConversions;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
@@ -81,6 +82,8 @@ public class InferencePayloadReconciler {
 
     }
 
+
+
     /**
      * Convert both input and output {@link InferencePartialPayload} to a TrustyAI {@link Prediction}.
      * 
@@ -124,12 +127,13 @@ public class InferencePayloadReconciler {
         final ModelInferResponse output;
         try {
             output = ModelInferResponse.parseFrom(outputs);
+
         } catch (InvalidProtocolBufferException e) {
             throw new DataframeCreateException(e.getMessage());
         }
         final PredictionOutput predictionOutput;
         try {
-            final List<Output> convertedOutputs = TensorConverter.outputTensorToOutputs(output.getOutputsList());
+            final List<Output> convertedOutputs = TensorConverter.outputTensorToOutputs(output.getOutputsList(), output.getRawOutputContentsList());
             predictionOutput = new PredictionOutput(convertedOutputs);
         } catch (IllegalArgumentException e) {
             throw new DataframeCreateException("Error parsing output payload: " + e.getMessage());
