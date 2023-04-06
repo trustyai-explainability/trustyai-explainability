@@ -6,7 +6,7 @@ This script tests the current ODH-Manifests master integration of TrustyAI.
 2. Make sure you logged into the oc CLI: `oc login ...` 
 3. Run `./trustyai_test.sh`
 4. At a certain point in the script, it will say:
-```shell
+```
 Ensure metrics are in Prometheus
 Please check that trustyai_spd data exists at the following endpoint:
 [URL]
