@@ -2,6 +2,10 @@ package org.kie.trustyai.service.scenarios.nodata;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -23,6 +27,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestProfile(BaseTestProfile.class)
 class StorageTest {
 
+    private final static String FILENAME = "file.txt";
+
     private final static String MODEL_ID = "non-existing-model";
     @Inject
     Instance<MockMemoryStorage> storage;
@@ -39,7 +45,7 @@ class StorageTest {
         Exception exception = assertThrows(StorageReadException.class, () -> {
             storage.get().readData(MODEL_ID);
         });
-        assertEquals("Data file not found", exception.getMessage());
+        assertEquals("Data file '" + MODEL_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -131,6 +137,33 @@ class StorageTest {
         assertFalse(storage.get().fileExists(filename));
         storage.get().save(ByteBuffer.wrap("data".getBytes()), filename);
         assertTrue(storage.get().fileExists(filename));
+    }
+
+    @Test
+    void concurrentAppend() throws InterruptedException {
+        final int threads = 20;
+        final int N = 1000;
+        final String data = "123456789";
+        // create file
+        storage.get().save(ByteBuffer.wrap((data + "\n").getBytes()), FILENAME);
+        assertTrue(storage.get().fileExists(FILENAME));
+        ExecutorService service = Executors.newFixedThreadPool(threads);
+        CountDownLatch latch = new CountDownLatch(threads);
+        for (int i = 0; i < threads; i++) {
+            service.execute(() -> {
+                for (int j = 0; j < N; j++) {
+                    storage.get().append(ByteBuffer.wrap((data + "\n").getBytes()), FILENAME);
+                }
+                latch.countDown();
+            });
+        }
+        latch.await();
+        final String result = new String(storage.get().read(FILENAME).array());
+        final String[] lines = result.split("\n");
+
+        assertTrue(Arrays.stream(lines).allMatch(line -> line.equals(data)));
+        assertEquals(N * threads + 1, lines.length);
+
     }
 
 }

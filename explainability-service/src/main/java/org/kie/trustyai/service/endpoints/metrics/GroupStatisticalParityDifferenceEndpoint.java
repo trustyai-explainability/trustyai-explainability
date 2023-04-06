@@ -27,9 +27,7 @@ import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceResponse;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.kie.trustyai.service.validators.ValidBaseMetricRequest;
 
 @Tag(name = "Statistical Parity Difference Endpoint", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
         "difference between the proportion of the majority and protected classes getting a particular outcome.")
@@ -118,7 +116,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
-    public String createaRequest(BaseMetricRequest request) throws JsonProcessingException {
+    public Response createaRequest(@ValidBaseMetricRequest BaseMetricRequest request) {
 
         final UUID id = UUID.randomUUID();
 
@@ -127,8 +125,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
         final BaseScheduledResponse response =
                 new BaseScheduledResponse(id);
 
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(response);
+        return Response.ok().entity(response).build();
     }
 
     @DELETE

@@ -12,7 +12,7 @@ metadata:
     prometheus.io/scheme: http
   labels:
     app.kubernetes.io/name: trustyai-service
-    app.kubernetes.io/version: 999-SNAPSHOT
+    app.kubernetes.io/version: 0.1.0
     app.openshift.io/runtime: quarkus
   name: trustyai-service
 spec:
@@ -22,7 +22,7 @@ spec:
       targetPort: 8080
   selector:
     app.kubernetes.io/name: trustyai-service
-    app.kubernetes.io/version: 999-SNAPSHOT
+    app.kubernetes.io/version: 0.1.0
   type: ClusterIP
 ---
 apiVersion: apps/v1
@@ -30,30 +30,60 @@ kind: Deployment
 metadata:
   annotations:
     app.openshift.io/vcs-url: <<unknown>>
-    app.quarkus.io/commit-id: 0acbb40970b5c0dd7e5a50966d6b3d68e137be10
-    app.quarkus.io/build-timestamp: 2023-02-24 - 13:56:14 +0000
+    app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
+    app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
     prometheus.io/scrape: "true"
     prometheus.io/path: /q/metrics
     prometheus.io/port: "8080"
     prometheus.io/scheme: http
   labels:
     app.openshift.io/runtime: quarkus
-    app.kubernetes.io/version: 999-SNAPSHOT
+    app.kubernetes.io/version: 0.1.0
     app.kubernetes.io/name: trustyai-service
+    app.kubernetes.io/version: 0.1.0
+    app.openshift.io/runtime: quarkus
   name: trustyai-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/version: 999-SNAPSHOT
+      app.kubernetes.io/version: 0.1.0
       app.kubernetes.io/name: trustyai-service
   template:
     metadata:
+      annotations:
+        app.openshift.io/vcs-url: <<unknown>>
+        app.quarkus.io/commit-id: ea73183a2c1b81bd9afe31005644d374b5bdeb34
+        app.quarkus.io/build-timestamp: 2023-02-15 - 15:41:47 +0000
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /q/metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scheme: http
       labels:
         app.openshift.io/runtime: quarkus
-        app.kubernetes.io/version: 999-SNAPSHOT
+        app.kubernetes.io/version: 0.1.0
         app.kubernetes.io/name: trustyai-service
     spec:
+      initContainers:
+        - name: config-map-overrider
+          image: registry.redhat.io/openshift4/ose-cli@sha256:25fef269ac6e7491cb8340119a9b473acbeb53bc6970ad029fdaae59c3d0ca61
+          command: [ "/bin/bash", "-c", "--" ]
+          args:
+            - |
+              # ugly hack: write a configmap that knows its own namespace
+              echo "apiVersion: v1" > /tmp/model-serving-config.yaml
+              echo "kind: ConfigMap" >> /tmp/model-serving-config.yaml
+              echo "metadata:" >> /tmp/model-serving-config.yaml
+              echo "  name: model-serving-config" >> /tmp/model-serving-config.yaml
+              echo "data:" >> /tmp/model-serving-config.yaml
+              echo "  config.yaml: |" >> /tmp/model-serving-config.yaml
+              
+              current_namespace=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+              
+              echo "    payloadProcessors: "http://trustyai-service.$current_namespace/consumer/kserve/v2"" >> /tmp/model-serving-config.yaml
+              cat /tmp/model-serving-config.yaml
+              oc apply -f /tmp/model-serving-config.yaml
+              exit 0
       containers:
         - env:
             - name: STORAGE_DATA_FILENAME
@@ -81,22 +111,12 @@ spec:
                 configMapKeyRef:
                   key: service_data_format
                   name: trustyai-config
-            - name: SERVICE_MODEL_NAME
-              valueFrom:
-                configMapKeyRef:
-                  key: service_model_name
-                  name: trustyai-config
             - name: SERVICE_METRICS_SCHEDULE
               valueFrom:
                 configMapKeyRef:
                   key: service_metrics_schedule
                   name: trustyai-config
-            - name: SERVICE_KSERVE_TARGET
-              valueFrom:
-                configMapKeyRef:
-                  key: service_kserve_target
-                  name: trustyai-config
-          image: quay.io/ruimvieira/trustyai-service:999-SNAPSHOT
+          image: quay.io/trustyai/trustyai-service:0.1.0
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
@@ -127,8 +147,44 @@ spec:
             - mountPath: /inputs
               name: volume
               readOnly: false
+      serviceAccountName: trustyai-serviceaccount
       volumes:
         - name: volume
           persistentVolumeClaim:
             claimName: trustyai-service-pvc
             readOnly: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: trustyai-serviceaccount
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: trustyai-role
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: trustyai-clusterrolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: trustyai-role
+subjects:
+  - kind: ServiceAccount
+    name: trustyai-serviceaccount

@@ -2,22 +2,30 @@ package org.kie.trustyai.service.endpoints.metrics;
 
 import java.util.List;
 
-import javax.inject.Singleton;
+import javax.enterprise.context.ApplicationScoped;
 
+import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.metrics.FairnessMetrics;
 import org.kie.trustyai.explainability.metrics.utils.FairnessDefinitions;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 
-@Singleton
+import io.quarkus.cache.CacheResult;
+
+@ApplicationScoped
 public class MetricsCalculator {
 
+    private static final Logger LOG = Logger.getLogger(MetricsCalculator.class);
+
+    @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
     public double calculateSPD(Dataframe dataframe, BaseMetricRequest request) throws MetricCalculationException {
+        LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
             final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
@@ -51,7 +59,9 @@ public class MetricsCalculator {
                 spd);
     }
 
+    @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
     public double calculateDIR(Dataframe dataframe, BaseMetricRequest request) {
+        LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
 

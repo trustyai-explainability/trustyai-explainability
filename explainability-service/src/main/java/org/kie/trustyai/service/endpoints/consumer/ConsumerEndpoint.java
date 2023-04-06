@@ -78,8 +78,8 @@ public class ConsumerEndpoint {
             LOG.info("Received partial input payload from model='" + request.getModelId() + "', id=" + request.getId());
             try {
                 reconciler.addUnreconciledInput(request);
-            } catch (InvalidSchemaException e) {
-                final String message = "Invalid schema for payload request id=" + request.getId();
+            } catch (InvalidSchemaException | DataframeCreateException e) {
+                final String message = "Invalid schema for payload request id=" + request.getId() + ", " + e.getMessage();
                 LOG.error(message);
                 return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
             }
@@ -87,8 +87,8 @@ public class ConsumerEndpoint {
             LOG.info("Received partial output payload from model='" + request.getModelId() + "', id=" + request.getId());
             try {
                 reconciler.addUnreconciledOutput(request);
-            } catch (InvalidSchemaException e) {
-                final String message = "Invalid schema for payload response id=" + request.getId();
+            } catch (InvalidSchemaException | DataframeCreateException e) {
+                final String message = "Invalid schema for payload response id=" + request.getId() + ", " + e.getMessage();
                 LOG.error(message);
                 return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
             }

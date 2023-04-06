@@ -142,7 +142,7 @@ class ConsumerEndpointTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file not found", exception.getMessage());
+        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -162,7 +162,7 @@ class ConsumerEndpointTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file not found", exception.getMessage());
+        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -282,7 +282,7 @@ class ConsumerEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload response id=" + newId));
+                .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
     }
 
 }

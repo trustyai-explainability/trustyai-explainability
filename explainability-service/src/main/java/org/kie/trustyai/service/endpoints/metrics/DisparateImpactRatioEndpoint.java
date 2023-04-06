@@ -27,9 +27,7 @@ import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.kie.trustyai.service.validators.ValidBaseMetricRequest;
 
 @Tag(name = "Disparate Impact Ratio Endpoint", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
         "classifications by calculating the ratio between the proportion of the majority and protected classes getting" +
@@ -109,7 +107,7 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
-    public String createRequest(BaseMetricRequest request) throws JsonProcessingException {
+    public Response createRequest(@ValidBaseMetricRequest BaseMetricRequest request) {
 
         final UUID id = UUID.randomUUID();
 
@@ -118,8 +116,7 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
         final BaseScheduledResponse response =
                 new BaseScheduledResponse(id);
 
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(response);
+        return Response.ok().entity(response).build();
     }
 
     @DELETE

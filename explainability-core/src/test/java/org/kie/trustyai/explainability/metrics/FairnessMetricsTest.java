@@ -33,8 +33,53 @@ import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.kie.trustyai.explainability.metrics.FairnessMetrics.groupDisparateImpactRatio;
+import static org.kie.trustyai.explainability.metrics.FairnessMetrics.groupStatisticalParityDifference;
 
 class FairnessMetricsTest {
+
+    private static Dataframe createUnbiasedNumericDataframe(int observations, int groups, int outcomes) {
+        final Random random = new Random();
+        final List<Prediction> predictions = new ArrayList<>();
+        for (int i = 0; i < observations; i++) {
+            final PredictionInput predictionInput = new PredictionInput(List.of(
+                    FeatureFactory.newNumericalFeature("input-0", random.nextDouble()),
+                    FeatureFactory.newNumericalFeature("input-1", random.nextDouble()),
+                    FeatureFactory.newNumericalFeature("input-2", random.nextDouble()),
+                    FeatureFactory.newNumericalFeature("protected", random.nextInt(groups))));
+            final PredictionOutput predictionOutput = new PredictionOutput(List.of(new Output("outcome", Type.NUMBER, new Value(random.nextInt(outcomes)), 1.0)));
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
+    }
+
+    private static Dataframe createBiasedNumericDataframe(int observations, int groups, int biasedAgainst, double probability) {
+        final Random random = new Random();
+        final List<Prediction> predictions = new ArrayList<>();
+        for (int i = 0; i < observations; i++) {
+            final int group = random.nextInt(groups);
+            final PredictionInput predictionInput = new PredictionInput(List.of(
+                    FeatureFactory.newNumericalFeature("input-0", random.nextDouble()),
+                    FeatureFactory.newNumericalFeature("input-1", random.nextDouble()),
+                    FeatureFactory.newNumericalFeature("input-2", random.nextDouble()),
+                    FeatureFactory.newNumericalFeature("protected", group)));
+
+            int outcome;
+            if (group == biasedAgainst) {
+                if (random.nextDouble() < probability) {
+                    outcome = 0;
+                } else {
+                    outcome = 1;
+                }
+            } else {
+                outcome = random.nextInt(2);
+            }
+
+            final PredictionOutput predictionOutput = new PredictionOutput(List.of(new Output("outcome", Type.NUMBER, new Value(outcome), 1.0)));
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
+    }
 
     @Test
     void testIndividualConsistencyTextClassifier() throws ExecutionException, InterruptedException {
@@ -57,7 +102,7 @@ class FairnessMetricsTest {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double spd = FairnessMetrics.groupStatisticalParityDifference(selector, testInputs, model, output);
+        double spd = groupStatisticalParityDifference(selector, testInputs, model, output);
         assertThat(spd).isBetween(0.1, 0.2);
     }
 
@@ -67,7 +112,7 @@ class FairnessMetricsTest {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double spd = FairnessMetrics.groupStatisticalParityDifference(selector, testInputs, model, output);
+        double spd = groupStatisticalParityDifference(selector, testInputs, model, output);
         String generalDefinition = FairnessDefinitions.defineGroupStatisticalParityDifference();
         String specificDefinition = FairnessDefinitions.defineGroupStatisticalParityDifference(output, spd);
 
@@ -92,7 +137,7 @@ class FairnessMetricsTest {
         final Dataframe unpriviledged = dataframe.filterRowsByInputs(priviledgedFilter.negate());
 
         final Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double spd = FairnessMetrics.groupStatisticalParityDifference(priviledged, unpriviledged, List.of(output));
+        double spd = groupStatisticalParityDifference(priviledged, unpriviledged, List.of(output));
         assertThat(spd).isBetween(0.1, 0.2);
     }
 
@@ -343,5 +388,84 @@ class FairnessMetricsTest {
         output = new Output("spam", Type.BOOLEAN, new Value(true), 1);
         data.add(new SimplePrediction(new PredictionInput(features), new PredictionOutput(List.of(output))));
         return data;
+    }
+
+    @Test
+    void testGroupSPDUnbiased() {
+        final Dataframe unbiased = createUnbiasedNumericDataframe(5000, 3, 3);
+        final double epsilon = 0.05;
+        for (int i = 1; i < 3; i++) {
+            final int group = i;
+            final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(group));
+            final Dataframe unprivileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
+            final double spd = groupStatisticalParityDifference(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
+            assertTrue(spd < epsilon);
+            assertTrue(spd > -epsilon);
+        }
+        for (int i = 0; i < 3; i++) {
+            final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(1));
+            final Dataframe unprivileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
+            final double spd = groupStatisticalParityDifference(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(i), 1.0)));
+            assertTrue(spd < epsilon);
+            assertTrue(spd > -epsilon);
+        }
+    }
+
+    @Test
+    void testGroupSPDBiased() {
+        final List<Double> probabilities = List.of(0.1, 0.2, 0.3, 0.4, 0.5);
+        for (Double probability : probabilities) {
+            final Dataframe biased = createBiasedNumericDataframe(10000, 2, 1, probability);
+            final double epsilon = 0.05;
+
+            final Dataframe privileged = biased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
+            final Dataframe unprivileged = biased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(1));
+            final double spd = groupStatisticalParityDifference(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
+            assertTrue(spd < 0.5 - probability + epsilon);
+            assertTrue(spd > 0.5 - probability - epsilon);
+
+        }
+
+    }
+
+    @Test
+    void testGroupDIRUnbiased() {
+        final Dataframe unbiased = createUnbiasedNumericDataframe(10000, 3, 3);
+        final double epsilon = 0.15;
+        for (int i = 1; i < 3; i++) {
+            final int group = i;
+            final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(group));
+            final Dataframe unprivileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
+            final double dir = groupDisparateImpactRatio(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
+            System.out.println(dir);
+            assertTrue(dir < 1.0 + epsilon);
+            assertTrue(dir > 1.0 - epsilon);
+        }
+        for (int i = 0; i < 3; i++) {
+            final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(1));
+            final Dataframe unprivileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
+            final double dir = groupDisparateImpactRatio(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(i), 1.0)));
+            System.out.println(dir);
+            assertTrue(dir < 1.0 + epsilon);
+            assertTrue(dir > 1.0 - epsilon);
+        }
+    }
+
+    @Test
+    void testGroupDIRBiased() {
+        final List<Double> probabilities = List.of(0.1, 0.2, 0.3, 0.4, 0.5);
+        for (Double probability : probabilities) {
+            final Dataframe biased = createBiasedNumericDataframe(10000, 2, 1, probability);
+            final double epsilon = 0.1;
+
+            final Dataframe privileged = biased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
+            final Dataframe unprivileged = biased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(1));
+            final double dir = groupDisparateImpactRatio(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
+            final double expected = 2.0 * (1.0 - probability);
+            assertTrue(dir < expected + epsilon);
+            assertTrue(dir > expected - epsilon);
+
+        }
+
     }
 }

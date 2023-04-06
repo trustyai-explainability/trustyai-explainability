@@ -11,7 +11,6 @@ import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.endpoints.metrics.MetricsCalculator;
@@ -29,8 +28,6 @@ public class PrometheusScheduler {
     Instance<DataSource> dataSource;
     @Inject
     PrometheusPublisher publisher;
-    @Inject
-    ServiceConfig serviceConfig;
     @Inject
     MetricsCalculator calculator;
 
