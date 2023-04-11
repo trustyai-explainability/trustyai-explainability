@@ -44,7 +44,7 @@ RUN mvn -B clean package --file pom.xml -P service-minimal -DskipTests; rm -Rf e
 
 
 ###############################################################################
-FROM registry.redhat.io/ubi8/openjdk-17-runtime:1.14 as runtime
+FROM registry.redhat.io/ubi8/openjdk-17-runtime:1.15 as runtime
 ENV LANGUAGE='en_US:en'
 
 ## Livebuilder CODE BEGIN ##
