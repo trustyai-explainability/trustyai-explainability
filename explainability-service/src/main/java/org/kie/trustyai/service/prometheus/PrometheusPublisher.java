@@ -46,7 +46,7 @@ public class PrometheusPublisher {
                 Tag.of("protected", request.getProtectedAttribute()),
                 Tag.of("privileged", request.getPrivilegedAttribute().toString()),
                 Tag.of("unprivileged", request.getUnprivilegedAttribute().toString()),
-                Tag.of("batch_size", String.valueOf(serviceConfig.batchSize().orElse(-1))),
+                Tag.of("batch_size", String.valueOf(request.getBatchSize())),
                 Tag.of("request", id.toString()));
     }
 

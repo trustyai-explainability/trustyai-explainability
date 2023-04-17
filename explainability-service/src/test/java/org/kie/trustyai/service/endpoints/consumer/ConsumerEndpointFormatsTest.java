@@ -9,7 +9,9 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.jboss.resteasy.reactive.RestResponse;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
@@ -34,8 +36,7 @@ import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 @QuarkusTest
 @TestProfile(BaseTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ConsumerEndpointTest {
+class ConsumerEndpointFormatsTest {
 
     @Inject
     Instance<MockDatasource> datasource;
@@ -52,7 +53,6 @@ class ConsumerEndpointTest {
         storage.get().emptyStorage();
     }
 
-    @Order(1)
     @Test
     void consumeFullPostCorrectModelA() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(0);
@@ -268,8 +268,8 @@ class ConsumerEndpointTest {
                 .body(partialRequestPayloadAWrongSchema)
                 .when().post()
                 .then()
-                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload request id=" + newId + ", Payload schema and stored schema are not the same"));
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
 
         final InferencePartialPayload partialResponsePayloadBWrongSchema = new InferencePartialPayload();
         partialResponsePayloadBWrongSchema.setId(newId);

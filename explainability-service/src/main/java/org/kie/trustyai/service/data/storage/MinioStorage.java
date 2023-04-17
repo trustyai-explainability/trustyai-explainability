@@ -117,6 +117,11 @@ public class MinioStorage extends Storage {
         }
     }
 
+    @Override
+    public ByteBuffer readData(String modelId, int batchSize) throws StorageReadException {
+        throw new StorageReadException("Batch size not supported for MinIO storage");
+    }
+
     private void saveData(ByteBuffer byteBuffer, String bucketName, String filename) throws StorageWriteException, StorageReadException {
 
         try {

@@ -13,7 +13,7 @@ import io.quarkus.test.Mock;
 public class MockMemoryStorage extends MemoryStorage {
 
     public MockMemoryStorage() {
-        super(new MockMemoryStorageConfig());
+        super(new MockMemoryServiceConfig(), new MockMemoryStorageConfig());
 
     }
 

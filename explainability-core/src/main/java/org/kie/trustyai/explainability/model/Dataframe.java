@@ -722,7 +722,7 @@ public class Dataframe {
     }
 
     /**
-     * Return a {@link Dataframe} with only the selected rows.
+     * Return a copy of the {@link Dataframe} with only the selected rows.
      *
      * @param rows Rows to include in new {@link Dataframe}.
      * @return A filtered {@link Dataframe}.
@@ -790,6 +790,21 @@ public class Dataframe {
                 .map(fn)
                 .collect(Collectors.toCollection(ArrayList::new));
         data.set(column, transformedColumn);
+    }
+
+    /**
+     * Return the last n rows of the {@link Dataframe}.
+     * 
+     * @param n Number of rows to return
+     * @return A copy of the dataframe with only the last n rows.
+     */
+    public Dataframe tail(int n) {
+        final int size = getRowDimension();
+        if (n > size) {
+            throw new IllegalArgumentException("Cannot return more rows than the dataframe has.");
+        }
+        final List<Integer> rowIndices = IntStream.range(size - n, size).boxed().collect(Collectors.toList());
+        return filterByRowIndex(rowIndices);
     }
 
     /**

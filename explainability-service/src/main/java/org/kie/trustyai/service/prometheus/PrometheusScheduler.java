@@ -50,12 +50,14 @@ public class PrometheusScheduler {
                     final Predicate<Map.Entry<UUID, BaseMetricRequest>> filterByModelId = request -> request.getValue().getModelId().equals(modelId);
 
                     final Dataframe df = dataSource.get().getDataframe(modelId);
+
                     final List<Map.Entry<UUID, BaseMetricRequest>> modelSpdRequest =
                             spdRequests.entrySet().stream().filter(filterByModelId).collect(Collectors.toList());
 
                     // SPD requests
                     modelSpdRequest.forEach(entry -> {
-                        final double spd = calculator.calculateSPD(df, entry.getValue());
+                        final Dataframe batch = df.tail(entry.getValue().getBatchSize());
+                        final double spd = calculator.calculateSPD(batch, entry.getValue());
                         publisher.gaugeSPD(entry.getValue(), modelId, entry.getKey(), spd);
                     });
 
@@ -63,9 +65,9 @@ public class PrometheusScheduler {
                             dirRequests.entrySet().stream().filter(filterByModelId).collect(Collectors.toList());
 
                     // DIR requests
-
                     modelDirRequest.forEach(entry -> {
-                        final double dir = calculator.calculateDIR(df, entry.getValue());
+                        final Dataframe batch = df.tail(entry.getValue().getBatchSize());
+                        final double dir = calculator.calculateDIR(batch, entry.getValue());
                         publisher.gaugeDIR(entry.getValue(), modelId, entry.getKey(), dir);
                     });
 

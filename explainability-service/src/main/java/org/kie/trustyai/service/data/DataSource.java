@@ -59,14 +59,7 @@ public class DataSource {
 
         final Dataframe dataframe = parser.toDataframe(byteBuffer, metadata);
 
-        if (serviceConfig.batchSize().isPresent()) {
-            final int batchSize = serviceConfig.batchSize().getAsInt();
-            LOG.info("Batching with " + batchSize + " rows. Passing " + dataframe.getRowDimension() + " rows");
-            return dataframe;
-        } else {
-            LOG.info("No batching. Passing all of " + dataframe.getRowDimension() + " rows");
-            return dataframe;
-        }
+        return dataframe;
     }
 
     public void saveDataframe(final Dataframe dataframe, final String modelId) throws InvalidSchemaException {

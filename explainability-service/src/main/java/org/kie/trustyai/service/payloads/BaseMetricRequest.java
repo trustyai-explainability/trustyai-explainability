@@ -17,6 +17,8 @@ public class BaseMetricRequest {
     private TypedValue unprivilegedAttribute;
     private String modelId;
 
+    private int batchSize;
+
     public BaseMetricRequest() {
         // Public default no-argument constructor
     }
@@ -70,18 +72,27 @@ public class BaseMetricRequest {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(protectedAttribute, favorableOutcome, outcomeName, privilegedAttribute, unprivilegedAttribute);
+    }
+
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
         BaseMetricRequest that = (BaseMetricRequest) o;
-        return protectedAttribute.equals(that.protectedAttribute) && favorableOutcome.equals(that.favorableOutcome) && outcomeName.equals(that.outcomeName)
-                && privilegedAttribute.equals(that.privilegedAttribute) && unprivilegedAttribute.equals(that.unprivilegedAttribute);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(protectedAttribute, favorableOutcome, outcomeName, privilegedAttribute, unprivilegedAttribute);
+        return batchSize == that.batchSize && Objects.equals(protectedAttribute, that.protectedAttribute) && Objects.equals(favorableOutcome, that.favorableOutcome)
+                && Objects.equals(outcomeName, that.outcomeName) && Objects.equals(privilegedAttribute, that.privilegedAttribute) && Objects.equals(unprivilegedAttribute, that.unprivilegedAttribute)
+                && Objects.equals(modelId, that.modelId);
     }
 }
