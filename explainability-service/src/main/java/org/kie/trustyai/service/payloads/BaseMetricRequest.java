@@ -29,9 +29,13 @@ public class BaseMetricRequest {
         this.modelId = modelId;
     }
 
-    public String getRequestName() {return requestName; }
+    public String getRequestName() {
+        return requestName;
+    }
 
-    public void setRequestName(String requestName) { this.requestName = requestName; }
+    public void setRequestName(String requestName) {
+        this.requestName = requestName;
+    }
 
     public String getProtectedAttribute() {
         return protectedAttribute;
