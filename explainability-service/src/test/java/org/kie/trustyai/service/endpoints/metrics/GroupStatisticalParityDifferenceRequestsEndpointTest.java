@@ -32,8 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestProfile(MetricsEndpointTestProfile.class)
-@TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
-class DisparateImpactRatioRequestsEndpointTest {
+@TestHTTPEndpoint(GroupStatisticalParityDifferenceEndpoint.class)
+class GroupStatisticalParityDifferenceRequestsEndpointTest {
 
     private static final String MODEL_ID = "example1";
     @Inject
@@ -109,7 +109,6 @@ class DisparateImpactRatioRequestsEndpointTest {
                 .getDirRequests()
                 .get(response.getRequestId());
 
-        final int defaultBatchSize = serviceConfig.get().batchSize().getAsInt();
         assertEquals(BATCH_SIZE, request.getBatchSize());
     }
 
