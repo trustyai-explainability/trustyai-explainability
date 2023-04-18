@@ -62,6 +62,28 @@ public class DataSource {
         return dataframe;
     }
 
+    public Dataframe getDataframe(final String modelId, int batchSize) throws DataframeCreateException {
+
+        final ByteBuffer byteBuffer;
+        try {
+            byteBuffer = storage.get().readData(modelId, batchSize);
+        } catch (StorageReadException e) {
+            throw new DataframeCreateException(e.getMessage());
+        }
+
+        // Fetch metadata, if not yet read
+        final Metadata metadata;
+        try {
+            metadata = getMetadata(modelId);
+        } catch (StorageReadException e) {
+            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+        }
+
+        final Dataframe dataframe = parser.toDataframe(byteBuffer, metadata);
+
+        return dataframe;
+    }
+
     public void saveDataframe(final Dataframe dataframe, final String modelId) throws InvalidSchemaException {
 
         // Add to known models

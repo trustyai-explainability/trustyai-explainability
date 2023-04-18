@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.endpoints.metrics.MetricsCalculator;
@@ -31,6 +32,9 @@ public class PrometheusScheduler {
     @Inject
     MetricsCalculator calculator;
 
+    @Inject
+    ServiceConfig serviceConfig;
+
     public Map<UUID, BaseMetricRequest> getDirRequests() {
         return dirRequests;
     }
@@ -49,10 +53,18 @@ public class PrometheusScheduler {
 
                     final Predicate<Map.Entry<UUID, BaseMetricRequest>> filterByModelId = request -> request.getValue().getModelId().equals(modelId);
 
-                    final Dataframe df = dataSource.get().getDataframe(modelId);
-
                     final List<Map.Entry<UUID, BaseMetricRequest>> modelSpdRequest =
                             spdRequests.entrySet().stream().filter(filterByModelId).collect(Collectors.toList());
+
+                    final List<Map.Entry<UUID, BaseMetricRequest>> modelDirRequest =
+                            dirRequests.entrySet().stream().filter(filterByModelId).collect(Collectors.toList());
+
+                    // Determine maximum batch requested. All other batches as sub-batches of this one.
+                    final int maxBatchSize = Stream.concat(modelSpdRequest.stream(), modelDirRequest.stream())
+                            .mapToInt(entry -> entry.getValue().getBatchSize()).max()
+                            .orElse(serviceConfig.batchSize().getAsInt());
+
+                    final Dataframe df = dataSource.get().getDataframe(modelId, maxBatchSize);
 
                     // SPD requests
                     modelSpdRequest.forEach(entry -> {
@@ -60,9 +72,6 @@ public class PrometheusScheduler {
                         final double spd = calculator.calculateSPD(batch, entry.getValue());
                         publisher.gaugeSPD(entry.getValue(), modelId, entry.getKey(), spd);
                     });
-
-                    final List<Map.Entry<UUID, BaseMetricRequest>> modelDirRequest =
-                            dirRequests.entrySet().stream().filter(filterByModelId).collect(Collectors.toList());
 
                     // DIR requests
                     modelDirRequest.forEach(entry -> {

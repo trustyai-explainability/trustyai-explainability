@@ -18,8 +18,6 @@ import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -49,8 +47,12 @@ class GroupStatisticalParityDifferenceRequestsEndpointTest {
     Instance<ServiceConfig> serviceConfig;
 
     @BeforeEach
-    void populateStorage() throws JsonProcessingException {
+    void populateStorage() {
+        // Empty mock storage
         storage.get().emptyStorage();
+        // Clear any requests between tests
+        scheduler.get().getDirRequests().clear();
+        scheduler.get().getSpdRequests().clear();
         final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
@@ -76,7 +78,7 @@ class GroupStatisticalParityDifferenceRequestsEndpointTest {
         // Get stored request
         final BaseMetricRequest request = scheduler
                 .get()
-                .getDirRequests()
+                .getSpdRequests()
                 .get(response.getRequestId());
 
         final int defaultBatchSize = serviceConfig.get().batchSize().getAsInt();
@@ -106,7 +108,7 @@ class GroupStatisticalParityDifferenceRequestsEndpointTest {
         // Get stored request
         final BaseMetricRequest request = scheduler
                 .get()
-                .getDirRequests()
+                .getSpdRequests()
                 .get(response.getRequestId());
 
         assertEquals(BATCH_SIZE, request.getBatchSize());
