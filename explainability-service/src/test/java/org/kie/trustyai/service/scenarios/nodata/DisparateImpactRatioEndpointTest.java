@@ -1,5 +1,7 @@
 package org.kie.trustyai.service.scenarios.nodata;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -9,12 +11,14 @@ import javax.inject.Inject;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.DisparateImpactRatioEndpoint;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
@@ -33,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
 class DisparateImpactRatioEndpointTest {
 
+    private static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
 
@@ -44,7 +49,7 @@ class DisparateImpactRatioEndpointTest {
      *
      */
     @BeforeEach
-    void populateStorage() {
+    void populateStorageEmpty() {
         storage.get().emptyStorage();
     }
 
@@ -97,6 +102,7 @@ class DisparateImpactRatioEndpointTest {
 
     }
 
+    @Test
     void listSchedules() {
 
         // No schedule request made yet
@@ -129,6 +135,74 @@ class DisparateImpactRatioEndpointTest {
         nonExistingRequestId.requestId = UUID.randomUUID();
         given().contentType(ContentType.JSON).when().body(nonExistingRequestId).delete("/request")
                 .then().statusCode(RestResponse.StatusCode.NOT_FOUND).body(is(""));
+
+        scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(0, scheduleList.requests.size());
+    }
+
+    void populateStorage() {
+        populateStorageEmpty();
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        datasource.get().saveDataframe(dataframe, MODEL_ID);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+    }
+
+    @Test
+    void listNames() {
+        populateStorage();
+
+        // No schedule request made yet
+        final ScheduleList emptyList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+        assertEquals(0, emptyList.requests.size());
+
+        List<String> names = List.of("name1", "name2", "name3");
+        Map<UUID, String> nameIDs = new HashMap<>();
+
+        // Perform multiple schedule requests
+        for (String name : names) {
+            final BaseMetricRequest payload = RequestPayloadGenerator.named(name);
+            BaseScheduledResponse scheduledResponse = given()
+                    .contentType(ContentType.JSON)
+                    .body(payload)
+                    .when()
+                    .post("/request")
+                    .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(BaseScheduledResponse.class);
+            nameIDs.put(scheduledResponse.getRequestId(), name);
+        }
+
+        ScheduleList scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(3, scheduleList.requests.size());
+
+        // check that names are as expected
+        for (int i = 0; i < scheduleList.requests.size(); i++) {
+            UUID returnedID = scheduleList.requests.get(i).id;
+            assertEquals(nameIDs.get(returnedID), scheduleList.requests.get(i).request.getRequestName());
+
+            // delete the corresponding request
+            final ScheduleId thisRequestId = new ScheduleId();
+            thisRequestId.requestId = returnedID;
+            given()
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .body(thisRequestId)
+                    .delete("/request")
+                    .then()
+                    .statusCode(200)
+                    .body(is("Removed"));
+        }
 
         scheduleList = given()
                 .when()
