@@ -17,7 +17,7 @@ public class BaseMetricRequest {
     private TypedValue unprivilegedAttribute;
     private String modelId;
 
-    private int batchSize;
+    private Integer batchSize;
 
     public BaseMetricRequest() {
         // Public default no-argument constructor
@@ -76,11 +76,11 @@ public class BaseMetricRequest {
         return Objects.hash(protectedAttribute, favorableOutcome, outcomeName, privilegedAttribute, unprivilegedAttribute);
     }
 
-    public int getBatchSize() {
+    public Integer getBatchSize() {
         return batchSize;
     }
 
-    public void setBatchSize(int batchSize) {
+    public void setBatchSize(Integer batchSize) {
         this.batchSize = batchSize;
     }
 
