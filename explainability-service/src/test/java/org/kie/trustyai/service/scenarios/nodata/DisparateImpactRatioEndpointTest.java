@@ -33,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
 class DisparateImpactRatioEndpointTest {
 
-    private static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
 
@@ -98,7 +97,6 @@ class DisparateImpactRatioEndpointTest {
 
     }
 
-    @Test
     void listSchedules() {
 
         // No schedule request made yet
