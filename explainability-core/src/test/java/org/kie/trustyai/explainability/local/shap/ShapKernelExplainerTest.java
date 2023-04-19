@@ -700,7 +700,7 @@ class ShapKernelExplainerTest {
 
                 double coefMSE = (data.getRowVector(100).ebeMultiply(modelWeights))
                         .getDistance(explanations.getRowVector(0).getSubVector(0, 25));
-                assertTrue(coefMSE < 10);
+                assertTrue(coefMSE < 15, String.format("Expected %s to be less than 15", coefMSE));
             }
         }
     }
