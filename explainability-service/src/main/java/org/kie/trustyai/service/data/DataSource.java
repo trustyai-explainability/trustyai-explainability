@@ -20,6 +20,7 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.data.parsers.DataParser;
 import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
+import org.kie.trustyai.service.payloads.service.Schema;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -91,8 +92,16 @@ public class DataSource {
             final Metadata metadata = getMetadata(modelId);
 
             // validate metadata
-            if (metadata.getInputSchema().equals(MetadataUtils.getInputSchema(dataframe)) && metadata.getOutputSchema().equals(MetadataUtils.getOutputSchema(dataframe))) {
+            Schema newInputSchema = MetadataUtils.getInputSchema(dataframe);
+            Schema newOutputSchema = MetadataUtils.getOutputSchema(dataframe);
+
+            if (metadata.getInputSchema().equals(newInputSchema) && metadata.getOutputSchema().equals(newOutputSchema)) {
                 metadata.incrementObservations(dataframe.getRowDimension());
+
+                // update value list
+                metadata.mergeInputSchema(newInputSchema);
+                metadata.mergeOutputSchema(newOutputSchema);
+
                 try {
                     saveMetadata(metadata, modelId);
                 } catch (StorageWriteException e) {
