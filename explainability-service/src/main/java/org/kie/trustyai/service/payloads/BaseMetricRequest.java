@@ -10,12 +10,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class BaseMetricRequest {
 
     private String protectedAttribute;
-
     private TypedValue favorableOutcome;
     private String outcomeName;
     private TypedValue privilegedAttribute;
     private TypedValue unprivilegedAttribute;
     private String modelId;
+    private String requestName;
 
     public BaseMetricRequest() {
         // Public default no-argument constructor
@@ -27,6 +27,14 @@ public class BaseMetricRequest {
 
     public void setModelId(String modelId) {
         this.modelId = modelId;
+    }
+
+    public String getRequestName() {
+        return requestName;
+    }
+
+    public void setRequestName(String requestName) {
+        this.requestName = requestName;
     }
 
     public String getProtectedAttribute() {
