@@ -65,7 +65,8 @@ Issue a metric request to, for instance:
 curl -X POST --location "http://localhost:8080/metrics/spd/request" \
     -H "Content-Type: application/json" \
     -d "{
-            \"modelId\": \"example-1\",
+            \"modelId\": \"example-model-1\",
+            \"requestName\": \"lala\",
             \"protectedAttribute\": \"input-2\",
             \"favorableOutcome\": {
                 \"type\": \"DOUBLE\",

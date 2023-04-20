@@ -138,5 +138,4 @@ class DisparateImpactRatioEndpointTest {
         // Correct number of active requests
         assertEquals(0, scheduleList.requests.size());
     }
-
 }

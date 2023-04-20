@@ -1,6 +1,9 @@
 package org.kie.trustyai.service.endpoints.metrics;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -320,6 +323,65 @@ class DisparateImpactRatioEndpointTest {
         // Correct number of active requests
         assertEquals(0, scheduleList.requests.size());
 
+    }
+
+    @Test
+    void listNames() {
+        // No schedule request made yet
+        final ScheduleList emptyList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+        assertEquals(0, emptyList.requests.size());
+
+        List<String> names = List.of("name1", "name2", "name3");
+        Map<UUID, String> nameIDs = new HashMap<>();
+
+        // Perform multiple schedule requests
+        for (String name : names) {
+            final BaseMetricRequest payload = RequestPayloadGenerator.named(name);
+            BaseScheduledResponse scheduledResponse = given()
+                    .contentType(ContentType.JSON)
+                    .body(payload)
+                    .when()
+                    .post("/request")
+                    .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(BaseScheduledResponse.class);
+            nameIDs.put(scheduledResponse.getRequestId(), name);
+        }
+
+        ScheduleList scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(3, scheduleList.requests.size());
+
+        // check that names are as expected
+        for (int i = 0; i < scheduleList.requests.size(); i++) {
+            UUID returnedID = scheduleList.requests.get(i).id;
+            assertEquals(nameIDs.get(returnedID), scheduleList.requests.get(i).request.getRequestName());
+
+            // delete the corresponding request
+            final ScheduleId thisRequestId = new ScheduleId();
+            thisRequestId.requestId = returnedID;
+            given()
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .body(thisRequestId)
+                    .delete("/request")
+                    .then()
+                    .statusCode(200)
+                    .body(is("Removed"));
+        }
+
+        scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(0, scheduleList.requests.size());
     }
 
 }
