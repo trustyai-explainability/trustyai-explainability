@@ -41,6 +41,33 @@ public class RequestPayloadGenerator {
         return request;
     }
 
+    public static BaseMetricRequest named(String name) {
+        BaseMetricRequest request = new BaseMetricRequest();
+        request.setProtectedAttribute("gender");
+
+        TypedValue favorableOutcome = new TypedValue();
+        favorableOutcome.setType(INT32);
+        favorableOutcome.setValue(JsonNodeFactory.instance.numberNode(1));
+        request.setFavorableOutcome(favorableOutcome);
+
+        request.setOutcomeName("income");
+
+        TypedValue privilegedAttribute = new TypedValue();
+        privilegedAttribute.setType(INT32);
+        privilegedAttribute.setValue(JsonNodeFactory.instance.numberNode(1));
+        request.setPrivilegedAttribute(privilegedAttribute);
+
+        TypedValue unprivilegedAttribute = new TypedValue();
+        unprivilegedAttribute.setType(INT32);
+        unprivilegedAttribute.setValue(JsonNodeFactory.instance.numberNode(0));
+        request.setUnprivilegedAttribute(unprivilegedAttribute);
+
+        request.setModelId(MODEL_ID);
+        request.setRequestName(name);
+
+        return request;
+    }
+
     public static BaseMetricRequest incorrectType() {
         BaseMetricRequest request = new BaseMetricRequest();
         request.setProtectedAttribute("gender");

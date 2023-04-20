@@ -27,8 +27,7 @@ import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
-import static org.hamcrest.Matchers.any;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -202,6 +201,115 @@ class GroupStatisticalParityDifferenceEndpointTest {
 
         // Correct number of active requests
         assertEquals(0, scheduleList.requests.size());
+    }
+
+    @Test
+    void requestWrongType() {
+
+        // No schedule request made yet
+        final ScheduleList emptyList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        assertEquals(0, emptyList.requests.size());
+
+        // Perform multiple schedule requests
+        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseScheduledResponse firstRequest = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/request")
+                .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
+
+        assertNotNull(firstRequest.getRequestId());
+
+        final BaseMetricRequest wrongPayload = RequestPayloadGenerator.incorrectType();
+        given()
+                .contentType(ContentType.JSON)
+                .body(wrongPayload)
+                .when()
+                .post("/request")
+                .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("Invalid type for outcome. Got 'STRING', expected 'INT32'"));
+
+        ScheduleList scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(1, scheduleList.requests.size());
+
+        // Remove one request
+        final ScheduleId firstRequestId = new ScheduleId();
+        firstRequestId.requestId = firstRequest.getRequestId();
+        given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
+                .then().statusCode(200).body(is("Removed"));
+
+        scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(0, scheduleList.requests.size());
+
+    }
+
+    @Test
+    void requestUnknowType() {
+
+        // No schedule request made yet
+        final ScheduleList emptyList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        assertEquals(0, emptyList.requests.size());
+
+        // Perform multiple schedule requests
+        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseScheduledResponse firstRequest = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/request")
+                .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
+
+        assertNotNull(firstRequest.getRequestId());
+
+        final Map<String, Object> unknownPayload = RequestPayloadGenerator.unknownType();
+        given()
+                .contentType(ContentType.JSON)
+                .body(unknownPayload)
+                .when()
+                .post("/request")
+                .then().statusCode(RestResponse.StatusCode.BAD_REQUEST);
+
+        ScheduleList scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(1, scheduleList.requests.size());
+
+        // Remove one request
+        final ScheduleId firstRequestId = new ScheduleId();
+        firstRequestId.requestId = firstRequest.getRequestId();
+        given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
+                .then().statusCode(200).body(is("Removed"));
+
+        scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(0, scheduleList.requests.size());
+
     }
 
 }
