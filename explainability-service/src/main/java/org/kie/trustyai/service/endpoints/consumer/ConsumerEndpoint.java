@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
 import java.util.Base64;
+import java.util.List;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -46,7 +47,7 @@ public class ConsumerEndpoint {
         final byte[] inputBytes = Base64.getDecoder().decode(request.getInput().getBytes());
         final byte[] outputBytes = Base64.getDecoder().decode(request.getOutput().getBytes());
 
-        final Prediction prediction;
+        final List<Prediction> prediction;
         try {
             prediction = reconciler.payloadToPrediction(inputBytes, outputBytes);
         } catch (DataframeCreateException e) {

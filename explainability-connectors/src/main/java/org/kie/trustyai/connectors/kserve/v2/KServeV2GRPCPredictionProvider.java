@@ -1,17 +1,18 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.connectors.utils.ListenableFutureUtils;
-import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.TensorDataframe;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
@@ -27,9 +28,9 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
     private static final String DEFAULT_TENSOR_NAME = "predict";
     private final KServeConfig kServeConfig;
     private final ManagedChannel channel;
-    private final List<String> outputNames;
+    private final Optional<List<String>> outputNames;
 
-    private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, List<String> outputNames) {
+    private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, Optional<List<String>> outputNames) {
 
         this.kServeConfig = kServeConfig;
         this.channel = ManagedChannelBuilder.forTarget(kServeConfig.getTarget())
@@ -59,29 +60,8 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @param outputNames A {@link List} of output names to be used
      * @return A {@link PredictionProvider}
      */
-    public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, List<String> outputNames) {
+    public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, Optional<List<String>> outputNames) {
         return new KServeV2GRPCPredictionProvider(kServeConfig, outputNames);
-    }
-
-    private List<PredictionOutput> responseToPredictionOutput(ModelInferResponse response) {
-
-        final List<ModelInferResponse.InferOutputTensor> responseOutputs = response.getOutputsList();
-
-        final List<List<Output>> shapedOutputs = new ArrayList<>();
-
-        final int columns = (int) responseOutputs.get(0).getShape(1);
-        final AtomicInteger counter = new AtomicInteger();
-        final ModelInferResponse.InferOutputTensor tensor = responseOutputs.get(0);
-        final List<Output> outputs = TensorConverter.outputTensorToOutputs(tensor, null);
-
-        for (Output output : outputs) {
-            if (counter.getAndIncrement() % columns == 0) {
-                shapedOutputs.add(new ArrayList<>());
-            }
-            shapedOutputs.get(shapedOutputs.size() - 1).add(output);
-        }
-
-        return shapedOutputs.stream().map(PredictionOutput::new).collect(Collectors.toList());
     }
 
     @Override
@@ -120,8 +100,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
         final CompletableFuture<ModelInferResponse> futureResponse = ListenableFutureUtils.asCompletableFuture(listenableResponse);
 
-        return futureResponse.thenApply(this::responseToPredictionOutput);
-
+        return futureResponse.thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, outputNames));
     }
 
 }

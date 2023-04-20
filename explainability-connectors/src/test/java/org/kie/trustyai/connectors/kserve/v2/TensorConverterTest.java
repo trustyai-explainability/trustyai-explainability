@@ -13,7 +13,6 @@ import org.kie.trustyai.explainability.model.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TensorConverterTest {
-
     @Test
     void modelInferResponseToPredictionOutputSingle() {
 
@@ -27,7 +26,8 @@ class TensorConverterTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(1).setContents(contents).build();
 
-        PredictionOutput predictionOutput = new PredictionOutput(TensorConverter.outputTensorToOutputs(outputTensor, null));
+        final ModelInferResponse response = ModelInferResponse.newBuilder().addOutputs(outputTensor).build();
+        PredictionOutput predictionOutput = TensorConverter.parseKserveModelInferResponse(response).get(0);
 
         assertEquals(1, predictionOutput.getOutputs().size());
         assertEquals(value, predictionOutput.getOutputs().get(0).getValue().asNumber());
@@ -47,7 +47,8 @@ class TensorConverterTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null);
+        final ModelInferResponse response = ModelInferResponse.newBuilder().addOutputs(outputTensor).build();
+        final List<Output> predictionOutput = TensorConverter.parseKserveModelInferResponse(response).get(0).getOutputs();
 
         assertEquals(3, predictionOutput.size());
         for (int i = 0; i < 3; i++) {
@@ -68,8 +69,8 @@ class TensorConverterTest {
         ModelInferResponse.InferOutputTensor outputTensor = ModelInferResponse.InferOutputTensor.newBuilder()
                 .setDatatype("FP32")
                 .addShape(1).addShape(3).setContents(contents).build();
-
-        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null);
+        final ModelInferResponse response = ModelInferResponse.newBuilder().addOutputs(outputTensor).build();
+        final List<Output> predictionOutput = TensorConverter.parseKserveModelInferResponse(response).get(0).getOutputs();
 
         assertEquals(3, predictionOutput.size());
         for (int i = 0; i < 3; i++) {
@@ -91,7 +92,9 @@ class TensorConverterTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Output> predictionOutput = TensorConverter.outputTensorToOutputs(outputTensor, null);
+        final ModelInferResponse response = ModelInferResponse.newBuilder().addOutputs(outputTensor).build();
+
+        final List<Output> predictionOutput = TensorConverter.parseKserveModelInferResponse(response).get(0).getOutputs();
 
         assertEquals(3, predictionOutput.size());
         for (int i = 0; i < 3; i++) {
@@ -113,7 +116,8 @@ class TensorConverterTest {
                 .setDatatype("FP32")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Feature> predictionInput = TensorConverter.inputTensorToFeatures(tensor, null);
+        final ModelInferRequest request = ModelInferRequest.newBuilder().addInputs(tensor).build();
+        final List<Feature> predictionInput = TensorConverter.parseKserveModelInferRequest(request).get(0).getFeatures();
 
         assertEquals(3, predictionInput.size());
         for (int i = 0; i < 3; i++) {
@@ -135,7 +139,8 @@ class TensorConverterTest {
                 .setDatatype("FP64")
                 .addShape(1).addShape(3).setContents(contents).build();
 
-        final List<Feature> predictionInput = TensorConverter.inputTensorToFeatures(tensor, null);
+        final ModelInferRequest request = ModelInferRequest.newBuilder().addInputs(tensor).build();
+        final List<Feature> predictionInput = TensorConverter.parseKserveModelInferRequest(request).get(0).getFeatures();
 
         assertEquals(3, predictionInput.size());
         for (int i = 0; i < 3; i++) {
@@ -148,8 +153,9 @@ class TensorConverterTest {
         final Prediction prediction = PayloadUtils.createDummy1PredictionAllNumeric();
         final TensorDataframe tdf = TensorDataframe.createFromInputs(List.of(prediction.getInput()));
 
-        ModelInferRequest.InferInputTensor.Builder tensor = tdf.rowAsSingleArrayInputTensor(0, "predict");
-        final List<Feature> features = TensorConverter.inputTensorToFeatures(List.of(tensor.build()));
+        final ModelInferRequest.InferInputTensor.Builder tensor = tdf.rowAsSingleArrayInputTensor(0, "predict");
+        final ModelInferRequest request = ModelInferRequest.newBuilder().addInputs(tensor).build();
+        final List<Feature> features = TensorConverter.parseKserveModelInferRequest(request).get(0).getFeatures();
         assertEquals(prediction.getInput().getFeatures().size(), features.size());
     }
 
@@ -159,7 +165,8 @@ class TensorConverterTest {
         final TensorDataframe tdf = TensorDataframe.createFromInputs(List.of(prediction.getInput()));
 
         final List<ModelInferRequest.InferInputTensor> tensors = tdf.rowAsSingleDataframeInputTensor(0).stream().map(ModelInferRequest.InferInputTensor.Builder::build).collect(Collectors.toList());
-        final List<Feature> features = TensorConverter.inputTensorToFeatures(tensors);
+        final ModelInferRequest request = ModelInferRequest.newBuilder().addAllInputs(tensors).build();
+        final List<Feature> features = TensorConverter.parseKserveModelInferRequest(request).get(0).getFeatures();
         assertEquals(prediction.getInput().getFeatures().size(), features.size());
     }
 }
