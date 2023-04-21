@@ -1,0 +1,99 @@
+# This file should always match the KfDef used to deploy ODH Core components
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  name: odh-core
+spec:
+  applications:
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: odh-common
+    name: odh-common
+  - kustomizeConfig:
+      parameters:
+        - name: namespace
+          value: openshift-operators
+      repoRef:
+        name: manifests
+        path: openshift-pipelines/cluster
+    name: openshift-pipelines
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: odh-dashboard
+    name: odh-dashboard
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: prometheus/cluster
+    name: prometheus-cluster
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: prometheus/operator
+    name: prometheus-operator
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: grafana/cluster
+    name: grafana-cluster
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: grafana/grafana
+    name: grafana-instance
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: odh-notebook-controller
+    name: odh-notebook-controller
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: notebook-images
+    name: notebook-images
+  - kustomizeConfig:
+      overlays:
+        - metadata-store-mariadb
+        - ds-pipeline-ui
+        - object-store-minio
+        - default-configs
+      repoRef:
+        name: manifests
+        path: data-science-pipelines
+    name: data-science-pipelines
+  - kustomizeConfig:
+      parameters:
+      - name: monitoring-namespace
+        value: opendatahub
+      overlays:
+        - odh-model-controller
+      repoRef:
+        name: manifests-onnx-patch
+        path: model-mesh
+    name: model-mesh
+  - kustomizeConfig:
+      parameters:
+      - name: deployment-namespace
+        value: opendatahub
+      repoRef:
+        name: manifests
+        path: modelmesh-monitoring
+    name: modelmesh-monitoring
+  - kustomizeConfig:
+      repoRef:
+        name: manifests-onnx-patch
+        path: trustyai-service
+    name: trustyai
+  - kustomizeConfig:
+      repoRef:
+        name: manifests
+        path: data-science-pipelines-operator/
+    name: data-science-pipelines-operator
+  repos:
+  - name: manifests
+    uri: https://github.com/opendatahub-io/odh-manifests/tarball/master
+  - name: manifests-onnx-patch
+    uri: https://api.github.com/repos/robgeada/odh-manifests/tarball/TrustyAIDemo
+  version: master
