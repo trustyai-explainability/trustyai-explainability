@@ -81,7 +81,7 @@ function send_data(){
     header "Sending some data for TrustyAI (this will take a minute or two)"
     oc project $MM_NAMESPACE
 
-    $RESOURCEDIR/biased_models/send_data_batch batch_01
+    $RESOURCEDIR/biased_models/send_data_batch batch_01.json
 }
 
 function schedule_and_check_request(){
@@ -123,11 +123,11 @@ function send_more_data(){
     oc project $MM_NAMESPACE
 
   LOOP_IDX=1
-  for batch in $(ls $RESOURCEDIR/biased_models/data_json)
+  for batch in $(ls $RESOURCEDIR/biased_models/data_json_combined/)
   do
-      if [ "$batch" = "training_data" ]; then
+      if [ "$batch" = "training_data.json" ]; then
         :
-      elif [ "$batch" = "batch_01" ]; then
+      elif [ "$batch" = "batch_01.json" ]; then
         :
       else
         echo "===== Deployment Day $LOOP_IDX ====="

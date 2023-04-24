@@ -3,7 +3,7 @@
 source util/constants
 
 LOOP_IDX=0
-NFILES=$(ls $RESOURCEDIR/biased_models/data_json/$1/*.json | wc -l | xargs)
+NFILES=$(cat $RESOURCEDIR/biased_models/data_json_combined/$1 | jq 'length')
 THRESHOLD="${2:-$NFILES}"
 BATCH_SIZE=500
 PAUSE_TIME=0.005
@@ -51,7 +51,7 @@ fi
 echo "$START_OBS_BETA datapoints already in BETA dataset"
 
 
-for data in $(ls $RESOURCEDIR/biased_models/data_json/$1/*.json)
+for data in $(cat $RESOURCEDIR/biased_models/data_json_combined/$1 | jq -c '.[]')
 do
   if [ $(($LOOP_IDX % $BATCH_SIZE)) -eq 0 ] && [ $LOOP_IDX -gt 0 ]; then
     echo
