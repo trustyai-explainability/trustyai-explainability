@@ -95,5 +95,5 @@ spec:
   - name: manifests
     uri: https://github.com/opendatahub-io/odh-manifests/tarball/master
   - name: manifests-trustyai
-    uri: https://github.com/robgeada/trustyai-explainability/tarball/RHODS-8036
+    uri: https://github.com/trustyai-explainability/trustyai-explainability/tarball/main
   version: master
