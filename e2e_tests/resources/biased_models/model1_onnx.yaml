@@ -10,4 +10,4 @@ spec:
       modelFormat:
         name: onnx
       runtime: ovms-1.x
-      storageUri: "https://github.com/RobGeada/trustyai_april12_demo/blob/main/resources/loan_model_beta.onnx?raw=true" # update this
+      storageUri: ""https://github.com/trustyai-explainability/trustyai-explainability/blob/main/e2e_tests/resources/biased_models/loan_model_beta.onnx?raw=true"

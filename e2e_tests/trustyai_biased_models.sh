@@ -12,7 +12,7 @@ function setup_test() {
   header "Installing ODH and creating project"
   oc new-project $ODHPROJECT
   oc project $ODHPROJECT
-  os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/biased_models/odh-core.yaml"
+  os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/common/odh-core.yaml"
 }
 
 function check_trustyai_resources() {
