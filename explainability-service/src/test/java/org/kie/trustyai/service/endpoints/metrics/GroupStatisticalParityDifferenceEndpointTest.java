@@ -96,9 +96,9 @@ class GroupStatisticalParityDifferenceEndpointTest {
         assertEquals("SPD", response.getName());
         assertFalse(response.getThresholds().outsideBounds);
 
-        // with tiny threshold, the DIR is outside bounds
+        // with negative threshold, every SPD is outside bounds
         payload = RequestPayloadGenerator.correct();
-        payload.setThresholdDelta(.01);
+        payload.setThresholdDelta(-1.);
         response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
