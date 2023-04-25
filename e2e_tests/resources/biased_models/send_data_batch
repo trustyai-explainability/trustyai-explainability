@@ -60,8 +60,8 @@ do
   fi
 
   echo -ne "\rSent datapoint $(( $LOOP_IDX + 1 )) of $THRESHOLD"
-  curl -k https://$INFER_ROUTE_ALPHA/infer -d @$data > /dev/null 2>&1  &
-  curl -k https://$INFER_ROUTE_BETA/infer -d @$data > /dev/null 2>&1  &
+  curl -k https://$INFER_ROUTE_ALPHA/infer -d $data > /dev/null 2>&1  &
+  curl -k https://$INFER_ROUTE_BETA/infer -d $data > /dev/null 2>&1  &
 
   sleep $PAUSE_TIME
 
