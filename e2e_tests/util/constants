@@ -2,6 +2,8 @@
 
 # Change this if your project is not named opendatahub
 export ODHPROJECT=${ODHPROJECT:-"opendatahub"}
+RESOURCEDIR="resources"
+MM_NAMESPACE="${ODHPROJECT}-model"
 
 millisecond=1
 second=$(( 1000 * millisecond ))

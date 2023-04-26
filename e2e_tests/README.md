@@ -4,8 +4,11 @@ This script tests the current ODH-Manifests master integration of TrustyAI.
 # Usage
 1. Install the ODH operator onto your cluster
 2. Make sure you logged into the oc CLI: `oc login ...` 
-3. Run `./trustyai_test.sh`
-4. At a certain point in the script, it will say:
+3. (If you've run a script before, run):
+   1. `./script.sh clean` to clean the previous test, such that you can run another one again
+   2. `./script.sh reset` to completely remove all test objects
+4. Run `./[script].sh`
+5. At a certain point in the script, it will say:
 ```
 Ensure metrics are in Prometheus
 Please check that trustyai_spd data exists at the following endpoint:
@@ -27,3 +30,11 @@ Hit the `Graph` tab and make sure there is data populated there:
 If those steps proceeded without issue, return to the terminal and hit enter.
 
 4. The script will finish and clean up the cluster.
+
+# Testing your own image of TrustyAI
+1) Build and push your `trustyai-service` image
+2) Edit `e2e_tests/resources/manifests/trustyai-service/default/trustyai-deployment.yaml`, line 120 to point to your 
+image repo.
+3) Push the `trustyai-explainability` repo (including your changes to the `trustyai-deployment`file) to a branch
+4) Edit  `e2e_tests/resources/common/odh-core.yaml`, line 98 to point to your pushed branch
+5) Run the test scripts
