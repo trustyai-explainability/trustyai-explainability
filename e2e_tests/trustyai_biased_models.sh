@@ -184,7 +184,7 @@ function teardown_trustyai_test() {
 
 function teardown_test() {
   oc project $ODHPROJECT
-  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/biased_models/odh-core.yaml"
+  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/common/odh-core.yaml"
   os::cmd::expect_success "oc delete project $ODHPROJECT"
 }
 
