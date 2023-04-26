@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: trustyai-metrics
+  labels:
+    modelmesh-service: modelmesh-serving
+spec:
+  endpoints:
+    - interval: 4s
+      path: /q/metrics
+      honorLabels: true
+      honorTimestamps: true
+      scrapeTimeout: 3s
+      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      bearerTokenSecret:
+        key: ""
+      targetPort: 8080
+      scheme: http
+      params:
+        'match[]':
+          - '{__name__= "trustyai_spd"}'
+          - '{__name__= "trustyai_dir"}'
+      metricRelabelings:
+        - action: keep
+          regex: trustyai_.*
+          sourceLabels:
+            - __name__
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: trustyai-service
