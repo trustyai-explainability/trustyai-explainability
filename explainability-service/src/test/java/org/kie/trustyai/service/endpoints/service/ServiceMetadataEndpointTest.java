@@ -62,6 +62,7 @@ class ServiceMetadataEndpointTest {
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.dir);
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.spd);
         assertEquals(2, serviceMetadata.get(0).getData().getObservations());
+        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get(0).getValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
         assertEquals(dataframe.getInputNames()
@@ -90,6 +91,36 @@ class ServiceMetadataEndpointTest {
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.dir);
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.spd);
         assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
+
+        // check column values
+        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get(0).getValues().size());
+        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get(1).getValues().size());
+        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
+    }
+
+    @Test
+    void getThousandDiverseObservations() throws JsonProcessingException {
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 1000);
+        datasource.get().saveDataframe(dataframe, MODEL_ID);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+
+        final List<ServiceMetadata> serviceMetadata = given()
+                .when().get()
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                });
+
+        assertEquals(1, serviceMetadata.size());
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.dir);
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.spd);
+        assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
+
+        // check column values
+        assertEquals(null, serviceMetadata.get(0).getData().getInputSchema().getItems().get(0).getValues());
+        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get(1).getValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
     }

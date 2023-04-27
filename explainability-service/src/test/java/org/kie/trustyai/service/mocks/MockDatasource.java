@@ -33,6 +33,10 @@ public class MockDatasource extends DataSource {
     }
 
     public Dataframe generateRandomDataframe(int observations) {
+        return generateRandomDataframe(observations, 100);
+    }
+
+    public Dataframe generateRandomDataframe(int observations, int featureDiversity) {
         final List<Prediction> predictions = new ArrayList<>();
         final Random random = new Random();
         for (int i = 0; i < observations; i++) {
@@ -41,7 +45,7 @@ public class MockDatasource extends DataSource {
                     FeatureFactory.newObjectFeature(MetadataUtils.ID_FIELD, UUID.randomUUID()),
                     FeatureFactory.newObjectFeature(MetadataUtils.TIMESTAMP_FIELD, LocalDateTime.now()),
 
-                    FeatureFactory.newNumericalFeature("age", random.nextInt(100)),
+                    FeatureFactory.newNumericalFeature("age", random.nextInt(featureDiversity)),
                     FeatureFactory.newNumericalFeature("gender", random.nextBoolean() ? 1 : 0),
                     FeatureFactory.newNumericalFeature("race", random.nextBoolean() ? 1 : 0));
             final PredictionInput predictionInput = new PredictionInput(featureList);
