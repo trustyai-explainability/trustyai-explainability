@@ -14,6 +14,7 @@ import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
+import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponse;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceResponse;
@@ -73,6 +74,43 @@ class GroupStatisticalParityDifferenceEndpointTest {
         assertEquals("metric", response.getType());
         assertEquals("SPD", response.getName());
         assertFalse(Double.isNaN(response.getValue()));
+    }
+
+    @Test
+    void postThresh() throws JsonProcessingException {
+        datasource.get();
+
+        // with large threshold, the DIR is inside bounds
+        BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        payload.setThresholdDelta(.5);
+        DisparateImpactRatioResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(DisparateImpactRatioResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("SPD", response.getName());
+        assertFalse(response.getThresholds().outsideBounds);
+
+        // with negative threshold, every SPD is outside bounds
+        payload = RequestPayloadGenerator.correct();
+        payload.setThresholdDelta(-1.);
+        response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(DisparateImpactRatioResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("SPD", response.getName());
+        assertTrue(response.getThresholds().outsideBounds);
     }
 
     @Test

@@ -16,6 +16,7 @@ public class BaseMetricRequest {
     private TypedValue unprivilegedAttribute;
     private String modelId;
     private String requestName;
+    private Double thresholdDelta;
 
     public BaseMetricRequest() {
         // Public default no-argument constructor
@@ -77,6 +78,14 @@ public class BaseMetricRequest {
         this.unprivilegedAttribute = unprivilegedAttribute;
     }
 
+    public Double getThresholdDelta() {
+        return thresholdDelta;
+    }
+
+    public void setThresholdDelta(Double thresholdDelta) {
+        this.thresholdDelta = thresholdDelta;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -85,11 +94,11 @@ public class BaseMetricRequest {
             return false;
         BaseMetricRequest that = (BaseMetricRequest) o;
         return protectedAttribute.equals(that.protectedAttribute) && favorableOutcome.equals(that.favorableOutcome) && outcomeName.equals(that.outcomeName)
-                && privilegedAttribute.equals(that.privilegedAttribute) && unprivilegedAttribute.equals(that.unprivilegedAttribute);
+                && privilegedAttribute.equals(that.privilegedAttribute) && unprivilegedAttribute.equals(that.unprivilegedAttribute) && thresholdDelta == that.thresholdDelta;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(protectedAttribute, favorableOutcome, outcomeName, privilegedAttribute, unprivilegedAttribute);
+        return Objects.hash(protectedAttribute, favorableOutcome, outcomeName, privilegedAttribute, unprivilegedAttribute, thresholdDelta);
     }
 }
