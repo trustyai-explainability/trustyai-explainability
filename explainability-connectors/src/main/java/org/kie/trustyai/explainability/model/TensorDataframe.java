@@ -91,7 +91,6 @@ public class TensorDataframe {
         final ModelInferRequest.InferInputTensor.Builder inferInputTensorBuilder = ModelInferRequest.InferInputTensor.newBuilder();
 
         final Type trustyType = this.df.getType(0);
-        // TODO: Type should be infered or specified?
         final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(trustyType, this.df.getValue(0, 0)));
         inferInputTensorBuilder.setDatatype(kserveType);
 
@@ -128,7 +127,7 @@ public class TensorDataframe {
         inferOutputTensorBuilder.addShape(1);
         inferOutputTensorBuilder.addShape(this.df.getOutputsCount());
         inferOutputTensorBuilder.setContents(contents);
-        inferOutputTensorBuilder.setNameBytes(ByteString.copyFromUtf8(name));
+        inferOutputTensorBuilder.setName(name);
         inferOutputTensorBuilder.setDatatypeBytes(ByteString.copyFromUtf8(kserveType));
         return inferOutputTensorBuilder;
     }

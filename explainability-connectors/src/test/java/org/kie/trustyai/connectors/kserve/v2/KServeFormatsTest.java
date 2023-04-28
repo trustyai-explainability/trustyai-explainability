@@ -2,10 +2,11 @@ package org.kie.trustyai.connectors.kserve.v2;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
@@ -24,33 +25,41 @@ public class KServeFormatsTest {
     private static final String INPUT_PREFIX = "inputs";
     private static final String OUTPUT_PREFIX = "outputs";
 
-    static Prediction generateSingleInputSingleOutputPrediction() {
+    static Prediction generateSingleInputSingleOutputPrediction(String inputName, String outputName) {
         return new SimplePrediction(
                 new PredictionInput(
-                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))),
+                        List.of(FeatureFactory.newNumericalFeature(inputName, 10.0))),
                 new PredictionOutput(
                         List.of(
-                                new Output("o-1", Type.NUMBER, new Value(1.0), 1.0))));
+                                new Output(outputName, Type.NUMBER, new Value(1.0), 1.0))));
     }
 
-    static Prediction generateSingleInputMultiOutputPrediction(int nOutputFeatures) {
+    static String generateRandomFeatureName(String prefix) {
+        return prefix + "-" + UUID.randomUUID().toString();
+    }
+
+    static List<String> generateRandomFeatureNames(String prefix, int number) {
+        return IntStream.range(0, number).mapToObj(i -> generateRandomFeatureName(prefix)).collect(Collectors.toList());
+    }
+
+    static Prediction generateSingleInputMultiOutputPrediction(int nOutputFeatures, String inputName, String outputName) {
         return new SimplePrediction(
                 new PredictionInput(
-                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))),
+                        List.of(FeatureFactory.newNumericalFeature(inputName, 10.0))),
                 new PredictionOutput(IntStream.range(0, nOutputFeatures)
-                        .mapToObj(i -> new Output("o-" + i, Type.NUMBER, new Value((double) i), 1.0))
+                        .mapToObj(i -> new Output(outputName + "-" + i, Type.NUMBER, new Value((double) i), 1.0))
                         .collect(Collectors.toUnmodifiableList())));
     }
 
-    static Prediction generateMultiInputSingleOutputPrediction(int nInputFeatures) {
+    static Prediction generateMultiInputSingleOutputPrediction(int nInputFeatures, String inputName, String outputName) {
         return new SimplePrediction(
                 new PredictionInput(
                         IntStream.range(0, nInputFeatures)
-                                .mapToObj(i -> FeatureFactory.newNumericalFeature("f-" + i, (double) i * 10))
+                                .mapToObj(i -> FeatureFactory.newNumericalFeature(inputName + "-" + i, (double) i * 10))
                                 .collect(Collectors.toUnmodifiableList())),
                 new PredictionOutput(
                         List.of(
-                                new Output("o-1", Type.NUMBER, new Value(1.0), 1.0))));
+                                new Output(outputName, Type.NUMBER, new Value(1.0), 1.0))));
     }
 
     static Prediction generateMultiInputMultiOutputPrediction(int nInputs, int nOutputs) {
@@ -65,16 +74,16 @@ public class KServeFormatsTest {
                                 .collect(Collectors.toUnmodifiableList())));
     }
 
-    public static KServePayloads generateNPNoBatch(Prediction prediction) {
+    public static KServePayloads generateNPNoBatch(Prediction prediction, String inputTensorName, String outputTensorName) {
         final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
 
-        ModelInferRequest.InferInputTensor.Builder requestTensor = df.rowAsSingleArrayInputTensor(0, INPUT_PREFIX);
+        ModelInferRequest.InferInputTensor.Builder requestTensor = df.rowAsSingleArrayInputTensor(0, inputTensorName);
         final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
         request.addInputs(requestTensor);
         request.setModelName(MODEL_ID);
         request.setModelVersion(MODEL_VERSION);
 
-        final ModelInferResponse.InferOutputTensor.Builder responseTensor = df.rowAsSingleArrayOutputTensor(0, OUTPUT_PREFIX);
+        final ModelInferResponse.InferOutputTensor.Builder responseTensor = df.rowAsSingleArrayOutputTensor(0, outputTensorName);
         final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
         response.addOutputs(responseTensor);
         response.setModelName(MODEL_ID);
@@ -83,17 +92,17 @@ public class KServeFormatsTest {
         return new KServePayloads(request.build(), response.build());
     }
 
-    public static KServePayloads generateNPBatch(Prediction prediction, int batchSize) {
+    public static KServePayloads generateNPBatch(Prediction prediction, int batchSize, String inputName, String outputName) {
         final List<Prediction> predictions = IntStream.range(0, batchSize).mapToObj(i -> prediction).collect(Collectors.toList());
         final TensorDataframe df = TensorDataframe.createFrom(predictions);
 
-        ModelInferRequest.InferInputTensor.Builder requestTensor = df.asArrayInputTensor(INPUT_PREFIX);
+        ModelInferRequest.InferInputTensor.Builder requestTensor = df.asArrayInputTensor(inputName);
         final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
         request.addInputs(requestTensor);
         request.setModelName(MODEL_ID);
         request.setModelVersion(MODEL_VERSION);
 
-        final ModelInferResponse.InferOutputTensor.Builder responseTensor = df.asArrayOutputTensor(OUTPUT_PREFIX);
+        final ModelInferResponse.InferOutputTensor.Builder responseTensor = df.asArrayOutputTensor(outputName);
         final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
         response.addOutputs(responseTensor);
         response.setModelName(MODEL_ID);
@@ -139,39 +148,46 @@ public class KServeFormatsTest {
         return new KServePayloads(request.build(), response.build());
     }
 
-    @Test
+    @RepeatedTest(5)
     void testSingleInputSingleOutputNPNoBatch() {
-        final KServePayloads payload = generateNPNoBatch(generateSingleInputSingleOutputPrediction());
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+        final KServePayloads payload = generateNPNoBatch(generateSingleInputSingleOutputPrediction(inputName, outputName), inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(1, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
         final List<PredictionOutput> predictionOutputs = parseKserveModelInferResponse(payload.getOutput());
         assertEquals(1, predictionOutputs.size());
         assertEquals(1, predictionOutputs.get(0).getOutputs().size());
-        assertEquals(INPUT_PREFIX + "-0", predictionInputs.get(0).getFeatures().get(0).getName());
-        assertEquals(OUTPUT_PREFIX + "-0", predictionOutputs.get(0).getOutputs().get(0).getName());
+        assertEquals(inputName + "-0", predictionInputs.get(0).getFeatures().get(0).getName());
+        assertEquals(outputName + "-0", predictionOutputs.get(0).getOutputs().get(0).getName());
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testSingleInputMultiOutputNPNoBatch(int nOutputs) {
-        final KServePayloads payload = generateNPNoBatch(generateSingleInputMultiOutputPrediction(nOutputs));
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+        final KServePayloads payload = generateNPNoBatch(generateSingleInputMultiOutputPrediction(nOutputs, inputName, outputName), inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(1, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
         final List<PredictionOutput> predictionOutputs = parseKserveModelInferResponse(payload.getOutput());
         assertEquals(1, predictionOutputs.size());
         assertEquals(nOutputs, predictionOutputs.get(0).getOutputs().size());
-        assertEquals(INPUT_PREFIX + "-0", predictionInputs.get(0).getFeatures().get(0).getName());
+        assertEquals(inputName + "-0", predictionInputs.get(0).getFeatures().get(0).getName());
         for (int i = 0; i < nOutputs; i++) {
-            assertEquals(OUTPUT_PREFIX + "-" + i, predictionOutputs.get(0).getOutputs().get(i).getName());
+            assertEquals(outputName + "-" + i, predictionOutputs.get(0).getOutputs().get(i).getName());
         }
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testMultiInputSingleOutputNPNoBatch(int nFeatures) {
-        final KServePayloads payload = generateNPNoBatch(generateMultiInputSingleOutputPrediction(nFeatures));
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPNoBatch(generateMultiInputSingleOutputPrediction(nFeatures, inputName, outputName), inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(1, predictionInputs.size());
         assertEquals(nFeatures, predictionInputs.get(0).getFeatures().size());
@@ -179,15 +195,18 @@ public class KServeFormatsTest {
         assertEquals(1, predictionOutputs.size());
         assertEquals(1, predictionOutputs.get(0).getOutputs().size());
         for (int i = 0; i < nFeatures; i++) {
-            assertEquals(INPUT_PREFIX + "-" + i, predictionInputs.get(0).getFeatures().get(i).getName());
+            assertEquals(inputName + "-" + i, predictionInputs.get(0).getFeatures().get(i).getName());
         }
-        assertEquals(OUTPUT_PREFIX + "-0", predictionOutputs.get(0).getOutputs().get(0).getName());
+        assertEquals(outputName + "-0", predictionOutputs.get(0).getOutputs().get(0).getName());
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testMultiInputMultiOutputNPNoBatch(int nFeatures) {
-        final KServePayloads payload = generateNPNoBatch(generateMultiInputMultiOutputPrediction(nFeatures, nFeatures * 2));
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPNoBatch(generateMultiInputMultiOutputPrediction(nFeatures, nFeatures * 2), inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(1, predictionInputs.size());
         assertEquals(nFeatures, predictionInputs.get(0).getFeatures().size());
@@ -195,18 +214,22 @@ public class KServeFormatsTest {
         assertEquals(1, predictionOutputs.size());
         assertEquals(nFeatures * 2, predictionOutputs.get(0).getOutputs().size());
         for (int i = 0; i < nFeatures; i++) {
-            assertEquals(INPUT_PREFIX + "-" + i, predictionInputs.get(0).getFeatures().get(i).getName());
+            assertEquals(inputName + "-" + i, predictionInputs.get(0).getFeatures().get(i).getName());
         }
         for (int i = 0; i < nFeatures * 2; i++) {
-            assertEquals(OUTPUT_PREFIX + "-" + i, predictionOutputs.get(0).getOutputs().get(i).getName());
+            assertEquals(outputName + "-" + i, predictionOutputs.get(0).getOutputs().get(i).getName());
         }
     }
 
     // Start provided names tests
 
-    @Test
+    @RepeatedTest(5)
     void testSingleInputSingleOutputNPNoBatchProvidedNames() {
-        final KServePayloads payload = generateNPNoBatch(generateSingleInputSingleOutputPrediction());
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPNoBatch(generateSingleInputSingleOutputPrediction(
+                inputName, outputName), inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput(), Optional.of(List.of("foo-1")));
         assertEquals(1, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
@@ -220,7 +243,10 @@ public class KServeFormatsTest {
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testSingleInputMultiOutputNPNoBatchProvidedNames(int nOutputs) {
-        final KServePayloads payload = generateNPNoBatch(generateSingleInputMultiOutputPrediction(nOutputs));
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPNoBatch(generateSingleInputMultiOutputPrediction(nOutputs, inputName, outputName), inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput(), Optional.of(List.of("foo-1")));
         assertEquals(1, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
@@ -237,7 +263,10 @@ public class KServeFormatsTest {
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testMultiInputSingleOutputNPNoBatchProvidedNames(int nFeatures) {
-        final KServePayloads payload = generateNPNoBatch(generateMultiInputSingleOutputPrediction(nFeatures));
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPNoBatch(generateMultiInputSingleOutputPrediction(nFeatures, inputName, outputName), inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput(),
                 Optional.of(IntStream.range(0, nFeatures).mapToObj(i -> "foo-" + i).collect(Collectors.toList())));
         assertEquals(1, predictionInputs.size());
@@ -255,7 +284,11 @@ public class KServeFormatsTest {
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testMultiInputMultiOutputNPNoBatchProvidedNames(int nFeatures) {
-        final KServePayloads payload = generateNPNoBatch(generateMultiInputMultiOutputPrediction(nFeatures, nFeatures * 2));
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPNoBatch(generateMultiInputMultiOutputPrediction(nFeatures, nFeatures * 2),
+                inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput(),
                 Optional.of(IntStream.range(0, nFeatures).mapToObj(i -> "foo-" + i).collect(Collectors.toList())));
         assertEquals(1, predictionInputs.size());
@@ -272,9 +305,13 @@ public class KServeFormatsTest {
         }
     }
 
-    @Test
+    @RepeatedTest(5)
     void testSingleInputSingleOutputNPBatchProvidedNames() {
-        final KServePayloads payload = generateNPBatch(generateSingleInputSingleOutputPrediction(), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPBatch(generateSingleInputSingleOutputPrediction(
+                inputName, outputName), 10, inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput(), Optional.of(List.of("foo-1")));
         assertEquals(10, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
@@ -288,7 +325,10 @@ public class KServeFormatsTest {
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testSingleInputMultiOutputNPBatchProvidedNames(int nOutputs) {
-        final KServePayloads payload = generateNPBatch(generateSingleInputMultiOutputPrediction(nOutputs), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPBatch(generateSingleInputMultiOutputPrediction(nOutputs, inputName, outputName), 10, inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput(), Optional.of(List.of("foo-1")));
         assertEquals(10, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
@@ -306,7 +346,10 @@ public class KServeFormatsTest {
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testMultiInputSingleOutputNPBatchProvidedNames(int nFeatures) {
-        final KServePayloads payload = generateNPBatch(generateMultiInputSingleOutputPrediction(nFeatures), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPBatch(generateMultiInputSingleOutputPrediction(nFeatures, inputName, outputName), 10, inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput(), Optional.of(
                 IntStream.range(0, nFeatures).mapToObj(i -> "foo-" + i).collect(Collectors.toList())));
         assertEquals(10, predictionInputs.size());
@@ -324,7 +367,10 @@ public class KServeFormatsTest {
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testMultiInputMultiOutputNPBatchProvidedNames(int nFeatures) {
-        final KServePayloads payload = generateNPBatch(generateMultiInputMultiOutputPrediction(nFeatures, nFeatures * 2), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPBatch(generateMultiInputMultiOutputPrediction(nFeatures, nFeatures * 2), 10, inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput(), Optional.of(
                 IntStream.range(0, nFeatures).mapToObj(i -> "foo-" + i).collect(Collectors.toList())));
         assertEquals(10, predictionInputs.size());
@@ -345,39 +391,49 @@ public class KServeFormatsTest {
 
     // End provided names tests
 
-    @Test
+    @RepeatedTest(5)
     void testSingleInputSingleOutputPDNoBatch() {
-        final KServePayloads payload = generatePDNoBatch(generateSingleInputSingleOutputPrediction());
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generatePDNoBatch(generateSingleInputSingleOutputPrediction(
+                inputName, outputName));
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(1, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
         final List<PredictionOutput> predictionOutputs = parseKserveModelInferResponse(payload.getOutput());
         assertEquals(1, predictionOutputs.size());
         assertEquals(1, predictionOutputs.get(0).getOutputs().size());
-        assertEquals("f-1", predictionInputs.get(0).getFeatures().get(0).getName());
-        assertEquals("o-1", predictionOutputs.get(0).getOutputs().get(0).getName());
+        assertEquals(inputName, predictionInputs.get(0).getFeatures().get(0).getName());
+        assertEquals(outputName, predictionOutputs.get(0).getOutputs().get(0).getName());
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testSingleInputMultiOutputPDNoBatch(int nOutputs) {
-        final KServePayloads payload = generatePDNoBatch(generateSingleInputMultiOutputPrediction(nOutputs));
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generatePDNoBatch(generateSingleInputMultiOutputPrediction(nOutputs, inputName, outputName));
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(1, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
         final List<PredictionOutput> predictionOutputs = parseKserveModelInferResponse(payload.getOutput());
         assertEquals(1, predictionOutputs.size());
         assertEquals(nOutputs, predictionOutputs.get(0).getOutputs().size());
-        assertEquals("f-1", predictionInputs.get(0).getFeatures().get(0).getName());
+        assertEquals(inputName, predictionInputs.get(0).getFeatures().get(0).getName());
         for (int i = 0; i < nOutputs; i++) {
-            assertEquals("o-" + i, predictionOutputs.get(0).getOutputs().get(i).getName());
+            assertEquals(outputName + "-" + i, predictionOutputs.get(0).getOutputs().get(i).getName());
         }
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testMultiInputSingleOutputPDNoBatch(int nFeatures) {
-        final KServePayloads payload = generatePDNoBatch(generateMultiInputSingleOutputPrediction(nFeatures));
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generatePDNoBatch(generateMultiInputSingleOutputPrediction(nFeatures, inputName, outputName));
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(1, predictionInputs.size());
         assertEquals(nFeatures, predictionInputs.get(0).getFeatures().size());
@@ -385,9 +441,9 @@ public class KServeFormatsTest {
         assertEquals(1, predictionOutputs.size());
         assertEquals(1, predictionOutputs.get(0).getOutputs().size());
         for (int i = 0; i < nFeatures; i++) {
-            assertEquals("f-" + i, predictionInputs.get(0).getFeatures().get(i).getName());
+            assertEquals(inputName + "-" + i, predictionInputs.get(0).getFeatures().get(i).getName());
         }
-        assertEquals("o-1", predictionOutputs.get(0).getOutputs().get(0).getName());
+        assertEquals(outputName, predictionOutputs.get(0).getOutputs().get(0).getName());
     }
 
     @ParameterizedTest
@@ -408,40 +464,52 @@ public class KServeFormatsTest {
         }
     }
 
-    @Test
+    @RepeatedTest(5)
     void testSingleInputSingleOutputNPBatch() {
-        final KServePayloads payload = generateNPBatch(generateSingleInputSingleOutputPrediction(), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPBatch(generateSingleInputSingleOutputPrediction(
+                inputName, outputName), 10, inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(10, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
         final List<PredictionOutput> predictionOutputs = parseKserveModelInferResponse(payload.getOutput());
         assertEquals(10, predictionOutputs.size());
         assertEquals(1, predictionOutputs.get(0).getOutputs().size());
-        assertEquals(INPUT_PREFIX + "-0", predictionInputs.get(0).getFeatures().get(0).getName());
-        assertEquals(OUTPUT_PREFIX + "-0", predictionOutputs.get(0).getOutputs().get(0).getName());
+        assertEquals(inputName + "-0", predictionInputs.get(0).getFeatures().get(0).getName());
+        assertEquals(outputName + "-0", predictionOutputs.get(0).getOutputs().get(0).getName());
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testSingleInputMultiOutputNPBatch(int nOutputs) {
-        final KServePayloads payload = generateNPBatch(generateSingleInputMultiOutputPrediction(nOutputs), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPBatch(generateSingleInputMultiOutputPrediction(nOutputs, inputName, outputName), 10,
+                inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(10, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
         final List<PredictionOutput> predictionOutputs = parseKserveModelInferResponse(payload.getOutput());
         assertEquals(10, predictionOutputs.size());
         assertEquals(nOutputs, predictionOutputs.get(0).getOutputs().size());
-        assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(0).getName().equals(OUTPUT_PREFIX + "-0")));
+        assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(0).getName().equals(inputName + "-0")));
         for (int i = 0; i < nOutputs; i++) {
             final int n = i;
-            assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(n).getName().equals(OUTPUT_PREFIX + "-" + n)));
+            assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(n).getName().equals(outputName + "-" + n)));
         }
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testMultiInputSingleOutputNPBatch(int nFeatures) {
-        final KServePayloads payload = generateNPBatch(generateMultiInputSingleOutputPrediction(nFeatures), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPBatch(generateMultiInputSingleOutputPrediction(nFeatures, inputName, outputName), 10,
+                inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(10, predictionInputs.size());
         assertEquals(nFeatures, predictionInputs.get(0).getFeatures().size());
@@ -450,15 +518,19 @@ public class KServeFormatsTest {
         assertEquals(1, predictionOutputs.get(0).getOutputs().size());
         for (int i = 0; i < nFeatures; i++) {
             final int n = i;
-            assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(n).getName().equals(INPUT_PREFIX + "-" + n)));
+            assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(n).getName().equals(inputName + "-" + n)));
         }
-        assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(0).getName().equals(OUTPUT_PREFIX + "-0")));
+        assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(0).getName().equals(outputName + "-0")));
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testMultiInputMultiOutputNPBatch(int nFeatures) {
-        final KServePayloads payload = generateNPBatch(generateMultiInputMultiOutputPrediction(nFeatures, nFeatures * 2), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generateNPBatch(generateMultiInputMultiOutputPrediction(nFeatures, nFeatures * 2), 10,
+                inputName, outputName);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(10, predictionInputs.size());
         assertEquals(nFeatures, predictionInputs.get(0).getFeatures().size());
@@ -467,25 +539,29 @@ public class KServeFormatsTest {
         assertEquals(nFeatures * 2, predictionOutputs.get(0).getOutputs().size());
         for (int i = 0; i < nFeatures; i++) {
             final int n = i;
-            assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(n).getName().equals(INPUT_PREFIX + "-" + n)));
+            assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(n).getName().equals(inputName + "-" + n)));
         }
         for (int i = 0; i < nFeatures * 2; i++) {
             final int n = i;
-            assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(n).getName().equals(OUTPUT_PREFIX + "-" + n)));
+            assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(n).getName().equals(outputName + "-" + n)));
         }
     }
 
-    @Test
+    @RepeatedTest(5)
     void testSingleInputSingleOutputPDBatch() {
-        final KServePayloads payload = generatePDBatch(generateSingleInputSingleOutputPrediction(), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generatePDBatch(generateSingleInputSingleOutputPrediction(
+                inputName, outputName), 10);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput(), Optional.empty(), true);
         assertEquals(10, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
         final List<PredictionOutput> predictionOutputs = parseKserveModelInferResponse(payload.getOutput(), Optional.empty(), true);
         assertEquals(10, predictionOutputs.size());
         assertEquals(1, predictionOutputs.get(0).getOutputs().size());
-        assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(0).getName().equals("f-1")));
-        assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(0).getName().equals("o-1")));
+        assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(0).getName().equals(inputName)));
+        assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(0).getName().equals(outputName)));
     }
 
     //
@@ -493,24 +569,30 @@ public class KServeFormatsTest {
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testSingleInputMultiOutputPDBatch(int nOutputs) {
-        final KServePayloads payload = generatePDBatch(generateSingleInputMultiOutputPrediction(nOutputs), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generatePDBatch(generateSingleInputMultiOutputPrediction(nOutputs, inputName, outputName), 10);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput(), Optional.empty(), true);
         assertEquals(10, predictionInputs.size());
         assertEquals(1, predictionInputs.get(0).getFeatures().size());
         final List<PredictionOutput> predictionOutputs = parseKserveModelInferResponse(payload.getOutput());
         assertEquals(10, predictionOutputs.size());
         assertEquals(nOutputs, predictionOutputs.get(0).getOutputs().size());
-        assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(0).getName().equals("f-1")));
+        assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(0).getName().equals(inputName)));
         for (int i = 0; i < nOutputs; i++) {
             final int n = i;
-            assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(n).getName().equals("o-" + n)));
+            assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(n).getName().equals(outputName + "-" + n)));
         }
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 2, 3, 4, 5, 6, 7, 8, 9 })
     void testMultiInputSingleOutputPDBatch(int nFeatures) {
-        final KServePayloads payload = generatePDBatch(generateMultiInputSingleOutputPrediction(nFeatures), 10);
+        final String inputName = generateRandomFeatureName("input");
+        final String outputName = generateRandomFeatureName("output");
+
+        final KServePayloads payload = generatePDBatch(generateMultiInputSingleOutputPrediction(nFeatures, inputName, outputName), 10);
         final List<PredictionInput> predictionInputs = parseKserveModelInferRequest(payload.getInput());
         assertEquals(10, predictionInputs.size());
         assertEquals(nFeatures, predictionInputs.get(0).getFeatures().size());
@@ -519,9 +601,9 @@ public class KServeFormatsTest {
         assertEquals(1, predictionOutputs.get(0).getOutputs().size());
         for (int i = 0; i < nFeatures; i++) {
             final int n = i;
-            assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(n).getName().equals("f-" + n)));
+            assertTrue(predictionInputs.stream().allMatch(pi -> pi.getFeatures().get(n).getName().equals(inputName + "-" + n)));
         }
-        assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(0).getName().equals("o-1")));
+        assertTrue(predictionOutputs.stream().allMatch(po -> po.getOutputs().get(0).getName().equals(outputName)));
     }
 
     @ParameterizedTest
