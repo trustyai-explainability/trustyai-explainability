@@ -3,9 +3,6 @@
 source util/constants
 source util/unit_testing_functions
 
-RESOURCEDIR="resources"
-MM_NAMESPACE="${ODHPROJECT}-model"
-
 os::test::junit::declare_suite_start "$MY_SCRIPT"
 
 
@@ -13,7 +10,7 @@ function setup_test() {
   header "Installing ODH and creating project"
   oc new-project $ODHPROJECT
   oc project $ODHPROJECT
-  os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/odh-core.yaml"
+  os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/common/odh-core.yaml"
 }
 
 
@@ -24,24 +21,36 @@ function check_trustyai_resources() {
   os::cmd::try_until_text "oc get deployment trustyai-service" "trustyai-service" $odhdefaulttimeout $odhdefaultinterval
   os::cmd::try_until_text "oc get route trustyai-service-route" "trustyai-service-route" $odhdefaulttimeout $odhdefaultinterval
 
-  oc wait --for=condition=Ready $(oc get pod -o name | grep trustyai) --timeout=${odhdefaulttimeout}ms
+  echo -n "Waiting on trustyai pod to spin up "
+  while [[ -z "$(oc get pods | grep trustyai-service | grep 1/1)" ]]
+  do
+    echo -n "."
+    sleep 5
+  done
+  echo "[done]"
 }
 
 function deploy_model() {
     header "Deploying model into ModelMesh"
     oc new-project $MM_NAMESPACE
     os::cmd::expect_success "oc project $MM_NAMESPACE"
-    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/service_account.yaml -n ${MM_NAMESPACE}"
+    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/ci/service_account.yaml -n ${MM_NAMESPACE}"
     oc label namespace $MM_NAMESPACE "modelmesh-enabled=true" --overwrite=true || echo "Failed to apply modelmesh-enabled label."
-    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/secret.yaml -n ${MM_NAMESPACE}"
-    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/odh-mlserver-0.x.yaml  -n ${MM_NAMESPACE}"
+    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/common/secret.yaml -n ${MM_NAMESPACE}"
+    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/ci/odh-mlserver-0.x.yaml  -n ${MM_NAMESPACE}"
 
     SECRETKEY=$(openssl rand -hex 32)
-    sed -i "s/<secretkey>/$SECRETKEY/g" ${RESOURCEDIR}/sample-minio.yaml
-    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/sample-minio.yaml -n ${MM_NAMESPACE}"
-    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/openvino-inference-service.yaml -n ${MM_NAMESPACE}"
-    echo "Sleeping for 30s to allow models to download..."
-    sleep 30
+    sed -i "s/<secretkey>/$SECRETKEY/g" ${RESOURCEDIR}/ci/sample-minio.yaml
+    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/ci/sample-minio.yaml -n ${MM_NAMESPACE}"
+    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/ci/openvino-inference-service.yaml -n ${MM_NAMESPACE}"
+
+    echo -n "Waiting on modelserving runtime pods to spin up "
+    while [[ -z "$(oc get pods | grep modelmesh-serving | grep 5/5)" ]]
+    do
+      echo -n "."
+      sleep 5
+    done
+    echo "[done]"
 }
 
 function check_mm_resources() {
@@ -51,7 +60,7 @@ function check_mm_resources() {
   INFER_ROUTE=$(oc get route example-sklearn-isvc --template={{.spec.host}}{{.spec.path}})
   token=$(oc create token user-one -n ${MM_NAMESPACE})
   os::cmd::try_until_text "oc get pod | grep modelmesh-serving" "5/5" $odhdefaulttimeout $odhdefaultinterval
-  os::cmd::try_until_text "curl -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/data.json -H 'Authorization: Bearer $token' -i" "model_name"
+  os::cmd::try_until_text "curl -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/ci/data.json -H 'Authorization: Bearer $token' -i" "model_name"
 }
 
 function check_communication(){
@@ -59,7 +68,7 @@ function check_communication(){
     oc project $MM_NAMESPACE
 
     # send some data to modelmesh
-    os::cmd::expect_success_and_text "curl -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/data.json -H 'Authorization: Bearer $token' -i" "model_name"
+    os::cmd::expect_success_and_text "curl -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/ci/data.json -H 'Authorization: Bearer $token' -i" "model_name"
     oc project ${ODHPROJECT}
     os::cmd::try_until_text "oc logs $(oc get pods -o name | grep trustyai-service)" "Received partial input payload" $odhdefaulttimeout $odhdefaultinterval
 }
@@ -72,7 +81,7 @@ function generate_data(){
     DIVISOR=128.498 # divide bash's $RANDOM by this to get a float range of [0.,255.], for MNIST
     for i in {1..500};
     do
-      DATA=$(sed "s/\[40.83, 3.5, 0.5, 0\]/\[$(($RANDOM % 2)),$(($RANDOM / 128)),$(($RANDOM / 128)), $(($RANDOM / 128)) \]/" ${RESOURCEDIR}/data.json)
+      DATA=$(sed "s/\[40.83, 3.5, 0.5, 0\]/\[$(($RANDOM % 2)),$(($RANDOM / 128)),$(($RANDOM / 128)), $(($RANDOM / 128)) \]/" ${RESOURCEDIR}/ci/data.json)
       curl -k https://$INFER_ROUTE/infer -d "$DATA"  -H 'Authorization: Bearer $token' -i > /dev/null 2>&1 &
       sleep .01
     done
@@ -132,27 +141,35 @@ function teardown_trustyai_test() {
         }'" "Removed"
 
   oc project $MM_NAMESPACE
-  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/secret.yaml"
-  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/odh-mlserver-0.x.yaml"
-  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/model.yaml"
+  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/common/secret.yaml"
+  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/ci/odh-mlserver-0.x.yaml"
+  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/ci/model.yaml"
   os::cmd::expect_success "oc delete project $MM_NAMESPACE"
 }
 
 function teardown_test() {
   oc project $ODHPROJECT
-  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/odh-core.yaml"
+  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/common/odh-core.yaml"
   os::cmd::expect_success "oc delete project $ODHPROJECT"
 }
 
-setup_test
-deploy_model
-check_mm_resources
-check_communication
-generate_data
-schedule_and_check_request
-test_prometheus_scraping
-teardown_trustyai_test
-teardown_test
+
+if [ ! -z $1 ] && [ $1 == "clean" ]; then
+  teardown_trustyai_test
+elif [ ! -z $1 ] && [ $1 == "reset" ]; then
+  teardown_trustyai_test
+  teardown_test
+else
+  setup_test
+  check_trustyai_resources
+  deploy_model
+  check_mm_resources
+  check_communication
+  generate_data
+  schedule_and_check_request
+  test_prometheus_scraping
+fi
+
 
 
 

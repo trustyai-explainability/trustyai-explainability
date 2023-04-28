@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.data.metadata;
 
+import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.payloads.service.Schema;
 
 public class Metadata {
@@ -41,6 +42,28 @@ public class Metadata {
 
     public void incrementObservations(int observations) {
         this.observations += observations;
+    }
+
+    public void mergeInputSchema(Schema otherSchema) {
+        if (otherSchema.equals(this.inputSchema)) {
+            for (int i = 0; i < this.inputSchema.getItems().size(); i++) {
+                this.inputSchema.getItems().get(i).getValues().addAll(otherSchema.getItems().get(i).getValues());
+            }
+        } else {
+            final String message = "Original schema and schema-to-merge are compatible";
+            throw new InvalidSchemaException(message);
+        }
+    }
+
+    public void mergeOutputSchema(Schema otherSchema) {
+        if (otherSchema.equals(this.outputSchema)) {
+            for (int i = 0; i < this.outputSchema.getItems().size(); i++) {
+                this.outputSchema.getItems().get(i).getValues().addAll(otherSchema.getItems().get(i).getValues());
+            }
+        } else {
+            final String message = "Original schema and schema-to-merge are compatible";
+            throw new InvalidSchemaException(message);
+        }
     }
 
     public String getModelId() {

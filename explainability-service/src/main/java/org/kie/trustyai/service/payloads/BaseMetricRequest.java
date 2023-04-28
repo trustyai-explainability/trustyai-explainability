@@ -16,6 +16,7 @@ public class BaseMetricRequest {
     private TypedValue unprivilegedAttribute;
     private String modelId;
     private String requestName;
+    private Double thresholdDelta;
 
     private Integer batchSize;
 
@@ -79,9 +80,12 @@ public class BaseMetricRequest {
         this.unprivilegedAttribute = unprivilegedAttribute;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(protectedAttribute, favorableOutcome, outcomeName, privilegedAttribute, unprivilegedAttribute);
+    public Double getThresholdDelta() {
+        return thresholdDelta;
+    }
+
+    public void setThresholdDelta(Double thresholdDelta) {
+        this.thresholdDelta = thresholdDelta;
     }
 
     public Integer getBatchSize() {
@@ -99,8 +103,12 @@ public class BaseMetricRequest {
         if (o == null || getClass() != o.getClass())
             return false;
         BaseMetricRequest that = (BaseMetricRequest) o;
-        return batchSize == that.batchSize && Objects.equals(protectedAttribute, that.protectedAttribute) && Objects.equals(favorableOutcome, that.favorableOutcome)
-                && Objects.equals(outcomeName, that.outcomeName) && Objects.equals(privilegedAttribute, that.privilegedAttribute) && Objects.equals(unprivilegedAttribute, that.unprivilegedAttribute)
-                && Objects.equals(modelId, that.modelId);
+        return protectedAttribute.equals(that.protectedAttribute) && favorableOutcome.equals(that.favorableOutcome) && outcomeName.equals(that.outcomeName)
+                && privilegedAttribute.equals(that.privilegedAttribute) && unprivilegedAttribute.equals(that.unprivilegedAttribute) && thresholdDelta == that.thresholdDelta;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(protectedAttribute, favorableOutcome, outcomeName, privilegedAttribute, unprivilegedAttribute, thresholdDelta);
     }
 }

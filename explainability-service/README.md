@@ -351,6 +351,31 @@ The metrics will now be pushed to Prometheus with the runtime provided `SERVICE_
 e.g. `SERVICE_METRICS_SCHEDULE=10s`)
 which follows the [Quarkus syntax](https://quarkus.io/guides/scheduler-reference).
 
+You can also specify the bias threshold deltas in the request body:
+```shell
+curl -X POST --location "http://{{host}}/metrics/spd/request" \
+    -H "Content-Type: application/json" \
+    -d "{
+          \"thresholdDelta\": 0.05,
+          \"protectedAttribute\": \"input-2\",
+          \"favorableOutcome\": {
+            \"type\": \"DOUBLE\",
+            \"value\": 1.0
+          },
+          \"outcomeName\": \"output-0\",
+          \"privilegedAttribute\": {
+            \"type\": \"DOUBLE\",
+            \"value\": 1.0
+          },
+          \"unprivilegedAttribute\": {
+            \"type\": \"DOUBLE\",
+            \"value\": 0.0
+          }
+        }"
+```
+This means that _this specific_ metric request will consider SPD values within +/-0.05 to be fair, and values outside
+those bounds to be unfair.
+
 You can also specify the batch size in the request body:
 
 ```shell

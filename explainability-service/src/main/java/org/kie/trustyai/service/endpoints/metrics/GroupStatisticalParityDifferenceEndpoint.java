@@ -95,9 +95,20 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
         }
         final String definition = calculator.getSPDDefinition(spd, request);
 
-        final MetricThreshold thresholds = new MetricThreshold(
-                metricsConfig.spd().thresholdLower(),
-                metricsConfig.spd().thresholdUpper(), spd);
+        MetricThreshold thresholds;
+        if (request.getThresholdDelta() == null) {
+            thresholds =
+                    new MetricThreshold(
+                            metricsConfig.spd().thresholdLower(),
+                            metricsConfig.spd().thresholdUpper(),
+                            spd);
+        } else {
+            thresholds =
+                    new MetricThreshold(
+                            0 - request.getThresholdDelta(),
+                            request.getThresholdDelta(),
+                            spd);
+        }
         final GroupStatisticalParityDifferenceResponse spdObj = new GroupStatisticalParityDifferenceResponse(spd, definition, thresholds);
         return Response.ok(spdObj).build();
     }

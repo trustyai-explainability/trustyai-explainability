@@ -84,11 +84,20 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
         }
         final String dirDefinition = calculator.getDIRDefinition(dir, request);
 
-        final MetricThreshold thresholds =
-                new MetricThreshold(
-                        metricsConfig.dir().thresholdLower(),
-                        metricsConfig.dir().thresholdUpper(),
-                        dir);
+        MetricThreshold thresholds;
+        if (request.getThresholdDelta() == null) {
+            thresholds =
+                    new MetricThreshold(
+                            metricsConfig.dir().thresholdLower(),
+                            metricsConfig.dir().thresholdUpper(),
+                            dir);
+        } else {
+            thresholds =
+                    new MetricThreshold(
+                            1 - request.getThresholdDelta(),
+                            1 + request.getThresholdDelta(),
+                            dir);
+        }
         final DisparateImpactRatioResponse dirObj = new DisparateImpactRatioResponse(dir, dirDefinition, thresholds);
         return Response.ok(dirObj).build();
     }

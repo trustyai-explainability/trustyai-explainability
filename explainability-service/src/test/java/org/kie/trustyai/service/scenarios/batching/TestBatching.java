@@ -35,8 +35,8 @@ class TestBatching {
 
         final int s = inputNames.size();
 
-        List<SchemaItem> inputSchema = IntStream.range(0, s).mapToObj(i -> new SchemaItem(DataType.DOUBLE, inputNames.get(i), i)).collect(Collectors.toList());
-        List<SchemaItem> outputSchema = IntStream.range(s, s + outputNames.size()).mapToObj(i -> new SchemaItem(DataType.DOUBLE, outputNames.get(i - s), i)).collect(Collectors.toList());
+        List<SchemaItem> inputSchema = IntStream.range(0, s).mapToObj(i -> new SchemaItem(DataType.DOUBLE, inputNames.get(i), null, i)).collect(Collectors.toList());
+        List<SchemaItem> outputSchema = IntStream.range(s, s + outputNames.size()).mapToObj(i -> new SchemaItem(DataType.DOUBLE, outputNames.get(i - s), null, i)).collect(Collectors.toList());
 
         metadata.setInputSchema(Schema.from(inputSchema));
         metadata.setOutputSchema(Schema.from(outputSchema));
