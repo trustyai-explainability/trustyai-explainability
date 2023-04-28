@@ -10,10 +10,14 @@ import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.kie.trustyai.explainability.model.Type.*;
 
 public class TensorConverter {
+
+    private static final Logger logger = LoggerFactory.getLogger(TensorConverter.class);
 
     public static KServeDatatype trustyToKserveType(Type type, Value value) throws IllegalArgumentException {
         final Object object = value.getUnderlyingObject();
@@ -111,6 +115,7 @@ public class TensorConverter {
                     final int secondShape = shape.get(1).intValue();
                     final InferTensorContents contents = tensor.getContents();
                     if (isBatch) {
+                        logger.debug("Using NP codec (batch)");
                         return IntStream.range(0, secondShape)
                                 .mapToObj(i -> new PredictionInput(new ArrayList<>(List.of(contentsToFeature(contents, tensor.getDatatype(), tensor.getName(), i)))))
                                 .collect(Collectors.toCollection(ArrayList::new));
@@ -119,12 +124,13 @@ public class TensorConverter {
                             final List<Feature> features = IntStream.range(0, secondShape)
                                     .mapToObj(i -> contentsToFeature(contents, tensor.getDatatype(), featureNames.get().get(i), i))
                                     .collect(Collectors.toCollection(ArrayList::new));
+                            logger.debug("Using NP codec (no batch, provided names)");
                             return new ArrayList<>(List.of(new PredictionInput(features)));
                         } else {
                             final List<Feature> features = IntStream.range(0, secondShape)
                                     .mapToObj(i -> contentsToFeature(contents, tensor.getDatatype(), tensor.getName() + "-" + i, i))
                                     .collect(Collectors.toCollection(ArrayList::new));
-
+                            logger.debug("Using NP codec (no batch)");
                             return new ArrayList<>(List.of(new PredictionInput(features)));
                         }
                     }
@@ -132,6 +138,7 @@ public class TensorConverter {
                     // A single element feature, no batch. PD or NP irrelevant
                     final InferTensorContents contents = tensor.getContents();
                     final Feature feature = contentsToFeature(contents, tensor.getDatatype(), tensor.getName(), 0);
+                    logger.debug("Using NP codec (single input, no batch");
                     return new ArrayList<>(List.of(new PredictionInput(new ArrayList<>(List.of(feature)))));
                 } else {
                     throw new IllegalArgumentException("Shape size not supported for tabular data");
@@ -152,6 +159,7 @@ public class TensorConverter {
                     }
                     predictionInputs.add(new PredictionInput(features));
                 }
+                logger.debug("Using NP codec (batch)");
                 return predictionInputs;
             }
 
@@ -159,6 +167,7 @@ public class TensorConverter {
             final List<Long> shape = data.getInputs(0).getShapeList();
             if (shape.size() < 2) {
                 // Multi-feature PD, no batch
+                logger.debug("Using PD codec (no batch)");
                 final List<ModelInferRequest.InferInputTensor> tensors = data.getInputsList();
                 final List<Feature> features = tensors.stream().map(tensor -> {
                     final InferTensorContents contents = tensor.getContents();
@@ -167,6 +176,7 @@ public class TensorConverter {
                 return new ArrayList<>(List.of(new PredictionInput(features)));
             } else {
                 // Multi-feature PD, batch
+                logger.debug("Using NP codec (batch)");
                 final int secondShape = shape.get(1).intValue();
                 final List<ModelInferRequest.InferInputTensor> tensors = data.getInputsList();
                 final List<List<Feature>> features = tensors.stream().map(tensor -> {
@@ -213,6 +223,7 @@ public class TensorConverter {
                     final int secondShape = shape.get(1).intValue();
                     final InferTensorContents contents = tensor.getContents();
                     if (isBatch) {
+                        logger.debug("Using NP codec (batch)");
                         return IntStream.range(0, secondShape)
                                 .mapToObj(i -> new PredictionOutput(List.of(contentsToOutput(contents, tensor.getDatatype(), tensor.getName(), i))))
                                 .collect(Collectors.toCollection(ArrayList::new));
@@ -221,12 +232,14 @@ public class TensorConverter {
                             final List<Output> output = IntStream.range(0, secondShape)
                                     .mapToObj(i -> contentsToOutput(contents, tensor.getDatatype(), featureNames.get().get(i), i))
                                     .collect(Collectors.toCollection(ArrayList::new));
+                            logger.debug("Using NP codec (no batch, provided names)");
                             return List.of(new PredictionOutput(output));
 
                         } else {
                             final List<Output> output = IntStream.range(0, secondShape)
                                     .mapToObj(i -> contentsToOutput(contents, tensor.getDatatype(), tensor.getName() + "-" + i, i))
                                     .collect(Collectors.toCollection(ArrayList::new));
+                            logger.debug("Using NP codec (no batch)");
                             return List.of(new PredictionOutput(output));
                         }
                     }
@@ -234,6 +247,7 @@ public class TensorConverter {
                     // A single element feature, no batch. PD or NP irrelevant
                     final InferTensorContents contents = tensor.getContents();
                     final Output output = contentsToOutput(contents, tensor.getDatatype(), tensor.getName(), 0);
+                    logger.debug("Using NP codec (single input, no batch");
                     return List.of(new PredictionOutput(List.of(output)));
                 } else {
                     throw new IllegalArgumentException("Shape size not supported for tabular data");
@@ -255,6 +269,7 @@ public class TensorConverter {
                     }
                     predictionOutputs.add(new PredictionOutput(outputs));
                 }
+                logger.debug("Using NP codec (batch)");
                 return predictionOutputs;
             }
 
@@ -262,6 +277,7 @@ public class TensorConverter {
             final List<Long> shape = data.getOutputs(0).getShapeList();
             if (shape.size() < 2) {
                 // Multi-feature PD, no batch
+                logger.debug("Using PD codec (no batch)");
                 final List<ModelInferResponse.InferOutputTensor> tensors = data.getOutputsList();
                 final List<Output> outputs = tensors.stream().map(tensor -> {
                     final InferTensorContents contents = tensor.getContents();
@@ -270,6 +286,7 @@ public class TensorConverter {
                 return List.of(new PredictionOutput(outputs));
             } else {
                 // Multi-feature PD, batch
+                logger.debug("Using NP codec (batch)");
                 final int secondShape = shape.get(1).intValue();
                 final List<ModelInferResponse.InferOutputTensor> tensors = data.getOutputsList();
                 final List<List<Output>> outputs = tensors.stream().map(tensor -> {

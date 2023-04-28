@@ -22,8 +22,6 @@ public class KServeFormatsTest {
 
     private static final String MODEL_ID = "example-1";
     private static final String MODEL_VERSION = "0.0.1";
-    private static final String INPUT_PREFIX = "inputs";
-    private static final String OUTPUT_PREFIX = "outputs";
 
     static Prediction generateSingleInputSingleOutputPrediction(String inputName, String outputName) {
         return new SimplePrediction(
