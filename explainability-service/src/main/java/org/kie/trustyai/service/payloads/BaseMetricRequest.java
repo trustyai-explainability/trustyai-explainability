@@ -103,12 +103,23 @@ public class BaseMetricRequest {
         if (o == null || getClass() != o.getClass())
             return false;
         BaseMetricRequest that = (BaseMetricRequest) o;
-        return protectedAttribute.equals(that.protectedAttribute) && favorableOutcome.equals(that.favorableOutcome) && outcomeName.equals(that.outcomeName)
-                && privilegedAttribute.equals(that.privilegedAttribute) && unprivilegedAttribute.equals(that.unprivilegedAttribute) && thresholdDelta == that.thresholdDelta;
+        return protectedAttribute.equals(that.protectedAttribute)
+                && favorableOutcome.equals(that.favorableOutcome)
+                && outcomeName.equals(that.outcomeName)
+                && privilegedAttribute.equals(that.privilegedAttribute)
+                && unprivilegedAttribute.equals(that.unprivilegedAttribute)
+                && thresholdDelta == that.thresholdDelta
+                && batchSize == that.batchSize;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(protectedAttribute, favorableOutcome, outcomeName, privilegedAttribute, unprivilegedAttribute, thresholdDelta);
+        return Objects.hash(protectedAttribute,
+                favorableOutcome,
+                outcomeName,
+                privilegedAttribute,
+                unprivilegedAttribute,
+                thresholdDelta,
+                batchSize);
     }
 }
