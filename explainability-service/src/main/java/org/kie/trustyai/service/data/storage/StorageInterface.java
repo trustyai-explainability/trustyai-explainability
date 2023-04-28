@@ -12,6 +12,8 @@ public interface StorageInterface {
     @CacheResult(cacheName = "dataframe", keyGenerator = DataCacheKeyGen.class)
     ByteBuffer readData(String modelId) throws StorageReadException;
 
+    ByteBuffer readData(String modelId, int batchSize) throws StorageReadException;
+
     boolean dataExists(String modelId) throws StorageReadException;
 
     void save(ByteBuffer data, String location) throws StorageWriteException;

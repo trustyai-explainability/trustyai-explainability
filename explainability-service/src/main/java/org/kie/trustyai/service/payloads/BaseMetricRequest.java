@@ -18,6 +18,8 @@ public class BaseMetricRequest {
     private String requestName;
     private Double thresholdDelta;
 
+    private Integer batchSize;
+
     public BaseMetricRequest() {
         // Public default no-argument constructor
     }
@@ -84,6 +86,14 @@ public class BaseMetricRequest {
 
     public void setThresholdDelta(Double thresholdDelta) {
         this.thresholdDelta = thresholdDelta;
+    }
+
+    public Integer getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(Integer batchSize) {
+        this.batchSize = batchSize;
     }
 
     @Override

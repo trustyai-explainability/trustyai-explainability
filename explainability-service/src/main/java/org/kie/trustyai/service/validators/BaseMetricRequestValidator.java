@@ -63,6 +63,12 @@ public class BaseMetricRequestValidator implements ConstraintValidator<ValidBase
                         .addConstraintViolation();
                 return false;
             }
+            if (Objects.nonNull(request.getBatchSize()) && request.getBatchSize() <= 0) {
+                context.buildConstraintViolationWithTemplate(
+                        "Request batch size must be bigger than 0.")
+                        .addConstraintViolation();
+                return false;
+            }
         }
         return true;
     }

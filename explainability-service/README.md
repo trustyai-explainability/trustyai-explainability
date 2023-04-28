@@ -8,7 +8,7 @@
         * [Using data in storage only](#using-data-in-storage-only)
             * [Own data in MinIO](#own-data-in-minio)
         * [Consuming KServe v2 data](#consuming-kserve-v2-data)
-    * [S3 (MinIO)](#s3--minio-)
+    * [S3 (MinIO)](#s3-minio)
 * [Endpoints](#endpoints)
     * [Metrics](#metrics)
         * [Statistical Parity Difference](#statistical-parity-difference)
@@ -18,6 +18,7 @@
     * [Prometheus](#prometheus)
     * [Health checks](#health-checks)
     * [Consuming KServe v2 payloads](#consuming-kserve-v2-payloads)
+    * [Service info](#service-info)
 * [Data sources](#data-sources)
     * [Metrics](#metrics-1)
 * [Deployment](#deployment)
@@ -374,6 +375,34 @@ curl -X POST --location "http://{{host}}/metrics/spd/request" \
 ```
 This means that _this specific_ metric request will consider SPD values within +/-0.05 to be fair, and values outside
 those bounds to be unfair.
+
+You can also specify the batch size in the request body:
+
+```shell
+curl -X POST --location "http://{{host}}/metrics/spd/request" \
+    -H "Content-Type: application/json" \
+    -d "{
+          \"batchSize\": 1000,
+          \"protectedAttribute\": \"input-2\",
+          \"favorableOutcome\": {
+            \"type\": \"DOUBLE\",
+            \"value\": 1.0
+          },
+          \"outcomeName\": \"output-0\",
+          \"privilegedAttribute\": {
+            \"type\": \"DOUBLE\",
+            \"value\": 1.0
+          },
+          \"unprivilegedAttribute\": {
+            \"type\": \"DOUBLE\",
+            \"value\": 0.0
+          }
+        }"
+```
+
+This mean that for _this specific_ metric request the dataset used will
+consist of the last 1000 records.
+If the batch size is omitted, the default value is taken from the configuration variable `BATCH_SIZE` as the default.
 
 To stop the periodic calculation you can issue an HTTP `DELETE` request to the `/metrics/$METRIC/request` endpoint, with
 the id of periodic task we want to cancel in the payload.

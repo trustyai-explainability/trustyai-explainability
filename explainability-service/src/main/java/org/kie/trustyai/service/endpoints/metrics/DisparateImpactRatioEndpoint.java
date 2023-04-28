@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.endpoints.metrics;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.enterprise.inject.Instance;
@@ -14,6 +15,7 @@ import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.kie.trustyai.explainability.metrics.utils.FairnessDefinitions;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -47,6 +49,9 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
 
     @Inject
     PrometheusScheduler scheduler;
+
+    @Inject
+    ServiceConfig serviceConfig;
 
     DisparateImpactRatioEndpoint() {
         super();
@@ -119,6 +124,12 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     public Response createRequest(@ValidBaseMetricRequest BaseMetricRequest request) {
 
         final UUID id = UUID.randomUUID();
+
+        if (Objects.isNull(request.getBatchSize())) {
+            final int defaultBatchSize = serviceConfig.batchSize().getAsInt();
+            LOG.warn("Request batch size is empty. Using the default value of " + defaultBatchSize);
+            request.setBatchSize(defaultBatchSize);
+        }
 
         scheduler.registerDIR(id, request);
 
