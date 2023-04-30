@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.MockDatasource;
@@ -83,7 +84,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void postThresh() throws JsonProcessingException {
-        datasource.get();
+        datasource.get().reset();
 
         // with large threshold, the DIR is inside bounds
         BaseMetricRequest payload = RequestPayloadGenerator.correct();
@@ -119,26 +120,23 @@ class DisparateImpactRatioEndpointTest {
     }
 
     @Test
+    @DisplayName("DIR request incorrectly typed")
     void postIncorrectType() throws JsonProcessingException {
         datasource.get().reset();
 
         final BaseMetricRequest payload = RequestPayloadGenerator.incorrectType();
 
-        final DisparateImpactRatioResponse response = given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
-                .statusCode(RestResponse.StatusCode.OK)
-                .extract()
-                .body().as(DisparateImpactRatioResponse.class);
-
-        assertEquals("metric", response.getType());
-        assertEquals("DIR", response.getName());
-        assertTrue(Double.isNaN(response.getValue()));
+                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("Invalid type for outcome. Got 'STRING', expected 'INT32'"));
     }
 
     @Test
+    @DisplayName("DIR request with incorrect input")
     void postIncorrectInput() throws JsonProcessingException {
         datasource.get().reset();
 
@@ -150,7 +148,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .body(is("Error calculating metric"));
+                .body(containsString("No protected attribute found with name=city"));
 
     }
 

@@ -65,7 +65,7 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response dir(BaseMetricRequest request) throws DataframeCreateException {
+    public Response dir(@ValidBaseMetricRequest BaseMetricRequest request) throws DataframeCreateException {
 
         final Dataframe dataframe;
         try {
