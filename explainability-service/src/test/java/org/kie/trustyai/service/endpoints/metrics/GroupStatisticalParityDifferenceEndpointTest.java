@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.MockDatasource;
@@ -114,24 +115,21 @@ class GroupStatisticalParityDifferenceEndpointTest {
     }
 
     @Test
+    @DisplayName("SPD request with incorrect type")
     void postIncorrectType() {
         final BaseMetricRequest payload = RequestPayloadGenerator.incorrectType();
 
-        final GroupStatisticalParityDifferenceResponse response = given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
-                .statusCode(RestResponse.StatusCode.OK)
-                .extract()
-                .body().as(GroupStatisticalParityDifferenceResponse.class);
-
-        assertEquals("metric", response.getType());
-        assertEquals("SPD", response.getName());
-        assertEquals(0.0, response.getValue());
+                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("Invalid type for outcome. Got 'STRING', expected 'INT32'"));
     }
 
     @Test
+    @DisplayName("SPD request with incorrect input")
     void postIncorrectInput() {
         final Map<String, Object> payload = RequestPayloadGenerator.incorrectInput();
 
@@ -141,7 +139,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .body(is("Error calculating metric"));
+                .body(containsString("No protected attribute found with name=city"));
 
     }
 

@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.DisparateImpactRatioEndpoint;
@@ -25,6 +26,7 @@ import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -57,6 +59,7 @@ class DisparateImpactRatioEndpointTest {
     }
 
     @Test
+    @DisplayName("DIR POST correct (no data)")
     void dirPostCorrect() {
         final BaseMetricRequest payload = RequestPayloadGenerator.correct();
 
@@ -66,8 +69,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("No data available"));
-
+                .body(containsString("No metadadata found for model=" + payload.getModelId()));
     }
 
     @Test
@@ -80,7 +82,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("No data available"));
+                .body(containsString("No metadadata found for model=" + payload.getModelId()));
     }
 
     @Test
@@ -93,7 +95,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("No data available"));
+                .body(containsString("No metadadata found for model=" + payload.get("modelId")));
 
     }
 

@@ -76,7 +76,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response spd(BaseMetricRequest request) throws DataframeCreateException {
+    public Response spd(@ValidBaseMetricRequest BaseMetricRequest request) throws DataframeCreateException {
 
         final Dataframe dataframe;
         try {
