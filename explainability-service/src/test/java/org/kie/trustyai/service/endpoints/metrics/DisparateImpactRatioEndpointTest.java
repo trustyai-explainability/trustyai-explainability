@@ -40,16 +40,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class DisparateImpactRatioEndpointTest {
 
     private static final String MODEL_ID = "example1";
+    private static final int N_SAMPLES = 100;
     @Inject
     Instance<MockDatasource> datasource;
-
     @Inject
     Instance<MockMemoryStorage> storage;
 
     @BeforeEach
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }

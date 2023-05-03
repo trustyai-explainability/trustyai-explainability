@@ -68,14 +68,14 @@ public class PrometheusScheduler {
 
                     // SPD requests
                     modelSpdRequest.forEach(entry -> {
-                        final Dataframe batch = df.tail(entry.getValue().getBatchSize());
+                        final Dataframe batch = df.tail(Math.min(df.getRowDimension(), entry.getValue().getBatchSize()));
                         final double spd = calculator.calculateSPD(batch, entry.getValue());
                         publisher.gaugeSPD(entry.getValue(), modelId, entry.getKey(), spd);
                     });
 
                     // DIR requests
                     modelDirRequest.forEach(entry -> {
-                        final Dataframe batch = df.tail(entry.getValue().getBatchSize());
+                        final Dataframe batch = df.tail(Math.min(df.getRowDimension(), entry.getValue().getBatchSize()));
                         final double dir = calculator.calculateDIR(batch, entry.getValue());
                         publisher.gaugeDIR(entry.getValue(), modelId, entry.getKey(), dir);
                     });
