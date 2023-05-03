@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -17,6 +18,7 @@ import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -27,14 +29,14 @@ import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(MetricsEndpointTestProfile.class)
 @TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
 class DisparateImpactRatioRequestsEndpointTest {
 
+    private static final int N_SAMPLES = 100;
     private static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
@@ -137,6 +139,56 @@ class DisparateImpactRatioRequestsEndpointTest {
                 .getDirRequests();
 
         assertTrue(requests.isEmpty());
+    }
+
+    @DisplayName("DIR request with custom batch size")
+    void requestCustomBatchSize() {
+
+        // No schedule request made yet
+        final ScheduleList emptyList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        assertEquals(0, emptyList.requests.size());
+
+        // Perform multiple schedule requests
+        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        payload.setBatchSize(N_SAMPLES - 10);
+        final BaseScheduledResponse firstRequest = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/request")
+                .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
+
+        assertNotNull(firstRequest.getRequestId());
+
+        payload.setBatchSize(N_SAMPLES + 1000);
+        final BaseScheduledResponse secondRequest = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/request")
+                .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
+
+        assertNotNull(secondRequest.getRequestId());
+
+        payload.setBatchSize(0);
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when()
+                .post("/request")
+                .then().statusCode(400).body(containsString("Request batch size must be bigger than 0."));
+
+        ScheduleList scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(2, scheduleList.requests.size());
     }
 
 }

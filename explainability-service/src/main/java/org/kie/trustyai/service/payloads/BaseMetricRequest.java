@@ -108,8 +108,8 @@ public class BaseMetricRequest {
                 && outcomeName.equals(that.outcomeName)
                 && privilegedAttribute.equals(that.privilegedAttribute)
                 && unprivilegedAttribute.equals(that.unprivilegedAttribute)
-                && thresholdDelta == that.thresholdDelta
-                && batchSize == that.batchSize;
+                && Objects.equals(thresholdDelta, that.thresholdDelta)
+                && Objects.equals(batchSize, that.batchSize);
     }
 
     @Override
