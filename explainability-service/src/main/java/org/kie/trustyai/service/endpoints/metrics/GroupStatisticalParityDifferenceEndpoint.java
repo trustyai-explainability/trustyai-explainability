@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.endpoints.metrics;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.enterprise.inject.Instance;
@@ -14,6 +15,7 @@ import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.kie.trustyai.explainability.metrics.utils.FairnessDefinitions;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -47,6 +49,9 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
     @Inject
     MetricsConfig metricsConfig;
 
+    @Inject
+    ServiceConfig serviceConfig;
+
     GroupStatisticalParityDifferenceEndpoint() {
         super();
     }
@@ -71,7 +76,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response spd(BaseMetricRequest request) throws DataframeCreateException {
+    public Response spd(@ValidBaseMetricRequest BaseMetricRequest request) throws DataframeCreateException {
 
         final Dataframe dataframe;
         try {
@@ -90,9 +95,20 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
         }
         final String definition = calculator.getSPDDefinition(spd, request);
 
-        final MetricThreshold thresholds = new MetricThreshold(
-                metricsConfig.spd().thresholdLower(),
-                metricsConfig.spd().thresholdUpper(), spd);
+        MetricThreshold thresholds;
+        if (request.getThresholdDelta() == null) {
+            thresholds =
+                    new MetricThreshold(
+                            metricsConfig.spd().thresholdLower(),
+                            metricsConfig.spd().thresholdUpper(),
+                            spd);
+        } else {
+            thresholds =
+                    new MetricThreshold(
+                            0 - request.getThresholdDelta(),
+                            request.getThresholdDelta(),
+                            spd);
+        }
         final GroupStatisticalParityDifferenceResponse spdObj = new GroupStatisticalParityDifferenceResponse(spd, definition, thresholds);
         return Response.ok(spdObj).build();
     }
@@ -119,6 +135,12 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
     public Response createaRequest(@ValidBaseMetricRequest BaseMetricRequest request) {
 
         final UUID id = UUID.randomUUID();
+
+        if (Objects.isNull(request.getBatchSize())) {
+            final int defaultBatchSize = serviceConfig.batchSize().getAsInt();
+            LOG.warn("Request batch size is empty. Using the default value of " + defaultBatchSize);
+            request.setBatchSize(defaultBatchSize);
+        }
 
         scheduler.registerSPD(id, request);
 

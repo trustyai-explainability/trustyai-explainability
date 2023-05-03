@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.MockDatasource;
@@ -39,16 +40,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class DisparateImpactRatioEndpointTest {
 
     private static final String MODEL_ID = "example1";
+    private static final int N_SAMPLES = 100;
     @Inject
     Instance<MockDatasource> datasource;
-
     @Inject
     Instance<MockMemoryStorage> storage;
 
     @BeforeEach
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }
@@ -82,26 +83,60 @@ class DisparateImpactRatioEndpointTest {
     }
 
     @Test
-    void postIncorrectType() throws JsonProcessingException {
+    void postThresh() throws JsonProcessingException {
         datasource.get().reset();
 
-        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectType();
-
-        final DisparateImpactRatioResponse response = given()
+        // with large threshold, the DIR is inside bounds
+        BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        payload.setThresholdDelta(.5);
+        DisparateImpactRatioResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
-                .statusCode(RestResponse.StatusCode.OK)
+                .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
                 .body().as(DisparateImpactRatioResponse.class);
 
         assertEquals("metric", response.getType());
         assertEquals("DIR", response.getName());
-        assertTrue(Double.isNaN(response.getValue()));
+        assertFalse(response.getThresholds().outsideBounds);
+
+        // with tiny threshold, the DIR is outside bounds
+        payload = RequestPayloadGenerator.correct();
+        payload.setThresholdDelta(.01);
+        response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(DisparateImpactRatioResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("DIR", response.getName());
+        assertTrue(response.getThresholds().outsideBounds);
     }
 
     @Test
+    @DisplayName("DIR request incorrectly typed")
+    void postIncorrectType() throws JsonProcessingException {
+        datasource.get().reset();
+
+        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectType();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("Invalid type for outcome. Got 'STRING', expected 'INT32'"));
+    }
+
+    @Test
+    @DisplayName("DIR request with incorrect input")
     void postIncorrectInput() throws JsonProcessingException {
         datasource.get().reset();
 
@@ -113,7 +148,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .body(is("Error calculating metric"));
+                .body(containsString("No protected attribute found with name=city"));
 
     }
 
@@ -361,6 +396,66 @@ class DisparateImpactRatioEndpointTest {
         for (int i = 0; i < scheduleList.requests.size(); i++) {
             UUID returnedID = scheduleList.requests.get(i).id;
             assertEquals(nameIDs.get(returnedID), scheduleList.requests.get(i).request.getRequestName());
+
+            // delete the corresponding request
+            final ScheduleId thisRequestId = new ScheduleId();
+            thisRequestId.requestId = returnedID;
+            given()
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .body(thisRequestId)
+                    .delete("/request")
+                    .then()
+                    .statusCode(200)
+                    .body(is("Removed"));
+        }
+
+        scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(0, scheduleList.requests.size());
+    }
+
+    @Test
+    void listThresholds() {
+        // No schedule request made yet
+        final ScheduleList emptyList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+        assertEquals(0, emptyList.requests.size());
+
+        List<Double> threshs = List.of(.1, .05, .5);
+        Map<UUID, Double> threshIDs = new HashMap<>();
+
+        // Perform multiple schedule requests
+        for (Double thresh : threshs) {
+            final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+            payload.setThresholdDelta(thresh);
+            BaseScheduledResponse scheduledResponse = given()
+                    .contentType(ContentType.JSON)
+                    .body(payload)
+                    .when()
+                    .post("/request")
+                    .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(BaseScheduledResponse.class);
+            threshIDs.put(scheduledResponse.getRequestId(), thresh);
+        }
+
+        ScheduleList scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(3, scheduleList.requests.size());
+
+        // check that names are as expected
+        for (int i = 0; i < scheduleList.requests.size(); i++) {
+            UUID returnedID = scheduleList.requests.get(i).id;
+            assertEquals(threshIDs.get(returnedID), scheduleList.requests.get(i).request.getThresholdDelta());
 
             // delete the corresponding request
             final ScheduleId thisRequestId = new ScheduleId();

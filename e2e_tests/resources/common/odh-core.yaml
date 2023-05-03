@@ -54,16 +54,6 @@ spec:
         path: notebook-images
     name: notebook-images
   - kustomizeConfig:
-      overlays:
-        - metadata-store-mariadb
-        - ds-pipeline-ui
-        - object-store-minio
-        - default-configs
-      repoRef:
-        name: manifests
-        path: data-science-pipelines
-    name: data-science-pipelines
-  - kustomizeConfig:
       parameters:
       - name: monitoring-namespace
         value: opendatahub
@@ -86,11 +76,6 @@ spec:
         name: manifests-trustyai
         path: e2e_tests/resources/manifests/trustyai-service
     name: trustyai
-  - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: data-science-pipelines-operator/
-    name: data-science-pipelines-operator
   repos:
   - name: manifests
     uri: https://github.com/opendatahub-io/odh-manifests/tarball/master

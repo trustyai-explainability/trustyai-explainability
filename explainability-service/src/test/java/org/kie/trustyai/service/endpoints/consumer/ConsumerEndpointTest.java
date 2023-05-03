@@ -264,8 +264,8 @@ class ConsumerEndpointTest {
                 .body(partialRequestPayloadAWrongSchema)
                 .when().post()
                 .then()
-                .statusCode(RestResponse.StatusCode.OK)
-                .body(is(""));
+                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(is("Invalid schema for payload request id=" + newId + ", Payload schema and stored schema are not the same"));
 
         final InferencePartialPayload partialResponsePayloadBWrongSchema = new InferencePartialPayload();
         partialResponsePayloadBWrongSchema.setId(newId);

@@ -20,6 +20,7 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.data.parsers.DataParser;
 import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
+import org.kie.trustyai.service.payloads.service.Schema;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,14 +60,29 @@ public class DataSource {
 
         final Dataframe dataframe = parser.toDataframe(byteBuffer, metadata);
 
-        if (serviceConfig.batchSize().isPresent()) {
-            final int batchSize = serviceConfig.batchSize().getAsInt();
-            LOG.info("Batching with " + batchSize + " rows. Passing " + dataframe.getRowDimension() + " rows");
-            return dataframe;
-        } else {
-            LOG.info("No batching. Passing all of " + dataframe.getRowDimension() + " rows");
-            return dataframe;
+        return dataframe;
+    }
+
+    public Dataframe getDataframe(final String modelId, int batchSize) throws DataframeCreateException {
+
+        final ByteBuffer byteBuffer;
+        try {
+            byteBuffer = storage.get().readData(modelId, batchSize);
+        } catch (StorageReadException e) {
+            throw new DataframeCreateException(e.getMessage());
         }
+
+        // Fetch metadata, if not yet read
+        final Metadata metadata;
+        try {
+            metadata = getMetadata(modelId);
+        } catch (StorageReadException e) {
+            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+        }
+
+        final Dataframe dataframe = parser.toDataframe(byteBuffer, metadata);
+
+        return dataframe;
     }
 
     public void saveDataframe(final Dataframe dataframe, final String modelId) throws InvalidSchemaException {
@@ -91,8 +107,16 @@ public class DataSource {
             final Metadata metadata = getMetadata(modelId);
 
             // validate metadata
-            if (metadata.getInputSchema().equals(MetadataUtils.getInputSchema(dataframe)) && metadata.getOutputSchema().equals(MetadataUtils.getOutputSchema(dataframe))) {
+            Schema newInputSchema = MetadataUtils.getInputSchema(dataframe);
+            Schema newOutputSchema = MetadataUtils.getOutputSchema(dataframe);
+
+            if (metadata.getInputSchema().equals(newInputSchema) && metadata.getOutputSchema().equals(newOutputSchema)) {
                 metadata.incrementObservations(dataframe.getRowDimension());
+
+                // update value list
+                metadata.mergeInputSchema(newInputSchema);
+                metadata.mergeOutputSchema(newOutputSchema);
+
                 try {
                     saveMetadata(metadata, modelId);
                 } catch (StorageWriteException e) {

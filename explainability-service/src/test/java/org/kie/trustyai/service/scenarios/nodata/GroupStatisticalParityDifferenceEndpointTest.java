@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.GroupStatisticalParityDifferenceEndpoint;
@@ -59,6 +60,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
     }
 
     @Test
+    @DisplayName("SPD POST correct (no data)")
     void spdPostCorrect() {
         final BaseMetricRequest payload = RequestPayloadGenerator.correct();
 
@@ -68,11 +70,12 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("No data available"));
+                .body(containsString("No metadadata found for model=" + payload.getModelId()));
 
     }
 
     @Test
+    @DisplayName("SPD POST incorrect type (no data)")
     void spdPostIncorrectType() {
         final BaseMetricRequest payload = RequestPayloadGenerator.incorrectType();
 
@@ -82,10 +85,11 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("No data available"));
+                .body(containsString("No metadadata found for model=" + payload.getModelId()));
     }
 
     @Test
+    @DisplayName("SPD POST incorrect input (no data)")
     void spdPostIncorrectInput() {
         final Map<String, Object> payload = RequestPayloadGenerator.incorrectInput();
 
@@ -95,7 +99,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("No data available"));
+                .body(containsString("The supplied metric request details are not valid."));
 
     }
 

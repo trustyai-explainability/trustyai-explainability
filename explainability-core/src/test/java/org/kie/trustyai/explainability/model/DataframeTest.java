@@ -597,4 +597,27 @@ class DataframeTest {
         assertEquals(df.getValue(row, 3), outputRow.get(0).getValue());
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = { 1, 100, 5000 })
+    void tailDataframe(int size) {
+        final Dataframe df = createTestDataframe();
+
+        final Dataframe tail = df.tail(size);
+
+        assertEquals(size, tail.getRowDimension());
+        assertEquals(3, tail.getInputsCount());
+        assertEquals(1, tail.getOutputsCount());
+    }
+
+    @Test
+    void tailDataframeInvalid() {
+        final Dataframe df = createTestDataframe();
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            df.tail(N + 1000);
+        });
+        assertEquals("Cannot return more rows than the dataframe has.", exception.getMessage());
+
+    }
+
 }

@@ -61,13 +61,19 @@ public class PVCStorage extends Storage {
     @Override
     public ByteBuffer readData(String modelId) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);
+        return readData(modelId, batchSize);
+    }
+
+    @Override
+    public ByteBuffer readData(String modelId, int batchSize) throws StorageReadException {
+        LOG.debug("Cache miss. Reading data for " + modelId);
         try {
             return ByteBuffer.wrap(
                     BatchReader.linesToBytes(
                             BatchReader.readEntries(
                                     BatchReader.getDataInputStream(
                                             buildDataPath(modelId).toString()),
-                                    this.batchSize)));
+                                    batchSize)));
         } catch (IOException e) {
             LOG.error("Error reading input file for model " + modelId);
             throw new StorageReadException(e.getMessage());

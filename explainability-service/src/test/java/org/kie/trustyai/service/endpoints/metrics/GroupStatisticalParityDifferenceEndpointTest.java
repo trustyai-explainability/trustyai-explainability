@@ -8,12 +8,14 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
+import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponse;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceResponse;
@@ -76,24 +78,58 @@ class GroupStatisticalParityDifferenceEndpointTest {
     }
 
     @Test
-    void postIncorrectType() {
-        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectType();
+    void postThresh() throws JsonProcessingException {
+        datasource.get();
 
-        final GroupStatisticalParityDifferenceResponse response = given()
+        // with large threshold, the DIR is inside bounds
+        BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        payload.setThresholdDelta(.5);
+        DisparateImpactRatioResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
-                .statusCode(RestResponse.StatusCode.OK)
+                .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(GroupStatisticalParityDifferenceResponse.class);
+                .body().as(DisparateImpactRatioResponse.class);
 
         assertEquals("metric", response.getType());
         assertEquals("SPD", response.getName());
-        assertEquals(0.0, response.getValue());
+        assertFalse(response.getThresholds().outsideBounds);
+
+        // with negative threshold, every SPD is outside bounds
+        payload = RequestPayloadGenerator.correct();
+        payload.setThresholdDelta(-1.);
+        response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(DisparateImpactRatioResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("SPD", response.getName());
+        assertTrue(response.getThresholds().outsideBounds);
     }
 
     @Test
+    @DisplayName("SPD request with incorrect type")
+    void postIncorrectType() {
+        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectType();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("Invalid type for outcome. Got 'STRING', expected 'INT32'"));
+    }
+
+    @Test
+    @DisplayName("SPD request with incorrect input")
     void postIncorrectInput() {
         final Map<String, Object> payload = RequestPayloadGenerator.incorrectInput();
 
@@ -103,7 +139,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .body(is("Error calculating metric"));
+                .body(containsString("No protected attribute found with name=city"));
 
     }
 

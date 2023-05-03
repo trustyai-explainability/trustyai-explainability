@@ -3,6 +3,7 @@ package org.kie.trustyai.service.data.storage;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.CRC32;
@@ -11,6 +12,7 @@ import java.util.zip.Checksum;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.logging.Logger;
+import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
@@ -25,21 +27,35 @@ public class MemoryStorage extends Storage {
 
     protected final Map<String, String> data = new ConcurrentHashMap<>();
     private final String dataFilename;
+    private final int batchSize;
 
-    public MemoryStorage(StorageConfig config) {
+    public MemoryStorage(ServiceConfig serviceConfig, StorageConfig config) {
         this.dataFilename = config.dataFilename();
+        this.batchSize = serviceConfig.batchSize().getAsInt();
     }
 
     @Override
     public ByteBuffer readData(final String modelId) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);
+        return readData(modelId, this.batchSize);
+    }
+
+    @Override
+    public ByteBuffer readData(String modelId, int batchSize) throws StorageReadException {
+        LOG.debug("Cache miss. Reading data for " + modelId);
         final String key = getDataFilename(modelId);
         if (data.containsKey(key)) {
-            return ByteBuffer.wrap(data.get(key).getBytes());
+            final String[] lines = data.get(key).split("\n");
+            final int size = lines.length;
+            if (size <= batchSize) {
+                return ByteBuffer.wrap(data.get(key).getBytes());
+            } else {
+                final String lastLines = String.join("\n", Arrays.asList(lines).subList(size - batchSize, size));
+                return ByteBuffer.wrap(lastLines.getBytes());
+            }
         } else {
             throw new StorageReadException("Data file '" + key + "' not found");
         }
-
     }
 
     @Override
