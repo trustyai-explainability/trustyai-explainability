@@ -11,18 +11,11 @@ import javax.inject.Inject;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.service.BaseTestProfile;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
-import org.kie.trustyai.service.payloads.consumer.PartialKind;
-import org.kie.trustyai.service.utils.KServePayloads;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
@@ -32,6 +25,7 @@ import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
+import org.kie.trustyai.service.utils.KServePayloads;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -662,7 +656,7 @@ class ConsumerEndpointFormatsTest {
         assertEquals(predictions.get(0).getOutput().getOutputs().get(0).getValue().asNumber(), storedDf.getValue(0, 2).asNumber());
     }
 
-       @Test
+    @Test
     void consumeFullPostCorrectModelA() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(0);
 
