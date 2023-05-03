@@ -1,7 +1,10 @@
 package org.kie.trustyai.service.data.utils;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.inject.Instance;
@@ -71,7 +74,7 @@ public class InferencePayloadReconciler {
         final byte[] inputBytes = Base64.getDecoder().decode(input.getData().getBytes());
         final byte[] outputBytes = Base64.getDecoder().decode(output.getData().getBytes());
 
-        final Prediction prediction = payloadToPrediction(inputBytes, outputBytes);
+        final Prediction prediction = payloadToPrediction(inputBytes, outputBytes, id);
         final Dataframe dataframe = Dataframe.createFrom(prediction);
 
         datasource.get().saveDataframe(dataframe, modelId);
@@ -86,10 +89,11 @@ public class InferencePayloadReconciler {
      * 
      * @param inputs KServe v2 protobuf raw bytes
      * @param outputs KServe v2 protobuf raw bytes
+     * @param id The unique id of the payload
      * @return A {@link Prediction}
      * @throws DataframeCreateException
      */
-    public Prediction payloadToPrediction(byte[] inputs, byte[] outputs) throws DataframeCreateException {
+    public Prediction payloadToPrediction(byte[] inputs, byte[] outputs, String id) throws DataframeCreateException {
         final ModelInferRequest input;
         try {
             input = ModelInferRequest.parseFrom(inputs);
@@ -117,7 +121,7 @@ public class InferencePayloadReconciler {
 
         // enrich with data and id
         final List<Feature> features = new ArrayList<>();
-        features.add(FeatureFactory.newObjectFeature(MetadataUtils.ID_FIELD, UUID.randomUUID()));
+        features.add(FeatureFactory.newObjectFeature(MetadataUtils.ID_FIELD, id));
         features.add(FeatureFactory.newObjectFeature(MetadataUtils.TIMESTAMP_FIELD, LocalDateTime.now()));
         features.addAll(predictionInput.getFeatures());
 
