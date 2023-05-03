@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
 import java.util.Base64;
+import java.util.UUID;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -48,7 +49,7 @@ public class ConsumerEndpoint {
 
         final Prediction prediction;
         try {
-            prediction = reconciler.payloadToPrediction(inputBytes, outputBytes);
+            prediction = reconciler.payloadToPrediction(inputBytes, outputBytes, String.valueOf(UUID.randomUUID()));
         } catch (DataframeCreateException e) {
             LOG.error("Could not create dataframe from payloads: " + e.getMessage());
             return Response.serverError().status(RestResponse.StatusCode.INTERNAL_SERVER_ERROR).build();
