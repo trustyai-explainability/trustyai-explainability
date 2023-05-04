@@ -4,6 +4,6 @@
 package org.kie.trustyai.connectors.kserve.v2.grpc;
 
 public interface ServerMetadataRequestOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:inference.ServerMetadataRequest)
-        com.google.protobuf.MessageOrBuilder {
+    // @@protoc_insertion_point(interface_extends:inference.ServerMetadataRequest)
+    com.google.protobuf.MessageOrBuilder {
 }
