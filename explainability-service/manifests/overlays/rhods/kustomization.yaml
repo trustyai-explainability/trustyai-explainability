@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+configMapGenerator:
+  - name: trustyai-config
+    behavior: merge
+    env: params.env

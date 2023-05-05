@@ -1,0 +1,30 @@
+name: Build and Push
+on: [ push, pull_request ]
+jobs:
+  # Ensure that tests pass before publishing a new image.
+  build:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: quay.io/trustyai/trustyai-service
+      CI: true
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+      SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build service image
+        run: |
+          docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
+          docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
+          docker build -t ${{ env.IMAGE_NAME }}:ci-$SHA .
+      - name: Log in to Quay
+        run: docker login -u ${{ secrets.QUAY_ROBOT_USERNAME }} -p ${{ secrets.QUAY_ROBOT_SECRET }} quay.io
+      - name: Push to Quay
+        run: |
+          # Strip git ref prefix from version
+          # Currently, we rely on nightly builds for pushing images, so exit if
+          # not a tag version for now.
+          if [ "$BRANCH_NAME" == "main" ]; then
+            echo "Skipping image push"
+            exit 0
+          fi
+          docker push ${{ env.IMAGE_NAME }}-ci:$SHA
