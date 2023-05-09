@@ -5,7 +5,8 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.metrics.FairnessMetrics;
+import org.kie.trustyai.explainability.metrics.fairness.group.DisparateImpactRatio;
+import org.kie.trustyai.explainability.metrics.fairness.group.GroupStatisticalParityDifference;
 import org.kie.trustyai.explainability.metrics.utils.FairnessDefinitions;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
@@ -36,7 +37,7 @@ public class MetricsCalculator {
                     value -> value.equals(unprivilegedAttr));
             final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
             final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
-            return FairnessMetrics.groupStatisticalParityDifference(privileged, unprivileged,
+            return GroupStatisticalParityDifference.calculate(privileged, unprivileged,
                     List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
         } catch (Exception e) {
             throw new MetricCalculationException(e.getMessage(), e);
@@ -74,7 +75,7 @@ public class MetricsCalculator {
                     value -> value.equals(unprivilegedAttr));
             final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
             final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
-            return FairnessMetrics.groupDisparateImpactRatio(privileged, unprivileged,
+            return DisparateImpactRatio.calculate(privileged, unprivileged,
                     List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
         } catch (Exception e) {
             throw new MetricCalculationException(e.getMessage(), e);
