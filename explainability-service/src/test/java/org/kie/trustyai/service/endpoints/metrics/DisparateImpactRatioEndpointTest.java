@@ -102,9 +102,9 @@ class DisparateImpactRatioEndpointTest {
         assertEquals("DIR", response.getName());
         assertFalse(response.getThresholds().outsideBounds);
 
-        // with tiny threshold, the DIR is outside bounds
+        // with negative threshold, the DIR is guaranteed outside bounds
         payload = RequestPayloadGenerator.correct();
-        payload.setThresholdDelta(.01);
+        payload.setThresholdDelta(-.5);
         response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)

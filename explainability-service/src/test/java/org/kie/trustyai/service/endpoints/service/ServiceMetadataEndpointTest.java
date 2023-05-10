@@ -75,7 +75,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void getThousandObservations() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 50);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -93,7 +93,7 @@ class ServiceMetadataEndpointTest {
         assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
 
         // check column values
-        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get(0).getValues().size());
+        assertEquals(50, serviceMetadata.get(0).getData().getInputSchema().getItems().get(0).getValues().size());
         assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get(1).getValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
