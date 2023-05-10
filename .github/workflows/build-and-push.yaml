@@ -1,5 +1,5 @@
 name: Build and Push
-on: [ push, pull_request ]
+on: [ push, pull_request_target ]
 jobs:
   # Ensure that tests pass before publishing a new image.
   build:
