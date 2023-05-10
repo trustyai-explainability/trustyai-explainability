@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.explainability.metrics.fairness;
+package org.kie.trustyai.metrics.fairness;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +25,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.kie.trustyai.explainability.metrics.ConfusionMatrix;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.metrics.accuracy.ConfusionMatrix;
 
 public class FairnessMetricsUtils {
 

@@ -1,4 +1,4 @@
-package org.kie.trustyai.explainability.metrics.fairness.individual;
+package org.kie.trustyai.metrics.fairness.individual;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;

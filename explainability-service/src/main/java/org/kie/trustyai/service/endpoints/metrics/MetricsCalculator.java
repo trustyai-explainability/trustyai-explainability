@@ -5,13 +5,13 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.metrics.fairness.group.DisparateImpactRatio;
-import org.kie.trustyai.explainability.metrics.fairness.group.GroupStatisticalParityDifference;
-import org.kie.trustyai.explainability.metrics.utils.FairnessDefinitions;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.metrics.fairness.FairnessDefinitions;
+import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
+import org.kie.trustyai.metrics.fairness.group.GroupStatisticalParityDifference;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;

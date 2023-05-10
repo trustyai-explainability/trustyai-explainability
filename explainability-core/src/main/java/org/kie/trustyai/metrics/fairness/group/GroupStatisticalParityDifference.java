@@ -1,16 +1,16 @@
-package org.kie.trustyai.explainability.metrics.fairness.group;
+package org.kie.trustyai.metrics.fairness.group;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.explainability.metrics.fairness.FairnessMetricsUtils;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.metrics.fairness.FairnessMetricsUtils;
 
-public class DisparateImpactRatio {
+public class GroupStatisticalParityDifference {
     /**
-     * Calculate disparate impact ratio (DIR).
+     * Calculate statistical/demographic parity difference (SPD).
      *
      * @param groupSelector a predicate used to select the privileged group
      * @param samples a list of inputs to be used for testing fairness
@@ -27,18 +27,18 @@ public class DisparateImpactRatio {
         double probabilityUnprivileged = FairnessMetricsUtils.getFavorableLabelProbability(groupSelector.negate(), samples, model, favorableOutput);
         double probabilityPrivileged = FairnessMetricsUtils.getFavorableLabelProbability(groupSelector, samples, model, favorableOutput);
 
-        return probabilityUnprivileged / probabilityPrivileged;
+        return probabilityUnprivileged - probabilityPrivileged;
     }
 
     /**
-     * Calculate disparate impact ratio (DIR).
+     * Calculate statistical/demographic parity difference (SPD)
      *
      * @param samples A dataframe of inputs to be used for testing fairness
      * @param model A model as a {@link PredictionProvider} to be tested for fairness
      * @param priviledgeColumns A {@link List} of integers specifying the privileged columns
      * @param priviledgeValues A {@link List} of {@link Value} specifying the privileged values
      * @param favorableOutput The favorable output
-     * @return The DIR score
+     * @return The group SPD score
      * @throws ExecutionException
      * @throws InterruptedException
      */
@@ -62,20 +62,22 @@ public class DisparateImpactRatio {
     }
 
     /**
-     * Calculate disparate impact ratio (DIR).
+     * Calculate statistical/demographic parity difference (SPD) when the
+     * labels are pre-calculated.
      *
      * @param priviledged {@link Dataframe} with the priviledged groups
      * @param unpriviledged {@link Dataframe} with the unpriviledged groups
      * @param favorableOutput an output that is considered favorable / desirable
-     * @return DIR, between 0 and 1
+     * @return SPD, between 0 and 1
      */
     public static double calculate(Dataframe priviledged, Dataframe unpriviledged, List<Output> favorableOutput) {
+
         final List<Value> favorableValues = favorableOutput.stream().map(Output::getValue).collect(Collectors.toUnmodifiableList());
         final Predicate<List<Value>> match = values -> values.equals(favorableValues);
 
         final double probabilityPrivileged = (double) priviledged.filterRowsByOutputs(match).getRowDimension() / (double) priviledged.getRowDimension();
         final double probabilityUnprivileged = (double) unpriviledged.filterRowsByOutputs(match).getRowDimension() / (double) unpriviledged.getRowDimension();
 
-        return probabilityUnprivileged / probabilityPrivileged;
+        return probabilityUnprivileged - probabilityPrivileged;
     }
 }

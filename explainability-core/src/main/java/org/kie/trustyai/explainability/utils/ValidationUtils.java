@@ -19,10 +19,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.kie.trustyai.explainability.local.LocalExplainer;
-import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.SaliencyResults;
+import org.kie.trustyai.metrics.explainability.ExplainabilityMetrics;
 
 /**
  * Utility class for validating desiderata about models' explainability.
