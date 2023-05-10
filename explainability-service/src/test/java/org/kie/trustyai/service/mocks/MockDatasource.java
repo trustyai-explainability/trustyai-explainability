@@ -46,7 +46,7 @@ public class MockDatasource extends DataSource {
                     FeatureFactory.newObjectFeature(MetadataUtils.TIMESTAMP_FIELD, LocalDateTime.now()),
 
                     // guarantee feature diversity for age is min(observations, featureDiversity)
-                    FeatureFactory.newNumericalFeature("age", i%featureDiversity),
+                    FeatureFactory.newNumericalFeature("age", i % featureDiversity),
                     FeatureFactory.newNumericalFeature("gender", random.nextBoolean() ? 1 : 0),
                     FeatureFactory.newNumericalFeature("race", random.nextBoolean() ? 1 : 0));
             final PredictionInput predictionInput = new PredictionInput(featureList);
