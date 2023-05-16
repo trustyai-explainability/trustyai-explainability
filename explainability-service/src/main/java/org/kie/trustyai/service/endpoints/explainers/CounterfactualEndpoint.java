@@ -16,8 +16,7 @@
 package org.kie.trustyai.service.endpoints.explainers;
 
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutionException;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -30,11 +29,9 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.connectors.kserve.v2.KServeV2GRPCPredictionProvider;
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualExplainer;
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualResult;
 import org.kie.trustyai.explainability.model.CounterfactualPrediction;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
@@ -43,14 +40,17 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.data.utils.MetadataUtils;
+import org.kie.trustyai.service.payloads.BaseExplanationRequest;
+import org.kie.trustyai.service.payloads.BaseExplanationResponse;
 import org.kie.trustyai.service.payloads.CFExplanationRequest;
+import org.kie.trustyai.service.payloads.CounterfactualExplanationResponse;
 
 @Tag(name = "Counterfactual Explainer Endpoint", description = ".")
 @Path("/explainers/cf")
-public class CounterfactualEndpoint {
+public class CounterfactualEndpoint extends ExplainerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(CounterfactualEndpoint.class);
+
     @Inject
     Instance<DataSource> dataSource;
 
@@ -61,40 +61,25 @@ public class CounterfactualEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response explain(CFExplanationRequest request) throws DataframeCreateException {
-        final Dataframe dataframe;
+        return processRequest(request, dataSource.get(), serviceConfig);
+    }
+
+    @Override
+    public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain, List<PredictionInput> inputs) {
+        CounterfactualExplainer counterfactualExplainer = new CounterfactualExplainer();
         try {
-            dataframe = dataSource.get().getDataframe(request.getModelId());
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+            CounterfactualResult counterfactualResult = counterfactualExplainer.explainAsync(predictionToExplain, model).get();
+            return CounterfactualExplanationResponse.from(counterfactualResult);
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Failed to explain {} ", predictionToExplain, e);
+            return CounterfactualExplanationResponse.empty();
         }
+    }
 
-        List<Prediction> predictions = dataframe.asPredictions();
-        if (predictions != null) {
-            try {
-                Predicate<Prediction> idFilter = prediction -> prediction.getInput()
-                        .getFeatureByName(MetadataUtils.ID_FIELD).orElseThrow()
-                        .getValue().asString().equals(request.getPredictionId());
-                Prediction predictionToExplain = predictions.stream().filter(idFilter).findFirst().orElseThrow();
-
-                PredictionProvider model = KServeV2GRPCPredictionProvider.forTarget(serviceConfig.kserveTarget()
-                                                                                            .orElseThrow(), request.getModelId());
-                List<PredictionInput> inputs = predictions.stream().filter(idFilter.negate()).map(Prediction::getInput)
-                        .limit(100).collect(Collectors.toList());
-
-                CounterfactualPrediction counterfactualPrediction = new CounterfactualPrediction(
-                        predictionToExplain.getInput(), new PredictionOutput(request.getGoals()),
-                        new PredictionInputsDataDistribution(inputs), predictionToExplain.getExecutionId(), 300L);
-                CounterfactualExplainer counterfactualExplainer = new CounterfactualExplainer();
-                CounterfactualResult counterfactualResult = counterfactualExplainer.explainAsync(counterfactualPrediction, model).get();
-
-                return Response.ok(counterfactualResult).build();
-            } catch (Exception e) {
-                LOG.error("Could not generate explanation, {}", e);
-                return Response.serverError().build();
-            }
-        } else {
-            return Response.noContent().build();
-        }
+    @Override
+    protected Prediction prepare(Prediction prediction, BaseExplanationRequest request, List<PredictionInput> testData) {
+        return new CounterfactualPrediction(
+                prediction.getInput(), new PredictionOutput(((CFExplanationRequest) request).getGoals()),
+                new PredictionInputsDataDistribution(testData), prediction.getExecutionId(), 300L);
     }
 }

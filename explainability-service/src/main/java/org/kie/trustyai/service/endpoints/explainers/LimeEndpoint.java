@@ -16,8 +16,7 @@
 package org.kie.trustyai.service.endpoints.explainers;
 
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutionException;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -30,24 +29,21 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.connectors.kserve.v2.KServeV2GRPCPredictionProvider;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
 import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.payloads.BaseExplanationRequest;
+import org.kie.trustyai.service.payloads.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.SaliencyExplanationResponse;
 
 @Tag(name = "LIME Explainer Endpoint", description = ".")
 @Path("/explainers/lime")
-public class LimeEndpoint {
+public class LimeEndpoint extends ExplainerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(LimeEndpoint.class);
     @Inject
@@ -59,41 +55,24 @@ public class LimeEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response explain(BaseExplanationRequest request) throws DataframeCreateException {
-        final Dataframe dataframe;
+    public Response explain(BaseExplanationRequest request) {
+        return processRequest(request, dataSource.get(), serviceConfig);
+    }
+
+    @Override
+    public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain, List<PredictionInput> inputs) {
+        LimeConfig config = new LimeConfig().withDataDistribution(new PredictionInputsDataDistribution(inputs));
+        LimeExplainer limeExplainer = new LimeExplainer(config); //TODO: switch to RecordingLimeExplainer?
         try {
-            dataframe = dataSource.get().getDataframe(request.getModelId());
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
-        }
-
-        List<Prediction> predictions = dataframe.asPredictions();
-        if (predictions != null) {
-            try {
-                Predicate<Prediction> idFilter = prediction -> prediction.getInput()
-                        .getFeatureByName(MetadataUtils.ID_FIELD).orElseThrow()
-                        .getValue().asString().equals(request.getPredictionId());
-                Prediction predictionToExplain = predictions.stream().filter(idFilter).findFirst().orElseThrow();
-
-                PredictionProvider model = KServeV2GRPCPredictionProvider.forTarget(serviceConfig.kserveTarget()
-                                                                                            .orElseThrow(), request.getModelId());
-
-                List<PredictionInput> inputs = predictions.stream().filter(idFilter.negate()).map(Prediction::getInput)
-                        .limit(100).collect(Collectors.toList());
-                LimeConfig config = new LimeConfig().withDataDistribution(new PredictionInputsDataDistribution(inputs));
-                LimeExplainer limeExplainer = new LimeExplainer(config);
-
-                SaliencyResults saliencyResults = limeExplainer.explainAsync(predictionToExplain, model).get();
-
-                return Response.ok(saliencyResults).build();
-            } catch (Exception e) {
-                LOG.error("Could not generate explanation, {}", e);
-                return Response.serverError().build();
-            }
-        } else {
-            return Response.noContent().build();
+            return SaliencyExplanationResponse.fromSaliencyResults(limeExplainer.explainAsync(predictionToExplain, model).get());
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Failed to explain {} ", predictionToExplain, e);
+            return SaliencyExplanationResponse.empty();
         }
     }
 
+    @Override
+    protected Prediction prepare(Prediction prediction, BaseExplanationRequest request, List<PredictionInput> testData) {
+        return prediction;
+    }
 }
