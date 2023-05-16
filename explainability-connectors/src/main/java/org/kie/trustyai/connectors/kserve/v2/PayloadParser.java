@@ -9,7 +9,47 @@ import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
 
+import com.google.protobuf.ByteString;
+
 public class PayloadParser {
+
+    public static PredictionInput requestToInput(ModelInferRequest request, List<String> inputNames) throws IllegalArgumentException {
+
+        // If we don't have raw contents, process with the default parser
+        if (request.getRawInputContentsList().isEmpty()) {
+            return inputTensorToPredictionInput(request.getInputs(0), inputNames);
+        } else { // We have raw contents and need to parse accordingly
+            return rawContentToPredictionInput(request, inputNames);
+        }
+    }
+
+    public static PredictionInput rawContentToPredictionInput(ModelInferRequest request, List<String> inputNames) throws IllegalArgumentException {
+        final ModelInferRequest.InferInputTensor tensor = request.getInputs(0);
+        final ByteString raw = request.getRawInputContents(0);
+        final KServeDatatype type;
+        try {
+            type = KServeDatatype.valueOf(tensor.getDatatype());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+        }
+        switch (type) {
+            case BOOL:
+                return inputFromContentList(RawConverter.toBoolean(raw), Type.BOOLEAN, inputNames);
+            case INT8:
+            case INT16:
+            case INT32:
+                return inputFromContentList(RawConverter.toInteger(raw), Type.NUMBER, inputNames);
+            case INT64:
+                return inputFromContentList(RawConverter.toLong(raw), Type.NUMBER, inputNames);
+            case FP32:
+                return inputFromContentList(RawConverter.toFloat(raw), Type.NUMBER, inputNames);
+            case FP64:
+                return inputFromContentList(RawConverter.toDouble(raw), Type.NUMBER, inputNames);
+            default:
+                throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+        }
+
+    }
 
     public static PredictionInput inputTensorToPredictionInput(ModelInferRequest.InferInputTensor tensor,
             List<String> inputNames) throws IllegalArgumentException {
