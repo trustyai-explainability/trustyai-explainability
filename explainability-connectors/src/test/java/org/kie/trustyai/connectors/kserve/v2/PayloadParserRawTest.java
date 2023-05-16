@@ -5,7 +5,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.PredictionInput;
@@ -41,21 +40,21 @@ class PayloadParserRawTest {
         System.out.println(predictionInput.getFeatures().get(0));
     }
 
+    // Output tests
     @Test
     void modelInferResponseToPredictionOutputMulti() {
 
         final Random random = new Random();
         final List<Double> values = random.doubles(3).boxed().collect(Collectors.toList());
-        InferTensorContents.Builder contents = InferTensorContents.newBuilder()
-                .addFp64Contents(values.get(0))
-                .addFp64Contents(values.get(1))
-                .addFp64Contents(values.get(2));
 
+        ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
+        response.addRawOutputContents(RawConverterUtils.fromDouble(values));
         ModelInferResponse.InferOutputTensor outputTensor = ModelInferResponse.InferOutputTensor.newBuilder()
                 .setDatatype("FP64")
-                .addShape(1).addShape(3).setContents(contents).build();
+                .addShape(1).addShape(3).build();
+        response.addOutputs(outputTensor);
 
-        PredictionOutput predictionOutput = PayloadParser.outputTensorToPredictionOutput(outputTensor, null);
+        PredictionOutput predictionOutput = PayloadParser.rawContentToPredictionOutput(response.build(), null);
 
         assertEquals(3, predictionOutput.getOutputs().size());
         for (int i = 0; i < 3; i++) {
@@ -68,16 +67,14 @@ class PayloadParserRawTest {
 
         final Random random = new Random();
         final List<Float> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
-        InferTensorContents.Builder contents = InferTensorContents.newBuilder()
-                .addFp32Contents(values.get(0))
-                .addFp32Contents(values.get(1))
-                .addFp32Contents(values.get(2));
-
+        ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
+        response.addRawOutputContents(RawConverterUtils.fromFloat(values));
         ModelInferResponse.InferOutputTensor outputTensor = ModelInferResponse.InferOutputTensor.newBuilder()
                 .setDatatype("FP32")
-                .addShape(1).addShape(3).setContents(contents).build();
+                .addShape(1).addShape(3).build();
+        response.addOutputs(outputTensor);
 
-        PredictionOutput predictionOutput = PayloadParser.outputTensorToPredictionOutput(outputTensor, null);
+        PredictionOutput predictionOutput = PayloadParser.rawContentToPredictionOutput(response.build(), null);
 
         assertEquals(3, predictionOutput.getOutputs().size());
         for (int i = 0; i < 3; i++) {
@@ -90,16 +87,14 @@ class PayloadParserRawTest {
 
         final Random random = new Random();
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
-        InferTensorContents.Builder contents = InferTensorContents.newBuilder()
-                .addFp64Contents(values.get(0))
-                .addFp64Contents(values.get(1))
-                .addFp64Contents(values.get(2));
-
+        ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
+        response.addRawOutputContents(RawConverterUtils.fromDouble(values));
         ModelInferResponse.InferOutputTensor outputTensor = ModelInferResponse.InferOutputTensor.newBuilder()
                 .setDatatype("FP64")
-                .addShape(1).addShape(3).setContents(contents).build();
+                .addShape(1).addShape(3).build();
+        response.addOutputs(outputTensor);
 
-        PredictionOutput predictionOutput = PayloadParser.outputTensorToPredictionOutput(outputTensor, null);
+        PredictionOutput predictionOutput = PayloadParser.rawContentToPredictionOutput(response.build(), null);
 
         assertEquals(3, predictionOutput.getOutputs().size());
         for (int i = 0; i < 3; i++) {
@@ -112,16 +107,14 @@ class PayloadParserRawTest {
 
         final Random random = new Random();
         final List<Float> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
-        InferTensorContents.Builder contents = InferTensorContents.newBuilder()
-                .addFp32Contents(values.get(0))
-                .addFp32Contents(values.get(1))
-                .addFp32Contents(values.get(2));
-
+        ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
+        builder.addRawInputContents(RawConverterUtils.fromFloat(values));
         ModelInferRequest.InferInputTensor tensor = ModelInferRequest.InferInputTensor.newBuilder()
                 .setDatatype("FP32")
-                .addShape(1).addShape(3).setContents(contents).build();
+                .addShape(1).addShape(3).build();
+        builder.addInputs(tensor);
 
-        PredictionInput predictionInput = PayloadParser.inputTensorToPredictionInput(tensor, null);
+        PredictionInput predictionInput = PayloadParser.rawContentToPredictionInput(builder.build(), null);
 
         assertEquals(3, predictionInput.getFeatures().size());
         for (int i = 0; i < 3; i++) {
@@ -134,16 +127,14 @@ class PayloadParserRawTest {
 
         final Random random = new Random();
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
-        InferTensorContents.Builder contents = InferTensorContents.newBuilder()
-                .addFp64Contents(values.get(0))
-                .addFp64Contents(values.get(1))
-                .addFp64Contents(values.get(2));
-
+        ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
+        builder.addRawInputContents(RawConverterUtils.fromDouble(values));
         ModelInferRequest.InferInputTensor tensor = ModelInferRequest.InferInputTensor.newBuilder()
                 .setDatatype("FP64")
-                .addShape(1).addShape(3).setContents(contents).build();
+                .addShape(1).addShape(3).build();
+        builder.addInputs(tensor);
 
-        PredictionInput predictionInput = PayloadParser.inputTensorToPredictionInput(tensor, null);
+        PredictionInput predictionInput = PayloadParser.rawContentToPredictionInput(builder.build(), null);
 
         assertEquals(3, predictionInput.getFeatures().size());
         for (int i = 0; i < 3; i++) {

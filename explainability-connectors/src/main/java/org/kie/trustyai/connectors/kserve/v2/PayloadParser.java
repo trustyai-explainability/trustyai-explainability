@@ -78,6 +78,45 @@ public class PayloadParser {
         }
     }
 
+    public static PredictionOutput responseToOutput(ModelInferResponse response, List<String> outputNames) throws IllegalArgumentException {
+
+        // If we don't have raw contents, process with the default parser
+        if (response.getRawOutputContentsList().isEmpty()) {
+            return outputTensorToPredictionOutput(response.getOutputs(0), outputNames);
+        } else { // We have raw contents and need to parse accordingly
+            return rawContentToPredictionOutput(response, outputNames);
+        }
+    }
+
+    public static PredictionOutput rawContentToPredictionOutput(ModelInferResponse response,
+            List<String> outputNames) throws IllegalArgumentException {
+        final ModelInferResponse.InferOutputTensor tensor = response.getOutputs(0);
+        final ByteString raw = response.getRawOutputContents(0);
+        final KServeDatatype type;
+        try {
+            type = KServeDatatype.valueOf(tensor.getDatatype());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Currently unsupported type for Tensor output, type=" + tensor.getDatatype());
+        }
+
+        switch (type) {
+            case BOOL:
+                return outputFromContentList(RawConverter.toBoolean(raw), Type.BOOLEAN, outputNames);
+            case INT8:
+            case INT16:
+            case INT32:
+                return outputFromContentList(RawConverter.toInteger(raw), Type.NUMBER, outputNames);
+            case INT64:
+                return outputFromContentList(RawConverter.toLong(raw), Type.NUMBER, outputNames);
+            case FP32:
+                return outputFromContentList(RawConverter.toFloat(raw), Type.NUMBER, outputNames);
+            case FP64:
+                return outputFromContentList(RawConverter.toDouble(raw), Type.NUMBER, outputNames);
+            default:
+                throw new IllegalArgumentException("Currently unsupported type for Tensor output, type=" + tensor.getDatatype());
+        }
+    }
+
     public static PredictionOutput outputTensorToPredictionOutput(ModelInferResponse.InferOutputTensor tensor,
             List<String> outputNames) throws IllegalArgumentException {
         final InferTensorContents responseOutputContents = tensor.getContents();
