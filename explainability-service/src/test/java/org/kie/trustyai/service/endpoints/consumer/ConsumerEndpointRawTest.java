@@ -12,9 +12,8 @@ import javax.inject.Inject;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.kie.trustyai.connectors.kserve.v2.RawConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -22,7 +21,6 @@ import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.RawConverterUtils;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
 
@@ -43,7 +41,6 @@ import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 @QuarkusTest
 @TestProfile(BaseTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ConsumerEndpointRawTest {
 
     @Inject
@@ -56,7 +53,7 @@ class ConsumerEndpointRawTest {
         final Random random = new Random();
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
         ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
-        builder.addRawInputContents(RawConverterUtils.fromDouble(values));
+        builder.addRawInputContents(RawConverter.fromDouble(values));
         ModelInferRequest.InferInputTensor tensor = ModelInferRequest.InferInputTensor.newBuilder()
                 .setDatatype("FP64")
                 .addShape(1).addShape(3)
@@ -77,7 +74,7 @@ class ConsumerEndpointRawTest {
         final Random random = new Random();
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble());
         ModelInferResponse.Builder builder = ModelInferResponse.newBuilder();
-        builder.addRawOutputContents(RawConverterUtils.fromDouble(values));
+        builder.addRawOutputContents(RawConverter.fromDouble(values));
         ModelInferResponse.InferOutputTensor tensor = ModelInferResponse.InferOutputTensor.newBuilder()
                 .setDatatype("FP64")
                 .addShape(1).addShape(2)
