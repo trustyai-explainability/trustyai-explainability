@@ -1,6 +1,8 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
+import java.util.Base64;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -9,15 +11,19 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.jboss.resteasy.reactive.RestResponse;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
+import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
-import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.payloads.RawConverterUtils;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
-import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
@@ -31,17 +37,62 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 
+/**
+ * Test the {@link ConsumerEndpoint} with raw content payloads.
+ */
 @QuarkusTest
 @TestProfile(BaseTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ConsumerEndpointTest {
+class ConsumerEndpointRawTest {
 
     @Inject
     Instance<MockDatasource> datasource;
 
     @Inject
     Instance<MockMemoryStorage> storage;
+
+    private static InferencePartialPayload createInput(UUID id) {
+        final Random random = new Random();
+        final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
+        ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
+        builder.addRawInputContents(RawConverterUtils.fromDouble(values));
+        ModelInferRequest.InferInputTensor tensor = ModelInferRequest.InferInputTensor.newBuilder()
+                .setDatatype("FP64")
+                .addShape(1).addShape(3)
+                .build();
+        builder.addInputs(tensor);
+        builder.setModelName(MODEL_A_ID);
+        builder.setModelVersion("1");
+        builder.setId(id.toString());
+        final InferencePartialPayload payload = new InferencePartialPayload();
+        payload.setKind(PartialKind.request);
+        payload.setData(Base64.getEncoder().encodeToString(builder.build().toByteArray()));
+        payload.setId(id.toString());
+        payload.setModelId(MODEL_A_ID);
+        return payload;
+    }
+
+    private static InferencePartialPayload createOutput(UUID id) {
+        final Random random = new Random();
+        final List<Double> values = List.of(random.nextDouble(), random.nextDouble());
+        ModelInferResponse.Builder builder = ModelInferResponse.newBuilder();
+        builder.addRawOutputContents(RawConverterUtils.fromDouble(values));
+        ModelInferResponse.InferOutputTensor tensor = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .addShape(1).addShape(2)
+                .build();
+        builder.addOutputs(tensor);
+        builder.setModelName(MODEL_A_ID);
+        builder.setModelVersion("1");
+        builder.setId(id.toString());
+        final InferencePartialPayload payload = new InferencePartialPayload();
+        payload.setKind(PartialKind.response);
+        payload.setData(Base64.getEncoder().encodeToString(builder.build().toByteArray()));
+        payload.setId(id.toString());
+        payload.setModelId(MODEL_A_ID);
+        return payload;
+    }
 
     /**
      * Empty the storage before each test.
@@ -52,85 +103,14 @@ class ConsumerEndpointTest {
         storage.get().emptyStorage();
     }
 
-    @Order(1)
-    @Test
-    void consumeFullPostCorrectModelA() {
-        final InferencePayload payload = PayloadProducer.getInferencePayloadA(0);
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/full")
-                .then()
-                .statusCode(RestResponse.StatusCode.OK)
-
-                .body(is(""));
-
-        final Dataframe dataframe = datasource.get().getDataframe(payload.getModelId());
-        assertEquals(1, dataframe.getRowDimension());
-        assertEquals(4, dataframe.getColumnDimension());
-        assertEquals(3, dataframe.getInputsCount());
-        assertEquals(1, dataframe.getOutputsCount());
-    }
-
-    @Order(3)
-    @Test
-    void consumeFullPostIncorrectModelA() {
-        final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
-        // Mangle inputs
-        payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/full")
-                .then()
-                .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
-
-                .body(is(""));
-    }
-
-    @Order(2)
-    @Test
-    void consumeFullPostCorrectModelB() {
-        final InferencePayload payload = PayloadProducer.getInferencePayloadB(1);
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/full")
-                .then()
-                .statusCode(RestResponse.StatusCode.OK)
-
-                .body(is(""));
-
-        final Dataframe dataframe = datasource.get().getDataframe(PayloadProducer.MODEL_B_ID);
-        assertEquals(1, dataframe.getRowDimension());
-        assertEquals(5, dataframe.getColumnDimension());
-        assertEquals(3, dataframe.getInputsCount());
-        assertEquals(2, dataframe.getOutputsCount());
-    }
-
-    @Order(4)
-    @Test
-    void consumeFullPostIncorrectModelB() {
-        final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
-        // Mangle inputs
-        payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/full")
-                .then()
-                .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
-
-                .body(is(""));
-    }
-
     @Test
     void consumePartialPostInputsOnly() {
-        final String id = UUID.randomUUID().toString();
+
+        final UUID id = UUID.randomUUID();
         for (int i = 0; i < 5; i++) {
-            final InferencePartialPayload payload = PayloadProducer.getInferencePartialPayloadInput(id, i);
+
+            final InferencePartialPayload payload = createInput(id);
+
             given()
                     .contentType(ContentType.JSON)
                     .body(payload)
@@ -148,9 +128,9 @@ class ConsumerEndpointTest {
 
     @Test
     void consumePartialPostOutputsOnly() {
-        final String id = UUID.randomUUID().toString();
+        final UUID id = UUID.randomUUID();
         for (int i = 0; i < 5; i++) {
-            final InferencePartialPayload payload = PayloadProducer.getInferencePartialPayloadOutput(id, i);
+            final InferencePartialPayload payload = createInput(id);
             given()
                     .contentType(ContentType.JSON)
                     .body(payload)
@@ -168,9 +148,9 @@ class ConsumerEndpointTest {
 
     @Test
     void consumePartialPostSome() {
-        final List<String> ids = IntStream.range(0, 5).mapToObj(i -> UUID.randomUUID().toString()).collect(Collectors.toList());
+        final List<UUID> ids = IntStream.range(0, 5).mapToObj(i -> UUID.randomUUID()).collect(Collectors.toList());
         for (int i = 0; i < 5; i++) {
-            final InferencePartialPayload payload = PayloadProducer.getInferencePartialPayloadInput(ids.get(i), i);
+            final InferencePartialPayload payload = createInput(ids.get(i));
             given()
                     .contentType(ContentType.JSON)
                     .body(payload)
@@ -180,7 +160,7 @@ class ConsumerEndpointTest {
                     .body(is(""));
         }
         for (int i = 0; i < 3; i++) {
-            final InferencePartialPayload payload = PayloadProducer.getInferencePartialPayloadOutput(ids.get(i), i);
+            final InferencePartialPayload payload = createOutput(ids.get(i));
             given()
                     .contentType(ContentType.JSON)
                     .body(payload)
@@ -197,9 +177,9 @@ class ConsumerEndpointTest {
 
     @Test
     void consumePartialPostAll() {
-        final List<String> ids = IntStream.range(0, 5).mapToObj(i -> UUID.randomUUID().toString()).collect(Collectors.toList());
+        final List<UUID> ids = IntStream.range(0, 5).mapToObj(i -> UUID.randomUUID()).collect(Collectors.toList());
         for (int i = 0; i < 5; i++) {
-            final InferencePartialPayload payload = PayloadProducer.getInferencePartialPayloadInput(ids.get(i), i);
+            final InferencePartialPayload payload = createInput(ids.get(i));
             given()
                     .contentType(ContentType.JSON)
                     .body(payload)
@@ -209,7 +189,7 @@ class ConsumerEndpointTest {
                     .body(is(""));
         }
         for (int i = 0; i < 5; i++) {
-            final InferencePartialPayload payload = PayloadProducer.getInferencePartialPayloadOutput(ids.get(i), i);
+            final InferencePartialPayload payload = createOutput(ids.get(i));
             given()
                     .contentType(ContentType.JSON)
                     .body(payload)
@@ -223,66 +203,4 @@ class ConsumerEndpointTest {
         assertEquals(5, dataframe.getRowDimension());
 
     }
-
-    @Test
-    void consumeDifferentSchemas() {
-        final InferencePayload payloadModelA = PayloadProducer.getInferencePayloadA(0);
-        final InferencePayload payloadModelB = PayloadProducer.getInferencePayloadB(0);
-
-        // Generate two partial payloads with consistent metadata (from the same model)
-        final String id = "This schema is OK";
-        final InferencePartialPayload partialRequestPayloadA = new InferencePartialPayload();
-        partialRequestPayloadA.setId(id);
-        partialRequestPayloadA.setData(payloadModelA.getInput());
-        partialRequestPayloadA.setModelId(MODEL_A_ID);
-        partialRequestPayloadA.setKind(PartialKind.request);
-        given()
-                .contentType(ContentType.JSON)
-                .body(partialRequestPayloadA)
-                .when().post()
-                .then()
-                .statusCode(RestResponse.StatusCode.OK)
-                .body(is(""));
-        final InferencePartialPayload partialResponsePayloadA = new InferencePartialPayload();
-        partialResponsePayloadA.setId(id);
-        partialResponsePayloadA.setData(payloadModelA.getOutput());
-        partialResponsePayloadA.setModelId(MODEL_A_ID);
-        partialResponsePayloadA.setKind(PartialKind.response);
-        given()
-                .contentType(ContentType.JSON)
-                .body(partialResponsePayloadA)
-                .when().post()
-                .then()
-                .statusCode(RestResponse.StatusCode.OK)
-                .body(is(""));
-
-        // Generate two partial payloads with inconsistent metadata (from different models)
-        final String newId = "This schema is NOT OK";
-        final InferencePartialPayload partialRequestPayloadAWrongSchema = new InferencePartialPayload();
-        partialRequestPayloadAWrongSchema.setId(newId);
-        partialRequestPayloadAWrongSchema.setData(payloadModelA.getInput());
-        partialRequestPayloadAWrongSchema.setModelId(MODEL_A_ID);
-        partialRequestPayloadAWrongSchema.setKind(PartialKind.request);
-        given()
-                .contentType(ContentType.JSON)
-                .body(partialRequestPayloadAWrongSchema)
-                .when().post()
-                .then()
-                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload request id=" + newId + ", Payload schema and stored schema are not the same"));
-
-        final InferencePartialPayload partialResponsePayloadBWrongSchema = new InferencePartialPayload();
-        partialResponsePayloadBWrongSchema.setId(newId);
-        partialResponsePayloadBWrongSchema.setData(PayloadProducer.getInferencePayloadB(0).getOutput());
-        partialResponsePayloadBWrongSchema.setModelId(MODEL_A_ID);
-        partialResponsePayloadBWrongSchema.setKind(PartialKind.response);
-        given()
-                .contentType(ContentType.JSON)
-                .body(partialResponsePayloadBWrongSchema)
-                .when().post()
-                .then()
-                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
-    }
-
 }

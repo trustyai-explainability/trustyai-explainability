@@ -36,8 +36,6 @@ class PayloadParserRawTest {
         //
         assertEquals(1, predictionInput.getFeatures().size());
         assertEquals(value, predictionInput.getFeatures().get(0).getValue().asNumber());
-        System.out.println(value);
-        System.out.println(predictionInput.getFeatures().get(0));
     }
 
     // Output tests
