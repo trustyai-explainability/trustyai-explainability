@@ -10,4 +10,4 @@ spec:
       modelFormat:
         name: sklearn
       runtime: mlserver-0.x
-      storageUri: "https://github.com/trustyai-explainability/trustyai-explainability/raw/main/explainability-service/demo/models/model.joblib?raw=true"
+      storageUri: "https://github.com/trustyai-explainability/trustyai-explainability/raw/e3a0de0f73bffb764c65e44ccc7f40735104bb9d/explainability-service/demo/models/model.joblib"
