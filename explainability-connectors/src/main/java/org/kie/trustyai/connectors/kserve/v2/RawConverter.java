@@ -1,6 +1,7 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class RawConverter {
     public static List<Integer> toInteger(ByteString raw) {
         List<Integer> integerList = new ArrayList<>();
         ByteBuffer byteBuffer = ByteBuffer.wrap(raw.toByteArray());
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         while (byteBuffer.hasRemaining()) {
             integerList.add(byteBuffer.getInt());
         }
@@ -31,6 +33,7 @@ public class RawConverter {
     public static List<Long> toLong(ByteString raw) {
         List<Long> longList = new ArrayList<>();
         ByteBuffer byteBuffer = ByteBuffer.wrap(raw.toByteArray());
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         while (byteBuffer.hasRemaining()) {
             longList.add(byteBuffer.getLong());
         }
@@ -40,6 +43,7 @@ public class RawConverter {
     public static List<Float> toFloat(ByteString raw) {
         List<Float> floatList = new ArrayList<>();
         ByteBuffer byteBuffer = ByteBuffer.wrap(raw.toByteArray());
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         while (byteBuffer.hasRemaining()) {
             floatList.add(byteBuffer.getFloat());
         }
@@ -49,6 +53,7 @@ public class RawConverter {
     public static List<Double> toDouble(ByteString raw) {
         List<Double> doubleList = new ArrayList<>();
         ByteBuffer byteBuffer = ByteBuffer.wrap(raw.toByteArray());
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         while (byteBuffer.hasRemaining()) {
             doubleList.add(byteBuffer.getDouble());
         }
@@ -67,6 +72,7 @@ public class RawConverter {
 
     public static ByteString fromInteger(List<Integer> integerList) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(integerList.size() * 4);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         for (int value : integerList) {
             byteBuffer.putInt(value);
         }
@@ -75,6 +81,7 @@ public class RawConverter {
 
     public static ByteString fromLong(List<Long> longList) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(longList.size() * 8);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         for (long value : longList) {
             byteBuffer.putLong(value);
         }
@@ -83,6 +90,7 @@ public class RawConverter {
 
     public static ByteString fromFloat(List<Float> floatList) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(floatList.size() * 4);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         for (float value : floatList) {
             byteBuffer.putFloat(value);
         }
@@ -91,6 +99,7 @@ public class RawConverter {
 
     public static ByteString fromDouble(List<Double> doubleList) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(doubleList.size() * 8);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         for (double value : doubleList) {
             byteBuffer.putDouble(value);
         }
