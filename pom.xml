@@ -280,6 +280,7 @@
         <module>explainability-arrow</module>
         <module>explainability-connectors</module>
         <module>explainability-service</module>
+        <module>explainability-external</module>
     </modules>
 
 

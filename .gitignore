@@ -28,3 +28,5 @@ release.properties
 pom.xml.tag
 pom.xml.next
 release-pom.xml
+__pycache__
+*.egg-info
