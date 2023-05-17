@@ -1,7 +1,7 @@
 name: Build and Push
 on:
   push:
-    branches:
+    branches-ignore:
       - main
     paths-ignore:
       - 'LICENSE'
@@ -31,12 +31,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build service image
         run: |
-          # Currently, we rely on nightly builds for building images, so exit if
-          # not a tag version for now.
-          if [ "$BRANCH_NAME" == "main" ]; then
-            echo "Skipping image build"
-            exit 0
-          fi
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
           docker build -t ${{ env.IMAGE_NAME }}:ci-$SHA .
@@ -44,10 +38,4 @@ jobs:
         run: docker login -u ${{ secrets.QUAY_ROBOT_USERNAME }} -p ${{ secrets.QUAY_ROBOT_SECRET }} quay.io
       - name: Push to Quay
         run: |
-          # Currently, we rely on nightly builds for pushing images, so exit if
-          # not a tag version for now.
-          if [ "$BRANCH_NAME" == "main" ]; then
-            echo "Skipping image push"
-            exit 0
-          fi
           docker push ${{ env.IMAGE_NAME }}-ci:$SHA
