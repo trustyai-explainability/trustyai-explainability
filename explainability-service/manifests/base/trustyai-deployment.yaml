@@ -37,8 +37,6 @@ metadata:
     prometheus.io/port: "8080"
     prometheus.io/scheme: http
   labels:
-    app.openshift.io/runtime: quarkus
-    app.kubernetes.io/version: 0.1.0
     app.kubernetes.io/name: trustyai-service
     app.kubernetes.io/version: 0.1.0
     app.openshift.io/runtime: quarkus
@@ -116,7 +114,7 @@ spec:
                 configMapKeyRef:
                   key: service_metrics_schedule
                   name: trustyai-config
-          image: quay.io/trustyai/trustyai-service:0.1.0
+          image: $(image)
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
@@ -148,11 +146,13 @@ spec:
               name: volume
               readOnly: false
       serviceAccountName: trustyai-serviceaccount
+
       volumes:
         - name: volume
           persistentVolumeClaim:
             claimName: trustyai-service-pvc
             readOnly: false
+
 ---
 apiVersion: v1
 kind: ServiceAccount
