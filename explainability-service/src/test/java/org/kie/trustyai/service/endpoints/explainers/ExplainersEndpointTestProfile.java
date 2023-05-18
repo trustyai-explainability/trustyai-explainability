@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.metrics;
+package org.kie.trustyai.service.endpoints.explainers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +13,7 @@ import static org.kie.trustyai.service.data.storage.DataFormat.CSV;
 import static org.kie.trustyai.service.data.storage.StorageFormat.MEMORY;
 
 public class ExplainersEndpointTestProfile implements QuarkusTestProfile {
+
     @Override
     public Map<String, String> getConfigOverrides() {
         final Map<String, String> overrides = new HashMap<>();
@@ -28,7 +29,5 @@ public class ExplainersEndpointTestProfile implements QuarkusTestProfile {
     @Override
     public Set<Class<?>> getEnabledAlternatives() {
         return Set.of(MockDatasource.class, MockMemoryStorage.class);
-
     }
-
 }

@@ -1,4 +1,6 @@
-package org.kie.trustyai.service.endpoints.metrics;
+package org.kie.trustyai.service.endpoints.explainers;
+
+import java.util.List;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -7,14 +9,19 @@ import javax.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.endpoints.explainers.SHAPEndpoint;
+import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.payloads.BaseExplanationRequest;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.restassured.http.ContentType;
 
+import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.is;
 
@@ -46,26 +53,19 @@ class ShapEndpointTest {
                 .body(is(""));
     }
 
-    //    @Test
-    //    void postCorrect() throws JsonProcessingException {
-    //        datasource.get().reset();
-    //        Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
-    //        List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
-    //        String id = String.valueOf(predictionInputs.get(0).hashCode());
-    //        final BaseExplanationRequest payload = new BaseExplanationRequest();
-    //        payload.setModelId(MODEL_ID);
-    //        payload.setPredictionId(id);
-    //
-    //        final SaliencyExplanationResponse response = given()
-    //                .contentType(ContentType.JSON)
-    //                .body(payload)
-    //                .when().post()
-    //                .then()
-    //                .statusCode(Response.Status.OK.getStatusCode())
-    //                .extract()
-    //                .body().as(SaliencyExplanationResponse.class);
-    //
-    //        assertNotNull(response.getSaliencies());
-    //    }
+    @Test
+    void postWithoutKserve() throws JsonProcessingException {
+        datasource.get().reset();
+        Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
+        List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
+        String id = String.valueOf(predictionInputs.get(0).hashCode());
+        final BaseExplanationRequest payload = new BaseExplanationRequest();
+        payload.setModelId(MODEL_ID);
+        payload.setPredictionId(id);
 
+        given().contentType(ContentType.JSON).body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+    }
 }
