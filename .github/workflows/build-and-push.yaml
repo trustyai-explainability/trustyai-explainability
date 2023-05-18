@@ -33,7 +33,7 @@ jobs:
         run: |
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
-          docker build -t ${{ env.IMAGE_NAME }}:ci-$SHA .
+          docker build -t ${{ env.IMAGE_NAME }}-ci:$SHA .
       - name: Log in to Quay
         run: docker login -u ${{ secrets.QUAY_ROBOT_USERNAME }} -p ${{ secrets.QUAY_ROBOT_SECRET }} quay.io
       - name: Push to Quay
