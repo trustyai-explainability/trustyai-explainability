@@ -3,8 +3,6 @@ package org.kie.trustyai.service.data.metadata;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.payloads.service.Schema;
 
-import java.util.Arrays;
-
 public class Metadata {
 
     private Schema inputSchema = new Schema();

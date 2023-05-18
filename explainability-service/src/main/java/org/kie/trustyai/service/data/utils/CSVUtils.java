@@ -14,8 +14,6 @@ import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
 
-import javax.xml.crypto.Data;
-
 public class CSVUtils {
 
     private CSVUtils() {
