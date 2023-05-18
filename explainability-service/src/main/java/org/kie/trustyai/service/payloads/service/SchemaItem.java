@@ -1,8 +1,12 @@
 package org.kie.trustyai.service.payloads.service;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.payloads.values.DataType;
 
 public class SchemaItem {

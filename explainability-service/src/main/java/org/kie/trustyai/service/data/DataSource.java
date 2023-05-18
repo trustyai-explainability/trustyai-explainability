@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -59,7 +60,6 @@ public class DataSource {
         }
 
         final Dataframe dataframe = parser.toDataframe(byteBuffer, metadata);
-
         return dataframe;
     }
 
@@ -145,6 +145,7 @@ public class DataSource {
 
     public void saveMetadata(Metadata metadata, String modelId) throws StorageWriteException {
         final ObjectMapper mapper = new ObjectMapper();
+        mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer byteBuffer;
         try {
             byteBuffer = ByteBuffer.wrap(mapper.writeValueAsString(metadata).getBytes());
@@ -156,6 +157,7 @@ public class DataSource {
 
     public Metadata getMetadata(String modelId) throws StorageReadException {
         final ObjectMapper mapper = new ObjectMapper();
+        mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer metadataBytes = storage.get().read(modelId + "-" + METADATA_FILENAME);
         try {
             return mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), Metadata.class);

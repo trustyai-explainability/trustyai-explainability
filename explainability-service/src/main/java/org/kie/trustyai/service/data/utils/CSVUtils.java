@@ -14,6 +14,8 @@ import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
 
+import javax.xml.crypto.Data;
+
 public class CSVUtils {
 
     private CSVUtils() {
@@ -65,8 +67,10 @@ public class CSVUtils {
                 } else if (types.equals(Type.NUMBER)) {
                     if (vtypes.equals(DataType.DOUBLE) || vtypes.equals(DataType.FLOAT)) {
                         return new Output(name, Type.NUMBER, new Value(Double.valueOf(valueString)), 1.0);
-                    } else {
+                    } else if (vtypes.equals(DataType.INT32)) {
                         return new Output(name, Type.NUMBER, new Value(Integer.valueOf(valueString)), 1.0);
+                    } else {
+                        return new Output(name, Type.NUMBER, new Value(Long.valueOf(valueString)), 1.0);
                     }
                 } else {
                     return new Output(name, Type.CATEGORICAL, new Value(valueString), 1.0);
