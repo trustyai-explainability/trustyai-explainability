@@ -1,9 +1,7 @@
 package org.kie.trustyai.service.data.utils;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
@@ -39,8 +37,8 @@ public class MetadataUtils {
 
         // grab unique values
         Set<Object> uniqueValues = dataframe.getColumn(i).stream()
-                    .map(Value::getUnderlyingObject)
-                    .collect(Collectors.toSet());
+                .map(Value::getUnderlyingObject)
+                .collect(Collectors.toSet());
         schemaItem.setValues(uniqueValues.size() < 200 ? uniqueValues : null);
 
         schemaItem.setIndex(i);
