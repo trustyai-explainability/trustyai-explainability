@@ -18,10 +18,8 @@ public class PayloadConverter {
         } else if (type == FLOAT || type == DOUBLE) {
             return new Value(node.getValue().asDouble());
         } else if (type == INT32) {
-            System.out.println("parsing as int: "+ node.getValue());
             return new Value(node.getValue().asInt());
         } else if (type == INT64) {
-            System.out.println("parsing as long: "+ node.getValue());
             return new Value(node.getValue().asLong());
         } else if (type == STRING) {
             return new Value(node.getValue().asText());
