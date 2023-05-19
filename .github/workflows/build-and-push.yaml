@@ -1,0 +1,41 @@
+name: Build and Push
+on:
+  push:
+    branches-ignore:
+      - main
+    paths-ignore:
+      - 'LICENSE'
+      - '**/.gitignore'
+      - '**.md'
+      - '**.adoc'
+      - '*.txt'
+      - '.github/**'
+  pull_request_target:
+    paths-ignore:
+      - 'LICENSE'
+      - '**/.gitignore'
+      - '**.md'
+      - '**.adoc'
+      - '*.txt'
+      - '.github/**'
+jobs:
+  # Ensure that tests pass before publishing a new image.
+  build:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: quay.io/trustyai/trustyai-service
+      CI: true
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+      SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build service image
+        run: |
+          docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
+          docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
+          docker build -t ${{ env.IMAGE_NAME }}:ci-$SHA .
+      - name: Log in to Quay
+        run: docker login -u ${{ secrets.QUAY_ROBOT_USERNAME }} -p ${{ secrets.QUAY_ROBOT_SECRET }} quay.io
+      - name: Push to Quay
+        run: |
+          docker push ${{ env.IMAGE_NAME }}-ci:$SHA
