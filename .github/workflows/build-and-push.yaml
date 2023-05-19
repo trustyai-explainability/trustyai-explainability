@@ -33,7 +33,10 @@ jobs:
         run: |
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
-          docker build -t ${{ env.IMAGE_NAME }}-ci:$SHA .
+          cp Dockerfile Dockerfile.tmp
+          sed -i 's#summary="odh-trustyai-service\"#summary="odh-trustyai-service" \\ \n      quay.expires-after=7d#' Dockerfile.tmp
+          docker build -t ${{ env.IMAGE_NAME }}-ci:$SHA -f Dockerfile.tmp .
+          rm Dockerfile.tmp
       - name: Log in to Quay
         run: docker login -u ${{ secrets.QUAY_ROBOT_USERNAME }} -p ${{ secrets.QUAY_ROBOT_SECRET }} quay.io
       - name: Push to Quay
