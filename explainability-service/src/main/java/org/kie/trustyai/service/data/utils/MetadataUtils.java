@@ -15,6 +15,7 @@ public class MetadataUtils {
 
     public static final String ID_FIELD = "_id";
     public static final String TIMESTAMP_FIELD = "_timestamp";
+    public static final String METADATA = "_metadata";
 
     private MetadataUtils() {
 

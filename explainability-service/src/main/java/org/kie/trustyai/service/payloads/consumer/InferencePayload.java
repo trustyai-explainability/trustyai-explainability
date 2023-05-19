@@ -1,10 +1,14 @@
 package org.kie.trustyai.service.payloads.consumer;
 
+import java.util.Map;
+
 public class InferencePayload {
 
     private String input;
     private String output;
     private String modelId;
+
+    private Map<String, String> metadata;
 
     public String getModelId() {
         return modelId;
@@ -30,4 +34,11 @@ public class InferencePayload {
         this.output = output;
     }
 
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, String> metadata) {
+        this.metadata = metadata;
+    }
 }

@@ -74,7 +74,7 @@ public class InferencePayloadReconciler {
         final byte[] inputBytes = Base64.getDecoder().decode(input.getData().getBytes());
         final byte[] outputBytes = Base64.getDecoder().decode(output.getData().getBytes());
 
-        final Prediction prediction = payloadToPrediction(inputBytes, outputBytes, id);
+        final Prediction prediction = payloadToPrediction(inputBytes, outputBytes, id, input.getMetadata());
         final Dataframe dataframe = Dataframe.createFrom(prediction);
 
         datasource.get().saveDataframe(dataframe, modelId);
@@ -93,7 +93,7 @@ public class InferencePayloadReconciler {
      * @return A {@link Prediction}
      * @throws DataframeCreateException
      */
-    public Prediction payloadToPrediction(byte[] inputs, byte[] outputs, String id) throws DataframeCreateException {
+    public Prediction payloadToPrediction(byte[] inputs, byte[] outputs, String id, Map<String, String> metadata) throws DataframeCreateException {
         final ModelInferRequest input;
         try {
             input = ModelInferRequest.parseFrom(inputs);
@@ -122,6 +122,7 @@ public class InferencePayloadReconciler {
         // enrich with data and id
         final List<Feature> features = new ArrayList<>();
         features.add(FeatureFactory.newObjectFeature(MetadataUtils.ID_FIELD, id));
+        features.add(FeatureFactory.newObjectFeature(MetadataUtils.METADATA, metadata));
         features.add(FeatureFactory.newObjectFeature(MetadataUtils.TIMESTAMP_FIELD, LocalDateTime.now()));
         features.addAll(predictionInput.getFeatures());
 

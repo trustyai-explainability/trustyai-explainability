@@ -1,5 +1,7 @@
 package org.kie.trustyai.service.payloads.consumer;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InferencePartialPayload {
@@ -11,6 +13,8 @@ public class InferencePartialPayload {
     private PartialKind kind;
 
     private String id;
+
+    private Map<String, String> metadata;
 
     public String getId() {
         return id;
@@ -42,5 +46,13 @@ public class InferencePartialPayload {
 
     public void setKind(PartialKind kind) {
         this.kind = kind;
+    }
+
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, String> metadata) {
+        this.metadata = metadata;
     }
 }
