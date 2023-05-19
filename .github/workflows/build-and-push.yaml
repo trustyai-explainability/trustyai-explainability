@@ -29,12 +29,12 @@ jobs:
         if:  github.ref != 'refs/heads/main'
         run: | 
           echo "TAG=$SHA" >> $GITHUB_ENV
-          echo "IMAGE_NAME="quay.io/trustyai/trustyai-service-ci" >> $GITHUB_ENV
+          echo "IMAGE_NAME=quay.io/trustyai/trustyai-service-ci" >> $GITHUB_ENV
       - name: Set main-branch environment
         if:  github.ref == 'refs/heads/main'
         run: |
           echo "TAG=latest" >> $GITHUB_ENV
-          echo "IMAGE_NAME="quay.io/trustyai/trustyai-service" >> $GITHUB_ENV
+          echo "IMAGE_NAME=quay.io/trustyai/trustyai-service" >> $GITHUB_ENV
       - name: Pull prerequisite images
         run: |
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
