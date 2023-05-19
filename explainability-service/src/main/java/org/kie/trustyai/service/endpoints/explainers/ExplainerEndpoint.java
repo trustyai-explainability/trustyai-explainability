@@ -38,6 +38,7 @@ public abstract class ExplainerEndpoint {
             predictionToExplain = prepare(predictionToExplain, request, testDataDistribution);
 
             BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution);
+            entity.setId(request.getId());
             return Response.ok(entity).build();
         } catch (Exception e) {
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();

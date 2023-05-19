@@ -15,11 +15,19 @@
  */
 package org.kie.trustyai.service.payloads;
 
+import java.util.UUID;
+
 public class BaseExplanationRequest {
+
+    private String id;
 
     private String modelId;
 
     private String predictionId;
+
+    public BaseExplanationRequest() {
+        this.id = UUID.randomUUID().toString();
+    }
 
     public String getModelId() {
         return modelId;
@@ -35,5 +43,13 @@ public class BaseExplanationRequest {
 
     public void setPredictionId(String predictionId) {
         this.predictionId = predictionId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
