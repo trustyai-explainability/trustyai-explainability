@@ -19,7 +19,6 @@ on:
 jobs:
   # Ensure that tests pass before publishing a new image.
   build-and-push-ci:
-    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       SHA: ${{ github.sha }}
