@@ -45,7 +45,7 @@ public class PrometheusScheduler {
     }
 
     public Map<UUID, BaseMetricRequest> getAllRequests() {
-        // extend this with other metrics when more are added
+        // extend this with other metrics when more are added=
         ConcurrentHashMap<UUID, BaseMetricRequest> result = new ConcurrentHashMap<>();
         result.putAll(getDirRequests());
         result.putAll(getSpdRequests());
