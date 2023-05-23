@@ -58,7 +58,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
 
     @Override
     public String getMetricName() {
-        return "spd";
+        return "SPD";
     }
 
     @Override
@@ -142,6 +142,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
             request.setBatchSize(defaultBatchSize);
         }
 
+        request.setMetricName(getMetricName());
         scheduler.registerSPD(id, request);
 
         final BaseScheduledResponse response =

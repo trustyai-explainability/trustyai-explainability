@@ -83,7 +83,13 @@ class UniversalListingEndpointTest {
                 .get("/metrics/all/requests")
                 .then().statusCode(200).extract().body().as(ScheduleList.class);
         for (ScheduleRequest sr : scheduleList.requests) {
-            assertTrue(sr.id.equals(first) ^ sr.id.equals(second));
+            if (sr.id.equals(first)) {
+                assertEquals("DIR", sr.request.getMetricName());
+            } else if (sr.id.equals(second)) {
+                assertEquals("SPD", sr.request.getMetricName());
+            } else {
+                fail();
+            }
         }
 
         // Correct number of active requests

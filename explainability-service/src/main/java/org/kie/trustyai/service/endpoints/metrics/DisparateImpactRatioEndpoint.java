@@ -59,7 +59,7 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
 
     @Override
     public String getMetricName() {
-        return "dir";
+        return "DIR";
     }
 
     @POST
@@ -131,6 +131,7 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
             request.setBatchSize(defaultBatchSize);
         }
 
+        request.setMetricName(getMetricName());
         scheduler.registerDIR(id, request);
 
         final BaseScheduledResponse response =
