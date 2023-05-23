@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
@@ -34,9 +35,14 @@ class UniversalListingEndpointTest {
     @Inject
     Instance<MockMemoryStorage> storage;
 
+    @Inject
+    Instance<MockPrometheusScheduler> scheduler;
+
     @BeforeEach
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
+        scheduler.get().getDirRequests().clear();
+        scheduler.get().getSpdRequests().clear();
         final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
@@ -44,7 +50,7 @@ class UniversalListingEndpointTest {
 
     @DisplayName("Check multi-metrics requests are returned")
     @Test
-    void requestCustomBatchSize() {
+    void requestMultipleMetricsSize() {
         // No schedule request made yet
         final ScheduleList emptyList = given()
                 .when()
