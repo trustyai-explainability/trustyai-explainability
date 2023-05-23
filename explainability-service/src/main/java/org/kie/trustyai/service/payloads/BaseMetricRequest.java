@@ -15,7 +15,12 @@ public class BaseMetricRequest {
     private TypedValue privilegedAttribute;
     private TypedValue unprivilegedAttribute;
     private String modelId;
+
+    // this is the unique name of this specific request
     private String requestName;
+
+    // this is the name of the metric that this request calculates, e.g., DIR or SPD
+    private String metricName;
     private Double thresholdDelta;
 
     private Integer batchSize;
@@ -96,6 +101,14 @@ public class BaseMetricRequest {
         this.batchSize = batchSize;
     }
 
+    public String getMetricName() {
+        return metricName;
+    }
+
+    public void setMetricName(String metricName) {
+        this.metricName = metricName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -108,6 +121,7 @@ public class BaseMetricRequest {
                 && outcomeName.equals(that.outcomeName)
                 && privilegedAttribute.equals(that.privilegedAttribute)
                 && unprivilegedAttribute.equals(that.unprivilegedAttribute)
+                && metricName.equals(that.metricName)
                 && Objects.equals(thresholdDelta, that.thresholdDelta)
                 && Objects.equals(batchSize, that.batchSize);
     }
@@ -120,6 +134,7 @@ public class BaseMetricRequest {
                 privilegedAttribute,
                 unprivilegedAttribute,
                 thresholdDelta,
-                batchSize);
+                batchSize,
+                metricName);
     }
 }
