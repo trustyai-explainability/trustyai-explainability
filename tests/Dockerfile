@@ -4,6 +4,7 @@ ARG ORG=trustyai-explainability
 ARG BRANCH=main
 ARG ODS_CI_REPO=https://github.com/red-hat-data-services/ods-ci
 # This git reference should always reference a stable commit from ods-ci that supports ODH
+# This hash corresponds to a March 24th, 2023 commit
 ARG ODS_CI_GITREF=a0d8e0a8cf58629f895a1660c5d766c3aa4ce82e
 ARG OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/latest/openshift-client-linux.tar.gz
 
