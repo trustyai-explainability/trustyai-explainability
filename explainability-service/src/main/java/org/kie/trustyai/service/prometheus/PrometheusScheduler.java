@@ -43,6 +43,13 @@ public class PrometheusScheduler {
         return spdRequests;
     }
 
+    public Map<UUID, BaseMetricRequest> getAllRequests() {
+        // extend this with other metrics when more are added
+        Map<UUID, BaseMetricRequest> result = getDirRequests();
+        result.putAll(getSpdRequests());
+        return result;
+    }
+
     @Scheduled(every = "{service.metrics-schedule}")
     void calculate() {
 
