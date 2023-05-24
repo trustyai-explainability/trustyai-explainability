@@ -15,19 +15,17 @@
  */
 package org.kie.trustyai.service.payloads;
 
-import java.util.List;
+import java.util.Map;
 
-import org.kie.trustyai.explainability.model.Output;
+public class CounterfactualExplanationRequest extends BaseExplanationRequest {
 
-public class CFExplanationRequest extends BaseExplanationRequest {
+    private Map<String, String> goals;
 
-    private List<Output> goals;
-
-    public List<Output> getGoals() {
+    public Map<String, String> getGoals() {
         return goals;
     }
 
-    public void setGoals(List<Output> goals) {
+    public void setGoals(Map<String, String> goals) {
         this.goals = goals;
     }
 }

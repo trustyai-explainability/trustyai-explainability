@@ -1,6 +1,8 @@
 package org.kie.trustyai.service.endpoints.explainers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -12,7 +14,7 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.BaseExplanationRequest;
+import org.kie.trustyai.service.payloads.CounterfactualExplanationRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -28,7 +30,7 @@ import static org.hamcrest.Matchers.is;
 @QuarkusTest
 @TestProfile(ExplainersEndpointTestProfile.class)
 @TestHTTPEndpoint(CounterfactualEndpoint.class)
-class CFEndpointTest {
+class CounterfactualEndpointTest {
 
     private static final String MODEL_ID = "example1";
     private static final int N_SAMPLES = 100;
@@ -59,9 +61,12 @@ class CFEndpointTest {
         Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
-        final BaseExplanationRequest payload = new BaseExplanationRequest();
+        final CounterfactualExplanationRequest payload = new CounterfactualExplanationRequest();
         payload.setModelId(MODEL_ID);
         payload.setPredictionId(id);
+        Map<String, String> map = new HashMap<>();
+        map.put("income", "2");
+        payload.setGoals(map);
 
         given().contentType(ContentType.JSON).body(payload)
                 .when().post()

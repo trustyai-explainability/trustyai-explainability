@@ -15,7 +15,9 @@
  */
 package org.kie.trustyai.service.endpoints.explainers;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.enterprise.inject.Instance;
@@ -32,17 +34,23 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualExplainer;
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualResult;
 import org.kie.trustyai.explainability.model.CounterfactualPrediction;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureDistribution;
+import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.domain.FeatureDomain;
+import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.payloads.BaseExplanationRequest;
 import org.kie.trustyai.service.payloads.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.CFExplanationRequest;
+import org.kie.trustyai.service.payloads.CounterfactualExplanationRequest;
 import org.kie.trustyai.service.payloads.CounterfactualExplanationResponse;
 
 @Tag(name = "Counterfactual Explainer Endpoint", description = ".")
@@ -60,7 +68,7 @@ public class CounterfactualEndpoint extends ExplainerEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response explain(CFExplanationRequest request) throws DataframeCreateException {
+    public Response explain(CounterfactualExplanationRequest request) throws DataframeCreateException {
         return processRequest(request, dataSource.get(), serviceConfig);
     }
 
@@ -78,8 +86,33 @@ public class CounterfactualEndpoint extends ExplainerEndpoint {
 
     @Override
     protected Prediction prepare(Prediction prediction, BaseExplanationRequest request, List<PredictionInput> testData) {
-        return new CounterfactualPrediction(
-                prediction.getInput(), new PredictionOutput(((CFExplanationRequest) request).getGoals()),
-                new PredictionInputsDataDistribution(testData), prediction.getExecutionId(), 300L);
+        PredictionInput input = prediction.getInput();
+
+        List<Feature> cfInputFeatures = new ArrayList<>();
+        PredictionInputsDataDistribution dataDistribution = new PredictionInputsDataDistribution(testData);
+        List<FeatureDistribution> featureDistributions = dataDistribution.asFeatureDistributions();
+        for (FeatureDistribution featureDistribution : featureDistributions) {
+            String name = featureDistribution.getFeature().getName();
+            Feature feature = input.getFeatureByName(name).orElse(null);
+            if (feature != null) {
+                FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+                Feature cfFeature = new Feature(name, feature.getType(), feature.getValue(), feature.isConstrained(),
+                        featureDomain);
+                cfInputFeatures.add(cfFeature);
+            }
+        }
+
+        List<Output> goals = new ArrayList<>();
+        CounterfactualExplanationRequest counterfactualExplanationRequest = (CounterfactualExplanationRequest) request;
+        Map<String, String> targetGoals = counterfactualExplanationRequest.getGoals();
+        for (Output output : prediction.getOutput().getOutputs()) {
+            String newGoalValue = targetGoals.get(output.getName());
+            if (newGoalValue != null) {
+                goals.add(new Output(output.getName(), output.getType(), new Value(newGoalValue), output.getScore()));
+            }
+        }
+
+        return new CounterfactualPrediction(new PredictionInput(cfInputFeatures), new PredictionOutput(goals),
+                dataDistribution, prediction.getExecutionId(), 300L);
     }
 }
