@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.explainers;
+package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.List;
 
@@ -10,9 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.BaseExplanationRequest;
+import org.kie.trustyai.service.payloads.LocalExplanationRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -27,8 +28,8 @@ import static org.hamcrest.Matchers.is;
 
 @QuarkusTest
 @TestProfile(ExplainersEndpointTestProfile.class)
-@TestHTTPEndpoint(LimeEndpoint.class)
-class LimeEndpointTest {
+@TestHTTPEndpoint(SHAPEndpoint.class)
+class ShapEndpointTest {
 
     private static final String MODEL_ID = "example1";
     private static final int N_SAMPLES = 100;
@@ -59,7 +60,7 @@ class LimeEndpointTest {
         Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
-        final BaseExplanationRequest payload = new BaseExplanationRequest();
+        final LocalExplanationRequest payload = new LocalExplanationRequest();
         payload.setModelId(MODEL_ID);
         payload.setPredictionId(id);
 

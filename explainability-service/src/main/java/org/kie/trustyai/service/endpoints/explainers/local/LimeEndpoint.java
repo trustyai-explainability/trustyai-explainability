@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.service.endpoints.explainers;
+package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -29,23 +29,23 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.local.shap.ShapConfig;
-import org.kie.trustyai.explainability.local.shap.ShapKernelExplainer;
+import org.kie.trustyai.explainability.local.lime.LimeConfig;
+import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.payloads.BaseExplanationRequest;
 import org.kie.trustyai.service.payloads.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.LocalExplanationRequest;
 import org.kie.trustyai.service.payloads.SaliencyExplanationResponse;
 
-@Tag(name = "SHAP Explainer Endpoint", description = ".")
-@Path("/explainers/shap")
-public class SHAPEndpoint extends ExplainerEndpoint {
+@Tag(name = "LIME Explainer Endpoint")
+@Path("/explainers/local/lime")
+public class LimeEndpoint extends LocalExplainerEndpoint {
 
-    private static final Logger LOG = Logger.getLogger(SHAPEndpoint.class);
-
+    private static final Logger LOG = Logger.getLogger(LimeEndpoint.class);
     @Inject
     Instance<DataSource> dataSource;
 
@@ -55,15 +55,16 @@ public class SHAPEndpoint extends ExplainerEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response explain(BaseExplanationRequest request) {
+    public Response explain(LocalExplanationRequest request) {
         return processRequest(request, dataSource.get(), serviceConfig);
     }
 
     @Override
     public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain, List<PredictionInput> inputs) {
-        ShapKernelExplainer shapKernelExplainer = new ShapKernelExplainer(ShapConfig.builder().withBackground(inputs).build());
+        LimeConfig config = new LimeConfig().withDataDistribution(new PredictionInputsDataDistribution(inputs));
+        LimeExplainer limeExplainer = new LimeExplainer(config); //TODO: switch to RecordingLimeExplainer?
         try {
-            return SaliencyExplanationResponse.fromSaliencyResults(shapKernelExplainer.explainAsync(predictionToExplain, model).get());
+            return SaliencyExplanationResponse.fromSaliencyResults(limeExplainer.explainAsync(predictionToExplain, model).get());
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Failed to explain {} ", predictionToExplain, e);
             return SaliencyExplanationResponse.empty();
@@ -71,7 +72,7 @@ public class SHAPEndpoint extends ExplainerEndpoint {
     }
 
     @Override
-    protected Prediction prepare(Prediction prediction, BaseExplanationRequest request, List<PredictionInput> testData) {
+    protected Prediction prepare(Prediction prediction, LocalExplanationRequest request, List<PredictionInput> testData) {
         return prediction;
     }
 }

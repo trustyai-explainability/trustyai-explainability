@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.service.endpoints.explainers;
+package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,14 +48,14 @@ import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.payloads.BaseExplanationRequest;
 import org.kie.trustyai.service.payloads.BaseExplanationResponse;
 import org.kie.trustyai.service.payloads.CounterfactualExplanationRequest;
 import org.kie.trustyai.service.payloads.CounterfactualExplanationResponse;
+import org.kie.trustyai.service.payloads.LocalExplanationRequest;
 
-@Tag(name = "Counterfactual Explainer Endpoint", description = ".")
-@Path("/explainers/cf")
-public class CounterfactualEndpoint extends ExplainerEndpoint {
+@Tag(name = "Counterfactual Explainer Endpoint")
+@Path("/explainers/local/cf")
+public class CounterfactualEndpoint extends LocalExplainerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(CounterfactualEndpoint.class);
 
@@ -85,7 +85,7 @@ public class CounterfactualEndpoint extends ExplainerEndpoint {
     }
 
     @Override
-    protected Prediction prepare(Prediction prediction, BaseExplanationRequest request, List<PredictionInput> testData) {
+    protected Prediction prepare(Prediction prediction, LocalExplanationRequest request, List<PredictionInput> testData) {
         PredictionInput input = prediction.getInput();
 
         List<Feature> cfInputFeatures = new ArrayList<>();

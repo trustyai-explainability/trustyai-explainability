@@ -15,17 +15,41 @@
  */
 package org.kie.trustyai.service.payloads;
 
-import java.util.Map;
+import java.util.UUID;
 
-public class CounterfactualExplanationRequest extends LocalExplanationRequest {
+public class LocalExplanationRequest {
 
-    private Map<String, String> goals;
+    private String id;
 
-    public Map<String, String> getGoals() {
-        return goals;
+    private String modelId;
+
+    private String predictionId;
+
+    public LocalExplanationRequest() {
+        this.id = UUID.randomUUID().toString();
     }
 
-    public void setGoals(Map<String, String> goals) {
-        this.goals = goals;
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+
+    public String getPredictionId() {
+        return predictionId;
+    }
+
+    public void setPredictionId(String predictionId) {
+        this.predictionId = predictionId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

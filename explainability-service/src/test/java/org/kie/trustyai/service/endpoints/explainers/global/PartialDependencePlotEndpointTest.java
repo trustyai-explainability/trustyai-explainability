@@ -1,6 +1,4 @@
-package org.kie.trustyai.service.endpoints.explainers;
-
-import java.util.List;
+package org.kie.trustyai.service.endpoints.explainers.global;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -9,10 +7,10 @@ import javax.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.BaseExplanationRequest;
+import org.kie.trustyai.service.payloads.GlobalExplanationRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -27,8 +25,8 @@ import static org.hamcrest.Matchers.is;
 
 @QuarkusTest
 @TestProfile(ExplainersEndpointTestProfile.class)
-@TestHTTPEndpoint(SHAPEndpoint.class)
-class ShapEndpointTest {
+@TestHTTPEndpoint(PartialDependencePlotEndpoint.class)
+class PartialDependencePlotEndpointTest {
 
     private static final String MODEL_ID = "example1";
     private static final int N_SAMPLES = 100;
@@ -57,11 +55,8 @@ class ShapEndpointTest {
     void postWithoutKserve() throws JsonProcessingException {
         datasource.get().reset();
         Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
-        List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
-        String id = String.valueOf(predictionInputs.get(0).hashCode());
-        final BaseExplanationRequest payload = new BaseExplanationRequest();
+        final GlobalExplanationRequest payload = new GlobalExplanationRequest();
         payload.setModelId(MODEL_ID);
-        payload.setPredictionId(id);
 
         given().contentType(ContentType.JSON).body(payload)
                 .when().post()
