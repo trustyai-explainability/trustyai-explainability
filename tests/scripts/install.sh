@@ -55,9 +55,9 @@ else
 fi
 
 if [ -z "${OPENSHIFT_TESTUSER_NAME}" ] || [ -z "${OPENSHIFT_TESTUSER_PASS}" ]; then
-  OAUTH_PATCH_TEXT="$(cat $HOME/peak/operator-tests/odh-manifests/resources/oauth-patch.htpasswd.json)"
+  OAUTH_PATCH_TEXT="$(cat $HOME/peak/operator-tests/trustyai-explainability/resources/oauth-patch.htpasswd.json)"
   echo "Creating HTPASSWD OAuth provider"
-  oc apply -f $HOME/peak/operator-tests/odh-manifests/resources/htpasswd.secret.yaml
+  oc apply -f $HOME/peak/operator-tests/trustyai-explainability/resources/htpasswd.secret.yaml
 
   # Test if any oauth identityProviders exists. If not, initialize the identityProvider list
   if ! oc get oauth cluster -o json | jq -e '.spec.identityProviders' ; then
@@ -81,15 +81,6 @@ if ! [ -z "${SKIP_KFDEF_INSTALL}" ]; then
   echo "Relying on existing KfDef because SKIP_KFDEF_INSTALL was set"
 else
 
-
-  oc get crd odhdashboardconfigs.opendatahub.io
-  result=$?
-  # Apply ODH Dashboard CRDs if not applied
-  # In ODH 1.4.1, the CRDs will be bundled with the ODH operator install
-  if [ "$result" -ne 0 ]; then
-    echo "Deploying missing ODH Dashboard CRDs"
-    oc apply -k $HOME/peak/operator-tests/odh-manifests/resources/odh-dashboard/crd
-  fi
 
   echo "Creating the following KfDef"
   cat ./${KFDEF_FILENAME} > ${ARTIFACT_DIR}/${KFDEF_FILENAME}

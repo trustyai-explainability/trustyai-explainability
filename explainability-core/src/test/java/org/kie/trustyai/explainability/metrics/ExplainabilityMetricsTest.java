@@ -15,11 +15,7 @@
  */
 package org.kie.trustyai.explainability.metrics;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -32,18 +28,10 @@ import org.kie.trustyai.explainability.TestUtils;
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SaliencyResults;
-import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.LocalSaliencyStability;
 import org.kie.trustyai.explainability.utils.models.TestModels;
+import org.kie.trustyai.metrics.explainability.ExplainabilityMetrics;
 
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.supplyAsync;

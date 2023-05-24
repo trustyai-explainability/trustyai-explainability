@@ -1,9 +1,7 @@
 package org.kie.trustyai.service.data.utils;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
@@ -22,6 +20,7 @@ public class MetadataUtils {
 
     public static SchemaItem extractRowSchema(Dataframe dataframe, int i) {
         final Value value = dataframe.getValue(0, i);
+
         final SchemaItem schemaItem = new SchemaItem();
         if (value.getUnderlyingObject() instanceof Integer) {
             schemaItem.setType(DataType.INT32);
@@ -37,11 +36,11 @@ public class MetadataUtils {
         schemaItem.setName(dataframe.getColumnNames().get(i));
 
         // grab unique values
-        List<Value> allValues = dataframe.getColumn(i);
-        Set<Object> uniqueValues = IntStream.range(0, allValues.size())
-                .mapToObj(idx -> allValues.get(idx).getUnderlyingObject())
+        Set<Object> uniqueValues = dataframe.getColumn(i).stream()
+                .map(Value::getUnderlyingObject)
                 .collect(Collectors.toSet());
         schemaItem.setValues(uniqueValues.size() < 200 ? uniqueValues : null);
+
         schemaItem.setIndex(i);
         return schemaItem;
     }

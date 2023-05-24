@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.prometheus;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,8 +24,8 @@ import io.quarkus.scheduler.Scheduled;
 public class PrometheusScheduler {
 
     private static final Logger LOG = Logger.getLogger(PrometheusScheduler.class);
-    private final Map<UUID, BaseMetricRequest> spdRequests = new HashMap<>();
-    private final Map<UUID, BaseMetricRequest> dirRequests = new HashMap<>();
+    private final ConcurrentHashMap<UUID, BaseMetricRequest> spdRequests = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, BaseMetricRequest> dirRequests = new ConcurrentHashMap<>();
     @Inject
     Instance<DataSource> dataSource;
     @Inject
@@ -41,6 +42,14 @@ public class PrometheusScheduler {
 
     public Map<UUID, BaseMetricRequest> getSpdRequests() {
         return spdRequests;
+    }
+
+    public Map<UUID, BaseMetricRequest> getAllRequests() {
+        // extend this with other metrics when more are added=
+        ConcurrentHashMap<UUID, BaseMetricRequest> result = new ConcurrentHashMap<>();
+        result.putAll(getDirRequests());
+        result.putAll(getSpdRequests());
+        return result;
     }
 
     @Scheduled(every = "{service.metrics-schedule}")

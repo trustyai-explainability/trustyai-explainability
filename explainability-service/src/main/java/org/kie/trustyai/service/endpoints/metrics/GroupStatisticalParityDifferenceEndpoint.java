@@ -13,8 +13,8 @@ import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
-import org.kie.trustyai.explainability.metrics.utils.FairnessDefinitions;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.metrics.fairness.FairnessDefinitions;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
@@ -58,7 +58,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
 
     @Override
     public String getMetricName() {
-        return "spd";
+        return "SPD";
     }
 
     @Override
@@ -142,6 +142,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
             request.setBatchSize(defaultBatchSize);
         }
 
+        request.setMetricName(getMetricName());
         scheduler.registerSPD(id, request);
 
         final BaseScheduledResponse response =

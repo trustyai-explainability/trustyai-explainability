@@ -50,7 +50,7 @@ public class Metadata {
                 this.inputSchema.getItems().get(i).getValues().addAll(otherSchema.getItems().get(i).getValues());
             }
         } else {
-            final String message = "Original schema and schema-to-merge are compatible";
+            final String message = "Original schema and schema-to-merge are not compatible";
             throw new InvalidSchemaException(message);
         }
     }
@@ -61,7 +61,7 @@ public class Metadata {
                 this.outputSchema.getItems().get(i).getValues().addAll(otherSchema.getItems().get(i).getValues());
             }
         } else {
-            final String message = "Original schema and schema-to-merge are compatible";
+            final String message = "Original schema and schema-to-merge are not compatible";
             throw new InvalidSchemaException(message);
         }
     }
