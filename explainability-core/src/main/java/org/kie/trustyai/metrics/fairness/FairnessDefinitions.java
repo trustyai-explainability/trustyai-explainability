@@ -1,4 +1,4 @@
-package org.kie.trustyai.explainability.metrics.utils;
+package org.kie.trustyai.metrics.fairness;
 
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Value;

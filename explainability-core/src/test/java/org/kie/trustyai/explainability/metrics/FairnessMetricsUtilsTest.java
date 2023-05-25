@@ -26,17 +26,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.kie.trustyai.explainability.metrics.utils.FairnessDefinitions;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.models.TestModels;
+import org.kie.trustyai.metrics.fairness.FairnessDefinitions;
+import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
+import org.kie.trustyai.metrics.fairness.group.GroupAverageOddsDifference;
+import org.kie.trustyai.metrics.fairness.group.GroupAveragePredictiveValueDifference;
+import org.kie.trustyai.metrics.fairness.group.GroupStatisticalParityDifference;
+import org.kie.trustyai.metrics.fairness.individual.IndividualConsistency;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.kie.trustyai.explainability.metrics.FairnessMetrics.groupDisparateImpactRatio;
-import static org.kie.trustyai.explainability.metrics.FairnessMetrics.groupStatisticalParityDifference;
 
-class FairnessMetricsTest {
+class FairnessMetricsUtilsTest {
 
     private static Dataframe createUnbiasedNumericDataframe(int observations, int groups, int outcomes) {
         final Random random = new Random();
@@ -92,7 +95,7 @@ class FairnessMetricsTest {
         };
         List<PredictionInput> testInputs = getTestInputs();
         PredictionProvider model = TestModels.getDummyTextClassifier();
-        double individualConsistency = FairnessMetrics.individualConsistency(proximityFunction, testInputs, model);
+        double individualConsistency = IndividualConsistency.calculate(proximityFunction, testInputs, model);
         assertThat(individualConsistency).isBetween(0d, 1d);
     }
 
@@ -102,7 +105,7 @@ class FairnessMetricsTest {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double spd = groupStatisticalParityDifference(selector, testInputs, model, output);
+        double spd = GroupStatisticalParityDifference.calculate(selector, testInputs, model, output);
         assertThat(spd).isBetween(0.1, 0.2);
     }
 
@@ -112,7 +115,7 @@ class FairnessMetricsTest {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double spd = groupStatisticalParityDifference(selector, testInputs, model, output);
+        double spd = GroupStatisticalParityDifference.calculate(selector, testInputs, model, output);
         String generalDefinition = FairnessDefinitions.defineGroupStatisticalParityDifference();
         String specificDefinition = FairnessDefinitions.defineGroupStatisticalParityDifference(output, spd);
 
@@ -137,7 +140,7 @@ class FairnessMetricsTest {
         final Dataframe unpriviledged = dataframe.filterRowsByInputs(priviledgedFilter.negate());
 
         final Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double spd = groupStatisticalParityDifference(priviledged, unpriviledged, List.of(output));
+        double spd = GroupStatisticalParityDifference.calculate(priviledged, unpriviledged, List.of(output));
         assertThat(spd).isBetween(0.1, 0.2);
     }
 
@@ -147,7 +150,7 @@ class FairnessMetricsTest {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double dir = FairnessMetrics.groupDisparateImpactRatio(selector, testInputs, model, output);
+        double dir = DisparateImpactRatio.calculate(selector, testInputs, model, output);
         assertThat(dir).isPositive();
     }
 
@@ -164,7 +167,7 @@ class FairnessMetricsTest {
         final Dataframe unpriviledged = dataframe.filterRowsByInputs(priviledgedFilter.negate());
 
         final Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double dir = FairnessMetrics.groupDisparateImpactRatio(priviledged, unpriviledged, List.of(output));
+        double dir = DisparateImpactRatio.calculate(priviledged, unpriviledged, List.of(output));
         assertThat(dir).isBetween(1.0, 2.0);
     }
 
@@ -181,7 +184,7 @@ class FairnessMetricsTest {
         final Dataframe unpriviledged = dataframe.filterRowsByInputs(priviledgedFilter.negate());
 
         final Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double dir = FairnessMetrics.groupDisparateImpactRatio(priviledged, unpriviledged, List.of(output));
+        double dir = DisparateImpactRatio.calculate(priviledged, unpriviledged, List.of(output));
 
         String generalDefinition = FairnessDefinitions.defineGroupDisparateImpactRatio();
         String specificDefinition = FairnessDefinitions.defineGroupDisparateImpactRatio(output, dir);
@@ -200,7 +203,7 @@ class FairnessMetricsTest {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> inputSelector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Predicate<PredictionOutput> outputSelector = predictionOutput -> predictionOutput.getByName("spam").get().getValue().asNumber() == 0;
-        double aod = FairnessMetrics.groupAverageOddsDifference(inputSelector, outputSelector, dataset, model);
+        double aod = GroupAverageOddsDifference.calculate(inputSelector, outputSelector, dataset, model);
         assertThat(aod).isBetween(-1d, 1d);
     }
 
@@ -225,7 +228,7 @@ class FairnessMetricsTest {
         PredictionProvider model = TestModels.getSimpleBiasedClassifier(2, new Value("M"), 0.75);
         Predicate<PredictionInput> inputSelector = predictionInput -> predictionInput.getFeatures().get(2).getValue().asString().equals("M");
         Predicate<PredictionOutput> outputSelector = predictionOutput -> (boolean) predictionOutput.getOutputs().get(0).getValue().getUnderlyingObject();
-        double aod = FairnessMetrics.groupAverageOddsDifference(inputSelector, outputSelector, dataset, model);
+        double aod = GroupAverageOddsDifference.calculate(inputSelector, outputSelector, dataset, model);
         System.out.println(aod);
         assertThat(aod).isBetween(-0.3, -0.1);
     }
@@ -253,7 +256,7 @@ class FairnessMetricsTest {
         PredictionProvider model = TestModels.getSimpleBiasedClassifier(2, new Value("M"), 0.75);
         final List<PredictionOutput> predictedOutputs = model.predictAsync(inputs).get();
         final Dataframe truth = Dataframe.createFrom(inputs, predictedOutputs);
-        double aod = FairnessMetrics.groupAverageOddsDifference(test, truth, List.of(2), List.of(new Value("M")), List.of(new Value(true)));
+        double aod = GroupAverageOddsDifference.calculate(test, truth, List.of(2), List.of(new Value("M")), List.of(new Value(true)));
         System.out.println(aod);
         assertThat(aod).isBetween(-0.3, -0.1);
     }
@@ -281,7 +284,7 @@ class FairnessMetricsTest {
         PredictionProvider model = TestModels.getSimpleBiasedClassifier(2, new Value("M"), 0.75);
         final List<PredictionOutput> predictedOutputs = model.predictAsync(inputs).get();
         final Dataframe truth = Dataframe.createFrom(inputs, predictedOutputs);
-        double aod = FairnessMetrics.groupAveragePredictiveValueDifference(test, truth, List.of(2), List.of(new Value("M")), List.of(new Value(true)));
+        double aod = GroupAveragePredictiveValueDifference.calculate(test, truth, List.of(2), List.of(new Value("M")), List.of(new Value(true)));
         System.out.println(aod);
         assertThat(aod).isBetween(-0.15, 0.15);
     }
@@ -293,7 +296,7 @@ class FairnessMetricsTest {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> inputSelector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Predicate<PredictionOutput> outputSelector = predictionOutput -> predictionOutput.getByName("spam").get().getValue().asNumber() == 0;
-        double apvd = FairnessMetrics.groupAveragePredictiveValueDifference(inputSelector, outputSelector, dataset, model);
+        double apvd = GroupAveragePredictiveValueDifference.calculate(inputSelector, outputSelector, dataset, model);
         assertThat(apvd).isBetween(-1d, 1d);
     }
 
@@ -398,14 +401,14 @@ class FairnessMetricsTest {
             final int group = i;
             final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(group));
             final Dataframe unprivileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
-            final double spd = groupStatisticalParityDifference(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
+            final double spd = GroupStatisticalParityDifference.calculate(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
             assertTrue(spd < epsilon);
             assertTrue(spd > -epsilon);
         }
         for (int i = 0; i < 3; i++) {
             final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(1));
             final Dataframe unprivileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
-            final double spd = groupStatisticalParityDifference(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(i), 1.0)));
+            final double spd = GroupStatisticalParityDifference.calculate(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(i), 1.0)));
             assertTrue(spd < epsilon);
             assertTrue(spd > -epsilon);
         }
@@ -420,7 +423,7 @@ class FairnessMetricsTest {
 
             final Dataframe privileged = biased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
             final Dataframe unprivileged = biased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(1));
-            final double spd = groupStatisticalParityDifference(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
+            final double spd = GroupStatisticalParityDifference.calculate(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
             assertTrue(spd < 0.5 - probability + epsilon);
             assertTrue(spd > 0.5 - probability - epsilon);
 
@@ -436,7 +439,7 @@ class FairnessMetricsTest {
             final int group = i;
             final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(group));
             final Dataframe unprivileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
-            final double dir = groupDisparateImpactRatio(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
+            final double dir = DisparateImpactRatio.calculate(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
             System.out.println(dir);
             assertTrue(dir < 1.0 + epsilon);
             assertTrue(dir > 1.0 - epsilon);
@@ -444,7 +447,7 @@ class FairnessMetricsTest {
         for (int i = 0; i < 3; i++) {
             final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(1));
             final Dataframe unprivileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
-            final double dir = groupDisparateImpactRatio(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(i), 1.0)));
+            final double dir = DisparateImpactRatio.calculate(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(i), 1.0)));
             System.out.println(dir);
             assertTrue(dir < 1.0 + epsilon);
             assertTrue(dir > 1.0 - epsilon);
@@ -460,7 +463,7 @@ class FairnessMetricsTest {
 
             final Dataframe privileged = biased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
             final Dataframe unprivileged = biased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(1));
-            final double dir = groupDisparateImpactRatio(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
+            final double dir = DisparateImpactRatio.calculate(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
             final double expected = 2.0 * (1.0 - probability);
             assertTrue(dir < expected + epsilon);
             assertTrue(dir > expected - epsilon);
