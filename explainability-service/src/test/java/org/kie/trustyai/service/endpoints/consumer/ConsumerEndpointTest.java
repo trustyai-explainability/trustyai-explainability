@@ -68,8 +68,8 @@ class ConsumerEndpointTest {
 
         final Dataframe dataframe = datasource.get().getDataframe(payload.getModelId());
         assertEquals(1, dataframe.getRowDimension());
-        assertEquals(4, dataframe.getColumnDimension());
-        assertEquals(3, dataframe.getInputsCount());
+        assertEquals(5, dataframe.getColumnDimension());
+        assertEquals(4, dataframe.getInputsCount());
         assertEquals(1, dataframe.getOutputsCount());
     }
 
@@ -105,8 +105,8 @@ class ConsumerEndpointTest {
 
         final Dataframe dataframe = datasource.get().getDataframe(PayloadProducer.MODEL_B_ID);
         assertEquals(1, dataframe.getRowDimension());
-        assertEquals(5, dataframe.getColumnDimension());
-        assertEquals(3, dataframe.getInputsCount());
+        assertEquals(6, dataframe.getColumnDimension());
+        assertEquals(4, dataframe.getInputsCount());
         assertEquals(2, dataframe.getOutputsCount());
     }
 

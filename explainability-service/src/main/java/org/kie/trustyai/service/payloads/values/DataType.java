@@ -6,5 +6,6 @@ public enum DataType {
     DOUBLE,
     INT32,
     INT64,
-    STRING
+    STRING,
+    MAP
 }

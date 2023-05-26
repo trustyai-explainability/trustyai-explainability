@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.payloads.consumer;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class InferencePayload {
@@ -8,7 +9,7 @@ public class InferencePayload {
     private String output;
     private String modelId;
 
-    private Map<String, String> metadata;
+    private Map<String, String> metadata = new HashMap<>();
 
     public String getModelId() {
         return modelId;

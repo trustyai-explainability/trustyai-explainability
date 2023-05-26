@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.data.utils;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,8 @@ public class MetadataUtils {
             schemaItem.setType(DataType.BOOL);
         } else if (value.getUnderlyingObject() instanceof String) {
             schemaItem.setType(DataType.STRING);
+        } else if (value.getUnderlyingObject() instanceof Map) {
+            schemaItem.setType(DataType.MAP);
         }
         schemaItem.setName(dataframe.getColumnNames().get(i));
 
