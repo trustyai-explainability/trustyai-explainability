@@ -16,12 +16,15 @@
 package org.kie.trustyai.explainability.utils;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,12 +45,14 @@ import org.kie.trustyai.explainability.model.FeatureDistribution;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.GenericFeatureDistribution;
 import org.kie.trustyai.explainability.model.IndependentFeaturesDataDistribution;
+import org.kie.trustyai.explainability.model.NumericFeatureDistribution;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PartialDependenceGraph;
 import org.kie.trustyai.explainability.model.PerturbationContext;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -437,5 +442,112 @@ class DataUtilsTest {
         PredictionInput input = new PredictionInput(features);
         String textifiedInput = DataUtils.textify(input);
         assertThat(textifiedInput).isNotNull().isEqualTo("we go here and there as you go there and here");
+    }
+
+    @Test
+    void testEmptyFeatureDistributionToFeatureDomain() {
+        FeatureDistribution featureDistribution = new GenericFeatureDistribution(new Feature("f1", Type.UNDEFINED,
+                new Value(null)),
+                Collections.emptyList());
+        FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+        assertThat(featureDomain).isNotNull();
+        assertThat(featureDomain.isEmpty()).isTrue();
+    }
+
+    @Test
+    void testNumericFeatureDistributionToFeatureDomain() {
+        FeatureDistribution featureDistribution = new NumericFeatureDistribution(new Feature("f1", Type.NUMBER,
+                new Value(null)),
+                new double[] { 1, 2, 3, 4 });
+        FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+        assertThat(featureDomain).isNotNull();
+        assertThat(featureDomain.isEmpty()).isFalse();
+    }
+
+    @Test
+    void testTimeFeatureDistributionToFeatureDomain() {
+        FeatureDistribution featureDistribution = new NumericFeatureDistribution(new Feature("f1", Type.TIME,
+                new Value(null)),
+                new double[] { 1, 2, 3, 4 });
+        FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+        assertThat(featureDomain).isNotNull();
+        assertThat(featureDomain.isEmpty()).isFalse();
+    }
+
+    @Test
+    void testCurrencyFeatureDistributionToFeatureDomain() {
+        FeatureDistribution featureDistribution = new GenericFeatureDistribution(new Feature("f1", Type.CURRENCY,
+                new Value(null)),
+                List.of(new Value("EUR"),
+                        new Value("USD")));
+        FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+        assertThat(featureDomain).isNotNull();
+        assertThat(featureDomain.isEmpty()).isFalse();
+    }
+
+    @Test
+    void testBinaryFeatureDistributionToFeatureDomain() {
+        FeatureDistribution featureDistribution = new GenericFeatureDistribution(new Feature("f1", Type.BINARY,
+                new Value(null)),
+                List.of(new Value(ByteBuffer.allocate(4)),
+                        new Value(ByteBuffer.allocate(4))));
+        FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+        assertThat(featureDomain).isNotNull();
+        assertThat(featureDomain.isEmpty()).isFalse();
+    }
+
+    @Test
+    void testCategoricalFeatureDistributionToFeatureDomain() {
+        FeatureDistribution featureDistribution = new GenericFeatureDistribution(new Feature("f1", Type.CATEGORICAL,
+                new Value(null)),
+                List.of(new Value("cat1"),
+                        new Value("cat2")));
+        FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+        assertThat(featureDomain).isNotNull();
+        assertThat(featureDomain.isEmpty()).isFalse();
+    }
+
+    @Test
+    void testURIFeatureDistributionToFeatureDomain() {
+        FeatureDistribution featureDistribution = new GenericFeatureDistribution(new Feature("f1", Type.URI,
+                new Value(null)),
+                List.of(new Value(URI.create("http://foo.bar")),
+                        new Value(URI.create("http://lorem.ips.um"))));
+        FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+        assertThat(featureDomain).isNotNull();
+        assertThat(featureDomain.isEmpty()).isFalse();
+    }
+
+    @Test
+    void testDurationFeatureDistributionToFeatureDomain() {
+        FeatureDistribution featureDistribution = new GenericFeatureDistribution(new Feature("f1", Type.DURATION,
+                new Value(null)),
+                List.of(new Value(Duration.ofDays(1)),
+                        new Value(Duration.ofDays(2))));
+        FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+        assertThat(featureDomain).isNotNull();
+        assertThat(featureDomain.isEmpty()).isFalse();
+    }
+
+    @Test
+    void testTextFeatureDistributionToFeatureDomain() {
+        FeatureDistribution featureDistribution = new GenericFeatureDistribution(new Feature("f1", Type.TEXT,
+                new Value(null)),
+                List.of(new Value("foo bar"),
+                        new Value("lorem ipsum")));
+        FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+        assertThat(featureDomain).isNotNull();
+        assertThat(featureDomain.isEmpty()).isFalse();
+    }
+
+    @Test
+    void testObjectFeatureDistributionToFeatureDomain() {
+        FeatureDistribution featureDistribution = new GenericFeatureDistribution(new Feature("f1", Type.UNDEFINED,
+                new Value(null)),
+                List.of(new Value(new Object()),
+                        new Value(new Object())));
+        FeatureDomain featureDomain = DataUtils.toFeatureDomain(featureDistribution);
+        assertThat(featureDomain).isNotNull();
+        assertThat(featureDomain.isEmpty()).isFalse();
     }
 }

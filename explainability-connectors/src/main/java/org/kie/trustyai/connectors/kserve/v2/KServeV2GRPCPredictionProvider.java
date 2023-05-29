@@ -1,10 +1,13 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
+import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
@@ -29,14 +32,16 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
     private final ManagedChannel channel;
     private final List<String> outputNames;
 
-    private KServeV2GRPCPredictionProvider(String target, String modelName, List<String> outputNames) {
+    private final Map<String, String> optionalParameters;
+
+    private KServeV2GRPCPredictionProvider(String target, String modelName, List<String> outputNames, Map<String, String> optionalParameters) {
 
         this.modelName = modelName;
         this.channel = ManagedChannelBuilder.forTarget(target)
                 .usePlaintext()
                 .build();
         this.outputNames = outputNames;
-
+        this.optionalParameters = optionalParameters;
     }
 
     /**
@@ -48,7 +53,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(String target, String modelName) {
-        return KServeV2GRPCPredictionProvider.forTarget(target, modelName, null);
+        return KServeV2GRPCPredictionProvider.forTarget(target, modelName, null, null);
     }
 
     /**
@@ -61,7 +66,34 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(String target, String modelName, List<String> outputNames) {
-        return new KServeV2GRPCPredictionProvider(target, modelName, outputNames);
+        return new KServeV2GRPCPredictionProvider(target, modelName, outputNames, null);
+    }
+
+    /**
+     * Create a {@link KServeV2GRPCPredictionProvider} with an endpoint at {@code target} and named {@code modelName}.
+     * In this case, the output names are specified with {@code outputNames}.
+     *
+     * @param target The remote KServe v2 model server
+     * @param modelName The model's name
+     * @param outputNames A {@link List} of output names to be used
+     * @param parameters A {@link Map} of parameters to pass to the gRPC method call
+     * @return A {@link PredictionProvider}
+     */
+    public static KServeV2GRPCPredictionProvider forTarget(String target, String modelName, List<String> outputNames, Map<String, String> parameters) {
+        return new KServeV2GRPCPredictionProvider(target, modelName, outputNames, parameters);
+    }
+
+    /**
+     * Create a {@link KServeV2GRPCPredictionProvider} with an endpoint at {@code target} and named {@code modelName}.
+     * In this case, the output names are specified with {@code outputNames}.
+     *
+     * @param target The remote KServe v2 model server
+     * @param modelName The model's name
+     * @param parameters A {@link Map} of parameters to pass to the gRPC method call
+     * @return A {@link PredictionProvider}
+     */
+    public static KServeV2GRPCPredictionProvider forTarget(String target, String modelName, Map<String, String> parameters) {
+        return new KServeV2GRPCPredictionProvider(target, modelName, null, parameters);
     }
 
     private ModelInferRequest.InferInputTensor.Builder buildTensor(InferTensorContents.Builder contents, int nSamples, int nFeatures) {
@@ -73,6 +105,13 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
                 .addShape(nFeatures)
                 .setDatatype(DEFAULT_DATATYPE.toString())
                 .setContents(contents);
+        if (this.optionalParameters != null) {
+            Map<String, InferParameter> parameterMap = new HashMap<>();
+            for (Map.Entry<String, String> entry : optionalParameters.entrySet()) {
+                parameterMap.put(entry.getKey(), InferParameter.newBuilder().setStringParam(entry.getValue()).build());
+            }
+            tensor.putAllParameters(parameterMap);
+        }
         return tensor;
     }
 

@@ -18,12 +18,15 @@ package org.kie.trustyai.explainability.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URI;
+import java.nio.ByteBuffer;
 import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,6 +63,16 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.domain.BinaryFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.CategoricalFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.CurrencyFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.DurationFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.FeatureDomain;
+import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.TimeFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.URIFeatureDomain;
 
 /**
  * Utility methods to handle and manipulate data.
@@ -746,4 +759,57 @@ public class DataUtils {
         return euclideanDistance(xNum, yNum) + lambda * hammingDistance(xStr, yStr);
     }
 
+    public static FeatureDomain toFeatureDomain(FeatureDistribution featureDistribution) {
+        FeatureDomain featureDomain;
+        if (featureDistribution.isEmpty()) {
+            featureDomain = new EmptyFeatureDomain();
+        } else {
+            Feature feature = featureDistribution.getFeature();
+            Type featureType = feature.getType();
+
+            switch (featureType) {
+                case CATEGORICAL:
+                    featureDomain = CategoricalFeatureDomain.create(featureDistribution.getAllSamples().stream()
+                            .map(Value::asString).collect(Collectors.toSet()));
+                    break;
+                case BINARY:
+                    featureDomain = BinaryFeatureDomain.create(featureDistribution.getAllSamples().stream()
+                            .map(v -> (ByteBuffer) v.getUnderlyingObject())
+                            .collect(Collectors.toSet()));
+                    break;
+                case NUMBER:
+                    featureDomain = NumericalFeatureDomain.create(featureDistribution.getAllSamples().stream().map(Value::asNumber)
+                            .mapToDouble(Double::doubleValue).min().orElse(Double.MIN_VALUE),
+                            featureDistribution.getAllSamples().stream().map(Value::asNumber)
+                                    .mapToDouble(Double::doubleValue).max().orElse(Double.MAX_VALUE));
+                    break;
+                case URI:
+                    featureDomain = URIFeatureDomain.create(featureDistribution.getAllSamples().stream().map(Value::asString)
+                            .map(URI::create).collect(Collectors.toSet()));
+                    break;
+                case TIME:
+                    featureDomain = TimeFeatureDomain.create(featureDistribution.getAllSamples().stream().map(Value::asNumber)
+                            .mapToDouble(Double::doubleValue).min().orElse(Double.MIN_VALUE),
+                            featureDistribution.getAllSamples().stream().map(Value::asNumber)
+                                    .mapToDouble(Double::doubleValue).min().orElse(Double.MAX_VALUE));
+                    break;
+                case DURATION:
+                    featureDomain = DurationFeatureDomain.create(featureDistribution.getAllSamples().stream().map(Value::asNumber)
+                            .mapToDouble(Double::doubleValue).min().orElse(Double.MIN_VALUE),
+                            featureDistribution.getAllSamples().stream().map(Value::asNumber)
+                                    .mapToDouble(Double::doubleValue).min().orElse(Double.MAX_VALUE));
+                    break;
+                case CURRENCY:
+                    featureDomain = CurrencyFeatureDomain.create(featureDistribution.getAllSamples().stream()
+                            .map(Value::asString).map(Currency::getInstance)
+                            .collect(Collectors.toSet()));
+                    break;
+                default:
+                    featureDomain = ObjectFeatureDomain.create(featureDistribution.getAllSamples().stream()
+                            .map(Value::getUnderlyingObject).collect(Collectors.toSet()));
+                    break;
+            }
+        }
+        return featureDomain;
+    }
 }

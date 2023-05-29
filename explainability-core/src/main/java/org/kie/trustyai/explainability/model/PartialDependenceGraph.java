@@ -18,7 +18,7 @@ package org.kie.trustyai.explainability.model;
 import java.util.List;
 
 /**
- * A series of two dimensional points {@code (Feature:Value, Output:Value)} explaining partial dependency between
+ * A series of two-dimensional points {@code (Feature:Value, Output:Value)} explaining partial dependency between
  * a {@link Feature} and an {@link Output} for a given model.
  */
 public class PartialDependenceGraph {
