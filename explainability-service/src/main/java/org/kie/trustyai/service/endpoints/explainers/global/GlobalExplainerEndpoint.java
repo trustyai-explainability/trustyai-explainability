@@ -39,7 +39,6 @@ public abstract class GlobalExplainerEndpoint extends ExplainerEndpoint {
             List<Prediction> predictions = dataframe.asPredictions();
 
             BaseExplanationResponse entity = generateExplanation(model, predictions);
-            entity.setId(request.getId());
             return Response.ok(entity).build();
         } catch (Exception e) {
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();

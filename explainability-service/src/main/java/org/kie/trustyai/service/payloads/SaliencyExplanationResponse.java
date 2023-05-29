@@ -15,10 +15,6 @@ public class SaliencyExplanationResponse extends BaseExplanationResponse {
 
     protected Map<String, List<FeatureSaliency>> saliencies;
 
-    public SaliencyExplanationResponse() {
-        super();
-    }
-
     public SaliencyExplanationResponse(Map<String, List<FeatureSaliency>> saliencies) {
         super();
         this.saliencies = saliencies;
@@ -38,7 +34,6 @@ public class SaliencyExplanationResponse extends BaseExplanationResponse {
                 "timestamp=" + timestamp +
                 ", type='" + type + '\'' +
                 ", saliencies=" + saliencies +
-                ", id=" + id +
                 '}';
     }
 

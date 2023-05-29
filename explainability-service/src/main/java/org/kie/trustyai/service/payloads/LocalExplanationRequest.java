@@ -15,19 +15,11 @@
  */
 package org.kie.trustyai.service.payloads;
 
-import java.util.UUID;
-
 public class LocalExplanationRequest {
-
-    private String id;
 
     private String modelId;
 
     private String predictionId;
-
-    public LocalExplanationRequest() {
-        this.id = UUID.randomUUID().toString();
-    }
 
     public String getModelId() {
         return modelId;
@@ -45,11 +37,4 @@ public class LocalExplanationRequest {
         this.predictionId = predictionId;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 }

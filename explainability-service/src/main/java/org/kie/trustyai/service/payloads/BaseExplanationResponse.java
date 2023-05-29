@@ -8,8 +8,6 @@ public class BaseExplanationResponse {
 
     protected String type = "explanation";
 
-    protected String id;
-
     public BaseExplanationResponse() {
     }
 
@@ -25,11 +23,4 @@ public class BaseExplanationResponse {
         return timestamp;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 }
