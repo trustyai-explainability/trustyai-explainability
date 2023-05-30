@@ -37,6 +37,7 @@ public class MetricsCalculator {
                     value -> value.equals(unprivilegedAttr));
             final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
             final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
+
             return GroupStatisticalParityDifference.calculate(privileged, unprivileged,
                     List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
         } catch (Exception e) {

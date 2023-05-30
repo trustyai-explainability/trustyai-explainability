@@ -72,15 +72,15 @@ public class ReconciledMetricRequest {
         final Metadata metadata = dataSource.get().getMetadata(request.getModelId());
         return new ReconciledMetricRequest(
                 request,
-                metadata.getOutputSchema().getItems().get(request.getOutcomeName()).getType(),
-                metadata.getInputSchema().getItems().get(request.getProtectedAttribute()).getType());
+                metadata.getInputSchema().getItems().get(request.getProtectedAttribute()).getType(),
+                metadata.getOutputSchema().getItems().get(request.getOutcomeName()).getType());
     }
 
     public static ReconciledMetricRequest reconcile(BaseMetricRequest request, Metadata metadata) {
         return new ReconciledMetricRequest(
                 request,
-                metadata.getOutputSchema().getItems().get(request.getOutcomeName()).getType(),
-                metadata.getInputSchema().getItems().get(request.getProtectedAttribute()).getType());
+                metadata.getInputSchema().getItems().get(request.getProtectedAttribute()).getType(),
+                metadata.getOutputSchema().getItems().get(request.getOutcomeName()).getType());
     }
 
     public String getProtectedAttribute() {

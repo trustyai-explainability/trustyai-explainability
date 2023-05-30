@@ -34,35 +34,17 @@ public class PayloadConverter {
         if (type == BOOL) {
             return v.isBoolean();
         } else if (type == FLOAT) {
-            return v.isFloat();
+            return v.isFloat() || v.isDouble();
         } else if (type == DOUBLE) {
             return v.isDouble();
         } else if (type == INT32) {
             return v.isInt();
         } else if (type == INT64) {
-            return v.isLong();
+            return v.isLong() || v.isInt();
         } else if (type == STRING) {
             return v.isTextual();
         } else {
             return false;
-        }
-    }
-
-    public static DataType getNodeType(JsonNode v) {
-        if (v.isBoolean()) {
-            return BOOL;
-        } else if (v.isFloat()) {
-            return FLOAT;
-        } else if (v.isDouble()) {
-            return DOUBLE;
-        } else if (v.isInt()) {
-            return INT32;
-        } else if (v.isLong()) {
-            return INT64;
-        } else if (v.isTextual()) {
-            return STRING;
-        } else {
-            return UNKNOWN;
         }
     }
 

@@ -13,7 +13,6 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
-import org.kie.trustyai.service.payloads.values.DataType;
 
 @ApplicationScoped
 public class BaseMetricRequestValidator implements ConstraintValidator<ValidBaseMetricRequest, BaseMetricRequest> {
@@ -46,25 +45,23 @@ public class BaseMetricRequestValidator implements ConstraintValidator<ValidBase
             }
             // Outcome name guaranteed to exist
             final SchemaItem outcomeSchema = metadata.getOutputSchema().getItems().get(outcomeName);
-            DataType requestedOutcomeType = PayloadConverter.getNodeType(request.getFavorableOutcome());
-            if (!outcomeSchema.getType().equals(requestedOutcomeType)) {
+            if (!PayloadConverter.checkValueType(outcomeSchema.getType(), request.getFavorableOutcome())) {
                 context.buildConstraintViolationWithTemplate(
-                        "Invalid type for outcome. Got '" + requestedOutcomeType + "', expected '" + outcomeSchema.getType().toString() + "'").addConstraintViolation();
+                        "Invalid type for outcome. Got '" + request.getFavorableOutcome() + "', expected object compatible with '" + outcomeSchema.getType().toString() + "'").addConstraintViolation();
                 return false;
             }
             // Protected attribute guaranteed to exist
             final SchemaItem protectedAttrSchema = metadata.getInputSchema().getItems().get(protectedAttribute);
-            DataType requestedPrivilegedType = PayloadConverter.getNodeType(request.getPrivilegedAttribute());
-            if (!protectedAttrSchema.getType().equals(requestedPrivilegedType)) {
+            if (!PayloadConverter.checkValueType(protectedAttrSchema.getType(), request.getPrivilegedAttribute())) {
                 context.buildConstraintViolationWithTemplate(
-                        "Invalid type for privileged attribute. Got '" + requestedPrivilegedType + "', expected '" + protectedAttrSchema.getType().toString() + "'")
+                        "Invalid type for privileged attribute. Got '" + request.getPrivilegedAttribute() + "', expected object compatible with ''" + protectedAttrSchema.getType().toString() + "'")
                         .addConstraintViolation();
                 return false;
             }
-            DataType requestedUnprivilegedType = PayloadConverter.getNodeType(request.getUnprivilegedAttribute());
-            if (!protectedAttrSchema.getType().equals(requestedUnprivilegedType)) {
+            if (!PayloadConverter.checkValueType(protectedAttrSchema.getType(), request.getUnprivilegedAttribute())) {
                 context.buildConstraintViolationWithTemplate(
-                        "Invalid type for unprivileged attribute. Got '" + requestedUnprivilegedType + "', expected '" + protectedAttrSchema.getType().toString() + "'")
+                        "Invalid type for unprivileged attribute. Got '" + request.getUnprivilegedAttribute() + "', expected object compatible with ''" + protectedAttrSchema.getType().toString()
+                                + "'")
                         .addConstraintViolation();
                 return false;
             }

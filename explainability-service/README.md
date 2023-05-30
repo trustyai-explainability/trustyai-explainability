@@ -68,19 +68,10 @@ curl -X POST --location "http://localhost:8080/metrics/spd/request" \
             \"modelId\": \"example-model-1\",
             \"requestName\": \"lala\",
             \"protectedAttribute\": \"input-2\",
-            \"favorableOutcome\": {
-                \"type\": \"DOUBLE\",
-                \"value\": 1.0
-            },
+            \"favorableOutcome\":  1.0,
             \"outcomeName\": \"output-0\",
-            \"privilegedAttribute\": {
-                \"type\": \"DOUBLE\",
-                \"value\": 1.0
-            },
-            \"unprivilegedAttribute\": {
-                \"type\": \"DOUBLE\",
-                \"value\": 0.0
-            } 
+            \"privilegedAttribute\": 1.0,
+            \"unprivilegedAttribute\": 0.0
         }"
 ```
 
@@ -226,19 +217,10 @@ curl -X POST --location "http://{{host}}/metrics/spd" \
     -d "{
           \"modelId\": \"example-model-1\",
           \"protectedAttribute\": \"input-2\",
-          \"favorableOutcome\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-          },
+          \"favorableOutcome\": 1.0,
           \"outcomeName\": \"output-0\",
-          \"privilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-          },
-          \"unprivilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 0.0
-          }
+          \"privilegedAttribute\": 1.0,
+          \"unprivilegedAttribute\": 0.0
         }"
 ```
 
@@ -272,19 +254,10 @@ curl -X POST --location "http://{{host}}/metrics/dir" \
     -d "{
           \"modelId\": \"example-model-1\",
           \"protectedAttribute\": \"input-2\",
-          \"favorableOutcome\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-          },
+          \"favorableOutcome\": 1.0,
           \"outcomeName\": \"output-0\",
-          \"privilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-          },
-          \"unprivilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 0.0
-          }
+          \"privilegedAttribute\": 1.0,
+          \"unprivilegedAttribute\": 0.0
         }"
 ```
 
@@ -317,20 +290,12 @@ Looking at the SPD example above if we wanted the metric to be calculated period
 curl -X POST --location "http://{{host}}/metrics/spd/request" \
     -H "Content-Type: application/json" \
     -d "{
+          \"modelId\": \"example-model-1\",
           \"protectedAttribute\": \"input-2\",
-          \"favorableOutcome\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-          },
+          \"favorableOutcome\": 1.0
           \"outcomeName\": \"output-0\",
-          \"privilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-          },
-          \"unprivilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 0.0
-          }
+          \"privilegedAttribute\": 1.0,
+          \"unprivilegedAttribute\": 0.0
         }"
 ```
 
@@ -356,21 +321,13 @@ You can also specify the bias threshold deltas in the request body:
 curl -X POST --location "http://{{host}}/metrics/spd/request" \
     -H "Content-Type: application/json" \
     -d "{
+          \"modelId\": \"example-model-1\",
           \"thresholdDelta\": 0.05,
           \"protectedAttribute\": \"input-2\",
-          \"favorableOutcome\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-          },
+          \"favorableOutcome\": 1.0,
           \"outcomeName\": \"output-0\",
-          \"privilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-          },
-          \"unprivilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 0.0
-          }
+          \"privilegedAttribute\": 1.0,
+          \"unprivilegedAttribute\": 0.0
         }"
 ```
 This means that _this specific_ metric request will consider SPD values within +/-0.05 to be fair, and values outside
@@ -382,21 +339,13 @@ You can also specify the batch size in the request body:
 curl -X POST --location "http://{{host}}/metrics/spd/request" \
     -H "Content-Type: application/json" \
     -d "{
+          \"modelId\": \"example-model-1\",
           \"batchSize\": 1000,
           \"protectedAttribute\": \"input-2\",
-          \"favorableOutcome\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-          },
+          \"favorableOutcome\": 1.0,
           \"outcomeName\": \"output-0\",
-          \"privilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-          },
-          \"unprivilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 0.0
-          }
+          \"privilegedAttribute\": 1.0,
+          \"unprivilegedAttribute\": 0.0
         }"
 ```
 
@@ -425,7 +374,7 @@ curl -X GET --location "http://{{host}}:8080/metrics/spd/requests"
 
 This will return, as an example:
 
-```text
+```shell
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
 content-length: 271
@@ -482,19 +431,10 @@ curl -X POST --location "http://{{host}}:8080/metrics/{metric}/definition" \
     -H "Content-Type: application/json" \
     -d "{
           \"protectedAttribute\": \"gender\",
-          \"favorableOutcome\": {
-            \"type\": \"INT32\",
-            \"value\": 1
-          },
+          \"favorableOutcome\": 1
           \"outcomeName\": \"income\",
-          \"privilegedAttribute\": {
-            \"type\": \"INT32\",
-            \"value\": 1
-          },
-          \"unprivilegedAttribute\": {
-            \"type\": \"INT32\",
-            \"value\": 0
-          },
+          \"privilegedAttribute\": 1
+          \"unprivilegedAttribute\": 0
           \"metricValue\": 0.25
         }"
 ```

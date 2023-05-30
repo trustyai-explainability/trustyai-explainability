@@ -143,7 +143,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("Invalid type for outcome. Got 'STRING', expected 'INT32'"));
+                .body(containsString("Got '\\\"male\\\"', expected object compatible with 'INT32'"));
     }
 
     @Test
@@ -291,7 +291,7 @@ class DisparateImpactRatioEndpointTest {
                 .when()
                 .post("/request")
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("Invalid type for outcome. Got 'STRING', expected 'INT32'"));
+                .body(containsString("Got '\\\"male\\\"', expected object compatible with 'INT32'"));
 
         ScheduleList scheduleList = given()
                 .when()
