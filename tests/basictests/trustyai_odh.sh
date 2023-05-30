@@ -95,19 +95,10 @@ function schedule_and_check_request(){
     --data '{
         \"modelId\": \"example-sklearn-isvc\",
         \"protectedAttribute\": \"input-0\",
-        \"favorableOutcome\": {
-            \"type\": \"INT64\",
-            \"value\": 0.0
-        },
+        \"favorableOutcome\": 0,
         \"outcomeName\": \"output-0\",
-        \"privilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 0.0
-        },
-        \"unprivilegedAttribute\": {
-            \"type\": \"DOUBLE\",
-            \"value\": 1.0
-        }
+        \"privilegedAttribute\": 0.0,
+        \"unprivilegedAttribute\": 1.0,
     }'" "requestId"
   os::cmd::try_until_text "curl http://$TRUSTY_ROUTE/q/metrics" "trustyai_spd"
 }
