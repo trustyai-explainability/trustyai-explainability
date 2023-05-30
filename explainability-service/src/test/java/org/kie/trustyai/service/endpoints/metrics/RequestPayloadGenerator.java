@@ -4,12 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.values.TypedValue;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-
-import static org.kie.trustyai.service.payloads.values.DataType.INT32;
-import static org.kie.trustyai.service.payloads.values.DataType.STRING;
 
 public class RequestPayloadGenerator {
 
@@ -18,24 +14,10 @@ public class RequestPayloadGenerator {
     public static BaseMetricRequest correct() {
         BaseMetricRequest request = new BaseMetricRequest();
         request.setProtectedAttribute("gender");
-
-        TypedValue favorableOutcome = new TypedValue();
-        favorableOutcome.setType(INT32);
-        favorableOutcome.setValue(JsonNodeFactory.instance.numberNode(1));
-        request.setFavorableOutcome(favorableOutcome);
-
+        request.setFavorableOutcome(JsonNodeFactory.instance.numberNode(1));
         request.setOutcomeName("income");
-
-        TypedValue privilegedAttribute = new TypedValue();
-        privilegedAttribute.setType(INT32);
-        privilegedAttribute.setValue(JsonNodeFactory.instance.numberNode(1));
-        request.setPrivilegedAttribute(privilegedAttribute);
-
-        TypedValue unprivilegedAttribute = new TypedValue();
-        unprivilegedAttribute.setType(INT32);
-        unprivilegedAttribute.setValue(JsonNodeFactory.instance.numberNode(0));
-        request.setUnprivilegedAttribute(unprivilegedAttribute);
-
+        request.setPrivilegedAttribute(JsonNodeFactory.instance.numberNode(1));
+        request.setUnprivilegedAttribute(JsonNodeFactory.instance.numberNode(0));
         request.setModelId(MODEL_ID);
 
         return request;
@@ -44,24 +26,10 @@ public class RequestPayloadGenerator {
     public static BaseMetricRequest named(String name) {
         BaseMetricRequest request = new BaseMetricRequest();
         request.setProtectedAttribute("gender");
-
-        TypedValue favorableOutcome = new TypedValue();
-        favorableOutcome.setType(INT32);
-        favorableOutcome.setValue(JsonNodeFactory.instance.numberNode(1));
-        request.setFavorableOutcome(favorableOutcome);
-
+        request.setFavorableOutcome(JsonNodeFactory.instance.numberNode(1));
         request.setOutcomeName("income");
-
-        TypedValue privilegedAttribute = new TypedValue();
-        privilegedAttribute.setType(INT32);
-        privilegedAttribute.setValue(JsonNodeFactory.instance.numberNode(1));
-        request.setPrivilegedAttribute(privilegedAttribute);
-
-        TypedValue unprivilegedAttribute = new TypedValue();
-        unprivilegedAttribute.setType(INT32);
-        unprivilegedAttribute.setValue(JsonNodeFactory.instance.numberNode(0));
-        request.setUnprivilegedAttribute(unprivilegedAttribute);
-
+        request.setPrivilegedAttribute(JsonNodeFactory.instance.numberNode(1));
+        request.setUnprivilegedAttribute(JsonNodeFactory.instance.numberNode(0));
         request.setModelId(MODEL_ID);
         request.setRequestName(name);
 
@@ -71,24 +39,10 @@ public class RequestPayloadGenerator {
     public static BaseMetricRequest incorrectType() {
         BaseMetricRequest request = new BaseMetricRequest();
         request.setProtectedAttribute("gender");
-
-        TypedValue favorableOutcome = new TypedValue();
-        favorableOutcome.setType(STRING);
-        favorableOutcome.setValue(JsonNodeFactory.instance.numberNode(1));
-        request.setFavorableOutcome(favorableOutcome);
-
+        request.setFavorableOutcome(JsonNodeFactory.instance.textNode("male"));
         request.setOutcomeName("income");
-
-        TypedValue privilegedAttribute = new TypedValue();
-        privilegedAttribute.setType(INT32);
-        privilegedAttribute.setValue(JsonNodeFactory.instance.numberNode(1));
-        request.setPrivilegedAttribute(privilegedAttribute);
-
-        TypedValue unprivilegedAttribute = new TypedValue();
-        unprivilegedAttribute.setType(INT32);
-        unprivilegedAttribute.setValue(JsonNodeFactory.instance.numberNode(0));
-        request.setUnprivilegedAttribute(unprivilegedAttribute);
-
+        request.setPrivilegedAttribute(JsonNodeFactory.instance.numberNode(1));
+        request.setUnprivilegedAttribute(JsonNodeFactory.instance.numberNode(0));
         request.setModelId(MODEL_ID);
 
         return request;

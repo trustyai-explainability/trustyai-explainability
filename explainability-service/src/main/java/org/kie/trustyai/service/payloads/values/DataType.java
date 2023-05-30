@@ -7,5 +7,9 @@ public enum DataType {
     INT32,
     INT64,
     STRING,
+<<<<<<< HEAD
     MAP
+=======
+    UNKNOWN
+>>>>>>> 876c5cc (Removed mandatory typing from request body)
 }

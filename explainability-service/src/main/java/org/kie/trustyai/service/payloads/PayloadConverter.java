@@ -5,6 +5,8 @@ import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.payloads.values.TypedValue;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import static org.kie.trustyai.service.payloads.values.DataType.*;
 
 public class PayloadConverter {
@@ -12,7 +14,7 @@ public class PayloadConverter {
     }
 
     public static Value convertToValue(TypedValue node) {
-        final DataType type = node.getType();
+        DataType type = node.getType();
         if (type == BOOL) {
             return new Value(node.getValue().asBoolean());
         } else if (type == FLOAT || type == DOUBLE) {
@@ -25,6 +27,42 @@ public class PayloadConverter {
             return new Value(node.getValue().asText());
         } else {
             return new Value(null);
+        }
+    }
+
+    public static boolean checkValueType(DataType type, JsonNode v) {
+        if (type == BOOL) {
+            return v.isBoolean();
+        } else if (type == FLOAT) {
+            return v.isFloat();
+        } else if (type == DOUBLE) {
+            return v.isDouble();
+        } else if (type == INT32) {
+            return v.isInt();
+        } else if (type == INT64) {
+            return v.isLong();
+        } else if (type == STRING) {
+            return v.isTextual();
+        } else {
+            return false;
+        }
+    }
+
+    public static DataType getNodeType(JsonNode v) {
+        if (v.isBoolean()) {
+            return BOOL;
+        } else if (v.isFloat()) {
+            return FLOAT;
+        } else if (v.isDouble()) {
+            return DOUBLE;
+        } else if (v.isInt()) {
+            return INT32;
+        } else if (v.isLong()) {
+            return INT64;
+        } else if (v.isTextual()) {
+            return STRING;
+        } else {
+            return UNKNOWN;
         }
     }
 

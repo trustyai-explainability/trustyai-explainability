@@ -14,8 +14,8 @@ import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
 import org.kie.trustyai.metrics.fairness.group.GroupStatisticalParityDifference;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.PayloadConverter;
+import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
 
 import io.quarkus.cache.CacheResult;
 
@@ -25,7 +25,7 @@ public class MetricsCalculator {
     private static final Logger LOG = Logger.getLogger(MetricsCalculator.class);
 
     @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public double calculateSPD(Dataframe dataframe, BaseMetricRequest request) throws MetricCalculationException {
+    public double calculateSPD(Dataframe dataframe, ReconciledMetricRequest request) throws MetricCalculationException {
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
@@ -44,7 +44,7 @@ public class MetricsCalculator {
         }
     }
 
-    public String getSPDDefinition(double spd, BaseMetricRequest request) {
+    public String getSPDDefinition(double spd, ReconciledMetricRequest request) {
         final String outcomeName = request.getOutcomeName();
         final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
         final String protectedAttribute = request.getProtectedAttribute();
@@ -61,7 +61,7 @@ public class MetricsCalculator {
     }
 
     @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public double calculateDIR(Dataframe dataframe, BaseMetricRequest request) {
+    public double calculateDIR(Dataframe dataframe, ReconciledMetricRequest request) {
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
@@ -82,7 +82,7 @@ public class MetricsCalculator {
         }
     }
 
-    public String getDIRDefinition(double dir, BaseMetricRequest request) {
+    public String getDIRDefinition(double dir, ReconciledMetricRequest request) {
         final String outcomeName = request.getOutcomeName();
         final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
         final String protectedAttribute = request.getProtectedAttribute();

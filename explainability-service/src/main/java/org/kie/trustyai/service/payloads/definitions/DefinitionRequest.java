@@ -5,7 +5,7 @@ import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class DefinitionRequest extends BaseMetricRequest {
-    JsonNode metricValue;
+    public JsonNode metricValue;
 
     public DefinitionRequest() {
         super();

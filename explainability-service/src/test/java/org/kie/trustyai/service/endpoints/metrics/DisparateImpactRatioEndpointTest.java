@@ -10,12 +10,14 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.reactive.RestResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponse;
@@ -46,12 +48,21 @@ class DisparateImpactRatioEndpointTest {
     @Inject
     Instance<MockMemoryStorage> storage;
 
+    @Inject
+    Instance<MockPrometheusScheduler> scheduler;
+
     @BeforeEach
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
         final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+    }
+
+    @AfterEach
+    void clearRequests() {
+        scheduler.get().getDirRequests().clear();
+        scheduler.get().getSpdRequests().clear();
     }
 
     @Test
@@ -367,6 +378,7 @@ class DisparateImpactRatioEndpointTest {
                 .when()
                 .get("/requests")
                 .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+        System.out.println(emptyList.requests);
         assertEquals(0, emptyList.requests.size());
 
         List<String> names = List.of("name1", "name2", "name3");
