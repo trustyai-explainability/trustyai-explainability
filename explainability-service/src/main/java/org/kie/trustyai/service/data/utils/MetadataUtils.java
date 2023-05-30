@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.data.utils;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,6 +14,7 @@ public class MetadataUtils {
 
     public static final String ID_FIELD = "_id";
     public static final String TIMESTAMP_FIELD = "_timestamp";
+    public static final String METADATA = "_metadata";
 
     private MetadataUtils() {
 
@@ -32,6 +34,8 @@ public class MetadataUtils {
             schemaItem.setType(DataType.BOOL);
         } else if (value.getUnderlyingObject() instanceof String) {
             schemaItem.setType(DataType.STRING);
+        } else if (value.getUnderlyingObject() instanceof Map) {
+            schemaItem.setType(DataType.MAP);
         }
         schemaItem.setName(dataframe.getColumnNames().get(i));
 
@@ -51,6 +55,7 @@ public class MetadataUtils {
                 .stream()
                 .filter(i -> !dataframe.getColumnNames().get(i).equals(ID_FIELD))
                 .filter(i -> !dataframe.getColumnNames().get(i).equals(TIMESTAMP_FIELD))
+                .filter(i -> !dataframe.getColumnNames().get(i).equals(METADATA))
                 .map(i -> extractRowSchema(dataframe, i)).collect(Collectors.toList()));
     }
 
