@@ -55,6 +55,7 @@ public class MetadataUtils {
                 .stream()
                 .filter(i -> !dataframe.getColumnNames().get(i).equals(ID_FIELD))
                 .filter(i -> !dataframe.getColumnNames().get(i).equals(TIMESTAMP_FIELD))
+                .filter(i -> !dataframe.getColumnNames().get(i).equals(METADATA))
                 .map(i -> extractRowSchema(dataframe, i)).collect(Collectors.toList()));
     }
 
