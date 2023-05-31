@@ -34,8 +34,6 @@ function check_trustyai_resources() {
 
 function deploy_model() {
     header "Deploying model into ModelMesh"
-    echo $(oc logs $(oc get pods -n openshift-operators -o name | grep opendatahub-operator) -n openshift-operators)
-
     oc new-project $MM_NAMESPACE
     os::cmd::expect_success "oc project $MM_NAMESPACE"
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/modelmesh/service_account.yaml -n ${MM_NAMESPACE}"
