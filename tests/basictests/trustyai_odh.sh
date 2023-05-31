@@ -29,6 +29,8 @@ function check_trustyai_resources() {
   os::cmd::try_until_text "oc get route trustyai-service-route" "trustyai-service-route" $odhdefaulttimeout $odhdefaultinterval
 
   oc wait --for=condition=Ready $(oc get pod -o name | grep trustyai) --timeout=${odhdefaulttimeout}ms
+
+  echo $(oc logs $(oc get pods -n openshift-operators -o name | grep opendatahub-operator) -n openshift-operators)
 }
 
 function deploy_model() {
