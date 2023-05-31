@@ -30,11 +30,12 @@ function check_trustyai_resources() {
 
   oc wait --for=condition=Ready $(oc get pod -o name | grep trustyai) --timeout=${odhdefaulttimeout}ms
 
-  echo $(oc logs $(oc get pods -n openshift-operators -o name | grep opendatahub-operator) -n openshift-operators)
 }
 
 function deploy_model() {
     header "Deploying model into ModelMesh"
+    echo $(oc logs $(oc get pods -n openshift-operators -o name | grep opendatahub-operator) -n openshift-operators)
+
     oc new-project $MM_NAMESPACE
     os::cmd::expect_success "oc project $MM_NAMESPACE"
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/modelmesh/service_account.yaml -n ${MM_NAMESPACE}"
