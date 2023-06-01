@@ -1,8 +1,6 @@
 name: Build and Push
 on:
   push:
-    branches:
-      - main
     paths-ignore:
       - 'LICENSE'
       - '**/.gitignore'
