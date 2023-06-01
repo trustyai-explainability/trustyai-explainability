@@ -18,8 +18,6 @@ jobs:
   # Ensure that tests pass before publishing a new image.
   build-and-push-ci:
     runs-on: ubuntu-latest
-    env:
-      SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v2
       - name: debug
@@ -27,12 +25,12 @@ jobs:
           echo "GITHUB.REF: ${{ github.ref }}"
           echo "GITHUB.HEAD_REF: ${{ github.head_ref }}"
       - name: Set CI environment
-        if:  github.head_ref != "" && github.head_ref != 'main'
+        if:  github.head_ref != '' && github.head_ref != 'main'
         run: | 
           echo "TAG=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
           echo "IMAGE_NAME=quay.io/trustyai/trustyai-service-ci" >> $GITHUB_ENV
       - name: Set main-branch environment
-        if:  github.head_ref == "" && github.ref == 'refs/heads/main'
+        if:  github.head_ref == '' && github.ref == 'refs/heads/main'
         run: |
           echo "TAG=latest" >> $GITHUB_ENV
           echo "IMAGE_NAME=quay.io/trustyai/trustyai-service" >> $GITHUB_ENV
@@ -41,7 +39,7 @@ jobs:
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
       - name: Put expiry date on CI-tagged image
-        if:  github.head_ref != "" && github.head_ref != 'main'
+        if:  github.head_ref != '' && github.head_ref != 'main'
         run: sed -i 's#summary="odh-trustyai-service\"#summary="odh-trustyai-service" \\ \n      quay.expires-after=7d#' Dockerfile
       - name: Build image
         run: docker build -t ${{ env.IMAGE_NAME }}:$TAG .
