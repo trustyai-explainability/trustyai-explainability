@@ -1,8 +1,6 @@
-name: Build and Push
+name: Build and Push CI
 on:
-  push:
-    branches:
-      - "main"
+  pull_request_target:
     paths-ignore:
       - 'LICENSE'
       - '**/.gitignore'
@@ -11,7 +9,7 @@ on:
       - '*.txt'
 jobs:
   # Ensure that tests pass before publishing a new image.
-  build-and-push:
+  build-and-push-ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,8 +17,11 @@ jobs:
           ref: "refs/pull/${{ github.event.number }}/merge"
       - name: Pull prerequisite images
         uses: actions/quay/pull_prerequisites
+      - name: Put expiry date on CI-tagged image
+        run: sed -i 's#summary="odh-trustyai-service\"#summary="odh-trustyai-service" \\ \n      quay.expires-after=7d#' Dockerfile
       - name: Build and Push
         uses: actions/quay/build_and_push
         with:
-          image-name: quay.io/trustyai/trustyai-service
-          tag:  latest
+          image-name: quay.io/trustyai/trustyai-service-ci
+          tag: ${{ github.sha }}
+

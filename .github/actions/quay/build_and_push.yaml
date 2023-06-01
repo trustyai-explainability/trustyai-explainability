@@ -1,0 +1,21 @@
+name: "Pull prerequisite images"
+description: "Pull dependent images of TrustyAI service"
+
+inputs:
+  image-name:
+    description: "Quay repo name"
+    required: true
+  tag:
+    description: "Quay image tag"
+    required: true
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build image
+      run: docker build -t ${{ inputs.image-name }}:${{ inputs.tag }} .
+    - name: Log in to Quay
+      run: docker login -u ${{ secrets.QUAY_ROBOT_USERNAME }} -p ${{ secrets.QUAY_ROBOT_SECRET }} quay.io
+    - name: Push to Quay CI repo
+      run: docker push ${{ inputs.image-name }}:${{ inputs.tag }}
