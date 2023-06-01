@@ -9,7 +9,7 @@ on:
       - '**.md'
       - '**.adoc'
       - '*.txt'
-  pull_request_targgiet:
+  pull_request_target:
     paths-ignore:
       - 'LICENSE'
       - '**/.gitignore'
