@@ -24,7 +24,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: debug
         run: |
+          echo "GITHUB REF"
           echo ${{ github.ref }}
+          echo "GITHUB HEAD REF"
           echo ${{ github.head_ref }}
       - name: Set CI environment
         if:  github.head_ref != 'main'
