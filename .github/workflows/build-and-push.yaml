@@ -1,13 +1,15 @@
 name: Build and Push
 on:
   push:
+    branches:
+      - main
     paths-ignore:
       - 'LICENSE'
       - '**/.gitignore'
       - '**.md'
       - '**.adoc'
       - '*.txt'
-  pull_request_target:
+  pull_request_targgiet:
     paths-ignore:
       - 'LICENSE'
       - '**/.gitignore'
