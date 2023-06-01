@@ -22,8 +22,6 @@ jobs:
       SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: "refs/pull/${{ github.event.number }}/merge"
       - name: debug
         run: |
           echo ${{ github.ref }}
