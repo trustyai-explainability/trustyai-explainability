@@ -18,9 +18,9 @@ jobs:
         with:
           ref: "refs/pull/${{ github.event.number }}/merge"
       - name: Pull prerequisite images
-        uses: actions/quay/pull_prerequisites
+        uses: ./.github/actions/quay/pull_prerequisites
       - name: Build and Push
-        uses: actions/quay/build_and_push
+        uses: ./.github/actions/quay/build_and_push
         with:
           image-name: quay.io/trustyai/trustyai-service
           tag:  latest

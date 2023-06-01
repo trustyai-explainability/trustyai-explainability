@@ -16,11 +16,11 @@ jobs:
         with:
           ref: "refs/pull/${{ github.event.number }}/merge"
       - name: Pull prerequisite images
-        uses: actions/quay/pull_prerequisites
+        uses: ./.github/actions/quay/pull_prerequisites
       - name: Put expiry date on CI-tagged image
         run: sed -i 's#summary="odh-trustyai-service\"#summary="odh-trustyai-service" \\ \n      quay.expires-after=7d#' Dockerfile
       - name: Build and Push
-        uses: actions/quay/build_and_push
+        uses: ./.github/actions/quay/build_and_push
         with:
           image-name: quay.io/trustyai/trustyai-service-ci
           tag: ${{ github.sha }}
