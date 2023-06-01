@@ -2,7 +2,14 @@ name: Build and Push
 on:
   push:
     branches:
-      - "main"
+      - main
+    paths-ignore:
+      - 'LICENSE'
+      - '**/.gitignore'
+      - '**.md'
+      - '**.adoc'
+      - '*.txt'
+  pull_request_target:
     paths-ignore:
       - 'LICENSE'
       - '**/.gitignore'
@@ -11,16 +18,35 @@ on:
       - '*.txt'
 jobs:
   # Ensure that tests pass before publishing a new image.
-  build-and-push:
+  build-and-push-ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: "refs/pull/${{ github.event.number }}/merge"
+      - name: Log reference variables
+        run: |
+          echo "GITHUB.REF: ${{ github.ref }}"
+          echo "GITHUB.HEAD_REF: ${{ github.head_ref }}"
+          echo "SHA: ${{ github.event.pull_request.head.sha }}"
+      - name: Set CI environment
+        if:  github.head_ref != '' && github.head_ref != 'main'
+        run: | 
+          echo "TAG=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+          echo "IMAGE_NAME=quay.io/trustyai/trustyai-service-ci" >> $GITHUB_ENV
+      - name: Set main-branch environment
+        if:  github.head_ref == '' && github.ref == 'refs/heads/main'
+        run: |
+          echo "TAG=latest" >> $GITHUB_ENV
+          echo "IMAGE_NAME=quay.io/trustyai/trustyai-service" >> $GITHUB_ENV
       - name: Pull prerequisite images
-        uses: actions/quay/pull_prerequisites
-      - name: Build and Push
-        uses: actions/quay/build_and_push
-        with:
-          image-name: quay.io/trustyai/trustyai-service
-          tag:  latest
+        run: |
+          docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
+          docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
+      - name: Put expiry date on CI-tagged image
+        if:  github.head_ref != '' && github.head_ref != 'main'
+        run: sed -i 's#summary="odh-trustyai-service\"#summary="odh-trustyai-service" \\ \n      quay.expires-after=7d#' Dockerfile
+      - name: Build image
+        run: docker build -t ${{ env.IMAGE_NAME }}:$TAG .
+      - name: Log in to Quay
+        run: docker login -u ${{ secrets.QUAY_ROBOT_USERNAME }} -p ${{ secrets.QUAY_ROBOT_SECRET }} quay.io
+      - name: Push to Quay CI repo
+        run: docker push ${{ env.IMAGE_NAME }}:$TAG

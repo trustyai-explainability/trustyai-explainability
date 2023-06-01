@@ -1,9 +1,0 @@
-name: "Pull prerequisite images"
-description: "Pull dependent images of TrustyAI service"
-runs:
-  using: "composite"
-  steps:
-    - name: "Pull prerequisite images"
-      run: |
-        docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
-        docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
