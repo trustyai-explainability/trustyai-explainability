@@ -21,6 +21,11 @@ jobs:
   build-and-push-ci:
     runs-on: ubuntu-latest
     steps:
+      - uses: mheap/github-action-required-labels@v4
+        with:
+          mode: exactly
+          count: 1
+          labels: "ok-to-test"
       - uses: actions/checkout@v3
         if: github.head_ref != '' && github.head_ref != 'main'
         with:
