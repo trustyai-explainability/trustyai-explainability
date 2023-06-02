@@ -14,7 +14,7 @@ public class PayloadConverter {
     }
 
     public static Value convertToValue(TypedValue node) {
-        DataType type = node.getType();
+        final DataType type = node.getType();
         if (type == BOOL) {
             return new Value(node.getValue().asBoolean());
         } else if (type == FLOAT || type == DOUBLE) {

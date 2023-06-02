@@ -378,7 +378,6 @@ class DisparateImpactRatioEndpointTest {
                 .when()
                 .get("/requests")
                 .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
-        System.out.println(emptyList.requests);
         assertEquals(0, emptyList.requests.size());
 
         List<String> names = List.of("name1", "name2", "name3");

@@ -68,31 +68,31 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response dir(@ValidBaseMetricRequest BaseMetricRequest request) throws DataframeCreateException {
+    public Response dir(@ValidBaseMetricRequest BaseMetricRequest rawRequest) throws DataframeCreateException {
 
         final Dataframe dataframe;
         final Metadata metadata;
         try {
-            dataframe = dataSource.get().getDataframe(request.getModelId());
-            metadata = dataSource.get().getMetadata(request.getModelId());
+            dataframe = dataSource.get().getDataframe(rawRequest.getModelId());
+            metadata = dataSource.get().getMetadata(rawRequest.getModelId());
         } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
+            LOG.error("No data available for model " + rawRequest.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
-        ReconciledMetricRequest reconciledMetricRequest = ReconciledMetricRequest.reconcile(request, metadata);
+        ReconciledMetricRequest reconciledMetricRequest = ReconciledMetricRequest.reconcile(rawRequest, metadata);
 
         final double dir;
         try {
             dir = calculator.calculateDIR(dataframe, reconciledMetricRequest);
         } catch (MetricCalculationException e) {
-            LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
+            LOG.error("Error calculating metric for model " + reconciledMetricRequest.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
         final String dirDefinition = calculator.getDIRDefinition(dir, reconciledMetricRequest);
 
         MetricThreshold thresholds;
-        if (request.getThresholdDelta() == null) {
+        if (reconciledMetricRequest.getThresholdDelta() == null) {
             thresholds =
                     new MetricThreshold(
                             metricsConfig.dir().thresholdLower(),
@@ -101,8 +101,8 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
         } else {
             thresholds =
                     new MetricThreshold(
-                            1 - request.getThresholdDelta(),
-                            1 + request.getThresholdDelta(),
+                            1 - reconciledMetricRequest.getThresholdDelta(),
+                            1 + reconciledMetricRequest.getThresholdDelta(),
                             dir);
         }
         final DisparateImpactRatioResponse dirObj = new DisparateImpactRatioResponse(dir, dirDefinition, thresholds);
