@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: mheap/github-action-required-labels@v4
         with:
-          mode: exactly
+          mode: minimum
           count: 1
           labels: "ok-to-test"
       - uses: actions/checkout@v3
