@@ -21,7 +21,15 @@ jobs:
   build-and-push-ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: mheap/github-action-required-labels@v4
+        with:
+          mode: minimum
+          count: 1
+          labels: "ok-to-test"
+      - uses: actions/checkout@v3
+        if: github.head_ref != '' && github.head_ref != 'main'
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Log reference variables
         run: |
           echo "GITHUB.REF: ${{ github.ref }}"
