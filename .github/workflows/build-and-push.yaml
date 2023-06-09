@@ -25,7 +25,7 @@ jobs:
         with:
           mode: minimum
           count: 1
-          labels: "ok-to-test"
+          labels: "ok-to-test", "lgtm"
       - uses: actions/checkout@v3
         if: github.head_ref != '' && github.head_ref != 'main'
         with:
