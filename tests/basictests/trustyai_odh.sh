@@ -99,7 +99,7 @@ function schedule_and_check_request(){
         \"favorableOutcome\": 0,
         \"outcomeName\": \"output-0\",
         \"privilegedAttribute\": 0.0,
-        \"unprivilegedAttribute\": 1.0,
+        \"unprivilegedAttribute\": 1.0
     }'" "requestId"
   os::cmd::try_until_text "curl http://$TRUSTY_ROUTE/q/metrics" "trustyai_spd"
 }
