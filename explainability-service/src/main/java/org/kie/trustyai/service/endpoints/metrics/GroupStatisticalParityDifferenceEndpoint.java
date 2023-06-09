@@ -20,10 +20,13 @@ import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
+import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.MetricThreshold;
+import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
 import org.kie.trustyai.service.payloads.definitions.DefinitionRequest;
+import org.kie.trustyai.service.payloads.definitions.ReconciledDefinitionRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
@@ -67,7 +70,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
     @Produces(MediaType.APPLICATION_JSON)
     public Response listRequests() {
         final ScheduleList scheduleList = new ScheduleList();
-        for (Map.Entry<UUID, BaseMetricRequest> entry : scheduler.getSpdRequests().entrySet()) {
+        for (Map.Entry<UUID, ReconciledMetricRequest> entry : scheduler.getSpdRequests().entrySet()) {
             scheduleList.requests.add(new ScheduleRequest(entry.getKey(), entry.getValue()));
         }
         return Response.ok(scheduleList).build();
@@ -79,21 +82,25 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
     public Response spd(@ValidBaseMetricRequest BaseMetricRequest request) throws DataframeCreateException {
 
         final Dataframe dataframe;
+        final Metadata metadata;
         try {
             dataframe = dataSource.get().getDataframe(request.getModelId());
+            metadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
+        ReconciledMetricRequest reconciledMetricRequest = ReconciledMetricRequest.reconcile(request, metadata);
+
         final double spd;
         try {
-            spd = calculator.calculateSPD(dataframe, request);
+            spd = calculator.calculateSPD(dataframe, reconciledMetricRequest);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
-        final String definition = calculator.getSPDDefinition(spd, request);
+        final String definition = calculator.getSPDDefinition(spd, reconciledMetricRequest);
 
         MetricThreshold thresholds;
         if (request.getThresholdDelta() == null) {
@@ -125,7 +132,16 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/definition")
     public Response getSpecificDefinition(DefinitionRequest request) {
-        return Response.ok(calculator.getSPDDefinition(request.getMetricValue(), request)).build();
+        final ReconciledMetricRequest reconciledMetricRequest;
+        try {
+            reconciledMetricRequest = ReconciledMetricRequest.reconcile(request, dataSource);
+        } catch (DataframeCreateException e) {
+            LOG.error("No data available: " + e.getMessage(), e);
+            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+        }
+
+        ReconciledDefinitionRequest reconciledDefinitionRequest = new ReconciledDefinitionRequest(reconciledMetricRequest, request.metricValue);
+        return Response.ok(calculator.getSPDDefinition(request.getMetricValue(), reconciledDefinitionRequest)).build();
     }
 
     @POST
@@ -133,7 +149,6 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
     public Response createaRequest(@ValidBaseMetricRequest BaseMetricRequest request) {
-
         final UUID id = UUID.randomUUID();
 
         if (Objects.isNull(request.getBatchSize())) {
@@ -143,7 +158,15 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
         }
 
         request.setMetricName(getMetricName());
-        scheduler.registerSPD(id, request);
+
+        final ReconciledMetricRequest reconciledMetricRequest;
+        try {
+            reconciledMetricRequest = ReconciledMetricRequest.reconcile(request, dataSource);
+        } catch (DataframeCreateException e) {
+            LOG.error("No data available: " + e.getMessage(), e);
+            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+        }
+        scheduler.registerSPD(id, reconciledMetricRequest);
 
         final BaseScheduledResponse response =
                 new BaseScheduledResponse(id);

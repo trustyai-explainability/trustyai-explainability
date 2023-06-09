@@ -1,25 +1,25 @@
 package org.kie.trustyai.service.payloads.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Schema {
-    private final List<SchemaItem> items;
+    private final Map<String, SchemaItem> items;
 
     public Schema() {
-        this.items = new ArrayList<>();
+        this.items = new ConcurrentHashMap<>();
     }
 
-    public Schema(List<SchemaItem> items) {
+    public Schema(Map<String, SchemaItem> items) {
         this.items = items;
     }
 
-    public static Schema from(List<SchemaItem> items) {
+    public static Schema from(Map<String, SchemaItem> items) {
         return new Schema(items);
     }
 
-    public List<SchemaItem> getItems() {
+    public Map<String, SchemaItem> getItems() {
         return items;
     }
 

@@ -2,6 +2,7 @@ package org.kie.trustyai.service.data.utils;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -56,11 +57,14 @@ public class MetadataUtils {
                 .filter(i -> !dataframe.getColumnNames().get(i).equals(ID_FIELD))
                 .filter(i -> !dataframe.getColumnNames().get(i).equals(TIMESTAMP_FIELD))
                 .filter(i -> !dataframe.getColumnNames().get(i).equals(METADATA))
-                .map(i -> extractRowSchema(dataframe, i)).collect(Collectors.toList()));
+                .map(i -> extractRowSchema(dataframe, i))
+                .collect(Collectors.toMap(SchemaItem::getName, Function.identity())));
     }
 
     public static Schema getOutputSchema(Dataframe dataframe) {
-        return Schema.from(dataframe.getOutputsIndices().stream().map(i -> extractRowSchema(dataframe, i)).collect(Collectors.toList()));
+        return Schema.from(dataframe.getOutputsIndices().stream()
+                .map(i -> extractRowSchema(dataframe, i))
+                .collect(Collectors.toMap(SchemaItem::getName, Function.identity())));
     }
 
 }

@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.endpoints.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +15,6 @@ import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -62,15 +62,17 @@ class ServiceMetadataEndpointTest {
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.dir);
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.spd);
         assertEquals(2, serviceMetadata.get(0).getData().getObservations());
-        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get(0).getValues().size());
+        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
         assertEquals(dataframe.getInputNames()
                 .stream()
                 .filter(name -> !name.equals(MetadataUtils.ID_FIELD))
-                .filter(name -> !name.equals(MetadataUtils.TIMESTAMP_FIELD)).collect(Collectors.toList()),
-                serviceMetadata.get(0).getData().getInputSchema().getItems().stream().map(SchemaItem::getName).collect(Collectors.toList()));
-        assertEquals(dataframe.getOutputNames(), serviceMetadata.get(0).getData().getOutputSchema().getItems().stream().map(SchemaItem::getName).collect(Collectors.toList()));
+                .filter(name -> !name.equals(MetadataUtils.TIMESTAMP_FIELD)).collect(Collectors.toSet()),
+                serviceMetadata.get(0).getData().getInputSchema().getItems().keySet());
+        assertEquals(
+                new HashSet<>(dataframe.getOutputNames()),
+                serviceMetadata.get(0).getData().getOutputSchema().getItems().keySet());
     }
 
     @Test
@@ -93,8 +95,8 @@ class ServiceMetadataEndpointTest {
         assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
 
         // check column values
-        assertEquals(50, serviceMetadata.get(0).getData().getInputSchema().getItems().get(0).getValues().size());
-        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get(1).getValues().size());
+        assertEquals(50, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("race").getValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
     }
@@ -119,8 +121,8 @@ class ServiceMetadataEndpointTest {
         assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
 
         // check column values
-        assertEquals(null, serviceMetadata.get(0).getData().getInputSchema().getItems().get(0).getValues());
-        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get(1).getValues().size());
+        assertEquals(null, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues());
+        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("race").getValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
     }

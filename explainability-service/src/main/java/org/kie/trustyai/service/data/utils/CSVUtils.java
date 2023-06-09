@@ -2,9 +2,10 @@ package org.kie.trustyai.service.data.utils;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -23,19 +24,21 @@ public class CSVUtils {
     public static List<Prediction> parse(String in, Metadata metadata) throws IOException {
         CSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(in));
 
-        final List<Integer> inputIndices = metadata.getInputSchema().getItems()
+        final List<String> inputNames = metadata.getInputSchema().getItems().entrySet()
                 .stream()
-                .map(SchemaItem::getIndex)
+                .sorted(Comparator.comparingInt(e -> e.getValue().getIndex()))
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-        final List<Integer> outputIndices = metadata.getOutputSchema().getItems()
+        final List<String> outputNames = metadata.getOutputSchema().getItems().entrySet()
                 .stream()
-                .map(SchemaItem::getIndex)
+                .sorted(Comparator.comparingInt(e -> e.getValue().getIndex()))
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
         return parser.stream().map(entry -> {
 
-            final List<Feature> inputFeatures = IntStream.range(0, inputIndices.size()).mapToObj(index -> {
-                final SchemaItem schemaItem = metadata.getInputSchema().getItems().get(index);
+            final List<Feature> inputFeatures = inputNames.stream().map(colName -> {
+                final SchemaItem schemaItem = metadata.getInputSchema().getItems().get(colName);
                 final int inputIndex = schemaItem.getIndex();
                 final String name = schemaItem.getName();
                 final String valueString = entry.get(inputIndex);
@@ -53,8 +56,8 @@ public class CSVUtils {
                 }
             }).collect(Collectors.toList());
 
-            final List<Output> outputs = IntStream.range(0, outputIndices.size()).mapToObj(index -> {
-                final SchemaItem schemaItem = metadata.getOutputSchema().getItems().get(index);
+            final List<Output> outputs = outputNames.stream().map(colName -> {
+                final SchemaItem schemaItem = metadata.getOutputSchema().getItems().get(colName);
                 final int inputIndex = schemaItem.getIndex();
                 final String name = schemaItem.getName();
                 final DataType vtypes = schemaItem.getType();

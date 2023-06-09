@@ -18,6 +18,7 @@ import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
+import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -76,7 +77,7 @@ class DisparateImpactRatioRequestsEndpointTest {
                 .body().as(BaseScheduledResponse.class);
 
         // Get stored request
-        final BaseMetricRequest request = scheduler
+        final ReconciledMetricRequest request = scheduler
                 .get()
                 .getDirRequests()
                 .get(response.getRequestId());
@@ -106,7 +107,7 @@ class DisparateImpactRatioRequestsEndpointTest {
                 .body().as(BaseScheduledResponse.class);
 
         // Get stored request
-        final BaseMetricRequest request = scheduler
+        final ReconciledMetricRequest request = scheduler
                 .get()
                 .getDirRequests()
                 .get(response.getRequestId());
@@ -134,7 +135,7 @@ class DisparateImpactRatioRequestsEndpointTest {
                 .body(containsString("Request batch size must be bigger than 0."));
 
         // Get stored request
-        final Map<UUID, BaseMetricRequest> requests = scheduler
+        final Map<UUID, ReconciledMetricRequest> requests = scheduler
                 .get()
                 .getDirRequests();
 
