@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
@@ -40,7 +40,7 @@ public class UniversalListingEndpoint implements MetricsEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response listRequests() {
         final ScheduleList scheduleList = new ScheduleList();
-        for (Map.Entry<UUID, BaseMetricRequest> entry : scheduler.getAllRequests().entrySet()) {
+        for (Map.Entry<UUID, ReconciledMetricRequest> entry : scheduler.getAllRequests().entrySet()) {
             scheduleList.requests.add(new ScheduleRequest(entry.getKey(), entry.getValue()));
         }
         return Response.ok(scheduleList).build();

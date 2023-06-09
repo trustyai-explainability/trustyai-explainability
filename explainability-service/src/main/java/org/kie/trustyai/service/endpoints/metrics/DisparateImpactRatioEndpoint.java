@@ -20,10 +20,13 @@ import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
+import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.MetricThreshold;
+import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
 import org.kie.trustyai.service.payloads.definitions.DefinitionRequest;
+import org.kie.trustyai.service.payloads.definitions.ReconciledDefinitionRequest;
 import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponse;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
@@ -65,27 +68,31 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response dir(@ValidBaseMetricRequest BaseMetricRequest request) throws DataframeCreateException {
+    public Response dir(@ValidBaseMetricRequest BaseMetricRequest rawRequest) throws DataframeCreateException {
 
         final Dataframe dataframe;
+        final Metadata metadata;
         try {
-            dataframe = dataSource.get().getDataframe(request.getModelId());
+            dataframe = dataSource.get().getDataframe(rawRequest.getModelId());
+            metadata = dataSource.get().getMetadata(rawRequest.getModelId());
         } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
+            LOG.error("No data available for model " + rawRequest.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
+        ReconciledMetricRequest reconciledMetricRequest = ReconciledMetricRequest.reconcile(rawRequest, metadata);
+
         final double dir;
         try {
-            dir = calculator.calculateDIR(dataframe, request);
+            dir = calculator.calculateDIR(dataframe, reconciledMetricRequest);
         } catch (MetricCalculationException e) {
-            LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
+            LOG.error("Error calculating metric for model " + reconciledMetricRequest.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
-        final String dirDefinition = calculator.getDIRDefinition(dir, request);
+        final String dirDefinition = calculator.getDIRDefinition(dir, reconciledMetricRequest);
 
         MetricThreshold thresholds;
-        if (request.getThresholdDelta() == null) {
+        if (reconciledMetricRequest.getThresholdDelta() == null) {
             thresholds =
                     new MetricThreshold(
                             metricsConfig.dir().thresholdLower(),
@@ -94,8 +101,8 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
         } else {
             thresholds =
                     new MetricThreshold(
-                            1 - request.getThresholdDelta(),
-                            1 + request.getThresholdDelta(),
+                            1 - reconciledMetricRequest.getThresholdDelta(),
+                            1 + reconciledMetricRequest.getThresholdDelta(),
                             dir);
         }
         final DisparateImpactRatioResponse dirObj = new DisparateImpactRatioResponse(dir, dirDefinition, thresholds);
@@ -114,7 +121,16 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/definition")
     public Response getSpecificDefinition(DefinitionRequest request) {
-        return Response.ok(calculator.getDIRDefinition(request.getMetricValue(), request)).build();
+        final ReconciledMetricRequest reconciledMetricRequest;
+        try {
+            reconciledMetricRequest = ReconciledMetricRequest.reconcile(request, dataSource);
+        } catch (DataframeCreateException e) {
+            LOG.error("No data available: " + e.getMessage(), e);
+            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+        }
+
+        ReconciledDefinitionRequest reconciledDefinitionRequest = new ReconciledDefinitionRequest(reconciledMetricRequest, request.metricValue);
+        return Response.ok(calculator.getDIRDefinition(request.getMetricValue(), reconciledDefinitionRequest)).build();
     }
 
     @POST
@@ -130,9 +146,16 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
             LOG.warn("Request batch size is empty. Using the default value of " + defaultBatchSize);
             request.setBatchSize(defaultBatchSize);
         }
-
         request.setMetricName(getMetricName());
-        scheduler.registerDIR(id, request);
+
+        final ReconciledMetricRequest reconciledMetricRequest;
+        try {
+            reconciledMetricRequest = ReconciledMetricRequest.reconcile(request, dataSource);
+        } catch (DataframeCreateException e) {
+            LOG.error("No data available: " + e.getMessage(), e);
+            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+        }
+        scheduler.registerDIR(id, reconciledMetricRequest);
 
         final BaseScheduledResponse response =
                 new BaseScheduledResponse(id);
@@ -164,7 +187,7 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response listRequests() {
         final ScheduleList scheduleList = new ScheduleList();
-        for (Map.Entry<UUID, BaseMetricRequest> entry : scheduler.getDirRequests().entrySet()) {
+        for (Map.Entry<UUID, ReconciledMetricRequest> entry : scheduler.getDirRequests().entrySet()) {
             scheduleList.requests.add(new ScheduleRequest(entry.getKey(), entry.getValue()));
         }
         return Response.ok(scheduleList).build();

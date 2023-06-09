@@ -28,18 +28,16 @@ spec:
     name: prometheus-operator
   - kustomizeConfig:
       parameters:
-      - name: monitoring-namespace
-        value: opendatahub
-      overlays:
-        - odh-model-controller
+        - name: monitoring-namespace
+          value: opendatahub
       repoRef:
         name: manifests
         path: model-mesh
     name: model-mesh
   - kustomizeConfig:
       parameters:
-      - name: deployment-namespace
-        value: opendatahub
+        - name: deployment-namespace
+          value: opendatahub
       repoRef:
         name: manifests
         path: modelmesh-monitoring

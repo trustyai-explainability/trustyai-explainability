@@ -49,8 +49,9 @@ else
   if [ $REPO_NAME == "trustyai-explainability" ]; then
     echo "Setting manifests in kfctl_openshift to use pull number: $PULL_NUMBER"
     sed -i "s#uri: https://github.com/trustyai-explainability/trustyai-explainability/tarball/main#uri: https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/tarball/pull/${PULL_NUMBER}/head#" ./${KFDEF_FILENAME}
-    BRANCH_SHA=$(curl  https://api.github.com/repos/trustyai-explainability/trustyai-explainability/pulls/164 | jq ".head.sha")
-    sed -i "s#value: \"quay.io/trustyai/trustyai-service:latest\"#value: \"quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}#"
+    BRANCH_SHA=$(curl  https://api.github.com/repos/trustyai-explainability/trustyai-explainability/pulls/${PULL_NUMBER} | jq ".head.sha")
+    sed -i "s#value: \"quay.io/trustyai/trustyai-service:latest\"#value: \"quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}#" ./${KFDEF_FILENAME}
+    cat ./${KFDEF_FILENAME}
   fi
 fi
 

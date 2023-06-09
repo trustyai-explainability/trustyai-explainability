@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -35,8 +37,10 @@ class TestBatching {
 
         final int s = inputNames.size();
 
-        List<SchemaItem> inputSchema = IntStream.range(0, s).mapToObj(i -> new SchemaItem(DataType.DOUBLE, inputNames.get(i), null, i)).collect(Collectors.toList());
-        List<SchemaItem> outputSchema = IntStream.range(s, s + outputNames.size()).mapToObj(i -> new SchemaItem(DataType.DOUBLE, outputNames.get(i - s), null, i)).collect(Collectors.toList());
+        Map<String, SchemaItem> inputSchema = IntStream.range(0, s).mapToObj(i -> new SchemaItem(DataType.DOUBLE, inputNames.get(i), null, i))
+                .collect(Collectors.toMap(SchemaItem::getName, Function.identity()));
+        Map<String, SchemaItem> outputSchema = IntStream.range(s, s + outputNames.size()).mapToObj(i -> new SchemaItem(DataType.DOUBLE, outputNames.get(i - s), null, i))
+                .collect(Collectors.toMap(SchemaItem::getName, Function.identity()));
 
         metadata.setInputSchema(Schema.from(inputSchema));
         metadata.setOutputSchema(Schema.from(outputSchema));

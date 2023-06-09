@@ -46,8 +46,8 @@ public class Metadata {
 
     public void mergeInputSchema(Schema otherSchema) {
         if (otherSchema.equals(this.inputSchema)) {
-            for (int i = 0; i < this.inputSchema.getItems().size(); i++) {
-                this.inputSchema.getItems().get(i).getValues().addAll(otherSchema.getItems().get(i).getValues());
+            for (String columnName : this.inputSchema.getItems().keySet()) {
+                this.inputSchema.getItems().get(columnName).getValues().addAll(otherSchema.getItems().get(columnName).getValues());
             }
         } else {
             final String message = "Original schema and schema-to-merge are not compatible";
@@ -57,8 +57,8 @@ public class Metadata {
 
     public void mergeOutputSchema(Schema otherSchema) {
         if (otherSchema.equals(this.outputSchema)) {
-            for (int i = 0; i < this.outputSchema.getItems().size(); i++) {
-                this.outputSchema.getItems().get(i).getValues().addAll(otherSchema.getItems().get(i).getValues());
+            for (String columnName : this.outputSchema.getItems().keySet()) {
+                this.outputSchema.getItems().get(columnName).getValues().addAll(otherSchema.getItems().get(columnName).getValues());
             }
         } else {
             final String message = "Original schema and schema-to-merge are not compatible";

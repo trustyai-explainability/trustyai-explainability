@@ -5,6 +5,8 @@ import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.payloads.values.TypedValue;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import static org.kie.trustyai.service.payloads.values.DataType.*;
 
 public class PayloadConverter {
@@ -25,6 +27,24 @@ public class PayloadConverter {
             return new Value(node.getValue().asText());
         } else {
             return new Value(null);
+        }
+    }
+
+    public static boolean checkValueType(DataType type, JsonNode v) {
+        if (type == BOOL) {
+            return v.isBoolean();
+        } else if (type == FLOAT) {
+            return v.isFloat() || v.isDouble();
+        } else if (type == DOUBLE) {
+            return v.isDouble();
+        } else if (type == INT32) {
+            return v.isInt();
+        } else if (type == INT64) {
+            return v.isLong() || v.isInt();
+        } else if (type == STRING) {
+            return v.isTextual();
+        } else {
+            return false;
         }
     }
 

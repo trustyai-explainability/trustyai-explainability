@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
 
 import io.quarkus.cache.CacheKeyGenerator;
 import io.quarkus.cache.CompositeCacheKey;
@@ -33,7 +34,7 @@ public class MetricCalculationCacheKeyGen implements CacheKeyGenerator {
     @Override
     public Object generate(Method method, Object... methodParams) {
 
-        final BaseMetricRequest request = (BaseMetricRequest) methodParams[1];
+        final ReconciledMetricRequest request = (ReconciledMetricRequest) methodParams[1];
         final String modelId = request.getModelId();
         LOG.debug("Creating cache key for model " + modelId);
         return new CompositeCacheKey(modelId, storage.get().getLastModified(modelId), request.hashCode());
