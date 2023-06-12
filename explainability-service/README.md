@@ -521,31 +521,31 @@ Will return, for instance
             }
         },
         "data": {
-            "inputSchema": [
-                {
-                    "type": "DOUBLE",
-                    "name": "input-0",
-                    "index": 2
+            "inputSchema": {
+                "items": {
+                    "input-0": {
+                        "type": "DOUBLE",
+                        "name": "input-0",
+                        "index": 1
+                    }, 
                 },
-                {
-                    "type": "DOUBLE",
-                    "name": "input-1",
-                    "index": 3
+                nameMapping: {
+                    "input-0": "Age",
+                }
+            },
+            "outputSchema": {
+                "items": {
+                    "output-0": {
+                        "type": "INT32",
+                        "name": "output-0",
+                        "index": 5
+                    }
                 },
-                {
-                    "type": "DOUBLE",
-                    "name": "input-2",
-                    "index": 4
+                "nameMapping:" {
+                    "output-0": "Income",
                 }
-            ],
-            "outputSchema": [
-                {
-                    "type": "DOUBLE",
-                    "name": "output-0",
-                    "index": 5
-                }
-            ],
-            "observations": 83,
+            },
+            "observations": 105,
             "modelId": "example-model-1"
         }
     },
@@ -557,31 +557,37 @@ Will return, for instance
             }
         },
         "data": {
-            "inputSchema": [
-                {
-                    "type": "DOUBLE",
-                    "name": "input-0",
-                    "index": 2
+            "inputSchema": {
+                "items": {
+                    "input-0": {
+                        "type": "DOUBLE",
+                        "name": "input-0",
+                        "index": 1
+                    },
+                     "input-1": {
+                        "type": "DOUBLE",
+                        "name": "input-1",
+                        "index": 2
+                    }              
                 },
-                {
-                    "type": "DOUBLE",
-                    "name": "input-1",
-                    "index": 3
+                nameMapping: {
+                    "input-0": "Age",
+                    "input-2": "Race",
+                }
+            },
+            "outputSchema": {
+                "items": {
+                    "output-0": {
+                        "type": "INT32",
+                        "name": "output-0",
+                        "index": 5
+                    }
                 },
-                {
-                    "type": "DOUBLE",
-                    "name": "input-2",
-                    "index": 4
+                "nameMapping:" {
+                    "output-0": "Income",
                 }
-            ],
-            "outputSchema": [
-                {
-                    "type": "DOUBLE",
-                    "name": "output-0",
-                    "index": 5
-                }
-            ],
-            "observations": 83,
+            },
+            "observations": 105,
             "modelId": "example-model-2"
         }
     },
@@ -593,41 +599,79 @@ Will return, for instance
             }
         },
         "data": {
-            "inputSchema": [
-                {
-                    "type": "DOUBLE",
-                    "name": "input-0",
-                    "index": 2
+            "inputSchema": {
+                "items": {
+                    "input-0": {
+                        "type": "DOUBLE",
+                        "name": "input-0",
+                        "index": 1
+                    },
+                     "input-1": {
+                        "type": "DOUBLE",
+                        "name": "input-1",
+                        "index": 2
+                    },
+                    "input-2": {
+                        "type": "DOUBLE",
+                        "name": "input-1",
+                        "index": 3
+                    },
+                    "input-3": {
+                        "type": "DOUBLE",
+                        "name": "input-3",
+                        "index": 4
+                    }
                 },
-                {
-                    "type": "DOUBLE",
-                    "name": "input-1",
-                    "index": 3
-                },
-                {
-                    "type": "DOUBLE",
-                    "name": "input-2",
-                    "index": 4
+                nameMapping: {
+                    "input-0": "Age",
+                    "input-2": "Race",
+                    "input-3": "Gender",
+                    "input-4": "Employment",
                 }
-            ],
-            "outputSchema": [
-                {
-                    "type": "INT32",
-                    "name": "output-0",
-                    "index": 5
+            },
+            "outputSchema": {
+                "items": {
+                    "output-0": {
+                        "type": "INT32",
+                        "name": "output-0",
+                        "index": 5
+                    },
+                    "output-1": {
+                            "type": "INT32",
+                            "name": "output-1",
+                            "index": 6
+                    }
                 },
-                {
-                    "type": "INT32",
-                    "name": "output-1",
-                    "index": 6
+                "nameMapping:" {
+                    "output-0": "Income",
+                    "output-1": "Credit Score",
                 }
-            ],
+            },
             "observations": 85,
             "modelId": "example-model-3"
         }
     }
 ]
 ```
+## Defining Feature/Output Names
+```bash
+curl -X POST --location "http://localhost:8080/q/info" \
+    -H "Content-Type: application/json" \
+    -d '{
+        "modelId": "example-model-1", 
+        "inputMapping": 
+            {
+                "input-0": "age", 
+                "input-1": "race",
+                "input-2": "gender"
+            },
+        "outputMapping": 
+            {
+                "output-0": "predictedIncome=high"
+            }
+    }'
+```
+
 
 # Data sources
 
