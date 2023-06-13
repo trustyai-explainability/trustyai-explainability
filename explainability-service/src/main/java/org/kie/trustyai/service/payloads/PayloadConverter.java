@@ -34,9 +34,9 @@ public class PayloadConverter {
         if (type == BOOL) {
             return v.isBoolean();
         } else if (type == FLOAT) {
-            return v.isFloat() || v.isDouble();
+            return v.isNumber();
         } else if (type == DOUBLE) {
-            return v.isDouble();
+            return v.isNumber();
         } else if (type == INT32) {
             return v.isInt();
         } else if (type == INT64) {

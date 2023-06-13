@@ -10,9 +10,9 @@ import org.kie.trustyai.service.payloads.values.TypedValue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PayloadConverterTest {
 
@@ -117,5 +117,74 @@ class PayloadConverterTest {
         assertEquals(Type.NUMBER, PayloadConverter.convertToType(DataType.INT32));
         assertEquals(Type.NUMBER, PayloadConverter.convertToType(DataType.INT64));
         assertEquals(Type.CATEGORICAL, PayloadConverter.convertToType(DataType.STRING));
+    }
+
+    @Test
+    void testCheckValueTypeBool() {
+        JsonNode boolNode = JsonNodeFactory.instance.booleanNode(true);
+        JsonNode nonBoolNode = JsonNodeFactory.instance.textNode("true");
+
+        assertTrue(PayloadConverter.checkValueType(DataType.BOOL, boolNode));
+        assertFalse(PayloadConverter.checkValueType(DataType.BOOL, nonBoolNode));
+    }
+
+    @Test
+    void testCheckValueTypeFloat() {
+        JsonNode floatNode1 = JsonNodeFactory.instance.numberNode(1.1f);
+        JsonNode floatNode2 = JsonNodeFactory.instance.numberNode(1); // edge case
+        JsonNode nonFloatNode = JsonNodeFactory.instance.textNode("1.1");
+
+        assertTrue(PayloadConverter.checkValueType(DataType.FLOAT, floatNode1));
+        assertTrue(PayloadConverter.checkValueType(DataType.FLOAT, floatNode2)); // edge case
+        assertFalse(PayloadConverter.checkValueType(DataType.FLOAT, nonFloatNode));
+    }
+
+    @Test
+    void testCheckValueTypeDouble() {
+        JsonNode doubleNode1 = JsonNodeFactory.instance.numberNode(1.1f);
+        JsonNode doubleNode2 = JsonNodeFactory.instance.numberNode(1);
+        JsonNode nonFloatNode = JsonNodeFactory.instance.textNode("1.1");
+
+        assertTrue(PayloadConverter.checkValueType(DataType.DOUBLE, doubleNode1));
+        assertTrue(PayloadConverter.checkValueType(DataType.DOUBLE, doubleNode2));
+        assertFalse(PayloadConverter.checkValueType(DataType.DOUBLE, nonFloatNode));
+    }
+
+    @Test
+    void testCheckValueTypeInt32() {
+        JsonNode int32Node1 = JsonNodeFactory.instance.numberNode(1.1f);
+        JsonNode int32Node2 = JsonNodeFactory.instance.numberNode(1);
+        JsonNode nonInt32Node = JsonNodeFactory.instance.textNode("1.1");
+
+        assertFalse(PayloadConverter.checkValueType(DataType.INT32, int32Node1));
+        assertTrue(PayloadConverter.checkValueType(DataType.INT32, int32Node2));
+        assertFalse(PayloadConverter.checkValueType(DataType.INT32, nonInt32Node));
+    }
+
+    @Test
+    void testCheckValueTypeInt64() {
+        JsonNode int64Node1 = JsonNodeFactory.instance.numberNode(1.1f);
+        JsonNode int64Node2 = JsonNodeFactory.instance.numberNode(1);
+        JsonNode nonInt64Node = JsonNodeFactory.instance.textNode("1.1");
+
+        assertFalse(PayloadConverter.checkValueType(DataType.INT64, int64Node1));
+        assertTrue(PayloadConverter.checkValueType(DataType.INT64, int64Node2));
+        assertFalse(PayloadConverter.checkValueType(DataType.INT64, nonInt64Node));
+    }
+
+    @Test
+    void testCheckValueTypeUnknown() {
+        JsonNode node = JsonNodeFactory.instance.textNode("unknown");
+
+        assertFalse(PayloadConverter.checkValueType(DataType.UNKNOWN, node));
+    }
+
+    @Test
+    void testCheckValueTypeMap() {
+        // Map is not covered in your function, it will always return false
+        JsonNode node = JsonNodeFactory.instance.objectNode().put("key", "value");
+
+        assertFalse(PayloadConverter.checkValueType(DataType.MAP, node));
+
     }
 }
