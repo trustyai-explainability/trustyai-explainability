@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: mheap/github-action-required-labels@v4
+        if: github.head_ref != '' && github.head_ref != 'main'
         with:
           mode: minimum
           count: 1
