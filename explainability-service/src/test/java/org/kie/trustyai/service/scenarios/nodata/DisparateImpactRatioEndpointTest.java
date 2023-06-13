@@ -1,6 +1,5 @@
 package org.kie.trustyai.service.scenarios.nodata;
 
-import java.util.Map;
 import java.util.UUID;
 
 import javax.enterprise.inject.Instance;
@@ -87,7 +86,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void dirPostIncorrectInput() {
-        final Map<String, Object> payload = RequestPayloadGenerator.incorrectInput();
+        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
         given()
                 .contentType(ContentType.JSON)
@@ -95,7 +94,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No metadadata found for model=" + payload.get("modelId")));
+                .body(containsString("No metadadata found for model=" + payload.getModelId()));
 
     }
 

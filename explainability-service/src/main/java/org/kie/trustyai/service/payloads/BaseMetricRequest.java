@@ -3,17 +3,17 @@ package org.kie.trustyai.service.payloads;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 public class BaseMetricRequest {
 
     private String protectedAttribute;
-    private JsonNode favorableOutcome;
+    private ValueNode favorableOutcome;
     private String outcomeName;
 
-    private JsonNode privilegedAttribute;
-    private JsonNode unprivilegedAttribute;
+    private ValueNode privilegedAttribute;
+    private ValueNode unprivilegedAttribute;
 
     private String modelId;
 
@@ -62,29 +62,29 @@ public class BaseMetricRequest {
         this.outcomeName = outcomeName;
     }
 
-    // raw getters and setters  ================================================
-    public void setFavorableOutcome(JsonNode favorableOutcome) {
-        this.favorableOutcome = favorableOutcome;
-    }
-
-    public void setPrivilegedAttribute(JsonNode privilegedAttribute) {
-        this.privilegedAttribute = privilegedAttribute;
-    }
-
-    public void setUnprivilegedAttribute(JsonNode unprivilegedAttribute) {
-        this.unprivilegedAttribute = unprivilegedAttribute;
-    }
-
-    public JsonNode getFavorableOutcome() {
+    public ValueNode getFavorableOutcome() {
         return favorableOutcome;
     }
 
-    public JsonNode getPrivilegedAttribute() {
+    // raw getters and setters  ================================================
+    public void setFavorableOutcome(ValueNode favorableOutcome) {
+        this.favorableOutcome = favorableOutcome;
+    }
+
+    public ValueNode getPrivilegedAttribute() {
         return privilegedAttribute;
     }
 
-    public JsonNode getUnprivilegedAttribute() {
+    public void setPrivilegedAttribute(ValueNode privilegedAttribute) {
+        this.privilegedAttribute = privilegedAttribute;
+    }
+
+    public ValueNode getUnprivilegedAttribute() {
         return unprivilegedAttribute;
+    }
+
+    public void setUnprivilegedAttribute(ValueNode unprivilegedAttribute) {
+        this.unprivilegedAttribute = unprivilegedAttribute;
     }
 
     public Double getThresholdDelta() {
