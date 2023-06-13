@@ -16,6 +16,7 @@ on:
       - '**.md'
       - '**.adoc'
       - '*.txt'
+    types: [labeled, opened, synchronize, reopened]
 jobs:
   # Ensure that tests pass before publishing a new image.
   build-and-push-ci:
@@ -31,6 +32,8 @@ jobs:
         if: github.head_ref != '' && github.head_ref != 'main'
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v3
+        if:  github.head_ref == '' && github.ref == 'refs/heads/main'
       - name: Log reference variables
         run: |
           echo "GITHUB.REF: ${{ github.ref }}"
