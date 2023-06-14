@@ -69,9 +69,6 @@ public class Dataframe {
             df.metadata.inputs.add(false);
             df.data.add(new ArrayList<>());
         }
-        df.metadata.synthetics.add(false);
-        df.metadata.ids.add(prediction.getExecutionId().toString());
-        df.metadata.timestamps.add(LocalDateTime.now());
 
         // Copy data
         df.addPrediction(prediction);
@@ -96,14 +93,18 @@ public class Dataframe {
      * @return A @link{Dataframe}
      */
     public static Dataframe createFrom(List<Prediction> predictions) {
-        final Prediction prediction = predictions.get(0);
-        final Dataframe df = Dataframe.createFrom(prediction);
+        final Dataframe df;
+        if (predictions != null && predictions.size() > 0) {
+            final Prediction prediction = predictions.get(0);
+            df = Dataframe.createFrom(prediction);
 
-        if (predictions.size() > 1) {
-            final List<Prediction> rest = predictions.subList(1, predictions.size());
-            df.addPredictions(rest);
+            if (predictions.size() > 1) {
+                final List<Prediction> rest = predictions.subList(1, predictions.size());
+                df.addPredictions(rest);
+            }
+        } else {
+            df = new Dataframe();
         }
-
         return df;
     }
 
@@ -177,12 +178,8 @@ public class Dataframe {
             df.data.add(new ArrayList<>());
         }
 
-        df.metadata.synthetics.add(predictionMetadata.isSynthetic());
-        df.metadata.ids.add(predictionMetadata.getId());
-        df.metadata.timestamps.add(predictionMetadata.getPredictionTime());
-
         // Copy data
-        df.addPrediction(prediction);
+        df.addPredictions(List.of(prediction), List.of(predictionMetadata));
 
         return df;
     }
@@ -224,36 +221,67 @@ public class Dataframe {
      * @param predictions The {@link List} of {@link Prediction} to add.
      */
     public void addPredictions(List<Prediction> predictions) {
-        final Prediction prediction = predictions.get(0);
-        final List<Feature> inputs = prediction.getInput().getFeatures();
-        final List<Output> outputs = prediction.getOutput().getOutputs();
+        addPredictions(predictions, null);
+    }
 
-        // Validate schema
-        if (!getInputNames().equals(inputs.stream().map(Feature::getName).collect(Collectors.toList()))) {
-            throw new IllegalArgumentException("Prediction inputs do not match dataframe inputs");
-        }
-        if (!getOutputNames().equals(outputs.stream().map(Output::getName).collect(Collectors.toList()))) {
-            throw new IllegalArgumentException("Prediction outputs do not match dataframe inputs");
-        }
+    /**
+     * Add a {@link List} of predictions to the {@link Dataframe}
+     *
+     * @param predictions The {@link List} of {@link Prediction} to add.
+     * @param predictionsMetadata The {@link List} of {@link PredictionMetadata} or {@code null}.
+     */
+    public void addPredictions(List<Prediction> predictions, List<PredictionMetadata> predictionsMetadata) {
+        if (predictions != null && predictions.size() > 0) {
+            final Prediction prediction = predictions.get(0);
+            final List<Feature> inputs = prediction.getInput().getFeatures();
+            final List<Output> outputs = prediction.getOutput().getOutputs();
 
-        final int inputsSize = getInputsCount();
-
-        IntStream.range(0, predictions.size()).forEach(i -> {
-            Prediction currentPrediction = predictions.get(i);
-            final List<Feature> currentInputs = currentPrediction.getInput().getFeatures();
-            final List<Output> currentOutputs = currentPrediction.getOutput().getOutputs();
-            // Copy data
-            for (int col = 0; col < inputsSize; col++) {
-                data.get(col).add(currentInputs.get(col).getValue());
+            // Validate schema
+            if (!getInputNames().equals(inputs.stream().map(Feature::getName).collect(Collectors.toList()))) {
+                throw new IllegalArgumentException("Prediction inputs do not match dataframe inputs");
             }
-            final int nFeatures = getColumnDimension();
-            for (int col = inputsSize; col < nFeatures; col++) {
-                data.get(col).add(currentOutputs.get(col - inputsSize).getValue());
+            if (!getOutputNames().equals(outputs.stream().map(Output::getName).collect(Collectors.toList()))) {
+                throw new IllegalArgumentException("Prediction outputs do not match dataframe inputs");
             }
-            metadata.synthetics.add(false);
-            metadata.ids.add(currentPrediction.getExecutionId().toString());
-            metadata.timestamps.add(LocalDateTime.now());
-        });
+
+            boolean alignedMetadata;
+            if (predictionsMetadata != null) {
+                if (predictionsMetadata.size() != predictions.size()) {
+                    throw new IllegalArgumentException("Different number of predictions " + predictions.size() +
+                            " and metadata " + predictionsMetadata.size());
+                } else {
+                    alignedMetadata = true;
+                }
+            } else {
+                alignedMetadata = false;
+            }
+            final int inputsSize = getInputsCount();
+
+            IntStream.range(0, predictions.size()).forEach(i -> {
+                Prediction currentPrediction = predictions.get(i);
+                final List<Feature> currentInputs = currentPrediction.getInput().getFeatures();
+                final List<Output> currentOutputs = currentPrediction.getOutput().getOutputs();
+                // Copy data
+                for (int col = 0; col < inputsSize; col++) {
+                    data.get(col).add(currentInputs.get(col).getValue());
+                }
+                final int nFeatures = getColumnDimension();
+                for (int col = inputsSize; col < nFeatures; col++) {
+                    data.get(col).add(currentOutputs.get(col - inputsSize).getValue());
+                }
+
+                if (alignedMetadata) {
+                    PredictionMetadata predictionMetadata = predictionsMetadata.get(i);
+                    metadata.synthetics.add(predictionMetadata.isSynthetic());
+                    metadata.ids.add(predictionMetadata.getId());
+                    metadata.timestamps.add(predictionMetadata.getPredictionTime());
+                } else {
+                    metadata.synthetics.add(false);
+                    metadata.ids.add(currentPrediction.getExecutionId().toString());
+                    metadata.timestamps.add(LocalDateTime.now());
+                }
+            });
+        }
     }
 
     /**
