@@ -39,7 +39,7 @@ jobs:
           echo "GITHUB.REF: ${{ github.ref }}"
           echo "GITHUB.HEAD_REF: ${{ github.head_ref }}"
           echo "SHA: ${{ github.event.pull_request.head.sha }}"
-          echo "CI IMAGE AT:\nquay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}"
+          echo "CI IMAGE AT: quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}"
       - name: Set CI environment
         if:  github.head_ref != '' && github.head_ref != 'main'
         run: | 
