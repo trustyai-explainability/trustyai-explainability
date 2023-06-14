@@ -143,7 +143,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
     @Test
     @DisplayName("SPD request with incorrect input")
     void postIncorrectInput() {
-        final Map<String, Object> payload = RequestPayloadGenerator.incorrectInput();
+        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
         given()
                 .contentType(ContentType.JSON)

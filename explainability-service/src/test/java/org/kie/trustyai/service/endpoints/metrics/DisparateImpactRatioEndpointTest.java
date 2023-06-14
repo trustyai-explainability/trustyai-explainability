@@ -151,7 +151,7 @@ class DisparateImpactRatioEndpointTest {
     void postIncorrectInput() throws JsonProcessingException {
         datasource.get().reset();
 
-        final Map<String, Object> payload = RequestPayloadGenerator.incorrectInput();
+        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
         given()
                 .contentType(ContentType.JSON)
