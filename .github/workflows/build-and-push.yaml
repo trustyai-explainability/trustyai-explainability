@@ -34,7 +34,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/checkout@v3
         if:  github.head_ref == '' && github.ref == 'refs/heads/main'
-      - name: Log reference variables (main)
+      - name: Log reference variables
         run: |
           echo "GITHUB.REF: ${{ github.ref }}"
           echo "GITHUB.HEAD_REF: ${{ github.head_ref }}"
