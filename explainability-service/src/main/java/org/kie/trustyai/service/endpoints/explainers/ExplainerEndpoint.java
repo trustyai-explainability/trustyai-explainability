@@ -9,7 +9,7 @@ import org.kie.trustyai.service.config.ServiceConfig;
 
 public abstract class ExplainerEndpoint {
 
-    protected static final String BIAS_IGNORE_PARAM = "bias-ignore";
+    public static final String BIAS_IGNORE_PARAM = "bias-ignore";
 
     protected PredictionProvider getModel(ServiceConfig serviceConfig, String modelId) throws Exception {
         String target = serviceConfig.kserveTarget().orElseThrow(() -> new Exception("kserve/model-mesh service endpoint not specified"));
