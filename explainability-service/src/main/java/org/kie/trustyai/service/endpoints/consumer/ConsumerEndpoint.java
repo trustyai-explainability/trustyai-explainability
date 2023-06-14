@@ -15,7 +15,6 @@ import javax.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
@@ -50,7 +49,7 @@ public class ConsumerEndpoint {
         Dataframe dataframe;
         try {
             dataframe = reconciler.payloadToDataFrame(inputBytes, outputBytes, String.valueOf(UUID.randomUUID()),
-                                                      request.getMetadata(), modelId);
+                    request.getMetadata(), modelId);
         } catch (DataframeCreateException e) {
             LOG.error("Could not create dataframe from payloads: " + e.getMessage());
             return Response.serverError().status(RestResponse.StatusCode.INTERNAL_SERVER_ERROR).build();

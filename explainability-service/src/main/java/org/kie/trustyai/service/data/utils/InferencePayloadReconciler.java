@@ -144,7 +144,7 @@ public class InferencePayloadReconciler {
     }
 
     public Dataframe payloadToDataFrame(byte[] inputs, byte[] outputs, String id, Map<String, String> metadata,
-                                        String modelId) throws DataframeCreateException {
+            String modelId) throws DataframeCreateException {
         final ModelInferRequest input;
         try {
             input = ModelInferRequest.parseFrom(inputs);
