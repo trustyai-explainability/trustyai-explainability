@@ -1,4 +1,4 @@
-package org.kie.trustyai.explainability.tssaliency;
+package org.kie.trustyai.explainability.local.tssaliency;
 
 public class IntegratedGradient {
     // explanation = {
