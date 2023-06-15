@@ -7,225 +7,657 @@ package org.kie.trustyai.connectors.kserve.v2.grpc;
  * Protobuf type {@code inference.ModelMetadataResponse}
  */
 public final class ModelMetadataResponse extends
-        com.google.protobuf.GeneratedMessageV3 implements
-        // @@protoc_insertion_point(message_implements:inference.ModelMetadataResponse)
-        ModelMetadataResponseOrBuilder {
-    private static final long serialVersionUID = 0L;
+    com.google.protobuf.GeneratedMessageV3 implements
+    // @@protoc_insertion_point(message_implements:inference.ModelMetadataResponse)
+    ModelMetadataResponseOrBuilder {
+private static final long serialVersionUID = 0L;
+  // Use ModelMetadataResponse.newBuilder() to construct.
+  private ModelMetadataResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    super(builder);
+  }
+  private ModelMetadataResponse() {
+    name_ = "";
+    versions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    platform_ = "";
+    inputs_ = java.util.Collections.emptyList();
+    outputs_ = java.util.Collections.emptyList();
+  }
 
-    // Use ModelMetadataResponse.newBuilder() to construct.
-    private ModelMetadataResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-        super(builder);
+  @java.lang.Override
+  @SuppressWarnings({"unused"})
+  protected java.lang.Object newInstance(
+      UnusedPrivateParameter unused) {
+    return new ModelMetadataResponse();
+  }
+
+  @java.lang.Override
+  public final com.google.protobuf.UnknownFieldSet
+  getUnknownFields() {
+    return this.unknownFields;
+  }
+  private ModelMetadataResponse(
+      com.google.protobuf.CodedInputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    this();
+    if (extensionRegistry == null) {
+      throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
+    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+        com.google.protobuf.UnknownFieldSet.newBuilder();
+    try {
+      boolean done = false;
+      while (!done) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            done = true;
+            break;
+          case 10: {
+            java.lang.String s = input.readStringRequireUtf8();
 
-    private ModelMetadataResponse() {
-        name_ = "";
-        versions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        platform_ = "";
-        inputs_ = java.util.Collections.emptyList();
-        outputs_ = java.util.Collections.emptyList();
+            name_ = s;
+            break;
+          }
+          case 18: {
+            java.lang.String s = input.readStringRequireUtf8();
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              versions_ = new com.google.protobuf.LazyStringArrayList();
+              mutable_bitField0_ |= 0x00000001;
+            }
+            versions_.add(s);
+            break;
+          }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            platform_ = s;
+            break;
+          }
+          case 34: {
+            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+              inputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata>();
+              mutable_bitField0_ |= 0x00000002;
+            }
+            inputs_.add(
+                input.readMessage(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.parser(), extensionRegistry));
+            break;
+          }
+          case 42: {
+            if (!((mutable_bitField0_ & 0x00000004) != 0)) {
+              outputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata>();
+              mutable_bitField0_ |= 0x00000004;
+            }
+            outputs_.add(
+                input.readMessage(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.parser(), extensionRegistry));
+            break;
+          }
+          default: {
+            if (!parseUnknownField(
+                input, unknownFields, extensionRegistry, tag)) {
+              done = true;
+            }
+            break;
+          }
+        }
+      }
+    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      throw e.setUnfinishedMessage(this);
+    } catch (java.io.IOException e) {
+      throw new com.google.protobuf.InvalidProtocolBufferException(
+          e).setUnfinishedMessage(this);
+    } finally {
+      if (((mutable_bitField0_ & 0x00000001) != 0)) {
+        versions_ = versions_.getUnmodifiableView();
+      }
+      if (((mutable_bitField0_ & 0x00000002) != 0)) {
+        inputs_ = java.util.Collections.unmodifiableList(inputs_);
+      }
+      if (((mutable_bitField0_ & 0x00000004) != 0)) {
+        outputs_ = java.util.Collections.unmodifiableList(outputs_);
+      }
+      this.unknownFields = unknownFields.build();
+      makeExtensionsImmutable();
+    }
+  }
+  public static final com.google.protobuf.Descriptors.Descriptor
+      getDescriptor() {
+    return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_descriptor;
+  }
+
+  @java.lang.Override
+  protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internalGetFieldAccessorTable() {
+    return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_fieldAccessorTable
+        .ensureFieldAccessorsInitialized(
+            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.Builder.class);
+  }
+
+  public interface TensorMetadataOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:inference.ModelMetadataResponse.TensorMetadata)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * The tensor data type.
+     * </pre>
+     *
+     * <code>string datatype = 2;</code>
+     * @return The datatype.
+     */
+    java.lang.String getDatatype();
+    /**
+     * <pre>
+     * The tensor data type.
+     * </pre>
+     *
+     * <code>string datatype = 2;</code>
+     * @return The bytes for datatype.
+     */
+    com.google.protobuf.ByteString
+        getDatatypeBytes();
+
+    /**
+     * <pre>
+     * The tensor shape. A variable-size dimension is represented
+     * by a -1 value.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @return A list containing the shape.
+     */
+    java.util.List<java.lang.Long> getShapeList();
+    /**
+     * <pre>
+     * The tensor shape. A variable-size dimension is represented
+     * by a -1 value.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @return The count of shape.
+     */
+    int getShapeCount();
+    /**
+     * <pre>
+     * The tensor shape. A variable-size dimension is represented
+     * by a -1 value.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @param index The index of the element to return.
+     * @return The shape at the given index.
+     */
+    long getShape(int index);
+  }
+  /**
+   * <pre>
+   * Metadata for a tensor.
+   * </pre>
+   *
+   * Protobuf type {@code inference.ModelMetadataResponse.TensorMetadata}
+   */
+  public static final class TensorMetadata extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:inference.ModelMetadataResponse.TensorMetadata)
+      TensorMetadataOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use TensorMetadata.newBuilder() to construct.
+    private TensorMetadata(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private TensorMetadata() {
+      name_ = "";
+      datatype_ = "";
+      shape_ = emptyLongList();
     }
 
     @java.lang.Override
-    @SuppressWarnings({ "unused" })
+    @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
-            UnusedPrivateParameter unused) {
-        return new ModelMetadataResponse();
+        UnusedPrivateParameter unused) {
+      return new TensorMetadata();
     }
 
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-            getUnknownFields() {
-        return this.unknownFields;
+    getUnknownFields() {
+      return this.unknownFields;
     }
+    private TensorMetadata(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
 
-    private ModelMetadataResponse(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-            throw new java.lang.NullPointerException();
+              name_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              datatype_ = s;
+              break;
+            }
+            case 24: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                shape_ = newLongList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              shape_.addLong(input.readInt64());
+              break;
+            }
+            case 26: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
+                shape_ = newLongList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                shape_.addLong(input.readInt64());
+              }
+              input.popLimit(limit);
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
         }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-                com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-            boolean done = false;
-            while (!done) {
-                int tag = input.readTag();
-                switch (tag) {
-                    case 0:
-                        done = true;
-                        break;
-                    case 10: {
-                        java.lang.String s = input.readStringRequireUtf8();
-
-                        name_ = s;
-                        break;
-                    }
-                    case 18: {
-                        java.lang.String s = input.readStringRequireUtf8();
-                        if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                            versions_ = new com.google.protobuf.LazyStringArrayList();
-                            mutable_bitField0_ |= 0x00000001;
-                        }
-                        versions_.add(s);
-                        break;
-                    }
-                    case 26: {
-                        java.lang.String s = input.readStringRequireUtf8();
-
-                        platform_ = s;
-                        break;
-                    }
-                    case 34: {
-                        if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                            inputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata>();
-                            mutable_bitField0_ |= 0x00000002;
-                        }
-                        inputs_.add(
-                                input.readMessage(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.parser(), extensionRegistry));
-                        break;
-                    }
-                    case 42: {
-                        if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                            outputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata>();
-                            mutable_bitField0_ |= 0x00000004;
-                        }
-                        outputs_.add(
-                                input.readMessage(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.parser(), extensionRegistry));
-                        break;
-                    }
-                    default: {
-                        if (!parseUnknownField(
-                                input, unknownFields, extensionRegistry, tag)) {
-                            done = true;
-                        }
-                        break;
-                    }
-                }
-            }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-            throw new com.google.protobuf.InvalidProtocolBufferException(
-                    e).setUnfinishedMessage(this);
-        } finally {
-            if (((mutable_bitField0_ & 0x00000001) != 0)) {
-                versions_ = versions_.getUnmodifiableView();
-            }
-            if (((mutable_bitField0_ & 0x00000002) != 0)) {
-                inputs_ = java.util.Collections.unmodifiableList(inputs_);
-            }
-            if (((mutable_bitField0_ & 0x00000004) != 0)) {
-                outputs_ = java.util.Collections.unmodifiableList(outputs_);
-            }
-            this.unknownFields = unknownFields.build();
-            makeExtensionsImmutable();
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          shape_.makeImmutable(); // C
         }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
     }
-
     public static final com.google.protobuf.Descriptors.Descriptor
-            getDescriptor() {
-        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_descriptor;
+        getDescriptor() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-            internalGetFieldAccessorTable() {
-        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_fieldAccessorTable
-                .ensureFieldAccessorsInitialized(
-                        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.Builder.class);
+        internalGetFieldAccessorTable() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_TensorMetadata_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder.class);
     }
 
-    public interface TensorMetadataOrBuilder extends
-            // @@protoc_insertion_point(interface_extends:inference.ModelMetadataResponse.TensorMetadata)
-            com.google.protobuf.MessageOrBuilder {
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The name.
-         */
-        java.lang.String getName();
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The bytes for name.
-         */
-        com.google.protobuf.ByteString
-                getNameBytes();
-
-        /**
-         * <pre>
-         * The tensor data type.
-         * </pre>
-         *
-         * <code>string datatype = 2;</code>
-         * 
-         * @return The datatype.
-         */
-        java.lang.String getDatatype();
-
-        /**
-         * <pre>
-         * The tensor data type.
-         * </pre>
-         *
-         * <code>string datatype = 2;</code>
-         * 
-         * @return The bytes for datatype.
-         */
-        com.google.protobuf.ByteString
-                getDatatypeBytes();
-
-        /**
-         * <pre>
-         * The tensor shape. A variable-size dimension is represented
-         * by a -1 value.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @return A list containing the shape.
-         */
-        java.util.List<java.lang.Long> getShapeList();
-
-        /**
-         * <pre>
-         * The tensor shape. A variable-size dimension is represented
-         * by a -1 value.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @return The count of shape.
-         */
-        int getShapeCount();
-
-        /**
-         * <pre>
-         * The tensor shape. A variable-size dimension is represented
-         * by a -1 value.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The shape at the given index.
-         */
-        long getShape(int index);
+    public static final int NAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object name_;
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
+    public static final int DATATYPE_FIELD_NUMBER = 2;
+    private volatile java.lang.Object datatype_;
+    /**
+     * <pre>
+     * The tensor data type.
+     * </pre>
+     *
+     * <code>string datatype = 2;</code>
+     * @return The datatype.
+     */
+    @java.lang.Override
+    public java.lang.String getDatatype() {
+      java.lang.Object ref = datatype_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datatype_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The tensor data type.
+     * </pre>
+     *
+     * <code>string datatype = 2;</code>
+     * @return The bytes for datatype.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatatypeBytes() {
+      java.lang.Object ref = datatype_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datatype_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SHAPE_FIELD_NUMBER = 3;
+    private com.google.protobuf.Internal.LongList shape_;
+    /**
+     * <pre>
+     * The tensor shape. A variable-size dimension is represented
+     * by a -1 value.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @return A list containing the shape.
+     */
+    @java.lang.Override
+    public java.util.List<java.lang.Long>
+        getShapeList() {
+      return shape_;
+    }
+    /**
+     * <pre>
+     * The tensor shape. A variable-size dimension is represented
+     * by a -1 value.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @return The count of shape.
+     */
+    public int getShapeCount() {
+      return shape_.size();
+    }
+    /**
+     * <pre>
+     * The tensor shape. A variable-size dimension is represented
+     * by a -1 value.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @param index The index of the element to return.
+     * @return The shape at the given index.
+     */
+    public long getShape(int index) {
+      return shape_.getLong(index);
+    }
+    private int shapeMemoizedSerializedSize = -1;
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datatype_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, datatype_);
+      }
+      if (getShapeList().size() > 0) {
+        output.writeUInt32NoTag(26);
+        output.writeUInt32NoTag(shapeMemoizedSerializedSize);
+      }
+      for (int i = 0; i < shape_.size(); i++) {
+        output.writeInt64NoTag(shape_.getLong(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datatype_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, datatype_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < shape_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt64SizeNoTag(shape_.getLong(i));
+        }
+        size += dataSize;
+        if (!getShapeList().isEmpty()) {
+          size += 1;
+          size += com.google.protobuf.CodedOutputStream
+              .computeInt32SizeNoTag(dataSize);
+        }
+        shapeMemoizedSerializedSize = dataSize;
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata)) {
+        return super.equals(obj);
+      }
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata other = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getDatatype()
+          .equals(other.getDatatype())) return false;
+      if (!getShapeList()
+          .equals(other.getShapeList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + DATATYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatatype().hashCode();
+      if (getShapeCount() > 0) {
+        hash = (37 * hash) + SHAPE_FIELD_NUMBER;
+        hash = (53 * hash) + getShapeList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
     /**
      * <pre>
      * Metadata for a tensor.
@@ -233,2945 +665,2274 @@ public final class ModelMetadataResponse extends
      *
      * Protobuf type {@code inference.ModelMetadataResponse.TensorMetadata}
      */
-    public static final class TensorMetadata extends
-            com.google.protobuf.GeneratedMessageV3 implements
-            // @@protoc_insertion_point(message_implements:inference.ModelMetadataResponse.TensorMetadata)
-            TensorMetadataOrBuilder {
-        private static final long serialVersionUID = 0L;
-
-        // Use TensorMetadata.newBuilder() to construct.
-        private TensorMetadata(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-            super(builder);
-        }
-
-        private TensorMetadata() {
-            name_ = "";
-            datatype_ = "";
-            shape_ = emptyLongList();
-        }
-
-        @java.lang.Override
-        @SuppressWarnings({ "unused" })
-        protected java.lang.Object newInstance(
-                UnusedPrivateParameter unused) {
-            return new TensorMetadata();
-        }
-
-        @java.lang.Override
-        public final com.google.protobuf.UnknownFieldSet
-                getUnknownFields() {
-            return this.unknownFields;
-        }
-
-        private TensorMetadata(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            this();
-            if (extensionRegistry == null) {
-                throw new java.lang.NullPointerException();
-            }
-            int mutable_bitField0_ = 0;
-            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-                    com.google.protobuf.UnknownFieldSet.newBuilder();
-            try {
-                boolean done = false;
-                while (!done) {
-                    int tag = input.readTag();
-                    switch (tag) {
-                        case 0:
-                            done = true;
-                            break;
-                        case 10: {
-                            java.lang.String s = input.readStringRequireUtf8();
-
-                            name_ = s;
-                            break;
-                        }
-                        case 18: {
-                            java.lang.String s = input.readStringRequireUtf8();
-
-                            datatype_ = s;
-                            break;
-                        }
-                        case 24: {
-                            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                                shape_ = newLongList();
-                                mutable_bitField0_ |= 0x00000001;
-                            }
-                            shape_.addLong(input.readInt64());
-                            break;
-                        }
-                        case 26: {
-                            int length = input.readRawVarint32();
-                            int limit = input.pushLimit(length);
-                            if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
-                                shape_ = newLongList();
-                                mutable_bitField0_ |= 0x00000001;
-                            }
-                            while (input.getBytesUntilLimit() > 0) {
-                                shape_.addLong(input.readInt64());
-                            }
-                            input.popLimit(limit);
-                            break;
-                        }
-                        default: {
-                            if (!parseUnknownField(
-                                    input, unknownFields, extensionRegistry, tag)) {
-                                done = true;
-                            }
-                            break;
-                        }
-                    }
-                }
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                throw e.setUnfinishedMessage(this);
-            } catch (java.io.IOException e) {
-                throw new com.google.protobuf.InvalidProtocolBufferException(
-                        e).setUnfinishedMessage(this);
-            } finally {
-                if (((mutable_bitField0_ & 0x00000001) != 0)) {
-                    shape_.makeImmutable(); // C
-                }
-                this.unknownFields = unknownFields.build();
-                makeExtensionsImmutable();
-            }
-        }
-
-        public static final com.google.protobuf.Descriptors.Descriptor
-                getDescriptor() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor;
-        }
-
-        @java.lang.Override
-        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-                internalGetFieldAccessorTable() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_TensorMetadata_fieldAccessorTable
-                    .ensureFieldAccessorsInitialized(
-                            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.class,
-                            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder.class);
-        }
-
-        public static final int NAME_FIELD_NUMBER = 1;
-        private volatile java.lang.Object name_;
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The name.
-         */
-        @java.lang.Override
-        public java.lang.String getName() {
-            java.lang.Object ref = name_;
-            if (ref instanceof java.lang.String) {
-                return (java.lang.String) ref;
-            } else {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                name_ = s;
-                return s;
-            }
-        }
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The bytes for name.
-         */
-        @java.lang.Override
-        public com.google.protobuf.ByteString
-                getNameBytes() {
-            java.lang.Object ref = name_;
-            if (ref instanceof java.lang.String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                name_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        public static final int DATATYPE_FIELD_NUMBER = 2;
-        private volatile java.lang.Object datatype_;
-
-        /**
-         * <pre>
-         * The tensor data type.
-         * </pre>
-         *
-         * <code>string datatype = 2;</code>
-         * 
-         * @return The datatype.
-         */
-        @java.lang.Override
-        public java.lang.String getDatatype() {
-            java.lang.Object ref = datatype_;
-            if (ref instanceof java.lang.String) {
-                return (java.lang.String) ref;
-            } else {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                datatype_ = s;
-                return s;
-            }
-        }
-
-        /**
-         * <pre>
-         * The tensor data type.
-         * </pre>
-         *
-         * <code>string datatype = 2;</code>
-         * 
-         * @return The bytes for datatype.
-         */
-        @java.lang.Override
-        public com.google.protobuf.ByteString
-                getDatatypeBytes() {
-            java.lang.Object ref = datatype_;
-            if (ref instanceof java.lang.String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                datatype_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        public static final int SHAPE_FIELD_NUMBER = 3;
-        private com.google.protobuf.Internal.LongList shape_;
-
-        /**
-         * <pre>
-         * The tensor shape. A variable-size dimension is represented
-         * by a -1 value.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @return A list containing the shape.
-         */
-        @java.lang.Override
-        public java.util.List<java.lang.Long>
-                getShapeList() {
-            return shape_;
-        }
-
-        /**
-         * <pre>
-         * The tensor shape. A variable-size dimension is represented
-         * by a -1 value.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @return The count of shape.
-         */
-        public int getShapeCount() {
-            return shape_.size();
-        }
-
-        /**
-         * <pre>
-         * The tensor shape. A variable-size dimension is represented
-         * by a -1 value.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The shape at the given index.
-         */
-        public long getShape(int index) {
-            return shape_.getLong(index);
-        }
-
-        private int shapeMemoizedSerializedSize = -1;
-
-        private byte memoizedIsInitialized = -1;
-
-        @java.lang.Override
-        public final boolean isInitialized() {
-            byte isInitialized = memoizedIsInitialized;
-            if (isInitialized == 1)
-                return true;
-            if (isInitialized == 0)
-                return false;
-
-            memoizedIsInitialized = 1;
-            return true;
-        }
-
-        @java.lang.Override
-        public void writeTo(com.google.protobuf.CodedOutputStream output)
-                throws java.io.IOException {
-            getSerializedSize();
-            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
-            }
-            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datatype_)) {
-                com.google.protobuf.GeneratedMessageV3.writeString(output, 2, datatype_);
-            }
-            if (getShapeList().size() > 0) {
-                output.writeUInt32NoTag(26);
-                output.writeUInt32NoTag(shapeMemoizedSerializedSize);
-            }
-            for (int i = 0; i < shape_.size(); i++) {
-                output.writeInt64NoTag(shape_.getLong(i));
-            }
-            unknownFields.writeTo(output);
-        }
-
-        @java.lang.Override
-        public int getSerializedSize() {
-            int size = memoizedSize;
-            if (size != -1)
-                return size;
-
-            size = 0;
-            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
-            }
-            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datatype_)) {
-                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, datatype_);
-            }
-            {
-                int dataSize = 0;
-                for (int i = 0; i < shape_.size(); i++) {
-                    dataSize += com.google.protobuf.CodedOutputStream
-                            .computeInt64SizeNoTag(shape_.getLong(i));
-                }
-                size += dataSize;
-                if (!getShapeList().isEmpty()) {
-                    size += 1;
-                    size += com.google.protobuf.CodedOutputStream
-                            .computeInt32SizeNoTag(dataSize);
-                }
-                shapeMemoizedSerializedSize = dataSize;
-            }
-            size += unknownFields.getSerializedSize();
-            memoizedSize = size;
-            return size;
-        }
-
-        @java.lang.Override
-        public boolean equals(final java.lang.Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata)) {
-                return super.equals(obj);
-            }
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata other = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata) obj;
-
-            if (!getName()
-                    .equals(other.getName()))
-                return false;
-            if (!getDatatype()
-                    .equals(other.getDatatype()))
-                return false;
-            if (!getShapeList()
-                    .equals(other.getShapeList()))
-                return false;
-            if (!unknownFields.equals(other.unknownFields))
-                return false;
-            return true;
-        }
-
-        @java.lang.Override
-        public int hashCode() {
-            if (memoizedHashCode != 0) {
-                return memoizedHashCode;
-            }
-            int hash = 41;
-            hash = (19 * hash) + getDescriptor().hashCode();
-            hash = (37 * hash) + NAME_FIELD_NUMBER;
-            hash = (53 * hash) + getName().hashCode();
-            hash = (37 * hash) + DATATYPE_FIELD_NUMBER;
-            hash = (53 * hash) + getDatatype().hashCode();
-            if (getShapeCount() > 0) {
-                hash = (37 * hash) + SHAPE_FIELD_NUMBER;
-                hash = (53 * hash) + getShapeList().hashCode();
-            }
-            hash = (29 * hash) + unknownFields.hashCode();
-            memoizedHashCode = hash;
-            return hash;
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
-                java.nio.ByteBuffer data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
-                java.nio.ByteBuffer data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
-                com.google.protobuf.ByteString data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
-                com.google.protobuf.ByteString data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(byte[] data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
-                byte[] data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(java.io.InputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
-                java.io.InputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseDelimitedFrom(java.io.InputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseDelimitedWithIOException(PARSER, input);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseDelimitedFrom(
-                java.io.InputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
-                com.google.protobuf.CodedInputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parseFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input, extensionRegistry);
-        }
-
-        @java.lang.Override
-        public Builder newBuilderForType() {
-            return newBuilder();
-        }
-
-        public static Builder newBuilder() {
-            return DEFAULT_INSTANCE.toBuilder();
-        }
-
-        public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata prototype) {
-            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-        }
-
-        @java.lang.Override
-        public Builder toBuilder() {
-            return this == DEFAULT_INSTANCE
-                    ? new Builder()
-                    : new Builder().mergeFrom(this);
-        }
-
-        @java.lang.Override
-        protected Builder newBuilderForType(
-                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-            Builder builder = new Builder(parent);
-            return builder;
-        }
-
-        /**
-         * <pre>
-         * Metadata for a tensor.
-         * </pre>
-         *
-         * Protobuf type {@code inference.ModelMetadataResponse.TensorMetadata}
-         */
-        public static final class Builder extends
-                com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-                // @@protoc_insertion_point(builder_implements:inference.ModelMetadataResponse.TensorMetadata)
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder {
-            public static final com.google.protobuf.Descriptors.Descriptor
-                    getDescriptor() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor;
-            }
-
-            @java.lang.Override
-            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-                    internalGetFieldAccessorTable() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_TensorMetadata_fieldAccessorTable
-                        .ensureFieldAccessorsInitialized(
-                                org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.class,
-                                org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder.class);
-            }
-
-            // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.newBuilder()
-            private Builder() {
-                maybeForceBuilderInitialization();
-            }
-
-            private Builder(
-                    com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-                super(parent);
-                maybeForceBuilderInitialization();
-            }
-
-            private void maybeForceBuilderInitialization() {
-                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
-                }
-            }
-
-            @java.lang.Override
-            public Builder clear() {
-                super.clear();
-                name_ = "";
-
-                datatype_ = "";
-
-                shape_ = emptyLongList();
-                bitField0_ = (bitField0_ & ~0x00000001);
-                return this;
-            }
-
-            @java.lang.Override
-            public com.google.protobuf.Descriptors.Descriptor
-                    getDescriptorForType() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor;
-            }
-
-            @java.lang.Override
-            public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getDefaultInstanceForType() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance();
-            }
-
-            @java.lang.Override
-            public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata build() {
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata result = buildPartial();
-                if (!result.isInitialized()) {
-                    throw newUninitializedMessageException(result);
-                }
-                return result;
-            }
-
-            @java.lang.Override
-            public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata buildPartial() {
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata result = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata(this);
-                int from_bitField0_ = bitField0_;
-                result.name_ = name_;
-                result.datatype_ = datatype_;
-                if (((bitField0_ & 0x00000001) != 0)) {
-                    shape_.makeImmutable();
-                    bitField0_ = (bitField0_ & ~0x00000001);
-                }
-                result.shape_ = shape_;
-                onBuilt();
-                return result;
-            }
-
-            @java.lang.Override
-            public Builder clone() {
-                return super.clone();
-            }
-
-            @java.lang.Override
-            public Builder setField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    java.lang.Object value) {
-                return super.setField(field, value);
-            }
-
-            @java.lang.Override
-            public Builder clearField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field) {
-                return super.clearField(field);
-            }
-
-            @java.lang.Override
-            public Builder clearOneof(
-                    com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-                return super.clearOneof(oneof);
-            }
-
-            @java.lang.Override
-            public Builder setRepeatedField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    int index, java.lang.Object value) {
-                return super.setRepeatedField(field, index, value);
-            }
-
-            @java.lang.Override
-            public Builder addRepeatedField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    java.lang.Object value) {
-                return super.addRepeatedField(field, value);
-            }
-
-            @java.lang.Override
-            public Builder mergeFrom(com.google.protobuf.Message other) {
-                if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata) {
-                    return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata) other);
-                } else {
-                    super.mergeFrom(other);
-                    return this;
-                }
-            }
-
-            public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata other) {
-                if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance())
-                    return this;
-                if (!other.getName().isEmpty()) {
-                    name_ = other.name_;
-                    onChanged();
-                }
-                if (!other.getDatatype().isEmpty()) {
-                    datatype_ = other.datatype_;
-                    onChanged();
-                }
-                if (!other.shape_.isEmpty()) {
-                    if (shape_.isEmpty()) {
-                        shape_ = other.shape_;
-                        bitField0_ = (bitField0_ & ~0x00000001);
-                    } else {
-                        ensureShapeIsMutable();
-                        shape_.addAll(other.shape_);
-                    }
-                    onChanged();
-                }
-                this.mergeUnknownFields(other.unknownFields);
-                onChanged();
-                return this;
-            }
-
-            @java.lang.Override
-            public final boolean isInitialized() {
-                return true;
-            }
-
-            @java.lang.Override
-            public Builder mergeFrom(
-                    com.google.protobuf.CodedInputStream input,
-                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws java.io.IOException {
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parsedMessage = null;
-                try {
-                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                    parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata) e.getUnfinishedMessage();
-                    throw e.unwrapIOException();
-                } finally {
-                    if (parsedMessage != null) {
-                        mergeFrom(parsedMessage);
-                    }
-                }
-                return this;
-            }
-
-            private int bitField0_;
-
-            private java.lang.Object name_ = "";
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @return The name.
-             */
-            public java.lang.String getName() {
-                java.lang.Object ref = name_;
-                if (!(ref instanceof java.lang.String)) {
-                    com.google.protobuf.ByteString bs =
-                            (com.google.protobuf.ByteString) ref;
-                    java.lang.String s = bs.toStringUtf8();
-                    name_ = s;
-                    return s;
-                } else {
-                    return (java.lang.String) ref;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @return The bytes for name.
-             */
-            public com.google.protobuf.ByteString
-                    getNameBytes() {
-                java.lang.Object ref = name_;
-                if (ref instanceof String) {
-                    com.google.protobuf.ByteString b =
-                            com.google.protobuf.ByteString.copyFromUtf8(
-                                    (java.lang.String) ref);
-                    name_ = b;
-                    return b;
-                } else {
-                    return (com.google.protobuf.ByteString) ref;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @param value The name to set.
-             * @return This builder for chaining.
-             */
-            public Builder setName(
-                    java.lang.String value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-
-                name_ = value;
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @return This builder for chaining.
-             */
-            public Builder clearName() {
-
-                name_ = getDefaultInstance().getName();
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @param value The bytes for name to set.
-             * @return This builder for chaining.
-             */
-            public Builder setNameBytes(
-                    com.google.protobuf.ByteString value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                checkByteStringIsUtf8(value);
-
-                name_ = value;
-                onChanged();
-                return this;
-            }
-
-            private java.lang.Object datatype_ = "";
-
-            /**
-             * <pre>
-             * The tensor data type.
-             * </pre>
-             *
-             * <code>string datatype = 2;</code>
-             * 
-             * @return The datatype.
-             */
-            public java.lang.String getDatatype() {
-                java.lang.Object ref = datatype_;
-                if (!(ref instanceof java.lang.String)) {
-                    com.google.protobuf.ByteString bs =
-                            (com.google.protobuf.ByteString) ref;
-                    java.lang.String s = bs.toStringUtf8();
-                    datatype_ = s;
-                    return s;
-                } else {
-                    return (java.lang.String) ref;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor data type.
-             * </pre>
-             *
-             * <code>string datatype = 2;</code>
-             * 
-             * @return The bytes for datatype.
-             */
-            public com.google.protobuf.ByteString
-                    getDatatypeBytes() {
-                java.lang.Object ref = datatype_;
-                if (ref instanceof String) {
-                    com.google.protobuf.ByteString b =
-                            com.google.protobuf.ByteString.copyFromUtf8(
-                                    (java.lang.String) ref);
-                    datatype_ = b;
-                    return b;
-                } else {
-                    return (com.google.protobuf.ByteString) ref;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor data type.
-             * </pre>
-             *
-             * <code>string datatype = 2;</code>
-             * 
-             * @param value The datatype to set.
-             * @return This builder for chaining.
-             */
-            public Builder setDatatype(
-                    java.lang.String value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-
-                datatype_ = value;
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor data type.
-             * </pre>
-             *
-             * <code>string datatype = 2;</code>
-             * 
-             * @return This builder for chaining.
-             */
-            public Builder clearDatatype() {
-
-                datatype_ = getDefaultInstance().getDatatype();
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor data type.
-             * </pre>
-             *
-             * <code>string datatype = 2;</code>
-             * 
-             * @param value The bytes for datatype to set.
-             * @return This builder for chaining.
-             */
-            public Builder setDatatypeBytes(
-                    com.google.protobuf.ByteString value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                checkByteStringIsUtf8(value);
-
-                datatype_ = value;
-                onChanged();
-                return this;
-            }
-
-            private com.google.protobuf.Internal.LongList shape_ = emptyLongList();
-
-            private void ensureShapeIsMutable() {
-                if (!((bitField0_ & 0x00000001) != 0)) {
-                    shape_ = mutableCopy(shape_);
-                    bitField0_ |= 0x00000001;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor shape. A variable-size dimension is represented
-             * by a -1 value.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @return A list containing the shape.
-             */
-            public java.util.List<java.lang.Long>
-                    getShapeList() {
-                return ((bitField0_ & 0x00000001) != 0) ? java.util.Collections.unmodifiableList(shape_) : shape_;
-            }
-
-            /**
-             * <pre>
-             * The tensor shape. A variable-size dimension is represented
-             * by a -1 value.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @return The count of shape.
-             */
-            public int getShapeCount() {
-                return shape_.size();
-            }
-
-            /**
-             * <pre>
-             * The tensor shape. A variable-size dimension is represented
-             * by a -1 value.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @param index The index of the element to return.
-             * @return The shape at the given index.
-             */
-            public long getShape(int index) {
-                return shape_.getLong(index);
-            }
-
-            /**
-             * <pre>
-             * The tensor shape. A variable-size dimension is represented
-             * by a -1 value.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @param index The index to set the value at.
-             * @param value The shape to set.
-             * @return This builder for chaining.
-             */
-            public Builder setShape(
-                    int index, long value) {
-                ensureShapeIsMutable();
-                shape_.setLong(index, value);
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor shape. A variable-size dimension is represented
-             * by a -1 value.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @param value The shape to add.
-             * @return This builder for chaining.
-             */
-            public Builder addShape(long value) {
-                ensureShapeIsMutable();
-                shape_.addLong(value);
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor shape. A variable-size dimension is represented
-             * by a -1 value.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @param values The shape to add.
-             * @return This builder for chaining.
-             */
-            public Builder addAllShape(
-                    java.lang.Iterable<? extends java.lang.Long> values) {
-                ensureShapeIsMutable();
-                com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                        values, shape_);
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor shape. A variable-size dimension is represented
-             * by a -1 value.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @return This builder for chaining.
-             */
-            public Builder clearShape() {
-                shape_ = emptyLongList();
-                bitField0_ = (bitField0_ & ~0x00000001);
-                onChanged();
-                return this;
-            }
-
-            @java.lang.Override
-            public final Builder setUnknownFields(
-                    final com.google.protobuf.UnknownFieldSet unknownFields) {
-                return super.setUnknownFields(unknownFields);
-            }
-
-            @java.lang.Override
-            public final Builder mergeUnknownFields(
-                    final com.google.protobuf.UnknownFieldSet unknownFields) {
-                return super.mergeUnknownFields(unknownFields);
-            }
-
-            // @@protoc_insertion_point(builder_scope:inference.ModelMetadataResponse.TensorMetadata)
-        }
-
-        // @@protoc_insertion_point(class_scope:inference.ModelMetadataResponse.TensorMetadata)
-        private static final org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata DEFAULT_INSTANCE;
-        static {
-            DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata();
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getDefaultInstance() {
-            return DEFAULT_INSTANCE;
-        }
-
-        private static final com.google.protobuf.Parser<TensorMetadata> PARSER = new com.google.protobuf.AbstractParser<TensorMetadata>() {
-            @java.lang.Override
-            public TensorMetadata parsePartialFrom(
-                    com.google.protobuf.CodedInputStream input,
-                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
-                return new TensorMetadata(input, extensionRegistry);
-            }
-        };
-
-        public static com.google.protobuf.Parser<TensorMetadata> parser() {
-            return PARSER;
-        }
-
-        @java.lang.Override
-        public com.google.protobuf.Parser<TensorMetadata> getParserForType() {
-            return PARSER;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getDefaultInstanceForType() {
-            return DEFAULT_INSTANCE;
-        }
-
-    }
-
-    public static final int NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object name_;
-
-    /**
-     * <pre>
-     * The model name.
-     * </pre>
-     *
-     * <code>string name = 1;</code>
-     * 
-     * @return The name.
-     */
-    @java.lang.Override
-    public java.lang.String getName() {
-        java.lang.Object ref = name_;
-        if (ref instanceof java.lang.String) {
-            return (java.lang.String) ref;
-        } else {
-            com.google.protobuf.ByteString bs =
-                    (com.google.protobuf.ByteString) ref;
-            java.lang.String s = bs.toStringUtf8();
-            name_ = s;
-            return s;
-        }
-    }
-
-    /**
-     * <pre>
-     * The model name.
-     * </pre>
-     *
-     * <code>string name = 1;</code>
-     * 
-     * @return The bytes for name.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-            getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof java.lang.String) {
-            com.google.protobuf.ByteString b =
-                    com.google.protobuf.ByteString.copyFromUtf8(
-                            (java.lang.String) ref);
-            name_ = b;
-            return b;
-        } else {
-            return (com.google.protobuf.ByteString) ref;
-        }
-    }
-
-    public static final int VERSIONS_FIELD_NUMBER = 2;
-    private com.google.protobuf.LazyStringList versions_;
-
-    /**
-     * <pre>
-     * The versions of the model available on the server.
-     * </pre>
-     *
-     * <code>repeated string versions = 2;</code>
-     * 
-     * @return A list containing the versions.
-     */
-    public com.google.protobuf.ProtocolStringList
-            getVersionsList() {
-        return versions_;
-    }
-
-    /**
-     * <pre>
-     * The versions of the model available on the server.
-     * </pre>
-     *
-     * <code>repeated string versions = 2;</code>
-     * 
-     * @return The count of versions.
-     */
-    public int getVersionsCount() {
-        return versions_.size();
-    }
-
-    /**
-     * <pre>
-     * The versions of the model available on the server.
-     * </pre>
-     *
-     * <code>repeated string versions = 2;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The versions at the given index.
-     */
-    public java.lang.String getVersions(int index) {
-        return versions_.get(index);
-    }
-
-    /**
-     * <pre>
-     * The versions of the model available on the server.
-     * </pre>
-     *
-     * <code>repeated string versions = 2;</code>
-     * 
-     * @param index The index of the value to return.
-     * @return The bytes of the versions at the given index.
-     */
-    public com.google.protobuf.ByteString
-            getVersionsBytes(int index) {
-        return versions_.getByteString(index);
-    }
-
-    public static final int PLATFORM_FIELD_NUMBER = 3;
-    private volatile java.lang.Object platform_;
-
-    /**
-     * <pre>
-     * The model's platform. See Platforms.
-     * </pre>
-     *
-     * <code>string platform = 3;</code>
-     * 
-     * @return The platform.
-     */
-    @java.lang.Override
-    public java.lang.String getPlatform() {
-        java.lang.Object ref = platform_;
-        if (ref instanceof java.lang.String) {
-            return (java.lang.String) ref;
-        } else {
-            com.google.protobuf.ByteString bs =
-                    (com.google.protobuf.ByteString) ref;
-            java.lang.String s = bs.toStringUtf8();
-            platform_ = s;
-            return s;
-        }
-    }
-
-    /**
-     * <pre>
-     * The model's platform. See Platforms.
-     * </pre>
-     *
-     * <code>string platform = 3;</code>
-     * 
-     * @return The bytes for platform.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-            getPlatformBytes() {
-        java.lang.Object ref = platform_;
-        if (ref instanceof java.lang.String) {
-            com.google.protobuf.ByteString b =
-                    com.google.protobuf.ByteString.copyFromUtf8(
-                            (java.lang.String) ref);
-            platform_ = b;
-            return b;
-        } else {
-            return (com.google.protobuf.ByteString) ref;
-        }
-    }
-
-    public static final int INPUTS_FIELD_NUMBER = 4;
-    private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> inputs_;
-
-    /**
-     * <pre>
-     * The model's inputs.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-     */
-    @java.lang.Override
-    public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> getInputsList() {
-        return inputs_;
-    }
-
-    /**
-     * <pre>
-     * The model's inputs.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-     */
-    @java.lang.Override
-    public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder>
-            getInputsOrBuilderList() {
-        return inputs_;
-    }
-
-    /**
-     * <pre>
-     * The model's inputs.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-     */
-    @java.lang.Override
-    public int getInputsCount() {
-        return inputs_.size();
-    }
-
-    /**
-     * <pre>
-     * The model's inputs.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-     */
-    @java.lang.Override
-    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getInputs(int index) {
-        return inputs_.get(index);
-    }
-
-    /**
-     * <pre>
-     * The model's inputs.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-     */
-    @java.lang.Override
-    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder getInputsOrBuilder(
-            int index) {
-        return inputs_.get(index);
-    }
-
-    public static final int OUTPUTS_FIELD_NUMBER = 5;
-    private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> outputs_;
-
-    /**
-     * <pre>
-     * The model's outputs.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-     */
-    @java.lang.Override
-    public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> getOutputsList() {
-        return outputs_;
-    }
-
-    /**
-     * <pre>
-     * The model's outputs.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-     */
-    @java.lang.Override
-    public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder>
-            getOutputsOrBuilderList() {
-        return outputs_;
-    }
-
-    /**
-     * <pre>
-     * The model's outputs.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-     */
-    @java.lang.Override
-    public int getOutputsCount() {
-        return outputs_.size();
-    }
-
-    /**
-     * <pre>
-     * The model's outputs.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-     */
-    @java.lang.Override
-    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getOutputs(int index) {
-        return outputs_.get(index);
-    }
-
-    /**
-     * <pre>
-     * The model's outputs.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-     */
-    @java.lang.Override
-    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder getOutputsOrBuilder(
-            int index) {
-        return outputs_.get(index);
-    }
-
-    private byte memoizedIsInitialized = -1;
-
-    @java.lang.Override
-    public final boolean isInitialized() {
-        byte isInitialized = memoizedIsInitialized;
-        if (isInitialized == 1)
-            return true;
-        if (isInitialized == 0)
-            return false;
-
-        memoizedIsInitialized = 1;
-        return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-            throws java.io.IOException {
-        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-            com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
-        }
-        for (int i = 0; i < versions_.size(); i++) {
-            com.google.protobuf.GeneratedMessageV3.writeString(output, 2, versions_.getRaw(i));
-        }
-        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(platform_)) {
-            com.google.protobuf.GeneratedMessageV3.writeString(output, 3, platform_);
-        }
-        for (int i = 0; i < inputs_.size(); i++) {
-            output.writeMessage(4, inputs_.get(i));
-        }
-        for (int i = 0; i < outputs_.size(); i++) {
-            output.writeMessage(5, outputs_.get(i));
-        }
-        unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-        int size = memoizedSize;
-        if (size != -1)
-            return size;
-
-        size = 0;
-        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-            size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
-        }
-        {
-            int dataSize = 0;
-            for (int i = 0; i < versions_.size(); i++) {
-                dataSize += computeStringSizeNoTag(versions_.getRaw(i));
-            }
-            size += dataSize;
-            size += 1 * getVersionsList().size();
-        }
-        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(platform_)) {
-            size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, platform_);
-        }
-        for (int i = 0; i < inputs_.size(); i++) {
-            size += com.google.protobuf.CodedOutputStream
-                    .computeMessageSize(4, inputs_.get(i));
-        }
-        for (int i = 0; i < outputs_.size(); i++) {
-            size += com.google.protobuf.CodedOutputStream
-                    .computeMessageSize(5, outputs_.get(i));
-        }
-        size += unknownFields.getSerializedSize();
-        memoizedSize = size;
-        return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse)) {
-            return super.equals(obj);
-        }
-        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse other = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse) obj;
-
-        if (!getName()
-                .equals(other.getName()))
-            return false;
-        if (!getVersionsList()
-                .equals(other.getVersionsList()))
-            return false;
-        if (!getPlatform()
-                .equals(other.getPlatform()))
-            return false;
-        if (!getInputsList()
-                .equals(other.getInputsList()))
-            return false;
-        if (!getOutputsList()
-                .equals(other.getOutputsList()))
-            return false;
-        if (!unknownFields.equals(other.unknownFields))
-            return false;
-        return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-        if (memoizedHashCode != 0) {
-            return memoizedHashCode;
-        }
-        int hash = 41;
-        hash = (19 * hash) + getDescriptor().hashCode();
-        hash = (37 * hash) + NAME_FIELD_NUMBER;
-        hash = (53 * hash) + getName().hashCode();
-        if (getVersionsCount() > 0) {
-            hash = (37 * hash) + VERSIONS_FIELD_NUMBER;
-            hash = (53 * hash) + getVersionsList().hashCode();
-        }
-        hash = (37 * hash) + PLATFORM_FIELD_NUMBER;
-        hash = (53 * hash) + getPlatform().hashCode();
-        if (getInputsCount() > 0) {
-            hash = (37 * hash) + INPUTS_FIELD_NUMBER;
-            hash = (53 * hash) + getInputsList().hashCode();
-        }
-        if (getOutputsCount() > 0) {
-            hash = (37 * hash) + OUTPUTS_FIELD_NUMBER;
-            hash = (53 * hash) + getOutputsList().hashCode();
-        }
-        hash = (29 * hash) + unknownFields.hashCode();
-        memoizedHashCode = hash;
-        return hash;
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
-            java.nio.ByteBuffer data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
-            java.nio.ByteBuffer data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
-            com.google.protobuf.ByteString data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
-            com.google.protobuf.ByteString data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(byte[] data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
-            byte[] data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(java.io.InputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseDelimitedFrom(java.io.InputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseDelimitedFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
-            com.google.protobuf.CodedInputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() {
-        return newBuilder();
-    }
-
-    public static Builder newBuilder() {
-        return DEFAULT_INSTANCE.toBuilder();
-    }
-
-    public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse prototype) {
-        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-
-    @java.lang.Override
-    public Builder toBuilder() {
-        return this == DEFAULT_INSTANCE
-                ? new Builder()
-                : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        Builder builder = new Builder(parent);
-        return builder;
-    }
-
-    /**
-     * Protobuf type {@code inference.ModelMetadataResponse}
-     */
     public static final class Builder extends
-            com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-            // @@protoc_insertion_point(builder_implements:inference.ModelMetadataResponse)
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponseOrBuilder {
-        public static final com.google.protobuf.Descriptors.Descriptor
-                getDescriptor() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_descriptor;
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:inference.ModelMetadataResponse.TensorMetadata)
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_TensorMetadata_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder.class);
+      }
+
+      // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
         }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        name_ = "";
 
-        @java.lang.Override
-        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-                internalGetFieldAccessorTable() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_fieldAccessorTable
-                    .ensureFieldAccessorsInitialized(
-                            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.Builder.class);
+        datatype_ = "";
+
+        shape_ = emptyLongList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor;
+      }
+
+      @java.lang.Override
+      public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getDefaultInstanceForType() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata build() {
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
         }
+        return result;
+      }
 
-        // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.newBuilder()
-        private Builder() {
-            maybeForceBuilderInitialization();
+      @java.lang.Override
+      public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata buildPartial() {
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata result = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata(this);
+        int from_bitField0_ = bitField0_;
+        result.name_ = name_;
+        result.datatype_ = datatype_;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          shape_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
+        result.shape_ = shape_;
+        onBuilt();
+        return result;
+      }
 
-        private Builder(
-                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-            super(parent);
-            maybeForceBuilderInitialization();
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata) {
+          return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
         }
+      }
 
-        private void maybeForceBuilderInitialization() {
-            if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
-                getInputsFieldBuilder();
-                getOutputsFieldBuilder();
-            }
+      public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata other) {
+        if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          onChanged();
         }
-
-        @java.lang.Override
-        public Builder clear() {
-            super.clear();
-            name_ = "";
-
-            versions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        if (!other.getDatatype().isEmpty()) {
+          datatype_ = other.datatype_;
+          onChanged();
+        }
+        if (!other.shape_.isEmpty()) {
+          if (shape_.isEmpty()) {
+            shape_ = other.shape_;
             bitField0_ = (bitField0_ & ~0x00000001);
-            platform_ = "";
-
-            if (inputsBuilder_ == null) {
-                inputs_ = java.util.Collections.emptyList();
-                bitField0_ = (bitField0_ & ~0x00000002);
-            } else {
-                inputsBuilder_.clear();
-            }
-            if (outputsBuilder_ == null) {
-                outputs_ = java.util.Collections.emptyList();
-                bitField0_ = (bitField0_ & ~0x00000004);
-            } else {
-                outputsBuilder_.clear();
-            }
-            return this;
-        }
-
-        @java.lang.Override
-        public com.google.protobuf.Descriptors.Descriptor
-                getDescriptorForType() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_descriptor;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse getDefaultInstanceForType() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.getDefaultInstance();
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse build() {
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse result = buildPartial();
-            if (!result.isInitialized()) {
-                throw newUninitializedMessageException(result);
-            }
-            return result;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse buildPartial() {
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse result = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse(this);
-            int from_bitField0_ = bitField0_;
-            result.name_ = name_;
-            if (((bitField0_ & 0x00000001) != 0)) {
-                versions_ = versions_.getUnmodifiableView();
-                bitField0_ = (bitField0_ & ~0x00000001);
-            }
-            result.versions_ = versions_;
-            result.platform_ = platform_;
-            if (inputsBuilder_ == null) {
-                if (((bitField0_ & 0x00000002) != 0)) {
-                    inputs_ = java.util.Collections.unmodifiableList(inputs_);
-                    bitField0_ = (bitField0_ & ~0x00000002);
-                }
-                result.inputs_ = inputs_;
-            } else {
-                result.inputs_ = inputsBuilder_.build();
-            }
-            if (outputsBuilder_ == null) {
-                if (((bitField0_ & 0x00000004) != 0)) {
-                    outputs_ = java.util.Collections.unmodifiableList(outputs_);
-                    bitField0_ = (bitField0_ & ~0x00000004);
-                }
-                result.outputs_ = outputs_;
-            } else {
-                result.outputs_ = outputsBuilder_.build();
-            }
-            onBuilt();
-            return result;
-        }
-
-        @java.lang.Override
-        public Builder clone() {
-            return super.clone();
-        }
-
-        @java.lang.Override
-        public Builder setField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                java.lang.Object value) {
-            return super.setField(field, value);
-        }
-
-        @java.lang.Override
-        public Builder clearField(
-                com.google.protobuf.Descriptors.FieldDescriptor field) {
-            return super.clearField(field);
-        }
-
-        @java.lang.Override
-        public Builder clearOneof(
-                com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-            return super.clearOneof(oneof);
-        }
-
-        @java.lang.Override
-        public Builder setRepeatedField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                int index, java.lang.Object value) {
-            return super.setRepeatedField(field, index, value);
-        }
-
-        @java.lang.Override
-        public Builder addRepeatedField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                java.lang.Object value) {
-            return super.addRepeatedField(field, value);
-        }
-
-        @java.lang.Override
-        public Builder mergeFrom(com.google.protobuf.Message other) {
-            if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse) {
-                return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse) other);
-            } else {
-                super.mergeFrom(other);
-                return this;
-            }
-        }
-
-        public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse other) {
-            if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.getDefaultInstance())
-                return this;
-            if (!other.getName().isEmpty()) {
-                name_ = other.name_;
-                onChanged();
-            }
-            if (!other.versions_.isEmpty()) {
-                if (versions_.isEmpty()) {
-                    versions_ = other.versions_;
-                    bitField0_ = (bitField0_ & ~0x00000001);
-                } else {
-                    ensureVersionsIsMutable();
-                    versions_.addAll(other.versions_);
-                }
-                onChanged();
-            }
-            if (!other.getPlatform().isEmpty()) {
-                platform_ = other.platform_;
-                onChanged();
-            }
-            if (inputsBuilder_ == null) {
-                if (!other.inputs_.isEmpty()) {
-                    if (inputs_.isEmpty()) {
-                        inputs_ = other.inputs_;
-                        bitField0_ = (bitField0_ & ~0x00000002);
-                    } else {
-                        ensureInputsIsMutable();
-                        inputs_.addAll(other.inputs_);
-                    }
-                    onChanged();
-                }
-            } else {
-                if (!other.inputs_.isEmpty()) {
-                    if (inputsBuilder_.isEmpty()) {
-                        inputsBuilder_.dispose();
-                        inputsBuilder_ = null;
-                        inputs_ = other.inputs_;
-                        bitField0_ = (bitField0_ & ~0x00000002);
-                        inputsBuilder_ =
-                                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ? getInputsFieldBuilder() : null;
-                    } else {
-                        inputsBuilder_.addAllMessages(other.inputs_);
-                    }
-                }
-            }
-            if (outputsBuilder_ == null) {
-                if (!other.outputs_.isEmpty()) {
-                    if (outputs_.isEmpty()) {
-                        outputs_ = other.outputs_;
-                        bitField0_ = (bitField0_ & ~0x00000004);
-                    } else {
-                        ensureOutputsIsMutable();
-                        outputs_.addAll(other.outputs_);
-                    }
-                    onChanged();
-                }
-            } else {
-                if (!other.outputs_.isEmpty()) {
-                    if (outputsBuilder_.isEmpty()) {
-                        outputsBuilder_.dispose();
-                        outputsBuilder_ = null;
-                        outputs_ = other.outputs_;
-                        bitField0_ = (bitField0_ & ~0x00000004);
-                        outputsBuilder_ =
-                                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ? getOutputsFieldBuilder() : null;
-                    } else {
-                        outputsBuilder_.addAllMessages(other.outputs_);
-                    }
-                }
-            }
-            this.mergeUnknownFields(other.unknownFields);
-            onChanged();
-            return this;
-        }
-
-        @java.lang.Override
-        public final boolean isInitialized() {
-            return true;
-        }
-
-        @java.lang.Override
-        public Builder mergeFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parsedMessage = null;
-            try {
-                parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse) e.getUnfinishedMessage();
-                throw e.unwrapIOException();
-            } finally {
-                if (parsedMessage != null) {
-                    mergeFrom(parsedMessage);
-                }
-            }
-            return this;
-        }
-
-        private int bitField0_;
-
-        private java.lang.Object name_ = "";
-
-        /**
-         * <pre>
-         * The model name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The name.
-         */
-        public java.lang.String getName() {
-            java.lang.Object ref = name_;
-            if (!(ref instanceof java.lang.String)) {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                name_ = s;
-                return s;
-            } else {
-                return (java.lang.String) ref;
-            }
-        }
-
-        /**
-         * <pre>
-         * The model name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The bytes for name.
-         */
-        public com.google.protobuf.ByteString
-                getNameBytes() {
-            java.lang.Object ref = name_;
-            if (ref instanceof String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                name_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        /**
-         * <pre>
-         * The model name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @param value The name to set.
-         * @return This builder for chaining.
-         */
-        public Builder setName(
-                java.lang.String value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-
-            name_ = value;
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearName() {
-
-            name_ = getDefaultInstance().getName();
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @param value The bytes for name to set.
-         * @return This builder for chaining.
-         */
-        public Builder setNameBytes(
-                com.google.protobuf.ByteString value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            checkByteStringIsUtf8(value);
-
-            name_ = value;
-            onChanged();
-            return this;
-        }
-
-        private com.google.protobuf.LazyStringList versions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-
-        private void ensureVersionsIsMutable() {
-            if (!((bitField0_ & 0x00000001) != 0)) {
-                versions_ = new com.google.protobuf.LazyStringArrayList(versions_);
-                bitField0_ |= 0x00000001;
-            }
-        }
-
-        /**
-         * <pre>
-         * The versions of the model available on the server.
-         * </pre>
-         *
-         * <code>repeated string versions = 2;</code>
-         * 
-         * @return A list containing the versions.
-         */
-        public com.google.protobuf.ProtocolStringList
-                getVersionsList() {
-            return versions_.getUnmodifiableView();
-        }
-
-        /**
-         * <pre>
-         * The versions of the model available on the server.
-         * </pre>
-         *
-         * <code>repeated string versions = 2;</code>
-         * 
-         * @return The count of versions.
-         */
-        public int getVersionsCount() {
-            return versions_.size();
-        }
-
-        /**
-         * <pre>
-         * The versions of the model available on the server.
-         * </pre>
-         *
-         * <code>repeated string versions = 2;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The versions at the given index.
-         */
-        public java.lang.String getVersions(int index) {
-            return versions_.get(index);
-        }
-
-        /**
-         * <pre>
-         * The versions of the model available on the server.
-         * </pre>
-         *
-         * <code>repeated string versions = 2;</code>
-         * 
-         * @param index The index of the value to return.
-         * @return The bytes of the versions at the given index.
-         */
-        public com.google.protobuf.ByteString
-                getVersionsBytes(int index) {
-            return versions_.getByteString(index);
-        }
-
-        /**
-         * <pre>
-         * The versions of the model available on the server.
-         * </pre>
-         *
-         * <code>repeated string versions = 2;</code>
-         * 
-         * @param index The index to set the value at.
-         * @param value The versions to set.
-         * @return This builder for chaining.
-         */
-        public Builder setVersions(
-                int index, java.lang.String value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            ensureVersionsIsMutable();
-            versions_.set(index, value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The versions of the model available on the server.
-         * </pre>
-         *
-         * <code>repeated string versions = 2;</code>
-         * 
-         * @param value The versions to add.
-         * @return This builder for chaining.
-         */
-        public Builder addVersions(
-                java.lang.String value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            ensureVersionsIsMutable();
-            versions_.add(value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The versions of the model available on the server.
-         * </pre>
-         *
-         * <code>repeated string versions = 2;</code>
-         * 
-         * @param values The versions to add.
-         * @return This builder for chaining.
-         */
-        public Builder addAllVersions(
-                java.lang.Iterable<java.lang.String> values) {
-            ensureVersionsIsMutable();
-            com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                    values, versions_);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The versions of the model available on the server.
-         * </pre>
-         *
-         * <code>repeated string versions = 2;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearVersions() {
-            versions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-            bitField0_ = (bitField0_ & ~0x00000001);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The versions of the model available on the server.
-         * </pre>
-         *
-         * <code>repeated string versions = 2;</code>
-         * 
-         * @param value The bytes of the versions to add.
-         * @return This builder for chaining.
-         */
-        public Builder addVersionsBytes(
-                com.google.protobuf.ByteString value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            checkByteStringIsUtf8(value);
-            ensureVersionsIsMutable();
-            versions_.add(value);
-            onChanged();
-            return this;
-        }
-
-        private java.lang.Object platform_ = "";
-
-        /**
-         * <pre>
-         * The model's platform. See Platforms.
-         * </pre>
-         *
-         * <code>string platform = 3;</code>
-         * 
-         * @return The platform.
-         */
-        public java.lang.String getPlatform() {
-            java.lang.Object ref = platform_;
-            if (!(ref instanceof java.lang.String)) {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                platform_ = s;
-                return s;
-            } else {
-                return (java.lang.String) ref;
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's platform. See Platforms.
-         * </pre>
-         *
-         * <code>string platform = 3;</code>
-         * 
-         * @return The bytes for platform.
-         */
-        public com.google.protobuf.ByteString
-                getPlatformBytes() {
-            java.lang.Object ref = platform_;
-            if (ref instanceof String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                platform_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's platform. See Platforms.
-         * </pre>
-         *
-         * <code>string platform = 3;</code>
-         * 
-         * @param value The platform to set.
-         * @return This builder for chaining.
-         */
-        public Builder setPlatform(
-                java.lang.String value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-
-            platform_ = value;
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's platform. See Platforms.
-         * </pre>
-         *
-         * <code>string platform = 3;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearPlatform() {
-
-            platform_ = getDefaultInstance().getPlatform();
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's platform. See Platforms.
-         * </pre>
-         *
-         * <code>string platform = 3;</code>
-         * 
-         * @param value The bytes for platform to set.
-         * @return This builder for chaining.
-         */
-        public Builder setPlatformBytes(
-                com.google.protobuf.ByteString value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            checkByteStringIsUtf8(value);
-
-            platform_ = value;
-            onChanged();
-            return this;
-        }
-
-        private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> inputs_ =
-                java.util.Collections.emptyList();
-
-        private void ensureInputsIsMutable() {
-            if (!((bitField0_ & 0x00000002) != 0)) {
-                inputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata>(inputs_);
-                bitField0_ |= 0x00000002;
-            }
-        }
-
-        private com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder> inputsBuilder_;
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> getInputsList() {
-            if (inputsBuilder_ == null) {
-                return java.util.Collections.unmodifiableList(inputs_);
-            } else {
-                return inputsBuilder_.getMessageList();
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public int getInputsCount() {
-            if (inputsBuilder_ == null) {
-                return inputs_.size();
-            } else {
-                return inputsBuilder_.getCount();
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getInputs(int index) {
-            if (inputsBuilder_ == null) {
-                return inputs_.get(index);
-            } else {
-                return inputsBuilder_.getMessage(index);
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public Builder setInputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
-            if (inputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureInputsIsMutable();
-                inputs_.set(index, value);
-                onChanged();
-            } else {
-                inputsBuilder_.setMessage(index, value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public Builder setInputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
-            if (inputsBuilder_ == null) {
-                ensureInputsIsMutable();
-                inputs_.set(index, builderForValue.build());
-                onChanged();
-            } else {
-                inputsBuilder_.setMessage(index, builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public Builder addInputs(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
-            if (inputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureInputsIsMutable();
-                inputs_.add(value);
-                onChanged();
-            } else {
-                inputsBuilder_.addMessage(value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public Builder addInputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
-            if (inputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureInputsIsMutable();
-                inputs_.add(index, value);
-                onChanged();
-            } else {
-                inputsBuilder_.addMessage(index, value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public Builder addInputs(
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
-            if (inputsBuilder_ == null) {
-                ensureInputsIsMutable();
-                inputs_.add(builderForValue.build());
-                onChanged();
-            } else {
-                inputsBuilder_.addMessage(builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public Builder addInputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
-            if (inputsBuilder_ == null) {
-                ensureInputsIsMutable();
-                inputs_.add(index, builderForValue.build());
-                onChanged();
-            } else {
-                inputsBuilder_.addMessage(index, builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public Builder addAllInputs(
-                java.lang.Iterable<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> values) {
-            if (inputsBuilder_ == null) {
-                ensureInputsIsMutable();
-                com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                        values, inputs_);
-                onChanged();
-            } else {
-                inputsBuilder_.addAllMessages(values);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public Builder clearInputs() {
-            if (inputsBuilder_ == null) {
-                inputs_ = java.util.Collections.emptyList();
-                bitField0_ = (bitField0_ & ~0x00000002);
-                onChanged();
-            } else {
-                inputsBuilder_.clear();
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public Builder removeInputs(int index) {
-            if (inputsBuilder_ == null) {
-                ensureInputsIsMutable();
-                inputs_.remove(index);
-                onChanged();
-            } else {
-                inputsBuilder_.remove(index);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder getInputsBuilder(
-                int index) {
-            return getInputsFieldBuilder().getBuilder(index);
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder getInputsOrBuilder(
-                int index) {
-            if (inputsBuilder_ == null) {
-                return inputs_.get(index);
-            } else {
-                return inputsBuilder_.getMessageOrBuilder(index);
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder>
-                getInputsOrBuilderList() {
-            if (inputsBuilder_ != null) {
-                return inputsBuilder_.getMessageOrBuilderList();
-            } else {
-                return java.util.Collections.unmodifiableList(inputs_);
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder addInputsBuilder() {
-            return getInputsFieldBuilder().addBuilder(
-                    org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance());
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder addInputsBuilder(
-                int index) {
-            return getInputsFieldBuilder().addBuilder(
-                    index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance());
-        }
-
-        /**
-         * <pre>
-         * The model's inputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
-         */
-        public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder>
-                getInputsBuilderList() {
-            return getInputsFieldBuilder().getBuilderList();
-        }
-
-        private com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder>
-                getInputsFieldBuilder() {
-            if (inputsBuilder_ == null) {
-                inputsBuilder_ =
-                        new com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder>(
-                                inputs_,
-                                ((bitField0_ & 0x00000002) != 0),
-                                getParentForChildren(),
-                                isClean());
-                inputs_ = null;
-            }
-            return inputsBuilder_;
-        }
-
-        private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> outputs_ =
-                java.util.Collections.emptyList();
-
-        private void ensureOutputsIsMutable() {
-            if (!((bitField0_ & 0x00000004) != 0)) {
-                outputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata>(outputs_);
-                bitField0_ |= 0x00000004;
-            }
-        }
-
-        private com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder> outputsBuilder_;
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> getOutputsList() {
-            if (outputsBuilder_ == null) {
-                return java.util.Collections.unmodifiableList(outputs_);
-            } else {
-                return outputsBuilder_.getMessageList();
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public int getOutputsCount() {
-            if (outputsBuilder_ == null) {
-                return outputs_.size();
-            } else {
-                return outputsBuilder_.getCount();
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getOutputs(int index) {
-            if (outputsBuilder_ == null) {
-                return outputs_.get(index);
-            } else {
-                return outputsBuilder_.getMessage(index);
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public Builder setOutputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
-            if (outputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureOutputsIsMutable();
-                outputs_.set(index, value);
-                onChanged();
-            } else {
-                outputsBuilder_.setMessage(index, value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public Builder setOutputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
-            if (outputsBuilder_ == null) {
-                ensureOutputsIsMutable();
-                outputs_.set(index, builderForValue.build());
-                onChanged();
-            } else {
-                outputsBuilder_.setMessage(index, builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public Builder addOutputs(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
-            if (outputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureOutputsIsMutable();
-                outputs_.add(value);
-                onChanged();
-            } else {
-                outputsBuilder_.addMessage(value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public Builder addOutputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
-            if (outputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureOutputsIsMutable();
-                outputs_.add(index, value);
-                onChanged();
-            } else {
-                outputsBuilder_.addMessage(index, value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public Builder addOutputs(
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
-            if (outputsBuilder_ == null) {
-                ensureOutputsIsMutable();
-                outputs_.add(builderForValue.build());
-                onChanged();
-            } else {
-                outputsBuilder_.addMessage(builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public Builder addOutputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
-            if (outputsBuilder_ == null) {
-                ensureOutputsIsMutable();
-                outputs_.add(index, builderForValue.build());
-                onChanged();
-            } else {
-                outputsBuilder_.addMessage(index, builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public Builder addAllOutputs(
-                java.lang.Iterable<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> values) {
-            if (outputsBuilder_ == null) {
-                ensureOutputsIsMutable();
-                com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                        values, outputs_);
-                onChanged();
-            } else {
-                outputsBuilder_.addAllMessages(values);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public Builder clearOutputs() {
-            if (outputsBuilder_ == null) {
-                outputs_ = java.util.Collections.emptyList();
-                bitField0_ = (bitField0_ & ~0x00000004);
-                onChanged();
-            } else {
-                outputsBuilder_.clear();
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public Builder removeOutputs(int index) {
-            if (outputsBuilder_ == null) {
-                ensureOutputsIsMutable();
-                outputs_.remove(index);
-                onChanged();
-            } else {
-                outputsBuilder_.remove(index);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder getOutputsBuilder(
-                int index) {
-            return getOutputsFieldBuilder().getBuilder(index);
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder getOutputsOrBuilder(
-                int index) {
-            if (outputsBuilder_ == null) {
-                return outputs_.get(index);
-            } else {
-                return outputsBuilder_.getMessageOrBuilder(index);
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder>
-                getOutputsOrBuilderList() {
-            if (outputsBuilder_ != null) {
-                return outputsBuilder_.getMessageOrBuilderList();
-            } else {
-                return java.util.Collections.unmodifiableList(outputs_);
-            }
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder addOutputsBuilder() {
-            return getOutputsFieldBuilder().addBuilder(
-                    org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance());
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder addOutputsBuilder(
-                int index) {
-            return getOutputsFieldBuilder().addBuilder(
-                    index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance());
-        }
-
-        /**
-         * <pre>
-         * The model's outputs.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
-         */
-        public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder>
-                getOutputsBuilderList() {
-            return getOutputsFieldBuilder().getBuilderList();
-        }
-
-        private com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder>
-                getOutputsFieldBuilder() {
-            if (outputsBuilder_ == null) {
-                outputsBuilder_ =
-                        new com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder>(
-                                outputs_,
-                                ((bitField0_ & 0x00000004) != 0),
-                                getParentForChildren(),
-                                isClean());
-                outputs_ = null;
-            }
-            return outputsBuilder_;
-        }
-
-        @java.lang.Override
-        public final Builder setUnknownFields(
-                final com.google.protobuf.UnknownFieldSet unknownFields) {
-            return super.setUnknownFields(unknownFields);
-        }
-
-        @java.lang.Override
-        public final Builder mergeUnknownFields(
-                final com.google.protobuf.UnknownFieldSet unknownFields) {
-            return super.mergeUnknownFields(unknownFields);
-        }
-
-        // @@protoc_insertion_point(builder_scope:inference.ModelMetadataResponse)
+          } else {
+            ensureShapeIsMutable();
+            shape_.addAll(other.shape_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object datatype_ = "";
+      /**
+       * <pre>
+       * The tensor data type.
+       * </pre>
+       *
+       * <code>string datatype = 2;</code>
+       * @return The datatype.
+       */
+      public java.lang.String getDatatype() {
+        java.lang.Object ref = datatype_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datatype_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The tensor data type.
+       * </pre>
+       *
+       * <code>string datatype = 2;</code>
+       * @return The bytes for datatype.
+       */
+      public com.google.protobuf.ByteString
+          getDatatypeBytes() {
+        java.lang.Object ref = datatype_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datatype_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The tensor data type.
+       * </pre>
+       *
+       * <code>string datatype = 2;</code>
+       * @param value The datatype to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatatype(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        datatype_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor data type.
+       * </pre>
+       *
+       * <code>string datatype = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatatype() {
+        
+        datatype_ = getDefaultInstance().getDatatype();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor data type.
+       * </pre>
+       *
+       * <code>string datatype = 2;</code>
+       * @param value The bytes for datatype to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatatypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        datatype_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.Internal.LongList shape_ = emptyLongList();
+      private void ensureShapeIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          shape_ = mutableCopy(shape_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <pre>
+       * The tensor shape. A variable-size dimension is represented
+       * by a -1 value.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @return A list containing the shape.
+       */
+      public java.util.List<java.lang.Long>
+          getShapeList() {
+        return ((bitField0_ & 0x00000001) != 0) ?
+                 java.util.Collections.unmodifiableList(shape_) : shape_;
+      }
+      /**
+       * <pre>
+       * The tensor shape. A variable-size dimension is represented
+       * by a -1 value.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @return The count of shape.
+       */
+      public int getShapeCount() {
+        return shape_.size();
+      }
+      /**
+       * <pre>
+       * The tensor shape. A variable-size dimension is represented
+       * by a -1 value.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @param index The index of the element to return.
+       * @return The shape at the given index.
+       */
+      public long getShape(int index) {
+        return shape_.getLong(index);
+      }
+      /**
+       * <pre>
+       * The tensor shape. A variable-size dimension is represented
+       * by a -1 value.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The shape to set.
+       * @return This builder for chaining.
+       */
+      public Builder setShape(
+          int index, long value) {
+        ensureShapeIsMutable();
+        shape_.setLong(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor shape. A variable-size dimension is represented
+       * by a -1 value.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @param value The shape to add.
+       * @return This builder for chaining.
+       */
+      public Builder addShape(long value) {
+        ensureShapeIsMutable();
+        shape_.addLong(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor shape. A variable-size dimension is represented
+       * by a -1 value.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @param values The shape to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllShape(
+          java.lang.Iterable<? extends java.lang.Long> values) {
+        ensureShapeIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, shape_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor shape. A variable-size dimension is represented
+       * by a -1 value.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearShape() {
+        shape_ = emptyLongList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:inference.ModelMetadataResponse.TensorMetadata)
     }
 
-    // @@protoc_insertion_point(class_scope:inference.ModelMetadataResponse)
-    private static final org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse DEFAULT_INSTANCE;
+    // @@protoc_insertion_point(class_scope:inference.ModelMetadataResponse.TensorMetadata)
+    private static final org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata DEFAULT_INSTANCE;
     static {
-        DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse();
+      DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata();
     }
 
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse getDefaultInstance() {
-        return DEFAULT_INSTANCE;
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getDefaultInstance() {
+      return DEFAULT_INSTANCE;
     }
 
-    private static final com.google.protobuf.Parser<ModelMetadataResponse> PARSER = new com.google.protobuf.AbstractParser<ModelMetadataResponse>() {
-        @java.lang.Override
-        public ModelMetadataResponse parsePartialFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return new ModelMetadataResponse(input, extensionRegistry);
-        }
+    private static final com.google.protobuf.Parser<TensorMetadata>
+        PARSER = new com.google.protobuf.AbstractParser<TensorMetadata>() {
+      @java.lang.Override
+      public TensorMetadata parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new TensorMetadata(input, extensionRegistry);
+      }
     };
 
-    public static com.google.protobuf.Parser<ModelMetadataResponse> parser() {
-        return PARSER;
+    public static com.google.protobuf.Parser<TensorMetadata> parser() {
+      return PARSER;
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ModelMetadataResponse> getParserForType() {
-        return PARSER;
+    public com.google.protobuf.Parser<TensorMetadata> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public static final int NAME_FIELD_NUMBER = 1;
+  private volatile java.lang.Object name_;
+  /**
+   * <pre>
+   * The model name.
+   * </pre>
+   *
+   * <code>string name = 1;</code>
+   * @return The name.
+   */
+  @java.lang.Override
+  public java.lang.String getName() {
+    java.lang.Object ref = name_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      name_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * The model name.
+   * </pre>
+   *
+   * <code>string name = 1;</code>
+   * @return The bytes for name.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getNameBytes() {
+    java.lang.Object ref = name_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      name_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int VERSIONS_FIELD_NUMBER = 2;
+  private com.google.protobuf.LazyStringList versions_;
+  /**
+   * <pre>
+   * The versions of the model available on the server.
+   * </pre>
+   *
+   * <code>repeated string versions = 2;</code>
+   * @return A list containing the versions.
+   */
+  public com.google.protobuf.ProtocolStringList
+      getVersionsList() {
+    return versions_;
+  }
+  /**
+   * <pre>
+   * The versions of the model available on the server.
+   * </pre>
+   *
+   * <code>repeated string versions = 2;</code>
+   * @return The count of versions.
+   */
+  public int getVersionsCount() {
+    return versions_.size();
+  }
+  /**
+   * <pre>
+   * The versions of the model available on the server.
+   * </pre>
+   *
+   * <code>repeated string versions = 2;</code>
+   * @param index The index of the element to return.
+   * @return The versions at the given index.
+   */
+  public java.lang.String getVersions(int index) {
+    return versions_.get(index);
+  }
+  /**
+   * <pre>
+   * The versions of the model available on the server.
+   * </pre>
+   *
+   * <code>repeated string versions = 2;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the versions at the given index.
+   */
+  public com.google.protobuf.ByteString
+      getVersionsBytes(int index) {
+    return versions_.getByteString(index);
+  }
+
+  public static final int PLATFORM_FIELD_NUMBER = 3;
+  private volatile java.lang.Object platform_;
+  /**
+   * <pre>
+   * The model's platform. See Platforms.
+   * </pre>
+   *
+   * <code>string platform = 3;</code>
+   * @return The platform.
+   */
+  @java.lang.Override
+  public java.lang.String getPlatform() {
+    java.lang.Object ref = platform_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      platform_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * The model's platform. See Platforms.
+   * </pre>
+   *
+   * <code>string platform = 3;</code>
+   * @return The bytes for platform.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getPlatformBytes() {
+    java.lang.Object ref = platform_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      platform_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int INPUTS_FIELD_NUMBER = 4;
+  private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> inputs_;
+  /**
+   * <pre>
+   * The model's inputs.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+   */
+  @java.lang.Override
+  public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> getInputsList() {
+    return inputs_;
+  }
+  /**
+   * <pre>
+   * The model's inputs.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder> 
+      getInputsOrBuilderList() {
+    return inputs_;
+  }
+  /**
+   * <pre>
+   * The model's inputs.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+   */
+  @java.lang.Override
+  public int getInputsCount() {
+    return inputs_.size();
+  }
+  /**
+   * <pre>
+   * The model's inputs.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+   */
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getInputs(int index) {
+    return inputs_.get(index);
+  }
+  /**
+   * <pre>
+   * The model's inputs.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+   */
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder getInputsOrBuilder(
+      int index) {
+    return inputs_.get(index);
+  }
+
+  public static final int OUTPUTS_FIELD_NUMBER = 5;
+  private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> outputs_;
+  /**
+   * <pre>
+   * The model's outputs.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+   */
+  @java.lang.Override
+  public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> getOutputsList() {
+    return outputs_;
+  }
+  /**
+   * <pre>
+   * The model's outputs.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder> 
+      getOutputsOrBuilderList() {
+    return outputs_;
+  }
+  /**
+   * <pre>
+   * The model's outputs.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+   */
+  @java.lang.Override
+  public int getOutputsCount() {
+    return outputs_.size();
+  }
+  /**
+   * <pre>
+   * The model's outputs.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+   */
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getOutputs(int index) {
+    return outputs_.get(index);
+  }
+  /**
+   * <pre>
+   * The model's outputs.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+   */
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder getOutputsOrBuilder(
+      int index) {
+    return outputs_.get(index);
+  }
+
+  private byte memoizedIsInitialized = -1;
+  @java.lang.Override
+  public final boolean isInitialized() {
+    byte isInitialized = memoizedIsInitialized;
+    if (isInitialized == 1) return true;
+    if (isInitialized == 0) return false;
+
+    memoizedIsInitialized = 1;
+    return true;
+  }
+
+  @java.lang.Override
+  public void writeTo(com.google.protobuf.CodedOutputStream output)
+                      throws java.io.IOException {
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+    }
+    for (int i = 0; i < versions_.size(); i++) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, versions_.getRaw(i));
+    }
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(platform_)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, platform_);
+    }
+    for (int i = 0; i < inputs_.size(); i++) {
+      output.writeMessage(4, inputs_.get(i));
+    }
+    for (int i = 0; i < outputs_.size(); i++) {
+      output.writeMessage(5, outputs_.get(i));
+    }
+    unknownFields.writeTo(output);
+  }
+
+  @java.lang.Override
+  public int getSerializedSize() {
+    int size = memoizedSize;
+    if (size != -1) return size;
+
+    size = 0;
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < versions_.size(); i++) {
+        dataSize += computeStringSizeNoTag(versions_.getRaw(i));
+      }
+      size += dataSize;
+      size += 1 * getVersionsList().size();
+    }
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(platform_)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, platform_);
+    }
+    for (int i = 0; i < inputs_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(4, inputs_.get(i));
+    }
+    for (int i = 0; i < outputs_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(5, outputs_.get(i));
+    }
+    size += unknownFields.getSerializedSize();
+    memoizedSize = size;
+    return size;
+  }
+
+  @java.lang.Override
+  public boolean equals(final java.lang.Object obj) {
+    if (obj == this) {
+     return true;
+    }
+    if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse)) {
+      return super.equals(obj);
+    }
+    org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse other = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse) obj;
+
+    if (!getName()
+        .equals(other.getName())) return false;
+    if (!getVersionsList()
+        .equals(other.getVersionsList())) return false;
+    if (!getPlatform()
+        .equals(other.getPlatform())) return false;
+    if (!getInputsList()
+        .equals(other.getInputsList())) return false;
+    if (!getOutputsList()
+        .equals(other.getOutputsList())) return false;
+    if (!unknownFields.equals(other.unknownFields)) return false;
+    return true;
+  }
+
+  @java.lang.Override
+  public int hashCode() {
+    if (memoizedHashCode != 0) {
+      return memoizedHashCode;
+    }
+    int hash = 41;
+    hash = (19 * hash) + getDescriptor().hashCode();
+    hash = (37 * hash) + NAME_FIELD_NUMBER;
+    hash = (53 * hash) + getName().hashCode();
+    if (getVersionsCount() > 0) {
+      hash = (37 * hash) + VERSIONS_FIELD_NUMBER;
+      hash = (53 * hash) + getVersionsList().hashCode();
+    }
+    hash = (37 * hash) + PLATFORM_FIELD_NUMBER;
+    hash = (53 * hash) + getPlatform().hashCode();
+    if (getInputsCount() > 0) {
+      hash = (37 * hash) + INPUTS_FIELD_NUMBER;
+      hash = (53 * hash) + getInputsList().hashCode();
+    }
+    if (getOutputsCount() > 0) {
+      hash = (37 * hash) + OUTPUTS_FIELD_NUMBER;
+      hash = (53 * hash) + getOutputsList().hashCode();
+    }
+    hash = (29 * hash) + unknownFields.hashCode();
+    memoizedHashCode = hash;
+    return hash;
+  }
+
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
+      java.nio.ByteBuffer data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
+      java.nio.ByteBuffer data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
+      com.google.protobuf.ByteString data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
+      com.google.protobuf.ByteString data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(byte[] data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
+      byte[] data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(java.io.InputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
+      java.io.InputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseDelimitedFrom(java.io.InputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseDelimitedWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseDelimitedFrom(
+      java.io.InputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
+      com.google.protobuf.CodedInputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parseFrom(
+      com.google.protobuf.CodedInputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input, extensionRegistry);
+  }
+
+  @java.lang.Override
+  public Builder newBuilderForType() { return newBuilder(); }
+  public static Builder newBuilder() {
+    return DEFAULT_INSTANCE.toBuilder();
+  }
+  public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse prototype) {
+    return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+  }
+  @java.lang.Override
+  public Builder toBuilder() {
+    return this == DEFAULT_INSTANCE
+        ? new Builder() : new Builder().mergeFrom(this);
+  }
+
+  @java.lang.Override
+  protected Builder newBuilderForType(
+      com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+    Builder builder = new Builder(parent);
+    return builder;
+  }
+  /**
+   * Protobuf type {@code inference.ModelMetadataResponse}
+   */
+  public static final class Builder extends
+      com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+      // @@protoc_insertion_point(builder_implements:inference.ModelMetadataResponse)
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponseOrBuilder {
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.Builder.class);
+    }
+
+    // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.newBuilder()
+    private Builder() {
+      maybeForceBuilderInitialization();
+    }
+
+    private Builder(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      super(parent);
+      maybeForceBuilderInitialization();
+    }
+    private void maybeForceBuilderInitialization() {
+      if (com.google.protobuf.GeneratedMessageV3
+              .alwaysUseFieldBuilders) {
+        getInputsFieldBuilder();
+        getOutputsFieldBuilder();
+      }
+    }
+    @java.lang.Override
+    public Builder clear() {
+      super.clear();
+      name_ = "";
+
+      versions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000001);
+      platform_ = "";
+
+      if (inputsBuilder_ == null) {
+        inputs_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);
+      } else {
+        inputsBuilder_.clear();
+      }
+      if (outputsBuilder_ == null) {
+        outputs_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+      } else {
+        outputsBuilder_.clear();
+      }
+      return this;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Descriptors.Descriptor
+        getDescriptorForType() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelMetadataResponse_descriptor;
     }
 
     @java.lang.Override
     public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse getDefaultInstanceForType() {
-        return DEFAULT_INSTANCE;
+      return org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.getDefaultInstance();
     }
 
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse build() {
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse result = buildPartial();
+      if (!result.isInitialized()) {
+        throw newUninitializedMessageException(result);
+      }
+      return result;
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse buildPartial() {
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse result = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse(this);
+      int from_bitField0_ = bitField0_;
+      result.name_ = name_;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        versions_ = versions_.getUnmodifiableView();
+        bitField0_ = (bitField0_ & ~0x00000001);
+      }
+      result.versions_ = versions_;
+      result.platform_ = platform_;
+      if (inputsBuilder_ == null) {
+        if (((bitField0_ & 0x00000002) != 0)) {
+          inputs_ = java.util.Collections.unmodifiableList(inputs_);
+          bitField0_ = (bitField0_ & ~0x00000002);
+        }
+        result.inputs_ = inputs_;
+      } else {
+        result.inputs_ = inputsBuilder_.build();
+      }
+      if (outputsBuilder_ == null) {
+        if (((bitField0_ & 0x00000004) != 0)) {
+          outputs_ = java.util.Collections.unmodifiableList(outputs_);
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.outputs_ = outputs_;
+      } else {
+        result.outputs_ = outputsBuilder_.build();
+      }
+      onBuilt();
+      return result;
+    }
+
+    @java.lang.Override
+    public Builder clone() {
+      return super.clone();
+    }
+    @java.lang.Override
+    public Builder setField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        java.lang.Object value) {
+      return super.setField(field, value);
+    }
+    @java.lang.Override
+    public Builder clearField(
+        com.google.protobuf.Descriptors.FieldDescriptor field) {
+      return super.clearField(field);
+    }
+    @java.lang.Override
+    public Builder clearOneof(
+        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      return super.clearOneof(oneof);
+    }
+    @java.lang.Override
+    public Builder setRepeatedField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        int index, java.lang.Object value) {
+      return super.setRepeatedField(field, index, value);
+    }
+    @java.lang.Override
+    public Builder addRepeatedField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        java.lang.Object value) {
+      return super.addRepeatedField(field, value);
+    }
+    @java.lang.Override
+    public Builder mergeFrom(com.google.protobuf.Message other) {
+      if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse) {
+        return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse)other);
+      } else {
+        super.mergeFrom(other);
+        return this;
+      }
+    }
+
+    public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse other) {
+      if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.getDefaultInstance()) return this;
+      if (!other.getName().isEmpty()) {
+        name_ = other.name_;
+        onChanged();
+      }
+      if (!other.versions_.isEmpty()) {
+        if (versions_.isEmpty()) {
+          versions_ = other.versions_;
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          ensureVersionsIsMutable();
+          versions_.addAll(other.versions_);
+        }
+        onChanged();
+      }
+      if (!other.getPlatform().isEmpty()) {
+        platform_ = other.platform_;
+        onChanged();
+      }
+      if (inputsBuilder_ == null) {
+        if (!other.inputs_.isEmpty()) {
+          if (inputs_.isEmpty()) {
+            inputs_ = other.inputs_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensureInputsIsMutable();
+            inputs_.addAll(other.inputs_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.inputs_.isEmpty()) {
+          if (inputsBuilder_.isEmpty()) {
+            inputsBuilder_.dispose();
+            inputsBuilder_ = null;
+            inputs_ = other.inputs_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+            inputsBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getInputsFieldBuilder() : null;
+          } else {
+            inputsBuilder_.addAllMessages(other.inputs_);
+          }
+        }
+      }
+      if (outputsBuilder_ == null) {
+        if (!other.outputs_.isEmpty()) {
+          if (outputs_.isEmpty()) {
+            outputs_ = other.outputs_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensureOutputsIsMutable();
+            outputs_.addAll(other.outputs_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.outputs_.isEmpty()) {
+          if (outputsBuilder_.isEmpty()) {
+            outputsBuilder_.dispose();
+            outputsBuilder_ = null;
+            outputs_ = other.outputs_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+            outputsBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getOutputsFieldBuilder() : null;
+          } else {
+            outputsBuilder_.addAllMessages(other.outputs_);
+          }
+        }
+      }
+      this.mergeUnknownFields(other.unknownFields);
+      onChanged();
+      return this;
+    }
+
+    @java.lang.Override
+    public final boolean isInitialized() {
+      return true;
+    }
+
+    @java.lang.Override
+    public Builder mergeFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse parsedMessage = null;
+      try {
+        parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse) e.getUnfinishedMessage();
+        throw e.unwrapIOException();
+      } finally {
+        if (parsedMessage != null) {
+          mergeFrom(parsedMessage);
+        }
+      }
+      return this;
+    }
+    private int bitField0_;
+
+    private java.lang.Object name_ = "";
+    /**
+     * <pre>
+     * The model name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The model name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The model name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @param value The name to set.
+     * @return This builder for chaining.
+     */
+    public Builder setName(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      name_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The model name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearName() {
+      
+      name_ = getDefaultInstance().getName();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The model name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @param value The bytes for name to set.
+     * @return This builder for chaining.
+     */
+    public Builder setNameBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      name_ = value;
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.LazyStringList versions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    private void ensureVersionsIsMutable() {
+      if (!((bitField0_ & 0x00000001) != 0)) {
+        versions_ = new com.google.protobuf.LazyStringArrayList(versions_);
+        bitField0_ |= 0x00000001;
+       }
+    }
+    /**
+     * <pre>
+     * The versions of the model available on the server.
+     * </pre>
+     *
+     * <code>repeated string versions = 2;</code>
+     * @return A list containing the versions.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getVersionsList() {
+      return versions_.getUnmodifiableView();
+    }
+    /**
+     * <pre>
+     * The versions of the model available on the server.
+     * </pre>
+     *
+     * <code>repeated string versions = 2;</code>
+     * @return The count of versions.
+     */
+    public int getVersionsCount() {
+      return versions_.size();
+    }
+    /**
+     * <pre>
+     * The versions of the model available on the server.
+     * </pre>
+     *
+     * <code>repeated string versions = 2;</code>
+     * @param index The index of the element to return.
+     * @return The versions at the given index.
+     */
+    public java.lang.String getVersions(int index) {
+      return versions_.get(index);
+    }
+    /**
+     * <pre>
+     * The versions of the model available on the server.
+     * </pre>
+     *
+     * <code>repeated string versions = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the versions at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getVersionsBytes(int index) {
+      return versions_.getByteString(index);
+    }
+    /**
+     * <pre>
+     * The versions of the model available on the server.
+     * </pre>
+     *
+     * <code>repeated string versions = 2;</code>
+     * @param index The index to set the value at.
+     * @param value The versions to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVersions(
+        int index, java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureVersionsIsMutable();
+      versions_.set(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The versions of the model available on the server.
+     * </pre>
+     *
+     * <code>repeated string versions = 2;</code>
+     * @param value The versions to add.
+     * @return This builder for chaining.
+     */
+    public Builder addVersions(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureVersionsIsMutable();
+      versions_.add(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The versions of the model available on the server.
+     * </pre>
+     *
+     * <code>repeated string versions = 2;</code>
+     * @param values The versions to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllVersions(
+        java.lang.Iterable<java.lang.String> values) {
+      ensureVersionsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, versions_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The versions of the model available on the server.
+     * </pre>
+     *
+     * <code>repeated string versions = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearVersions() {
+      versions_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      bitField0_ = (bitField0_ & ~0x00000001);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The versions of the model available on the server.
+     * </pre>
+     *
+     * <code>repeated string versions = 2;</code>
+     * @param value The bytes of the versions to add.
+     * @return This builder for chaining.
+     */
+    public Builder addVersionsBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      ensureVersionsIsMutable();
+      versions_.add(value);
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object platform_ = "";
+    /**
+     * <pre>
+     * The model's platform. See Platforms.
+     * </pre>
+     *
+     * <code>string platform = 3;</code>
+     * @return The platform.
+     */
+    public java.lang.String getPlatform() {
+      java.lang.Object ref = platform_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        platform_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The model's platform. See Platforms.
+     * </pre>
+     *
+     * <code>string platform = 3;</code>
+     * @return The bytes for platform.
+     */
+    public com.google.protobuf.ByteString
+        getPlatformBytes() {
+      java.lang.Object ref = platform_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        platform_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The model's platform. See Platforms.
+     * </pre>
+     *
+     * <code>string platform = 3;</code>
+     * @param value The platform to set.
+     * @return This builder for chaining.
+     */
+    public Builder setPlatform(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      platform_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's platform. See Platforms.
+     * </pre>
+     *
+     * <code>string platform = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearPlatform() {
+      
+      platform_ = getDefaultInstance().getPlatform();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's platform. See Platforms.
+     * </pre>
+     *
+     * <code>string platform = 3;</code>
+     * @param value The bytes for platform to set.
+     * @return This builder for chaining.
+     */
+    public Builder setPlatformBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      platform_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> inputs_ =
+      java.util.Collections.emptyList();
+    private void ensureInputsIsMutable() {
+      if (!((bitField0_ & 0x00000002) != 0)) {
+        inputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata>(inputs_);
+        bitField0_ |= 0x00000002;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder> inputsBuilder_;
+
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> getInputsList() {
+      if (inputsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(inputs_);
+      } else {
+        return inputsBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public int getInputsCount() {
+      if (inputsBuilder_ == null) {
+        return inputs_.size();
+      } else {
+        return inputsBuilder_.getCount();
+      }
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getInputs(int index) {
+      if (inputsBuilder_ == null) {
+        return inputs_.get(index);
+      } else {
+        return inputsBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public Builder setInputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
+      if (inputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureInputsIsMutable();
+        inputs_.set(index, value);
+        onChanged();
+      } else {
+        inputsBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public Builder setInputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
+      if (inputsBuilder_ == null) {
+        ensureInputsIsMutable();
+        inputs_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        inputsBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public Builder addInputs(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
+      if (inputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureInputsIsMutable();
+        inputs_.add(value);
+        onChanged();
+      } else {
+        inputsBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public Builder addInputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
+      if (inputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureInputsIsMutable();
+        inputs_.add(index, value);
+        onChanged();
+      } else {
+        inputsBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public Builder addInputs(
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
+      if (inputsBuilder_ == null) {
+        ensureInputsIsMutable();
+        inputs_.add(builderForValue.build());
+        onChanged();
+      } else {
+        inputsBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public Builder addInputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
+      if (inputsBuilder_ == null) {
+        ensureInputsIsMutable();
+        inputs_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        inputsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public Builder addAllInputs(
+        java.lang.Iterable<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> values) {
+      if (inputsBuilder_ == null) {
+        ensureInputsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, inputs_);
+        onChanged();
+      } else {
+        inputsBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public Builder clearInputs() {
+      if (inputsBuilder_ == null) {
+        inputs_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+      } else {
+        inputsBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public Builder removeInputs(int index) {
+      if (inputsBuilder_ == null) {
+        ensureInputsIsMutable();
+        inputs_.remove(index);
+        onChanged();
+      } else {
+        inputsBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder getInputsBuilder(
+        int index) {
+      return getInputsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder getInputsOrBuilder(
+        int index) {
+      if (inputsBuilder_ == null) {
+        return inputs_.get(index);  } else {
+        return inputsBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder> 
+         getInputsOrBuilderList() {
+      if (inputsBuilder_ != null) {
+        return inputsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(inputs_);
+      }
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder addInputsBuilder() {
+      return getInputsFieldBuilder().addBuilder(
+          org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder addInputsBuilder(
+        int index) {
+      return getInputsFieldBuilder().addBuilder(
+          index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * The model's inputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata inputs = 4;</code>
+     */
+    public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder> 
+         getInputsBuilderList() {
+      return getInputsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder> 
+        getInputsFieldBuilder() {
+      if (inputsBuilder_ == null) {
+        inputsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder>(
+                inputs_,
+                ((bitField0_ & 0x00000002) != 0),
+                getParentForChildren(),
+                isClean());
+        inputs_ = null;
+      }
+      return inputsBuilder_;
+    }
+
+    private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> outputs_ =
+      java.util.Collections.emptyList();
+    private void ensureOutputsIsMutable() {
+      if (!((bitField0_ & 0x00000004) != 0)) {
+        outputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata>(outputs_);
+        bitField0_ |= 0x00000004;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder> outputsBuilder_;
+
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> getOutputsList() {
+      if (outputsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(outputs_);
+      } else {
+        return outputsBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public int getOutputsCount() {
+      if (outputsBuilder_ == null) {
+        return outputs_.size();
+      } else {
+        return outputsBuilder_.getCount();
+      }
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata getOutputs(int index) {
+      if (outputsBuilder_ == null) {
+        return outputs_.get(index);
+      } else {
+        return outputsBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public Builder setOutputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
+      if (outputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureOutputsIsMutable();
+        outputs_.set(index, value);
+        onChanged();
+      } else {
+        outputsBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public Builder setOutputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
+      if (outputsBuilder_ == null) {
+        ensureOutputsIsMutable();
+        outputs_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        outputsBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public Builder addOutputs(org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
+      if (outputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureOutputsIsMutable();
+        outputs_.add(value);
+        onChanged();
+      } else {
+        outputsBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public Builder addOutputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata value) {
+      if (outputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureOutputsIsMutable();
+        outputs_.add(index, value);
+        onChanged();
+      } else {
+        outputsBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public Builder addOutputs(
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
+      if (outputsBuilder_ == null) {
+        ensureOutputsIsMutable();
+        outputs_.add(builderForValue.build());
+        onChanged();
+      } else {
+        outputsBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public Builder addOutputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder builderForValue) {
+      if (outputsBuilder_ == null) {
+        ensureOutputsIsMutable();
+        outputs_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        outputsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public Builder addAllOutputs(
+        java.lang.Iterable<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata> values) {
+      if (outputsBuilder_ == null) {
+        ensureOutputsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, outputs_);
+        onChanged();
+      } else {
+        outputsBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public Builder clearOutputs() {
+      if (outputsBuilder_ == null) {
+        outputs_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+      } else {
+        outputsBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public Builder removeOutputs(int index) {
+      if (outputsBuilder_ == null) {
+        ensureOutputsIsMutable();
+        outputs_.remove(index);
+        onChanged();
+      } else {
+        outputsBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder getOutputsBuilder(
+        int index) {
+      return getOutputsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder getOutputsOrBuilder(
+        int index) {
+      if (outputsBuilder_ == null) {
+        return outputs_.get(index);  } else {
+        return outputsBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder> 
+         getOutputsOrBuilderList() {
+      if (outputsBuilder_ != null) {
+        return outputsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(outputs_);
+      }
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder addOutputsBuilder() {
+      return getOutputsFieldBuilder().addBuilder(
+          org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder addOutputsBuilder(
+        int index) {
+      return getOutputsFieldBuilder().addBuilder(
+          index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * The model's outputs.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelMetadataResponse.TensorMetadata outputs = 5;</code>
+     */
+    public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder> 
+         getOutputsBuilderList() {
+      return getOutputsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder> 
+        getOutputsFieldBuilder() {
+      if (outputsBuilder_ == null) {
+        outputsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadata.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse.TensorMetadataOrBuilder>(
+                outputs_,
+                ((bitField0_ & 0x00000004) != 0),
+                getParentForChildren(),
+                isClean());
+        outputs_ = null;
+      }
+      return outputsBuilder_;
+    }
+    @java.lang.Override
+    public final Builder setUnknownFields(
+        final com.google.protobuf.UnknownFieldSet unknownFields) {
+      return super.setUnknownFields(unknownFields);
+    }
+
+    @java.lang.Override
+    public final Builder mergeUnknownFields(
+        final com.google.protobuf.UnknownFieldSet unknownFields) {
+      return super.mergeUnknownFields(unknownFields);
+    }
+
+
+    // @@protoc_insertion_point(builder_scope:inference.ModelMetadataResponse)
+  }
+
+  // @@protoc_insertion_point(class_scope:inference.ModelMetadataResponse)
+  private static final org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse DEFAULT_INSTANCE;
+  static {
+    DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse();
+  }
+
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse getDefaultInstance() {
+    return DEFAULT_INSTANCE;
+  }
+
+  private static final com.google.protobuf.Parser<ModelMetadataResponse>
+      PARSER = new com.google.protobuf.AbstractParser<ModelMetadataResponse>() {
+    @java.lang.Override
+    public ModelMetadataResponse parsePartialFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return new ModelMetadataResponse(input, extensionRegistry);
+    }
+  };
+
+  public static com.google.protobuf.Parser<ModelMetadataResponse> parser() {
+    return PARSER;
+  }
+
+  @java.lang.Override
+  public com.google.protobuf.Parser<ModelMetadataResponse> getParserForType() {
+    return PARSER;
+  }
+
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ModelMetadataResponse getDefaultInstanceForType() {
+    return DEFAULT_INSTANCE;
+  }
+
 }
+

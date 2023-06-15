@@ -4,86 +4,75 @@
 package org.kie.trustyai.connectors.kserve.v2.grpc;
 
 public interface InferParameterOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:inference.InferParameter)
-        com.google.protobuf.MessageOrBuilder {
+    // @@protoc_insertion_point(interface_extends:inference.InferParameter)
+    com.google.protobuf.MessageOrBuilder {
 
-    /**
-     * <pre>
-     * A boolean parameter value.
-     * </pre>
-     *
-     * <code>bool bool_param = 1;</code>
-     * 
-     * @return Whether the boolParam field is set.
-     */
-    boolean hasBoolParam();
+  /**
+   * <pre>
+   * A boolean parameter value.
+   * </pre>
+   *
+   * <code>bool bool_param = 1;</code>
+   * @return Whether the boolParam field is set.
+   */
+  boolean hasBoolParam();
+  /**
+   * <pre>
+   * A boolean parameter value.
+   * </pre>
+   *
+   * <code>bool bool_param = 1;</code>
+   * @return The boolParam.
+   */
+  boolean getBoolParam();
 
-    /**
-     * <pre>
-     * A boolean parameter value.
-     * </pre>
-     *
-     * <code>bool bool_param = 1;</code>
-     * 
-     * @return The boolParam.
-     */
-    boolean getBoolParam();
+  /**
+   * <pre>
+   * An int64 parameter value.
+   * </pre>
+   *
+   * <code>int64 int64_param = 2;</code>
+   * @return Whether the int64Param field is set.
+   */
+  boolean hasInt64Param();
+  /**
+   * <pre>
+   * An int64 parameter value.
+   * </pre>
+   *
+   * <code>int64 int64_param = 2;</code>
+   * @return The int64Param.
+   */
+  long getInt64Param();
 
-    /**
-     * <pre>
-     * An int64 parameter value.
-     * </pre>
-     *
-     * <code>int64 int64_param = 2;</code>
-     * 
-     * @return Whether the int64Param field is set.
-     */
-    boolean hasInt64Param();
+  /**
+   * <pre>
+   * A string parameter value.
+   * </pre>
+   *
+   * <code>string string_param = 3;</code>
+   * @return Whether the stringParam field is set.
+   */
+  boolean hasStringParam();
+  /**
+   * <pre>
+   * A string parameter value.
+   * </pre>
+   *
+   * <code>string string_param = 3;</code>
+   * @return The stringParam.
+   */
+  java.lang.String getStringParam();
+  /**
+   * <pre>
+   * A string parameter value.
+   * </pre>
+   *
+   * <code>string string_param = 3;</code>
+   * @return The bytes for stringParam.
+   */
+  com.google.protobuf.ByteString
+      getStringParamBytes();
 
-    /**
-     * <pre>
-     * An int64 parameter value.
-     * </pre>
-     *
-     * <code>int64 int64_param = 2;</code>
-     * 
-     * @return The int64Param.
-     */
-    long getInt64Param();
-
-    /**
-     * <pre>
-     * A string parameter value.
-     * </pre>
-     *
-     * <code>string string_param = 3;</code>
-     * 
-     * @return Whether the stringParam field is set.
-     */
-    boolean hasStringParam();
-
-    /**
-     * <pre>
-     * A string parameter value.
-     * </pre>
-     *
-     * <code>string string_param = 3;</code>
-     * 
-     * @return The stringParam.
-     */
-    java.lang.String getStringParam();
-
-    /**
-     * <pre>
-     * A string parameter value.
-     * </pre>
-     *
-     * <code>string string_param = 3;</code>
-     * 
-     * @return The bytes for stringParam.
-     */
-    com.google.protobuf.ByteString
-            getStringParamBytes();
-
-    public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter.ParameterChoiceCase getParameterChoiceCase();
+  public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter.ParameterChoiceCase getParameterChoiceCase();
 }

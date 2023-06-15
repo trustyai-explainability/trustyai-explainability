@@ -4,332 +4,292 @@
 package org.kie.trustyai.connectors.kserve.v2.grpc;
 
 public interface InferTensorContentsOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:inference.InferTensorContents)
-        com.google.protobuf.MessageOrBuilder {
+    // @@protoc_insertion_point(interface_extends:inference.InferTensorContents)
+    com.google.protobuf.MessageOrBuilder {
 
-    /**
-     * <pre>
-     * Representation for BOOL data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bool bool_contents = 1;</code>
-     * 
-     * @return A list containing the boolContents.
-     */
-    java.util.List<java.lang.Boolean> getBoolContentsList();
+  /**
+   * <pre>
+   * Representation for BOOL data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bool bool_contents = 1;</code>
+   * @return A list containing the boolContents.
+   */
+  java.util.List<java.lang.Boolean> getBoolContentsList();
+  /**
+   * <pre>
+   * Representation for BOOL data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bool bool_contents = 1;</code>
+   * @return The count of boolContents.
+   */
+  int getBoolContentsCount();
+  /**
+   * <pre>
+   * Representation for BOOL data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bool bool_contents = 1;</code>
+   * @param index The index of the element to return.
+   * @return The boolContents at the given index.
+   */
+  boolean getBoolContents(int index);
 
-    /**
-     * <pre>
-     * Representation for BOOL data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bool bool_contents = 1;</code>
-     * 
-     * @return The count of boolContents.
-     */
-    int getBoolContentsCount();
+  /**
+   * <pre>
+   * Representation for INT8, INT16, and INT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated int32 int_contents = 2;</code>
+   * @return A list containing the intContents.
+   */
+  java.util.List<java.lang.Integer> getIntContentsList();
+  /**
+   * <pre>
+   * Representation for INT8, INT16, and INT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated int32 int_contents = 2;</code>
+   * @return The count of intContents.
+   */
+  int getIntContentsCount();
+  /**
+   * <pre>
+   * Representation for INT8, INT16, and INT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated int32 int_contents = 2;</code>
+   * @param index The index of the element to return.
+   * @return The intContents at the given index.
+   */
+  int getIntContents(int index);
 
-    /**
-     * <pre>
-     * Representation for BOOL data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bool bool_contents = 1;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The boolContents at the given index.
-     */
-    boolean getBoolContents(int index);
+  /**
+   * <pre>
+   * Representation for INT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated int64 int64_contents = 3;</code>
+   * @return A list containing the int64Contents.
+   */
+  java.util.List<java.lang.Long> getInt64ContentsList();
+  /**
+   * <pre>
+   * Representation for INT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated int64 int64_contents = 3;</code>
+   * @return The count of int64Contents.
+   */
+  int getInt64ContentsCount();
+  /**
+   * <pre>
+   * Representation for INT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated int64 int64_contents = 3;</code>
+   * @param index The index of the element to return.
+   * @return The int64Contents at the given index.
+   */
+  long getInt64Contents(int index);
 
-    /**
-     * <pre>
-     * Representation for INT8, INT16, and INT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated int32 int_contents = 2;</code>
-     * 
-     * @return A list containing the intContents.
-     */
-    java.util.List<java.lang.Integer> getIntContentsList();
+  /**
+   * <pre>
+   * Representation for UINT8, UINT16, and UINT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint32 uint_contents = 4;</code>
+   * @return A list containing the uintContents.
+   */
+  java.util.List<java.lang.Integer> getUintContentsList();
+  /**
+   * <pre>
+   * Representation for UINT8, UINT16, and UINT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint32 uint_contents = 4;</code>
+   * @return The count of uintContents.
+   */
+  int getUintContentsCount();
+  /**
+   * <pre>
+   * Representation for UINT8, UINT16, and UINT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint32 uint_contents = 4;</code>
+   * @param index The index of the element to return.
+   * @return The uintContents at the given index.
+   */
+  int getUintContents(int index);
 
-    /**
-     * <pre>
-     * Representation for INT8, INT16, and INT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated int32 int_contents = 2;</code>
-     * 
-     * @return The count of intContents.
-     */
-    int getIntContentsCount();
+  /**
+   * <pre>
+   * Representation for UINT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint64 uint64_contents = 5;</code>
+   * @return A list containing the uint64Contents.
+   */
+  java.util.List<java.lang.Long> getUint64ContentsList();
+  /**
+   * <pre>
+   * Representation for UINT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint64 uint64_contents = 5;</code>
+   * @return The count of uint64Contents.
+   */
+  int getUint64ContentsCount();
+  /**
+   * <pre>
+   * Representation for UINT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint64 uint64_contents = 5;</code>
+   * @param index The index of the element to return.
+   * @return The uint64Contents at the given index.
+   */
+  long getUint64Contents(int index);
 
-    /**
-     * <pre>
-     * Representation for INT8, INT16, and INT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated int32 int_contents = 2;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The intContents at the given index.
-     */
-    int getIntContents(int index);
+  /**
+   * <pre>
+   * Representation for FP32 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated float fp32_contents = 6;</code>
+   * @return A list containing the fp32Contents.
+   */
+  java.util.List<java.lang.Float> getFp32ContentsList();
+  /**
+   * <pre>
+   * Representation for FP32 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated float fp32_contents = 6;</code>
+   * @return The count of fp32Contents.
+   */
+  int getFp32ContentsCount();
+  /**
+   * <pre>
+   * Representation for FP32 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated float fp32_contents = 6;</code>
+   * @param index The index of the element to return.
+   * @return The fp32Contents at the given index.
+   */
+  float getFp32Contents(int index);
 
-    /**
-     * <pre>
-     * Representation for INT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated int64 int64_contents = 3;</code>
-     * 
-     * @return A list containing the int64Contents.
-     */
-    java.util.List<java.lang.Long> getInt64ContentsList();
+  /**
+   * <pre>
+   * Representation for FP64 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated double fp64_contents = 7;</code>
+   * @return A list containing the fp64Contents.
+   */
+  java.util.List<java.lang.Double> getFp64ContentsList();
+  /**
+   * <pre>
+   * Representation for FP64 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated double fp64_contents = 7;</code>
+   * @return The count of fp64Contents.
+   */
+  int getFp64ContentsCount();
+  /**
+   * <pre>
+   * Representation for FP64 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated double fp64_contents = 7;</code>
+   * @param index The index of the element to return.
+   * @return The fp64Contents at the given index.
+   */
+  double getFp64Contents(int index);
 
-    /**
-     * <pre>
-     * Representation for INT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated int64 int64_contents = 3;</code>
-     * 
-     * @return The count of int64Contents.
-     */
-    int getInt64ContentsCount();
-
-    /**
-     * <pre>
-     * Representation for INT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated int64 int64_contents = 3;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The int64Contents at the given index.
-     */
-    long getInt64Contents(int index);
-
-    /**
-     * <pre>
-     * Representation for UINT8, UINT16, and UINT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint32 uint_contents = 4;</code>
-     * 
-     * @return A list containing the uintContents.
-     */
-    java.util.List<java.lang.Integer> getUintContentsList();
-
-    /**
-     * <pre>
-     * Representation for UINT8, UINT16, and UINT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint32 uint_contents = 4;</code>
-     * 
-     * @return The count of uintContents.
-     */
-    int getUintContentsCount();
-
-    /**
-     * <pre>
-     * Representation for UINT8, UINT16, and UINT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint32 uint_contents = 4;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The uintContents at the given index.
-     */
-    int getUintContents(int index);
-
-    /**
-     * <pre>
-     * Representation for UINT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint64 uint64_contents = 5;</code>
-     * 
-     * @return A list containing the uint64Contents.
-     */
-    java.util.List<java.lang.Long> getUint64ContentsList();
-
-    /**
-     * <pre>
-     * Representation for UINT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint64 uint64_contents = 5;</code>
-     * 
-     * @return The count of uint64Contents.
-     */
-    int getUint64ContentsCount();
-
-    /**
-     * <pre>
-     * Representation for UINT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint64 uint64_contents = 5;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The uint64Contents at the given index.
-     */
-    long getUint64Contents(int index);
-
-    /**
-     * <pre>
-     * Representation for FP32 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated float fp32_contents = 6;</code>
-     * 
-     * @return A list containing the fp32Contents.
-     */
-    java.util.List<java.lang.Float> getFp32ContentsList();
-
-    /**
-     * <pre>
-     * Representation for FP32 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated float fp32_contents = 6;</code>
-     * 
-     * @return The count of fp32Contents.
-     */
-    int getFp32ContentsCount();
-
-    /**
-     * <pre>
-     * Representation for FP32 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated float fp32_contents = 6;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The fp32Contents at the given index.
-     */
-    float getFp32Contents(int index);
-
-    /**
-     * <pre>
-     * Representation for FP64 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated double fp64_contents = 7;</code>
-     * 
-     * @return A list containing the fp64Contents.
-     */
-    java.util.List<java.lang.Double> getFp64ContentsList();
-
-    /**
-     * <pre>
-     * Representation for FP64 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated double fp64_contents = 7;</code>
-     * 
-     * @return The count of fp64Contents.
-     */
-    int getFp64ContentsCount();
-
-    /**
-     * <pre>
-     * Representation for FP64 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated double fp64_contents = 7;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The fp64Contents at the given index.
-     */
-    double getFp64Contents(int index);
-
-    /**
-     * <pre>
-     * Representation for BYTES data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bytes bytes_contents = 8;</code>
-     * 
-     * @return A list containing the bytesContents.
-     */
-    java.util.List<com.google.protobuf.ByteString> getBytesContentsList();
-
-    /**
-     * <pre>
-     * Representation for BYTES data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bytes bytes_contents = 8;</code>
-     * 
-     * @return The count of bytesContents.
-     */
-    int getBytesContentsCount();
-
-    /**
-     * <pre>
-     * Representation for BYTES data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bytes bytes_contents = 8;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The bytesContents at the given index.
-     */
-    com.google.protobuf.ByteString getBytesContents(int index);
+  /**
+   * <pre>
+   * Representation for BYTES data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bytes bytes_contents = 8;</code>
+   * @return A list containing the bytesContents.
+   */
+  java.util.List<com.google.protobuf.ByteString> getBytesContentsList();
+  /**
+   * <pre>
+   * Representation for BYTES data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bytes bytes_contents = 8;</code>
+   * @return The count of bytesContents.
+   */
+  int getBytesContentsCount();
+  /**
+   * <pre>
+   * Representation for BYTES data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bytes bytes_contents = 8;</code>
+   * @param index The index of the element to return.
+   * @return The bytesContents at the given index.
+   */
+  com.google.protobuf.ByteString getBytesContents(int index);
 }

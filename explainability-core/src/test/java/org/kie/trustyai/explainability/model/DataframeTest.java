@@ -629,7 +629,7 @@ class DataframeTest {
             idx++;
         }
         df.addPredictions(predictions, metadata);
-        assertThat(df.getRows().size()).isEqualTo(10000);
+        assertThat(df.getRowDimension()).isEqualTo(10000);
     }
 
     @Test
@@ -647,7 +647,44 @@ class DataframeTest {
         }
         df.addPredictions(predictions, metadata);
         assertThat(df.getRows().size()).isEqualTo(20);
-        assertThat(df.filterOutSyntheticRows().asPredictions().size()).isEqualTo(10);
+        assertThat(df.filterOutSyntheticRows().getRowDimension()).isEqualTo(10);
     }
 
+    @Test
+    void testFilteringDataframeByTimestamp() {
+        Dataframe df = createTestDataframe(10);
+        LocalDateTime then = LocalDateTime.now();
+        assertThat(df).isNotNull();
+        assertThat(df.getRows()).isNotNull();
+        assertThat(df.getRows().size()).isEqualTo(10);
+        List<Prediction> predictions = createTestDataframe(10).asPredictions();
+        List<PredictionMetadata> metadata = new ArrayList<>();
+        int idx = 0;
+        for (Prediction ignored : predictions) {
+            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), false));
+            idx++;
+        }
+        df.addPredictions(predictions, metadata);
+        assertThat(df.getRows().size()).isEqualTo(20);
+        assertThat(df.filterRowsByTimeRange(then, LocalDateTime.now()).getRowDimension()).isEqualTo(10);
+    }
+
+    @Test
+    void testFilteringDataframeById() {
+        Dataframe df = createTestDataframe(1);
+        assertThat(df).isNotNull();
+        assertThat(df.getRows()).isNotNull();
+        assertThat(df.getRows().size()).isEqualTo(1);
+        List<Prediction> predictions = createTestDataframe(10).asPredictions();
+        List<PredictionMetadata> metadata = new ArrayList<>();
+        int idx = 0;
+        for (Prediction ignored : predictions) {
+            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), false));
+            idx++;
+        }
+        df.addPredictions(predictions, metadata);
+        assertThat(df.getRows().size()).isEqualTo(11);
+        Dataframe filteredById = df.filterRowsById("5");
+        assertThat(filteredById.getRowDimension()).isEqualTo(1);
+    }
 }

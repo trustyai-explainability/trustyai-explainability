@@ -815,7 +815,11 @@ public class Dataframe {
      */
     public Dataframe filterByRowIndex(List<Integer> rows) {
 
-        final Metadata metadataCopy = metadata.copy();
+        List<LocalDateTime> timestamps = rows.stream().map(metadata.timestamps::get).collect(Collectors.toList());
+        List<String> ids = rows.stream().map(metadata.ids::get).collect(Collectors.toList());
+        List<Boolean> synthetics = rows.stream().map(metadata.synthetics::get).collect(Collectors.toList());
+        Metadata metadataCopy = new Metadata(metadata.names, metadata.types, metadata.constrained, metadata.domains,
+                metadata.inputs, synthetics, ids, timestamps);
 
         final List<List<Value>> dataCopy = columnIndexStream().mapToObj(col -> {
             final List<Value> column = data.get(col);
