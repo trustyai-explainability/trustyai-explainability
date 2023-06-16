@@ -59,18 +59,13 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         // x(t, j) x = fxt;jgt2[T];j2[F] : Time series instance
         // b = fbjgj2[F]: Feature’s base values (optional)
         // ng = Number of samples for gradient estimation
-        // n = Number of steps in convex path
+        // nalpha = Number of steps in convex path
 
         PredictionInput predictionInputs = prediction.getInput();
 
         PredictionOutput predictionOutput = prediction.getOutput();
 
         List<Feature> features = predictionInputs.getFeatures();
-
-        // fbj = 1
-        // T
-        // PT
-        // t=1 xt;jgj2[F]
 
         if (baseValue.length == 0) {
             baseValue = calcBaseValue(features);
@@ -82,35 +77,71 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         }
         System.out.println();
 
+        Feature[] featuresArray = features.toArray(new Feature[0]);
+
+
+        // alpha = [ n(alpha) ] / n(alpha)
+        double[] nalpha = new double[steps];
+        for (int s = 0; s < steps; s++) {
+            nalpha[s] = s / ((double) steps - 1);
+        }
+
+        System.out.println("nalpha = ");
+        for (int i = 0; i < nalpha.length; i++) {
+            System.out.print(nalpha[i] + " ");
+        }
+        System.out.println();
+
+        // SCORE = 0
+        // for i 1 to n do
+        //   Compute affine sample:
+        //   s = alpha(i) * X + (1 - alpha(i)) * (1(T) * transpose(b))
+
+
+
+        //   T b>)
+        //   Compute Monte Carlo gradient (per time and feature dimension):
+        //   g = MC_GRADIENT(s; f; ng)
+        //   Update Score:
+        //   SCORE = SCORE + g
+        // n end for
+
+        for (int i = 0; i < steps; i++) {
+
+        }
+
         return null;
 
     }
 
     private double[] calcBaseValue(List<Feature> features) {
+
         // 1/T sum(1..T) x(t, j)
 
-        Feature feature0 = features.get(0);
+        Feature[] featuresArray = features.toArray(new Feature[0]);
+
+        Feature feature0 = featuresArray[0];
         assert feature0.getType() == Type.VECTOR;
 
         Value feature0Value = feature0.getValue();
 
         double[] feature0Values = feature0Value.asVector();
         int featureLength = feature0Values.length;
+
         double[] retval = new double[featureLength];
 
         for (int i = 0; i < featureLength; i++) {
             retval[i] = 0.0;
         }
 
-        Feature[] featuresArray = features.toArray(new Feature[0]);
-
-        for (int j = 0; j < features.size(); j++) {
+        for (int j = 0; j < featuresArray.length; j++) {
 
             Feature feature = featuresArray[j];
             assert feature.getType() == Type.VECTOR;
-            Value featureValue = feature.getValue();
 
+            Value featureValue = feature.getValue();
             double[] featureArray = featureValue.asVector();
+            assert featureArray.length == featureLength;
 
             for (int i = 0; i < featureLength; i++) {
                 retval[i] += featureArray[i];
@@ -118,7 +149,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         }
 
         for (int i = 0; i < featureLength; i++) {
-            retval[i] *= featureLength;
+            retval[i] /= featuresArray.length;
         }
 
         return retval;
