@@ -29,6 +29,8 @@ public class TSSaliencyExplainerTest {
             List<PredictionInput> inputs = new LinkedList<PredictionInput>();
 
             for (Feature datum : data) {
+
+                // System.out.println("name: " + datum.getName());
                 assert datum.getType() == Type.VECTOR;
 
                 Feature[] features2 = (Feature[]) datum.getValue().getUnderlyingObject();
@@ -37,11 +39,9 @@ public class TSSaliencyExplainerTest {
 
                 PredictionInput input = new PredictionInput(features2List);
                 inputs.add(input);
-
-                break;///////////////////////////////////
             }
 
-            System.out.println("inputs = " + inputs);
+            // System.out.println("inputs = " + inputs);
 
             PredictionProvider model = new TSSaliencyModel();
             CompletableFuture<List<PredictionOutput>> result = model.predictAsync(inputs);
