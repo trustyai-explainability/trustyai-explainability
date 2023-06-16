@@ -7,20 +7,16 @@ import java.util.function.Consumer;
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.SaliencyResults;
+import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.Value;
 
 public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
-    // public CompletableFuture<IntegratedGradient> explainAsync(Prediction
-    // prediction, PredictionProvider model,
-    // Consumer<IntegratedGradient> intermediateResultsConsumer) {
-
-    // private PredictionProvider model;
-    // private int inputLength;
-    // private List<Feature> x;
     private double[] baseValue; // check
-    // private int numSamples;
     private int gradientSamples; // Number of samples for gradient estimation
     private int steps; // Number of steps in convex path
     private Object gradientFunction;
@@ -47,45 +43,11 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
     public TSSaliencyExplainer(double[] baseValue, int gradientSamples, int steps, int randomSeed) {
 
-        // this.model = model;
-        // this.inputLength = inputLength;
-        // this.x = x;
         this.baseValue = baseValue;
-        // this.numSamples = numSamples;
         this.gradientSamples = gradientSamples;
-        // this.gradientFunction = gradientFunction;
         this.steps = steps;
         this.randomSeed = randomSeed;
     }
-
-    // CompletableFuture<IntegratedGradient> explainAsync(Prediction prediction,
-    // PredictionProvider model) {
-    // return explainAsync(prediction, model, unused -> {
-    // /* NOP */
-    // });
-    // };
-
-    // public interface Prediction {
-
-    // PredictionInput getInput();
-
-    // PredictionOutput getOutput();
-
-    // UUID getExecutionId();
-    // }
-
-    // @FunctionalInterface
-    // public interface PredictionProvider {
-
-    // /**
-    // * Perform a batch of predictions, given a batch of inputs.
-    // *
-    // * @param inputs the input batch
-    // * @return a batch of prediction outputs
-    // */
-    // CompletableFuture<List<PredictionOutput>> predictAsync(List<PredictionInput>
-    // inputs);
-    // }
 
     @Override
     public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model,
@@ -99,23 +61,66 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         // ng = Number of samples for gradient estimation
         // n = Number of steps in convex path
 
+        PredictionInput predictionInputs = prediction.getInput();
+
+        PredictionOutput predictionOutput = prediction.getOutput();
+
+        List<Feature> features = predictionInputs.getFeatures();
+
         // fbj = 1
         // T
         // PT
         // t=1 xt;jgj2[F]
 
-        // if (baseValue.length == 0) {
-        // baseValue = calcBaseValue();
-        // }
+        if (baseValue.length == 0) {
+            baseValue = calcBaseValue(features);
+        }
+
+        System.out.println("baseValues = ");
+        for (int i = 0; i < baseValue.length; i++) {
+            System.out.print(baseValue[i] + " ");
+        }
+        System.out.println();
 
         return null;
 
     }
 
-    // private double[] calcBaseValue() {
-    // // 1/T sum(1..T) x(t, j)
+    private double[] calcBaseValue(List<Feature> features) {
+        // 1/T sum(1..T) x(t, j)
 
-    // for (i = 0; i < )
+        Feature feature0 = features.get(0);
+        assert feature0.getType() == Type.VECTOR;
 
-    // }
+        Value feature0Value = feature0.getValue();
+
+        double[] feature0Values = feature0Value.asVector();
+        int featureLength = feature0Values.length;
+        double[] retval = new double[featureLength];
+
+        for (int i = 0; i < featureLength; i++) {
+            retval[i] = 0.0;
+        }
+
+        Feature[] featuresArray = features.toArray(new Feature[0]);
+
+        for (int j = 0; j < features.size(); j++) {
+
+            Feature feature = featuresArray[j];
+            assert feature.getType() == Type.VECTOR;
+            Value featureValue = feature.getValue();
+
+            double[] featureArray = featureValue.asVector();
+
+            for (int i = 0; i < featureLength; i++) {
+                retval[i] += featureArray[i];
+            }
+        }
+
+        for (int i = 0; i < featureLength; i++) {
+            retval[i] *= featureLength;
+        }
+
+        return retval;
+    }
 }
