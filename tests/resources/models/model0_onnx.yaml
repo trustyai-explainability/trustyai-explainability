@@ -1,0 +1,15 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: demo-loan-nn-onnx-alpha
+  annotations:
+    serving.kserve.io/deploymentMode: ModelMesh
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: onnx
+      runtime: ovms-1.x
+      storage:
+        key: aws-connection-minio-data-connection
+        path: onnx/loan_model_alpha.onnx

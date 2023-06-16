@@ -1,4 +1,0 @@
-varReference:
-- path: metadata/name
-  kind: ClusterRoleBinding
-  apiGroup: authorization.openshift.io
