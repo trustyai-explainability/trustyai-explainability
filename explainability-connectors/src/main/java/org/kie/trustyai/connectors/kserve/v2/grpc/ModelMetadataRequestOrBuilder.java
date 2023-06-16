@@ -4,54 +4,48 @@
 package org.kie.trustyai.connectors.kserve.v2.grpc;
 
 public interface ModelMetadataRequestOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:inference.ModelMetadataRequest)
-        com.google.protobuf.MessageOrBuilder {
+    // @@protoc_insertion_point(interface_extends:inference.ModelMetadataRequest)
+    com.google.protobuf.MessageOrBuilder {
 
-    /**
-     * <pre>
-     * The name of the model.
-     * </pre>
-     *
-     * <code>string name = 1;</code>
-     * 
-     * @return The name.
-     */
-    java.lang.String getName();
+  /**
+   * <pre>
+   * The name of the model.
+   * </pre>
+   *
+   * <code>string name = 1;</code>
+   * @return The name.
+   */
+  java.lang.String getName();
+  /**
+   * <pre>
+   * The name of the model.
+   * </pre>
+   *
+   * <code>string name = 1;</code>
+   * @return The bytes for name.
+   */
+  com.google.protobuf.ByteString
+      getNameBytes();
 
-    /**
-     * <pre>
-     * The name of the model.
-     * </pre>
-     *
-     * <code>string name = 1;</code>
-     * 
-     * @return The bytes for name.
-     */
-    com.google.protobuf.ByteString
-            getNameBytes();
-
-    /**
-     * <pre>
-     * The version of the model to check for readiness. If not given the
-     * server will choose a version based on the model and internal policy.
-     * </pre>
-     *
-     * <code>string version = 2;</code>
-     * 
-     * @return The version.
-     */
-    java.lang.String getVersion();
-
-    /**
-     * <pre>
-     * The version of the model to check for readiness. If not given the
-     * server will choose a version based on the model and internal policy.
-     * </pre>
-     *
-     * <code>string version = 2;</code>
-     * 
-     * @return The bytes for version.
-     */
-    com.google.protobuf.ByteString
-            getVersionBytes();
+  /**
+   * <pre>
+   * The version of the model to check for readiness. If not given the
+   * server will choose a version based on the model and internal policy.
+   * </pre>
+   *
+   * <code>string version = 2;</code>
+   * @return The version.
+   */
+  java.lang.String getVersion();
+  /**
+   * <pre>
+   * The version of the model to check for readiness. If not given the
+   * server will choose a version based on the model and internal policy.
+   * </pre>
+   *
+   * <code>string version = 2;</code>
+   * @return The bytes for version.
+   */
+  com.google.protobuf.ByteString
+      getVersionBytes();
 }

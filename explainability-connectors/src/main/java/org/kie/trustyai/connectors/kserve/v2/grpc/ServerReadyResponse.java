@@ -7,535 +7,494 @@ package org.kie.trustyai.connectors.kserve.v2.grpc;
  * Protobuf type {@code inference.ServerReadyResponse}
  */
 public final class ServerReadyResponse extends
-        com.google.protobuf.GeneratedMessageV3 implements
-        // @@protoc_insertion_point(message_implements:inference.ServerReadyResponse)
-        ServerReadyResponseOrBuilder {
-    private static final long serialVersionUID = 0L;
+    com.google.protobuf.GeneratedMessageV3 implements
+    // @@protoc_insertion_point(message_implements:inference.ServerReadyResponse)
+    ServerReadyResponseOrBuilder {
+private static final long serialVersionUID = 0L;
+  // Use ServerReadyResponse.newBuilder() to construct.
+  private ServerReadyResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    super(builder);
+  }
+  private ServerReadyResponse() {
+  }
 
-    // Use ServerReadyResponse.newBuilder() to construct.
-    private ServerReadyResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-        super(builder);
+  @java.lang.Override
+  @SuppressWarnings({"unused"})
+  protected java.lang.Object newInstance(
+      UnusedPrivateParameter unused) {
+    return new ServerReadyResponse();
+  }
+
+  @java.lang.Override
+  public final com.google.protobuf.UnknownFieldSet
+  getUnknownFields() {
+    return this.unknownFields;
+  }
+  private ServerReadyResponse(
+      com.google.protobuf.CodedInputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    this();
+    if (extensionRegistry == null) {
+      throw new java.lang.NullPointerException();
     }
+    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+        com.google.protobuf.UnknownFieldSet.newBuilder();
+    try {
+      boolean done = false;
+      while (!done) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            done = true;
+            break;
+          case 8: {
 
-    private ServerReadyResponse() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({ "unused" })
-    protected java.lang.Object newInstance(
-            UnusedPrivateParameter unused) {
-        return new ServerReadyResponse();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-            getUnknownFields() {
-        return this.unknownFields;
-    }
-
-    private ServerReadyResponse(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-            throw new java.lang.NullPointerException();
-        }
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-                com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-            boolean done = false;
-            while (!done) {
-                int tag = input.readTag();
-                switch (tag) {
-                    case 0:
-                        done = true;
-                        break;
-                    case 8: {
-
-                        ready_ = input.readBool();
-                        break;
-                    }
-                    default: {
-                        if (!parseUnknownField(
-                                input, unknownFields, extensionRegistry, tag)) {
-                            done = true;
-                        }
-                        break;
-                    }
-                }
+            ready_ = input.readBool();
+            break;
+          }
+          default: {
+            if (!parseUnknownField(
+                input, unknownFields, extensionRegistry, tag)) {
+              done = true;
             }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-            throw new com.google.protobuf.InvalidProtocolBufferException(
-                    e).setUnfinishedMessage(this);
-        } finally {
-            this.unknownFields = unknownFields.build();
-            makeExtensionsImmutable();
+            break;
+          }
         }
+      }
+    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      throw e.setUnfinishedMessage(this);
+    } catch (java.io.IOException e) {
+      throw new com.google.protobuf.InvalidProtocolBufferException(
+          e).setUnfinishedMessage(this);
+    } finally {
+      this.unknownFields = unknownFields.build();
+      makeExtensionsImmutable();
     }
+  }
+  public static final com.google.protobuf.Descriptors.Descriptor
+      getDescriptor() {
+    return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ServerReadyResponse_descriptor;
+  }
 
+  @java.lang.Override
+  protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internalGetFieldAccessorTable() {
+    return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ServerReadyResponse_fieldAccessorTable
+        .ensureFieldAccessorsInitialized(
+            org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.class, org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.Builder.class);
+  }
+
+  public static final int READY_FIELD_NUMBER = 1;
+  private boolean ready_;
+  /**
+   * <pre>
+   * True if the inference server is ready, false if not ready.
+   * </pre>
+   *
+   * <code>bool ready = 1;</code>
+   * @return The ready.
+   */
+  @java.lang.Override
+  public boolean getReady() {
+    return ready_;
+  }
+
+  private byte memoizedIsInitialized = -1;
+  @java.lang.Override
+  public final boolean isInitialized() {
+    byte isInitialized = memoizedIsInitialized;
+    if (isInitialized == 1) return true;
+    if (isInitialized == 0) return false;
+
+    memoizedIsInitialized = 1;
+    return true;
+  }
+
+  @java.lang.Override
+  public void writeTo(com.google.protobuf.CodedOutputStream output)
+                      throws java.io.IOException {
+    if (ready_ != false) {
+      output.writeBool(1, ready_);
+    }
+    unknownFields.writeTo(output);
+  }
+
+  @java.lang.Override
+  public int getSerializedSize() {
+    int size = memoizedSize;
+    if (size != -1) return size;
+
+    size = 0;
+    if (ready_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(1, ready_);
+    }
+    size += unknownFields.getSerializedSize();
+    memoizedSize = size;
+    return size;
+  }
+
+  @java.lang.Override
+  public boolean equals(final java.lang.Object obj) {
+    if (obj == this) {
+     return true;
+    }
+    if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse)) {
+      return super.equals(obj);
+    }
+    org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse other = (org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse) obj;
+
+    if (getReady()
+        != other.getReady()) return false;
+    if (!unknownFields.equals(other.unknownFields)) return false;
+    return true;
+  }
+
+  @java.lang.Override
+  public int hashCode() {
+    if (memoizedHashCode != 0) {
+      return memoizedHashCode;
+    }
+    int hash = 41;
+    hash = (19 * hash) + getDescriptor().hashCode();
+    hash = (37 * hash) + READY_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getReady());
+    hash = (29 * hash) + unknownFields.hashCode();
+    memoizedHashCode = hash;
+    return hash;
+  }
+
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
+      java.nio.ByteBuffer data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
+      java.nio.ByteBuffer data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
+      com.google.protobuf.ByteString data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
+      com.google.protobuf.ByteString data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(byte[] data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
+      byte[] data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(java.io.InputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
+      java.io.InputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseDelimitedFrom(java.io.InputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseDelimitedWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseDelimitedFrom(
+      java.io.InputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
+      com.google.protobuf.CodedInputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
+      com.google.protobuf.CodedInputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input, extensionRegistry);
+  }
+
+  @java.lang.Override
+  public Builder newBuilderForType() { return newBuilder(); }
+  public static Builder newBuilder() {
+    return DEFAULT_INSTANCE.toBuilder();
+  }
+  public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse prototype) {
+    return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+  }
+  @java.lang.Override
+  public Builder toBuilder() {
+    return this == DEFAULT_INSTANCE
+        ? new Builder() : new Builder().mergeFrom(this);
+  }
+
+  @java.lang.Override
+  protected Builder newBuilderForType(
+      com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+    Builder builder = new Builder(parent);
+    return builder;
+  }
+  /**
+   * Protobuf type {@code inference.ServerReadyResponse}
+   */
+  public static final class Builder extends
+      com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+      // @@protoc_insertion_point(builder_implements:inference.ServerReadyResponse)
+      org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponseOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
-            getDescriptor() {
-        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ServerReadyResponse_descriptor;
+        getDescriptor() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ServerReadyResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-            internalGetFieldAccessorTable() {
-        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ServerReadyResponse_fieldAccessorTable
-                .ensureFieldAccessorsInitialized(
-                        org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.class, org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.Builder.class);
+        internalGetFieldAccessorTable() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ServerReadyResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.class, org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.Builder.class);
     }
 
-    public static final int READY_FIELD_NUMBER = 1;
-    private boolean ready_;
+    // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.newBuilder()
+    private Builder() {
+      maybeForceBuilderInitialization();
+    }
 
+    private Builder(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      super(parent);
+      maybeForceBuilderInitialization();
+    }
+    private void maybeForceBuilderInitialization() {
+      if (com.google.protobuf.GeneratedMessageV3
+              .alwaysUseFieldBuilders) {
+      }
+    }
+    @java.lang.Override
+    public Builder clear() {
+      super.clear();
+      ready_ = false;
+
+      return this;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Descriptors.Descriptor
+        getDescriptorForType() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ServerReadyResponse_descriptor;
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse getDefaultInstanceForType() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.getDefaultInstance();
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse build() {
+      org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse result = buildPartial();
+      if (!result.isInitialized()) {
+        throw newUninitializedMessageException(result);
+      }
+      return result;
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse buildPartial() {
+      org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse result = new org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse(this);
+      result.ready_ = ready_;
+      onBuilt();
+      return result;
+    }
+
+    @java.lang.Override
+    public Builder clone() {
+      return super.clone();
+    }
+    @java.lang.Override
+    public Builder setField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        java.lang.Object value) {
+      return super.setField(field, value);
+    }
+    @java.lang.Override
+    public Builder clearField(
+        com.google.protobuf.Descriptors.FieldDescriptor field) {
+      return super.clearField(field);
+    }
+    @java.lang.Override
+    public Builder clearOneof(
+        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      return super.clearOneof(oneof);
+    }
+    @java.lang.Override
+    public Builder setRepeatedField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        int index, java.lang.Object value) {
+      return super.setRepeatedField(field, index, value);
+    }
+    @java.lang.Override
+    public Builder addRepeatedField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        java.lang.Object value) {
+      return super.addRepeatedField(field, value);
+    }
+    @java.lang.Override
+    public Builder mergeFrom(com.google.protobuf.Message other) {
+      if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse) {
+        return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse)other);
+      } else {
+        super.mergeFrom(other);
+        return this;
+      }
+    }
+
+    public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse other) {
+      if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.getDefaultInstance()) return this;
+      if (other.getReady() != false) {
+        setReady(other.getReady());
+      }
+      this.mergeUnknownFields(other.unknownFields);
+      onChanged();
+      return this;
+    }
+
+    @java.lang.Override
+    public final boolean isInitialized() {
+      return true;
+    }
+
+    @java.lang.Override
+    public Builder mergeFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parsedMessage = null;
+      try {
+        parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse) e.getUnfinishedMessage();
+        throw e.unwrapIOException();
+      } finally {
+        if (parsedMessage != null) {
+          mergeFrom(parsedMessage);
+        }
+      }
+      return this;
+    }
+
+    private boolean ready_ ;
     /**
      * <pre>
      * True if the inference server is ready, false if not ready.
      * </pre>
      *
      * <code>bool ready = 1;</code>
-     * 
      * @return The ready.
      */
     @java.lang.Override
     public boolean getReady() {
-        return ready_;
+      return ready_;
     }
-
-    private byte memoizedIsInitialized = -1;
-
-    @java.lang.Override
-    public final boolean isInitialized() {
-        byte isInitialized = memoizedIsInitialized;
-        if (isInitialized == 1)
-            return true;
-        if (isInitialized == 0)
-            return false;
-
-        memoizedIsInitialized = 1;
-        return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-            throws java.io.IOException {
-        if (ready_ != false) {
-            output.writeBool(1, ready_);
-        }
-        unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-        int size = memoizedSize;
-        if (size != -1)
-            return size;
-
-        size = 0;
-        if (ready_ != false) {
-            size += com.google.protobuf.CodedOutputStream
-                    .computeBoolSize(1, ready_);
-        }
-        size += unknownFields.getSerializedSize();
-        memoizedSize = size;
-        return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse)) {
-            return super.equals(obj);
-        }
-        org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse other = (org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse) obj;
-
-        if (getReady() != other.getReady())
-            return false;
-        if (!unknownFields.equals(other.unknownFields))
-            return false;
-        return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-        if (memoizedHashCode != 0) {
-            return memoizedHashCode;
-        }
-        int hash = 41;
-        hash = (19 * hash) + getDescriptor().hashCode();
-        hash = (37 * hash) + READY_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-                getReady());
-        hash = (29 * hash) + unknownFields.hashCode();
-        memoizedHashCode = hash;
-        return hash;
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
-            java.nio.ByteBuffer data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
-            java.nio.ByteBuffer data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
-            com.google.protobuf.ByteString data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
-            com.google.protobuf.ByteString data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(byte[] data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
-            byte[] data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(java.io.InputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseDelimitedFrom(java.io.InputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseDelimitedFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
-            com.google.protobuf.CodedInputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parseFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() {
-        return newBuilder();
-    }
-
-    public static Builder newBuilder() {
-        return DEFAULT_INSTANCE.toBuilder();
-    }
-
-    public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse prototype) {
-        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-
-    @java.lang.Override
-    public Builder toBuilder() {
-        return this == DEFAULT_INSTANCE
-                ? new Builder()
-                : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        Builder builder = new Builder(parent);
-        return builder;
-    }
-
     /**
-     * Protobuf type {@code inference.ServerReadyResponse}
+     * <pre>
+     * True if the inference server is ready, false if not ready.
+     * </pre>
+     *
+     * <code>bool ready = 1;</code>
+     * @param value The ready to set.
+     * @return This builder for chaining.
      */
-    public static final class Builder extends
-            com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-            // @@protoc_insertion_point(builder_implements:inference.ServerReadyResponse)
-            org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponseOrBuilder {
-        public static final com.google.protobuf.Descriptors.Descriptor
-                getDescriptor() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ServerReadyResponse_descriptor;
-        }
-
-        @java.lang.Override
-        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-                internalGetFieldAccessorTable() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ServerReadyResponse_fieldAccessorTable
-                    .ensureFieldAccessorsInitialized(
-                            org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.class, org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.Builder.class);
-        }
-
-        // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.newBuilder()
-        private Builder() {
-            maybeForceBuilderInitialization();
-        }
-
-        private Builder(
-                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-            super(parent);
-            maybeForceBuilderInitialization();
-        }
-
-        private void maybeForceBuilderInitialization() {
-            if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
-            }
-        }
-
-        @java.lang.Override
-        public Builder clear() {
-            super.clear();
-            ready_ = false;
-
-            return this;
-        }
-
-        @java.lang.Override
-        public com.google.protobuf.Descriptors.Descriptor
-                getDescriptorForType() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ServerReadyResponse_descriptor;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse getDefaultInstanceForType() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.getDefaultInstance();
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse build() {
-            org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse result = buildPartial();
-            if (!result.isInitialized()) {
-                throw newUninitializedMessageException(result);
-            }
-            return result;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse buildPartial() {
-            org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse result = new org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse(this);
-            result.ready_ = ready_;
-            onBuilt();
-            return result;
-        }
-
-        @java.lang.Override
-        public Builder clone() {
-            return super.clone();
-        }
-
-        @java.lang.Override
-        public Builder setField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                java.lang.Object value) {
-            return super.setField(field, value);
-        }
-
-        @java.lang.Override
-        public Builder clearField(
-                com.google.protobuf.Descriptors.FieldDescriptor field) {
-            return super.clearField(field);
-        }
-
-        @java.lang.Override
-        public Builder clearOneof(
-                com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-            return super.clearOneof(oneof);
-        }
-
-        @java.lang.Override
-        public Builder setRepeatedField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                int index, java.lang.Object value) {
-            return super.setRepeatedField(field, index, value);
-        }
-
-        @java.lang.Override
-        public Builder addRepeatedField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                java.lang.Object value) {
-            return super.addRepeatedField(field, value);
-        }
-
-        @java.lang.Override
-        public Builder mergeFrom(com.google.protobuf.Message other) {
-            if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse) {
-                return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse) other);
-            } else {
-                super.mergeFrom(other);
-                return this;
-            }
-        }
-
-        public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse other) {
-            if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse.getDefaultInstance())
-                return this;
-            if (other.getReady() != false) {
-                setReady(other.getReady());
-            }
-            this.mergeUnknownFields(other.unknownFields);
-            onChanged();
-            return this;
-        }
-
-        @java.lang.Override
-        public final boolean isInitialized() {
-            return true;
-        }
-
-        @java.lang.Override
-        public Builder mergeFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse parsedMessage = null;
-            try {
-                parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse) e.getUnfinishedMessage();
-                throw e.unwrapIOException();
-            } finally {
-                if (parsedMessage != null) {
-                    mergeFrom(parsedMessage);
-                }
-            }
-            return this;
-        }
-
-        private boolean ready_;
-
-        /**
-         * <pre>
-         * True if the inference server is ready, false if not ready.
-         * </pre>
-         *
-         * <code>bool ready = 1;</code>
-         * 
-         * @return The ready.
-         */
-        @java.lang.Override
-        public boolean getReady() {
-            return ready_;
-        }
-
-        /**
-         * <pre>
-         * True if the inference server is ready, false if not ready.
-         * </pre>
-         *
-         * <code>bool ready = 1;</code>
-         * 
-         * @param value The ready to set.
-         * @return This builder for chaining.
-         */
-        public Builder setReady(boolean value) {
-
-            ready_ = value;
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * True if the inference server is ready, false if not ready.
-         * </pre>
-         *
-         * <code>bool ready = 1;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearReady() {
-
-            ready_ = false;
-            onChanged();
-            return this;
-        }
-
-        @java.lang.Override
-        public final Builder setUnknownFields(
-                final com.google.protobuf.UnknownFieldSet unknownFields) {
-            return super.setUnknownFields(unknownFields);
-        }
-
-        @java.lang.Override
-        public final Builder mergeUnknownFields(
-                final com.google.protobuf.UnknownFieldSet unknownFields) {
-            return super.mergeUnknownFields(unknownFields);
-        }
-
-        // @@protoc_insertion_point(builder_scope:inference.ServerReadyResponse)
+    public Builder setReady(boolean value) {
+      
+      ready_ = value;
+      onChanged();
+      return this;
     }
-
-    // @@protoc_insertion_point(class_scope:inference.ServerReadyResponse)
-    private static final org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse DEFAULT_INSTANCE;
-    static {
-        DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse();
+    /**
+     * <pre>
+     * True if the inference server is ready, false if not ready.
+     * </pre>
+     *
+     * <code>bool ready = 1;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearReady() {
+      
+      ready_ = false;
+      onChanged();
+      return this;
     }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse getDefaultInstance() {
-        return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<ServerReadyResponse> PARSER = new com.google.protobuf.AbstractParser<ServerReadyResponse>() {
-        @java.lang.Override
-        public ServerReadyResponse parsePartialFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return new ServerReadyResponse(input, extensionRegistry);
-        }
-    };
-
-    public static com.google.protobuf.Parser<ServerReadyResponse> parser() {
-        return PARSER;
+    @java.lang.Override
+    public final Builder setUnknownFields(
+        final com.google.protobuf.UnknownFieldSet unknownFields) {
+      return super.setUnknownFields(unknownFields);
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ServerReadyResponse> getParserForType() {
-        return PARSER;
+    public final Builder mergeUnknownFields(
+        final com.google.protobuf.UnknownFieldSet unknownFields) {
+      return super.mergeUnknownFields(unknownFields);
     }
 
+
+    // @@protoc_insertion_point(builder_scope:inference.ServerReadyResponse)
+  }
+
+  // @@protoc_insertion_point(class_scope:inference.ServerReadyResponse)
+  private static final org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse DEFAULT_INSTANCE;
+  static {
+    DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse();
+  }
+
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse getDefaultInstance() {
+    return DEFAULT_INSTANCE;
+  }
+
+  private static final com.google.protobuf.Parser<ServerReadyResponse>
+      PARSER = new com.google.protobuf.AbstractParser<ServerReadyResponse>() {
     @java.lang.Override
-    public org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse getDefaultInstanceForType() {
-        return DEFAULT_INSTANCE;
+    public ServerReadyResponse parsePartialFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return new ServerReadyResponse(input, extensionRegistry);
     }
+  };
+
+  public static com.google.protobuf.Parser<ServerReadyResponse> parser() {
+    return PARSER;
+  }
+
+  @java.lang.Override
+  public com.google.protobuf.Parser<ServerReadyResponse> getParserForType() {
+    return PARSER;
+  }
+
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ServerReadyResponse getDefaultInstanceForType() {
+    return DEFAULT_INSTANCE;
+  }
 
 }
+

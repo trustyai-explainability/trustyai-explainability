@@ -13,2514 +13,2305 @@ package org.kie.trustyai.connectors.kserve.v2.grpc;
  * Protobuf type {@code inference.InferTensorContents}
  */
 public final class InferTensorContents extends
-        com.google.protobuf.GeneratedMessageV3 implements
-        // @@protoc_insertion_point(message_implements:inference.InferTensorContents)
-        InferTensorContentsOrBuilder {
-    private static final long serialVersionUID = 0L;
+    com.google.protobuf.GeneratedMessageV3 implements
+    // @@protoc_insertion_point(message_implements:inference.InferTensorContents)
+    InferTensorContentsOrBuilder {
+private static final long serialVersionUID = 0L;
+  // Use InferTensorContents.newBuilder() to construct.
+  private InferTensorContents(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    super(builder);
+  }
+  private InferTensorContents() {
+    boolContents_ = emptyBooleanList();
+    intContents_ = emptyIntList();
+    int64Contents_ = emptyLongList();
+    uintContents_ = emptyIntList();
+    uint64Contents_ = emptyLongList();
+    fp32Contents_ = emptyFloatList();
+    fp64Contents_ = emptyDoubleList();
+    bytesContents_ = java.util.Collections.emptyList();
+  }
 
-    // Use InferTensorContents.newBuilder() to construct.
-    private InferTensorContents(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-        super(builder);
+  @java.lang.Override
+  @SuppressWarnings({"unused"})
+  protected java.lang.Object newInstance(
+      UnusedPrivateParameter unused) {
+    return new InferTensorContents();
+  }
+
+  @java.lang.Override
+  public final com.google.protobuf.UnknownFieldSet
+  getUnknownFields() {
+    return this.unknownFields;
+  }
+  private InferTensorContents(
+      com.google.protobuf.CodedInputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    this();
+    if (extensionRegistry == null) {
+      throw new java.lang.NullPointerException();
     }
-
-    private InferTensorContents() {
-        boolContents_ = emptyBooleanList();
-        intContents_ = emptyIntList();
-        int64Contents_ = emptyLongList();
-        uintContents_ = emptyIntList();
-        uint64Contents_ = emptyLongList();
-        fp32Contents_ = emptyFloatList();
-        fp64Contents_ = emptyDoubleList();
-        bytesContents_ = java.util.Collections.emptyList();
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({ "unused" })
-    protected java.lang.Object newInstance(
-            UnusedPrivateParameter unused) {
-        return new InferTensorContents();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-            getUnknownFields() {
-        return this.unknownFields;
-    }
-
-    private InferTensorContents(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-            throw new java.lang.NullPointerException();
+    int mutable_bitField0_ = 0;
+    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+        com.google.protobuf.UnknownFieldSet.newBuilder();
+    try {
+      boolean done = false;
+      while (!done) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            done = true;
+            break;
+          case 8: {
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              boolContents_ = newBooleanList();
+              mutable_bitField0_ |= 0x00000001;
+            }
+            boolContents_.addBoolean(input.readBool());
+            break;
+          }
+          case 10: {
+            int length = input.readRawVarint32();
+            int limit = input.pushLimit(length);
+            if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
+              boolContents_ = newBooleanList();
+              mutable_bitField0_ |= 0x00000001;
+            }
+            while (input.getBytesUntilLimit() > 0) {
+              boolContents_.addBoolean(input.readBool());
+            }
+            input.popLimit(limit);
+            break;
+          }
+          case 16: {
+            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+              intContents_ = newIntList();
+              mutable_bitField0_ |= 0x00000002;
+            }
+            intContents_.addInt(input.readInt32());
+            break;
+          }
+          case 18: {
+            int length = input.readRawVarint32();
+            int limit = input.pushLimit(length);
+            if (!((mutable_bitField0_ & 0x00000002) != 0) && input.getBytesUntilLimit() > 0) {
+              intContents_ = newIntList();
+              mutable_bitField0_ |= 0x00000002;
+            }
+            while (input.getBytesUntilLimit() > 0) {
+              intContents_.addInt(input.readInt32());
+            }
+            input.popLimit(limit);
+            break;
+          }
+          case 24: {
+            if (!((mutable_bitField0_ & 0x00000004) != 0)) {
+              int64Contents_ = newLongList();
+              mutable_bitField0_ |= 0x00000004;
+            }
+            int64Contents_.addLong(input.readInt64());
+            break;
+          }
+          case 26: {
+            int length = input.readRawVarint32();
+            int limit = input.pushLimit(length);
+            if (!((mutable_bitField0_ & 0x00000004) != 0) && input.getBytesUntilLimit() > 0) {
+              int64Contents_ = newLongList();
+              mutable_bitField0_ |= 0x00000004;
+            }
+            while (input.getBytesUntilLimit() > 0) {
+              int64Contents_.addLong(input.readInt64());
+            }
+            input.popLimit(limit);
+            break;
+          }
+          case 32: {
+            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+              uintContents_ = newIntList();
+              mutable_bitField0_ |= 0x00000008;
+            }
+            uintContents_.addInt(input.readUInt32());
+            break;
+          }
+          case 34: {
+            int length = input.readRawVarint32();
+            int limit = input.pushLimit(length);
+            if (!((mutable_bitField0_ & 0x00000008) != 0) && input.getBytesUntilLimit() > 0) {
+              uintContents_ = newIntList();
+              mutable_bitField0_ |= 0x00000008;
+            }
+            while (input.getBytesUntilLimit() > 0) {
+              uintContents_.addInt(input.readUInt32());
+            }
+            input.popLimit(limit);
+            break;
+          }
+          case 40: {
+            if (!((mutable_bitField0_ & 0x00000010) != 0)) {
+              uint64Contents_ = newLongList();
+              mutable_bitField0_ |= 0x00000010;
+            }
+            uint64Contents_.addLong(input.readUInt64());
+            break;
+          }
+          case 42: {
+            int length = input.readRawVarint32();
+            int limit = input.pushLimit(length);
+            if (!((mutable_bitField0_ & 0x00000010) != 0) && input.getBytesUntilLimit() > 0) {
+              uint64Contents_ = newLongList();
+              mutable_bitField0_ |= 0x00000010;
+            }
+            while (input.getBytesUntilLimit() > 0) {
+              uint64Contents_.addLong(input.readUInt64());
+            }
+            input.popLimit(limit);
+            break;
+          }
+          case 53: {
+            if (!((mutable_bitField0_ & 0x00000020) != 0)) {
+              fp32Contents_ = newFloatList();
+              mutable_bitField0_ |= 0x00000020;
+            }
+            fp32Contents_.addFloat(input.readFloat());
+            break;
+          }
+          case 50: {
+            int length = input.readRawVarint32();
+            int limit = input.pushLimit(length);
+            if (!((mutable_bitField0_ & 0x00000020) != 0) && input.getBytesUntilLimit() > 0) {
+              fp32Contents_ = newFloatList();
+              mutable_bitField0_ |= 0x00000020;
+            }
+            while (input.getBytesUntilLimit() > 0) {
+              fp32Contents_.addFloat(input.readFloat());
+            }
+            input.popLimit(limit);
+            break;
+          }
+          case 57: {
+            if (!((mutable_bitField0_ & 0x00000040) != 0)) {
+              fp64Contents_ = newDoubleList();
+              mutable_bitField0_ |= 0x00000040;
+            }
+            fp64Contents_.addDouble(input.readDouble());
+            break;
+          }
+          case 58: {
+            int length = input.readRawVarint32();
+            int limit = input.pushLimit(length);
+            if (!((mutable_bitField0_ & 0x00000040) != 0) && input.getBytesUntilLimit() > 0) {
+              fp64Contents_ = newDoubleList();
+              mutable_bitField0_ |= 0x00000040;
+            }
+            while (input.getBytesUntilLimit() > 0) {
+              fp64Contents_.addDouble(input.readDouble());
+            }
+            input.popLimit(limit);
+            break;
+          }
+          case 66: {
+            if (!((mutable_bitField0_ & 0x00000080) != 0)) {
+              bytesContents_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+              mutable_bitField0_ |= 0x00000080;
+            }
+            bytesContents_.add(input.readBytes());
+            break;
+          }
+          default: {
+            if (!parseUnknownField(
+                input, unknownFields, extensionRegistry, tag)) {
+              done = true;
+            }
+            break;
+          }
         }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-                com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-            boolean done = false;
-            while (!done) {
-                int tag = input.readTag();
-                switch (tag) {
-                    case 0:
-                        done = true;
-                        break;
-                    case 8: {
-                        if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                            boolContents_ = newBooleanList();
-                            mutable_bitField0_ |= 0x00000001;
-                        }
-                        boolContents_.addBoolean(input.readBool());
-                        break;
-                    }
-                    case 10: {
-                        int length = input.readRawVarint32();
-                        int limit = input.pushLimit(length);
-                        if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
-                            boolContents_ = newBooleanList();
-                            mutable_bitField0_ |= 0x00000001;
-                        }
-                        while (input.getBytesUntilLimit() > 0) {
-                            boolContents_.addBoolean(input.readBool());
-                        }
-                        input.popLimit(limit);
-                        break;
-                    }
-                    case 16: {
-                        if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                            intContents_ = newIntList();
-                            mutable_bitField0_ |= 0x00000002;
-                        }
-                        intContents_.addInt(input.readInt32());
-                        break;
-                    }
-                    case 18: {
-                        int length = input.readRawVarint32();
-                        int limit = input.pushLimit(length);
-                        if (!((mutable_bitField0_ & 0x00000002) != 0) && input.getBytesUntilLimit() > 0) {
-                            intContents_ = newIntList();
-                            mutable_bitField0_ |= 0x00000002;
-                        }
-                        while (input.getBytesUntilLimit() > 0) {
-                            intContents_.addInt(input.readInt32());
-                        }
-                        input.popLimit(limit);
-                        break;
-                    }
-                    case 24: {
-                        if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                            int64Contents_ = newLongList();
-                            mutable_bitField0_ |= 0x00000004;
-                        }
-                        int64Contents_.addLong(input.readInt64());
-                        break;
-                    }
-                    case 26: {
-                        int length = input.readRawVarint32();
-                        int limit = input.pushLimit(length);
-                        if (!((mutable_bitField0_ & 0x00000004) != 0) && input.getBytesUntilLimit() > 0) {
-                            int64Contents_ = newLongList();
-                            mutable_bitField0_ |= 0x00000004;
-                        }
-                        while (input.getBytesUntilLimit() > 0) {
-                            int64Contents_.addLong(input.readInt64());
-                        }
-                        input.popLimit(limit);
-                        break;
-                    }
-                    case 32: {
-                        if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-                            uintContents_ = newIntList();
-                            mutable_bitField0_ |= 0x00000008;
-                        }
-                        uintContents_.addInt(input.readUInt32());
-                        break;
-                    }
-                    case 34: {
-                        int length = input.readRawVarint32();
-                        int limit = input.pushLimit(length);
-                        if (!((mutable_bitField0_ & 0x00000008) != 0) && input.getBytesUntilLimit() > 0) {
-                            uintContents_ = newIntList();
-                            mutable_bitField0_ |= 0x00000008;
-                        }
-                        while (input.getBytesUntilLimit() > 0) {
-                            uintContents_.addInt(input.readUInt32());
-                        }
-                        input.popLimit(limit);
-                        break;
-                    }
-                    case 40: {
-                        if (!((mutable_bitField0_ & 0x00000010) != 0)) {
-                            uint64Contents_ = newLongList();
-                            mutable_bitField0_ |= 0x00000010;
-                        }
-                        uint64Contents_.addLong(input.readUInt64());
-                        break;
-                    }
-                    case 42: {
-                        int length = input.readRawVarint32();
-                        int limit = input.pushLimit(length);
-                        if (!((mutable_bitField0_ & 0x00000010) != 0) && input.getBytesUntilLimit() > 0) {
-                            uint64Contents_ = newLongList();
-                            mutable_bitField0_ |= 0x00000010;
-                        }
-                        while (input.getBytesUntilLimit() > 0) {
-                            uint64Contents_.addLong(input.readUInt64());
-                        }
-                        input.popLimit(limit);
-                        break;
-                    }
-                    case 53: {
-                        if (!((mutable_bitField0_ & 0x00000020) != 0)) {
-                            fp32Contents_ = newFloatList();
-                            mutable_bitField0_ |= 0x00000020;
-                        }
-                        fp32Contents_.addFloat(input.readFloat());
-                        break;
-                    }
-                    case 50: {
-                        int length = input.readRawVarint32();
-                        int limit = input.pushLimit(length);
-                        if (!((mutable_bitField0_ & 0x00000020) != 0) && input.getBytesUntilLimit() > 0) {
-                            fp32Contents_ = newFloatList();
-                            mutable_bitField0_ |= 0x00000020;
-                        }
-                        while (input.getBytesUntilLimit() > 0) {
-                            fp32Contents_.addFloat(input.readFloat());
-                        }
-                        input.popLimit(limit);
-                        break;
-                    }
-                    case 57: {
-                        if (!((mutable_bitField0_ & 0x00000040) != 0)) {
-                            fp64Contents_ = newDoubleList();
-                            mutable_bitField0_ |= 0x00000040;
-                        }
-                        fp64Contents_.addDouble(input.readDouble());
-                        break;
-                    }
-                    case 58: {
-                        int length = input.readRawVarint32();
-                        int limit = input.pushLimit(length);
-                        if (!((mutable_bitField0_ & 0x00000040) != 0) && input.getBytesUntilLimit() > 0) {
-                            fp64Contents_ = newDoubleList();
-                            mutable_bitField0_ |= 0x00000040;
-                        }
-                        while (input.getBytesUntilLimit() > 0) {
-                            fp64Contents_.addDouble(input.readDouble());
-                        }
-                        input.popLimit(limit);
-                        break;
-                    }
-                    case 66: {
-                        if (!((mutable_bitField0_ & 0x00000080) != 0)) {
-                            bytesContents_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
-                            mutable_bitField0_ |= 0x00000080;
-                        }
-                        bytesContents_.add(input.readBytes());
-                        break;
-                    }
-                    default: {
-                        if (!parseUnknownField(
-                                input, unknownFields, extensionRegistry, tag)) {
-                            done = true;
-                        }
-                        break;
-                    }
-                }
-            }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-            throw new com.google.protobuf.InvalidProtocolBufferException(
-                    e).setUnfinishedMessage(this);
-        } finally {
-            if (((mutable_bitField0_ & 0x00000001) != 0)) {
-                boolContents_.makeImmutable(); // C
-            }
-            if (((mutable_bitField0_ & 0x00000002) != 0)) {
-                intContents_.makeImmutable(); // C
-            }
-            if (((mutable_bitField0_ & 0x00000004) != 0)) {
-                int64Contents_.makeImmutable(); // C
-            }
-            if (((mutable_bitField0_ & 0x00000008) != 0)) {
-                uintContents_.makeImmutable(); // C
-            }
-            if (((mutable_bitField0_ & 0x00000010) != 0)) {
-                uint64Contents_.makeImmutable(); // C
-            }
-            if (((mutable_bitField0_ & 0x00000020) != 0)) {
-                fp32Contents_.makeImmutable(); // C
-            }
-            if (((mutable_bitField0_ & 0x00000040) != 0)) {
-                fp64Contents_.makeImmutable(); // C
-            }
-            if (((mutable_bitField0_ & 0x00000080) != 0)) {
-                bytesContents_ = java.util.Collections.unmodifiableList(bytesContents_); // C
-            }
-            this.unknownFields = unknownFields.build();
-            makeExtensionsImmutable();
-        }
+      }
+    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      throw e.setUnfinishedMessage(this);
+    } catch (java.io.IOException e) {
+      throw new com.google.protobuf.InvalidProtocolBufferException(
+          e).setUnfinishedMessage(this);
+    } finally {
+      if (((mutable_bitField0_ & 0x00000001) != 0)) {
+        boolContents_.makeImmutable(); // C
+      }
+      if (((mutable_bitField0_ & 0x00000002) != 0)) {
+        intContents_.makeImmutable(); // C
+      }
+      if (((mutable_bitField0_ & 0x00000004) != 0)) {
+        int64Contents_.makeImmutable(); // C
+      }
+      if (((mutable_bitField0_ & 0x00000008) != 0)) {
+        uintContents_.makeImmutable(); // C
+      }
+      if (((mutable_bitField0_ & 0x00000010) != 0)) {
+        uint64Contents_.makeImmutable(); // C
+      }
+      if (((mutable_bitField0_ & 0x00000020) != 0)) {
+        fp32Contents_.makeImmutable(); // C
+      }
+      if (((mutable_bitField0_ & 0x00000040) != 0)) {
+        fp64Contents_.makeImmutable(); // C
+      }
+      if (((mutable_bitField0_ & 0x00000080) != 0)) {
+        bytesContents_ = java.util.Collections.unmodifiableList(bytesContents_); // C
+      }
+      this.unknownFields = unknownFields.build();
+      makeExtensionsImmutable();
     }
+  }
+  public static final com.google.protobuf.Descriptors.Descriptor
+      getDescriptor() {
+    return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_InferTensorContents_descriptor;
+  }
 
+  @java.lang.Override
+  protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internalGetFieldAccessorTable() {
+    return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_InferTensorContents_fieldAccessorTable
+        .ensureFieldAccessorsInitialized(
+            org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.class, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder.class);
+  }
+
+  public static final int BOOL_CONTENTS_FIELD_NUMBER = 1;
+  private com.google.protobuf.Internal.BooleanList boolContents_;
+  /**
+   * <pre>
+   * Representation for BOOL data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bool bool_contents = 1;</code>
+   * @return A list containing the boolContents.
+   */
+  @java.lang.Override
+  public java.util.List<java.lang.Boolean>
+      getBoolContentsList() {
+    return boolContents_;
+  }
+  /**
+   * <pre>
+   * Representation for BOOL data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bool bool_contents = 1;</code>
+   * @return The count of boolContents.
+   */
+  public int getBoolContentsCount() {
+    return boolContents_.size();
+  }
+  /**
+   * <pre>
+   * Representation for BOOL data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bool bool_contents = 1;</code>
+   * @param index The index of the element to return.
+   * @return The boolContents at the given index.
+   */
+  public boolean getBoolContents(int index) {
+    return boolContents_.getBoolean(index);
+  }
+  private int boolContentsMemoizedSerializedSize = -1;
+
+  public static final int INT_CONTENTS_FIELD_NUMBER = 2;
+  private com.google.protobuf.Internal.IntList intContents_;
+  /**
+   * <pre>
+   * Representation for INT8, INT16, and INT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated int32 int_contents = 2;</code>
+   * @return A list containing the intContents.
+   */
+  @java.lang.Override
+  public java.util.List<java.lang.Integer>
+      getIntContentsList() {
+    return intContents_;
+  }
+  /**
+   * <pre>
+   * Representation for INT8, INT16, and INT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated int32 int_contents = 2;</code>
+   * @return The count of intContents.
+   */
+  public int getIntContentsCount() {
+    return intContents_.size();
+  }
+  /**
+   * <pre>
+   * Representation for INT8, INT16, and INT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated int32 int_contents = 2;</code>
+   * @param index The index of the element to return.
+   * @return The intContents at the given index.
+   */
+  public int getIntContents(int index) {
+    return intContents_.getInt(index);
+  }
+  private int intContentsMemoizedSerializedSize = -1;
+
+  public static final int INT64_CONTENTS_FIELD_NUMBER = 3;
+  private com.google.protobuf.Internal.LongList int64Contents_;
+  /**
+   * <pre>
+   * Representation for INT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated int64 int64_contents = 3;</code>
+   * @return A list containing the int64Contents.
+   */
+  @java.lang.Override
+  public java.util.List<java.lang.Long>
+      getInt64ContentsList() {
+    return int64Contents_;
+  }
+  /**
+   * <pre>
+   * Representation for INT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated int64 int64_contents = 3;</code>
+   * @return The count of int64Contents.
+   */
+  public int getInt64ContentsCount() {
+    return int64Contents_.size();
+  }
+  /**
+   * <pre>
+   * Representation for INT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated int64 int64_contents = 3;</code>
+   * @param index The index of the element to return.
+   * @return The int64Contents at the given index.
+   */
+  public long getInt64Contents(int index) {
+    return int64Contents_.getLong(index);
+  }
+  private int int64ContentsMemoizedSerializedSize = -1;
+
+  public static final int UINT_CONTENTS_FIELD_NUMBER = 4;
+  private com.google.protobuf.Internal.IntList uintContents_;
+  /**
+   * <pre>
+   * Representation for UINT8, UINT16, and UINT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint32 uint_contents = 4;</code>
+   * @return A list containing the uintContents.
+   */
+  @java.lang.Override
+  public java.util.List<java.lang.Integer>
+      getUintContentsList() {
+    return uintContents_;
+  }
+  /**
+   * <pre>
+   * Representation for UINT8, UINT16, and UINT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint32 uint_contents = 4;</code>
+   * @return The count of uintContents.
+   */
+  public int getUintContentsCount() {
+    return uintContents_.size();
+  }
+  /**
+   * <pre>
+   * Representation for UINT8, UINT16, and UINT32 data types. The size
+   * must match what is expected by the tensor's shape. The contents
+   * must be the flattened, one-dimensional, row-major order of the
+   * tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint32 uint_contents = 4;</code>
+   * @param index The index of the element to return.
+   * @return The uintContents at the given index.
+   */
+  public int getUintContents(int index) {
+    return uintContents_.getInt(index);
+  }
+  private int uintContentsMemoizedSerializedSize = -1;
+
+  public static final int UINT64_CONTENTS_FIELD_NUMBER = 5;
+  private com.google.protobuf.Internal.LongList uint64Contents_;
+  /**
+   * <pre>
+   * Representation for UINT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint64 uint64_contents = 5;</code>
+   * @return A list containing the uint64Contents.
+   */
+  @java.lang.Override
+  public java.util.List<java.lang.Long>
+      getUint64ContentsList() {
+    return uint64Contents_;
+  }
+  /**
+   * <pre>
+   * Representation for UINT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint64 uint64_contents = 5;</code>
+   * @return The count of uint64Contents.
+   */
+  public int getUint64ContentsCount() {
+    return uint64Contents_.size();
+  }
+  /**
+   * <pre>
+   * Representation for UINT64 data types. The size must match what
+   * is expected by the tensor's shape. The contents must be the
+   * flattened, one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated uint64 uint64_contents = 5;</code>
+   * @param index The index of the element to return.
+   * @return The uint64Contents at the given index.
+   */
+  public long getUint64Contents(int index) {
+    return uint64Contents_.getLong(index);
+  }
+  private int uint64ContentsMemoizedSerializedSize = -1;
+
+  public static final int FP32_CONTENTS_FIELD_NUMBER = 6;
+  private com.google.protobuf.Internal.FloatList fp32Contents_;
+  /**
+   * <pre>
+   * Representation for FP32 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated float fp32_contents = 6;</code>
+   * @return A list containing the fp32Contents.
+   */
+  @java.lang.Override
+  public java.util.List<java.lang.Float>
+      getFp32ContentsList() {
+    return fp32Contents_;
+  }
+  /**
+   * <pre>
+   * Representation for FP32 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated float fp32_contents = 6;</code>
+   * @return The count of fp32Contents.
+   */
+  public int getFp32ContentsCount() {
+    return fp32Contents_.size();
+  }
+  /**
+   * <pre>
+   * Representation for FP32 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated float fp32_contents = 6;</code>
+   * @param index The index of the element to return.
+   * @return The fp32Contents at the given index.
+   */
+  public float getFp32Contents(int index) {
+    return fp32Contents_.getFloat(index);
+  }
+  private int fp32ContentsMemoizedSerializedSize = -1;
+
+  public static final int FP64_CONTENTS_FIELD_NUMBER = 7;
+  private com.google.protobuf.Internal.DoubleList fp64Contents_;
+  /**
+   * <pre>
+   * Representation for FP64 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated double fp64_contents = 7;</code>
+   * @return A list containing the fp64Contents.
+   */
+  @java.lang.Override
+  public java.util.List<java.lang.Double>
+      getFp64ContentsList() {
+    return fp64Contents_;
+  }
+  /**
+   * <pre>
+   * Representation for FP64 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated double fp64_contents = 7;</code>
+   * @return The count of fp64Contents.
+   */
+  public int getFp64ContentsCount() {
+    return fp64Contents_.size();
+  }
+  /**
+   * <pre>
+   * Representation for FP64 data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated double fp64_contents = 7;</code>
+   * @param index The index of the element to return.
+   * @return The fp64Contents at the given index.
+   */
+  public double getFp64Contents(int index) {
+    return fp64Contents_.getDouble(index);
+  }
+  private int fp64ContentsMemoizedSerializedSize = -1;
+
+  public static final int BYTES_CONTENTS_FIELD_NUMBER = 8;
+  private java.util.List<com.google.protobuf.ByteString> bytesContents_;
+  /**
+   * <pre>
+   * Representation for BYTES data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bytes bytes_contents = 8;</code>
+   * @return A list containing the bytesContents.
+   */
+  @java.lang.Override
+  public java.util.List<com.google.protobuf.ByteString>
+      getBytesContentsList() {
+    return bytesContents_;
+  }
+  /**
+   * <pre>
+   * Representation for BYTES data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bytes bytes_contents = 8;</code>
+   * @return The count of bytesContents.
+   */
+  public int getBytesContentsCount() {
+    return bytesContents_.size();
+  }
+  /**
+   * <pre>
+   * Representation for BYTES data type. The size must match what is
+   * expected by the tensor's shape. The contents must be the flattened,
+   * one-dimensional, row-major order of the tensor elements.
+   * </pre>
+   *
+   * <code>repeated bytes bytes_contents = 8;</code>
+   * @param index The index of the element to return.
+   * @return The bytesContents at the given index.
+   */
+  public com.google.protobuf.ByteString getBytesContents(int index) {
+    return bytesContents_.get(index);
+  }
+
+  private byte memoizedIsInitialized = -1;
+  @java.lang.Override
+  public final boolean isInitialized() {
+    byte isInitialized = memoizedIsInitialized;
+    if (isInitialized == 1) return true;
+    if (isInitialized == 0) return false;
+
+    memoizedIsInitialized = 1;
+    return true;
+  }
+
+  @java.lang.Override
+  public void writeTo(com.google.protobuf.CodedOutputStream output)
+                      throws java.io.IOException {
+    getSerializedSize();
+    if (getBoolContentsList().size() > 0) {
+      output.writeUInt32NoTag(10);
+      output.writeUInt32NoTag(boolContentsMemoizedSerializedSize);
+    }
+    for (int i = 0; i < boolContents_.size(); i++) {
+      output.writeBoolNoTag(boolContents_.getBoolean(i));
+    }
+    if (getIntContentsList().size() > 0) {
+      output.writeUInt32NoTag(18);
+      output.writeUInt32NoTag(intContentsMemoizedSerializedSize);
+    }
+    for (int i = 0; i < intContents_.size(); i++) {
+      output.writeInt32NoTag(intContents_.getInt(i));
+    }
+    if (getInt64ContentsList().size() > 0) {
+      output.writeUInt32NoTag(26);
+      output.writeUInt32NoTag(int64ContentsMemoizedSerializedSize);
+    }
+    for (int i = 0; i < int64Contents_.size(); i++) {
+      output.writeInt64NoTag(int64Contents_.getLong(i));
+    }
+    if (getUintContentsList().size() > 0) {
+      output.writeUInt32NoTag(34);
+      output.writeUInt32NoTag(uintContentsMemoizedSerializedSize);
+    }
+    for (int i = 0; i < uintContents_.size(); i++) {
+      output.writeUInt32NoTag(uintContents_.getInt(i));
+    }
+    if (getUint64ContentsList().size() > 0) {
+      output.writeUInt32NoTag(42);
+      output.writeUInt32NoTag(uint64ContentsMemoizedSerializedSize);
+    }
+    for (int i = 0; i < uint64Contents_.size(); i++) {
+      output.writeUInt64NoTag(uint64Contents_.getLong(i));
+    }
+    if (getFp32ContentsList().size() > 0) {
+      output.writeUInt32NoTag(50);
+      output.writeUInt32NoTag(fp32ContentsMemoizedSerializedSize);
+    }
+    for (int i = 0; i < fp32Contents_.size(); i++) {
+      output.writeFloatNoTag(fp32Contents_.getFloat(i));
+    }
+    if (getFp64ContentsList().size() > 0) {
+      output.writeUInt32NoTag(58);
+      output.writeUInt32NoTag(fp64ContentsMemoizedSerializedSize);
+    }
+    for (int i = 0; i < fp64Contents_.size(); i++) {
+      output.writeDoubleNoTag(fp64Contents_.getDouble(i));
+    }
+    for (int i = 0; i < bytesContents_.size(); i++) {
+      output.writeBytes(8, bytesContents_.get(i));
+    }
+    unknownFields.writeTo(output);
+  }
+
+  @java.lang.Override
+  public int getSerializedSize() {
+    int size = memoizedSize;
+    if (size != -1) return size;
+
+    size = 0;
+    {
+      int dataSize = 0;
+      dataSize = 1 * getBoolContentsList().size();
+      size += dataSize;
+      if (!getBoolContentsList().isEmpty()) {
+        size += 1;
+        size += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(dataSize);
+      }
+      boolContentsMemoizedSerializedSize = dataSize;
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < intContents_.size(); i++) {
+        dataSize += com.google.protobuf.CodedOutputStream
+          .computeInt32SizeNoTag(intContents_.getInt(i));
+      }
+      size += dataSize;
+      if (!getIntContentsList().isEmpty()) {
+        size += 1;
+        size += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(dataSize);
+      }
+      intContentsMemoizedSerializedSize = dataSize;
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < int64Contents_.size(); i++) {
+        dataSize += com.google.protobuf.CodedOutputStream
+          .computeInt64SizeNoTag(int64Contents_.getLong(i));
+      }
+      size += dataSize;
+      if (!getInt64ContentsList().isEmpty()) {
+        size += 1;
+        size += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(dataSize);
+      }
+      int64ContentsMemoizedSerializedSize = dataSize;
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < uintContents_.size(); i++) {
+        dataSize += com.google.protobuf.CodedOutputStream
+          .computeUInt32SizeNoTag(uintContents_.getInt(i));
+      }
+      size += dataSize;
+      if (!getUintContentsList().isEmpty()) {
+        size += 1;
+        size += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(dataSize);
+      }
+      uintContentsMemoizedSerializedSize = dataSize;
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < uint64Contents_.size(); i++) {
+        dataSize += com.google.protobuf.CodedOutputStream
+          .computeUInt64SizeNoTag(uint64Contents_.getLong(i));
+      }
+      size += dataSize;
+      if (!getUint64ContentsList().isEmpty()) {
+        size += 1;
+        size += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(dataSize);
+      }
+      uint64ContentsMemoizedSerializedSize = dataSize;
+    }
+    {
+      int dataSize = 0;
+      dataSize = 4 * getFp32ContentsList().size();
+      size += dataSize;
+      if (!getFp32ContentsList().isEmpty()) {
+        size += 1;
+        size += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(dataSize);
+      }
+      fp32ContentsMemoizedSerializedSize = dataSize;
+    }
+    {
+      int dataSize = 0;
+      dataSize = 8 * getFp64ContentsList().size();
+      size += dataSize;
+      if (!getFp64ContentsList().isEmpty()) {
+        size += 1;
+        size += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(dataSize);
+      }
+      fp64ContentsMemoizedSerializedSize = dataSize;
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < bytesContents_.size(); i++) {
+        dataSize += com.google.protobuf.CodedOutputStream
+          .computeBytesSizeNoTag(bytesContents_.get(i));
+      }
+      size += dataSize;
+      size += 1 * getBytesContentsList().size();
+    }
+    size += unknownFields.getSerializedSize();
+    memoizedSize = size;
+    return size;
+  }
+
+  @java.lang.Override
+  public boolean equals(final java.lang.Object obj) {
+    if (obj == this) {
+     return true;
+    }
+    if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents)) {
+      return super.equals(obj);
+    }
+    org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents other = (org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents) obj;
+
+    if (!getBoolContentsList()
+        .equals(other.getBoolContentsList())) return false;
+    if (!getIntContentsList()
+        .equals(other.getIntContentsList())) return false;
+    if (!getInt64ContentsList()
+        .equals(other.getInt64ContentsList())) return false;
+    if (!getUintContentsList()
+        .equals(other.getUintContentsList())) return false;
+    if (!getUint64ContentsList()
+        .equals(other.getUint64ContentsList())) return false;
+    if (!getFp32ContentsList()
+        .equals(other.getFp32ContentsList())) return false;
+    if (!getFp64ContentsList()
+        .equals(other.getFp64ContentsList())) return false;
+    if (!getBytesContentsList()
+        .equals(other.getBytesContentsList())) return false;
+    if (!unknownFields.equals(other.unknownFields)) return false;
+    return true;
+  }
+
+  @java.lang.Override
+  public int hashCode() {
+    if (memoizedHashCode != 0) {
+      return memoizedHashCode;
+    }
+    int hash = 41;
+    hash = (19 * hash) + getDescriptor().hashCode();
+    if (getBoolContentsCount() > 0) {
+      hash = (37 * hash) + BOOL_CONTENTS_FIELD_NUMBER;
+      hash = (53 * hash) + getBoolContentsList().hashCode();
+    }
+    if (getIntContentsCount() > 0) {
+      hash = (37 * hash) + INT_CONTENTS_FIELD_NUMBER;
+      hash = (53 * hash) + getIntContentsList().hashCode();
+    }
+    if (getInt64ContentsCount() > 0) {
+      hash = (37 * hash) + INT64_CONTENTS_FIELD_NUMBER;
+      hash = (53 * hash) + getInt64ContentsList().hashCode();
+    }
+    if (getUintContentsCount() > 0) {
+      hash = (37 * hash) + UINT_CONTENTS_FIELD_NUMBER;
+      hash = (53 * hash) + getUintContentsList().hashCode();
+    }
+    if (getUint64ContentsCount() > 0) {
+      hash = (37 * hash) + UINT64_CONTENTS_FIELD_NUMBER;
+      hash = (53 * hash) + getUint64ContentsList().hashCode();
+    }
+    if (getFp32ContentsCount() > 0) {
+      hash = (37 * hash) + FP32_CONTENTS_FIELD_NUMBER;
+      hash = (53 * hash) + getFp32ContentsList().hashCode();
+    }
+    if (getFp64ContentsCount() > 0) {
+      hash = (37 * hash) + FP64_CONTENTS_FIELD_NUMBER;
+      hash = (53 * hash) + getFp64ContentsList().hashCode();
+    }
+    if (getBytesContentsCount() > 0) {
+      hash = (37 * hash) + BYTES_CONTENTS_FIELD_NUMBER;
+      hash = (53 * hash) + getBytesContentsList().hashCode();
+    }
+    hash = (29 * hash) + unknownFields.hashCode();
+    memoizedHashCode = hash;
+    return hash;
+  }
+
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
+      java.nio.ByteBuffer data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
+      java.nio.ByteBuffer data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
+      com.google.protobuf.ByteString data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
+      com.google.protobuf.ByteString data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(byte[] data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
+      byte[] data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(java.io.InputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
+      java.io.InputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseDelimitedFrom(java.io.InputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseDelimitedWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseDelimitedFrom(
+      java.io.InputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
+      com.google.protobuf.CodedInputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
+      com.google.protobuf.CodedInputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input, extensionRegistry);
+  }
+
+  @java.lang.Override
+  public Builder newBuilderForType() { return newBuilder(); }
+  public static Builder newBuilder() {
+    return DEFAULT_INSTANCE.toBuilder();
+  }
+  public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents prototype) {
+    return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+  }
+  @java.lang.Override
+  public Builder toBuilder() {
+    return this == DEFAULT_INSTANCE
+        ? new Builder() : new Builder().mergeFrom(this);
+  }
+
+  @java.lang.Override
+  protected Builder newBuilderForType(
+      com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+    Builder builder = new Builder(parent);
+    return builder;
+  }
+  /**
+   * <pre>
+   * The data contained in a tensor represented by the repeated type
+   * that matches the tensor's data type. Protobuf oneof is not used
+   * because oneofs cannot contain repeated fields.
+   * </pre>
+   *
+   * Protobuf type {@code inference.InferTensorContents}
+   */
+  public static final class Builder extends
+      com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+      // @@protoc_insertion_point(builder_implements:inference.InferTensorContents)
+      org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
-            getDescriptor() {
-        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_InferTensorContents_descriptor;
+        getDescriptor() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_InferTensorContents_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-            internalGetFieldAccessorTable() {
-        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_InferTensorContents_fieldAccessorTable
-                .ensureFieldAccessorsInitialized(
-                        org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.class, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder.class);
+        internalGetFieldAccessorTable() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_InferTensorContents_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.class, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder.class);
     }
 
-    public static final int BOOL_CONTENTS_FIELD_NUMBER = 1;
-    private com.google.protobuf.Internal.BooleanList boolContents_;
+    // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.newBuilder()
+    private Builder() {
+      maybeForceBuilderInitialization();
+    }
 
-    /**
-     * <pre>
-     * Representation for BOOL data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bool bool_contents = 1;</code>
-     * 
-     * @return A list containing the boolContents.
-     */
+    private Builder(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      super(parent);
+      maybeForceBuilderInitialization();
+    }
+    private void maybeForceBuilderInitialization() {
+      if (com.google.protobuf.GeneratedMessageV3
+              .alwaysUseFieldBuilders) {
+      }
+    }
     @java.lang.Override
-    public java.util.List<java.lang.Boolean>
-            getBoolContentsList() {
-        return boolContents_;
-    }
-
-    /**
-     * <pre>
-     * Representation for BOOL data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bool bool_contents = 1;</code>
-     * 
-     * @return The count of boolContents.
-     */
-    public int getBoolContentsCount() {
-        return boolContents_.size();
-    }
-
-    /**
-     * <pre>
-     * Representation for BOOL data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bool bool_contents = 1;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The boolContents at the given index.
-     */
-    public boolean getBoolContents(int index) {
-        return boolContents_.getBoolean(index);
-    }
-
-    private int boolContentsMemoizedSerializedSize = -1;
-
-    public static final int INT_CONTENTS_FIELD_NUMBER = 2;
-    private com.google.protobuf.Internal.IntList intContents_;
-
-    /**
-     * <pre>
-     * Representation for INT8, INT16, and INT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated int32 int_contents = 2;</code>
-     * 
-     * @return A list containing the intContents.
-     */
-    @java.lang.Override
-    public java.util.List<java.lang.Integer>
-            getIntContentsList() {
-        return intContents_;
-    }
-
-    /**
-     * <pre>
-     * Representation for INT8, INT16, and INT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated int32 int_contents = 2;</code>
-     * 
-     * @return The count of intContents.
-     */
-    public int getIntContentsCount() {
-        return intContents_.size();
-    }
-
-    /**
-     * <pre>
-     * Representation for INT8, INT16, and INT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated int32 int_contents = 2;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The intContents at the given index.
-     */
-    public int getIntContents(int index) {
-        return intContents_.getInt(index);
-    }
-
-    private int intContentsMemoizedSerializedSize = -1;
-
-    public static final int INT64_CONTENTS_FIELD_NUMBER = 3;
-    private com.google.protobuf.Internal.LongList int64Contents_;
-
-    /**
-     * <pre>
-     * Representation for INT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated int64 int64_contents = 3;</code>
-     * 
-     * @return A list containing the int64Contents.
-     */
-    @java.lang.Override
-    public java.util.List<java.lang.Long>
-            getInt64ContentsList() {
-        return int64Contents_;
-    }
-
-    /**
-     * <pre>
-     * Representation for INT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated int64 int64_contents = 3;</code>
-     * 
-     * @return The count of int64Contents.
-     */
-    public int getInt64ContentsCount() {
-        return int64Contents_.size();
-    }
-
-    /**
-     * <pre>
-     * Representation for INT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated int64 int64_contents = 3;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The int64Contents at the given index.
-     */
-    public long getInt64Contents(int index) {
-        return int64Contents_.getLong(index);
-    }
-
-    private int int64ContentsMemoizedSerializedSize = -1;
-
-    public static final int UINT_CONTENTS_FIELD_NUMBER = 4;
-    private com.google.protobuf.Internal.IntList uintContents_;
-
-    /**
-     * <pre>
-     * Representation for UINT8, UINT16, and UINT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint32 uint_contents = 4;</code>
-     * 
-     * @return A list containing the uintContents.
-     */
-    @java.lang.Override
-    public java.util.List<java.lang.Integer>
-            getUintContentsList() {
-        return uintContents_;
-    }
-
-    /**
-     * <pre>
-     * Representation for UINT8, UINT16, and UINT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint32 uint_contents = 4;</code>
-     * 
-     * @return The count of uintContents.
-     */
-    public int getUintContentsCount() {
-        return uintContents_.size();
-    }
-
-    /**
-     * <pre>
-     * Representation for UINT8, UINT16, and UINT32 data types. The size
-     * must match what is expected by the tensor's shape. The contents
-     * must be the flattened, one-dimensional, row-major order of the
-     * tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint32 uint_contents = 4;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The uintContents at the given index.
-     */
-    public int getUintContents(int index) {
-        return uintContents_.getInt(index);
-    }
-
-    private int uintContentsMemoizedSerializedSize = -1;
-
-    public static final int UINT64_CONTENTS_FIELD_NUMBER = 5;
-    private com.google.protobuf.Internal.LongList uint64Contents_;
-
-    /**
-     * <pre>
-     * Representation for UINT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint64 uint64_contents = 5;</code>
-     * 
-     * @return A list containing the uint64Contents.
-     */
-    @java.lang.Override
-    public java.util.List<java.lang.Long>
-            getUint64ContentsList() {
-        return uint64Contents_;
-    }
-
-    /**
-     * <pre>
-     * Representation for UINT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint64 uint64_contents = 5;</code>
-     * 
-     * @return The count of uint64Contents.
-     */
-    public int getUint64ContentsCount() {
-        return uint64Contents_.size();
-    }
-
-    /**
-     * <pre>
-     * Representation for UINT64 data types. The size must match what
-     * is expected by the tensor's shape. The contents must be the
-     * flattened, one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated uint64 uint64_contents = 5;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The uint64Contents at the given index.
-     */
-    public long getUint64Contents(int index) {
-        return uint64Contents_.getLong(index);
-    }
-
-    private int uint64ContentsMemoizedSerializedSize = -1;
-
-    public static final int FP32_CONTENTS_FIELD_NUMBER = 6;
-    private com.google.protobuf.Internal.FloatList fp32Contents_;
-
-    /**
-     * <pre>
-     * Representation for FP32 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated float fp32_contents = 6;</code>
-     * 
-     * @return A list containing the fp32Contents.
-     */
-    @java.lang.Override
-    public java.util.List<java.lang.Float>
-            getFp32ContentsList() {
-        return fp32Contents_;
-    }
-
-    /**
-     * <pre>
-     * Representation for FP32 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated float fp32_contents = 6;</code>
-     * 
-     * @return The count of fp32Contents.
-     */
-    public int getFp32ContentsCount() {
-        return fp32Contents_.size();
-    }
-
-    /**
-     * <pre>
-     * Representation for FP32 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated float fp32_contents = 6;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The fp32Contents at the given index.
-     */
-    public float getFp32Contents(int index) {
-        return fp32Contents_.getFloat(index);
-    }
-
-    private int fp32ContentsMemoizedSerializedSize = -1;
-
-    public static final int FP64_CONTENTS_FIELD_NUMBER = 7;
-    private com.google.protobuf.Internal.DoubleList fp64Contents_;
-
-    /**
-     * <pre>
-     * Representation for FP64 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated double fp64_contents = 7;</code>
-     * 
-     * @return A list containing the fp64Contents.
-     */
-    @java.lang.Override
-    public java.util.List<java.lang.Double>
-            getFp64ContentsList() {
-        return fp64Contents_;
-    }
-
-    /**
-     * <pre>
-     * Representation for FP64 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated double fp64_contents = 7;</code>
-     * 
-     * @return The count of fp64Contents.
-     */
-    public int getFp64ContentsCount() {
-        return fp64Contents_.size();
-    }
-
-    /**
-     * <pre>
-     * Representation for FP64 data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated double fp64_contents = 7;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The fp64Contents at the given index.
-     */
-    public double getFp64Contents(int index) {
-        return fp64Contents_.getDouble(index);
-    }
-
-    private int fp64ContentsMemoizedSerializedSize = -1;
-
-    public static final int BYTES_CONTENTS_FIELD_NUMBER = 8;
-    private java.util.List<com.google.protobuf.ByteString> bytesContents_;
-
-    /**
-     * <pre>
-     * Representation for BYTES data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bytes bytes_contents = 8;</code>
-     * 
-     * @return A list containing the bytesContents.
-     */
-    @java.lang.Override
-    public java.util.List<com.google.protobuf.ByteString>
-            getBytesContentsList() {
-        return bytesContents_;
-    }
-
-    /**
-     * <pre>
-     * Representation for BYTES data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bytes bytes_contents = 8;</code>
-     * 
-     * @return The count of bytesContents.
-     */
-    public int getBytesContentsCount() {
-        return bytesContents_.size();
-    }
-
-    /**
-     * <pre>
-     * Representation for BYTES data type. The size must match what is
-     * expected by the tensor's shape. The contents must be the flattened,
-     * one-dimensional, row-major order of the tensor elements.
-     * </pre>
-     *
-     * <code>repeated bytes bytes_contents = 8;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The bytesContents at the given index.
-     */
-    public com.google.protobuf.ByteString getBytesContents(int index) {
-        return bytesContents_.get(index);
-    }
-
-    private byte memoizedIsInitialized = -1;
-
-    @java.lang.Override
-    public final boolean isInitialized() {
-        byte isInitialized = memoizedIsInitialized;
-        if (isInitialized == 1)
-            return true;
-        if (isInitialized == 0)
-            return false;
-
-        memoizedIsInitialized = 1;
-        return true;
+    public Builder clear() {
+      super.clear();
+      boolContents_ = emptyBooleanList();
+      bitField0_ = (bitField0_ & ~0x00000001);
+      intContents_ = emptyIntList();
+      bitField0_ = (bitField0_ & ~0x00000002);
+      int64Contents_ = emptyLongList();
+      bitField0_ = (bitField0_ & ~0x00000004);
+      uintContents_ = emptyIntList();
+      bitField0_ = (bitField0_ & ~0x00000008);
+      uint64Contents_ = emptyLongList();
+      bitField0_ = (bitField0_ & ~0x00000010);
+      fp32Contents_ = emptyFloatList();
+      bitField0_ = (bitField0_ & ~0x00000020);
+      fp64Contents_ = emptyDoubleList();
+      bitField0_ = (bitField0_ & ~0x00000040);
+      bytesContents_ = java.util.Collections.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000080);
+      return this;
     }
 
     @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-            throws java.io.IOException {
-        getSerializedSize();
-        if (getBoolContentsList().size() > 0) {
-            output.writeUInt32NoTag(10);
-            output.writeUInt32NoTag(boolContentsMemoizedSerializedSize);
-        }
-        for (int i = 0; i < boolContents_.size(); i++) {
-            output.writeBoolNoTag(boolContents_.getBoolean(i));
-        }
-        if (getIntContentsList().size() > 0) {
-            output.writeUInt32NoTag(18);
-            output.writeUInt32NoTag(intContentsMemoizedSerializedSize);
-        }
-        for (int i = 0; i < intContents_.size(); i++) {
-            output.writeInt32NoTag(intContents_.getInt(i));
-        }
-        if (getInt64ContentsList().size() > 0) {
-            output.writeUInt32NoTag(26);
-            output.writeUInt32NoTag(int64ContentsMemoizedSerializedSize);
-        }
-        for (int i = 0; i < int64Contents_.size(); i++) {
-            output.writeInt64NoTag(int64Contents_.getLong(i));
-        }
-        if (getUintContentsList().size() > 0) {
-            output.writeUInt32NoTag(34);
-            output.writeUInt32NoTag(uintContentsMemoizedSerializedSize);
-        }
-        for (int i = 0; i < uintContents_.size(); i++) {
-            output.writeUInt32NoTag(uintContents_.getInt(i));
-        }
-        if (getUint64ContentsList().size() > 0) {
-            output.writeUInt32NoTag(42);
-            output.writeUInt32NoTag(uint64ContentsMemoizedSerializedSize);
-        }
-        for (int i = 0; i < uint64Contents_.size(); i++) {
-            output.writeUInt64NoTag(uint64Contents_.getLong(i));
-        }
-        if (getFp32ContentsList().size() > 0) {
-            output.writeUInt32NoTag(50);
-            output.writeUInt32NoTag(fp32ContentsMemoizedSerializedSize);
-        }
-        for (int i = 0; i < fp32Contents_.size(); i++) {
-            output.writeFloatNoTag(fp32Contents_.getFloat(i));
-        }
-        if (getFp64ContentsList().size() > 0) {
-            output.writeUInt32NoTag(58);
-            output.writeUInt32NoTag(fp64ContentsMemoizedSerializedSize);
-        }
-        for (int i = 0; i < fp64Contents_.size(); i++) {
-            output.writeDoubleNoTag(fp64Contents_.getDouble(i));
-        }
-        for (int i = 0; i < bytesContents_.size(); i++) {
-            output.writeBytes(8, bytesContents_.get(i));
-        }
-        unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-        int size = memoizedSize;
-        if (size != -1)
-            return size;
-
-        size = 0;
-        {
-            int dataSize = 0;
-            dataSize = 1 * getBoolContentsList().size();
-            size += dataSize;
-            if (!getBoolContentsList().isEmpty()) {
-                size += 1;
-                size += com.google.protobuf.CodedOutputStream
-                        .computeInt32SizeNoTag(dataSize);
-            }
-            boolContentsMemoizedSerializedSize = dataSize;
-        }
-        {
-            int dataSize = 0;
-            for (int i = 0; i < intContents_.size(); i++) {
-                dataSize += com.google.protobuf.CodedOutputStream
-                        .computeInt32SizeNoTag(intContents_.getInt(i));
-            }
-            size += dataSize;
-            if (!getIntContentsList().isEmpty()) {
-                size += 1;
-                size += com.google.protobuf.CodedOutputStream
-                        .computeInt32SizeNoTag(dataSize);
-            }
-            intContentsMemoizedSerializedSize = dataSize;
-        }
-        {
-            int dataSize = 0;
-            for (int i = 0; i < int64Contents_.size(); i++) {
-                dataSize += com.google.protobuf.CodedOutputStream
-                        .computeInt64SizeNoTag(int64Contents_.getLong(i));
-            }
-            size += dataSize;
-            if (!getInt64ContentsList().isEmpty()) {
-                size += 1;
-                size += com.google.protobuf.CodedOutputStream
-                        .computeInt32SizeNoTag(dataSize);
-            }
-            int64ContentsMemoizedSerializedSize = dataSize;
-        }
-        {
-            int dataSize = 0;
-            for (int i = 0; i < uintContents_.size(); i++) {
-                dataSize += com.google.protobuf.CodedOutputStream
-                        .computeUInt32SizeNoTag(uintContents_.getInt(i));
-            }
-            size += dataSize;
-            if (!getUintContentsList().isEmpty()) {
-                size += 1;
-                size += com.google.protobuf.CodedOutputStream
-                        .computeInt32SizeNoTag(dataSize);
-            }
-            uintContentsMemoizedSerializedSize = dataSize;
-        }
-        {
-            int dataSize = 0;
-            for (int i = 0; i < uint64Contents_.size(); i++) {
-                dataSize += com.google.protobuf.CodedOutputStream
-                        .computeUInt64SizeNoTag(uint64Contents_.getLong(i));
-            }
-            size += dataSize;
-            if (!getUint64ContentsList().isEmpty()) {
-                size += 1;
-                size += com.google.protobuf.CodedOutputStream
-                        .computeInt32SizeNoTag(dataSize);
-            }
-            uint64ContentsMemoizedSerializedSize = dataSize;
-        }
-        {
-            int dataSize = 0;
-            dataSize = 4 * getFp32ContentsList().size();
-            size += dataSize;
-            if (!getFp32ContentsList().isEmpty()) {
-                size += 1;
-                size += com.google.protobuf.CodedOutputStream
-                        .computeInt32SizeNoTag(dataSize);
-            }
-            fp32ContentsMemoizedSerializedSize = dataSize;
-        }
-        {
-            int dataSize = 0;
-            dataSize = 8 * getFp64ContentsList().size();
-            size += dataSize;
-            if (!getFp64ContentsList().isEmpty()) {
-                size += 1;
-                size += com.google.protobuf.CodedOutputStream
-                        .computeInt32SizeNoTag(dataSize);
-            }
-            fp64ContentsMemoizedSerializedSize = dataSize;
-        }
-        {
-            int dataSize = 0;
-            for (int i = 0; i < bytesContents_.size(); i++) {
-                dataSize += com.google.protobuf.CodedOutputStream
-                        .computeBytesSizeNoTag(bytesContents_.get(i));
-            }
-            size += dataSize;
-            size += 1 * getBytesContentsList().size();
-        }
-        size += unknownFields.getSerializedSize();
-        memoizedSize = size;
-        return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents)) {
-            return super.equals(obj);
-        }
-        org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents other = (org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents) obj;
-
-        if (!getBoolContentsList()
-                .equals(other.getBoolContentsList()))
-            return false;
-        if (!getIntContentsList()
-                .equals(other.getIntContentsList()))
-            return false;
-        if (!getInt64ContentsList()
-                .equals(other.getInt64ContentsList()))
-            return false;
-        if (!getUintContentsList()
-                .equals(other.getUintContentsList()))
-            return false;
-        if (!getUint64ContentsList()
-                .equals(other.getUint64ContentsList()))
-            return false;
-        if (!getFp32ContentsList()
-                .equals(other.getFp32ContentsList()))
-            return false;
-        if (!getFp64ContentsList()
-                .equals(other.getFp64ContentsList()))
-            return false;
-        if (!getBytesContentsList()
-                .equals(other.getBytesContentsList()))
-            return false;
-        if (!unknownFields.equals(other.unknownFields))
-            return false;
-        return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-        if (memoizedHashCode != 0) {
-            return memoizedHashCode;
-        }
-        int hash = 41;
-        hash = (19 * hash) + getDescriptor().hashCode();
-        if (getBoolContentsCount() > 0) {
-            hash = (37 * hash) + BOOL_CONTENTS_FIELD_NUMBER;
-            hash = (53 * hash) + getBoolContentsList().hashCode();
-        }
-        if (getIntContentsCount() > 0) {
-            hash = (37 * hash) + INT_CONTENTS_FIELD_NUMBER;
-            hash = (53 * hash) + getIntContentsList().hashCode();
-        }
-        if (getInt64ContentsCount() > 0) {
-            hash = (37 * hash) + INT64_CONTENTS_FIELD_NUMBER;
-            hash = (53 * hash) + getInt64ContentsList().hashCode();
-        }
-        if (getUintContentsCount() > 0) {
-            hash = (37 * hash) + UINT_CONTENTS_FIELD_NUMBER;
-            hash = (53 * hash) + getUintContentsList().hashCode();
-        }
-        if (getUint64ContentsCount() > 0) {
-            hash = (37 * hash) + UINT64_CONTENTS_FIELD_NUMBER;
-            hash = (53 * hash) + getUint64ContentsList().hashCode();
-        }
-        if (getFp32ContentsCount() > 0) {
-            hash = (37 * hash) + FP32_CONTENTS_FIELD_NUMBER;
-            hash = (53 * hash) + getFp32ContentsList().hashCode();
-        }
-        if (getFp64ContentsCount() > 0) {
-            hash = (37 * hash) + FP64_CONTENTS_FIELD_NUMBER;
-            hash = (53 * hash) + getFp64ContentsList().hashCode();
-        }
-        if (getBytesContentsCount() > 0) {
-            hash = (37 * hash) + BYTES_CONTENTS_FIELD_NUMBER;
-            hash = (53 * hash) + getBytesContentsList().hashCode();
-        }
-        hash = (29 * hash) + unknownFields.hashCode();
-        memoizedHashCode = hash;
-        return hash;
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
-            java.nio.ByteBuffer data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
-            java.nio.ByteBuffer data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
-            com.google.protobuf.ByteString data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
-            com.google.protobuf.ByteString data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(byte[] data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
-            byte[] data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(java.io.InputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseDelimitedFrom(java.io.InputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseDelimitedFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
-            com.google.protobuf.CodedInputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parseFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() {
-        return newBuilder();
-    }
-
-    public static Builder newBuilder() {
-        return DEFAULT_INSTANCE.toBuilder();
-    }
-
-    public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents prototype) {
-        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-
-    @java.lang.Override
-    public Builder toBuilder() {
-        return this == DEFAULT_INSTANCE
-                ? new Builder()
-                : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        Builder builder = new Builder(parent);
-        return builder;
-    }
-
-    /**
-     * <pre>
-     * The data contained in a tensor represented by the repeated type
-     * that matches the tensor's data type. Protobuf oneof is not used
-     * because oneofs cannot contain repeated fields.
-     * </pre>
-     *
-     * Protobuf type {@code inference.InferTensorContents}
-     */
-    public static final class Builder extends
-            com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-            // @@protoc_insertion_point(builder_implements:inference.InferTensorContents)
-            org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder {
-        public static final com.google.protobuf.Descriptors.Descriptor
-                getDescriptor() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_InferTensorContents_descriptor;
-        }
-
-        @java.lang.Override
-        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-                internalGetFieldAccessorTable() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_InferTensorContents_fieldAccessorTable
-                    .ensureFieldAccessorsInitialized(
-                            org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.class, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder.class);
-        }
-
-        // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.newBuilder()
-        private Builder() {
-            maybeForceBuilderInitialization();
-        }
-
-        private Builder(
-                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-            super(parent);
-            maybeForceBuilderInitialization();
-        }
-
-        private void maybeForceBuilderInitialization() {
-            if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
-            }
-        }
-
-        @java.lang.Override
-        public Builder clear() {
-            super.clear();
-            boolContents_ = emptyBooleanList();
-            bitField0_ = (bitField0_ & ~0x00000001);
-            intContents_ = emptyIntList();
-            bitField0_ = (bitField0_ & ~0x00000002);
-            int64Contents_ = emptyLongList();
-            bitField0_ = (bitField0_ & ~0x00000004);
-            uintContents_ = emptyIntList();
-            bitField0_ = (bitField0_ & ~0x00000008);
-            uint64Contents_ = emptyLongList();
-            bitField0_ = (bitField0_ & ~0x00000010);
-            fp32Contents_ = emptyFloatList();
-            bitField0_ = (bitField0_ & ~0x00000020);
-            fp64Contents_ = emptyDoubleList();
-            bitField0_ = (bitField0_ & ~0x00000040);
-            bytesContents_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000080);
-            return this;
-        }
-
-        @java.lang.Override
-        public com.google.protobuf.Descriptors.Descriptor
-                getDescriptorForType() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_InferTensorContents_descriptor;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getDefaultInstanceForType() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.getDefaultInstance();
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents build() {
-            org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents result = buildPartial();
-            if (!result.isInitialized()) {
-                throw newUninitializedMessageException(result);
-            }
-            return result;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents buildPartial() {
-            org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents result = new org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents(this);
-            int from_bitField0_ = bitField0_;
-            if (((bitField0_ & 0x00000001) != 0)) {
-                boolContents_.makeImmutable();
-                bitField0_ = (bitField0_ & ~0x00000001);
-            }
-            result.boolContents_ = boolContents_;
-            if (((bitField0_ & 0x00000002) != 0)) {
-                intContents_.makeImmutable();
-                bitField0_ = (bitField0_ & ~0x00000002);
-            }
-            result.intContents_ = intContents_;
-            if (((bitField0_ & 0x00000004) != 0)) {
-                int64Contents_.makeImmutable();
-                bitField0_ = (bitField0_ & ~0x00000004);
-            }
-            result.int64Contents_ = int64Contents_;
-            if (((bitField0_ & 0x00000008) != 0)) {
-                uintContents_.makeImmutable();
-                bitField0_ = (bitField0_ & ~0x00000008);
-            }
-            result.uintContents_ = uintContents_;
-            if (((bitField0_ & 0x00000010) != 0)) {
-                uint64Contents_.makeImmutable();
-                bitField0_ = (bitField0_ & ~0x00000010);
-            }
-            result.uint64Contents_ = uint64Contents_;
-            if (((bitField0_ & 0x00000020) != 0)) {
-                fp32Contents_.makeImmutable();
-                bitField0_ = (bitField0_ & ~0x00000020);
-            }
-            result.fp32Contents_ = fp32Contents_;
-            if (((bitField0_ & 0x00000040) != 0)) {
-                fp64Contents_.makeImmutable();
-                bitField0_ = (bitField0_ & ~0x00000040);
-            }
-            result.fp64Contents_ = fp64Contents_;
-            if (((bitField0_ & 0x00000080) != 0)) {
-                bytesContents_ = java.util.Collections.unmodifiableList(bytesContents_);
-                bitField0_ = (bitField0_ & ~0x00000080);
-            }
-            result.bytesContents_ = bytesContents_;
-            onBuilt();
-            return result;
-        }
-
-        @java.lang.Override
-        public Builder clone() {
-            return super.clone();
-        }
-
-        @java.lang.Override
-        public Builder setField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                java.lang.Object value) {
-            return super.setField(field, value);
-        }
-
-        @java.lang.Override
-        public Builder clearField(
-                com.google.protobuf.Descriptors.FieldDescriptor field) {
-            return super.clearField(field);
-        }
-
-        @java.lang.Override
-        public Builder clearOneof(
-                com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-            return super.clearOneof(oneof);
-        }
-
-        @java.lang.Override
-        public Builder setRepeatedField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                int index, java.lang.Object value) {
-            return super.setRepeatedField(field, index, value);
-        }
-
-        @java.lang.Override
-        public Builder addRepeatedField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                java.lang.Object value) {
-            return super.addRepeatedField(field, value);
-        }
-
-        @java.lang.Override
-        public Builder mergeFrom(com.google.protobuf.Message other) {
-            if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents) {
-                return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents) other);
-            } else {
-                super.mergeFrom(other);
-                return this;
-            }
-        }
-
-        public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents other) {
-            if (other == org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.getDefaultInstance())
-                return this;
-            if (!other.boolContents_.isEmpty()) {
-                if (boolContents_.isEmpty()) {
-                    boolContents_ = other.boolContents_;
-                    bitField0_ = (bitField0_ & ~0x00000001);
-                } else {
-                    ensureBoolContentsIsMutable();
-                    boolContents_.addAll(other.boolContents_);
-                }
-                onChanged();
-            }
-            if (!other.intContents_.isEmpty()) {
-                if (intContents_.isEmpty()) {
-                    intContents_ = other.intContents_;
-                    bitField0_ = (bitField0_ & ~0x00000002);
-                } else {
-                    ensureIntContentsIsMutable();
-                    intContents_.addAll(other.intContents_);
-                }
-                onChanged();
-            }
-            if (!other.int64Contents_.isEmpty()) {
-                if (int64Contents_.isEmpty()) {
-                    int64Contents_ = other.int64Contents_;
-                    bitField0_ = (bitField0_ & ~0x00000004);
-                } else {
-                    ensureInt64ContentsIsMutable();
-                    int64Contents_.addAll(other.int64Contents_);
-                }
-                onChanged();
-            }
-            if (!other.uintContents_.isEmpty()) {
-                if (uintContents_.isEmpty()) {
-                    uintContents_ = other.uintContents_;
-                    bitField0_ = (bitField0_ & ~0x00000008);
-                } else {
-                    ensureUintContentsIsMutable();
-                    uintContents_.addAll(other.uintContents_);
-                }
-                onChanged();
-            }
-            if (!other.uint64Contents_.isEmpty()) {
-                if (uint64Contents_.isEmpty()) {
-                    uint64Contents_ = other.uint64Contents_;
-                    bitField0_ = (bitField0_ & ~0x00000010);
-                } else {
-                    ensureUint64ContentsIsMutable();
-                    uint64Contents_.addAll(other.uint64Contents_);
-                }
-                onChanged();
-            }
-            if (!other.fp32Contents_.isEmpty()) {
-                if (fp32Contents_.isEmpty()) {
-                    fp32Contents_ = other.fp32Contents_;
-                    bitField0_ = (bitField0_ & ~0x00000020);
-                } else {
-                    ensureFp32ContentsIsMutable();
-                    fp32Contents_.addAll(other.fp32Contents_);
-                }
-                onChanged();
-            }
-            if (!other.fp64Contents_.isEmpty()) {
-                if (fp64Contents_.isEmpty()) {
-                    fp64Contents_ = other.fp64Contents_;
-                    bitField0_ = (bitField0_ & ~0x00000040);
-                } else {
-                    ensureFp64ContentsIsMutable();
-                    fp64Contents_.addAll(other.fp64Contents_);
-                }
-                onChanged();
-            }
-            if (!other.bytesContents_.isEmpty()) {
-                if (bytesContents_.isEmpty()) {
-                    bytesContents_ = other.bytesContents_;
-                    bitField0_ = (bitField0_ & ~0x00000080);
-                } else {
-                    ensureBytesContentsIsMutable();
-                    bytesContents_.addAll(other.bytesContents_);
-                }
-                onChanged();
-            }
-            this.mergeUnknownFields(other.unknownFields);
-            onChanged();
-            return this;
-        }
-
-        @java.lang.Override
-        public final boolean isInitialized() {
-            return true;
-        }
-
-        @java.lang.Override
-        public Builder mergeFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parsedMessage = null;
-            try {
-                parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents) e.getUnfinishedMessage();
-                throw e.unwrapIOException();
-            } finally {
-                if (parsedMessage != null) {
-                    mergeFrom(parsedMessage);
-                }
-            }
-            return this;
-        }
-
-        private int bitField0_;
-
-        private com.google.protobuf.Internal.BooleanList boolContents_ = emptyBooleanList();
-
-        private void ensureBoolContentsIsMutable() {
-            if (!((bitField0_ & 0x00000001) != 0)) {
-                boolContents_ = mutableCopy(boolContents_);
-                bitField0_ |= 0x00000001;
-            }
-        }
-
-        /**
-         * <pre>
-         * Representation for BOOL data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bool bool_contents = 1;</code>
-         * 
-         * @return A list containing the boolContents.
-         */
-        public java.util.List<java.lang.Boolean>
-                getBoolContentsList() {
-            return ((bitField0_ & 0x00000001) != 0) ? java.util.Collections.unmodifiableList(boolContents_) : boolContents_;
-        }
-
-        /**
-         * <pre>
-         * Representation for BOOL data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bool bool_contents = 1;</code>
-         * 
-         * @return The count of boolContents.
-         */
-        public int getBoolContentsCount() {
-            return boolContents_.size();
-        }
-
-        /**
-         * <pre>
-         * Representation for BOOL data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bool bool_contents = 1;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The boolContents at the given index.
-         */
-        public boolean getBoolContents(int index) {
-            return boolContents_.getBoolean(index);
-        }
-
-        /**
-         * <pre>
-         * Representation for BOOL data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bool bool_contents = 1;</code>
-         * 
-         * @param index The index to set the value at.
-         * @param value The boolContents to set.
-         * @return This builder for chaining.
-         */
-        public Builder setBoolContents(
-                int index, boolean value) {
-            ensureBoolContentsIsMutable();
-            boolContents_.setBoolean(index, value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for BOOL data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bool bool_contents = 1;</code>
-         * 
-         * @param value The boolContents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addBoolContents(boolean value) {
-            ensureBoolContentsIsMutable();
-            boolContents_.addBoolean(value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for BOOL data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bool bool_contents = 1;</code>
-         * 
-         * @param values The boolContents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addAllBoolContents(
-                java.lang.Iterable<? extends java.lang.Boolean> values) {
-            ensureBoolContentsIsMutable();
-            com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                    values, boolContents_);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for BOOL data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bool bool_contents = 1;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearBoolContents() {
-            boolContents_ = emptyBooleanList();
-            bitField0_ = (bitField0_ & ~0x00000001);
-            onChanged();
-            return this;
-        }
-
-        private com.google.protobuf.Internal.IntList intContents_ = emptyIntList();
-
-        private void ensureIntContentsIsMutable() {
-            if (!((bitField0_ & 0x00000002) != 0)) {
-                intContents_ = mutableCopy(intContents_);
-                bitField0_ |= 0x00000002;
-            }
-        }
-
-        /**
-         * <pre>
-         * Representation for INT8, INT16, and INT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated int32 int_contents = 2;</code>
-         * 
-         * @return A list containing the intContents.
-         */
-        public java.util.List<java.lang.Integer>
-                getIntContentsList() {
-            return ((bitField0_ & 0x00000002) != 0) ? java.util.Collections.unmodifiableList(intContents_) : intContents_;
-        }
-
-        /**
-         * <pre>
-         * Representation for INT8, INT16, and INT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated int32 int_contents = 2;</code>
-         * 
-         * @return The count of intContents.
-         */
-        public int getIntContentsCount() {
-            return intContents_.size();
-        }
-
-        /**
-         * <pre>
-         * Representation for INT8, INT16, and INT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated int32 int_contents = 2;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The intContents at the given index.
-         */
-        public int getIntContents(int index) {
-            return intContents_.getInt(index);
-        }
-
-        /**
-         * <pre>
-         * Representation for INT8, INT16, and INT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated int32 int_contents = 2;</code>
-         * 
-         * @param index The index to set the value at.
-         * @param value The intContents to set.
-         * @return This builder for chaining.
-         */
-        public Builder setIntContents(
-                int index, int value) {
-            ensureIntContentsIsMutable();
-            intContents_.setInt(index, value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for INT8, INT16, and INT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated int32 int_contents = 2;</code>
-         * 
-         * @param value The intContents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addIntContents(int value) {
-            ensureIntContentsIsMutable();
-            intContents_.addInt(value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for INT8, INT16, and INT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated int32 int_contents = 2;</code>
-         * 
-         * @param values The intContents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addAllIntContents(
-                java.lang.Iterable<? extends java.lang.Integer> values) {
-            ensureIntContentsIsMutable();
-            com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                    values, intContents_);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for INT8, INT16, and INT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated int32 int_contents = 2;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearIntContents() {
-            intContents_ = emptyIntList();
-            bitField0_ = (bitField0_ & ~0x00000002);
-            onChanged();
-            return this;
-        }
-
-        private com.google.protobuf.Internal.LongList int64Contents_ = emptyLongList();
-
-        private void ensureInt64ContentsIsMutable() {
-            if (!((bitField0_ & 0x00000004) != 0)) {
-                int64Contents_ = mutableCopy(int64Contents_);
-                bitField0_ |= 0x00000004;
-            }
-        }
-
-        /**
-         * <pre>
-         * Representation for INT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated int64 int64_contents = 3;</code>
-         * 
-         * @return A list containing the int64Contents.
-         */
-        public java.util.List<java.lang.Long>
-                getInt64ContentsList() {
-            return ((bitField0_ & 0x00000004) != 0) ? java.util.Collections.unmodifiableList(int64Contents_) : int64Contents_;
-        }
-
-        /**
-         * <pre>
-         * Representation for INT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated int64 int64_contents = 3;</code>
-         * 
-         * @return The count of int64Contents.
-         */
-        public int getInt64ContentsCount() {
-            return int64Contents_.size();
-        }
-
-        /**
-         * <pre>
-         * Representation for INT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated int64 int64_contents = 3;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The int64Contents at the given index.
-         */
-        public long getInt64Contents(int index) {
-            return int64Contents_.getLong(index);
-        }
-
-        /**
-         * <pre>
-         * Representation for INT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated int64 int64_contents = 3;</code>
-         * 
-         * @param index The index to set the value at.
-         * @param value The int64Contents to set.
-         * @return This builder for chaining.
-         */
-        public Builder setInt64Contents(
-                int index, long value) {
-            ensureInt64ContentsIsMutable();
-            int64Contents_.setLong(index, value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for INT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated int64 int64_contents = 3;</code>
-         * 
-         * @param value The int64Contents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addInt64Contents(long value) {
-            ensureInt64ContentsIsMutable();
-            int64Contents_.addLong(value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for INT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated int64 int64_contents = 3;</code>
-         * 
-         * @param values The int64Contents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addAllInt64Contents(
-                java.lang.Iterable<? extends java.lang.Long> values) {
-            ensureInt64ContentsIsMutable();
-            com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                    values, int64Contents_);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for INT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated int64 int64_contents = 3;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearInt64Contents() {
-            int64Contents_ = emptyLongList();
-            bitField0_ = (bitField0_ & ~0x00000004);
-            onChanged();
-            return this;
-        }
-
-        private com.google.protobuf.Internal.IntList uintContents_ = emptyIntList();
-
-        private void ensureUintContentsIsMutable() {
-            if (!((bitField0_ & 0x00000008) != 0)) {
-                uintContents_ = mutableCopy(uintContents_);
-                bitField0_ |= 0x00000008;
-            }
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT8, UINT16, and UINT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint32 uint_contents = 4;</code>
-         * 
-         * @return A list containing the uintContents.
-         */
-        public java.util.List<java.lang.Integer>
-                getUintContentsList() {
-            return ((bitField0_ & 0x00000008) != 0) ? java.util.Collections.unmodifiableList(uintContents_) : uintContents_;
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT8, UINT16, and UINT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint32 uint_contents = 4;</code>
-         * 
-         * @return The count of uintContents.
-         */
-        public int getUintContentsCount() {
-            return uintContents_.size();
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT8, UINT16, and UINT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint32 uint_contents = 4;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The uintContents at the given index.
-         */
-        public int getUintContents(int index) {
-            return uintContents_.getInt(index);
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT8, UINT16, and UINT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint32 uint_contents = 4;</code>
-         * 
-         * @param index The index to set the value at.
-         * @param value The uintContents to set.
-         * @return This builder for chaining.
-         */
-        public Builder setUintContents(
-                int index, int value) {
-            ensureUintContentsIsMutable();
-            uintContents_.setInt(index, value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT8, UINT16, and UINT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint32 uint_contents = 4;</code>
-         * 
-         * @param value The uintContents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addUintContents(int value) {
-            ensureUintContentsIsMutable();
-            uintContents_.addInt(value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT8, UINT16, and UINT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint32 uint_contents = 4;</code>
-         * 
-         * @param values The uintContents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addAllUintContents(
-                java.lang.Iterable<? extends java.lang.Integer> values) {
-            ensureUintContentsIsMutable();
-            com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                    values, uintContents_);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT8, UINT16, and UINT32 data types. The size
-         * must match what is expected by the tensor's shape. The contents
-         * must be the flattened, one-dimensional, row-major order of the
-         * tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint32 uint_contents = 4;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearUintContents() {
-            uintContents_ = emptyIntList();
-            bitField0_ = (bitField0_ & ~0x00000008);
-            onChanged();
-            return this;
-        }
-
-        private com.google.protobuf.Internal.LongList uint64Contents_ = emptyLongList();
-
-        private void ensureUint64ContentsIsMutable() {
-            if (!((bitField0_ & 0x00000010) != 0)) {
-                uint64Contents_ = mutableCopy(uint64Contents_);
-                bitField0_ |= 0x00000010;
-            }
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint64 uint64_contents = 5;</code>
-         * 
-         * @return A list containing the uint64Contents.
-         */
-        public java.util.List<java.lang.Long>
-                getUint64ContentsList() {
-            return ((bitField0_ & 0x00000010) != 0) ? java.util.Collections.unmodifiableList(uint64Contents_) : uint64Contents_;
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint64 uint64_contents = 5;</code>
-         * 
-         * @return The count of uint64Contents.
-         */
-        public int getUint64ContentsCount() {
-            return uint64Contents_.size();
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint64 uint64_contents = 5;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The uint64Contents at the given index.
-         */
-        public long getUint64Contents(int index) {
-            return uint64Contents_.getLong(index);
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint64 uint64_contents = 5;</code>
-         * 
-         * @param index The index to set the value at.
-         * @param value The uint64Contents to set.
-         * @return This builder for chaining.
-         */
-        public Builder setUint64Contents(
-                int index, long value) {
-            ensureUint64ContentsIsMutable();
-            uint64Contents_.setLong(index, value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint64 uint64_contents = 5;</code>
-         * 
-         * @param value The uint64Contents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addUint64Contents(long value) {
-            ensureUint64ContentsIsMutable();
-            uint64Contents_.addLong(value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint64 uint64_contents = 5;</code>
-         * 
-         * @param values The uint64Contents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addAllUint64Contents(
-                java.lang.Iterable<? extends java.lang.Long> values) {
-            ensureUint64ContentsIsMutable();
-            com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                    values, uint64Contents_);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for UINT64 data types. The size must match what
-         * is expected by the tensor's shape. The contents must be the
-         * flattened, one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated uint64 uint64_contents = 5;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearUint64Contents() {
-            uint64Contents_ = emptyLongList();
-            bitField0_ = (bitField0_ & ~0x00000010);
-            onChanged();
-            return this;
-        }
-
-        private com.google.protobuf.Internal.FloatList fp32Contents_ = emptyFloatList();
-
-        private void ensureFp32ContentsIsMutable() {
-            if (!((bitField0_ & 0x00000020) != 0)) {
-                fp32Contents_ = mutableCopy(fp32Contents_);
-                bitField0_ |= 0x00000020;
-            }
-        }
-
-        /**
-         * <pre>
-         * Representation for FP32 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated float fp32_contents = 6;</code>
-         * 
-         * @return A list containing the fp32Contents.
-         */
-        public java.util.List<java.lang.Float>
-                getFp32ContentsList() {
-            return ((bitField0_ & 0x00000020) != 0) ? java.util.Collections.unmodifiableList(fp32Contents_) : fp32Contents_;
-        }
-
-        /**
-         * <pre>
-         * Representation for FP32 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated float fp32_contents = 6;</code>
-         * 
-         * @return The count of fp32Contents.
-         */
-        public int getFp32ContentsCount() {
-            return fp32Contents_.size();
-        }
-
-        /**
-         * <pre>
-         * Representation for FP32 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated float fp32_contents = 6;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The fp32Contents at the given index.
-         */
-        public float getFp32Contents(int index) {
-            return fp32Contents_.getFloat(index);
-        }
-
-        /**
-         * <pre>
-         * Representation for FP32 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated float fp32_contents = 6;</code>
-         * 
-         * @param index The index to set the value at.
-         * @param value The fp32Contents to set.
-         * @return This builder for chaining.
-         */
-        public Builder setFp32Contents(
-                int index, float value) {
-            ensureFp32ContentsIsMutable();
-            fp32Contents_.setFloat(index, value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for FP32 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated float fp32_contents = 6;</code>
-         * 
-         * @param value The fp32Contents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addFp32Contents(float value) {
-            ensureFp32ContentsIsMutable();
-            fp32Contents_.addFloat(value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for FP32 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated float fp32_contents = 6;</code>
-         * 
-         * @param values The fp32Contents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addAllFp32Contents(
-                java.lang.Iterable<? extends java.lang.Float> values) {
-            ensureFp32ContentsIsMutable();
-            com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                    values, fp32Contents_);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for FP32 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated float fp32_contents = 6;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearFp32Contents() {
-            fp32Contents_ = emptyFloatList();
-            bitField0_ = (bitField0_ & ~0x00000020);
-            onChanged();
-            return this;
-        }
-
-        private com.google.protobuf.Internal.DoubleList fp64Contents_ = emptyDoubleList();
-
-        private void ensureFp64ContentsIsMutable() {
-            if (!((bitField0_ & 0x00000040) != 0)) {
-                fp64Contents_ = mutableCopy(fp64Contents_);
-                bitField0_ |= 0x00000040;
-            }
-        }
-
-        /**
-         * <pre>
-         * Representation for FP64 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated double fp64_contents = 7;</code>
-         * 
-         * @return A list containing the fp64Contents.
-         */
-        public java.util.List<java.lang.Double>
-                getFp64ContentsList() {
-            return ((bitField0_ & 0x00000040) != 0) ? java.util.Collections.unmodifiableList(fp64Contents_) : fp64Contents_;
-        }
-
-        /**
-         * <pre>
-         * Representation for FP64 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated double fp64_contents = 7;</code>
-         * 
-         * @return The count of fp64Contents.
-         */
-        public int getFp64ContentsCount() {
-            return fp64Contents_.size();
-        }
-
-        /**
-         * <pre>
-         * Representation for FP64 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated double fp64_contents = 7;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The fp64Contents at the given index.
-         */
-        public double getFp64Contents(int index) {
-            return fp64Contents_.getDouble(index);
-        }
-
-        /**
-         * <pre>
-         * Representation for FP64 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated double fp64_contents = 7;</code>
-         * 
-         * @param index The index to set the value at.
-         * @param value The fp64Contents to set.
-         * @return This builder for chaining.
-         */
-        public Builder setFp64Contents(
-                int index, double value) {
-            ensureFp64ContentsIsMutable();
-            fp64Contents_.setDouble(index, value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for FP64 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated double fp64_contents = 7;</code>
-         * 
-         * @param value The fp64Contents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addFp64Contents(double value) {
-            ensureFp64ContentsIsMutable();
-            fp64Contents_.addDouble(value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for FP64 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated double fp64_contents = 7;</code>
-         * 
-         * @param values The fp64Contents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addAllFp64Contents(
-                java.lang.Iterable<? extends java.lang.Double> values) {
-            ensureFp64ContentsIsMutable();
-            com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                    values, fp64Contents_);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for FP64 data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated double fp64_contents = 7;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearFp64Contents() {
-            fp64Contents_ = emptyDoubleList();
-            bitField0_ = (bitField0_ & ~0x00000040);
-            onChanged();
-            return this;
-        }
-
-        private java.util.List<com.google.protobuf.ByteString> bytesContents_ = java.util.Collections.emptyList();
-
-        private void ensureBytesContentsIsMutable() {
-            if (!((bitField0_ & 0x00000080) != 0)) {
-                bytesContents_ = new java.util.ArrayList<com.google.protobuf.ByteString>(bytesContents_);
-                bitField0_ |= 0x00000080;
-            }
-        }
-
-        /**
-         * <pre>
-         * Representation for BYTES data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bytes bytes_contents = 8;</code>
-         * 
-         * @return A list containing the bytesContents.
-         */
-        public java.util.List<com.google.protobuf.ByteString>
-                getBytesContentsList() {
-            return ((bitField0_ & 0x00000080) != 0) ? java.util.Collections.unmodifiableList(bytesContents_) : bytesContents_;
-        }
-
-        /**
-         * <pre>
-         * Representation for BYTES data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bytes bytes_contents = 8;</code>
-         * 
-         * @return The count of bytesContents.
-         */
-        public int getBytesContentsCount() {
-            return bytesContents_.size();
-        }
-
-        /**
-         * <pre>
-         * Representation for BYTES data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bytes bytes_contents = 8;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The bytesContents at the given index.
-         */
-        public com.google.protobuf.ByteString getBytesContents(int index) {
-            return bytesContents_.get(index);
-        }
-
-        /**
-         * <pre>
-         * Representation for BYTES data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bytes bytes_contents = 8;</code>
-         * 
-         * @param index The index to set the value at.
-         * @param value The bytesContents to set.
-         * @return This builder for chaining.
-         */
-        public Builder setBytesContents(
-                int index, com.google.protobuf.ByteString value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            ensureBytesContentsIsMutable();
-            bytesContents_.set(index, value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for BYTES data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bytes bytes_contents = 8;</code>
-         * 
-         * @param value The bytesContents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addBytesContents(com.google.protobuf.ByteString value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            ensureBytesContentsIsMutable();
-            bytesContents_.add(value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for BYTES data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bytes bytes_contents = 8;</code>
-         * 
-         * @param values The bytesContents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addAllBytesContents(
-                java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
-            ensureBytesContentsIsMutable();
-            com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                    values, bytesContents_);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Representation for BYTES data type. The size must match what is
-         * expected by the tensor's shape. The contents must be the flattened,
-         * one-dimensional, row-major order of the tensor elements.
-         * </pre>
-         *
-         * <code>repeated bytes bytes_contents = 8;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearBytesContents() {
-            bytesContents_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000080);
-            onChanged();
-            return this;
-        }
-
-        @java.lang.Override
-        public final Builder setUnknownFields(
-                final com.google.protobuf.UnknownFieldSet unknownFields) {
-            return super.setUnknownFields(unknownFields);
-        }
-
-        @java.lang.Override
-        public final Builder mergeUnknownFields(
-                final com.google.protobuf.UnknownFieldSet unknownFields) {
-            return super.mergeUnknownFields(unknownFields);
-        }
-
-        // @@protoc_insertion_point(builder_scope:inference.InferTensorContents)
-    }
-
-    // @@protoc_insertion_point(class_scope:inference.InferTensorContents)
-    private static final org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents DEFAULT_INSTANCE;
-    static {
-        DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents();
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getDefaultInstance() {
-        return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<InferTensorContents> PARSER = new com.google.protobuf.AbstractParser<InferTensorContents>() {
-        @java.lang.Override
-        public InferTensorContents parsePartialFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return new InferTensorContents(input, extensionRegistry);
-        }
-    };
-
-    public static com.google.protobuf.Parser<InferTensorContents> parser() {
-        return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<InferTensorContents> getParserForType() {
-        return PARSER;
+    public com.google.protobuf.Descriptors.Descriptor
+        getDescriptorForType() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_InferTensorContents_descriptor;
     }
 
     @java.lang.Override
     public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getDefaultInstanceForType() {
-        return DEFAULT_INSTANCE;
+      return org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.getDefaultInstance();
     }
 
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents build() {
+      org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents result = buildPartial();
+      if (!result.isInitialized()) {
+        throw newUninitializedMessageException(result);
+      }
+      return result;
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents buildPartial() {
+      org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents result = new org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents(this);
+      int from_bitField0_ = bitField0_;
+      if (((bitField0_ & 0x00000001) != 0)) {
+        boolContents_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000001);
+      }
+      result.boolContents_ = boolContents_;
+      if (((bitField0_ & 0x00000002) != 0)) {
+        intContents_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000002);
+      }
+      result.intContents_ = intContents_;
+      if (((bitField0_ & 0x00000004) != 0)) {
+        int64Contents_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000004);
+      }
+      result.int64Contents_ = int64Contents_;
+      if (((bitField0_ & 0x00000008) != 0)) {
+        uintContents_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000008);
+      }
+      result.uintContents_ = uintContents_;
+      if (((bitField0_ & 0x00000010) != 0)) {
+        uint64Contents_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000010);
+      }
+      result.uint64Contents_ = uint64Contents_;
+      if (((bitField0_ & 0x00000020) != 0)) {
+        fp32Contents_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000020);
+      }
+      result.fp32Contents_ = fp32Contents_;
+      if (((bitField0_ & 0x00000040) != 0)) {
+        fp64Contents_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000040);
+      }
+      result.fp64Contents_ = fp64Contents_;
+      if (((bitField0_ & 0x00000080) != 0)) {
+        bytesContents_ = java.util.Collections.unmodifiableList(bytesContents_);
+        bitField0_ = (bitField0_ & ~0x00000080);
+      }
+      result.bytesContents_ = bytesContents_;
+      onBuilt();
+      return result;
+    }
+
+    @java.lang.Override
+    public Builder clone() {
+      return super.clone();
+    }
+    @java.lang.Override
+    public Builder setField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        java.lang.Object value) {
+      return super.setField(field, value);
+    }
+    @java.lang.Override
+    public Builder clearField(
+        com.google.protobuf.Descriptors.FieldDescriptor field) {
+      return super.clearField(field);
+    }
+    @java.lang.Override
+    public Builder clearOneof(
+        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      return super.clearOneof(oneof);
+    }
+    @java.lang.Override
+    public Builder setRepeatedField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        int index, java.lang.Object value) {
+      return super.setRepeatedField(field, index, value);
+    }
+    @java.lang.Override
+    public Builder addRepeatedField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        java.lang.Object value) {
+      return super.addRepeatedField(field, value);
+    }
+    @java.lang.Override
+    public Builder mergeFrom(com.google.protobuf.Message other) {
+      if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents) {
+        return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents)other);
+      } else {
+        super.mergeFrom(other);
+        return this;
+      }
+    }
+
+    public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents other) {
+      if (other == org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.getDefaultInstance()) return this;
+      if (!other.boolContents_.isEmpty()) {
+        if (boolContents_.isEmpty()) {
+          boolContents_ = other.boolContents_;
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          ensureBoolContentsIsMutable();
+          boolContents_.addAll(other.boolContents_);
+        }
+        onChanged();
+      }
+      if (!other.intContents_.isEmpty()) {
+        if (intContents_.isEmpty()) {
+          intContents_ = other.intContents_;
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          ensureIntContentsIsMutable();
+          intContents_.addAll(other.intContents_);
+        }
+        onChanged();
+      }
+      if (!other.int64Contents_.isEmpty()) {
+        if (int64Contents_.isEmpty()) {
+          int64Contents_ = other.int64Contents_;
+          bitField0_ = (bitField0_ & ~0x00000004);
+        } else {
+          ensureInt64ContentsIsMutable();
+          int64Contents_.addAll(other.int64Contents_);
+        }
+        onChanged();
+      }
+      if (!other.uintContents_.isEmpty()) {
+        if (uintContents_.isEmpty()) {
+          uintContents_ = other.uintContents_;
+          bitField0_ = (bitField0_ & ~0x00000008);
+        } else {
+          ensureUintContentsIsMutable();
+          uintContents_.addAll(other.uintContents_);
+        }
+        onChanged();
+      }
+      if (!other.uint64Contents_.isEmpty()) {
+        if (uint64Contents_.isEmpty()) {
+          uint64Contents_ = other.uint64Contents_;
+          bitField0_ = (bitField0_ & ~0x00000010);
+        } else {
+          ensureUint64ContentsIsMutable();
+          uint64Contents_.addAll(other.uint64Contents_);
+        }
+        onChanged();
+      }
+      if (!other.fp32Contents_.isEmpty()) {
+        if (fp32Contents_.isEmpty()) {
+          fp32Contents_ = other.fp32Contents_;
+          bitField0_ = (bitField0_ & ~0x00000020);
+        } else {
+          ensureFp32ContentsIsMutable();
+          fp32Contents_.addAll(other.fp32Contents_);
+        }
+        onChanged();
+      }
+      if (!other.fp64Contents_.isEmpty()) {
+        if (fp64Contents_.isEmpty()) {
+          fp64Contents_ = other.fp64Contents_;
+          bitField0_ = (bitField0_ & ~0x00000040);
+        } else {
+          ensureFp64ContentsIsMutable();
+          fp64Contents_.addAll(other.fp64Contents_);
+        }
+        onChanged();
+      }
+      if (!other.bytesContents_.isEmpty()) {
+        if (bytesContents_.isEmpty()) {
+          bytesContents_ = other.bytesContents_;
+          bitField0_ = (bitField0_ & ~0x00000080);
+        } else {
+          ensureBytesContentsIsMutable();
+          bytesContents_.addAll(other.bytesContents_);
+        }
+        onChanged();
+      }
+      this.mergeUnknownFields(other.unknownFields);
+      onChanged();
+      return this;
+    }
+
+    @java.lang.Override
+    public final boolean isInitialized() {
+      return true;
+    }
+
+    @java.lang.Override
+    public Builder mergeFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents parsedMessage = null;
+      try {
+        parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents) e.getUnfinishedMessage();
+        throw e.unwrapIOException();
+      } finally {
+        if (parsedMessage != null) {
+          mergeFrom(parsedMessage);
+        }
+      }
+      return this;
+    }
+    private int bitField0_;
+
+    private com.google.protobuf.Internal.BooleanList boolContents_ = emptyBooleanList();
+    private void ensureBoolContentsIsMutable() {
+      if (!((bitField0_ & 0x00000001) != 0)) {
+        boolContents_ = mutableCopy(boolContents_);
+        bitField0_ |= 0x00000001;
+       }
+    }
+    /**
+     * <pre>
+     * Representation for BOOL data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bool bool_contents = 1;</code>
+     * @return A list containing the boolContents.
+     */
+    public java.util.List<java.lang.Boolean>
+        getBoolContentsList() {
+      return ((bitField0_ & 0x00000001) != 0) ?
+               java.util.Collections.unmodifiableList(boolContents_) : boolContents_;
+    }
+    /**
+     * <pre>
+     * Representation for BOOL data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bool bool_contents = 1;</code>
+     * @return The count of boolContents.
+     */
+    public int getBoolContentsCount() {
+      return boolContents_.size();
+    }
+    /**
+     * <pre>
+     * Representation for BOOL data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bool bool_contents = 1;</code>
+     * @param index The index of the element to return.
+     * @return The boolContents at the given index.
+     */
+    public boolean getBoolContents(int index) {
+      return boolContents_.getBoolean(index);
+    }
+    /**
+     * <pre>
+     * Representation for BOOL data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bool bool_contents = 1;</code>
+     * @param index The index to set the value at.
+     * @param value The boolContents to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBoolContents(
+        int index, boolean value) {
+      ensureBoolContentsIsMutable();
+      boolContents_.setBoolean(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for BOOL data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bool bool_contents = 1;</code>
+     * @param value The boolContents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addBoolContents(boolean value) {
+      ensureBoolContentsIsMutable();
+      boolContents_.addBoolean(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for BOOL data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bool bool_contents = 1;</code>
+     * @param values The boolContents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllBoolContents(
+        java.lang.Iterable<? extends java.lang.Boolean> values) {
+      ensureBoolContentsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, boolContents_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for BOOL data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bool bool_contents = 1;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearBoolContents() {
+      boolContents_ = emptyBooleanList();
+      bitField0_ = (bitField0_ & ~0x00000001);
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.Internal.IntList intContents_ = emptyIntList();
+    private void ensureIntContentsIsMutable() {
+      if (!((bitField0_ & 0x00000002) != 0)) {
+        intContents_ = mutableCopy(intContents_);
+        bitField0_ |= 0x00000002;
+       }
+    }
+    /**
+     * <pre>
+     * Representation for INT8, INT16, and INT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated int32 int_contents = 2;</code>
+     * @return A list containing the intContents.
+     */
+    public java.util.List<java.lang.Integer>
+        getIntContentsList() {
+      return ((bitField0_ & 0x00000002) != 0) ?
+               java.util.Collections.unmodifiableList(intContents_) : intContents_;
+    }
+    /**
+     * <pre>
+     * Representation for INT8, INT16, and INT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated int32 int_contents = 2;</code>
+     * @return The count of intContents.
+     */
+    public int getIntContentsCount() {
+      return intContents_.size();
+    }
+    /**
+     * <pre>
+     * Representation for INT8, INT16, and INT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated int32 int_contents = 2;</code>
+     * @param index The index of the element to return.
+     * @return The intContents at the given index.
+     */
+    public int getIntContents(int index) {
+      return intContents_.getInt(index);
+    }
+    /**
+     * <pre>
+     * Representation for INT8, INT16, and INT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated int32 int_contents = 2;</code>
+     * @param index The index to set the value at.
+     * @param value The intContents to set.
+     * @return This builder for chaining.
+     */
+    public Builder setIntContents(
+        int index, int value) {
+      ensureIntContentsIsMutable();
+      intContents_.setInt(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for INT8, INT16, and INT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated int32 int_contents = 2;</code>
+     * @param value The intContents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addIntContents(int value) {
+      ensureIntContentsIsMutable();
+      intContents_.addInt(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for INT8, INT16, and INT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated int32 int_contents = 2;</code>
+     * @param values The intContents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllIntContents(
+        java.lang.Iterable<? extends java.lang.Integer> values) {
+      ensureIntContentsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, intContents_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for INT8, INT16, and INT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated int32 int_contents = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearIntContents() {
+      intContents_ = emptyIntList();
+      bitField0_ = (bitField0_ & ~0x00000002);
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.Internal.LongList int64Contents_ = emptyLongList();
+    private void ensureInt64ContentsIsMutable() {
+      if (!((bitField0_ & 0x00000004) != 0)) {
+        int64Contents_ = mutableCopy(int64Contents_);
+        bitField0_ |= 0x00000004;
+       }
+    }
+    /**
+     * <pre>
+     * Representation for INT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated int64 int64_contents = 3;</code>
+     * @return A list containing the int64Contents.
+     */
+    public java.util.List<java.lang.Long>
+        getInt64ContentsList() {
+      return ((bitField0_ & 0x00000004) != 0) ?
+               java.util.Collections.unmodifiableList(int64Contents_) : int64Contents_;
+    }
+    /**
+     * <pre>
+     * Representation for INT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated int64 int64_contents = 3;</code>
+     * @return The count of int64Contents.
+     */
+    public int getInt64ContentsCount() {
+      return int64Contents_.size();
+    }
+    /**
+     * <pre>
+     * Representation for INT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated int64 int64_contents = 3;</code>
+     * @param index The index of the element to return.
+     * @return The int64Contents at the given index.
+     */
+    public long getInt64Contents(int index) {
+      return int64Contents_.getLong(index);
+    }
+    /**
+     * <pre>
+     * Representation for INT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated int64 int64_contents = 3;</code>
+     * @param index The index to set the value at.
+     * @param value The int64Contents to set.
+     * @return This builder for chaining.
+     */
+    public Builder setInt64Contents(
+        int index, long value) {
+      ensureInt64ContentsIsMutable();
+      int64Contents_.setLong(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for INT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated int64 int64_contents = 3;</code>
+     * @param value The int64Contents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addInt64Contents(long value) {
+      ensureInt64ContentsIsMutable();
+      int64Contents_.addLong(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for INT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated int64 int64_contents = 3;</code>
+     * @param values The int64Contents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllInt64Contents(
+        java.lang.Iterable<? extends java.lang.Long> values) {
+      ensureInt64ContentsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, int64Contents_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for INT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated int64 int64_contents = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearInt64Contents() {
+      int64Contents_ = emptyLongList();
+      bitField0_ = (bitField0_ & ~0x00000004);
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.Internal.IntList uintContents_ = emptyIntList();
+    private void ensureUintContentsIsMutable() {
+      if (!((bitField0_ & 0x00000008) != 0)) {
+        uintContents_ = mutableCopy(uintContents_);
+        bitField0_ |= 0x00000008;
+       }
+    }
+    /**
+     * <pre>
+     * Representation for UINT8, UINT16, and UINT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint32 uint_contents = 4;</code>
+     * @return A list containing the uintContents.
+     */
+    public java.util.List<java.lang.Integer>
+        getUintContentsList() {
+      return ((bitField0_ & 0x00000008) != 0) ?
+               java.util.Collections.unmodifiableList(uintContents_) : uintContents_;
+    }
+    /**
+     * <pre>
+     * Representation for UINT8, UINT16, and UINT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint32 uint_contents = 4;</code>
+     * @return The count of uintContents.
+     */
+    public int getUintContentsCount() {
+      return uintContents_.size();
+    }
+    /**
+     * <pre>
+     * Representation for UINT8, UINT16, and UINT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint32 uint_contents = 4;</code>
+     * @param index The index of the element to return.
+     * @return The uintContents at the given index.
+     */
+    public int getUintContents(int index) {
+      return uintContents_.getInt(index);
+    }
+    /**
+     * <pre>
+     * Representation for UINT8, UINT16, and UINT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint32 uint_contents = 4;</code>
+     * @param index The index to set the value at.
+     * @param value The uintContents to set.
+     * @return This builder for chaining.
+     */
+    public Builder setUintContents(
+        int index, int value) {
+      ensureUintContentsIsMutable();
+      uintContents_.setInt(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for UINT8, UINT16, and UINT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint32 uint_contents = 4;</code>
+     * @param value The uintContents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addUintContents(int value) {
+      ensureUintContentsIsMutable();
+      uintContents_.addInt(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for UINT8, UINT16, and UINT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint32 uint_contents = 4;</code>
+     * @param values The uintContents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllUintContents(
+        java.lang.Iterable<? extends java.lang.Integer> values) {
+      ensureUintContentsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, uintContents_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for UINT8, UINT16, and UINT32 data types. The size
+     * must match what is expected by the tensor's shape. The contents
+     * must be the flattened, one-dimensional, row-major order of the
+     * tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint32 uint_contents = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearUintContents() {
+      uintContents_ = emptyIntList();
+      bitField0_ = (bitField0_ & ~0x00000008);
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.Internal.LongList uint64Contents_ = emptyLongList();
+    private void ensureUint64ContentsIsMutable() {
+      if (!((bitField0_ & 0x00000010) != 0)) {
+        uint64Contents_ = mutableCopy(uint64Contents_);
+        bitField0_ |= 0x00000010;
+       }
+    }
+    /**
+     * <pre>
+     * Representation for UINT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint64 uint64_contents = 5;</code>
+     * @return A list containing the uint64Contents.
+     */
+    public java.util.List<java.lang.Long>
+        getUint64ContentsList() {
+      return ((bitField0_ & 0x00000010) != 0) ?
+               java.util.Collections.unmodifiableList(uint64Contents_) : uint64Contents_;
+    }
+    /**
+     * <pre>
+     * Representation for UINT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint64 uint64_contents = 5;</code>
+     * @return The count of uint64Contents.
+     */
+    public int getUint64ContentsCount() {
+      return uint64Contents_.size();
+    }
+    /**
+     * <pre>
+     * Representation for UINT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint64 uint64_contents = 5;</code>
+     * @param index The index of the element to return.
+     * @return The uint64Contents at the given index.
+     */
+    public long getUint64Contents(int index) {
+      return uint64Contents_.getLong(index);
+    }
+    /**
+     * <pre>
+     * Representation for UINT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint64 uint64_contents = 5;</code>
+     * @param index The index to set the value at.
+     * @param value The uint64Contents to set.
+     * @return This builder for chaining.
+     */
+    public Builder setUint64Contents(
+        int index, long value) {
+      ensureUint64ContentsIsMutable();
+      uint64Contents_.setLong(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for UINT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint64 uint64_contents = 5;</code>
+     * @param value The uint64Contents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addUint64Contents(long value) {
+      ensureUint64ContentsIsMutable();
+      uint64Contents_.addLong(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for UINT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint64 uint64_contents = 5;</code>
+     * @param values The uint64Contents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllUint64Contents(
+        java.lang.Iterable<? extends java.lang.Long> values) {
+      ensureUint64ContentsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, uint64Contents_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for UINT64 data types. The size must match what
+     * is expected by the tensor's shape. The contents must be the
+     * flattened, one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated uint64 uint64_contents = 5;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearUint64Contents() {
+      uint64Contents_ = emptyLongList();
+      bitField0_ = (bitField0_ & ~0x00000010);
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.Internal.FloatList fp32Contents_ = emptyFloatList();
+    private void ensureFp32ContentsIsMutable() {
+      if (!((bitField0_ & 0x00000020) != 0)) {
+        fp32Contents_ = mutableCopy(fp32Contents_);
+        bitField0_ |= 0x00000020;
+       }
+    }
+    /**
+     * <pre>
+     * Representation for FP32 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated float fp32_contents = 6;</code>
+     * @return A list containing the fp32Contents.
+     */
+    public java.util.List<java.lang.Float>
+        getFp32ContentsList() {
+      return ((bitField0_ & 0x00000020) != 0) ?
+               java.util.Collections.unmodifiableList(fp32Contents_) : fp32Contents_;
+    }
+    /**
+     * <pre>
+     * Representation for FP32 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated float fp32_contents = 6;</code>
+     * @return The count of fp32Contents.
+     */
+    public int getFp32ContentsCount() {
+      return fp32Contents_.size();
+    }
+    /**
+     * <pre>
+     * Representation for FP32 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated float fp32_contents = 6;</code>
+     * @param index The index of the element to return.
+     * @return The fp32Contents at the given index.
+     */
+    public float getFp32Contents(int index) {
+      return fp32Contents_.getFloat(index);
+    }
+    /**
+     * <pre>
+     * Representation for FP32 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated float fp32_contents = 6;</code>
+     * @param index The index to set the value at.
+     * @param value The fp32Contents to set.
+     * @return This builder for chaining.
+     */
+    public Builder setFp32Contents(
+        int index, float value) {
+      ensureFp32ContentsIsMutable();
+      fp32Contents_.setFloat(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for FP32 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated float fp32_contents = 6;</code>
+     * @param value The fp32Contents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addFp32Contents(float value) {
+      ensureFp32ContentsIsMutable();
+      fp32Contents_.addFloat(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for FP32 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated float fp32_contents = 6;</code>
+     * @param values The fp32Contents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllFp32Contents(
+        java.lang.Iterable<? extends java.lang.Float> values) {
+      ensureFp32ContentsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, fp32Contents_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for FP32 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated float fp32_contents = 6;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearFp32Contents() {
+      fp32Contents_ = emptyFloatList();
+      bitField0_ = (bitField0_ & ~0x00000020);
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.Internal.DoubleList fp64Contents_ = emptyDoubleList();
+    private void ensureFp64ContentsIsMutable() {
+      if (!((bitField0_ & 0x00000040) != 0)) {
+        fp64Contents_ = mutableCopy(fp64Contents_);
+        bitField0_ |= 0x00000040;
+       }
+    }
+    /**
+     * <pre>
+     * Representation for FP64 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated double fp64_contents = 7;</code>
+     * @return A list containing the fp64Contents.
+     */
+    public java.util.List<java.lang.Double>
+        getFp64ContentsList() {
+      return ((bitField0_ & 0x00000040) != 0) ?
+               java.util.Collections.unmodifiableList(fp64Contents_) : fp64Contents_;
+    }
+    /**
+     * <pre>
+     * Representation for FP64 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated double fp64_contents = 7;</code>
+     * @return The count of fp64Contents.
+     */
+    public int getFp64ContentsCount() {
+      return fp64Contents_.size();
+    }
+    /**
+     * <pre>
+     * Representation for FP64 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated double fp64_contents = 7;</code>
+     * @param index The index of the element to return.
+     * @return The fp64Contents at the given index.
+     */
+    public double getFp64Contents(int index) {
+      return fp64Contents_.getDouble(index);
+    }
+    /**
+     * <pre>
+     * Representation for FP64 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated double fp64_contents = 7;</code>
+     * @param index The index to set the value at.
+     * @param value The fp64Contents to set.
+     * @return This builder for chaining.
+     */
+    public Builder setFp64Contents(
+        int index, double value) {
+      ensureFp64ContentsIsMutable();
+      fp64Contents_.setDouble(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for FP64 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated double fp64_contents = 7;</code>
+     * @param value The fp64Contents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addFp64Contents(double value) {
+      ensureFp64ContentsIsMutable();
+      fp64Contents_.addDouble(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for FP64 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated double fp64_contents = 7;</code>
+     * @param values The fp64Contents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllFp64Contents(
+        java.lang.Iterable<? extends java.lang.Double> values) {
+      ensureFp64ContentsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, fp64Contents_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for FP64 data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated double fp64_contents = 7;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearFp64Contents() {
+      fp64Contents_ = emptyDoubleList();
+      bitField0_ = (bitField0_ & ~0x00000040);
+      onChanged();
+      return this;
+    }
+
+    private java.util.List<com.google.protobuf.ByteString> bytesContents_ = java.util.Collections.emptyList();
+    private void ensureBytesContentsIsMutable() {
+      if (!((bitField0_ & 0x00000080) != 0)) {
+        bytesContents_ = new java.util.ArrayList<com.google.protobuf.ByteString>(bytesContents_);
+        bitField0_ |= 0x00000080;
+       }
+    }
+    /**
+     * <pre>
+     * Representation for BYTES data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bytes bytes_contents = 8;</code>
+     * @return A list containing the bytesContents.
+     */
+    public java.util.List<com.google.protobuf.ByteString>
+        getBytesContentsList() {
+      return ((bitField0_ & 0x00000080) != 0) ?
+               java.util.Collections.unmodifiableList(bytesContents_) : bytesContents_;
+    }
+    /**
+     * <pre>
+     * Representation for BYTES data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bytes bytes_contents = 8;</code>
+     * @return The count of bytesContents.
+     */
+    public int getBytesContentsCount() {
+      return bytesContents_.size();
+    }
+    /**
+     * <pre>
+     * Representation for BYTES data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bytes bytes_contents = 8;</code>
+     * @param index The index of the element to return.
+     * @return The bytesContents at the given index.
+     */
+    public com.google.protobuf.ByteString getBytesContents(int index) {
+      return bytesContents_.get(index);
+    }
+    /**
+     * <pre>
+     * Representation for BYTES data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bytes bytes_contents = 8;</code>
+     * @param index The index to set the value at.
+     * @param value The bytesContents to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBytesContents(
+        int index, com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureBytesContentsIsMutable();
+      bytesContents_.set(index, value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for BYTES data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bytes bytes_contents = 8;</code>
+     * @param value The bytesContents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addBytesContents(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureBytesContentsIsMutable();
+      bytesContents_.add(value);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for BYTES data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bytes bytes_contents = 8;</code>
+     * @param values The bytesContents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllBytesContents(
+        java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+      ensureBytesContentsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, bytesContents_);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Representation for BYTES data type. The size must match what is
+     * expected by the tensor's shape. The contents must be the flattened,
+     * one-dimensional, row-major order of the tensor elements.
+     * </pre>
+     *
+     * <code>repeated bytes bytes_contents = 8;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearBytesContents() {
+      bytesContents_ = java.util.Collections.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000080);
+      onChanged();
+      return this;
+    }
+    @java.lang.Override
+    public final Builder setUnknownFields(
+        final com.google.protobuf.UnknownFieldSet unknownFields) {
+      return super.setUnknownFields(unknownFields);
+    }
+
+    @java.lang.Override
+    public final Builder mergeUnknownFields(
+        final com.google.protobuf.UnknownFieldSet unknownFields) {
+      return super.mergeUnknownFields(unknownFields);
+    }
+
+
+    // @@protoc_insertion_point(builder_scope:inference.InferTensorContents)
+  }
+
+  // @@protoc_insertion_point(class_scope:inference.InferTensorContents)
+  private static final org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents DEFAULT_INSTANCE;
+  static {
+    DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents();
+  }
+
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getDefaultInstance() {
+    return DEFAULT_INSTANCE;
+  }
+
+  private static final com.google.protobuf.Parser<InferTensorContents>
+      PARSER = new com.google.protobuf.AbstractParser<InferTensorContents>() {
+    @java.lang.Override
+    public InferTensorContents parsePartialFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return new InferTensorContents(input, extensionRegistry);
+    }
+  };
+
+  public static com.google.protobuf.Parser<InferTensorContents> parser() {
+    return PARSER;
+  }
+
+  @java.lang.Override
+  public com.google.protobuf.Parser<InferTensorContents> getParserForType() {
+    return PARSER;
+  }
+
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getDefaultInstanceForType() {
+    return DEFAULT_INSTANCE;
+  }
+
 }
+

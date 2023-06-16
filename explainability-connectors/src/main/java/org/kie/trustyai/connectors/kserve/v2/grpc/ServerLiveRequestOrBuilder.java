@@ -4,6 +4,6 @@
 package org.kie.trustyai.connectors.kserve.v2.grpc;
 
 public interface ServerLiveRequestOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:inference.ServerLiveRequest)
-        com.google.protobuf.MessageOrBuilder {
+    // @@protoc_insertion_point(interface_extends:inference.ServerLiveRequest)
+    com.google.protobuf.MessageOrBuilder {
 }

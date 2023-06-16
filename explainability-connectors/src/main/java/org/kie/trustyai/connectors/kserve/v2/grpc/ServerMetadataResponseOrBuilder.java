@@ -4,100 +4,87 @@
 package org.kie.trustyai.connectors.kserve.v2.grpc;
 
 public interface ServerMetadataResponseOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:inference.ServerMetadataResponse)
-        com.google.protobuf.MessageOrBuilder {
+    // @@protoc_insertion_point(interface_extends:inference.ServerMetadataResponse)
+    com.google.protobuf.MessageOrBuilder {
 
-    /**
-     * <pre>
-     * The server name.
-     * </pre>
-     *
-     * <code>string name = 1;</code>
-     * 
-     * @return The name.
-     */
-    java.lang.String getName();
+  /**
+   * <pre>
+   * The server name.
+   * </pre>
+   *
+   * <code>string name = 1;</code>
+   * @return The name.
+   */
+  java.lang.String getName();
+  /**
+   * <pre>
+   * The server name.
+   * </pre>
+   *
+   * <code>string name = 1;</code>
+   * @return The bytes for name.
+   */
+  com.google.protobuf.ByteString
+      getNameBytes();
 
-    /**
-     * <pre>
-     * The server name.
-     * </pre>
-     *
-     * <code>string name = 1;</code>
-     * 
-     * @return The bytes for name.
-     */
-    com.google.protobuf.ByteString
-            getNameBytes();
+  /**
+   * <pre>
+   * The server version.
+   * </pre>
+   *
+   * <code>string version = 2;</code>
+   * @return The version.
+   */
+  java.lang.String getVersion();
+  /**
+   * <pre>
+   * The server version.
+   * </pre>
+   *
+   * <code>string version = 2;</code>
+   * @return The bytes for version.
+   */
+  com.google.protobuf.ByteString
+      getVersionBytes();
 
-    /**
-     * <pre>
-     * The server version.
-     * </pre>
-     *
-     * <code>string version = 2;</code>
-     * 
-     * @return The version.
-     */
-    java.lang.String getVersion();
-
-    /**
-     * <pre>
-     * The server version.
-     * </pre>
-     *
-     * <code>string version = 2;</code>
-     * 
-     * @return The bytes for version.
-     */
-    com.google.protobuf.ByteString
-            getVersionBytes();
-
-    /**
-     * <pre>
-     * The extensions supported by the server.
-     * </pre>
-     *
-     * <code>repeated string extensions = 3;</code>
-     * 
-     * @return A list containing the extensions.
-     */
-    java.util.List<java.lang.String>
-            getExtensionsList();
-
-    /**
-     * <pre>
-     * The extensions supported by the server.
-     * </pre>
-     *
-     * <code>repeated string extensions = 3;</code>
-     * 
-     * @return The count of extensions.
-     */
-    int getExtensionsCount();
-
-    /**
-     * <pre>
-     * The extensions supported by the server.
-     * </pre>
-     *
-     * <code>repeated string extensions = 3;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The extensions at the given index.
-     */
-    java.lang.String getExtensions(int index);
-
-    /**
-     * <pre>
-     * The extensions supported by the server.
-     * </pre>
-     *
-     * <code>repeated string extensions = 3;</code>
-     * 
-     * @param index The index of the value to return.
-     * @return The bytes of the extensions at the given index.
-     */
-    com.google.protobuf.ByteString
-            getExtensionsBytes(int index);
+  /**
+   * <pre>
+   * The extensions supported by the server.
+   * </pre>
+   *
+   * <code>repeated string extensions = 3;</code>
+   * @return A list containing the extensions.
+   */
+  java.util.List<java.lang.String>
+      getExtensionsList();
+  /**
+   * <pre>
+   * The extensions supported by the server.
+   * </pre>
+   *
+   * <code>repeated string extensions = 3;</code>
+   * @return The count of extensions.
+   */
+  int getExtensionsCount();
+  /**
+   * <pre>
+   * The extensions supported by the server.
+   * </pre>
+   *
+   * <code>repeated string extensions = 3;</code>
+   * @param index The index of the element to return.
+   * @return The extensions at the given index.
+   */
+  java.lang.String getExtensions(int index);
+  /**
+   * <pre>
+   * The extensions supported by the server.
+   * </pre>
+   *
+   * <code>repeated string extensions = 3;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the extensions at the given index.
+   */
+  com.google.protobuf.ByteString
+      getExtensionsBytes(int index);
 }

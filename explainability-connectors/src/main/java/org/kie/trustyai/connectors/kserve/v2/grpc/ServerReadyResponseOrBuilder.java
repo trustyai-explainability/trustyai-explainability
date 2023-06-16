@@ -4,17 +4,16 @@
 package org.kie.trustyai.connectors.kserve.v2.grpc;
 
 public interface ServerReadyResponseOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:inference.ServerReadyResponse)
-        com.google.protobuf.MessageOrBuilder {
+    // @@protoc_insertion_point(interface_extends:inference.ServerReadyResponse)
+    com.google.protobuf.MessageOrBuilder {
 
-    /**
-     * <pre>
-     * True if the inference server is ready, false if not ready.
-     * </pre>
-     *
-     * <code>bool ready = 1;</code>
-     * 
-     * @return The ready.
-     */
-    boolean getReady();
+  /**
+   * <pre>
+   * True if the inference server is ready, false if not ready.
+   * </pre>
+   *
+   * <code>bool ready = 1;</code>
+   * @return The ready.
+   */
+  boolean getReady();
 }
