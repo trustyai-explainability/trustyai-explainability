@@ -9,15 +9,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+
+import java.util.UUID;
 
 public class TSSaliencyExplainerTest {
 
@@ -39,11 +44,14 @@ public class TSSaliencyExplainerTest {
 
                 PredictionInput input = new PredictionInput(features2List);
                 inputs.add(input);
+
+                break;
             }
 
             // System.out.println("inputs = " + inputs);
 
             PredictionProvider model = new TSSaliencyModel();
+
             CompletableFuture<List<PredictionOutput>> result = model.predictAsync(inputs);
             List<PredictionOutput> results = result.get();
 
@@ -53,12 +61,59 @@ public class TSSaliencyExplainerTest {
                 for (Output output : outList) {
                     System.out.println(output);
                 }
-
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+
+            // public SimplePrediction(PredictionInput input, PredictionOutput output) {
+            //     super(input, output);
+            // }
+
+            // public interface Prediction {
+
+            //     PredictionInput getInput();
+            
+            //     PredictionOutput getOutput();
+            
+            //     UUID getExecutionId();
+            // }
+
+            PredictionInput predictionInput = inputs.get(0);
+
+            // public PredictionOutput(List<Output> outputs) {
+            //     this.outputs = outputs;
+            // }
+
+            PredictionOutput predictionOutput = results.get(0);
+
+            UUID uuid = UUID.randomUUID();
+            
+            Prediction prediction = new SimplePrediction(predictionInput, predictionOutput, uuid);
+
+            // public TSSaliencyExplainer(float[] baseValue, int gradientSamples, int steps, int randomSeed) {
+
+            //     Giridhar Ganapavarapu
+            //     3:02 PM
+            //   these are two numbers.. based on these numbers, we generate those many samples around X
+            //   3:02
+            //   We can set default values
+            //   3:03
+            //   like ng = 100 and nalpha = 10
+
+           
+            TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 100, 10, 0);
+
+            // public CompletableFuture<IntegratedGradient> explainAsync(Prediction prediction, PredictionProvider model,
+            // Consumer<IntegratedGradient> intermediateResultsConsumer) {
+
+   
+
+    }catch(
+
+    Exception e)
+    {
+        e.printStackTrace();
+    }
 
     }
 

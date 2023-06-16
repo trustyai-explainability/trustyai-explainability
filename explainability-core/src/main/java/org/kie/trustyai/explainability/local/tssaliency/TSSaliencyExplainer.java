@@ -8,15 +8,21 @@ import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.SaliencyResults;
 
-public class TSSaliencyExplainer implements LocalExplainer<IntegratedGradient> {
+public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
-    private PredictionProvider model;
-    private int inputLength;
-    private List<Feature> x;
-    private float[] baseValue; // check
-    private int numSamples;
-    private int gradientSamples;
+    // public CompletableFuture<IntegratedGradient> explainAsync(Prediction
+    // prediction, PredictionProvider model,
+    // Consumer<IntegratedGradient> intermediateResultsConsumer) {
+
+    // private PredictionProvider model;
+    // private int inputLength;
+    // private List<Feature> x;
+    private double[] baseValue; // check
+    // private int numSamples;
+    private int gradientSamples; // Number of samples for gradient estimation
+    private int steps; // Number of steps in convex path
     private Object gradientFunction;
     private int randomSeed;
 
@@ -32,16 +38,23 @@ public class TSSaliencyExplainer implements LocalExplainer<IntegratedGradient> {
     // random_seed: int = 22,
     // ):
 
-    public TSSaliencyExplainer(PredictionProvider model, int inputLength, List<Feature> x, float[] baseValue,
-            int numSamples, int gradientSamples, Object gradientFunction, int randomSeed) {
+    // f = Multivariate Time Series Model Inference Function
+    // T; F = Model’s time and feature input dimension
+    // x = fxt;jgt2[T];j2[F] : Time series instance
+    // b = fbjgj2[F]: Feature’s base values (optional)
+    // ng = Number of samples for gradient estimation
+    // n = Number of steps in convex path
 
-        this.model = model;
-        this.inputLength = inputLength;
-        this.x = x;
+    public TSSaliencyExplainer(double[] baseValue, int gradientSamples, int steps, int randomSeed) {
+
+        // this.model = model;
+        // this.inputLength = inputLength;
+        // this.x = x;
         this.baseValue = baseValue;
-        this.numSamples = numSamples;
+        // this.numSamples = numSamples;
         this.gradientSamples = gradientSamples;
-        this.gradientFunction = gradientFunction;
+        // this.gradientFunction = gradientFunction;
+        this.steps = steps;
         this.randomSeed = randomSeed;
     }
 
@@ -75,8 +88,8 @@ public class TSSaliencyExplainer implements LocalExplainer<IntegratedGradient> {
     // }
 
     @Override
-    public CompletableFuture<IntegratedGradient> explainAsync(Prediction prediction, PredictionProvider model,
-            Consumer<IntegratedGradient> intermediateResultsConsumer) {
+    public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model,
+            Consumer<SaliencyResults> intermediateResultsConsumer) {
 
         // Input:
         // f = Multivariate Time Series Model Inference Function CHECK
@@ -92,7 +105,7 @@ public class TSSaliencyExplainer implements LocalExplainer<IntegratedGradient> {
         // t=1 xt;jgj2[F]
 
         // if (baseValue.length == 0) {
-        //     baseValue = calcBaseValue();
+        // baseValue = calcBaseValue();
         // }
 
         return null;
@@ -100,11 +113,9 @@ public class TSSaliencyExplainer implements LocalExplainer<IntegratedGradient> {
     }
 
     // private double[] calcBaseValue() {
-    //     // 1/T sum(1..T) x(t, j)
+    // // 1/T sum(1..T) x(t, j)
 
-    //     for (i = 0; i < )
-
-
+    // for (i = 0; i < )
 
     // }
 }
