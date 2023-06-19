@@ -26,10 +26,11 @@ if [ -z "${SKIP_INSTALL}" ]; then
     oc new-project ${ODHPROJECT}
     oc project ${ODHPROJECT} # in case a new project is not created
     $HOME/peak/install.sh
-    echo "Sleeping for 5 min to let the KfDef install settle"
     if [ ${LOCAL} = true ]; then
+      echo "Sleeping for 30s to let the KfDef install settle"
       sleep 30s
     else
+      echo "Sleeping for 5 min to let the KfDef install settle"
       sleep 5m
     fi
 
