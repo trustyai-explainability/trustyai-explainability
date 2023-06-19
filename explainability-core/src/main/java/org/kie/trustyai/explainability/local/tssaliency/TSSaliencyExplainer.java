@@ -339,7 +339,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                 double gsum = 0.0;
 
                 for (int n = 0; n < ng; n++) {
-                    System.out.println(n + "," + t + "," + f);
+                    // System.out.println(n + "," + t + "," + f);
                     double term = diff[n] * U[n][t][f];
                     double term2 = term / MU;
                     gsum += term2;
