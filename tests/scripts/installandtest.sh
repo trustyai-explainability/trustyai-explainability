@@ -15,6 +15,7 @@ fi
 TESTS_REGEX=${TESTS_REGEX:-"basictests"}
 ODHPROJECT=${ODHPROJECT:-"opendatahub"}
 export ODHPROJECT
+export LOCAL
 
 echo "OCP version info"
 echo `oc version`
@@ -26,7 +27,11 @@ if [ -z "${SKIP_INSTALL}" ]; then
     oc project ${ODHPROJECT} # in case a new project is not created
     $HOME/peak/install.sh
     echo "Sleeping for 5 min to let the KfDef install settle"
-    sleep 5m
+    if [ ${LOCAL} = true ]; then
+      sleep 30s
+    else
+      sleep 5m
+    fi
 
     # Save the list of events and pods that are running prior to the test run
     oc get events --sort-by='{.lastTimestamp}' > ${ARTIFACT_DIR}/pretest-${ODHPROJECT}.events.txt
