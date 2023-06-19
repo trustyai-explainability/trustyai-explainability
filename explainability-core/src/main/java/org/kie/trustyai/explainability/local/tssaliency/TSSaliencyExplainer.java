@@ -246,13 +246,13 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
         double U[][][] = new double[ng][T][F];
 
-        for (int i = 0; i < ng; i++) {
+        for (int n = 0; n < ng; n++) {
 
             double sum = 0.0;
             for (int t = 0; t < T; t++) {
                 for (int f = 0; f < F; f++) {
-                    U[ng][t][f] = N.sample();
-                    sum += (U[ng][t][f]) * (U[ng][t][f]);
+                    U[n][t][f] = N.sample();
+                    sum += (U[n][t][f]) * (U[n][t][f]);
                 }
             }
 
@@ -260,7 +260,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
             for (int t = 0; t < T; t++) {
                 for (int f = 0; f < F; f++) {
-                    U[ng][t][f] = (U[ng][t][f]) / L2norm;
+                    U[n][t][f] = (U[n][t][f]) / L2norm;
                 }
             }
         }
@@ -269,7 +269,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
         List<PredictionInput> inputs = new LinkedList<PredictionInput>();
 
-        for (int i = 0; i < ng; i++) {
+        for (int n = 0; n < ng; n++) {
 
             // dfs = f(x + u * sample) - f(x)
 
@@ -280,7 +280,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                 double[] feature3Array = new double[F];
 
                 for (int f = 0; f < F; f++) {
-                    feature3Array[f] = x[t][f] + MU * U[ng][t][f];
+                    feature3Array[f] = x[t][f] + MU * U[n][t][f];
                 }
 
                 Feature feature3 = new Feature("xdelta" + t, Type.VECTOR, new Value(feature3Array));
@@ -334,11 +334,12 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         double mult = T * F / ng;
 
         for (int t = 0; t < T; t++) {
-            for (int f = 0; f < T; f++) {
+            for (int f = 0; f < F; f++) {
 
                 double gsum = 0.0;
 
                 for (int n = 0; n < ng; n++) {
+                    System.out.println(n + "," + t + "," + f);
                     double term = diff[n] * U[n][t][f];
                     double term2 = term / MU;
                     gsum += term2;
