@@ -331,6 +331,8 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
         double[][] retval = new double[T][F];
 
+        double mult = T * F / ng;
+
         for (int t = 0; t < T; t++) {
             for (int f = 0; f < T; f++) {
 
@@ -342,7 +344,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                     gsum += term2;
                 }
 
-                retval[t][f] = gsum;
+                retval[t][f] = mult * gsum;
             }
         }
 
