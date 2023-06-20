@@ -18,7 +18,7 @@ ARG CI_CONTAINER_VERSION="unknown"
 
 
 ## Livebuilder CODE BEGIN ##
-FROM registry.access.redhat.com/ubi8/openjdk-17:1.14-3.1661798365 AS build
+FROM registry.access.redhat.com/ubi8/openjdk-17:latest AS build
 
 ## Build args to be used at this step
 ARG SOURCE_CODE
@@ -44,7 +44,7 @@ RUN mvn -B clean package --file pom.xml -P service-minimal -DskipTests; rm -Rf e
 
 
 ###############################################################################
-FROM registry.access.redhat.com/ubi8/openjdk-17-runtime:1.15 AS runtime
+FROM registry.access.redhat.com/ubi8/openjdk-17-runtime:latest AS runtime
 ENV LANGUAGE='en_US:en'
 
 ## Livebuilder CODE BEGIN ##

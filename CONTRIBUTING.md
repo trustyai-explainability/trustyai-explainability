@@ -127,7 +127,7 @@ Great feature proposals should include a short **Description** of the feature, t
 If you have not done so on this machine, you need to:
 
 * Install Git and configure your GitHub access
-* Install Java SDK (OpenJDK recommended)
+* Install Java SDK (OpenJDK 17 recommended)
 * For Native Image, follow Quarkus instructions at [GraalVM](https://quarkus.io/guides/building-native-image)
 
 ## Build
