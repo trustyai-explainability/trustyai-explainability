@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureImportance;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
@@ -38,14 +39,11 @@ public class TSSaliencyExplainerTest {
             int count = 0;
             for (Feature datum : data) {
 
-                // System.out.println("name: " + datum.getName());
                 assert datum.getType() == Type.VECTOR;
 
                 Feature[] features2 = (Feature[]) datum.getValue().getUnderlyingObject();
 
                 List<Feature> features2List = Arrays.asList(features2);
-
-                // System.out.println(features2List);
 
                 PredictionInput input = new PredictionInput(features2List);
                 inputs.add(input);
@@ -54,8 +52,6 @@ public class TSSaliencyExplainerTest {
                     break;
                 }
             }
-
-            // System.out.println("inputs = " + inputs);
 
             PredictionProvider model = new TSSaliencyModel();
 
@@ -70,8 +66,6 @@ public class TSSaliencyExplainerTest {
                 }
             }
 
-            // System.exit(1);
-
             // ******** NOTE need a loop for e.g., Ford data
 
             PredictionInput predictionInput = inputs.get(0);
@@ -82,31 +76,22 @@ public class TSSaliencyExplainerTest {
 
             Prediction prediction = new SimplePrediction(predictionInput, predictionOutput, uuid);
 
-            // Giridhar Ganapavarapu
-            // 3:02 PM
-            // these are two numbers.. based on these numbers, we generate those many
-            // samples around X
-            // 3:02
-            // We can set default values
-            // 3:03
-            // like ng = 100 and nalpha = 10
-
             TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 50, 1000, 0);
 
             CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(prediction, model,
                     null);
             SaliencyResults saliencyResults = saliencyResultsCompletable.get();
 
-            // System.out.println(saliencyResults.getSaliencies());
-
             Map<String, Saliency> saliencyMap = saliencyResults.getSaliencies();
+            Saliency saliency = saliencyMap.get("result");
+            List<FeatureImportance> featureImportances = saliency.getPerFeatureImportance();
+            FeatureImportance featureImportance = featureImportances.get(0);
+
+            double[][] scoreResult = featureImportance.getScoreMatrix();
 
             for (int t = 0; t < 500; t++) {
                 for (int f = 0; f < 1; f++) {
-                    String name = "IG[" + t + "][" + f + "]";
-                    Saliency saliency = saliencyMap.get(name);
-                    Output output = saliency.getOutput();
-                    double score = output.getScore();
+                    double score = scoreResult[t][f];
                     System.out.println(score);
                 }
             }

@@ -19,6 +19,8 @@ public class TSSaliencyModel implements PredictionProvider {
     
     Double random[];
 
+    // FIXME Handle changes
+
     public TSSaliencyModel() {
 
         Random rng = new Random(0L);
@@ -27,10 +29,10 @@ public class TSSaliencyModel implements PredictionProvider {
 
         for (int i = 0; i < NUM_RANDOM; i++) {
             random[i] = rng.nextDouble();
-            System.out.println(random[i] + ",");
+            // System.out.println(random[i] + ",");
         }
 
-        System.out.println();
+        // System.out.println();
     }
 
     /**

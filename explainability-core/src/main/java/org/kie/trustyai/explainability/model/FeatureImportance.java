@@ -17,6 +17,10 @@ package org.kie.trustyai.explainability.model;
 
 import java.util.Objects;
 
+import javax.print.DocFlavor.SERVICE_FORMATTED;
+
+import org.apache.commons.math3.linear.MatrixDimensionMismatchException;
+
 /**
  * The importance associated to a given {@link Feature}.
  * This is usually the output of an explanation algorithm (local or global).
@@ -26,17 +30,27 @@ public class FeatureImportance {
     private final Feature feature;
     private final double score;
     private final double confidence;
+    private final double[][] scoreMatrix;
 
     public FeatureImportance(Feature feature, double score) {
         this.feature = feature;
         this.score = score;
         this.confidence = 0;
+        this.scoreMatrix = null;
     }
 
     public FeatureImportance(Feature feature, double score, double confidence) {
         this.feature = feature;
         this.score = score;
         this.confidence = confidence;
+        this.scoreMatrix = null;
+    }
+
+    public FeatureImportance(Feature feature, double[][] scoreMatrix, double confidence) {
+        this.feature = feature;
+        this.score = 0.0;
+        this.confidence = confidence;
+        this.scoreMatrix = scoreMatrix;
     }
 
     public Feature getFeature() {
@@ -49,6 +63,10 @@ public class FeatureImportance {
 
     public double getConfidence() {
         return confidence;
+    }
+
+    public double[][] getScoreMatrix() {
+        return scoreMatrix;
     }
 
     @Override
@@ -69,13 +87,47 @@ public class FeatureImportance {
             return false;
         }
         FeatureImportance other = (FeatureImportance) o;
-        return this.getFeature().equals(other.getFeature())
-                && (Math.abs(this.getScore() - other.getScore()) < 1e-6)
-                && (Math.abs(this.getConfidence() - other.getConfidence()) < 1e-6);
+
+        boolean matricesEqual = true;
+        if (scoreMatrix != other.scoreMatrix) {
+            int T1 = scoreMatrix.length;
+            int F1 = scoreMatrix[0].length;
+
+            int T2 = other.scoreMatrix.length;
+            int F2 = other.scoreMatrix[0].length;
+
+            if (T1 != T2 || F1 != F2) {
+                matricesEqual = false;
+            } else {
+                for (int t = 0; t < T1; t++) {
+                    for (int f = 0; f < F1; f++) {
+                        if (scoreMatrix[t][f] - other.scoreMatrix[t][f] > 1e-6) {
+                            matricesEqual = false;
+                            break;
+                        }
+                    }
+
+                    if (!matricesEqual) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        boolean retval;
+        if (!matricesEqual) {
+            retval = false;
+        } else {
+            retval = this.getFeature().equals(other.getFeature())
+                    && (Math.abs(this.getScore() - other.getScore()) < 1e-6)
+                    && (Math.abs(this.getConfidence() - other.getConfidence()) < 1e-6);
+        }
+
+        return retval;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feature, score, confidence);
+        return Objects.hash(feature, score, confidence, scoreMatrix);
     }
 }
