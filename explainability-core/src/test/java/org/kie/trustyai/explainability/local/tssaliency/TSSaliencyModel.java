@@ -2,6 +2,7 @@ package org.kie.trustyai.explainability.local.tssaliency;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import org.kie.trustyai.explainability.model.Feature;
@@ -14,17 +15,22 @@ import org.kie.trustyai.explainability.model.Value;
 
 public class TSSaliencyModel implements PredictionProvider {
 
-    int NUM_RANDOM = 2000;
+    int NUM_RANDOM = 500;
     
     Double random[];
 
     public TSSaliencyModel() {
 
+        Random rng = new Random(0L);
+
         random = new Double[NUM_RANDOM];
 
         for (int i = 0; i < NUM_RANDOM; i++) {
-            random[i] = Math.random();
+            random[i] = rng.nextDouble();
+            System.out.println(random[i] + ",");
         }
+
+        System.out.println();
     }
 
     /**
@@ -38,14 +44,14 @@ public class TSSaliencyModel implements PredictionProvider {
         CompletableFuture<List<PredictionOutput>> retval = new CompletableFuture<List<PredictionOutput>>();
 
         int numInputs = inputs.size();
-        System.out.println("numInputs = " + numInputs);
+        // System.out.println("numInputs = " + numInputs);
 
         List<PredictionOutput> outputs = new ArrayList<PredictionOutput>(numInputs);
 
         for (PredictionInput input : inputs) {
             List<Feature> features = input.getFeatures();
 
-            System.out.println("features.size() = " + features.size());
+            // System.out.println("features.size() = " + features.size());
 
             double y = compute(features);
 

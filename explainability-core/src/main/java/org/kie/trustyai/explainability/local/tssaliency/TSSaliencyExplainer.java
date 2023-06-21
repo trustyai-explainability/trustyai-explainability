@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureImportance;
@@ -17,17 +18,15 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SaliencyResults;
+import org.kie.trustyai.explainability.model.SaliencyResults.SourceExplainer;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
-import org.kie.trustyai.explainability.model.SaliencyResults.SourceExplainer;
-
-import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
     private double[] baseValue; // check
-    private int gradientSamples; // Number of samples for gradient estimation n(g)
-    private int steps; // Number of steps in convex path
+    private int ng; // Number of samples for gradient estimation n(g)
+    private int nalpha; // Number of steps in convex path
     // private Object gradientFunction;
     private int randomSeed;
 
@@ -50,11 +49,13 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
     // ng = Number of samples for gradient estimation
     // n = Number of steps in convex path
 
-    public TSSaliencyExplainer(double[] baseValue, int gradientSamples, int steps, int randomSeed) {
+    public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed) {
 
         this.baseValue = baseValue;
-        this.gradientSamples = gradientSamples;
-        this.steps = steps;
+        // ng = Number of samples for gradient estimation
+        this.ng = ng;
+        // nalpha  = Number of steps in convex path
+        this.nalpha = nalpha;
         this.randomSeed = randomSeed;
     }
 
@@ -92,23 +93,23 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                 baseValue = calcBaseValue(featuresArray, T, F);
             }
 
-            System.out.println("baseValues = ");
-            for (int i = 0; i < baseValue.length; i++) {
-                System.out.print(baseValue[i] + " ");
-            }
-            System.out.println();
+            // System.out.println("baseValues = ");
+            // for (int i = 0; i < baseValue.length; i++) {
+            //     System.out.print(baseValue[i] + " ");
+            // }
+            // System.out.println();
 
             // alpha = [ n(alpha) ] / n(alpha)
-            double[] alpha = new double[steps];
-            for (int s = 0; s < steps; s++) {
-                alpha[s] = s / ((double) steps - 1);
+            double[] alpha = new double[nalpha];
+            for (int s = 0; s < nalpha; s++) {
+                alpha[s] = s / ((double) nalpha - 1);
             }
 
-            System.out.println("alpha = ");
-            for (int i = 0; i < alpha.length; i++) {
-                System.out.print(alpha[i] + " ");
-            }
-            System.out.println();
+            // System.out.println("alpha = ");
+            // for (int i = 0; i < alpha.length; i++) {
+            //     System.out.print(alpha[i] + " ");
+            // }
+            // System.out.println();
 
             double[][] x = new double[T][F];
             for (int t = 0; t < T; t++) {
@@ -131,7 +132,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             }
 
             // for i 1 to n do
-            for (int i = 0; i < steps; i++) {
+            for (int i = 0; i < nalpha; i++) {
 
                 // Compute affine sample:
                 // s = alpha(i) * X + (1 - alpha(i)) * (1(T) * transpose(b))
@@ -158,13 +159,13 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                 // Compute Monte Carlo gradient (per time and feature dimension):
 
                 // g = MC_GRADIENT(s; f; ng)
-                double[][] g = monteCarloGradient(s, model, gradientSamples);
+                double[][] g = monteCarloGradient(s, model, ng);
 
                 // Update Score:
                 for (int t = 0; t < T; t++) {
 
                     for (int f = 0; f < F; f++) {
-                        score[t][f] = score[t][f] + g[t][f] / steps;
+                        score[t][f] = score[t][f] + g[t][f] / nalpha;
                     }
                 }
 

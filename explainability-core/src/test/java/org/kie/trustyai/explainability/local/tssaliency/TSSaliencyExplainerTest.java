@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -18,6 +20,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
@@ -30,8 +33,9 @@ public class TSSaliencyExplainerTest {
         try {
             List<Feature> data = load();
 
-            List<PredictionInput> inputs = new LinkedList<PredictionInput>();
+            List<PredictionInput> inputs = new ArrayList<PredictionInput>(data.size());
 
+            int count = 0;
             for (Feature datum : data) {
 
                 // System.out.println("name: " + datum.getName());
@@ -41,10 +45,14 @@ public class TSSaliencyExplainerTest {
 
                 List<Feature> features2List = Arrays.asList(features2);
 
+                // System.out.println(features2List);
+
                 PredictionInput input = new PredictionInput(features2List);
                 inputs.add(input);
 
-                break;
+                if (++count == 2) {
+                    break;
+                }
             }
 
             // System.out.println("inputs = " + inputs);
@@ -58,9 +66,13 @@ public class TSSaliencyExplainerTest {
                 List<Output> outList = prediction.getOutputs();
 
                 for (Output output : outList) {
-                    System.out.println(output);
+                    System.out.println("*********** " + output);
                 }
             }
+
+            // System.exit(1);
+
+            // ******** NOTE need a loop for e.g., Ford data
 
             PredictionInput predictionInput = inputs.get(0);
 
@@ -79,17 +91,27 @@ public class TSSaliencyExplainerTest {
             // 3:03
             // like ng = 100 and nalpha = 10
 
-            TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 100, 10, 0);
+            TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 50, 1000, 0);
 
             CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(prediction, model,
                     null);
             SaliencyResults saliencyResults = saliencyResultsCompletable.get();
 
-            System.out.println(saliencyResults.getSaliencies());
+            // System.out.println(saliencyResults.getSaliencies());
 
-        } catch (
+            Map<String, Saliency> saliencyMap = saliencyResults.getSaliencies();
 
-        Exception e) {
+            for (int t = 0; t < 500; t++) {
+                for (int f = 0; f < 1; f++) {
+                    String name = "IG[" + t + "][" + f + "]";
+                    Saliency saliency = saliencyMap.get(name);
+                    Output output = saliency.getOutput();
+                    double score = output.getScore();
+                    System.out.println(score);
+                }
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -97,7 +119,7 @@ public class TSSaliencyExplainerTest {
 
     public List<Feature> load() throws Exception {
 
-        File ifile = new File("../ford/FordA_TRAIN.txt");
+        File ifile = new File("../ford/FordA_TEST.txt");
         FileInputStream fis = new FileInputStream(ifile);
         InputStreamReader is = new InputStreamReader(fis);
         BufferedReader reader = new BufferedReader(is);
@@ -124,12 +146,19 @@ public class TSSaliencyExplainerTest {
                         feature3Array[0] = Double.valueOf(value);
                         Feature feature3 = new Feature("element" + element, Type.VECTOR, new Value(feature3Array));
                         features2.add(feature3);
+
+                        if (row == 0) {
+                            System.out.print(value + ",");
+                        }
                     }
 
                     element += 1;
                 }
 
                 Feature[] features2Array = features2.toArray(new Feature[0]);
+
+                System.out.println("dim = " + features2Array.length);
+
                 Feature feature = new Feature("row" + row, Type.VECTOR, new Value(features2Array));
 
                 features.add(feature);
