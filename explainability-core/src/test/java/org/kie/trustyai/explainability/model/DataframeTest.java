@@ -1,5 +1,6 @@
 package org.kie.trustyai.explainability.model;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -13,16 +14,17 @@ import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataframeTest {
 
     private static final int N = 5000;
 
-    public static Dataframe createTestDataframe() {
+    public static Dataframe createTestDataframe(int noOfPredictions) {
 
         final List<Prediction> predictions = new ArrayList<>();
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < noOfPredictions; i++) {
             final List<Feature> features = new ArrayList<>();
             features.add(FeatureFactory.newNumericalFeature("num-1", Math.random() * 100, NumericalFeatureDomain.create(0, 100)));
             features.add(FeatureFactory.newBooleanFeature("bool-2", new Random().nextBoolean(), ObjectFeatureDomain.create(Set.of(true, false))));
@@ -36,6 +38,10 @@ class DataframeTest {
             predictions.add(prediction);
         }
         return Dataframe.createFrom(predictions);
+    }
+
+    public static Dataframe createTestDataframe() {
+        return createTestDataframe(N);
     }
 
     public static Dataframe createTestInputDataframe() {
@@ -77,6 +83,17 @@ class DataframeTest {
         assertEquals(Type.BOOLEAN, df.getType(1));
         assertEquals(Type.BOOLEAN, df.getType(2));
 
+    }
+
+    @Test
+    void createFromEmptyPredictions() {
+        final List<Prediction> emptyList = new ArrayList<>();
+        final Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            Dataframe.createFrom(emptyList);
+        });
+
+        final String expected = "Cannot create a dataframe from an empy list of predictions.";
+        assertEquals(expected, exception.getMessage());
     }
 
     @Test
@@ -609,4 +626,76 @@ class DataframeTest {
 
     }
 
+    @Test
+    void testDataframeWithPredictionMetadata() {
+        Dataframe df = createTestDataframe();
+        assertThat(df).isNotNull();
+        assertThat(df.getRows()).isNotNull();
+        assertThat(df.getRows().size()).isEqualTo(5000);
+        List<Prediction> predictions = createTestDataframe().asPredictions();
+        List<PredictionMetadata> metadata = new ArrayList<>();
+        int idx = 0;
+        for (Prediction ignored : predictions) {
+            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), true));
+            idx++;
+        }
+        df.addPredictions(predictions, metadata);
+        assertThat(df.getRowDimension()).isEqualTo(10000);
+    }
+
+    @Test
+    void testFilteringDataframeSynthetic() {
+        Dataframe df = createTestDataframe(10);
+        assertThat(df).isNotNull();
+        assertThat(df.getRows()).isNotNull();
+        assertThat(df.getRows().size()).isEqualTo(10);
+        List<Prediction> predictions = createTestDataframe(10).asPredictions();
+        List<PredictionMetadata> metadata = new ArrayList<>();
+        int idx = 0;
+        for (Prediction ignored : predictions) {
+            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), true));
+            idx++;
+        }
+        df.addPredictions(predictions, metadata);
+        assertThat(df.getRows().size()).isEqualTo(20);
+        assertThat(df.filterOutSyntheticRows().getRowDimension()).isEqualTo(10);
+    }
+
+    @Test
+    void testFilteringDataframeByTimestamp() {
+        Dataframe df = createTestDataframe(10);
+        LocalDateTime then = LocalDateTime.now();
+        assertThat(df).isNotNull();
+        assertThat(df.getRows()).isNotNull();
+        assertThat(df.getRows().size()).isEqualTo(10);
+        List<Prediction> predictions = createTestDataframe(10).asPredictions();
+        List<PredictionMetadata> metadata = new ArrayList<>();
+        int idx = 0;
+        for (Prediction ignored : predictions) {
+            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), false));
+            idx++;
+        }
+        df.addPredictions(predictions, metadata);
+        assertThat(df.getRows().size()).isEqualTo(20);
+        assertThat(df.filterRowsByTimeRange(then, LocalDateTime.now()).getRowDimension()).isEqualTo(10);
+    }
+
+    @Test
+    void testFilteringDataframeById() {
+        Dataframe df = createTestDataframe(1);
+        assertThat(df).isNotNull();
+        assertThat(df.getRows()).isNotNull();
+        assertThat(df.getRows().size()).isEqualTo(1);
+        List<Prediction> predictions = createTestDataframe(10).asPredictions();
+        List<PredictionMetadata> metadata = new ArrayList<>();
+        int idx = 0;
+        for (Prediction ignored : predictions) {
+            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), false));
+            idx++;
+        }
+        df.addPredictions(predictions, metadata);
+        assertThat(df.getRows().size()).isEqualTo(11);
+        Dataframe filteredById = df.filterRowsById("5");
+        assertThat(filteredById.getRowDimension()).isEqualTo(1);
+    }
 }
