@@ -1,22 +1,16 @@
-package org.kie.trustyai.explainability.local.tssaliency;
+package org.kie.trustyai.explainability.utils.models;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 
 public class TSSaliencyModel implements PredictionProvider {
 
     int NUM_RANDOM = 500;
-    
+
     Double random[];
 
     // FIXME Handle changes
@@ -85,17 +79,17 @@ public class TSSaliencyModel implements PredictionProvider {
         for (Feature feature : features) { // iterate through features vectpr
             // System.out.println("feature = " + feature);
 
-            assert feature.getType() == Type.VECTOR; 
+            assert feature.getType() == Type.VECTOR;
 
             Value value = feature.getValue();
 
             double[] elements = value.asVector();
-            
+
             for (double element : elements) {
                 assert randomIndex <= NUM_RANDOM;
-                
+
                 sum += element * random[randomIndex];
-                
+
                 randomIndex += 1;
             }
         }

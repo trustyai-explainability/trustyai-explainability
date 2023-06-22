@@ -1,39 +1,25 @@
 package org.kie.trustyai.explainability.local.tssaliency;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.kie.trustyai.explainability.local.LocalExplainer;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SaliencyResults;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.SaliencyResults.SourceExplainer;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
 
 public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
+    final private int ng; // Number of samples for gradient estimation
+    final private int nalpha; // Number of steps in convex path
     private double[] baseValue; // check
-    private int ng; // Number of samples for gradient estimation
-    private int nalpha; // Number of steps in convex path
     private int randomSeed;
 
     public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed) {
         this.baseValue = baseValue;
-        this.ng = ng; 
-        this.nalpha = nalpha; 
+        this.ng = ng;
+        this.nalpha = nalpha;
         this.randomSeed = randomSeed;
     }
 
