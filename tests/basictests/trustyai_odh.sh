@@ -9,6 +9,7 @@ RESOURCEDIR="${MY_DIR}/../resources"
 
 TEST_USER=${OPENSHIFT_TESTUSER_NAME:-"admin"} #Username used to login to the ODH Dashboard
 TEST_PASS=${OPENSHIFT_TESTUSER_PASS:-"admin"} #Password used to login to the ODH Dashboard
+LOCAL=${LOCAL:-false}
 OPENSHIFT_OAUTH_ENDPOINT="https://$(oc get route -n openshift-authentication   oauth-openshift -o json | jq -r '.spec.host')"
 MM_NAMESPACE="${ODHPROJECT}-model"
 
