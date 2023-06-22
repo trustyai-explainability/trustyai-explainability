@@ -95,6 +95,7 @@ public class Dataframe {
      */
     public static Dataframe createFrom(List<Prediction> predictions) {
         final Dataframe df;
+
         if (predictions.isEmpty()) {
             throw new IllegalArgumentException("Cannot create a dataframe from an empy list of predictions.");
         }
@@ -176,8 +177,6 @@ public class Dataframe {
         // Process outputs metadata
         for (Output output : prediction.getOutput().getOutputs()) {
             df.metadata.names.add(output.getName());
-            System.out.println("df type:" + output.getType());
-
             df.metadata.types.add(output.getType());
             df.metadata.constrained.add(true);
             df.metadata.domains.add(EmptyFeatureDomain.create());

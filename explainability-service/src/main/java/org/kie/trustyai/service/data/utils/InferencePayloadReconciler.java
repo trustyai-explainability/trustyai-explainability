@@ -80,7 +80,6 @@ public class InferencePayloadReconciler {
         final byte[] outputBytes = Base64.getDecoder().decode(output.getData().getBytes());
 
         final List<Prediction> prediction = payloadToPrediction(inputBytes, outputBytes, id, input.getMetadata());
-        System.out.println("saving reconciled dataframe");
         final Dataframe dataframe = Dataframe.createFrom(prediction);
 
         datasource.get().saveDataframe(dataframe, modelId);
@@ -203,6 +202,57 @@ public class InferencePayloadReconciler {
 
         Prediction prediction = new SimplePrediction(new PredictionInput(features), predictionOutput);
         System.out.println("creating dataframe!");
+        return Dataframe.createFrom(prediction, predictionMetadata);
+    }
+
+    public Dataframe payloadToDataFrame(byte[] inputs, byte[] outputs, String id, Map<String, String> metadata,
+            String modelId) throws DataframeCreateException {
+        final ModelInferRequest input;
+        try {
+            input = ModelInferRequest.parseFrom(inputs);
+        } catch (InvalidProtocolBufferException e) {
+            throw new DataframeCreateException(e.getMessage());
+        }
+        final PredictionInput predictionInput;
+        try {
+            predictionInput = PayloadParser
+                    .requestToInput(input, null);
+        } catch (IllegalArgumentException e) {
+            throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
+        }
+        LOG.debug("Prediction input: " + predictionInput.getFeatures());
+
+        // Check for dataframe metadata name conflicts
+        if (predictionInput.getFeatures()
+                .stream()
+                .map(Feature::getName)
+                .anyMatch(name -> name.equals(MetadataUtils.ID_FIELD) || name.equals(MetadataUtils.TIMESTAMP_FIELD))) {
+            final String message = "An input feature as a protected name: \"_id\" or \"_timestamp\"";
+            LOG.error(message);
+            throw new DataframeCreateException(message);
+        }
+
+        final List<Feature> features = new ArrayList<>(predictionInput.getFeatures());
+
+        boolean synthetic = metadata.containsKey(ExplainerEndpoint.BIAS_IGNORE_PARAM);
+        PredictionMetadata predictionMetadata = new PredictionMetadata(id, modelId, LocalDateTime.now(), synthetic);
+
+        final ModelInferResponse output;
+        try {
+            output = ModelInferResponse.parseFrom(outputs);
+        } catch (InvalidProtocolBufferException e) {
+            throw new DataframeCreateException(e.getMessage());
+        }
+        final PredictionOutput predictionOutput;
+        try {
+            predictionOutput = PayloadParser
+                    .responseToOutput(output, null);
+        } catch (IllegalArgumentException e) {
+            throw new DataframeCreateException("Error parsing output payload: " + e.getMessage());
+        }
+        LOG.debug("Prediction output: " + predictionOutput.getOutputs());
+
+        Prediction prediction = new SimplePrediction(new PredictionInput(features), predictionOutput);
         return Dataframe.createFrom(prediction, predictionMetadata);
     }
 }
