@@ -78,7 +78,7 @@ spec:
               
               current_namespace=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
               
-              echo "    payloadProcessors: "http://trustyai-service.$current_namespace/consumer/kserve/v2"" >> /tmp/model-serving-config.yaml
+              echo "    payloadProcessors: "https://trustyai-service.$current_namespace/consumer/kserve/v2"" >> /tmp/model-serving-config.yaml
               cat /tmp/model-serving-config.yaml
               oc apply -f /tmp/model-serving-config.yaml
               exit 0
