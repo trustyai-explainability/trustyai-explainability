@@ -22,7 +22,7 @@ oc project $ODHPROJECT 2>&1 1>/dev/null
 
 check_for_reception () {
   while true
-  CHECKS=1
+  CHECKS=0
   do
     THRESH=$(( $1 * 250 / 1000 ))
     N_OBS=$(oc exec $TRUSTY_POD  -c trustyai-service -- bash -c "cat /inputs/$2-metadata.json"  | jq .observations)
@@ -30,7 +30,7 @@ check_for_reception () {
     if (( $N_OBS > $THRESH )); then
       break
     elif (( CHECKS > 10)); then
-      echo "ERROR: Message reception timeout";
+      echo "ERROR: Message reception timeout"
       exit 1
     else
       CHECKS=$((CHECKS+1))

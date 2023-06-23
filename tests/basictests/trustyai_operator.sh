@@ -144,6 +144,7 @@ function teardown_trustyai_test() {
   if [ $REQUESTS_CREATED = true ]; then
     for METRIC_NAME in "spd" "dir"
     do
+      curl -s http://$TRUSTY_ROUTE/metrics/$METRIC_NAME/requests
       for REQUEST in $(curl -s https://$TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
       do
         echo -n $REQUEST": "

@@ -170,8 +170,8 @@ function teardown_trustyai_test() {
   header "Cleaning up the TrustyAI test"
   oc project $ODHPROJECT  || eval "$FAILURE_HANDLING"
 
+  # delete all requests
   if [ $REQUESTS_CREATED = true ]; then
-    # delete all requests
     for METRIC_NAME in "spd" "dir"
     do
       for REQUEST in $(curl -s https://$TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
