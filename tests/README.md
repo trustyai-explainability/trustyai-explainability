@@ -1,29 +1,34 @@
-# TrustyAI OpenShift CI
+# TrustyAI OpenShift CI and E2E Tests
 The TrustyAI OpenShift-CI tests are based off the [odh-manifests CI tests](https://github.com/opendatahub-io/odh-manifests/tree/master/tests).
 
-# Running containerized tests
+# Running locally
 
-Running the tests this way assumes that you have an active kubeadmin login
-on the cluster that you want to run the tests against and that you have podman
-installed.  (If you prefer docker, you can edit the Makefile to replace podman
-with docker).
-
-Run the following:
+Assuming you are oc login'd with admin rights to a cluster, run the following from within the `tests` directory:
 
 ```sh
-cd tests
-make build
-make run
+make test
 ```
 
-## Cleaning up after your test run (optional)
+This will build the test container, run those tests against the cluster you are logged into, and then clean up afterwards.
+This is equivalent to running:
+```sh
+make build # build the test container (necessarily after any changes to test scripts/resources
+make run   # run the tests against the existing cluster
+make clean # remove the artifacts of the test from the cluster (operator, ODH, projects, etc)
+```
 
-Only run the following if you want to eliminate your Open Data Hub installation.
-
-To cleanup the Open Data Hub installation after a test run, you can run `make clean`.
-Running `make clean` **will wipe your Open Data Hub installation** and delete the project.
 
 
+## Useful Arguments
+* `BUILD_TOOL=docker/podman`: set the tool used to build and run the testing container
+* `SKIP_INSTALL=true/false`: skip the install of the ODH operator, if you've already installed it manually or via a previous test
+* `SKIP_KFDEF_INSTALL=true/false`: skip the install of ODH via KFdef, if you've already installed it manually or via a previous test
+* `TESTS_REGEX=${REGEX}`: only run tests whose names match the regex
+* `LOCAL=true/false`: This flag makes the test suite stop and wait for user input between the end of a test script and cluster teardown. 
+This prevents automatic teardown, which is useful for manual inspection of the cluster before teardown when running the tests locally.
+
+
+# OpenShift-CI Information
 ## Customizing test behavior
 
 Without changes, the test image will run `$HOME/peak/installandtest.sh` which
