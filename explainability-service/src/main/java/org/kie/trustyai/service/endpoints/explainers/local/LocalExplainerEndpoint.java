@@ -36,7 +36,8 @@ public abstract class LocalExplainerEndpoint extends ExplainerEndpoint {
     protected Response processRequest(LocalExplanationRequest request, DataSource dataSource, ServiceConfig serviceConfig) {
         try {
             String modelId = request.getModelId();
-            PredictionProvider model = getModel(serviceConfig, modelId);
+            String modelVersion = request.getModelVersion();
+            PredictionProvider model = getModel(serviceConfig, modelId, modelVersion);
 
             Dataframe dataframe = dataSource.getDataframe(modelId);
             List<Prediction> predictions = dataframe.asPredictions();

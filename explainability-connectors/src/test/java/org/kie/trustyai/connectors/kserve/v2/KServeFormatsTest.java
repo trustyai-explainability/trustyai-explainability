@@ -15,6 +15,7 @@ import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.TensorDataframe;
 
 import com.google.protobuf.ByteString;
 
