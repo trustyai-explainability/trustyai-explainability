@@ -49,3 +49,5 @@ clean:
 	oc delete subscription -n openshift-operators -l peak.test.subscription=opendatahub-operator
 	oc get mutatingwebhookconfiguration -o name | grep katib | grep $(ODHPROJECT) | xargs oc delete || true
 	oc get validatingwebhookconfiguration -o name | grep katib | grep $(ODHPROJECT) | xargs oc delete || true
+	oc delete project $(ODHPROJECT)-model || true
+	oc delete identity htpasswd-provider:admin || true

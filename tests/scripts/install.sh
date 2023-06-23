@@ -49,9 +49,22 @@ else
   if [ $REPO_NAME == "trustyai-explainability" ]; then
     echo "Setting manifests in kfctl_openshift to use pull number: $PULL_NUMBER"
     sed -i "s#uri: https://github.com/trustyai-explainability/trustyai-explainability/tarball/main#uri: https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/tarball/pull/${PULL_NUMBER}/head#" ./${KFDEF_FILENAME}
+
     BRANCH_SHA=$(curl  https://api.github.com/repos/trustyai-explainability/trustyai-explainability/pulls/${PULL_NUMBER} | jq ".head.sha"  | tr -d '"')
-    sed -i "s#value: \"quay.io/trustyai/trustyai-service:latest\"#value: \"quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}\"#" ./${KFDEF_FILENAME}
-    cat ./${KFDEF_FILENAME}
+
+    echo "Setting TrustyAI service kfdef to use PR image"
+    sed -i "s#value: \"quay.io/trustyai/trustyai-service:latest\"#value: \"quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}\"#" ../resources/trustyai/trustyai_service_kfdef.yaml
+
+    echo "Setting TrustyAI operator configmap to use PR image"
+    sed -i "s#trustyaiServiceImageName: \"quay.io/trustyai/trustyai-service\"#trustyaiServiceImageName: \"quay.io/trustyai/trustyai-service-ci\"#" ../resources/trustyai/trustyai_operator_configmap.yaml
+    sed -i "s#trustyaiServiceImageTag \"latest\"#trustyaiServiceImageTag: ${BRANCH_SHA}\"#" ../resources/trustyai/trustyai_operator_configmap.yaml
+    # to do: add service image specification
+
+    echo "TrustyAI Service KFDEF"
+    cat ../resources/trustyai/trustyai_service_kfdef.yaml
+
+    echo "TrustyAI Operator Custom Image ConfigMap"
+    cat ../resources/trustyai/trustyai_operator_configmap.yaml
   fi
 fi
 

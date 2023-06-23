@@ -42,17 +42,7 @@ spec:
         name: manifests
         path: modelmesh-monitoring
     name: modelmesh-monitoring
-  - kustomizeConfig:
-      repoRef:
-        name: trustyai-manifests
-        path: explainability-service/manifests
-      parameters:
-        - name: image
-          value: "quay.io/trustyai/trustyai-service:latest"
-    name: trustyai
   repos:
   - name: manifests
     uri: https://github.com/opendatahub-io/odh-manifests/tarball/master
-  - name: trustyai-manifests
-    uri: https://github.com/trustyai-explainability/trustyai-explainability/tarball/main
   version: master

@@ -31,14 +31,21 @@ function get_authentication(){
   TESTUSER_BEARER_TOKEN="$(curl -kiL -u $TEST_USER:$TEST_PASS -H 'X-CSRF-Token: xxx' $OPENSHIFT_OAUTH_ENDPOINT'/oauth/authorize?response_type=token&client_id=openshift-challenging-client' | grep -oP 'access_token=\K[^&]*')" || eval "$FAILURE_HANDLING"
 }
 
+function install_trustyai(){
+  header "Installing TrustyAI"
+  oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
+
+  oc apply -f ${RESOURCEDIR}/trustyai/trustyai_service_kfdef.yaml || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc get pod | grep trustyai-service" "1/1" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+}
+
+
 function check_trustyai_resources() {
   header "Checking that TrustyAI resources have spun up"
   oc project $ODHPROJECT  || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get deployment modelmesh-controller" "modelmesh-controller" $odhdefaulttimeout $odhdefaultinterval  || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get deployment trustyai-service" "trustyai-service" $odhdefaulttimeout $odhdefaultinterval  || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get route trustyai-service-route" "trustyai-service-route" $odhdefaulttimeout $odhdefaultinterval  || eval "$FAILURE_HANDLING"
-
-  oc wait --for=condition=Ready $(oc get pod -o name | grep trustyai) --timeout=${odhdefaulttimeout}ms || eval "$FAILURE_HANDLING"
 }
 
 function deploy_model() {
@@ -75,7 +82,6 @@ function check_mm_resources() {
   sleep 10
 }
 
-
 function check_communication(){
     header "Check communication between TrustyAI and ModelMesh"
     oc project $MM_NAMESPACE
@@ -88,9 +94,9 @@ function check_communication(){
 function send_data(){
     header "Sending some data for TrustyAI (this will take a minute or two)"
     oc project $MM_NAMESPACE
-
     $RESOURCEDIR/utils/send_data_batch $RESOURCEDIR/data/loan_default/batch_01.json || eval "$FAILURE_HANDLING"
 }
+
 
 function schedule_and_check_request(){
   header "Create a metric request and confirm calculation"
@@ -102,7 +108,7 @@ function schedule_and_check_request(){
     METRIC_UPPERCASE=$(echo ${METRIC_NAME} | tr '[:lower:]' '[:upper:]')
     for MODEL in $MODEL_ALPHA $MODEL_BETA
     do
-      curl -s --location http://$TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+      curl -s --location https://$TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
         --header 'Content-Type: application/json' \
         --data "{
                   \"modelId\": \"$MODEL\",
@@ -165,14 +171,13 @@ function teardown_trustyai_test() {
   oc project $ODHPROJECT  || eval "$FAILURE_HANDLING"
 
   if [ $REQUESTS_CREATED = true ]; then
-    REQUEST_ID="$(curl http://$TRUSTY_ROUTE/metrics/spd/requests | jq '.requests [0].id')"
     # delete all requests
     for METRIC_NAME in "spd" "dir"
     do
-      for REQUEST in $(curl -s http://$TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
+      for REQUEST in $(curl -s https://$TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
       do
         echo -n $REQUEST": "
-        curl -X DELETE --location http://$TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+        curl -X DELETE --location https://$TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
             -H 'Content-Type: application/json' \
             -d "{
                   \"requestId\": \"$REQUEST\"
@@ -181,6 +186,8 @@ function teardown_trustyai_test() {
       done
     done
   fi
+
+  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_service_kfdef.yaml"  || eval "$FAILURE_HANDLING"
 
   oc project $MM_NAMESPACE || echo "Could not switch to $MM_NAMESPACE"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/secret.yaml" || true
@@ -191,10 +198,11 @@ function teardown_trustyai_test() {
 }
 
 get_authentication
+[ $FAILURE = false ] && install_trustyai              || echo -e "\033[0;31mSkipping TrustyAI install due to previous failure\033[0m"
 [ $FAILURE = false ] && check_trustyai_resources      || echo -e "\033[0;31mSkipping TrustyAI resource check due to previous failure\033[0m"
 [ $FAILURE = false ] && deploy_model                  || echo -e "\033[0;31mSkipping model deployment due to previous failure\033[0m"
 [ $FAILURE = false ] && check_mm_resources            || echo -e "\033[0;31mSkipping ModelMesh resource check due to previous failure\033[0m"
-[ $FAILURE = false ] && check_communication           || echo -e "\033[0;31mSkipping ModelMesh-trustyai communication check due to previous failure\033[0m"
+[ $FAILURE = false ] && check_communication           || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check due to previous failure\033[0m"
 [ $FAILURE = false ] && send_data                     || echo -e "\033[0;31mSkipping data generation due to previous failure\033[0m"
 [ $FAILURE = false ] && schedule_and_check_request    || echo -e "\033[0;31mSkipping metric scheduling due to previous failure\033[0m\033[0m"
 [ $FAILURE = false ] && test_prometheus_scraping      || echo -e "\033[0;31mSkipping Prometheus data check due to previous failure\033[0m\033[0m"
