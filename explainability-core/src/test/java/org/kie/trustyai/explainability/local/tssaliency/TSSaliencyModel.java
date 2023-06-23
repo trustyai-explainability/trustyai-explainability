@@ -15,7 +15,7 @@ import org.kie.trustyai.explainability.model.Value;
 
 public class TSSaliencyModel implements PredictionProvider {
 
-    int NUM_RANDOM = 500;
+    int NUM_RANDOM = 7 * 120;
     
     Double random[];
 
@@ -27,12 +27,14 @@ public class TSSaliencyModel implements PredictionProvider {
 
         random = new Double[NUM_RANDOM];
 
+        System.out.println("random coefs:");
+
         for (int i = 0; i < NUM_RANDOM; i++) {
             random[i] = rng.nextDouble();
-            // System.out.println(random[i] + ",");
+            // System.out.print(random[i] + ",");
         }
 
-        // System.out.println();
+        System.out.println();
     }
 
     /**

@@ -45,7 +45,10 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             PredictionInput predictionInputs = prediction.getInput();
 
             PredictionOutput predictionOutput = prediction.getOutput();
+List<Output> outputs = predictionOutput.getOutputs();
+            Output output = outputs.get(0);
 
+            
             List<Feature> features = predictionInputs.getFeatures();
 
             Feature[] featuresArray = features.toArray(new Feature[0]);
@@ -105,7 +108,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                 // Compute Monte Carlo gradient (per time and feature dimension):
 
                 // g = MC_GRADIENT(s; f; ng)
-                double[][] g = monteCarloGradient(s, model, ng);
+                double[][] g = monteCarloGradient(s, model, output);
 
                 // Update Score:
                 for (int t = 0; t < T; t++) {
@@ -135,9 +138,6 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             FeatureImportance featureImportance = new FeatureImportance(predictionInputs.getFeatures().get(0), scoreResult, 0.0);
             List<FeatureImportance> featureImportances = new ArrayList<FeatureImportance>(1);
             featureImportances.add(featureImportance);
-
-            List<Output> outputs = predictionOutput.getOutputs();
-            Output output = outputs.get(0);
 
             Saliency saliency = new Saliency(output, featureImportances);
             saliencies.put("result", saliency);
@@ -186,7 +186,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         return retval;
     }
 
-    private double[][] monteCarloGradient(double[][] x, PredictionProvider model, int ng) throws Exception {
+    private double[][] monteCarloGradient(double[][] x, PredictionProvider model, Output output) throws Exception {
 
         final double SIGMA = 10.0;
         final double MU = 0.01;
@@ -248,48 +248,50 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             PredictionInput inputDelta = new PredictionInput(features2delta);
             inputs.add(inputDelta);
 
-            List<Feature> features2 = new LinkedList<Feature>();
-
-            for (int t = 0; t < T; t++) {
-
-                double[] feature3Array = new double[F];
-
-                for (int f = 0; f < F; f++) {
-                    feature3Array[f] = x[t][f];
-                }
-
-                Feature feature3 = new Feature("x" + t, Type.VECTOR, new Value(feature3Array));
-                features2.add(feature3);
-            }
-
-            PredictionInput input = new PredictionInput(features2);
-            inputs.add(input);
+            
         }
+
+        // List<Feature> features2 = new LinkedList<Feature>();
+
+        //     for (int t = 0; t < T; t++) {
+
+        //         double[] feature3Array = new double[F];
+
+        //         for (int f = 0; f < F; f++) {
+        //             feature3Array[f] = x[t][f];
+        //         }
+
+        //         Feature feature3 = new Feature("x" + t, Type.VECTOR, new Value(feature3Array));
+        //         features2.add(feature3);
+        //     }
+
+        //     PredictionInput input = new PredictionInput(features2);
+        //     inputs.add(input);
 
         CompletableFuture<List<PredictionOutput>> result = model.predictAsync(inputs);
         List<PredictionOutput> results = result.get();
 
-        for (int i = 0; i < results.size(); i += 2) {
+        for (int i = 0; i < results.size(); i ++) {
             PredictionOutput fxDeltaPredictionOutput = results.get(i);
-            PredictionOutput fxPredictionOutput = results.get(i + 1);
+            // PredictionOutput fxPredictionOutput = results.get(i + 1);
 
             List<Output> fxDeltas = fxDeltaPredictionOutput.getOutputs();
-            List<Output> fxs = fxPredictionOutput.getOutputs();
+            // List<Output> fxs = fxPredictionOutput.getOutputs();
 
             Output[] fxDelta = fxDeltas.toArray(new Output[0]);
-            Output[] fx = fxs.toArray(new Output[0]);
+            // Output[] fx = fxs.toArray(new Output[0]);
 
             double fxDeltaScore = fxDelta[0].getScore();
-            double fxScore = fx[0].getScore();
+            double fxScore = output.getScore();
 
-            diff[i / 2] = fxDeltaScore - fxScore;
+            diff[i] = fxDeltaScore - fxScore;
         }
 
         // g(t,j) = (T * F) / ng * sum(ng) (diff * U) / MU)
 
         double[][] retval = new double[T][F];
 
-        double mult = T * F / ng;
+        double mult = T * F / ((double) ng);
 
         for (int t = 0; t < T; t++) {
             for (int f = 0; f < F; f++) {
