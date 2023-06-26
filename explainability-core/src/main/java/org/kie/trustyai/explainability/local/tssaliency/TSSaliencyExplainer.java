@@ -250,28 +250,33 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
         }
 
-        // List<Feature> features2 = new LinkedList<Feature>();
+        List<Feature> features2 = new LinkedList<Feature>();
 
-        // for (int t = 0; t < T; t++) {
+        for (int t = 0; t < T; t++) {
 
-        // double[] feature3Array = new double[F];
+            double[] feature3Array = new double[F];
 
-        // for (int f = 0; f < F; f++) {
-        // feature3Array[f] = x[t][f];
-        // }
+            for (int f = 0; f < F; f++) {
+                feature3Array[f] = x[t][f];
+            }
 
-        // Feature feature3 = new Feature("x" + t, Type.VECTOR, new
-        // Value(feature3Array));
-        // features2.add(feature3);
-        // }
+            Feature feature3 = new Feature("x" + t, Type.VECTOR, new Value(feature3Array));
+            features2.add(feature3);
+        }
 
-        // PredictionInput input = new PredictionInput(features2);
-        // inputs.add(input);
+        PredictionInput input = new PredictionInput(features2);
+        inputs.add(input);
 
         CompletableFuture<List<PredictionOutput>> result = model.predictAsync(inputs);
         List<PredictionOutput> results = result.get();
 
-        for (int i = 0; i < results.size(); i++) {
+        // model prediction for original x
+        PredictionOutput fxPredictionOutput = results.get(results.size() - 1);
+        List<Output> fxs = fxPredictionOutput.getOutputs();
+        Output[] fx = fxs.toArray(new Output[0]);
+        double fxScore = fx[0].getScore();
+
+        for (int i = 0; i < results.size() - 1; i++) {
             PredictionOutput fxDeltaPredictionOutput = results.get(i);
             // PredictionOutput fxPredictionOutput = results.get(i + 1);
 
@@ -282,7 +287,6 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             // Output[] fx = fxs.toArray(new Output[0]);
 
             double fxDeltaScore = fxDelta[0].getScore();
-            double fxScore = output.getScore();
 
             diff[i] = fxDeltaScore - fxScore;
         }
