@@ -28,3 +28,4 @@ release.properties
 pom.xml.tag
 pom.xml.next
 release-pom.xml
+commons-math3-3.6.1
