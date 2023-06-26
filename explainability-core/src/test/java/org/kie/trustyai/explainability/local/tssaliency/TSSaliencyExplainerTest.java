@@ -90,8 +90,7 @@ public class TSSaliencyExplainerTest {
 
     }
 
-    @Test
-    public void testClimate() {
+    public static void main(String[] args) {
         try {
             List<Feature> data = loadClimate();
 
@@ -148,7 +147,7 @@ public class TSSaliencyExplainerTest {
 
     }
 
-    private void printResults(SaliencyResults saliencyResults) {
+    private static void printResults(SaliencyResults saliencyResults) {
         Map<String, Saliency> saliencyMap = saliencyResults.getSaliencies();
         Saliency saliency = saliencyMap.get("result");
         List<FeatureImportance> featureImportances = saliency.getPerFeatureImportance();
@@ -233,12 +232,12 @@ public class TSSaliencyExplainerTest {
         }
     }
 
-    public List<Feature> loadClimate() throws Exception {
+    public static List<Feature> loadClimate() throws Exception {
 
         int NUM_ROWS = 120;
         int NUM_FEATURES = 7;
 
-        File ifile = new File("../climate_test_data.txt");
+        File ifile = new File("climate_test_data.txt");
         FileInputStream fis = new FileInputStream(ifile);
         InputStreamReader is = new InputStreamReader(fis);
         BufferedReader reader = new BufferedReader(is);
