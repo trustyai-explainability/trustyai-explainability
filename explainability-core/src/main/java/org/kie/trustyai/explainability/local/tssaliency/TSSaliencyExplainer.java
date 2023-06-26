@@ -32,8 +32,8 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
     public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed) {
         this.baseValue = baseValue;
-        this.ng = ng; 
-        this.nalpha = nalpha; 
+        this.ng = ng;
+        this.nalpha = nalpha;
         this.randomSeed = randomSeed;
     }
 
@@ -45,10 +45,9 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             PredictionInput predictionInputs = prediction.getInput();
 
             PredictionOutput predictionOutput = prediction.getOutput();
-List<Output> outputs = predictionOutput.getOutputs();
+            List<Output> outputs = predictionOutput.getOutputs();
             Output output = outputs.get(0);
 
-            
             List<Feature> features = predictionInputs.getFeatures();
 
             Feature[] featuresArray = features.toArray(new Feature[0]);
@@ -131,11 +130,12 @@ List<Output> outputs = predictionOutput.getOutputs();
             for (int t = 0; t < T; t++) {
                 for (int f = 0; f < F; f++) {
                     // String name = "IG[" + t + "][" + f + "]";
-                    scoreResult[t][f] = x[t][f] * score[t][f];
+                    scoreResult[t][f] = (x[t][f] - baseValue[f]) * score[t][f];
                 }
             }
 
-            FeatureImportance featureImportance = new FeatureImportance(predictionInputs.getFeatures().get(0), scoreResult, 0.0);
+            FeatureImportance featureImportance = new FeatureImportance(predictionInputs.getFeatures().get(0),
+                    scoreResult, 0.0);
             List<FeatureImportance> featureImportances = new ArrayList<FeatureImportance>(1);
             featureImportances.add(featureImportance);
 
@@ -248,30 +248,30 @@ List<Output> outputs = predictionOutput.getOutputs();
             PredictionInput inputDelta = new PredictionInput(features2delta);
             inputs.add(inputDelta);
 
-            
         }
 
         // List<Feature> features2 = new LinkedList<Feature>();
 
-        //     for (int t = 0; t < T; t++) {
+        // for (int t = 0; t < T; t++) {
 
-        //         double[] feature3Array = new double[F];
+        // double[] feature3Array = new double[F];
 
-        //         for (int f = 0; f < F; f++) {
-        //             feature3Array[f] = x[t][f];
-        //         }
+        // for (int f = 0; f < F; f++) {
+        // feature3Array[f] = x[t][f];
+        // }
 
-        //         Feature feature3 = new Feature("x" + t, Type.VECTOR, new Value(feature3Array));
-        //         features2.add(feature3);
-        //     }
+        // Feature feature3 = new Feature("x" + t, Type.VECTOR, new
+        // Value(feature3Array));
+        // features2.add(feature3);
+        // }
 
-        //     PredictionInput input = new PredictionInput(features2);
-        //     inputs.add(input);
+        // PredictionInput input = new PredictionInput(features2);
+        // inputs.add(input);
 
         CompletableFuture<List<PredictionOutput>> result = model.predictAsync(inputs);
         List<PredictionOutput> results = result.get();
 
-        for (int i = 0; i < results.size(); i ++) {
+        for (int i = 0; i < results.size(); i++) {
             PredictionOutput fxDeltaPredictionOutput = results.get(i);
             // PredictionOutput fxPredictionOutput = results.get(i + 1);
 
