@@ -135,11 +135,31 @@ public class TSSaliencyExplainerTest {
 
             TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 1000, 50, 0);
 
-            CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(prediction, model,
-                    null);
-            SaliencyResults saliencyResults = saliencyResultsCompletable.get();
+            for (int i = 0; i < 10; i++) {
+                CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(prediction,
+                        model,
+                        null);
+                SaliencyResults saliencyResults = saliencyResultsCompletable.get();
+            }
 
-            printResults(saliencyResults);
+            int REPS = 10;
+            long startNanos = System.nanoTime();
+            for (int i = 0; i < REPS; i++) {
+                CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(prediction,
+                        model,
+                        null);
+                SaliencyResults saliencyResults = saliencyResultsCompletable.get();
+                if (i == 0) {
+                    // printResults(saliencyResults);
+                }
+            }
+            long endNanos = System.nanoTime();
+
+            double unitTime = (endNanos - startNanos) / 1.0e9 / REPS;
+
+            System.out.println("each iter = " + unitTime);
+
+            // printResults(saliencyResults);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -163,13 +183,12 @@ public class TSSaliencyExplainerTest {
 
             System.out.print("[");
 
-        
             for (int f = 0; f < scoreResult[0].length; f++) {
                 double score = scoreResult[t][f];
                 System.out.print(score + ",");
             }
 
-            System.out.println("],");            
+            System.out.println("],");
         }
 
         System.out.println("]");
@@ -278,7 +297,6 @@ public class TSSaliencyExplainerTest {
                     System.out.print(feature3Array[e] + ",");
                 }
                 System.out.println("],");
-                
 
                 Feature feature3 = new Feature("row" + row, Type.VECTOR, new Value(feature3Array));
                 features2.add(feature3);

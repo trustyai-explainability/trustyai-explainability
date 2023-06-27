@@ -1,6 +1,7 @@
 package org.kie.trustyai.explainability.local.tssaliency;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,7 +9,13 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import javax.xml.crypto.dsig.keyinfo.X509Data;
+
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.random.NormalizedRandomGenerator;
 import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureImportance;
@@ -22,6 +29,7 @@ import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.SaliencyResults.SourceExplainer;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 
 public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
@@ -29,12 +37,15 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
     private int ng; // Number of samples for gradient estimation
     private int nalpha; // Number of steps in convex path
     private int randomSeed;
+    private long totalNormalCount = 0;
+    private long totalNormalTime = 0;
 
     public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed) {
         this.baseValue = baseValue;
         this.ng = ng;
         this.nalpha = nalpha;
         this.randomSeed = randomSeed;
+    
     }
 
     @Override
@@ -45,25 +56,32 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             PredictionInput predictionInputs = prediction.getInput();
 
             PredictionOutput predictionOutput = prediction.getOutput();
+
+            // RealVector pi =
+            // MatrixUtilsExtensions.vectorFromPredictionInput(predictionInputs);
+
             List<Output> outputs = predictionOutput.getOutputs();
             Output output = outputs.get(0);
 
-            List<Feature> features = predictionInputs.getFeatures();
+            // List<Feature> features = predictionInputs.getFeatures();
 
-            Feature[] featuresArray = features.toArray(new Feature[0]);
-            int T = featuresArray.length;
+            double[][] x = matrixFromFeatures(predictionInputs);
 
-            Feature feature0 = featuresArray[0];
-            assert feature0.getType() == Type.VECTOR;
+            RealMatrix pi = MatrixUtils.createRealMatrix(x);
 
-            Value feature0Value = feature0.getValue();
+            // Feature[] featuresArray = features.toArray(new Feature[0]);
+            // int T = featuresArray.length;
 
-            double[] feature0Values = feature0Value.asVector();
-            int F = feature0Values.length;
+            // Feature feature0 = featuresArray[0];
+            // assert feature0.getType() == Type.VECTOR;
 
-            if (baseValue.length == 0) {
-                baseValue = calcBaseValue(featuresArray, T, F);
-            }
+            // Value feature0Value = feature0.getValue();
+
+            // double[] feature0Values = feature0Value.asVector();
+            // int F = feature0Values.length;
+
+            int T = x.length;
+            int F = x[0].length;
 
             // alpha = [ n(alpha) ] / n(alpha)
             double[] alpha = new double[nalpha];
@@ -71,15 +89,19 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                 alpha[s] = s / ((double) nalpha - 1);
             }
 
-            double[][] x = new double[T][F];
-            for (int t = 0; t < T; t++) {
-                Feature feature = featuresArray[t];
-                Value value = feature.getValue();
-                double[] elements = value.asVector();
+            // double[][] x = new double[T][F];
+            // for (int t = 0; t < T; t++) {
+            // Feature feature = featuresArray[t];
+            // Value value = feature.getValue();
+            // double[] elements = value.asVector();
 
-                for (int f = 0; f < F; f++) {
-                    x[t][f] = elements[f];
-                }
+            // for (int f = 0; f < F; f++) {
+            // x[t][f] = elements[f];
+            // }
+            // }
+
+            if (baseValue.length == 0) {
+                baseValue = calcBaseValue(x);
             }
 
             // SCORE = 0
@@ -107,7 +129,11 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                 // Compute Monte Carlo gradient (per time and feature dimension):
 
                 // g = MC_GRADIENT(s; f; ng)
-                double[][] g = monteCarloGradient(s, model, output);
+                long startNano = System.nanoTime();
+                double[][] g = monteCarloGradient(s, model);
+                long endNano = System.nanoTime();
+                double time = (endNano - startNano) / 1e9;
+                System.out.println(i + " monte carlo time = " + time);
 
                 // Update Score:
                 for (int t = 0; t < T; t++) {
@@ -146,6 +172,10 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
             retval.complete(saliencyResults);
 
+            System.out.println("normal avg time = " + ((double) totalNormalTime) / totalNormalCount);
+            System.out.println("normal total time = " + ((double) totalNormalTime) / 1e9); 
+            System.out.println("normal total calls = " + totalNormalCount);
+
             return retval;
         } catch (
 
@@ -155,27 +185,65 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         }
     }
 
-    private double[] calcBaseValue(Feature[] featuresArray, int T, int F) {
+    // public static RealMatrix realMatrixFromFeatures(List<Feature> ps) {
+    // // return MatrixUtils.createRealMatrix(
+    // double[][] vect = ps.stream()
+    // // .map(p -> p.toArray(new Feature[0]))
+
+    // .map(f -> f.getValue().asVector()).toArray(double[][]::new);
+
+    // // .map(p -> p.getFeatures().stream()
+    // // .mapToDouble(f -> f.getValue().asNumber())
+    // // .toArray())
+    // // .toArray(double[][]::new));
+
+    // return MatrixUtils.createRealMatrix(vect);
+    // }
+
+    public static double[][] matrixFromFeatures(PredictionInput pi) {
+
+        List<Feature> ps = pi.getFeatures();
+
+        // return MatrixUtils.createRealMatrix(
+        double[][] vect = ps.stream()
+                // .map(p -> p.toArray(new Feature[0]))
+
+                .map(f -> f.getValue().asVector()).toArray(double[][]::new);
+
+        // .map(p -> p.getFeatures().stream()
+        // .mapToDouble(f -> f.getValue().asNumber())
+        // .toArray())
+        // .toArray(double[][]::new));
+
+        return vect;
+    }
+
+    private double[] calcBaseValue(double[][] x) {
 
         // 1/T sum(1..T) x(t, j)
 
+        int T = x.length;
+        int F = x[0].length;
+
         double[] retval = new double[F];
 
-        for (int i = 0; i < F; i++) {
-            retval[i] = 0.0;
-        }
+        // for (int i = 0; i < F; i++) {
+        //     retval[i] = 0.0;
+        // }
 
-        for (int j = 0; j < T; j++) {
+        Arrays.fill(retval, 0.0);
 
-            Feature feature = featuresArray[j];
-            assert feature.getType() == Type.VECTOR;
+        for (int t = 0; t < T; t++) {
 
-            Value featureValue = feature.getValue();
-            double[] featureArray = featureValue.asVector();
-            assert featureArray.length == F;
+            // Feature feature = featuresArray[j];
+            // assert feature.getType() == Type.VECTOR;
 
-            for (int i = 0; i < F; i++) {
-                retval[i] += featureArray[i];
+            // Value featureValue = feature.getValue();
+            // double[] featureArray = featureValue.asVector();
+            // assert featureArray.length == F;
+
+            for (int f = 0; f < F; f++) {
+                retval[f] += x[t][f];
             }
         }
 
@@ -186,13 +254,16 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         return retval;
     }
 
-    private double[][] monteCarloGradient(double[][] x, PredictionProvider model, Output output) throws Exception {
+    private double[][] monteCarloGradient(double[][] x, PredictionProvider model) throws Exception {
 
         final double SIGMA = 10.0;
         final double MU = 0.01;
 
         int T = x.length;
         int F = x[0].length;
+
+        // long totalNormalCount = 0;
+        // long totalNormalTime = 0;
 
         // double[] x = baseValue;
         // gradientSamples mu
@@ -206,10 +277,17 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
         for (int n = 0; n < ng; n++) {
 
+            long startNano = System.nanoTime();
+
             double sum = 0.0;
             for (int t = 0; t < T; t++) {
                 for (int f = 0; f < F; f++) {
+                    long normalStart = System.nanoTime();
                     U[n][t][f] = N.sample();
+                    long normalEnd = System.nanoTime();
+                    totalNormalCount++;
+                    totalNormalTime += (normalEnd - normalStart);
+                    
                     sum += (U[n][t][f]) * (U[n][t][f]);
                 }
             }
@@ -221,6 +299,11 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                     U[n][t][f] = (U[n][t][f]) / L2norm;
                 }
             }
+
+            long endNano = System.nanoTime();
+
+            double time = (endNano - startNano) / 1e9;
+            // System.out.println(n + " monte carlo inner time = " + time);
         }
 
         double[] diff = new double[ng];
@@ -313,6 +396,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             }
         }
 
+        
         return retval;
     }
 }
