@@ -1,5 +1,21 @@
+/*
+ * Copyright 2022 Red Hat, Inc. and/or its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.kie.trustyai.explainability.model;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -77,14 +93,18 @@ public class Dataframe {
      * @return A @link{Dataframe}
      */
     public static Dataframe createFrom(List<Prediction> predictions) {
-        final Prediction prediction = predictions.get(0);
-        final Dataframe df = Dataframe.createFrom(prediction);
+        final Dataframe df;
+        if (predictions != null && predictions.size() > 0) {
+            final Prediction prediction = predictions.get(0);
+            df = Dataframe.createFrom(prediction);
 
-        if (predictions.size() > 1) {
-            final List<Prediction> rest = predictions.subList(1, predictions.size());
-            df.addPredictions(rest);
+            if (predictions.size() > 1) {
+                final List<Prediction> rest = predictions.subList(1, predictions.size());
+                df.addPredictions(rest);
+            }
+        } else {
+            df = new Dataframe();
         }
-
         return df;
     }
 
@@ -109,6 +129,9 @@ public class Dataframe {
             for (int col = 0; col < inputsSize; col++) {
                 df.data.get(col).add(currentInputs.get(col).getValue());
             }
+            df.metadata.synthetics.add(false);
+            df.metadata.ids.add(UUID.randomUUID().toString());
+            df.metadata.timestamps.add(LocalDateTime.now());
         });
 
         return df;
@@ -129,6 +152,34 @@ public class Dataframe {
 
         final List<Prediction> rest = predictions.subList(1, predictions.size());
         df.addPredictions(rest);
+
+        return df;
+    }
+
+    public static Dataframe createFrom(Prediction prediction, PredictionMetadata predictionMetadata) {
+        final Dataframe df = new Dataframe();
+
+        // Process inputs metadata
+        for (Feature feature : prediction.getInput().getFeatures()) {
+            df.metadata.names.add(feature.getName());
+            df.metadata.types.add(feature.getType());
+            df.metadata.constrained.add(feature.isConstrained());
+            df.metadata.domains.add(feature.getDomain());
+            df.metadata.inputs.add(true);
+            df.data.add(new ArrayList<>());
+        }
+        // Process outputs metadata
+        for (Output output : prediction.getOutput().getOutputs()) {
+            df.metadata.names.add(output.getName());
+            df.metadata.types.add(output.getType());
+            df.metadata.constrained.add(true);
+            df.metadata.domains.add(EmptyFeatureDomain.create());
+            df.metadata.inputs.add(false);
+            df.data.add(new ArrayList<>());
+        }
+
+        // Copy data
+        df.addPredictions(List.of(prediction), List.of(predictionMetadata));
 
         return df;
     }
@@ -170,32 +221,67 @@ public class Dataframe {
      * @param predictions The {@link List} of {@link Prediction} to add.
      */
     public void addPredictions(List<Prediction> predictions) {
-        final Prediction prediction = predictions.get(0);
-        final List<Feature> inputs = prediction.getInput().getFeatures();
-        final List<Output> outputs = prediction.getOutput().getOutputs();
+        addPredictions(predictions, null);
+    }
 
-        // Validate schema
-        if (!getInputNames().equals(inputs.stream().map(Feature::getName).collect(Collectors.toList()))) {
-            throw new IllegalArgumentException("Prediction inputs do not match dataframe inputs");
-        }
-        if (!getOutputNames().equals(outputs.stream().map(Output::getName).collect(Collectors.toList()))) {
-            throw new IllegalArgumentException("Prediction outputs do not match dataframe inputs");
-        }
+    /**
+     * Add a {@link List} of predictions to the {@link Dataframe}
+     *
+     * @param predictions The {@link List} of {@link Prediction} to add.
+     * @param predictionsMetadata The {@link List} of {@link PredictionMetadata} or {@code null}.
+     */
+    public void addPredictions(List<Prediction> predictions, List<PredictionMetadata> predictionsMetadata) {
+        if (predictions != null && predictions.size() > 0) {
+            final Prediction prediction = predictions.get(0);
+            final List<Feature> inputs = prediction.getInput().getFeatures();
+            final List<Output> outputs = prediction.getOutput().getOutputs();
 
-        final int inputsSize = getInputsCount();
-
-        IntStream.range(0, predictions.size()).forEach(i -> {
-            final List<Feature> currentInputs = predictions.get(i).getInput().getFeatures();
-            final List<Output> currentOutputs = predictions.get(i).getOutput().getOutputs();
-            // Copy data
-            for (int col = 0; col < inputsSize; col++) {
-                data.get(col).add(currentInputs.get(col).getValue());
+            // Validate schema
+            if (!getInputNames().equals(inputs.stream().map(Feature::getName).collect(Collectors.toList()))) {
+                throw new IllegalArgumentException("Prediction inputs do not match dataframe inputs");
             }
-            final int nFeatures = getColumnDimension();
-            for (int col = inputsSize; col < nFeatures; col++) {
-                data.get(col).add(currentOutputs.get(col - inputsSize).getValue());
+            if (!getOutputNames().equals(outputs.stream().map(Output::getName).collect(Collectors.toList()))) {
+                throw new IllegalArgumentException("Prediction outputs do not match dataframe inputs");
             }
-        });
+
+            boolean alignedMetadata;
+            if (predictionsMetadata != null) {
+                if (predictionsMetadata.size() != predictions.size()) {
+                    throw new IllegalArgumentException("Different number of predictions " + predictions.size() +
+                            " and metadata " + predictionsMetadata.size());
+                } else {
+                    alignedMetadata = true;
+                }
+            } else {
+                alignedMetadata = false;
+            }
+            final int inputsSize = getInputsCount();
+
+            IntStream.range(0, predictions.size()).forEach(i -> {
+                Prediction currentPrediction = predictions.get(i);
+                final List<Feature> currentInputs = currentPrediction.getInput().getFeatures();
+                final List<Output> currentOutputs = currentPrediction.getOutput().getOutputs();
+                // Copy data
+                for (int col = 0; col < inputsSize; col++) {
+                    data.get(col).add(currentInputs.get(col).getValue());
+                }
+                final int nFeatures = getColumnDimension();
+                for (int col = inputsSize; col < nFeatures; col++) {
+                    data.get(col).add(currentOutputs.get(col - inputsSize).getValue());
+                }
+
+                if (alignedMetadata) {
+                    PredictionMetadata predictionMetadata = predictionsMetadata.get(i);
+                    metadata.synthetics.add(predictionMetadata.isSynthetic());
+                    metadata.ids.add(predictionMetadata.getId());
+                    metadata.timestamps.add(predictionMetadata.getPredictionTime());
+                } else {
+                    metadata.synthetics.add(false);
+                    metadata.ids.add(currentPrediction.getExecutionId().toString());
+                    metadata.timestamps.add(LocalDateTime.now());
+                }
+            });
+        }
     }
 
     /**
@@ -729,7 +815,11 @@ public class Dataframe {
      */
     public Dataframe filterByRowIndex(List<Integer> rows) {
 
-        final Metadata metadataCopy = metadata.copy();
+        List<LocalDateTime> timestamps = rows.stream().map(metadata.timestamps::get).collect(Collectors.toList());
+        List<String> ids = rows.stream().map(metadata.ids::get).collect(Collectors.toList());
+        List<Boolean> synthetics = rows.stream().map(metadata.synthetics::get).collect(Collectors.toList());
+        Metadata metadataCopy = new Metadata(metadata.names, metadata.types, metadata.constrained, metadata.domains,
+                metadata.inputs, synthetics, ids, timestamps);
 
         final List<List<Value>> dataCopy = columnIndexStream().mapToObj(col -> {
             final List<Value> column = data.get(col);
@@ -776,6 +866,25 @@ public class Dataframe {
 
         return filterByRowIndex(filteredRowIndices);
 
+    }
+
+    public Dataframe filterRowsById(String id) {
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> metadata.ids.get(rowNumber).equals(id))
+                .boxed().collect(Collectors.toList());
+        return filterByRowIndex(rowIndexes);
+    }
+
+    public Dataframe filterOutSyntheticRows() {
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> !metadata.synthetics.get(rowNumber))
+                .boxed().collect(Collectors.toList());
+        return filterByRowIndex(rowIndexes);
+    }
+
+    public Dataframe filterRowsByTimeRange(LocalDateTime lowerBound, LocalDateTime upperBound) {
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> metadata.timestamps.get(rowNumber)
+                .isBefore(upperBound) && metadata.timestamps.get(rowNumber).isAfter(lowerBound)).boxed()
+                .collect(Collectors.toList());
+        return filterByRowIndex(rowIndexes);
     }
 
     /**
@@ -943,17 +1052,25 @@ public class Dataframe {
         private final List<Boolean> constrained;
         private final List<FeatureDomain> domains;
         private final List<Boolean> inputs;
+        private final List<Boolean> synthetics;
+        private final List<String> ids;
+        private final List<LocalDateTime> timestamps;
 
         private Metadata() {
-            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         }
 
-        private Metadata(List<String> names, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains, List<Boolean> inputs) {
+        private Metadata(List<String> names, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains,
+                List<Boolean> inputs, List<Boolean> synthetics, List<String> ids, List<LocalDateTime> timestamps) {
             this.names = new ArrayList<>(names);
             this.types = new ArrayList<>(types);
             this.constrained = new ArrayList<>(constrained);
             this.domains = new ArrayList<>(domains);
             this.inputs = new ArrayList<>(inputs);
+            this.synthetics = synthetics;
+            this.ids = ids;
+            this.timestamps = timestamps;
         }
 
         public void remove(int column) {
@@ -962,6 +1079,9 @@ public class Dataframe {
             constrained.remove(column);
             domains.remove(column);
             inputs.remove(column);
+            synthetics.remove(column);
+            ids.remove(column);
+            timestamps.remove(column);
         }
 
         public Metadata copy() {
@@ -970,7 +1090,10 @@ public class Dataframe {
                     new ArrayList<>(this.types),
                     new ArrayList<>(this.constrained),
                     new ArrayList<>(this.domains),
-                    new ArrayList<>(this.inputs));
+                    new ArrayList<>(this.inputs),
+                    new ArrayList<>(this.synthetics),
+                    new ArrayList<>(this.ids),
+                    new ArrayList<>(this.timestamps));
         }
 
     }

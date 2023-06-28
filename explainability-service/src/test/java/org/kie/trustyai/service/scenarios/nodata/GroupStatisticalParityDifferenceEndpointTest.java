@@ -1,6 +1,5 @@
 package org.kie.trustyai.service.scenarios.nodata;
 
-import java.util.Map;
 import java.util.UUID;
 
 import javax.enterprise.inject.Instance;
@@ -91,7 +90,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
     @Test
     @DisplayName("SPD POST incorrect input (no data)")
     void spdPostIncorrectInput() {
-        final Map<String, Object> payload = RequestPayloadGenerator.incorrectInput();
+        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
         given()
                 .contentType(ContentType.JSON)

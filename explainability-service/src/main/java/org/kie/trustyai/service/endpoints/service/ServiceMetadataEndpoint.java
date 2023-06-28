@@ -1,11 +1,15 @@
 package org.kie.trustyai.service.endpoints.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -17,6 +21,8 @@ import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.payloads.service.NameMapping;
+import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 
@@ -64,6 +70,53 @@ public class ServiceMetadataEndpoint {
 
         return Response.ok(serviceMetadataList).build();
 
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response labelSchema(NameMapping nameMapping) throws JsonProcessingException {
+
+        if (!dataSource.get().getKnownModels().contains(nameMapping.getModelID())) {
+            return Response.serverError()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Model ID " + nameMapping.getModelID() + " does not exist in TrustyAI metadata.")
+                    .build();
+        }
+        final Metadata metadata = dataSource.get().getMetadata(nameMapping.getModelID());
+
+        // validation
+        Schema inputSchema = metadata.getInputSchema();
+        Set<String> inputKeySet = inputSchema.getItems().keySet();
+        Set<String> nameMappingInputKeySet = nameMapping.getInputMapping().keySet();
+
+        Schema outputSchema = metadata.getOutputSchema();
+        Set<String> outputKeySet = outputSchema.getItems().keySet();
+        Set<String> nameMappingOutputKeySet = nameMapping.getOutputMapping().keySet();
+
+        if (!inputKeySet.containsAll(nameMappingInputKeySet)) {
+            Set<String> copyNameMapping = new HashSet<>(nameMappingInputKeySet);
+            copyNameMapping.removeAll(inputKeySet);
+            return Response.serverError()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Not all mapped input fields exist in model metadata, input features " + copyNameMapping + " do not exist")
+                    .build();
+        }
+
+        if (!outputKeySet.containsAll(nameMappingOutputKeySet)) {
+            Set<String> copyNameMapping = new HashSet<>(nameMappingOutputKeySet);
+            copyNameMapping.removeAll(outputKeySet);
+            return Response.serverError()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Not all mapped output fields exist in model metadata, output fields " + copyNameMapping + " do not exist")
+                    .build();
+        }
+
+        inputSchema.setNameMapping(nameMapping.getInputMapping());
+        outputSchema.setNameMapping(nameMapping.getOutputMapping());
+        dataSource.get().saveMetadata(metadata, metadata.getModelId());
+
+        return Response.ok().entity("Feature and output name mapping successfully applied.").build();
     }
 
 }
