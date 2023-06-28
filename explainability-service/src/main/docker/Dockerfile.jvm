@@ -81,11 +81,11 @@ ENV LANGUAGE='en_US:en'
 
 USER root
 
-RUN microdnf -y install python3 python3-pip gcc gcc-c++ make git && \
+RUN microdnf -y install python3 python3-pip python3-devel gcc gcc-c++ make git && \
     microdnf clean all
 
 # Install numpy, jep, and your local package
-RUN pip3 --user install numpy jep -e /python/
+RUN pip3 install --user numpy jep
 
 # We make four distinct layers so if there are application changes the library layers can be re-used
 COPY --chown=185 explainability-service/target/quarkus-app/lib/ /deployments/lib/
@@ -95,6 +95,8 @@ COPY --chown=185 explainability-service/target/quarkus-app/quarkus/ /deployments
 
 # Copy your local package
 COPY --chown=185 explainability-external/src/main/python/ /python/
+
+RUN pip3 install -e /python/
 
 # Switch to non-root user before running pip install to avoid permission issues
 USER 185

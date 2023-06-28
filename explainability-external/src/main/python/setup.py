@@ -11,7 +11,7 @@ setup(
         "pandas<=1.4.3",  # For AIX360 compatibility
         "numpy",
         "jep==4.1.1",
-        "grpcio==1.54.2",
+        "grpcio",
         "protobuf==3.19.4",
     ],
 )
