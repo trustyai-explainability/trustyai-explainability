@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -45,7 +46,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         this.ng = ng;
         this.nalpha = nalpha;
         this.randomSeed = randomSeed;
-    
+
     }
 
     @Override
@@ -173,7 +174,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             retval.complete(saliencyResults);
 
             System.out.println("normal avg time = " + ((double) totalNormalTime) / totalNormalCount);
-            System.out.println("normal total time = " + ((double) totalNormalTime) / 1e9); 
+            System.out.println("normal total time = " + ((double) totalNormalTime) / 1e9);
             System.out.println("normal total calls = " + totalNormalCount);
 
             return retval;
@@ -228,7 +229,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         double[] retval = new double[F];
 
         // for (int i = 0; i < F; i++) {
-        //     retval[i] = 0.0;
+        // retval[i] = 0.0;
         // }
 
         Arrays.fill(retval, 0.0);
@@ -268,7 +269,8 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         // double[] x = baseValue;
         // gradientSamples mu
 
-        NormalDistribution N = new NormalDistribution(0.0, SIGMA);
+        // NormalDistribution N = new NormalDistribution(0.0, SIGMA);
+        Random r = new Random();
         // N.reseedRandomGenerator(randomSeed);
 
         // Sample ng independent data points from the unit sphere
@@ -283,11 +285,12 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             for (int t = 0; t < T; t++) {
                 for (int f = 0; f < F; f++) {
                     long normalStart = System.nanoTime();
-                    U[n][t][f] = N.sample();
+                    // U[n][t][f] = N.sample();
+                    U[n][t][f] = r.nextGaussian() * SIGMA;
                     long normalEnd = System.nanoTime();
                     totalNormalCount++;
                     totalNormalTime += (normalEnd - normalStart);
-                    
+
                     sum += (U[n][t][f]) * (U[n][t][f]);
                 }
             }
@@ -396,7 +399,6 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             }
         }
 
-        
         return retval;
     }
 }
