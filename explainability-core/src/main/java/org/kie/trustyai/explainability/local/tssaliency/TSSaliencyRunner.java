@@ -79,8 +79,8 @@ public class TSSaliencyRunner implements Runnable {
                 alphas += I.toString() + ",";
             }
 
-            System.out.println(
-                    "thread " + Thread.currentThread().getName() + " done " + alphas + " process " + processingms);
+            // System.out.println(
+            //         "thread " + Thread.currentThread().getName() + " done " + alphas + " process " + processingms);
 
         } catch (Exception e) {
             e.printStackTrace();
