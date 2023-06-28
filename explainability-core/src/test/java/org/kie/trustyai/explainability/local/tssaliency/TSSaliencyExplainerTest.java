@@ -150,7 +150,7 @@ public class TSSaliencyExplainerTest {
                         null);
                 SaliencyResults saliencyResults = saliencyResultsCompletable.get();
                 if (i == 0) {
-                    // printResults(saliencyResults);
+                    printResults(saliencyResults);
                 }
             }
             long endNanos = System.nanoTime();

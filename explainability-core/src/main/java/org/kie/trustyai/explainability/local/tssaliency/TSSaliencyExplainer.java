@@ -3,6 +3,7 @@ package org.kie.trustyai.explainability.local.tssaliency;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import javax.print.attribute.standard.NumberOfInterveningJobs;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
@@ -36,7 +38,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
     private double[] baseValue; // check
     private int ng; // Number of samples for gradient estimation
-    private int nalpha; // Number of steps in convex path
+    public int nalpha; // Number of steps in convex path
     private int randomSeed;
     private long totalNormalCount = 0;
     private long totalNormalTime = 0;
@@ -113,38 +115,30 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                 }
             }
 
-            // for i 1 to n do
+            int numberCores = Runtime.getRuntime().availableProcessors();
+
+            TSSaliencyThreadInfo[] threadInfo = new TSSaliencyThreadInfo[numberCores];
+            for (int t = 0; t < numberCores; t++) {
+                threadInfo[t] = new TSSaliencyThreadInfo();
+                threadInfo[t].alphaList = new LinkedList<Integer>();
+                // alphaList[t] = new LinkedList<Integer>();
+            }
+
+            // int currentThreadNumber = 0;
             for (int i = 0; i < nalpha; i++) {
+                threadInfo[i % numberCores].alphaList.add(Integer.valueOf(i));
+            }
 
-                // Compute affine sample:
-                // s = alpha(i) * X + (1 - alpha(i)) * (1(T) * transpose(b))
+            for (int t = 0; t < numberCores; t++) {
+                threadInfo[t].runner = new TSSaliencyRunner(x, alpha, baseValue, score, model, this,
+                        threadInfo[t].alphaList);
 
-                double[][] s = new double[T][F];
-                for (int t = 0; t < T; t++) {
+                threadInfo[t].thread = new Thread(threadInfo[t].runner, "Runner" + t);
+                threadInfo[t].thread.start();
+            }
 
-                    for (int f = 0; f < F; f++) {
-                        s[t][f] = alpha[i] * x[t][f] + (1.0 - alpha[i]) * baseValue[f];
-                    }
-                }
-
-                // Compute Monte Carlo gradient (per time and feature dimension):
-
-                // g = MC_GRADIENT(s; f; ng)
-                long startNano = System.nanoTime();
-                double[][] g = monteCarloGradient(s, model);
-                long endNano = System.nanoTime();
-                double time = (endNano - startNano) / 1e9;
-                System.out.println(i + " monte carlo time = " + time);
-
-                // Update Score:
-                for (int t = 0; t < T; t++) {
-
-                    for (int f = 0; f < F; f++) {
-                        score[t][f] = score[t][f] + g[t][f] / nalpha;
-                    }
-                }
-
-                // n end for
+            for (int i = 0; i < numberCores; i++) {
+                threadInfo[i].thread.join();
             }
 
             // IG(t,j) = x(t,j) * SCORE(t,j)
@@ -173,9 +167,11 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
             retval.complete(saliencyResults);
 
-            System.out.println("normal avg time = " + ((double) totalNormalTime) / totalNormalCount);
-            System.out.println("normal total time = " + ((double) totalNormalTime) / 1e9);
-            System.out.println("normal total calls = " + totalNormalCount);
+            // System.out.println("normal avg time = " + ((double) totalNormalTime) /
+            // totalNormalCount);
+            // System.out.println("normal total time = " + ((double) totalNormalTime) /
+            // 1e9);
+            // System.out.println("normal total calls = " + totalNormalCount);
 
             return retval;
         } catch (
@@ -255,7 +251,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
         return retval;
     }
 
-    private double[][] monteCarloGradient(double[][] x, PredictionProvider model) throws Exception {
+    public double[][] monteCarloGradient(double[][] x, PredictionProvider model) throws Exception {
 
         final double SIGMA = 10.0;
         final double MU = 0.01;
@@ -279,17 +275,17 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
 
         for (int n = 0; n < ng; n++) {
 
-            long startNano = System.nanoTime();
+            // long startNano = System.nanoTime();
 
             double sum = 0.0;
             for (int t = 0; t < T; t++) {
                 for (int f = 0; f < F; f++) {
-                    long normalStart = System.nanoTime();
+                    // long normalStart = System.nanoTime();
                     // U[n][t][f] = N.sample();
                     U[n][t][f] = r.nextGaussian() * SIGMA;
-                    long normalEnd = System.nanoTime();
-                    totalNormalCount++;
-                    totalNormalTime += (normalEnd - normalStart);
+                    // long normalEnd = System.nanoTime();
+                    // totalNormalCount++;
+                    // totalNormalTime += (normalEnd - normalStart);
 
                     sum += (U[n][t][f]) * (U[n][t][f]);
                 }
@@ -303,9 +299,9 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
                 }
             }
 
-            long endNano = System.nanoTime();
+            // long endNano = System.nanoTime();
 
-            double time = (endNano - startNano) / 1e9;
+            // double time = (endNano - startNano) / 1e9;
             // System.out.println(n + " monte carlo inner time = " + time);
         }
 
