@@ -12,12 +12,14 @@ import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.TensorDataframe;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TensorConverterTest {
     @Test
     void modelInferResponseToPredictionOutputSingle() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final double value = random.nextDouble();
 
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
@@ -58,9 +60,68 @@ class TensorConverterTest {
     }
 
     @Test
-    void modelInferResponseToPredictionOutputFp32() {
+    void modelInferRequestToPredictionInputMalformed() {
 
         final Random random = new Random();
+        final double value = random.nextDouble();
+
+        InferTensorContents.Builder contents = InferTensorContents.newBuilder()
+                .addFp64Contents(value).addFp64Contents(value);
+
+        ModelInferRequest.InferInputTensor inputTensor = ModelInferRequest.InferInputTensor.newBuilder()
+                .setDatatype("FP64")
+                .addShape(2).addShape(2).setContents(contents).build();
+
+        final ModelInferRequest request = ModelInferRequest.newBuilder().addInputs(inputTensor).build();
+        Exception e = assertThrows(IllegalArgumentException.class, () -> TensorConverter.parseKserveModelInferRequest(request));
+        assertTrue(e.getMessage().contains("Error in input-tensor parsing"));
+    }
+
+    @Test
+    void modelInferResponseToPredictionOutputMalformed() {
+
+        final Random random = new Random();
+        final double value = random.nextDouble();
+
+        InferTensorContents.Builder contents = InferTensorContents.newBuilder()
+                .addFp64Contents(value).addFp64Contents(value);
+
+        ModelInferResponse.InferOutputTensor outputTensor = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .addShape(2).addShape(2).setContents(contents).build();
+
+        final ModelInferResponse response = ModelInferResponse.newBuilder().addOutputs(outputTensor).build();
+        Exception e = assertThrows(IllegalArgumentException.class, () -> TensorConverter.parseKserveModelInferResponse(response, 1));
+        assertTrue(e.getMessage().contains("Error in output-tensor parsing"));
+    }
+
+    @Test
+    void modelInferResponseToPredictionOutputMultiMismatch() {
+
+        final Random random = new Random(0);
+        final List<Double> values = random.doubles(4).boxed().collect(Collectors.toList());
+        InferTensorContents.Builder contents1 = InferTensorContents.newBuilder()
+                .addFp64Contents(values.get(0))
+                .addFp64Contents(values.get(1));
+        InferTensorContents.Builder contents2 = InferTensorContents.newBuilder()
+                .addFp64Contents(values.get(2))
+                .addFp64Contents(values.get(3));
+        ModelInferResponse.InferOutputTensor outputTensor1 = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .addShape(1).addShape(2).setContents(contents1).build();
+        ModelInferResponse.InferOutputTensor outputTensor2 = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .addShape(1).addShape(2).setContents(contents2).build();
+
+        final ModelInferResponse response = ModelInferResponse.newBuilder().addAllOutputs(List.of(outputTensor1, outputTensor2)).build();
+        assertThrows(IllegalArgumentException.class, () -> TensorConverter.parseKserveModelInferResponse(response, 3));
+
+    }
+
+    @Test
+    void modelInferResponseToPredictionOutputFp32() {
+
+        final Random random = new Random(0);
         final List<Float> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
                 .addFp32Contents(values.get(0))
@@ -82,7 +143,7 @@ class TensorConverterTest {
     @Test
     void modelInferResponseToPredictionOutputFp64() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
                 .addFp64Contents(values.get(0))
@@ -95,7 +156,7 @@ class TensorConverterTest {
 
         final ModelInferResponse response = ModelInferResponse.newBuilder().addOutputs(outputTensor).build();
 
-        final List<Output> predictionOutput = TensorConverter.parseKserveModelInferResponse(response, 1).get(0).getOutputs();
+        final List<Output> predictionOutput = TensorConverter.parseKserveModelInferResponse(response, values.size()).get(0).getOutputs();
 
         assertEquals(3, predictionOutput.size());
         for (int i = 0; i < 3; i++) {
@@ -106,7 +167,7 @@ class TensorConverterTest {
     @Test
     void modelInferResponseToPredictionInputFp32() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Float> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
                 .addFp32Contents(values.get(0))
@@ -129,7 +190,7 @@ class TensorConverterTest {
     @Test
     void modelInferResponseToPredictionInputFp64() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
                 .addFp64Contents(values.get(0))

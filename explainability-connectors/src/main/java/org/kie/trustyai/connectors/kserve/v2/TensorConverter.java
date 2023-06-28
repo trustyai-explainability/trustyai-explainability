@@ -42,59 +42,90 @@ public class TensorConverter {
         }
     }
 
-    static Feature contentsToFeature(InferTensorContents tensorContents, String kserveDatatype, String name, int index) {
+    static Feature contentsToFeature(ModelInferRequest.InferInputTensor tensor, String name, int index) {
         final KServeDatatype type;
+        InferTensorContents tensorContents = tensor.getContents();
         try {
-            type = KServeDatatype.valueOf(kserveDatatype);
+            type = KServeDatatype.valueOf(tensor.getDatatype());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + kserveDatatype);
+            throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
         }
 
-        switch (type) {
-            case BOOL:
-                return FeatureFactory.newBooleanFeature(name, tensorContents.getBoolContents(index));
-            case INT8:
-            case INT16:
-            case INT32:
-                return FeatureFactory.newNumericalFeature(name, tensorContents.getIntContents(index));
-            case INT64:
-                return FeatureFactory.newNumericalFeature(name, tensorContents.getInt64Contents(index));
-            case FP32:
-                return FeatureFactory.newNumericalFeature(name, tensorContents.getFp32Contents(index));
-            case FP64:
-                return FeatureFactory.newNumericalFeature(name, tensorContents.getFp64Contents(index));
-            case BYTES:
-                return FeatureFactory.newCategoricalFeature(name, String.valueOf(tensorContents.getBytesContents(index)));
-            default:
-                throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + kserveDatatype);
+        int contentsCount = 0;
+        try {
+            switch (type) {
+                case BOOL:
+                    contentsCount = tensorContents.getBoolContentsCount();
+                    return FeatureFactory.newBooleanFeature(name, tensorContents.getBoolContents(index));
+                case INT8:
+                case INT16:
+                case INT32:
+                    contentsCount = tensorContents.getIntContentsCount();
+                    return FeatureFactory.newNumericalFeature(name, tensorContents.getIntContents(index));
+                case INT64:
+                    contentsCount = tensorContents.getInt64ContentsCount();
+                    return FeatureFactory.newNumericalFeature(name, tensorContents.getInt64Contents(index));
+                case FP32:
+                    contentsCount = tensorContents.getFp32ContentsCount();
+                    return FeatureFactory.newNumericalFeature(name, tensorContents.getFp32Contents(index));
+                case FP64:
+                    contentsCount = tensorContents.getFp64ContentsCount();
+                    return FeatureFactory.newNumericalFeature(name, tensorContents.getFp64Contents(index));
+                case BYTES:
+                    contentsCount = tensorContents.getBytesContentsCount();
+                    return FeatureFactory.newCategoricalFeature(name, String.valueOf(tensorContents.getBytesContents(index)));
+                default:
+                    throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+            }
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Error in input-tensor parsing: Attempting to access index %d of input-tensor which only has length %d. This can happen if the tensor reports an incorrect shape.%nThe tensor that caused the error is shown below:%n%s",
+                            index, contentsCount, tensor));
         }
     }
 
-    static Output contentsToOutput(InferTensorContents tensorContents, String kserveDatatype, String name, int index) {
+    static Output contentsToOutput(ModelInferResponse.InferOutputTensor tensor, String name, int index) {
         final KServeDatatype type;
+        InferTensorContents tensorContents = tensor.getContents();
 
         try {
-            type = KServeDatatype.valueOf(kserveDatatype);
+            type = KServeDatatype.valueOf(tensor.getDatatype());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + kserveDatatype);
+            throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
         }
-        switch (type) {
-            case BOOL:
-                return new Output(name, Type.BOOLEAN, new Value(tensorContents.getBoolContents(index)), 1.0);
-            case INT8:
-            case INT16:
-            case INT32:
-                return new Output(name, Type.NUMBER, new Value(tensorContents.getIntContents(index)), 1.0);
-            case INT64:
-                return new Output(name, Type.NUMBER, new Value(tensorContents.getInt64Contents(index)), 1.0);
-            case FP32:
-                return new Output(name, Type.NUMBER, new Value(tensorContents.getFp32Contents(index)), 1.0);
-            case FP64:
-                return new Output(name, Type.NUMBER, new Value(tensorContents.getFp64Contents(index)), 1.0);
-            case BYTES:
-                return new Output(name, Type.CATEGORICAL, new Value(String.valueOf(tensorContents.getBytesContents(index))), 1.0);
-            default:
-                throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + kserveDatatype);
+
+        int contentsCount = 0;
+        try {
+            switch (type) {
+                case BOOL:
+                    contentsCount = tensorContents.getBoolContentsCount();
+                    return new Output(name, Type.BOOLEAN, new Value(tensorContents.getBoolContents(index)), 1.0);
+                case INT8:
+                case INT16:
+                case INT32:
+                    contentsCount = tensorContents.getIntContentsCount();
+                    return new Output(name, Type.NUMBER, new Value(tensorContents.getIntContents(index)), 1.0);
+                case INT64:
+                    contentsCount = tensorContents.getInt64ContentsCount();
+                    return new Output(name, Type.NUMBER, new Value(tensorContents.getInt64Contents(index)), 1.0);
+                case FP32:
+                    contentsCount = tensorContents.getFp32ContentsCount();
+                    return new Output(name, Type.NUMBER, new Value(tensorContents.getFp32Contents(index)), 1.0);
+                case FP64:
+                    contentsCount = tensorContents.getFp64ContentsCount();
+                    return new Output(name, Type.NUMBER, new Value(tensorContents.getFp64Contents(index)), 1.0);
+                case BYTES:
+                    contentsCount = tensorContents.getBytesContentsCount();
+                    return new Output(name, Type.CATEGORICAL, new Value(String.valueOf(tensorContents.getBytesContents(index))), 1.0);
+                default:
+                    throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+            }
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Error in output-tensor parsing: Attempting to access index %d of output-tensor which only has length %d. This can happen if the tensor reports an incorrect shape.%nThe tensor that caused the error is shown below:%n%s",
+                            index, contentsCount, tensor));
         }
     }
 
@@ -112,7 +143,7 @@ public class TensorConverter {
             return new ArrayList<>(List.of(PayloadParser.rawContentToPredictionInput(data, names)));
         }
         final List<Feature> feature = IntStream.range(0, secondShape)
-                .mapToObj(i -> contentsToFeature(tensor.getContents(), tensor.getDatatype(), names.get(i), i))
+                .mapToObj(i -> contentsToFeature(tensor, names.get(i), i))
                 .collect(Collectors.toCollection(ArrayList::new));
         return List.of(new PredictionInput(feature));
     }
@@ -123,7 +154,7 @@ public class TensorConverter {
             return PayloadParser.rawContentToPredictionInput(data, names).getFeatures();
         }
         return IntStream.range(0, secondShape)
-                .mapToObj(i -> contentsToFeature(tensor.getContents(), tensor.getDatatype(), names.get(i), i))
+                .mapToObj(i -> contentsToFeature(tensor, names.get(i), i))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -132,7 +163,7 @@ public class TensorConverter {
         if (raw) {
             return PayloadParser.rawContentToFeature(data, name, 0, idx);
         } else {
-            return contentsToFeature(tensor.getContents(), tensor.getDatatype(), name, idx);
+            return contentsToFeature(tensor, name, idx);
         }
     }
 
@@ -158,7 +189,6 @@ public class TensorConverter {
                     // NP features, no batch
                     List<String> names;
                     if (isBatch) {
-                        System.out.println("in A");
                         List<Feature> fs = rawHandlerMultiFeature(
                                 data,
                                 tensor,
@@ -168,17 +198,14 @@ public class TensorConverter {
                         return fs.stream().map(f -> new PredictionInput(List.of(f))).collect(Collectors.toList());
                     } else {
                         if (featureNames.isPresent()) {
-                            System.out.println("in B");
                             names = featureNames.get();
                         } else {
-                            System.out.println("in C");
                             names = labelTensors(tensor.getName(), secondShape);
                         }
                         return rawHandlerMulti(data, tensor, names, secondShape, raw);
                     }
                 } else if (shape.size() == 1) {
                     // A single element feature, no batch. PD or NP irrelevant
-                    System.out.println("in D");
                     List<Feature> fs = new ArrayList<>();
                     fs.add(rawHandlerSingle(data, tensor, tensor.getName(), 0, raw));
                     return List.of(new PredictionInput(fs));
@@ -187,7 +214,6 @@ public class TensorConverter {
                 }
             } else {
                 // NP-batch
-                System.out.println("in E");
                 final int secondShape = shape.get(1).intValue();
                 final List<PredictionInput> predictionInputs = new ArrayList<>();
 
@@ -208,11 +234,9 @@ public class TensorConverter {
             final List<Long> shape = data.getInputs(0).getShapeList();
             if (shape.size() < 2) {
                 // Multi-feature PD, no batch
-                System.out.println("in F");
                 logger.debug("Using PD codec (no batch)");
                 final List<ModelInferRequest.InferInputTensor> tensors = data.getInputsList();
                 final List<Feature> features = tensors.stream().map(tensor -> {
-                    final InferTensorContents contents = tensor.getContents();
                     return rawHandlerSingle(data, tensor, tensor.getName(), 0, raw);
                 }).collect(Collectors.toCollection(ArrayList::new));
 
@@ -221,7 +245,6 @@ public class TensorConverter {
                 // given some shape (ntensors, a, b, ... n)
                 // return ntensors of PredictionOutputs, each with a*b*c*...*n outputs
 
-                System.out.println("in G");
                 // Multi-feature PD, batch
                 logger.debug("Using NP codec (batch)");
                 final int secondShape = shape.get(1).intValue();
@@ -252,7 +275,7 @@ public class TensorConverter {
         if (raw) {
             return PayloadParser.rawContentToOutput(data, name, 0, idx);
         } else {
-            return contentsToOutput(tensor.getContents(), tensor.getDatatype(), name, idx);
+            return contentsToOutput(tensor, name, idx);
         }
     }
 
@@ -262,7 +285,7 @@ public class TensorConverter {
             return PayloadParser.rawContentToPredictionOutput(data, names).getOutputs();
         }
         return IntStream.range(0, secondShape)
-                .mapToObj(i -> contentsToOutput(tensor.getContents(), tensor.getDatatype(), names.get(i), i))
+                .mapToObj(i -> contentsToOutput(tensor, names.get(i), i))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -271,9 +294,8 @@ public class TensorConverter {
         if (raw) {
             return new ArrayList<>(List.of(PayloadParser.rawContentToPredictionOutput(data, names)));
         }
-        System.out.println(names + ": " + secondShape);
         final List<Output> output = IntStream.range(0, secondShape)
-                .mapToObj(i -> contentsToOutput(tensor.getContents(), tensor.getDatatype(), names.get(i), i))
+                .mapToObj(i -> contentsToOutput(tensor, names.get(i), i))
                 .collect(Collectors.toCollection(ArrayList::new));
         return List.of(new PredictionOutput(output));
     }
@@ -305,7 +327,6 @@ public class TensorConverter {
                     List<String> names;
                     if (isBatch) {
                         logger.debug("Using NP codec (batch)");
-                        System.out.println("out A");
                         names = Collections.nCopies(secondShape, tensor.getName());
                         List<Output> os = rawHandlerMultiOutput(data, tensor, names, secondShape, raw);
                         return os.stream().map(o -> new PredictionOutput(List.of(o))).collect(Collectors.toList());
@@ -315,12 +336,10 @@ public class TensorConverter {
                         } else {
                             names = IntStream.range(0, secondShape).mapToObj(i -> tensor.getName() + "-" + i).collect(Collectors.toCollection(ArrayList::new));
                         }
-                        System.out.println("out B");
                         return rawHandlerMulti(data, tensor, names, secondShape, raw);
                     }
 
                 } else if (shape.size() == 1) {
-                    System.out.println("out C");
                     // A single element feature, no batch. PD or NP irrelevant
                     return List.of(new PredictionOutput(List.of(rawHandlerSingle(data, tensor, tensor.getName(), 0, raw))));
                 } else {
@@ -328,7 +347,6 @@ public class TensorConverter {
                 }
             } else {
                 // NP-batch
-                System.out.println("out D");
                 final int secondShape = shape.get(1).intValue();
                 final List<PredictionOutput> predictionOutputs = new ArrayList<>();
 
@@ -345,74 +363,58 @@ public class TensorConverter {
             }
 
         } else if (count > 1) { // The PD codec case
-            final List<Long> shape = data.getOutputs(0).getShapeList();
-            if (shape.size() < 2) {
-                System.out.println("out E");
-                // Multi-feature PD, no batch
-                logger.debug("Using PD codec (no batch)");
-                final List<ModelInferResponse.InferOutputTensor> tensors = data.getOutputsList();
-                final List<Output> outputs = tensors.stream().map(tensor -> {
-                    final InferTensorContents contents = tensor.getContents();
-                    return rawHandlerSingle(data, tensor, tensor.getName(), 0, raw);
-                }).collect(Collectors.toCollection(ArrayList::new));
-                return List.of(new PredictionOutput(outputs));
-            } else {
-                System.out.println("out F");
-                // Multi-feature PD, batch
-                logger.debug("Using NP codec (batch)");
+            // Multi-feature PD, batch
+            logger.debug("Using NP codec (batch)");
 
-                final List<ModelInferResponse.InferOutputTensor> tensors = data.getOutputsList();
-                List<Integer> perTensorSecondShape = new ArrayList<>();
-                List<List<Long>> perTensorShapes = new ArrayList<>();
+            final List<ModelInferResponse.InferOutputTensor> tensors = data.getOutputsList();
+            List<Integer> perTensorSecondShape = new ArrayList<>();
+            List<List<Long>> perTensorShapes = new ArrayList<>();
 
-                for (int tensorIDX = 0; tensorIDX < tensors.size(); tensorIDX++) {
-                    List<Long> perTensorShape = tensors.get(tensorIDX).getShapeList();
-                    perTensorSecondShape.add(1);
-                    perTensorShapes.add(perTensorShape);
-                    for (int i = 1; i < perTensorShape.size(); i++) {
-                        perTensorSecondShape.set(tensorIDX, perTensorSecondShape.get(tensorIDX) * perTensorShape.get(i).intValue());
-                    }
-                }
-
-                // given some shape (ntensors, a, b, ... n)
-                // return ntensors of PredictionOutputs, each with a*b*c*...*n outputs
-                System.out.printf("%d : %s %n", enforcedFirstDimension, perTensorShapes);
-                if (enforcedFirstDimension == 1) {
-                    System.out.println("out G");
-                    final List<Output> outputs = IntStream.range(0, tensors.size())
-                            .mapToObj(tensorIDX -> {
-                                List<String> names = labelTensors(tensors.get(tensorIDX).getName(), perTensorSecondShape.get(tensorIDX));
-                                System.out.println(tensorIDX);
-                                return rawHandlerMulti(
-                                        data,
-                                        tensors.get(tensorIDX),
-                                        names,
-                                        perTensorSecondShape.get(tensorIDX),
-                                        raw).get(0).getOutputs();
-                            }).flatMap(Collection::stream).collect(Collectors.toList());
-                    return List.of(new PredictionOutput(outputs));
-                } else if (perTensorSecondShape.stream().allMatch(i -> i == enforcedFirstDimension)) {
-                    System.out.println("out H");
-                    List<List<Output>> outputs = tensors.stream()
-                            .map(tensor -> IntStream.range(0, perTensorSecondShape.get(0))
-                                    .mapToObj(i -> rawHandlerSingle(data, tensor, tensor.getName(), i, raw))
-                                    .collect(Collectors.toCollection(ArrayList::new)))
-                            .collect(Collectors.toCollection(ArrayList::new));
-
-                    // Transpose the features
-                    final List<PredictionOutput> predictionOutputs = new ArrayList<>();
-                    for (int batch = 0; batch < perTensorSecondShape.get(0); batch++) {
-                        final List<Output> batchOutputs = new ArrayList<>();
-                        for (int outputIndex = 0; outputIndex < tensors.size(); outputIndex++) {
-                            batchOutputs.add(outputs.get(outputIndex).get(batch));
-                        }
-                        predictionOutputs.add(new PredictionOutput(batchOutputs));
-                    }
-                    return predictionOutputs;
-                } else {
-                    throw new IllegalArgumentException("Tensor shapes: " + perTensorSecondShape + " do not match number of inputs " + enforcedFirstDimension);
+            for (int tensorIDX = 0; tensorIDX < tensors.size(); tensorIDX++) {
+                List<Long> perTensorShape = tensors.get(tensorIDX).getShapeList();
+                perTensorSecondShape.add(1);
+                perTensorShapes.add(perTensorShape);
+                for (int i = 1; i < perTensorShape.size(); i++) {
+                    perTensorSecondShape.set(tensorIDX, perTensorSecondShape.get(tensorIDX) * perTensorShape.get(i).intValue());
                 }
             }
+
+            // given some shape (ntensors, a, b, ... n)
+            // return ntensors of PredictionOutputs, each with a*b*c*...*n outputs
+            if (enforcedFirstDimension == 1) {
+                final List<Output> outputs = IntStream.range(0, tensors.size())
+                        .mapToObj(tensorIDX -> {
+                            List<String> names = labelTensors(tensors.get(tensorIDX).getName(), perTensorSecondShape.get(tensorIDX));
+                            return rawHandlerMulti(
+                                    data,
+                                    tensors.get(tensorIDX),
+                                    names,
+                                    perTensorSecondShape.get(tensorIDX),
+                                    raw).get(0).getOutputs();
+                        }).flatMap(Collection::stream).collect(Collectors.toList());
+                return List.of(new PredictionOutput(outputs));
+
+            } else if (perTensorSecondShape.stream().allMatch(i -> i == enforcedFirstDimension)) {
+                List<List<Output>> outputs = tensors.stream()
+                        .map(tensor -> IntStream.range(0, perTensorSecondShape.get(0))
+                                .mapToObj(i -> rawHandlerSingle(data, tensor, tensor.getName(), i, raw))
+                                .collect(Collectors.toCollection(ArrayList::new)))
+                        .collect(Collectors.toCollection(ArrayList::new));
+
+                // Transpose the features
+                final List<PredictionOutput> predictionOutputs = new ArrayList<>();
+                for (int batch = 0; batch < perTensorSecondShape.get(0); batch++) {
+                    final List<Output> batchOutputs = new ArrayList<>();
+                    for (int outputIndex = 0; outputIndex < tensors.size(); outputIndex++) {
+                        batchOutputs.add(outputs.get(outputIndex).get(batch));
+                    }
+                    predictionOutputs.add(new PredictionOutput(batchOutputs));
+                }
+                return predictionOutputs;
+            } else {
+                throw new IllegalArgumentException("Tensor shapes: " + perTensorSecondShape + " do not match number of inputs " + enforcedFirstDimension);
+            }
+
         } else {
             throw new IllegalArgumentException("Data inputs count not supported: " + count);
         }

@@ -34,7 +34,7 @@ public abstract class GlobalExplainerEndpoint extends ExplainerEndpoint {
         try {
             String modelId = request.getModelId();
             String modelVersion = request.getModelVersion();
-            PredictionProvider model = getModel(serviceConfig, modelId, "0.0.1");
+            PredictionProvider model = getModel(serviceConfig, modelId, modelVersion);
 
             Dataframe dataframe = dataSource.getDataframe(modelId);
             List<Prediction> predictions = dataframe.asPredictions();

@@ -27,7 +27,7 @@ import static org.kie.trustyai.connectors.kserve.v2.TensorConverter.parseKserveM
 public class KServeFormatsTest {
 
     private static final String MODEL_ID = "example-1";
-    private static final String MODEL_VERSION = "0.0.1";
+    private static final String MODEL_VERSION = "0.0.1-TEST";
 
     static Prediction generateSingleInputSingleOutputPrediction(String inputName, String outputName) {
         return new SimplePrediction(
@@ -502,7 +502,7 @@ public class KServeFormatsTest {
         assertEquals(nOutputs, predictionOutputs.get(0).getOutputs().size());
         assertEquals(inputName, predictionInputs.get(0).getFeatures().get(0).getName());
         for (int i = 0; i < nOutputs; i++) {
-            assertEquals(outputName + "-" + i, predictionOutputs.get(0).getOutputs().get(i).getName());
+            assertEquals(outputName + "-" + i + "-0", predictionOutputs.get(0).getOutputs().get(i).getName());
         }
     }
 
@@ -539,7 +539,7 @@ public class KServeFormatsTest {
             assertEquals("f-" + i, predictionInputs.get(0).getFeatures().get(i).getName());
         }
         for (int i = 0; i < nFeatures * 2; i++) {
-            assertEquals("o-" + i, predictionOutputs.get(0).getOutputs().get(i).getName());
+            assertEquals("o-" + i + "-0", predictionOutputs.get(0).getOutputs().get(i).getName());
         }
     }
 

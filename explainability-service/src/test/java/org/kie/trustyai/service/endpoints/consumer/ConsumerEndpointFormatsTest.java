@@ -44,7 +44,7 @@ import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 class ConsumerEndpointFormatsTest {
 
     private static final String MODEL_ID = "example-1";
-    private static final String MODEL_VERSION = "0.0.1";
+    private static final String MODEL_VERSION = "0.0.1-TEST";
     private static final String INPUT_PREFIX = "inputs-lala";
     private static final String OUTPUT_PREFIX = "outputs-lala";
 
