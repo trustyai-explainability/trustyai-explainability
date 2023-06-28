@@ -73,7 +73,7 @@ class TensorConverterTest {
                 .addShape(2).addShape(2).setContents(contents).build();
 
         final ModelInferRequest request = ModelInferRequest.newBuilder().addInputs(inputTensor).build();
-        Exception e = assertThrows(IllegalArgumentException.class, ()->TensorConverter.parseKserveModelInferRequest(request));
+        Exception e = assertThrows(IllegalArgumentException.class, () -> TensorConverter.parseKserveModelInferRequest(request));
         assertTrue(e.getMessage().contains("Error in input-tensor parsing"));
     }
 
@@ -91,7 +91,7 @@ class TensorConverterTest {
                 .addShape(2).addShape(2).setContents(contents).build();
 
         final ModelInferResponse response = ModelInferResponse.newBuilder().addOutputs(outputTensor).build();
-        Exception e = assertThrows(IllegalArgumentException.class, ()->TensorConverter.parseKserveModelInferResponse(response, 1));
+        Exception e = assertThrows(IllegalArgumentException.class, () -> TensorConverter.parseKserveModelInferResponse(response, 1));
         assertTrue(e.getMessage().contains("Error in output-tensor parsing"));
     }
 
@@ -114,7 +114,7 @@ class TensorConverterTest {
                 .addShape(1).addShape(2).setContents(contents2).build();
 
         final ModelInferResponse response = ModelInferResponse.newBuilder().addAllOutputs(List.of(outputTensor1, outputTensor2)).build();
-       assertThrows( IllegalArgumentException.class, ()->TensorConverter.parseKserveModelInferResponse(response, 3));
+        assertThrows(IllegalArgumentException.class, () -> TensorConverter.parseKserveModelInferResponse(response, 3));
 
     }
 
