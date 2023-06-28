@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
 import org.kie.trustyai.explainability.model.*;
 
 public class PayloadUtils {
-    private static final Random random = new Random();
+    private static final Random random = new Random(0);
 
     public static PredictionProvider getDummy2Provider() {
         final KServeConfig target = KServeConfig.create("0.0.0.0:8081", "dummy2", "v0.0.1", CodecParameter.PD);
