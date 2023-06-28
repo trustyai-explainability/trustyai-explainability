@@ -12,11 +12,11 @@ import org.kie.trustyai.external.interfaces.TsFrame;
 import org.kie.trustyai.external.utils.PrepareDatasets;
 import org.kie.trustyai.external.utils.PythonWrapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import jep.SubInterpreter;
 import jep.python.PyCallable;
 import jep.python.PyObject;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TSICETest {
 

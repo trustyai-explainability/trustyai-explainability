@@ -1,16 +1,16 @@
-from ast import List
-from typing import Callable, Optional, Union
+from typing import Optional, Union
+
 import pandas as pd
 from aix360.algorithms.tsice import TSICEExplainer as _TSICEExplainer
 from aix360.algorithms.tsutils.tsperturbers import TSPerturber
-
 from trustyaiexternal.api import Explainer
+
 
 class TSICEExplainer(Explainer):
     """Time Series ICE Explainer"""
 
-    def __init__(self, model_name: str, 
-                 model_version: str, 
+    def __init__(self, model_name: str,
+                 model_version: str,
                  input_length: int,
                  forecast_lookahead: int,
                  n_variables: int = 1,
@@ -32,23 +32,18 @@ class TSICEExplainer(Explainer):
         self.perturbers = perturbers
         self.explanation_window_start = explanation_window_start
         self.explanation_window_length = explanation_window_length
-        
+        self._explainer = _TSICEExplainer(forecaster=self._model.predict,
+                                          input_length=self.input_length,
+                                          forecast_lookahead=self.forecast_lookahead,
+                                          n_variables=self.n_variables,
+                                          n_exogs=self.n_exogs,
+                                          n_perturbations=self.n_perturbations,
+                                          features_to_analyze=self.features_to_analyze,
+                                          perturbers=self.perturbers,
+                                          explanation_window_start=self.explanation_window_start,
+                                          explanation_window_length=self.explanation_window_length)
 
-    def explain(self, point: pd.DataFrame, model = None) -> dict:
+    def explain(self, point: pd.DataFrame) -> dict:
         """Explains a single prediction.
-        
-        If model is None, the model passed to the constructor is used as a remote gRPC rmodel.
         """
-        if model is None:
-            model = self._model
-        explainer = _TSICEExplainer(forecaster=model.predict,
-                            input_length=self.input_length,
-                            forecast_lookahead=self.forecast_lookahead,
-                            n_variables=self.n_variables,
-                            n_exogs=self.n_exogs,
-                            n_perturbations=self.n_perturbations,
-                            features_to_analyze=self.features_to_analyze,
-                            perturbers=self.perturbers,
-                            explanation_window_start=self.explanation_window_start,
-                            explanation_window_length=self.explanation_window_length)
-        return explainer.explain_instance(ts=point)
+        return self._explainer.explain_instance(ts=point)
