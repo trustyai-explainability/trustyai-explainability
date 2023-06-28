@@ -10,6 +10,7 @@ RESOURCEDIR="${MY_DIR}/../resources"
 TEST_USER=${OPENSHIFT_TESTUSER_NAME:-"admin"} #Username used to login to the ODH Dashboard
 TEST_PASS=${OPENSHIFT_TESTUSER_PASS:-"admin"} #Password used to login to the ODH Dashboard
 LOCAL=${LOCAL:-false}
+TEARDOWN=${TEARDOWN:-false}
 OPENSHIFT_OAUTH_ENDPOINT="https://$(oc get route -n openshift-authentication   oauth-openshift -o json | jq -r '.spec.host')"
 MM_NAMESPACE="${ODHPROJECT}-model"
 
@@ -17,6 +18,7 @@ MM_NAMESPACE="${ODHPROJECT}-model"
 REQUESTS_CREATED=false
 FAILURE=false
 FAILURE_HANDLING='FAILURE=true && echo -e "\033[0;31mERROR\033[0m"'
+
 
 os::test::junit::declare_suite_start "$MY_SCRIPT"
 
@@ -100,9 +102,9 @@ function generate_data(){
 function schedule_and_check_request(){
   header "Create a metric request and confirm calculation"
   oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
-  TRUSTY_ROUTE=$(oc get route/trustyai --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
+  TRUSTY_ROUTE=http://$(oc get route/trustyai --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
-  os::cmd::expect_success_and_text "curl --location https://$TRUSTY_ROUTE/metrics/spd/request \
+  os::cmd::expect_success_and_text "curl -k --location $TRUSTY_ROUTE/metrics/spd/request \
     --header 'Content-Type: application/json' \
     --data '{
         \"modelId\": \"example-sklearn-isvc\",
@@ -112,7 +114,7 @@ function schedule_and_check_request(){
         \"privilegedAttribute\": 0.0,
         \"unprivilegedAttribute\": 1.0
     }'" "requestId" || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "curl https://$TRUSTY_ROUTE/q/metrics" "trustyai_spd" || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "curl -k $TRUSTY_ROUTE/q/metrics" "trustyai_spd" || eval "$FAILURE_HANDLING"
   REQUESTS_CREATED=true
 }
 
@@ -120,6 +122,9 @@ function schedule_and_check_request(){
 function test_prometheus_scraping(){
     header "Ensure metrics are in Prometheus"
     MODEL_MONITORING_ROUTE=$(oc get route -n ${ODHPROJECT} odh-model-monitoring --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
+
+    curl -k --location -g --request GET 'https://'$MODEL_MONITORING_ROUTE'//api/v1/query?query=trustyai_spd' -H 'Authorization: Bearer $TESTUSER_BEARER_TOKEN' -i
+    curl -k --location -g --request GET 'https://'$MODEL_MONITORING_ROUTE'//api/v1/query?query=trustyai_spd' -u $TEST_USER:$TEST_PASS
     os::cmd::try_until_text "curl -k --location -g --request GET 'https://'$MODEL_MONITORING_ROUTE'//api/v1/query?query=trustyai_spd' -H 'Authorization: Bearer $TESTUSER_BEARER_TOKEN' -i" "value" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
@@ -131,14 +136,15 @@ function local_teardown_wait(){
 function teardown_trustyai_test() {
   header "Cleaning up the TrustyAI test"
   oc project $ODHPROJECT
+  TRUSTY_ROUTE=http://$(oc get route/trustyai --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
   # delete all requests
   if [ $REQUESTS_CREATED = true ]; then
     for METRIC_NAME in "spd" "dir"
     do
-      for REQUEST in $(curl -s https://$TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
+      for REQUEST in $(curl -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
       do
-        curl -X DELETE --location https://$TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+        curl -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
             -H 'Content-Type: application/json' \
             -d "{
                   \"requestId\": \"$REQUEST\"
@@ -149,7 +155,6 @@ function teardown_trustyai_test() {
   fi
 
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_service_kfdef.yaml"  || eval "$FAILURE_HANDLING"
-  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_service_kfdef.yaml"  || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc project $MM_NAMESPACE" || echo "Could not switch to $MM_NAMESPACE"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/secret.yaml"  || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/odh-mlserver-0.x.yaml"  || eval "$FAILURE_HANDLING"
@@ -157,18 +162,18 @@ function teardown_trustyai_test() {
   os::cmd::expect_success "oc delete project $MM_NAMESPACE" || eval "$FAILURE_HANDLING"
 }
 
-get_authentication
-[ $FAILURE = false ] && install_trustyai            || echo -e "\033[0;31mSkipping TrustyAI install due to previous failure\033[0m"
-[ $FAILURE = false ] && check_trustyai_resources    || echo -e "\033[0;31mSkipping TrustyAI resource check due to previous failure\033[0m"
-[ $FAILURE = false ] && deploy_model                || echo -e "\033[0;31mSkipping model deployment due to previous failure\033[0m"
-[ $FAILURE = false ] && check_mm_resources          || echo -e "\033[0;31mSkipping ModelMesh resource check due to previous failure\033[0m"
-[ $FAILURE = false ] && check_communication         || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check due to previous failure\033[0m"
-[ $FAILURE = false ] && generate_data               || echo -e "\033[0;31mSkipping data generation due to previous failure\033[0m"
-[ $FAILURE = false ] && schedule_and_check_request  || echo -e "\033[0;31mSkipping metric scheduling due to previous failure\033[0m"
-[ $FAILURE = false ] && test_prometheus_scraping    || echo -e "\033[0;31mSkipping Prometheus data check due to previous failure\033[0m"
-
-
-[ $LOCAL = true ] && local_teardown_wait
+if [ $TEARDOWN = false ]; then
+  get_authentication
+  [ $FAILURE = false ] && install_trustyai            || echo -e "\033[0;31mSkipping TrustyAI install due to previous failure\033[0m"
+  [ $FAILURE = false ] && check_trustyai_resources    || echo -e "\033[0;31mSkipping TrustyAI resource check due to previous failure\033[0m"
+  [ $FAILURE = false ] && deploy_model                || echo -e "\033[0;31mSkipping model deployment due to previous failure\033[0m"
+  [ $FAILURE = false ] && check_mm_resources          || echo -e "\033[0;31mSkipping ModelMesh resource check due to previous failure\033[0m"
+  [ $FAILURE = false ] && check_communication         || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check due to previous failure\033[0m"
+  [ $FAILURE = false ] && generate_data               || echo -e "\033[0;31mSkipping data generation due to previous failure\033[0m"
+  [ $FAILURE = false ] && schedule_and_check_request  || echo -e "\033[0;31mSkipping metric scheduling due to previous failure\033[0m"
+  [ $FAILURE = false ] && test_prometheus_scraping    || echo -e "\033[0;31mSkipping Prometheus data check due to previous failure\033[0m"
+  [ $LOCAL = true ] && local_teardown_wait
+fi
 teardown_trustyai_test
 
 
