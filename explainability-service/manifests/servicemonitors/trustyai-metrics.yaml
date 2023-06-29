@@ -14,7 +14,6 @@ spec:
       bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
       bearerTokenSecret:
         key: ""
-      targetPort: 8080
       scheme: http
       params:
         'match[]':
