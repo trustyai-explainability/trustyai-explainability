@@ -84,7 +84,7 @@ USER root
 RUN microdnf -y install python3 python3-pip python3-devel gcc gcc-c++ make git && \
     microdnf clean all
 
-# Install numpy, jep, and your local package
+# Numpy *must* be installed before Jep, in order for Jep to enable numpy support
 RUN pip3 install --user numpy jep
 
 # We make four distinct layers so if there are application changes the library layers can be re-used
