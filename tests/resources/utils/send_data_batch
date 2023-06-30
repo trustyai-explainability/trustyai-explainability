@@ -12,13 +12,11 @@ MODEL_BETA=demo-loan-nn-onnx-beta
 ODHPROJECT=opendatahub
 MM_NAMESPACE=opendatahub-model
 
-oc project $ODHPROJECT 2>&1 1>/dev/null
-TRUSTY_POD=$(oc get pods -o name | grep trustyai)
-
 oc project $MM_NAMESPACE 2>&1 1>/dev/null
+TRUSTY_POD=$(oc get pods -o name | grep trustyai-service)
+
 INFER_ROUTE_ALPHA=$(oc get route demo-loan-nn-onnx-alpha --template={{.spec.host}}{{.spec.path}})
 INFER_ROUTE_BETA=$(oc get route demo-loan-nn-onnx-beta --template={{.spec.host}}{{.spec.path}})
-oc project $ODHPROJECT 2>&1 1>/dev/null
 
 check_for_reception () {
   CHECKS=0

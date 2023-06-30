@@ -53,7 +53,7 @@ else
     BRANCH_SHA=$(curl  https://api.github.com/repos/trustyai-explainability/trustyai-explainability/pulls/${PULL_NUMBER} | jq ".head.sha"  | tr -d '"')
 
     echo "Setting TrustyAI service kfdef to use PR image"
-    sed -i "s#value: \"quay.io/trustyai/trustyai-service:latest\"#value: \"quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}\"#" ../resources/trustyai/trustyai_service_kfdef.yaml
+    # sed -i "s#value: \"quay.io/trustyai/trustyai-service:latest\"#value: \"quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}\"#" ../resources/trustyai/trustyai_service_kfdef.yaml
 
     echo "Setting TrustyAI operator configmap to use PR image"
     sed -i "s#trustyaiServiceImageName: \"quay.io/trustyai/trustyai-service\"#trustyaiServiceImageName: \"quay.io/trustyai/trustyai-service-ci\"#" ../resources/trustyai/trustyai_operator_configmap.yaml

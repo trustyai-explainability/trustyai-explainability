@@ -12,7 +12,6 @@ TEST_PASS=${OPENSHIFT_TESTUSER_PASS:-"admin"} #Password used to login to the ODH
 LOCAL=${LOCAL:-false}
 TEARDOWN=${TEARDOWN:-false}
 
-OPENSHIFT_OAUTH_ENDPOINT="https://$(oc get route -n openshift-authentication   oauth-openshift -o json | jq -r '.spec.host')"
 MM_NAMESPACE="${ODHPROJECT}-model"
 
 # trackers of test successes
@@ -29,12 +28,6 @@ function setup_monitoring() {
     oc apply -f ${RESOURCEDIR}/modelmesh/enable-uwm.yaml || eval "$FAILURE_HANDLING"
 }
 
-function get_authentication(){
-  header "Getting authentication credentials to cluster"
-
-  oc adm policy add-role-to-user view -n ${ODHPROJECT} --rolebinding-name "view-$TEST_USER" $TEST_USER || eval "$FAILURE_HANDLING"
-  TESTUSER_BEARER_TOKEN="$(curl -kiL -u $TEST_USER:$TEST_PASS -H 'X-CSRF-Token: xxx' $OPENSHIFT_OAUTH_ENDPOINT'/oauth/authorize?response_type=token&client_id=openshift-challenging-client' | grep -oP 'access_token=\K[^&]*')" || eval "$FAILURE_HANDLING"
-}
 
 function install_trustyai_operator(){
   header "Installing TrustyAI Operator"
@@ -63,7 +56,6 @@ function deploy_model() {
     #os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/trustyai/openvino-serving-runtime.yaml -n ${MM_NAMESPACE}"
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/models/openvino-inference-service.yaml -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/trustyai/trustyai_crd.yaml -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
-    sleep 30
 }
 
 function check_trustyai_resources() {
@@ -72,6 +64,7 @@ function check_trustyai_resources() {
 
   os::cmd::try_until_text "oc get deployment trustyai-service" "trustyai-service" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get route trustyai-service-route" "trustyai-service-route" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc get pod | grep trustyai-service" "1/1" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 
 }
 
@@ -79,10 +72,10 @@ function check_mm_resources() {
   header "Checking that ModelMesh resources have spun up"
   oc project $MM_NAMESPACE || eval "$FAILURE_HANDLING"
 
+  os::cmd::try_until_text "oc get pod | grep modelmesh-serving" "5/5" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get route example-sklearn-isvc" "example-sklearn-isvc" $odhdefaulttimeout $odhdefaultinterval
   INFER_ROUTE=$(oc get route example-sklearn-isvc --template={{.spec.host}}{{.spec.path}}) || eval "$FAILURE_HANDLING"
   token=$(oc create token user-one -n ${MM_NAMESPACE}) || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "oc get pod | grep modelmesh-serving" "5/5" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "curl -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/trustyai/data.json -H 'Authorization: Bearer $token' -i" "model_name" || eval "$FAILURE_HANDLING"
 }
 
@@ -133,15 +126,10 @@ function schedule_and_check_request(){
 function test_prometheus_scraping(){
     header "Ensure metrics are in Prometheus"
 
-    SECRET=`oc get secret -n openshift-user-workload-monitoring | grep  prometheus-user-workload-token | head -n 1 | awk '{print $1 }'`
-    TOKEN=`echo $(oc get secret $SECRET -n openshift-user-workload-monitoring -o json | jq -r '.data.token') | base64 -d`
-    THANOS_QUERIER_HOST=`oc get route thanos-querier -n openshift-monitoring -o json | jq -r '.spec.host'`
-    curl -X GET -kG "https://$THANOS_QUERIER_HOST/api/v1/query?" --data-urlencode "query=modelmesh_models_loaded_total{namespace='opendatahub-model'}" -H "Authorization: Bearer $TOKEN"
-
-#    MODEL_MONITORING_ROUTE=$(oc get route -n ${ODHPROJECT} odh-model-monitoring --template={{.spec.host}})
-#    curl -k --location -g --request GET 'https://'$MODEL_MONITORING_ROUTE'//api/v1/query?query=trustyai_spd' -H 'Authorization: Bearer $TESTUSER_BEARER_TOKEN' -i
-
-#    os::cmd::try_until_text "curl -k --location -g --request GET 'https://'$MODEL_MONITORING_ROUTE'//api/v1/query?query=trustyai_spd' -H 'Authorization: Bearer $TESTUSER_BEARER_TOKEN' -i" "value" $odhdefaulttimeout $odhdefaultinterval
+    SECRET=`oc get secret -n openshift-user-workload-monitoring | grep  prometheus-user-workload-token | head -n 1 | awk '{print $1 }'` || eval "$FAILURE_HANDLING"
+    TOKEN=`echo $(oc get secret $SECRET -n openshift-user-workload-monitoring -o json | jq -r '.data.token') | base64 -d` || eval "$FAILURE_HANDLING"
+    THANOS_QUERIER_HOST=`oc get route thanos-querier -n openshift-monitoring -o json | jq -r '.spec.host'` || eval "$FAILURE_HANDLING"
+    os::cmd::try_until_text "curl -X GET -kG \"https://$THANOS_QUERIER_HOST/api/v1/query?\" --data-urlencode \"query=trustyai_spd{namespace='opendatahub-model'}\" -H 'Authorization: Bearer $TOKEN' | jq '.data.result[0].metric.protected'" "input-0" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function local_teardown_wait(){
@@ -153,7 +141,7 @@ function teardown_trustyai_test() {
   header "Cleaning up the TrustyAI test"
 
   oc project $MM_NAMESPACE || eval "$FAILURE_HANDLING"
-  TRUSTY_ROUTE=http://$(oc get route/trustyai --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
+  TRUSTY_ROUTE=http://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
   if [ $REQUESTS_CREATED = true ]; then
     for METRIC_NAME in "spd" "dir"
@@ -174,15 +162,14 @@ function teardown_trustyai_test() {
 
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/secret.yaml" || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/odh-mlserver-0.x.yaml" || eval "$FAILURE_HANDLING"
-  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/model.yaml" || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_crd.yaml"  || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete project $MM_NAMESPACE" || eval "$FAILURE_HANDLING"
-    os::cmd::expect_success "oc delete project trustyai-service-operator-system" || eval "$FAILURE_HANDLING"
+  os::cmd::expect_success "oc delete project trustyai-service-operator-system" || eval "$FAILURE_HANDLING"
 
   oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_operator_configmap.yaml"  || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml"  || eval "$FAILURE_HANDLING"
-  os::cmd::expect_success "oc delete deployment trustyai-service-operator"  || eval "$FAILURE_HANDLING"
+  os::cmd::expect_success "oc delete deployment trustyai-service-operator-controller-manager"  || eval "$FAILURE_HANDLING"
 
 }
 
