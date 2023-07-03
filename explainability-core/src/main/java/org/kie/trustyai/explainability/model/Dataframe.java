@@ -15,7 +15,12 @@
  */
 package org.kie.trustyai.explainability.model;
 
+import java.net.URI;
+import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAmount;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -783,19 +788,31 @@ public class Dataframe {
      */
     public List<Feature> columnAsFeatures(int column) {
         validateColumnIndex(column);
-
         final Type type = metadata.types.get(column);
-        if (type.equals(Type.NUMBER)) {
-            return data.get(column).stream()
-                    .map(v -> FeatureFactory.newNumericalFeature(metadata.names.get(column), (Number) v.getUnderlyingObject(), metadata.domains.get(column)))
-                    .collect(Collectors.toCollection(ArrayList::new));
-        } else if (type.equals(Type.BOOLEAN)) {
-            return data.get(column).stream()
-                    .map(v -> FeatureFactory.newBooleanFeature(metadata.names.get(column), (Boolean) v.getUnderlyingObject(), metadata.domains.get(column)))
-                    .collect(Collectors.toCollection(ArrayList::new));
-        } else {
-            return new ArrayList<>();
-        }
+        final List<Value> values = data.get(column);
+        final String name = metadata.names.get(column);
+        final FeatureDomain domain = metadata.domains.get(column);
+
+        // Map each type to its corresponding feature generator
+        Map<Type, Function<Value, Feature>> featureGenerators = Map.of(
+                Type.NUMBER, v -> FeatureFactory.newNumericalFeature(name, (Number) v.getUnderlyingObject(), domain),
+                Type.BOOLEAN, v -> FeatureFactory.newBooleanFeature(name, (Boolean) v.getUnderlyingObject(), domain),
+                Type.TEXT, v -> FeatureFactory.newTextFeature(name, (String) v.getUnderlyingObject(), domain),
+                Type.CATEGORICAL, v -> FeatureFactory.newCategoricalFeature(name, (String) v.getUnderlyingObject(), domain),
+                Type.BINARY, v -> FeatureFactory.newBinaryFeature(name, ByteBuffer.wrap((byte[]) v.getUnderlyingObject()), domain),
+                Type.URI, v -> FeatureFactory.newURIFeature(name, (URI) v.getUnderlyingObject(), domain),
+                Type.TIME, v -> FeatureFactory.newTimeFeature(name, LocalTime.from((LocalDateTime) v.getUnderlyingObject()), domain),
+                Type.DURATION, v -> FeatureFactory.newDurationFeature(name, Duration.from((TemporalAmount) v.getUnderlyingObject()), domain),
+                Type.VECTOR, v -> FeatureFactory.newVectorFeature(name, v.asVector()),
+                Type.CURRENCY, v -> FeatureFactory.newCurrencyFeature(name, (Currency) v.getUnderlyingObject(), domain));
+
+        // Default to Object Feature
+        Function<Value, Feature> defaultGenerator = v -> FeatureFactory.newObjectFeature(name, v.getUnderlyingObject(), domain);
+        Function<Value, Feature> generator = featureGenerators.getOrDefault(type, defaultGenerator);
+
+        return values.stream()
+                .map(generator)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
