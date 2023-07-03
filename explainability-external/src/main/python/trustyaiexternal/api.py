@@ -80,7 +80,16 @@ class Converter:
 
 
 class GRPCModel:
-    """Wrapper for a GRPC model"""
+    """Wrapper for a GRPC model
+    
+    Connects to a GRPC model and provides a predict method to make predictions.
+
+    Args:
+
+        model_name (str): name of the model
+        model_version (str): version of the model
+        target (str): target of the model
+    """
     def __init__(self, model_name: str, model_version: str, target: str = '0.0.0.0:8081'):
         self.channel = grpc.insecure_channel(target)
         self.stub = proto_pb2_grpc.GRPCInferenceServiceStub(self.channel)
@@ -97,6 +106,8 @@ class GRPCModel:
             data = x.to_numpy()
         else:
             data = x
+
+        print(x)
 
         input = proto_pb2.ModelInferRequest().InferInputTensor()
         input.name = "input"

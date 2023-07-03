@@ -8,9 +8,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
+import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.external.interfaces.ExternalPythonExplainer;
-import org.kie.trustyai.external.interfaces.TimeSeriesExplainer;
 import org.kie.trustyai.external.interfaces.TsFrame;
 
 import jep.SubInterpreter;
@@ -39,7 +40,6 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
         addConstructionArg("target", builder.modelTarget);
     }
 
-    @Override
     public CompletableFuture<TSICEExplanation> explainAsync(TsFrame dataframe, PredictionProvider model, Consumer<TSICEExplanation> intermediateResultsConsumer) {
 
         final Map<String, Object> args = Map.of("point", dataframe.getTsFrame(this.interpreter));
@@ -60,6 +60,16 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public CompletableFuture<TSICEExplanation> explainAsync(Prediction prediction, PredictionProvider model, Consumer<TSICEExplanation> intermediateResultsConsumer) {
+        return explainAsync(List.of(prediction), model, intermediateResultsConsumer);
+    }
+
+    @Override
+    public CompletableFuture<TSICEExplanation> explainAsync(List<Prediction> prediction, PredictionProvider model, Consumer<TSICEExplanation> intermediateResultsConsumer) {
+        return null;
     }
 
     public enum AnalyseFeature {

@@ -4,11 +4,10 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.external.interfaces.PassthroughPythonPredictionProvider;
-import org.kie.trustyai.external.interfaces.TimeSeriesExplainer;
-import org.kie.trustyai.external.interfaces.TsFrame;
 import org.kie.trustyai.external.utils.PrepareDatasets;
 import org.kie.trustyai.external.utils.PythonWrapper;
 
@@ -46,10 +45,10 @@ class TSICETest {
             PyObject instance = (PyObject) ((PyCallable) sub.getValue("create_model")).call();
             final PredictionProvider model = new PassthroughPythonPredictionProvider((PyCallable) instance.getAttr("predict"));
 
-            final TsFrame tsFrame = new TsFrame(sunspots.tail(inputLength), "month");
+            //            final TsFrame tsFrame = new TsFrame(sunspots.tail(inputLength), "month");
 
             // Request the explanation
-            TSICEExplanation explanation = tsice.explainAsync(tsFrame, model).get();
+            TSICEExplanation explanation = tsice.explainAsync(sunspots.tail(inputLength).asPredictions(), model).get();
 
             assertEquals(1, explanation.getDataX().size());
             assertEquals(inputLength, explanation.getDataX().get("sunspots").size());
