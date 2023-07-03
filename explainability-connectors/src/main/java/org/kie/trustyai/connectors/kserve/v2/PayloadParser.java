@@ -23,9 +23,13 @@ public class PayloadParser {
         }
     }
 
-    public static PredictionInput rawContentToPredictionInput(ModelInferRequest request, List<String> inputNames) throws IllegalArgumentException {
-        final ModelInferRequest.InferInputTensor tensor = request.getInputs(0);
-        final ByteString raw = request.getRawInputContents(0);
+    public static PredictionInput rawContentToPredictionInput(ModelInferRequest request, List<String> inputNames) {
+        return rawContentToPredictionInput(request, inputNames, 0);
+    }
+
+    public static PredictionInput rawContentToPredictionInput(ModelInferRequest request, List<String> inputNames, int idx) throws IllegalArgumentException {
+        final ModelInferRequest.InferInputTensor tensor = request.getInputs(idx);
+        final ByteString raw = request.getRawInputContents(idx);
         final KServeDatatype type;
         try {
             type = KServeDatatype.valueOf(tensor.getDatatype());
@@ -48,7 +52,34 @@ public class PayloadParser {
             default:
                 throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
         }
+    }
 
+    // this is less efficient than converting everything to a PredictionInput, so avoid when possible
+    public static Feature rawContentToFeature(ModelInferRequest request, String inputName, int tensorIDX, int featureIDX) throws IllegalArgumentException {
+        final ModelInferRequest.InferInputTensor tensor = request.getInputs(tensorIDX);
+        final ByteString raw = request.getRawInputContents(tensorIDX);
+        final KServeDatatype type;
+        try {
+            type = KServeDatatype.valueOf(tensor.getDatatype());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+        }
+        switch (type) {
+            case BOOL:
+                return new Feature(inputName, Type.BOOLEAN, new Value(RawConverter.toBoolean(raw).get(featureIDX)));
+            case INT8:
+            case INT16:
+            case INT32:
+                return new Feature(inputName, Type.NUMBER, new Value(RawConverter.toInteger(raw).get(featureIDX)));
+            case INT64:
+                return new Feature(inputName, Type.NUMBER, new Value(RawConverter.toLong(raw).get(featureIDX)));
+            case FP32:
+                return new Feature(inputName, Type.NUMBER, new Value(RawConverter.toFloat(raw).get(featureIDX)));
+            case FP64:
+                return new Feature(inputName, Type.NUMBER, new Value(RawConverter.toDouble(raw).get(featureIDX)));
+            default:
+                throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+        }
     }
 
     public static PredictionInput inputTensorToPredictionInput(ModelInferRequest.InferInputTensor tensor,
@@ -88,10 +119,14 @@ public class PayloadParser {
         }
     }
 
+    public static PredictionOutput rawContentToPredictionOutput(ModelInferResponse response, List<String> outputNames) {
+        return rawContentToPredictionOutput(response, outputNames, 0);
+    }
+
     public static PredictionOutput rawContentToPredictionOutput(ModelInferResponse response,
-            List<String> outputNames) throws IllegalArgumentException {
-        final ModelInferResponse.InferOutputTensor tensor = response.getOutputs(0);
-        final ByteString raw = response.getRawOutputContents(0);
+            List<String> outputNames, int idx) throws IllegalArgumentException {
+        final ModelInferResponse.InferOutputTensor tensor = response.getOutputs(idx);
+        final ByteString raw = response.getRawOutputContents(idx);
         final KServeDatatype type;
         try {
             type = KServeDatatype.valueOf(tensor.getDatatype());
@@ -114,6 +149,34 @@ public class PayloadParser {
                 return outputFromContentList(RawConverter.toDouble(raw), Type.NUMBER, outputNames);
             default:
                 throw new IllegalArgumentException("Currently unsupported type for Tensor output, type=" + tensor.getDatatype());
+        }
+    }
+
+    // this is less efficient than converting converting everything to a PredictionOutput, so avoid when possible
+    public static Output rawContentToOutput(ModelInferResponse request, String outputName, int tensorIDX, int outputIDX) throws IllegalArgumentException {
+        final ModelInferResponse.InferOutputTensor tensor = request.getOutputs(tensorIDX);
+        final ByteString raw = request.getRawOutputContents(tensorIDX);
+        final KServeDatatype type;
+        try {
+            type = KServeDatatype.valueOf(tensor.getDatatype());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+        }
+        switch (type) {
+            case BOOL:
+                return new Output(outputName, Type.BOOLEAN, new Value(RawConverter.toBoolean(raw).get(outputIDX)), 1.0);
+            case INT8:
+            case INT16:
+            case INT32:
+                return new Output(outputName, Type.NUMBER, new Value(RawConverter.toInteger(raw).get(outputIDX)), 1.0);
+            case INT64:
+                return new Output(outputName, Type.NUMBER, new Value(RawConverter.toLong(raw).get(outputIDX)), 1.0);
+            case FP32:
+                return new Output(outputName, Type.NUMBER, new Value(RawConverter.toFloat(raw).get(outputIDX)), 1.0);
+            case FP64:
+                return new Output(outputName, Type.NUMBER, new Value(RawConverter.toDouble(raw).get(outputIDX)), 1.0);
+            default:
+                throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
         }
     }
 
@@ -147,26 +210,26 @@ public class PayloadParser {
 
     public static PredictionOutput outputFromContentList(List<?> values, Type type, List<String> outputNames) {
         final int size = values.size();
-        List<String> names = outputNames == null ? IntStream.range(0, size).mapToObj(i -> "output-" + i).collect(Collectors.toList()) : outputNames;
+        List<String> names = outputNames == null ? IntStream.range(0, size).mapToObj(i -> "outputs-" + i).collect(Collectors.toList()) : outputNames;
         if (names.size() != size) {
             throw new IllegalArgumentException("Output names list has an incorrect size (" + names.size() + ", when it should be " + size + ")");
         }
         return new PredictionOutput(IntStream
                 .range(0, size)
                 .mapToObj(i -> new Output(names.get(i), type, new Value(values.get(i)), 1.0))
-                .collect(Collectors.toUnmodifiableList()));
+                .collect(Collectors.toList()));
     }
 
     public static PredictionInput inputFromContentList(List<?> values, Type type, List<String> outputNames) {
         final int size = values.size();
-        List<String> names = outputNames == null ? IntStream.range(0, size).mapToObj(i -> "input-" + i).collect(Collectors.toList()) : outputNames;
+        List<String> names = outputNames == null ? IntStream.range(0, size).mapToObj(i -> "inputs-" + i).collect(Collectors.toList()) : outputNames;
         if (names.size() != size) {
             throw new IllegalArgumentException("Input names list has an incorrect size (" + names.size() + ", when it should be " + size + ")");
         }
         return new PredictionInput(IntStream
                 .range(0, size)
                 .mapToObj(i -> new Feature(names.get(i), type, new Value(values.get(i))))
-                .collect(Collectors.toUnmodifiableList()));
+                .collect(Collectors.toList()));
     }
 
     public static void addFeature(InferTensorContents.Builder content, Feature feature) {

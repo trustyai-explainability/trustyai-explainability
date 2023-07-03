@@ -18,7 +18,7 @@ class PayloadParserTest {
     @Test
     void modelInferResponseToPredictionOutputSingle() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final double value = random.nextDouble();
 
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
@@ -37,7 +37,7 @@ class PayloadParserTest {
     @Test
     void modelInferResponseToPredictionOutputMulti() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Double> values = random.doubles(3).boxed().collect(Collectors.toList());
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
                 .addFp64Contents(values.get(0))
@@ -59,7 +59,7 @@ class PayloadParserTest {
     @Test
     void modelInferResponseToPredictionOutputFp32() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Float> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
                 .addFp32Contents(values.get(0))
@@ -81,7 +81,7 @@ class PayloadParserTest {
     @Test
     void modelInferResponseToPredictionOutputFp64() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
                 .addFp64Contents(values.get(0))
@@ -103,7 +103,7 @@ class PayloadParserTest {
     @Test
     void modelInferResponseToPredictionInputFp32() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Float> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
                 .addFp32Contents(values.get(0))
@@ -125,7 +125,7 @@ class PayloadParserTest {
     @Test
     void modelInferResponseToPredictionInputFp64() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
         InferTensorContents.Builder contents = InferTensorContents.newBuilder()
                 .addFp64Contents(values.get(0))

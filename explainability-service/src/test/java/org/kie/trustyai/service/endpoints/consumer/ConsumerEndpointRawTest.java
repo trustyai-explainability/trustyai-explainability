@@ -50,7 +50,7 @@ class ConsumerEndpointRawTest {
     Instance<MockMemoryStorage> storage;
 
     private static InferencePartialPayload createInputFP64(UUID id) {
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
         ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
         builder.addRawInputContents(RawConverter.fromDouble(values));
@@ -71,7 +71,7 @@ class ConsumerEndpointRawTest {
     }
 
     private static InferencePartialPayload createOutputF64(UUID id) {
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble());
         ModelInferResponse.Builder builder = ModelInferResponse.newBuilder();
         builder.addRawOutputContents(RawConverter.fromDouble(values));
@@ -92,7 +92,7 @@ class ConsumerEndpointRawTest {
     }
 
     private static InferencePartialPayload createInputINT64(UUID id) {
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Long> values = List.of(random.nextLong(), random.nextLong(), random.nextLong());
         ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
         builder.addRawInputContents(RawConverter.fromLong(values));
@@ -113,7 +113,7 @@ class ConsumerEndpointRawTest {
     }
 
     private static InferencePartialPayload createOutputINT64(UUID id) {
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Long> values = List.of(random.nextLong(), random.nextLong());
         ModelInferResponse.Builder builder = ModelInferResponse.newBuilder();
         builder.addRawOutputContents(RawConverter.fromLong(values));
@@ -134,7 +134,7 @@ class ConsumerEndpointRawTest {
     }
 
     private static InferencePartialPayload createInputINT32(UUID id) {
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Integer> values = List.of(random.nextInt(), random.nextInt(), random.nextInt());
         ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
         builder.addRawInputContents(RawConverter.fromInteger(values));
@@ -155,7 +155,7 @@ class ConsumerEndpointRawTest {
     }
 
     private static InferencePartialPayload createOutputINT32(UUID id) {
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Integer> values = List.of(random.nextInt(), random.nextInt());
         ModelInferResponse.Builder builder = ModelInferResponse.newBuilder();
         builder.addRawOutputContents(RawConverter.fromInteger(values));

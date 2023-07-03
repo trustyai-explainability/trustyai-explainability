@@ -9,7 +9,8 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import org.jboss.resteasy.reactive.RestResponse;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
@@ -34,7 +35,6 @@ import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 @QuarkusTest
 @TestProfile(BaseTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ConsumerEndpointTest {
 
     @Inject
@@ -52,7 +52,6 @@ class ConsumerEndpointTest {
         storage.get().emptyStorage();
     }
 
-    @Order(1)
     @Test
     void consumeFullPostCorrectModelA() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(0);
@@ -73,7 +72,6 @@ class ConsumerEndpointTest {
         assertEquals(1, dataframe.getOutputsCount());
     }
 
-    @Order(3)
     @Test
     void consumeFullPostIncorrectModelA() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
@@ -89,7 +87,6 @@ class ConsumerEndpointTest {
                 .body(is(""));
     }
 
-    @Order(2)
     @Test
     void consumeFullPostCorrectModelB() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadB(1);
@@ -110,7 +107,6 @@ class ConsumerEndpointTest {
         assertEquals(2, dataframe.getOutputsCount());
     }
 
-    @Order(4)
     @Test
     void consumeFullPostIncorrectModelB() {
         final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
@@ -284,5 +280,4 @@ class ConsumerEndpointTest {
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
     }
-
 }

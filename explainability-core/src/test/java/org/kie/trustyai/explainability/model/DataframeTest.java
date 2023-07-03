@@ -86,6 +86,17 @@ class DataframeTest {
     }
 
     @Test
+    void createFromEmptyPredictions() {
+        final List<Prediction> emptyList = new ArrayList<>();
+        final Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            Dataframe.createFrom(emptyList);
+        });
+
+        final String expected = "Cannot create a dataframe from an empy list of predictions.";
+        assertEquals(expected, exception.getMessage());
+    }
+
+    @Test
     void createFromInputs() {
         final Dataframe df = createTestInputDataframe();
 

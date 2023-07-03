@@ -23,7 +23,7 @@ class RawConverterTest {
 
     @Test
     void rawInteger() {
-        final List<Integer> data = new Random().ints(20, 0, 100).boxed().collect(Collectors.toList());
+        final List<Integer> data = new Random(0).ints(20, 0, 100).boxed().collect(Collectors.toList());
         final ByteString byteString = RawConverter.fromInteger(data);
         final List<Integer> converted = RawConverter.toInteger(byteString);
         assertEquals(data, converted);
@@ -31,7 +31,7 @@ class RawConverterTest {
 
     @Test
     void rawLong() {
-        final List<Long> data = new Random().longs(20, 0, 100).boxed().collect(Collectors.toList());
+        final List<Long> data = new Random(0).longs(20, 0, 100).boxed().collect(Collectors.toList());
         final ByteString byteString = RawConverter.fromLong(data);
         final List<Long> converted = RawConverter.toLong(byteString);
         assertEquals(data, converted);
@@ -39,7 +39,7 @@ class RawConverterTest {
 
     @Test
     void rawFloat() {
-        Random random = new Random();
+        Random random = new Random(0);
         List<Float> data = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             data.add(random.nextFloat());
@@ -52,7 +52,7 @@ class RawConverterTest {
 
     @Test
     void rawDouble() {
-        Random random = new Random();
+        Random random = new Random(0);
         List<Double> data = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             data.add(random.nextDouble());

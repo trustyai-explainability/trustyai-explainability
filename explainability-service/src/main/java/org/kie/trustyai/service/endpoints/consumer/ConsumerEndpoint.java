@@ -47,10 +47,12 @@ public class ConsumerEndpoint {
         final byte[] outputBytes = Base64.getDecoder().decode(request.getOutput().getBytes());
 
         Dataframe dataframe;
+
         try {
             dataframe = reconciler.payloadToDataFrame(inputBytes, outputBytes, String.valueOf(UUID.randomUUID()),
                     request.getMetadata(), modelId);
         } catch (DataframeCreateException e) {
+
             LOG.error("Could not create dataframe from payloads: " + e.getMessage());
             return Response.serverError().status(RestResponse.StatusCode.INTERNAL_SERVER_ERROR).build();
         }
