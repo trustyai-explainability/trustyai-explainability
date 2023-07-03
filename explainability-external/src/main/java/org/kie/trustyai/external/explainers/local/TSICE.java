@@ -26,7 +26,7 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
         super();
         this.interpreter = builder.interpreter;
         addConstructionArg("model_name", builder.modelName);
-        addConstructionArg("model_version", "1.0.0");
+        addConstructionArg("model_version", builder.modelVersion);
         addConstructionArg("input_length", builder.inputLength);
         addConstructionArg("forecast_lookahead", builder.forecastLookahead);
         builder.nVariables.ifPresent(integer -> addConstructionArg("n_variables", integer));
@@ -36,12 +36,13 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
         builder.perturbers.ifPresent(strings -> addConstructionArg("perturbers", strings));
         addConstructionArg("explanation_window_start", builder.explanationWindowStart);
         addConstructionArg("explanation_window_length", builder.explanationWindowLength);
+        addConstructionArg("target", builder.modelTarget);
     }
 
     @Override
     public CompletableFuture<TSICEExplanation> explainAsync(TsFrame dataframe, PredictionProvider model, Consumer<TSICEExplanation> intermediateResultsConsumer) {
 
-        final Map<String, Object> args = Map.of("point", dataframe.getTsFrame(this.interpreter), "model", model);
+        final Map<String, Object> args = Map.of("point", dataframe.getTsFrame(this.interpreter));
         final Map<String, Object> result;
         try {
             result = this.invoke(args, interpreter);
@@ -97,6 +98,8 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
         private int explanationWindowLength;
         private String modelTarget;
         private String modelName;
+
+        private String modelVersion;
         private SubInterpreter interpreter;
 
         public Builder withInputLength(int inputLength) {
@@ -144,10 +147,11 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
             return this;
         }
 
-        public TSICE build(SubInterpreter interpreter, String modelTarget, String modelName) {
+        public TSICE build(SubInterpreter interpreter, String modelTarget, String modelName, String version) {
             this.interpreter = interpreter;
             this.modelTarget = modelTarget;
             this.modelName = modelName;
+            this.modelVersion = version;
             return new TSICE(this);
         }
     }

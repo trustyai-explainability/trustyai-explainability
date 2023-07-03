@@ -12,16 +12,16 @@ import org.kie.trustyai.external.interfaces.TsFrame;
 import org.kie.trustyai.external.utils.PrepareDatasets;
 import org.kie.trustyai.external.utils.PythonWrapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import jep.SubInterpreter;
 import jep.python.PyCallable;
 import jep.python.PyObject;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 class TSICETest {
 
     @Test
-    void explainAsync() throws ExecutionException, InterruptedException {
+    void explainAsyncTest() throws ExecutionException, InterruptedException {
 
         try (SubInterpreter sub = PythonWrapper.INSTANCE.getSubInterpreter()) {
             final Dataframe sunspots = PrepareDatasets.getSunSpotsDataset();
@@ -39,7 +39,7 @@ class TSICETest {
                     .withNPerturbations(nPerturbations)
                     .withFeaturesToAnalyze(featuresToAnalyse)
                     .withExplanationWindowLength(observationLength)
-                    .withExplanationWindowStart(36).build(sub, "", "");
+                    .withExplanationWindowStart(36).build(sub, "192.168.0.47:8081", "model", "v0.1.0");
 
             // We import the model from Python by using the passthrough prediction provider
             sub.exec("from trustyaiexternal.models.forecaster import create_model");
