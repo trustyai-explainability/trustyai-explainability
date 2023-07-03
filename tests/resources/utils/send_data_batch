@@ -4,7 +4,7 @@ LOOP_IDX=0
 NFILES=$(cat $1 | jq 'length')
 THRESHOLD="${2:-$NFILES}"
 BATCH_SIZE=500
-PAUSE_TIME=0.005
+PAUSE_TIME=0.01
 
 MODEL_ALPHA=demo-loan-nn-onnx-alpha
 MODEL_BETA=demo-loan-nn-onnx-beta
@@ -12,23 +12,26 @@ MODEL_BETA=demo-loan-nn-onnx-beta
 ODHPROJECT=opendatahub
 MM_NAMESPACE=opendatahub-model
 
-oc project $ODHPROJECT 2>&1 1>/dev/null
-TRUSTY_POD=$(oc get pods -o name | grep trustyai)
-
 oc project $MM_NAMESPACE 2>&1 1>/dev/null
+TRUSTY_POD=$(oc get pods -o name | grep trustyai-service)
+
 INFER_ROUTE_ALPHA=$(oc get route demo-loan-nn-onnx-alpha --template={{.spec.host}}{{.spec.path}})
 INFER_ROUTE_BETA=$(oc get route demo-loan-nn-onnx-beta --template={{.spec.host}}{{.spec.path}})
-oc project $ODHPROJECT 2>&1 1>/dev/null
 
 check_for_reception () {
+  CHECKS=0
   while true
   do
-    THRESH=$(( $1 * 505 / 1000 ))
+    THRESH=$(( $1 * 250 / 1000 ))
     N_OBS=$(oc exec $TRUSTY_POD  -c trustyai-service -- bash -c "cat /inputs/$2-metadata.json"  | jq .observations)
-    echo -ne "\rMaking sure TrustyAI $2 dataset contains at least $THRESH points, has $N_OBS";
-    if (( $N_OBS > $THRESH )); then
+    echo -ne "\rMaking sure TrustyAI $2 dataset contains at least $THRESH points, has $N_OBS (tried $CHECKS times)";
+    if (( $CHECKS > 10)); then
+      echo "\033[0;31mERROR: Message reception timeout\033[0m"
+      exit 1
+    elif (( $N_OBS > $THRESH )); then
       break
     else
+      ((CHECKS=CHECKS+1))
       sleep 1
     fi
   done

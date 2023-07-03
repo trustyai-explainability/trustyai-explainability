@@ -24,8 +24,9 @@ make clean # remove the artifacts of the test from the cluster (operator, ODH, p
 * `SKIP_INSTALL=true/false`: skip the install of the ODH operator, if you've already installed it manually or via a previous test
 * `SKIP_KFDEF_INSTALL=true/false`: skip the install of ODH via KFdef, if you've already installed it manually or via a previous test
 * `TESTS_REGEX=${REGEX}`: only run tests whose names match the regex
-* `LOCAL=true/false`: This flag makes the test suite stop and wait for user input between the end of a test script and cluster teardown. 
-This prevents automatic teardown, which is useful for manual inspection of the cluster before teardown when running the tests locally.
+* `LOCAL=true/false`: This flag makes the test suite stop and wait for user input between the end of a test script and cluster teardown.   This prevents automatic teardown, which is useful for manual inspection of the cluster before teardown when running the tests locally.
+* `TEARDOWN=true/false`: This flag will just run the corresponding `teardown` functions within the various tests, useful for cleaning up stranded components from failed tests, without deleting the operator and ODH install. It's recommended to use this with a `make run`, as using `make test` will trigger a `make clean` that fully wipes the cluster. 
+
 
 
 # OpenShift-CI Information

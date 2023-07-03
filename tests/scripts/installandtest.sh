@@ -16,6 +16,7 @@ TESTS_REGEX=${TESTS_REGEX:-"basictests"}
 ODHPROJECT=${ODHPROJECT:-"opendatahub"}
 export ODHPROJECT
 export LOCAL
+export TEARDOWN
 
 echo "OCP version info"
 echo `oc version`
