@@ -1,0 +1,18 @@
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  name: trustyai-service
+spec:
+  applications:
+    - kustomizeConfig:
+        repoRef:
+          name: manifests
+          path: explainability-service/manifests
+        parameters:
+          - name: image
+            value: "quay.io/trustyai/trustyai-service:latest"
+      name: trustyai
+  repos:
+    - name: manifests
+      uri: https://github.com/trustyai-explainability/trustyai-explainability/tarball/main
+  version: v1.0.0

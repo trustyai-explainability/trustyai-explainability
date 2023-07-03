@@ -1,0 +1,15 @@
+apiVersion: kfdef.apps.kubeflow.org/v1
+kind: KfDef
+metadata:
+  name: trustyai-service-operator
+spec:
+  applications:
+    - kustomizeConfig:
+        repoRef:
+          name: manifests
+          path: config
+      name: trustyai-service-operator
+  repos:
+    - name: manifests
+      uri: https://github.com/trustyai-explainability/trustyai-service-operator/tarball/main
+  version: v1.0.0
