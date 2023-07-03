@@ -19,11 +19,21 @@ public class GlobalExplanationRequest {
 
     private String modelId;
 
+    private String modelVersion;
+
     public String getModelId() {
         return modelId;
     }
 
     public void setModelId(String modelId) {
         this.modelId = modelId;
+    }
+
+    public String getModelVersion() {
+        return modelVersion;
+    }
+
+    public void setModelVersion(String modelVersion) {
+        this.modelVersion = modelVersion;
     }
 }

@@ -17,16 +17,6 @@ spec:
         path: odh-dashboard
     name: odh-dashboard
   - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: prometheus/cluster
-    name: prometheus-cluster
-  - kustomizeConfig:
-      repoRef:
-        name: manifests
-        path: prometheus/operator
-    name: prometheus-operator
-  - kustomizeConfig:
       parameters:
         - name: monitoring-namespace
           value: opendatahub
@@ -42,17 +32,7 @@ spec:
         name: manifests
         path: modelmesh-monitoring
     name: modelmesh-monitoring
-  - kustomizeConfig:
-      repoRef:
-        name: trustyai-manifests
-        path: explainability-service/manifests
-      parameters:
-        - name: image
-          value: "quay.io/trustyai/trustyai-service:latest"
-    name: trustyai
   repos:
   - name: manifests
     uri: https://github.com/opendatahub-io/odh-manifests/tarball/master
-  - name: trustyai-manifests
-    uri: https://github.com/trustyai-explainability/trustyai-explainability/tarball/main
   version: master

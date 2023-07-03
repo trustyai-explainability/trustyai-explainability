@@ -25,10 +25,13 @@ public class MetadataUtils {
         final Value value = dataframe.getValue(0, i);
 
         final SchemaItem schemaItem = new SchemaItem();
+
         if (value.getUnderlyingObject() instanceof Integer) {
             schemaItem.setType(DataType.INT32);
         } else if (value.getUnderlyingObject() instanceof Double) {
             schemaItem.setType(DataType.DOUBLE);
+        } else if (value.getUnderlyingObject() instanceof Float) {
+            schemaItem.setType(DataType.FLOAT);
         } else if (value.getUnderlyingObject() instanceof Long) {
             schemaItem.setType(DataType.INT64);
         } else if (value.getUnderlyingObject() instanceof Boolean) {

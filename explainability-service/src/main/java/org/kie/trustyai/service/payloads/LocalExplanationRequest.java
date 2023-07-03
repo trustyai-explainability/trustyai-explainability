@@ -21,6 +21,8 @@ public class LocalExplanationRequest {
 
     private String predictionId;
 
+    private String modelVersion;
+
     public String getModelId() {
         return modelId;
     }
@@ -35,6 +37,14 @@ public class LocalExplanationRequest {
 
     public void setPredictionId(String predictionId) {
         this.predictionId = predictionId;
+    }
+
+    public String getModelVersion() {
+        return modelVersion;
+    }
+
+    public void setModelVersion(String modelVersion) {
+        this.modelVersion = modelVersion;
     }
 
 }

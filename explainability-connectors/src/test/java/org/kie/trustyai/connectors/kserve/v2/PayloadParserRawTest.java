@@ -20,7 +20,7 @@ class PayloadParserRawTest {
     @Test
     void modelInferRequestToPredictionOutputDoubleSingle() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final double value = random.nextDouble();
 
         ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
@@ -42,7 +42,7 @@ class PayloadParserRawTest {
     @Test
     void modelInferResponseToPredictionOutputMulti() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Double> values = random.doubles(3).boxed().collect(Collectors.toList());
 
         ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
@@ -63,7 +63,7 @@ class PayloadParserRawTest {
     @Test
     void modelInferResponseToPredictionOutputFp32() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Float> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
         ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
         response.addRawOutputContents(RawConverter.fromFloat(values));
@@ -83,7 +83,7 @@ class PayloadParserRawTest {
     @Test
     void modelInferResponseToPredictionOutputFp64() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
         ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
         response.addRawOutputContents(RawConverter.fromDouble(values));
@@ -103,7 +103,7 @@ class PayloadParserRawTest {
     @Test
     void modelInferResponseToPredictionInputFp32() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Float> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
         ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
         builder.addRawInputContents(RawConverter.fromFloat(values));
@@ -123,7 +123,7 @@ class PayloadParserRawTest {
     @Test
     void modelInferResponseToPredictionInputFp64() {
 
-        final Random random = new Random();
+        final Random random = new Random(0);
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
         ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
         builder.addRawInputContents(RawConverter.fromDouble(values));
