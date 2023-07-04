@@ -188,6 +188,6 @@ if [ $TEARDOWN = false ]; then
 fi
 teardown_trustyai_test
 
-[$FAILURE = true ] && os::cmd::expect_success "exit 1"
+[ $FAILURE = true ] && os::cmd::expect_success "exit 1"
 
 os::test::junit::declare_suite_end
