@@ -56,15 +56,14 @@ else
     # sed -i "s#value: \"quay.io/trustyai/trustyai-service:latest\"#value: \"quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}\"#" ../resources/trustyai/trustyai_service_kfdef.yaml
 
     echo "Setting TrustyAI operator configmap to use PR image"
-    sed -i "s#trustyaiServiceImageName: \"quay.io/trustyai/trustyai-service\"#trustyaiServiceImageName: \"quay.io/trustyai/trustyai-service-ci\"#" ../resources/trustyai/trustyai_operator_configmap.yaml
-    sed -i "s#trustyaiServiceImageTag \"latest\"#trustyaiServiceImageTag: ${BRANCH_SHA}\"#" ../resources/trustyai/trustyai_operator_configmap.yaml
-    # to do: add service image specification
+    sed -i "s#trustyaiServiceImageName: \"quay.io/trustyai/trustyai-service\"#trustyaiServiceImageName: \"quay.io/trustyai/trustyai-service-ci\"#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
+    sed -i "s#trustyaiServiceImageTag \"latest\"#trustyaiServiceImageTag: ${BRANCH_SHA}\"#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
 
-    echo "TrustyAI Service KFDEF"
-    cat ../resources/trustyai/trustyai_service_kfdef.yaml
+    # Applying the following configmap to operator
+    cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml > ${ARTIFACT_DIR}/trustyai_operator_configmap.yaml
 
     echo "TrustyAI Operator Custom Image ConfigMap"
-    cat ../resources/trustyai/trustyai_operator_configmap.yaml
+    cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
   fi
 fi
 
@@ -98,6 +97,7 @@ else
 
   echo "Creating the following KfDef"
   cat ./${KFDEF_FILENAME} > ${ARTIFACT_DIR}/${KFDEF_FILENAME}
+
   oc apply -f ./${KFDEF_FILENAME}
   kfctl_result=$?
   if [ "$kfctl_result" -ne 0 ]; then
