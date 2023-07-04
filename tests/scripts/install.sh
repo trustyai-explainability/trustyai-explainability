@@ -57,7 +57,7 @@ else
 
     echo "Setting TrustyAI operator configmap to use PR image"
     sed -i "s#trustyaiServiceImageName: \"quay.io/trustyai/trustyai-service\"#trustyaiServiceImageName: \"quay.io/trustyai/trustyai-service-ci\"#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
-    sed -i "s#trustyaiServiceImageTag \"latest\"#trustyaiServiceImageTag: ${BRANCH_SHA}\"#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
+    sed -i "s#trustyaiServiceImageTag: \"latest\"#trustyaiServiceImageTag: ${BRANCH_SHA}\"#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
 
     # Applying the following configmap to operator
     cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml > ${ARTIFACT_DIR}/trustyai_operator_configmap.yaml
