@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
+import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.external.interfaces.ExternalPythonExplainer;
@@ -69,7 +70,9 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
 
     @Override
     public CompletableFuture<TSICEExplanation> explainAsync(List<Prediction> prediction, PredictionProvider model, Consumer<TSICEExplanation> intermediateResultsConsumer) {
-        return null;
+        Dataframe df = Dataframe.createFrom(prediction);
+        TsFrame tsFrame = new TsFrame(df, "month");
+        return explainAsync(tsFrame, model, intermediateResultsConsumer);
     }
 
     public enum AnalyseFeature {

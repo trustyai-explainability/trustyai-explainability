@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Union
 
 import grpc
 import numpy as np
@@ -25,11 +25,14 @@ class Metric(ABC):
 
 class Explainer(ABC):
     """Base class for all explainers"""
-    def __init__(self, model_name, model_version, target):
+    def __init__(self, 
+                 model_name: str, 
+                 model_version: str, 
+                 target: str):
         self._model = GRPCModel(model_name=model_name, model_version=model_version, target=target)
 
     @abstractmethod
-    def explain(self, point: pd.DataFrame, model = None) -> dict:
+    def explain(self, point: pd.DataFrame) -> dict:
         pass
 
 class Converter:
@@ -78,17 +81,21 @@ class Converter:
         df[timestamp_column] = pd.to_datetime(df[timestamp_column], format=format)
         return tsFrame(df=df, timestamp_column=timestamp_column) # type: ignore
 
+class DummyModel:
+    def predict(self, x: pd.DataFrame) -> pd.DataFrame:
+        logging.warning(f"Dummy model received data: {x}")
+        return x.tail(12)
 
 class GRPCModel:
     """Wrapper for a GRPC model
     
-    Connects to a GRPC model and provides a predict method to make predictions.
+    Connects to a GRPC model and provides a `predict` method to make predictions.
 
     Args:
 
         model_name (str): name of the model
         model_version (str): version of the model
-        target (str): target of the model
+        target (str): target of the model (gRPC host and port)
     """
     def __init__(self, model_name: str, model_version: str, target: str = '0.0.0.0:8081'):
         self.channel = grpc.insecure_channel(target)
@@ -96,32 +103,41 @@ class GRPCModel:
         self._model_name = model_name
         self._model_version = model_version
 
-    def predict(self, x: pd.DataFrame) -> np.ndarray:
-        request = proto_pb2.ModelInferRequest()
-        request.model_name = self._model_name
-        request.model_version = self._model_version
-        request.id = "request_id"
+    def predict(self, x: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
+        """Generic predict method for GRPC models.
+        Aims at replacing a standard scikit-learn predict method.
 
-        if (isinstance(x, pd.DataFrame)):
+        Args:
+            x (Union[pd.DataFrame, np.ndarray]): input data, either a pandas dataframe or a numpy array
+        """
+        request = proto_pb2.ModelInferRequest()
+        request.model_name = self._model_name # type: ignore
+        request.model_version = self._model_version # type: ignore
+        request.id = "request_id" # type: ignore
+
+        if isinstance(x, pd.DataFrame):
             data = x.to_numpy()
         else:
             data = x
 
-        print(x)
-
+        data = data.T
+        # print(data)
+        # print([data.shape[0], data.shape[1]])
         input = proto_pb2.ModelInferRequest().InferInputTensor()
         input.name = "input"
         input.datatype = "FP64"
-        input.shape.extend([data.shape[0], data.shape[1]])
+        input.shape.extend([data.shape[1], data.shape[0]])
 
-        _data = [val.item() for val in data.flatten()]
+        logging.warning(f"Data shape is: {data.shape}")
 
-        input_contents = proto_pb2.InferTensorContents(fp64_contents=_data)
-        input.contents.CopyFrom(input_contents)
+        input_contents = proto_pb2.InferTensorContents(fp64_contents=[1.0]*144)
+        input.contents.MergeFrom(input_contents)
 
         request.inputs.extend([input])
+        print(request)
         response = self.stub.ModelInfer(request)
 
         output = response.outputs[0]
-        return np.array(output.contents.int64_contents)
+        contents = output.contents.fp64_contents
+        return np.array(output.contents.fp64_contents).T
 
