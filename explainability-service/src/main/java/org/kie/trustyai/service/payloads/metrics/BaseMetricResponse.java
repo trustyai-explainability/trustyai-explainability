@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.payloads;
+package org.kie.trustyai.service.payloads.metrics;
 
 import java.util.Date;
 import java.util.UUID;
@@ -55,5 +55,4 @@ public abstract class BaseMetricResponse {
     public void setId(UUID id) {
         this.id = id;
     }
-
 }

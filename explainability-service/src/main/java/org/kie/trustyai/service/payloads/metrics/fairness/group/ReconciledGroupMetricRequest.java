@@ -1,25 +1,19 @@
-package org.kie.trustyai.service.payloads;
+package org.kie.trustyai.service.payloads.metrics.fairness.group;
 
 import javax.enterprise.inject.Instance;
 
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.payloads.metrics.ReconciledBaseMetricRequest;
 import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.payloads.values.TypedValue;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({ "protected", "favorable" })
-public class ReconciledMetricRequest {
+public class ReconciledGroupMetricRequest extends ReconciledBaseMetricRequest {
     private String protectedAttribute;
     private String outcomeName;
-    private String modelId;
-
-    // this is the unique name of this specific request
-    private String requestName;
-
-    // this is the name of the metric that this request calculates, e.g., DIR or SPD
-    private String metricName;
     private Double thresholdDelta;
 
     private Integer batchSize;
@@ -28,16 +22,13 @@ public class ReconciledMetricRequest {
     private TypedValue favorableOutcome;
     private TypedValue unprivilegedAttribute;
 
-    public ReconciledMetricRequest() {
-    };
 
-    public ReconciledMetricRequest(String protectedAttribute, String outcomeName, String modelId, String requestName, String metricName, Double thresholdDelta, Integer batchSize,
-            TypedValue privilegedAttribute, TypedValue favorableOutcome, TypedValue unprivilegedAttribute) {
+
+    public ReconciledGroupMetricRequest(String protectedAttribute, String outcomeName, String modelId, String requestName, String metricName, Double thresholdDelta, Integer batchSize,
+                                        TypedValue privilegedAttribute, TypedValue favorableOutcome, TypedValue unprivilegedAttribute) {
+        super(modelId, requestName, metricName);
         this.protectedAttribute = protectedAttribute;
         this.outcomeName = outcomeName;
-        this.modelId = modelId;
-        this.requestName = requestName;
-        this.metricName = metricName;
         this.thresholdDelta = thresholdDelta;
         this.batchSize = batchSize;
         this.privilegedAttribute = privilegedAttribute;
@@ -45,13 +36,11 @@ public class ReconciledMetricRequest {
         this.unprivilegedAttribute = unprivilegedAttribute;
     }
 
-    public ReconciledMetricRequest(BaseMetricRequest request, DataType protectedType, DataType outcomeType) {
+    public ReconciledGroupMetricRequest(GroupMetricRequest request, DataType protectedType, DataType outcomeType) {
 
+        super(request.getModelId(), request.getRequestName(), request.getMetricName());
         protectedAttribute = request.getProtectedAttribute();
         outcomeName = request.getOutcomeName();
-        modelId = request.getModelId();
-        requestName = request.getRequestName();
-        metricName = request.getMetricName();
         thresholdDelta = request.getThresholdDelta();
         batchSize = request.getBatchSize();
 
@@ -68,16 +57,16 @@ public class ReconciledMetricRequest {
         this.favorableOutcome.setValue(request.getFavorableOutcome());
     }
 
-    public static ReconciledMetricRequest reconcile(BaseMetricRequest request, Instance<DataSource> dataSource) {
+    public static ReconciledGroupMetricRequest reconcile(GroupMetricRequest request, Instance<DataSource> dataSource) {
         final Metadata metadata = dataSource.get().getMetadata(request.getModelId());
-        return new ReconciledMetricRequest(
+        return new ReconciledGroupMetricRequest(
                 request,
                 metadata.getInputSchema().getItems().get(request.getProtectedAttribute()).getType(),
                 metadata.getOutputSchema().getItems().get(request.getOutcomeName()).getType());
     }
 
-    public static ReconciledMetricRequest reconcile(BaseMetricRequest request, Metadata metadata) {
-        return new ReconciledMetricRequest(
+    public static ReconciledGroupMetricRequest reconcile(GroupMetricRequest request, Metadata metadata) {
+        return new ReconciledGroupMetricRequest(
                 request,
                 metadata.getInputSchema().getItems().get(request.getProtectedAttribute()).getType(),
                 metadata.getOutputSchema().getItems().get(request.getOutcomeName()).getType());
@@ -99,29 +88,6 @@ public class ReconciledMetricRequest {
         this.outcomeName = outcomeName;
     }
 
-    public String getModelId() {
-        return modelId;
-    }
-
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
-    }
-
-    public String getRequestName() {
-        return requestName;
-    }
-
-    public void setRequestName(String requestName) {
-        this.requestName = requestName;
-    }
-
-    public String getMetricName() {
-        return metricName;
-    }
-
-    public void setMetricName(String metricName) {
-        this.metricName = metricName;
-    }
 
     public Double getThresholdDelta() {
         return thresholdDelta;

@@ -28,8 +28,8 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
-import org.kie.trustyai.service.payloads.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.LocalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainability.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.explainability.LocalExplanationRequest;
 
 public abstract class LocalExplainerEndpoint extends ExplainerEndpoint {
 

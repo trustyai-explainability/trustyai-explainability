@@ -1,13 +1,13 @@
 package org.kie.trustyai.service.payloads.definitions;
 
-import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.ReconciledGroupMetricRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class ReconciledDefinitionRequest extends ReconciledMetricRequest {
+public class ReconciledGroupDefinitionRequest extends ReconciledGroupMetricRequest {
     JsonNode metricValue;
 
-    public ReconciledDefinitionRequest(ReconciledMetricRequest reconciledMetricRequest, JsonNode metricValue) {
+    public ReconciledGroupDefinitionRequest(ReconciledGroupMetricRequest reconciledMetricRequest, JsonNode metricValue) {
         super(reconciledMetricRequest.getProtectedAttribute(),
                 reconciledMetricRequest.getOutcomeName(),
                 reconciledMetricRequest.getModelId(),

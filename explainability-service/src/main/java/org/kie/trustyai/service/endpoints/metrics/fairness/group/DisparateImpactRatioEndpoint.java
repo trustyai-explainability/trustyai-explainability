@@ -1,5 +1,6 @@
-package org.kie.trustyai.service.endpoints.metrics;
+package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -10,29 +11,37 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import io.quarkus.cache.CacheResult;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.metrics.fairness.FairnessDefinitions;
+import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.data.metadata.Metadata;
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.endpoints.metrics.MetricsEndpoint;
+import org.kie.trustyai.service.payloads.PayloadConverter;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
-import org.kie.trustyai.service.payloads.MetricThreshold;
-import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
-import org.kie.trustyai.service.payloads.definitions.DefinitionRequest;
-import org.kie.trustyai.service.payloads.definitions.ReconciledDefinitionRequest;
-import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponse;
+import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.ReconciledGroupMetricRequest;
+import org.kie.trustyai.service.payloads.definitions.GroupDefinitionRequest;
+import org.kie.trustyai.service.payloads.definitions.ReconciledGroupDefinitionRequest;
+import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponseGroup;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
-import org.kie.trustyai.service.validators.ValidBaseMetricRequest;
+import org.kie.trustyai.service.validators.metrics.fairness.group.ValidBaseMetricRequest;
 
 @Tag(name = "Disparate Impact Ratio Endpoint", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
         "classifications by calculating the ratio between the proportion of the majority and protected classes getting" +
@@ -47,8 +56,6 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @Inject
     MetricsConfig metricsConfig;
 
-    @Inject
-    MetricsCalculator calculator;
 
     @Inject
     PrometheusScheduler scheduler;
@@ -68,7 +75,7 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response dir(@ValidBaseMetricRequest BaseMetricRequest rawRequest) throws DataframeCreateException {
+    public Response dir(@ValidBaseMetricRequest GroupMetricRequest rawRequest) throws DataframeCreateException {
 
         final Dataframe dataframe;
         final Metadata metadata;
@@ -80,16 +87,16 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
-        ReconciledMetricRequest reconciledMetricRequest = ReconciledMetricRequest.reconcile(rawRequest, metadata);
+        ReconciledGroupMetricRequest reconciledMetricRequest = ReconciledGroupMetricRequest.reconcile(rawRequest, metadata);
 
         final double dir;
         try {
-            dir = calculator.calculateDIR(dataframe, reconciledMetricRequest);
+            dir = this.calculate(dataframe, reconciledMetricRequest);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric for model " + reconciledMetricRequest.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
-        final String dirDefinition = calculator.getDIRDefinition(dir, reconciledMetricRequest);
+        final String dirDefinition = this.getDefinition(dir, reconciledMetricRequest);
 
         MetricThreshold thresholds;
         if (reconciledMetricRequest.getThresholdDelta() == null) {
@@ -105,7 +112,7 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
                             1 + reconciledMetricRequest.getThresholdDelta(),
                             dir);
         }
-        final DisparateImpactRatioResponse dirObj = new DisparateImpactRatioResponse(dir, dirDefinition, thresholds);
+        final DisparateImpactRatioResponseGroup dirObj = new DisparateImpactRatioResponseGroup(dir, dirDefinition, thresholds);
         return Response.ok(dirObj).build();
     }
 
@@ -120,24 +127,24 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/definition")
-    public Response getSpecificDefinition(DefinitionRequest request) {
-        final ReconciledMetricRequest reconciledMetricRequest;
+    public Response getSpecificDefinition(GroupDefinitionRequest request) {
+        final ReconciledGroupMetricRequest reconciledMetricRequest;
         try {
-            reconciledMetricRequest = ReconciledMetricRequest.reconcile(request, dataSource);
+            reconciledMetricRequest = ReconciledGroupMetricRequest.reconcile(request, dataSource);
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
-        ReconciledDefinitionRequest reconciledDefinitionRequest = new ReconciledDefinitionRequest(reconciledMetricRequest, request.metricValue);
-        return Response.ok(calculator.getDIRDefinition(request.getMetricValue(), reconciledDefinitionRequest)).build();
+        ReconciledGroupDefinitionRequest reconciledDefinitionRequest = new ReconciledGroupDefinitionRequest(reconciledMetricRequest, request.metricValue);
+        return Response.ok(this.getDefinition(request.getMetricValue(), reconciledDefinitionRequest)).build();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
-    public Response createRequest(@ValidBaseMetricRequest BaseMetricRequest request) {
+    public Response createRequest(@ValidBaseMetricRequest GroupMetricRequest request) {
 
         final UUID id = UUID.randomUUID();
 
@@ -148,9 +155,9 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
         }
         request.setMetricName(getMetricName());
 
-        final ReconciledMetricRequest reconciledMetricRequest;
+        final ReconciledGroupMetricRequest reconciledMetricRequest;
         try {
-            reconciledMetricRequest = ReconciledMetricRequest.reconcile(request, dataSource);
+            reconciledMetricRequest = ReconciledGroupMetricRequest.reconcile(request, dataSource);
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
@@ -187,9 +194,47 @@ public class DisparateImpactRatioEndpoint implements MetricsEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response listRequests() {
         final ScheduleList scheduleList = new ScheduleList();
-        for (Map.Entry<UUID, ReconciledMetricRequest> entry : scheduler.getDirRequests().entrySet()) {
+        for (Map.Entry<UUID, ReconciledGroupMetricRequest> entry : scheduler.getDirRequests().entrySet()) {
             scheduleList.requests.add(new ScheduleRequest(entry.getKey(), entry.getValue()));
         }
         return Response.ok(scheduleList).build();
+    }
+
+    @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
+    public double calculate(Dataframe dataframe, ReconciledGroupMetricRequest request) {
+        LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
+        try {
+            final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
+
+            final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
+
+            final Dataframe privileged = dataframe.filterByColumnValue(protectedIndex,
+                    value -> value.equals(privilegedAttr));
+            final Value unprivilegedAttr = PayloadConverter.convertToValue(request.getUnprivilegedAttribute());
+            final Dataframe unprivileged = dataframe.filterByColumnValue(protectedIndex,
+                    value -> value.equals(unprivilegedAttr));
+            final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
+            final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
+            return DisparateImpactRatio.calculate(privileged, unprivileged,
+                    List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+        } catch (Exception e) {
+            throw new MetricCalculationException(e.getMessage(), e);
+        }
+    }
+
+
+    public String getDefinition(double referenceValue, ReconciledGroupMetricRequest request) {
+        final String outcomeName = request.getOutcomeName();
+        final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
+        final String protectedAttribute = request.getProtectedAttribute();
+        final String priviliged = PayloadConverter.convertToValue(request.getPrivilegedAttribute()).toString();
+        final String unpriviliged = PayloadConverter.convertToValue(request.getUnprivilegedAttribute()).toString();
+        return FairnessDefinitions.defineGroupDisparateImpactRatio(
+                protectedAttribute,
+                priviliged,
+                unpriviliged,
+                outcomeName,
+                favorableOutcomeAttr,
+                referenceValue);
     }
 }

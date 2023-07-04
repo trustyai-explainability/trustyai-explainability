@@ -3,7 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -12,8 +12,8 @@ public class RequestPayloadGenerator {
 
     private static final String MODEL_ID = "example1";
 
-    public static BaseMetricRequest correct() {
-        BaseMetricRequest request = new BaseMetricRequest();
+    public static GroupMetricRequest correct() {
+        GroupMetricRequest request = new GroupMetricRequest();
         request.setProtectedAttribute("gender");
         request.setFavorableOutcome(IntNode.valueOf(1));
         request.setOutcomeName("income");
@@ -24,8 +24,8 @@ public class RequestPayloadGenerator {
         return request;
     }
 
-    public static BaseMetricRequest named(String name) {
-        BaseMetricRequest request = new BaseMetricRequest();
+    public static GroupMetricRequest named(String name) {
+        GroupMetricRequest request = new GroupMetricRequest();
         request.setProtectedAttribute("gender");
         request.setFavorableOutcome(IntNode.valueOf(1));
         request.setOutcomeName("income");
@@ -37,8 +37,8 @@ public class RequestPayloadGenerator {
         return request;
     }
 
-    public static BaseMetricRequest incorrectType() {
-        BaseMetricRequest request = new BaseMetricRequest();
+    public static GroupMetricRequest incorrectType() {
+        GroupMetricRequest request = new GroupMetricRequest();
         request.setProtectedAttribute("gender");
         request.setFavorableOutcome(TextNode.valueOf("male"));
         request.setOutcomeName("income");
@@ -49,8 +49,8 @@ public class RequestPayloadGenerator {
         return request;
     }
 
-    public static BaseMetricRequest incorrectInput() {
-        BaseMetricRequest request = new BaseMetricRequest();
+    public static GroupMetricRequest incorrectInput() {
+        GroupMetricRequest request = new GroupMetricRequest();
         request.setProtectedAttribute("city");
         request.setFavorableOutcome(TextNode.valueOf("approved"));
         request.setOutcomeName("income");

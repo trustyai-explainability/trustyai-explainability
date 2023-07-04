@@ -36,9 +36,9 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.payloads.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.LocalExplanationRequest;
-import org.kie.trustyai.service.payloads.SaliencyExplanationResponse;
+import org.kie.trustyai.service.payloads.explainability.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.explainability.LocalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainability.SaliencyExplanationResponse;
 
 @Tag(name = "SHAP Explainer Endpoint")
 @Path("/explainers/local/shap")

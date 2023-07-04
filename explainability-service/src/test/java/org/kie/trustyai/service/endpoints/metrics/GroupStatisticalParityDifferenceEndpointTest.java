@@ -12,15 +12,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.endpoints.metrics.fairness.group.GroupStatisticalParityDifferenceEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
-import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponse;
+import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponseGroup;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
-import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceResponse;
+import org.kie.trustyai.service.payloads.spd.GroupStatisticalParityDifferenceResponseGroup;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -73,16 +74,16 @@ class GroupStatisticalParityDifferenceEndpointTest {
 
     @Test
     void postCorrect() {
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
 
-        final GroupStatisticalParityDifferenceResponse response = given()
+        final GroupStatisticalParityDifferenceResponseGroup response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
                 .statusCode(200)
                 .extract()
-                .body().as(GroupStatisticalParityDifferenceResponse.class);
+                .body().as(GroupStatisticalParityDifferenceResponseGroup.class);
 
         assertEquals("metric", response.getType());
         assertEquals("SPD", response.getName());
@@ -94,16 +95,16 @@ class GroupStatisticalParityDifferenceEndpointTest {
         datasource.get();
 
         // with large threshold, the DIR is inside bounds
-        BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        GroupMetricRequest payload = RequestPayloadGenerator.correct();
         payload.setThresholdDelta(.5);
-        DisparateImpactRatioResponse response = given()
+        DisparateImpactRatioResponseGroup response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(DisparateImpactRatioResponse.class);
+                .body().as(DisparateImpactRatioResponseGroup.class);
 
         assertEquals("metric", response.getType());
         assertEquals("SPD", response.getName());
@@ -119,7 +120,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(DisparateImpactRatioResponse.class);
+                .body().as(DisparateImpactRatioResponseGroup.class);
 
         assertEquals("metric", response.getType());
         assertEquals("SPD", response.getName());
@@ -129,7 +130,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
     @Test
     @DisplayName("SPD request with incorrect type")
     void postIncorrectType() {
-        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectType();
+        final GroupMetricRequest payload = RequestPayloadGenerator.incorrectType();
 
         given()
                 .contentType(ContentType.JSON)
@@ -143,7 +144,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
     @Test
     @DisplayName("SPD request with incorrect input")
     void postIncorrectInput() {
-        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectInput();
+        final GroupMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
         given()
                 .contentType(ContentType.JSON)
@@ -181,7 +182,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -263,7 +264,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -273,7 +274,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
 
         assertNotNull(firstRequest.getRequestId());
 
-        final BaseMetricRequest wrongPayload = RequestPayloadGenerator.incorrectType();
+        final GroupMetricRequest wrongPayload = RequestPayloadGenerator.incorrectType();
         given()
                 .contentType(ContentType.JSON)
                 .body(wrongPayload)
@@ -318,7 +319,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)
                 .body(payload)

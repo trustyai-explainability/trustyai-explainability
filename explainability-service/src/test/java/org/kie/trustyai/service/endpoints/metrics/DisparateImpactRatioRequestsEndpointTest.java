@@ -13,12 +13,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
+import org.kie.trustyai.service.endpoints.metrics.fairness.group.DisparateImpactRatioEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
-import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.ReconciledGroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -65,7 +66,7 @@ class DisparateImpactRatioRequestsEndpointTest {
     @Test
     void postCorrectRequestDefaultBatchSize() {
 
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
 
         final BaseScheduledResponse response = given()
                 .contentType(ContentType.JSON)
@@ -77,7 +78,7 @@ class DisparateImpactRatioRequestsEndpointTest {
                 .body().as(BaseScheduledResponse.class);
 
         // Get stored request
-        final ReconciledMetricRequest request = scheduler
+        final ReconciledGroupMetricRequest request = scheduler
                 .get()
                 .getDirRequests()
                 .get(response.getRequestId());
@@ -94,7 +95,7 @@ class DisparateImpactRatioRequestsEndpointTest {
 
         final int BATCH_SIZE = 1000;
 
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         payload.setBatchSize(BATCH_SIZE);
 
         final BaseScheduledResponse response = given()
@@ -107,7 +108,7 @@ class DisparateImpactRatioRequestsEndpointTest {
                 .body().as(BaseScheduledResponse.class);
 
         // Get stored request
-        final ReconciledMetricRequest request = scheduler
+        final ReconciledGroupMetricRequest request = scheduler
                 .get()
                 .getDirRequests()
                 .get(response.getRequestId());
@@ -123,7 +124,7 @@ class DisparateImpactRatioRequestsEndpointTest {
 
         final int BATCH_SIZE = -1;
 
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         payload.setBatchSize(BATCH_SIZE);
 
         given()
@@ -135,7 +136,7 @@ class DisparateImpactRatioRequestsEndpointTest {
                 .body(containsString("Request batch size must be bigger than 0."));
 
         // Get stored request
-        final Map<UUID, ReconciledMetricRequest> requests = scheduler
+        final Map<UUID, ReconciledGroupMetricRequest> requests = scheduler
                 .get()
                 .getDirRequests();
 
@@ -154,7 +155,7 @@ class DisparateImpactRatioRequestsEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         payload.setBatchSize(N_SAMPLES - 10);
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)

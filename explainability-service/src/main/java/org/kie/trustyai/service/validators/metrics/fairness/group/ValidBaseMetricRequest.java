@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.validators;
+package org.kie.trustyai.service.validators.metrics.fairness.group;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

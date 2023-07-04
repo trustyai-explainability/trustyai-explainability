@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.payloads;
 
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

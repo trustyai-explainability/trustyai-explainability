@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.validators;
+package org.kie.trustyai.service.validators.metrics.fairness.group;
 
 import java.util.Objects;
 
@@ -10,12 +10,12 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 
 @ApplicationScoped
-public class BaseMetricRequestValidator implements ConstraintValidator<ValidBaseMetricRequest, BaseMetricRequest> {
+public class BaseMetricRequestValidator implements ConstraintValidator<ValidBaseMetricRequest, GroupMetricRequest> {
     @Inject
     Instance<DataSource> dataSource;
 
@@ -25,7 +25,7 @@ public class BaseMetricRequestValidator implements ConstraintValidator<ValidBase
     }
 
     @Override
-    public boolean isValid(BaseMetricRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(GroupMetricRequest request, ConstraintValidatorContext context) {
         final String modelId = request.getModelId();
         if (!dataSource.get().hasMetadata(modelId)) {
             context.buildConstraintViolationWithTemplate("No metadadata found for model=" + modelId).addConstraintViolation();

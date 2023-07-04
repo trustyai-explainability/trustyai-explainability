@@ -1,12 +1,13 @@
-package org.kie.trustyai.service.payloads;
+package org.kie.trustyai.service.payloads.metrics.fairness.group;
 
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.node.ValueNode;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
 @JsonPropertyOrder({ "protected", "favorable" })
-public class BaseMetricRequest {
+public class GroupMetricRequest extends BaseMetricRequest {
 
     private String protectedAttribute;
     private ValueNode favorableOutcome;
@@ -15,36 +16,15 @@ public class BaseMetricRequest {
     private ValueNode privilegedAttribute;
     private ValueNode unprivilegedAttribute;
 
-    private String modelId;
-
-    // this is the unique name of this specific request
-    private String requestName;
-
-    // this is the name of the metric that this request calculates, e.g., DIR or SPD
-    private String metricName;
     private Double thresholdDelta;
 
     private Integer batchSize;
 
-    public BaseMetricRequest() {
+    public GroupMetricRequest() {
         // Public default no-argument constructor
+        super();
     }
 
-    public String getModelId() {
-        return modelId;
-    }
-
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
-    }
-
-    public String getRequestName() {
-        return requestName;
-    }
-
-    public void setRequestName(String requestName) {
-        this.requestName = requestName;
-    }
 
     public String getProtectedAttribute() {
         return protectedAttribute;
@@ -103,13 +83,6 @@ public class BaseMetricRequest {
         this.batchSize = batchSize;
     }
 
-    public String getMetricName() {
-        return metricName;
-    }
-
-    public void setMetricName(String metricName) {
-        this.metricName = metricName;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -117,13 +90,13 @@ public class BaseMetricRequest {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        BaseMetricRequest that = (BaseMetricRequest) o;
+        GroupMetricRequest that = (GroupMetricRequest) o;
         return protectedAttribute.equals(that.protectedAttribute)
                 && favorableOutcome.equals(that.favorableOutcome)
                 && outcomeName.equals(that.outcomeName)
                 && privilegedAttribute.equals(that.privilegedAttribute)
                 && unprivilegedAttribute.equals(that.unprivilegedAttribute)
-                && metricName.equals(that.metricName)
+                && this.getMetricName().equals(that.getMetricName())
                 && Objects.equals(thresholdDelta, that.thresholdDelta)
                 && Objects.equals(batchSize, that.batchSize);
     }
@@ -137,6 +110,6 @@ public class BaseMetricRequest {
                 unprivilegedAttribute,
                 thresholdDelta,
                 batchSize,
-                metricName);
+                this.getMetricName());
     }
 }

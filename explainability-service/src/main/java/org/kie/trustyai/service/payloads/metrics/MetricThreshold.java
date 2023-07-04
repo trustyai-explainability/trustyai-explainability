@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.payloads;
+package org.kie.trustyai.service.payloads.metrics;
 
 public class MetricThreshold {
     public double lowerBound;

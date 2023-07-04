@@ -15,12 +15,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.endpoints.metrics.fairness.group.DisparateImpactRatioEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
-import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponse;
+import org.kie.trustyai.service.payloads.dir.DisparateImpactRatioResponseGroup;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
@@ -77,16 +78,16 @@ class DisparateImpactRatioEndpointTest {
     void postCorrect() throws JsonProcessingException {
         datasource.get().reset();
 
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
 
-        final DisparateImpactRatioResponse response = given()
+        final DisparateImpactRatioResponseGroup response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(DisparateImpactRatioResponse.class);
+                .body().as(DisparateImpactRatioResponseGroup.class);
 
         assertEquals("metric", response.getType());
         assertEquals("DIR", response.getName());
@@ -98,16 +99,16 @@ class DisparateImpactRatioEndpointTest {
         datasource.get().reset();
 
         // with large threshold, the DIR is inside bounds
-        BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        GroupMetricRequest payload = RequestPayloadGenerator.correct();
         payload.setThresholdDelta(.5);
-        DisparateImpactRatioResponse response = given()
+        DisparateImpactRatioResponseGroup response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(DisparateImpactRatioResponse.class);
+                .body().as(DisparateImpactRatioResponseGroup.class);
 
         assertEquals("metric", response.getType());
         assertEquals("DIR", response.getName());
@@ -123,7 +124,7 @@ class DisparateImpactRatioEndpointTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(DisparateImpactRatioResponse.class);
+                .body().as(DisparateImpactRatioResponseGroup.class);
 
         assertEquals("metric", response.getType());
         assertEquals("DIR", response.getName());
@@ -135,7 +136,7 @@ class DisparateImpactRatioEndpointTest {
     void postIncorrectType() throws JsonProcessingException {
         datasource.get().reset();
 
-        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectType();
+        final GroupMetricRequest payload = RequestPayloadGenerator.incorrectType();
 
         given()
                 .contentType(ContentType.JSON)
@@ -151,7 +152,7 @@ class DisparateImpactRatioEndpointTest {
     void postIncorrectInput() throws JsonProcessingException {
         datasource.get().reset();
 
-        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectInput();
+        final GroupMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
         given()
                 .contentType(ContentType.JSON)
@@ -192,7 +193,7 @@ class DisparateImpactRatioEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -274,7 +275,7 @@ class DisparateImpactRatioEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -284,7 +285,7 @@ class DisparateImpactRatioEndpointTest {
 
         assertNotNull(firstRequest.getRequestId());
 
-        final BaseMetricRequest wrongPayload = RequestPayloadGenerator.incorrectType();
+        final GroupMetricRequest wrongPayload = RequestPayloadGenerator.incorrectType();
         given()
                 .contentType(ContentType.JSON)
                 .body(wrongPayload)
@@ -329,7 +330,7 @@ class DisparateImpactRatioEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -385,7 +386,7 @@ class DisparateImpactRatioEndpointTest {
 
         // Perform multiple schedule requests
         for (String name : names) {
-            final BaseMetricRequest payload = RequestPayloadGenerator.named(name);
+            final GroupMetricRequest payload = RequestPayloadGenerator.named(name);
             BaseScheduledResponse scheduledResponse = given()
                     .contentType(ContentType.JSON)
                     .body(payload)
@@ -444,7 +445,7 @@ class DisparateImpactRatioEndpointTest {
 
         // Perform multiple schedule requests
         for (Double thresh : threshs) {
-            final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+            final GroupMetricRequest payload = RequestPayloadGenerator.correct();
             payload.setThresholdDelta(thresh);
             BaseScheduledResponse scheduledResponse = given()
                     .contentType(ContentType.JSON)

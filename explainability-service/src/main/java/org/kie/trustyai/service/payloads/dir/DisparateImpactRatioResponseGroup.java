@@ -1,14 +1,14 @@
 package org.kie.trustyai.service.payloads.dir;
 
-import org.kie.trustyai.service.payloads.BaseMetricResponse;
-import org.kie.trustyai.service.payloads.MetricThreshold;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricResponse;
+import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 
-public class DisparateImpactRatioResponse extends BaseMetricResponse {
+public class DisparateImpactRatioResponseGroup extends GroupMetricResponse {
 
     private MetricThreshold thresholds;
     private String name = "DIR";
 
-    public DisparateImpactRatioResponse(Double value, String specificDefinition, MetricThreshold threshold) {
+    public DisparateImpactRatioResponseGroup(Double value, String specificDefinition, MetricThreshold threshold) {
         super(value, specificDefinition);
         this.thresholds = threshold;
     }

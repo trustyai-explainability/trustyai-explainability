@@ -1,14 +1,14 @@
 package org.kie.trustyai.service.payloads.spd;
 
-import org.kie.trustyai.service.payloads.BaseMetricResponse;
-import org.kie.trustyai.service.payloads.MetricThreshold;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricResponse;
+import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 
-public class GroupStatisticalParityDifferenceResponse extends BaseMetricResponse {
+public class GroupStatisticalParityDifferenceResponseGroup extends GroupMetricResponse {
 
     private String name = "SPD";
     private MetricThreshold thresholds;
 
-    public GroupStatisticalParityDifferenceResponse(Double value, String specificDefinition, MetricThreshold thresholds) {
+    public GroupStatisticalParityDifferenceResponseGroup(Double value, String specificDefinition, MetricThreshold thresholds) {
         super(value, specificDefinition);
         this.thresholds = thresholds;
     }

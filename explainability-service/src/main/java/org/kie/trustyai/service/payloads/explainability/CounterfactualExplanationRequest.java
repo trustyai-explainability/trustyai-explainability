@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.service.payloads;
+package org.kie.trustyai.service.payloads.explainability;
+
+import org.kie.trustyai.service.payloads.explainability.LocalExplanationRequest;
 
 import java.util.Map;
 

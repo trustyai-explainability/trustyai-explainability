@@ -1,13 +1,13 @@
 package org.kie.trustyai.service.payloads.definitions;
 
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class DefinitionRequest extends BaseMetricRequest {
+public class GroupDefinitionRequest extends GroupMetricRequest {
     public JsonNode metricValue;
 
-    public DefinitionRequest() {
+    public GroupDefinitionRequest() {
         super();
     }
 

@@ -15,8 +15,7 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.endpoints.metrics.MetricsCalculator;
-import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.ReconciledGroupMetricRequest;
 
 import io.quarkus.scheduler.Scheduled;
 
@@ -24,29 +23,27 @@ import io.quarkus.scheduler.Scheduled;
 public class PrometheusScheduler {
 
     private static final Logger LOG = Logger.getLogger(PrometheusScheduler.class);
-    private final ConcurrentHashMap<UUID, ReconciledMetricRequest> spdRequests = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<UUID, ReconciledMetricRequest> dirRequests = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, ReconciledGroupMetricRequest> spdRequests = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, ReconciledGroupMetricRequest> dirRequests = new ConcurrentHashMap<>();
     @Inject
     Instance<DataSource> dataSource;
     @Inject
     PrometheusPublisher publisher;
-    @Inject
-    MetricsCalculator calculator;
 
     @Inject
     ServiceConfig serviceConfig;
 
-    public Map<UUID, ReconciledMetricRequest> getDirRequests() {
+    public Map<UUID, ReconciledGroupMetricRequest> getDirRequests() {
         return dirRequests;
     }
 
-    public Map<UUID, ReconciledMetricRequest> getSpdRequests() {
+    public Map<UUID, ReconciledGroupMetricRequest> getSpdRequests() {
         return spdRequests;
     }
 
-    public Map<UUID, ReconciledMetricRequest> getAllRequests() {
+    public Map<UUID, ReconciledGroupMetricRequest> getAllRequests() {
         // extend this with other metrics when more are added=
-        ConcurrentHashMap<UUID, ReconciledMetricRequest> result = new ConcurrentHashMap<>();
+        ConcurrentHashMap<UUID, ReconciledGroupMetricRequest> result = new ConcurrentHashMap<>();
         result.putAll(getDirRequests());
         result.putAll(getSpdRequests());
         return result;
@@ -60,12 +57,12 @@ public class PrometheusScheduler {
             try {
                 for (final String modelId : getModelIds()) {
 
-                    final Predicate<Map.Entry<UUID, ReconciledMetricRequest>> filterByModelId = request -> request.getValue().getModelId().equals(modelId);
+                    final Predicate<Map.Entry<UUID, ReconciledGroupMetricRequest>> filterByModelId = request -> request.getValue().getModelId().equals(modelId);
 
-                    final List<Map.Entry<UUID, ReconciledMetricRequest>> modelSpdRequest =
+                    final List<Map.Entry<UUID, ReconciledGroupMetricRequest>> modelSpdRequest =
                             spdRequests.entrySet().stream().filter(filterByModelId).collect(Collectors.toList());
 
-                    final List<Map.Entry<UUID, ReconciledMetricRequest>> modelDirRequest =
+                    final List<Map.Entry<UUID, ReconciledGroupMetricRequest>> modelDirRequest =
                             dirRequests.entrySet().stream().filter(filterByModelId).collect(Collectors.toList());
 
                     // Determine maximum batch requested. All other batches as sub-batches of this one.
@@ -100,11 +97,11 @@ public class PrometheusScheduler {
         return publisher;
     }
 
-    public void registerSPD(UUID id, ReconciledMetricRequest request) {
+    public void registerSPD(UUID id, ReconciledGroupMetricRequest request) {
         spdRequests.put(id, request);
     }
 
-    public void registerDIR(UUID id, ReconciledMetricRequest request) {
+    public void registerDIR(UUID id, ReconciledGroupMetricRequest request) {
         dirRequests.put(id, request);
     }
 
@@ -120,7 +117,7 @@ public class PrometheusScheduler {
     public Set<String> getModelIds() {
         return Stream.of(spdRequests.values(), dirRequests.values())
                 .flatMap(Collection::stream)
-                .map(ReconciledMetricRequest::getModelId)
+                .map(ReconciledGroupMetricRequest::getModelId)
                 .collect(Collectors.toSet());
     }
 }
