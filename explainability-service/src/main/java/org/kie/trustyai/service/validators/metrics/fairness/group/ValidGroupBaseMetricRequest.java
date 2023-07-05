@@ -10,8 +10,8 @@ import javax.validation.Payload;
 
 @Target({ ElementType.PARAMETER, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = BaseMetricRequestValidator.class)
-public @interface ValidBaseMetricRequest {
+@Constraint(validatedBy = BaseGroupMetricRequestValidator.class)
+public @interface ValidGroupBaseMetricRequest {
     String message() default "The supplied metric request details are not valid.";
 
     Class<?>[] groups() default {};

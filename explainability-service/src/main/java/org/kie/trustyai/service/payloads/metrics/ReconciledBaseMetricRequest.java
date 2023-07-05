@@ -1,5 +1,7 @@
 package org.kie.trustyai.service.payloads.metrics;
 
+import java.util.Map;
+
 public class ReconciledBaseMetricRequest {
     private String modelId;
 
@@ -8,6 +10,9 @@ public class ReconciledBaseMetricRequest {
 
     // this is the name of the metric that this request calculates, e.g., DIR or SPD
     private String metricName;
+
+    // the tags to place into Prometheus
+    private Map<String, String> tags;
 
     public ReconciledBaseMetricRequest(String modelId, String requestName, String metricName){
         this.metricName = metricName;
@@ -37,5 +42,11 @@ public class ReconciledBaseMetricRequest {
 
     public void setMetricName(String metricName) {
         this.metricName = metricName;
+    }
+
+    public Map<String, String> getTags(){ return this.tags; }
+
+    public void setTags(Map<String, String> tags){
+        this.tags = tags;
     }
 }

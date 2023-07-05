@@ -3,16 +3,20 @@ package org.kie.trustyai.service.payloads.metrics;
 import java.util.Date;
 import java.util.UUID;
 
-public abstract class BaseMetricResponse {
+public class BaseMetricResponse {
     public final Date timestamp = new Date();
     protected String type = "metric";
     protected Double value;
     protected String specificDefinition;
+    protected String name;
     protected UUID id;
+    protected MetricThreshold threshold;
 
-    protected BaseMetricResponse(Double value, String specificDefinition) {
+    public BaseMetricResponse(Double value, String specificDefinition, MetricThreshold threshold, String name) {
         this.value = value;
         this.id = UUID.randomUUID();
+        this.name = name;
+        this.threshold = threshold;
         this.specificDefinition = specificDefinition;
     }
 
@@ -28,9 +32,9 @@ public abstract class BaseMetricResponse {
         return timestamp;
     }
 
-    public abstract String getName();
+    public String getName() { return this.getName(); }
 
-    public abstract void setName(String name);
+    public void setName(String name) { this.name = name; }
 
     public Double getValue() {
         return value;

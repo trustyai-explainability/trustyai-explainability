@@ -15,12 +15,12 @@ import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 
 @ApplicationScoped
-public class BaseMetricRequestValidator implements ConstraintValidator<ValidBaseMetricRequest, GroupMetricRequest> {
+public class BaseGroupMetricRequestValidator implements ConstraintValidator<ValidGroupBaseMetricRequest, GroupMetricRequest> {
     @Inject
     Instance<DataSource> dataSource;
 
     @Override
-    public void initialize(ValidBaseMetricRequest constraintAnnotation) {
+    public void initialize(ValidGroupBaseMetricRequest constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 

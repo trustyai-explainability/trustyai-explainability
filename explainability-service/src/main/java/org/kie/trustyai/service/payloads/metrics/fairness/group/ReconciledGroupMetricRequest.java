@@ -2,6 +2,8 @@ package org.kie.trustyai.service.payloads.metrics.fairness.group;
 
 import javax.enterprise.inject.Instance;
 
+import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Tags;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.metrics.ReconciledBaseMetricRequest;
@@ -10,18 +12,20 @@ import org.kie.trustyai.service.payloads.values.TypedValue;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @JsonPropertyOrder({ "protected", "favorable" })
 public class ReconciledGroupMetricRequest extends ReconciledBaseMetricRequest {
-    private String protectedAttribute;
-    private String outcomeName;
-    private Double thresholdDelta;
+    private final String protectedAttribute;
+    private final String outcomeName;
+    private final Double thresholdDelta;
 
     private Integer batchSize;
 
-    private TypedValue privilegedAttribute;
-    private TypedValue favorableOutcome;
-    private TypedValue unprivilegedAttribute;
-
+    private final TypedValue privilegedAttribute;
+    private final TypedValue favorableOutcome;
+    private final TypedValue unprivilegedAttribute;
 
 
     public ReconciledGroupMetricRequest(String protectedAttribute, String outcomeName, String modelId, String requestName, String metricName, Double thresholdDelta, Integer batchSize,
@@ -55,6 +59,20 @@ public class ReconciledGroupMetricRequest extends ReconciledBaseMetricRequest {
         this.favorableOutcome = new TypedValue();
         this.favorableOutcome.setType(outcomeType);
         this.favorableOutcome.setValue(request.getFavorableOutcome());
+
+        super.setTags(retrieveTags());
+
+    }
+
+    public Map<String, String> retrieveTags(){
+        Map<String, String> tags = new HashMap<>();
+        tags.put("outcome", this.getOutcomeName());
+        tags.put("favorable_value", this.getFavorableOutcome().toString());
+        tags.put("protected", this.getProtectedAttribute());
+        tags.put("privileged", this.getPrivilegedAttribute().toString());
+        tags.put("unprivileged", this.getUnprivilegedAttribute().toString());
+        tags.put("batch_size", String.valueOf(this.getBatchSize()));
+        return tags;
     }
 
     public static ReconciledGroupMetricRequest reconcile(GroupMetricRequest request, Instance<DataSource> dataSource) {
@@ -76,26 +94,14 @@ public class ReconciledGroupMetricRequest extends ReconciledBaseMetricRequest {
         return protectedAttribute;
     }
 
-    public void setProtectedAttribute(String protectedAttribute) {
-        this.protectedAttribute = protectedAttribute;
-    }
-
     public String getOutcomeName() {
         return outcomeName;
     }
-
-    public void setOutcomeName(String outcomeName) {
-        this.outcomeName = outcomeName;
-    }
-
 
     public Double getThresholdDelta() {
         return thresholdDelta;
     }
 
-    public void setThresholdDelta(Double thresholdDelta) {
-        this.thresholdDelta = thresholdDelta;
-    }
 
     public Integer getBatchSize() {
         return batchSize;
@@ -109,23 +115,13 @@ public class ReconciledGroupMetricRequest extends ReconciledBaseMetricRequest {
         return privilegedAttribute;
     }
 
-    public void setPrivilegedAttribute(TypedValue privilegedAttribute) {
-        this.privilegedAttribute = privilegedAttribute;
-    }
-
     public TypedValue getFavorableOutcome() {
         return favorableOutcome;
     }
 
-    public void setFavorableOutcome(TypedValue favorableOutcome) {
-        this.favorableOutcome = favorableOutcome;
-    }
 
     public TypedValue getUnprivilegedAttribute() {
         return unprivilegedAttribute;
     }
 
-    public void setUnprivilegedAttribute(TypedValue unprivilegedAttribute) {
-        this.unprivilegedAttribute = unprivilegedAttribute;
-    }
 }

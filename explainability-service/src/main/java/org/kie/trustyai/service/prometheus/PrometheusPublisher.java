@@ -1,14 +1,18 @@
 package org.kie.trustyai.service.prometheus;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
+import org.kie.trustyai.service.payloads.metrics.ReconciledBaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.ReconciledGroupMetricRequest;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -38,37 +42,23 @@ public class PrometheusPublisher {
 
     }
 
-    private Iterable<Tag> generateTags(String modelName, UUID id, ReconciledGroupMetricRequest request) {
-        return Tags.of(
-                Tag.of("model", modelName),
-                Tag.of("outcome", request.getOutcomeName()),
-                Tag.of("favorable_value", request.getFavorableOutcome().toString()),
-                Tag.of("protected", request.getProtectedAttribute()),
-                Tag.of("privileged", request.getPrivilegedAttribute().toString()),
-                Tag.of("unprivileged", request.getUnprivilegedAttribute().toString()),
-                Tag.of("batch_size", String.valueOf(request.getBatchSize())),
-                Tag.of("request", id.toString()));
+    private Iterable<Tag> generateTags(String modelName, UUID id, ReconciledBaseMetricRequest request) {
+        List<Tag> tags = request.getTags().entrySet().stream()
+                .map(e -> Tag.of(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+        tags.add(Tag.of("request", id.toString()));
+        tags.add(Tag.of("model", modelName));
+        return Tags.of(tags);
     }
 
-    public void gaugeSPD(ReconciledGroupMetricRequest request, String modelName, UUID id, double value) {
+    public void gauge(ReconciledGroupMetricRequest request, String modelName, UUID id, double value) {
 
         values.put(id, new AtomicDouble(value));
 
         final Iterable<Tag> tags = generateTags(modelName, id, request);
 
-        createOrUpdateGauge("trustyai_spd", tags, id);
+        createOrUpdateGauge("trustyai_"+request.getMetricName().toLowerCase(), tags, id);
 
-        LOG.info("Scheduled request for SPD id=" + id + ", value=" + value);
-    }
-
-    public void gaugeDIR(ReconciledGroupMetricRequest request, String modelName, UUID id, double value) {
-
-        values.put(id, new AtomicDouble(value));
-
-        final Iterable<Tag> tags = generateTags(modelName, id, request);
-
-        createOrUpdateGauge("trustyai_dir", tags, id);
-
-        LOG.info("Scheduled request for DIR id=" + id + ", value=" + value);
+        LOG.info(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
     }
 }

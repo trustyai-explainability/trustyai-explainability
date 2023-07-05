@@ -5,12 +5,9 @@ public abstract class BaseMetricRequest {
     private String requestName;     // this is the unique name of this specific request
     private String metricName;   // this is the name of the metric that this request calculates, e.g., DIR or SPD
 
-    public BaseMetricRequest() {
-    }
+    public BaseMetricRequest() {}
 
-    public String getModelId() {
-        return modelId;
-    }
+    public String getModelId() { return modelId;}
 
     public void setModelId(String modelId) {
         this.modelId = modelId;
