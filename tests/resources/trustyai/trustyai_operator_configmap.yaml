@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: trustyai-service-operator-config
 data:
-  trustyaiServiceImageName: "quay.io/rgeada/trustyai-service"
+  trustyaiServiceImageName: "quay.io/trustyai/trustyai-service"
   trustyaiServiceImageTag: "latest"
