@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -216,7 +215,7 @@ public class TensorConverter {
             } else {
                 // NP-batch
                 final List<PredictionInput> predictionInputs = new ArrayList<>();
-                if (shape.size() == 1 ){
+                if (shape.size() == 1) {
                     for (int batch = 0; batch < firstShape; batch++) {
                         final List<Feature> features = new ArrayList<>();
                         String name = featureNames.isPresent() ? featureNames.get().get(0) : tensor.getName();
@@ -358,7 +357,7 @@ public class TensorConverter {
             } else {
                 // NP-batch
                 final List<PredictionOutput> predictionOutputs = new ArrayList<>();
-                if (shape.size() == 1 ) {
+                if (shape.size() == 1) {
 
                     for (int batch = 0; batch < firstShape; batch++) {
                         final List<Output> outputs = new ArrayList<>();
