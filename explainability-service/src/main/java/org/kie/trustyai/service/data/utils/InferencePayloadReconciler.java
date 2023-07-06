@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -114,22 +113,6 @@ public class InferencePayloadReconciler {
         }
         LOG.debug("Prediction input: " + predictionInput);
 
-        // Check for dataframe metadata name conflicts
-        predictionInput.stream().map(PredictionInput::getFeatures).flatMap(List::stream).map(Feature::getName).forEach(name -> {
-            if (name.equals(MetadataUtils.ID_FIELD) || name.equals(MetadataUtils.TIMESTAMP_FIELD)) {
-                final String message = "An input feature as a protected name: \"_id\" or \"_timestamp\"";
-                LOG.error(message);
-                throw new DataframeCreateException(message);
-            }
-        });
-
-        // enrich with data and id
-        final LocalDateTime now = LocalDateTime.now();
-        predictionInput.forEach(pi -> {
-            pi.getFeatures().add(FeatureFactory.newObjectFeature(MetadataUtils.ID_FIELD, UUID.randomUUID()));
-            pi.getFeatures().add(FeatureFactory.newObjectFeature(MetadataUtils.TIMESTAMP_FIELD, now));
-        });
-
         final ModelInferResponse output;
         try {
             output = ModelInferResponse.parseFrom(outputs);
@@ -170,20 +153,10 @@ public class InferencePayloadReconciler {
         }
         LOG.debug("Prediction input: " + predictionInput.getFeatures());
 
-        // Check for dataframe metadata name conflicts
-        if (predictionInput.getFeatures()
-                .stream()
-                .map(Feature::getName)
-                .anyMatch(name -> name.equals(MetadataUtils.ID_FIELD) || name.equals(MetadataUtils.TIMESTAMP_FIELD))) {
-            final String message = "An input feature as a protected name: \"_id\" or \"_timestamp\"";
-            LOG.error(message);
-            throw new DataframeCreateException(message);
-        }
-
         final List<Feature> features = new ArrayList<>(predictionInput.getFeatures());
 
         boolean synthetic = metadata.containsKey(ExplainerEndpoint.BIAS_IGNORE_PARAM);
-        PredictionMetadata predictionMetadata = new PredictionMetadata(id, modelId, LocalDateTime.now(), synthetic);
+        PredictionMetadata predictionMetadata = new PredictionMetadata(id, LocalDateTime.now(), synthetic);
 
         final ModelInferResponse output;
         try {

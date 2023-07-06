@@ -36,7 +36,6 @@ public class CSVUtils {
                 .collect(Collectors.toList());
 
         return parser.stream().map(entry -> {
-
             final List<Feature> inputFeatures = inputNames.stream().map(colName -> {
                 final SchemaItem schemaItem = metadata.getInputSchema().getItems().get(colName);
                 final int inputIndex = schemaItem.getIndex();
@@ -83,5 +82,10 @@ public class CSVUtils {
 
             return new SimplePrediction(predictionInput, predictionOutput);
         }).collect(Collectors.toList());
+    }
+
+    public static List<List<Value>> parseRaw(String in, Type[] types) throws IOException {
+        CSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(in));
+        return parser.stream().map(entry -> entry.stream().map(Value::new).collect(Collectors.toList())).collect(Collectors.toList());
     }
 }
