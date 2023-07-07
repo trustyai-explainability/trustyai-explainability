@@ -55,6 +55,9 @@ fi
 echo "$START_OBS_BETA datapoints already in BETA dataset"
 
 
+# ========
+# this script is useful for sending many inferences one-by-one, so is preserved below
+# ========
 #for data in $(cat $1 | jq -c '.[]')
 #do
 #  if [ $(($LOOP_IDX % $BATCH_SIZE)) -eq 0 ] && [ $LOOP_IDX -gt 0 ]; then
@@ -76,6 +79,7 @@ echo "$START_OBS_BETA datapoints already in BETA dataset"
 #
 #  let "LOOP_IDX++"
 #done
+# ========
 
 # batched version of the script
 curl -k https://$INFER_ROUTE_ALPHA/infer -d @$1 > /dev/null 2>&1  &
