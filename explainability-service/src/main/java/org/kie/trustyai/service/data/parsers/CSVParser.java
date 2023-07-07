@@ -117,11 +117,7 @@ public class CSVParser implements DataParser {
         ByteBuffer dataBuffer = toByteBuffer(dataframe, includeHeader);
         final StringBuilder output = new StringBuilder();
         if (includeHeader) {
-            output
-                    .append(
-                            String.join(",",
-                                    dataframe.getColumnNames().stream().map(name -> "\"" + name + "\"").collect(Collectors.toList())))
-                    .append("\n");
+            output.append(String.join(",", "synthetic", "id", "timestamp")).append("\n");
         }
         List<Boolean> synthetics = dataframe.getSynthetics();
         List<String> ids = dataframe.getIds();
