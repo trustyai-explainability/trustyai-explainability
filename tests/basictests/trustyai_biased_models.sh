@@ -124,6 +124,8 @@ function schedule_and_check_request(){
   [ $FAILURE = false ] && REQUESTS_CREATED=true
 }
 
+# this function may be useful if we want to vary the metric values over the course of the test, so preserving just in case
+# ========
 #function send_more_data(){
 #    header "Sending some data for TrustyAI (this will take a minute or two)"
 #    oc project $MM_NAMESPACE
