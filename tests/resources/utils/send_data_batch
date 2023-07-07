@@ -55,27 +55,36 @@ fi
 echo "$START_OBS_BETA datapoints already in BETA dataset"
 
 
-for data in $(cat $1 | jq -c '.[]')
-do
-  if [ $(($LOOP_IDX % $BATCH_SIZE)) -eq 0 ] && [ $LOOP_IDX -gt 0 ]; then
-    echo
-    check_for_reception $(( $LOOP_IDX + $START_OBS_ALPHA )) $MODEL_ALPHA
-    check_for_reception $(( $LOOP_IDX + $START_OBS_BETA )) $MODEL_BETA
-  fi
+# ========
+# this script is useful for sending many inferences one-by-one, so is preserved below
+# ========
+#for data in $(cat $1 | jq -c '.[]')
+#do
+#  if [ $(($LOOP_IDX % $BATCH_SIZE)) -eq 0 ] && [ $LOOP_IDX -gt 0 ]; then
+#    echo
+#    check_for_reception $(( $LOOP_IDX + $START_OBS_ALPHA )) $MODEL_ALPHA
+#    check_for_reception $(( $LOOP_IDX + $START_OBS_BETA )) $MODEL_BETA
+#  fi
+#
+#  echo -ne "\rSent datapoint $(( $LOOP_IDX + 1 )) of $THRESHOLD"
+#  curl -k https://$INFER_ROUTE_ALPHA/infer -d $data > /dev/null 2>&1  &
+#  curl -k https://$INFER_ROUTE_BETA/infer -d $data > /dev/null 2>&1  &
+#
+#  sleep $PAUSE_TIME
+#
+#  if [[ "$LOOP_IDX" -ge $(( $THRESHOLD - 1 )) ]]; then
+#    echo -e "\nAll datapoints sent"
+#    break
+#  fi
+#
+#  let "LOOP_IDX++"
+#done
+# ========
 
-  echo -ne "\rSent datapoint $(( $LOOP_IDX + 1 )) of $THRESHOLD"
-  curl -k https://$INFER_ROUTE_ALPHA/infer -d $data > /dev/null 2>&1  &
-  curl -k https://$INFER_ROUTE_BETA/infer -d $data > /dev/null 2>&1  &
+# batched version of the script
+curl -k https://$INFER_ROUTE_ALPHA/infer -d @$1 > /dev/null 2>&1  &
+curl -k https://$INFER_ROUTE_BETA/infer -d @$1 > /dev/null 2>&1  &
 
-  sleep $PAUSE_TIME
 
-  if [[ "$LOOP_IDX" -ge $(( $THRESHOLD - 1 )) ]]; then
-    echo -e "\nAll datapoints sent"
-    break
-  fi
-
-  let "LOOP_IDX++"
-done
-
-check_for_reception $(( $LOOP_IDX + $START_OBS_ALPHA + 1)) $MODEL_ALPHA
-check_for_reception $(( $LOOP_IDX + $START_OBS_BETA + 1)) $MODEL_BETA
+check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_ALPHA )) $MODEL_ALPHA
+check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_BETA )) $MODEL_BETA
