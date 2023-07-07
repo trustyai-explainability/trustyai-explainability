@@ -16,7 +16,6 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionMetadata;
-import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.metadata.Metadata;
@@ -61,7 +60,7 @@ public class CSVParser implements DataParser {
         final String internalData = UTF8.decode(internalDataByteBuffer).toString();
         final List<List<Value>> values;
         try {
-            values = CSVUtils.parseRaw(internalData, new Type[] { Type.BOOLEAN, Type.CATEGORICAL, Type.TIME });
+            values = CSVUtils.parseRaw(internalData);
         } catch (IOException e) {
             throw new DataframeCreateException(e.getMessage());
         }

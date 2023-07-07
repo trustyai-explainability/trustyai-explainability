@@ -84,7 +84,7 @@ public class CSVUtils {
         }).collect(Collectors.toList());
     }
 
-    public static List<List<Value>> parseRaw(String in, Type[] types) throws IOException {
+    public static List<List<Value>> parseRaw(String in) throws IOException {
         CSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(in));
         return parser.stream().map(entry -> entry.stream().map(Value::new).collect(Collectors.toList())).collect(Collectors.toList());
     }
