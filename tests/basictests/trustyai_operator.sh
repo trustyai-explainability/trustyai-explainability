@@ -112,9 +112,9 @@ function schedule_and_check_request(){
     --header 'Content-Type: application/json' \
     --data '{
         \"modelId\": \"example-sklearn-isvc\",
-        \"protectedAttribute\": \"input-0\",
+        \"protectedAttribute\": \"predict-0\",
         \"favorableOutcome\": 0,
-        \"outcomeName\": \"output-0\",
+        \"outcomeName\": \"predict\",
         \"privilegedAttribute\": 0.0,
         \"unprivilegedAttribute\": 1.0
     }'" "requestId" || eval "$FAILURE_HANDLING"
@@ -129,7 +129,7 @@ function test_prometheus_scraping(){
     SECRET=`oc get secret -n openshift-user-workload-monitoring | grep  prometheus-user-workload-token | head -n 1 | awk '{print $1 }'` || eval "$FAILURE_HANDLING"
     TOKEN=`echo $(oc get secret $SECRET -n openshift-user-workload-monitoring -o json | jq -r '.data.token') | base64 -d` || eval "$FAILURE_HANDLING"
     THANOS_QUERIER_HOST=`oc get route thanos-querier -n openshift-monitoring -o json | jq -r '.spec.host'` || eval "$FAILURE_HANDLING"
-    os::cmd::try_until_text "curl -X GET -kG \"https://$THANOS_QUERIER_HOST/api/v1/query?\" --data-urlencode \"query=trustyai_spd{namespace='opendatahub-model'}\" -H 'Authorization: Bearer $TOKEN' | jq '.data.result[0].metric.protected'" "input-0" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+    os::cmd::try_until_text "curl -X GET -kG \"https://$THANOS_QUERIER_HOST/api/v1/query?\" --data-urlencode \"query=trustyai_spd{namespace='opendatahub-model'}\" -H 'Authorization: Bearer $TOKEN' | jq '.data.result[0].metric.protected'" "predict-0" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function local_teardown_wait(){
@@ -187,5 +187,7 @@ if [ $TEARDOWN = false ]; then
   [ $LOCAL = true ] && local_teardown_wait
 fi
 teardown_trustyai_test
+
+[ $FAILURE = true ] && os::cmd::expect_success "echo 'A previous assertion failed, marking suite as failed' && exit 1"
 
 os::test::junit::declare_suite_end
