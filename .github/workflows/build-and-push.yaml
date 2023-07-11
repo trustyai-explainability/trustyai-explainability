@@ -24,16 +24,18 @@ jobs:
   # Ensure that tests pass before publishing a new image.
   build-and-push-ci:
     runs-on: ubuntu-latest
-    steps:
+    steps: # Assign context variable for various action contexts (tag, main, CI)
       - name: Assigning CI context
         if: github.head_ref != '' && github.head_ref != 'main' && !startsWith(github.ref, 'refs/tags/v'))
-        - run: echo "BUILD_CONTEXT=ci" >> $GITHUB_ENV
+        run: echo "BUILD_CONTEXT=ci" >> $GITHUB_ENV
       - name: Assigning tag context
         if: github.head_ref == '' && startsWith(github.ref, 'refs/tags/v')
-        - run: echo "BUILD_CONTEXT=tag" >> $GITHUB_ENV
+        run: echo "BUILD_CONTEXT=tag" >> $GITHUB_ENV
       - name: Assigning main context
-          if: github.head_ref == '' && startsWith(github.ref, 'refs/tags/v')
-                - run: echo "BUILD_CONTEXT=main" >> $GITHUB_ENV
+        if: github.head_ref == '' && startsWith(github.ref, 'refs/tags/v')
+        run: echo "BUILD_CONTEXT=main" >> $GITHUB_ENV
+      #
+      # Run checkouts
       - uses: mheap/github-action-required-labels@v4
         if: env.BUILD_CONTEXT == ci
         with:
@@ -46,6 +48,8 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/checkout@v3
         if: env.BUILD_CONTEXT == main ||  env.BUILD_CONTEXT == tag
+      #
+      # Print variables for debugging
       - name: Log reference variables
         run: |
           echo "GITHUB.REF: ${{ github.ref }}"
@@ -53,6 +57,8 @@ jobs:
           echo "SHA: ${{ github.event.pull_request.head.sha }}"
           echo "MAIN IMAGE AT: ${{ vars.QUAY_RELEASE_REPO }}:latest"
           echo "CI IMAGE AT: quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}"
+      #
+      # Set environments depending on context
       - name: Set CI environment
         if:  env.BUILD_CONTEXT == ci
         run: | 
@@ -63,11 +69,13 @@ jobs:
         run: |
           echo "TAG=latest" >> $GITHUB_ENV
           echo "IMAGE_NAME=${{ vars.QUAY_RELEASE_REPO }}" >> $GITHUB_ENV
-      - name: Set tagh environment
+      - name: Set tag environment
         if: env.BUILD_CONTEXT == tag
         run: |
           echo "TAG=${github.ref#refs/*/}" >> $GITHUB_ENV
           echo "IMAGE_NAME=${{ vars.QUAY_RELEASE_REPO }}" >> $GITHUB_ENV
+      #
+      # Run docker commands
       - name: Pull prerequisite images
         run: |
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
