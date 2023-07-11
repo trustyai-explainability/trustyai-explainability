@@ -4,8 +4,7 @@ on:
     branches:
       - main
     tags:
-      - v*-rhods
-      - v*-odh
+      - v*
     paths-ignore:
       - 'LICENSE'
       - '**/.gitignore'
@@ -73,7 +72,7 @@ jobs:
       - name: Set tag environment
         if: env.BUILD_CONTEXT == 'tag'
         run: |
-          echo "TAG=${github.ref#refs/*/}" >> $GITHUB_ENV
+          echo "TAG=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "IMAGE_NAME=${{ vars.QUAY_RELEASE_REPO }}" >> $GITHUB_ENV
       #
       # Run docker commands
