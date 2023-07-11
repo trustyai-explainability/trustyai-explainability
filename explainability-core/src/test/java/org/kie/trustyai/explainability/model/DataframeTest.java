@@ -636,7 +636,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), true));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), true));
             idx++;
         }
         df.addPredictions(predictions, metadata);
@@ -653,7 +653,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), true));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), true));
             idx++;
         }
         df.addPredictions(predictions, metadata);
@@ -672,7 +672,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), false));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), false));
             idx++;
         }
         df.addPredictions(predictions, metadata);
@@ -690,7 +690,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), false));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), false));
             idx++;
         }
         df.addPredictions(predictions, metadata);
