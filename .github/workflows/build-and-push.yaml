@@ -32,7 +32,7 @@ jobs:
         if: github.head_ref == '' && startsWith(github.ref, 'refs/tags/v')
         run: echo "BUILD_CONTEXT=tag" >> $GITHUB_ENV
       - name: Assigning main context
-        if: github.head_ref == '' && github.head_ref == 'main'
+        if: github.head_ref == '' && github.ref == 'refs/heads/main'
         run: echo "BUILD_CONTEXT=main" >> $GITHUB_ENV
       #
       # Run checkouts
@@ -52,6 +52,7 @@ jobs:
       # Print variables for debugging
       - name: Log reference variables
         run: |
+          echo "CONTEXT: ${{ env.BUILD_CONTEXT }}"
           echo "GITHUB.REF: ${{ github.ref }}"
           echo "GITHUB.HEAD_REF: ${{ github.head_ref }}"
           echo "SHA: ${{ github.event.pull_request.head.sha }}"
