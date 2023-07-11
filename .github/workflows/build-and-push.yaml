@@ -24,8 +24,7 @@ jobs:
   # Ensure that tests pass before publishing a new image.
   build-and-push-ci:
     runs-on: ubuntu-latest
-    steps:
-      # Assign context variable for switch between main/ci runs
+    steps: # Assign context variable for switch between main/ci runs
       - name: Assigning CI context
         if: github.head_ref != '' && github.head_ref != 'main' && !startsWith(github.ref, 'refs/tags/v'))
         - run: echo "BUILD_CONTEXT=ci" >> $GITHUB_ENV
