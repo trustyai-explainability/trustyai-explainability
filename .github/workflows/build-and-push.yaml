@@ -24,7 +24,7 @@ jobs:
   # Ensure that tests pass before publishing a new image.
   build-and-push-ci:
     runs-on: ubuntu-latest
-    steps: # Assign context variable for switch between main/ci runs
+    steps:
       - name: Assigning CI context
         if: github.head_ref != '' && github.head_ref != 'main' && !startsWith(github.ref, 'refs/tags/v'))
         - run: echo "BUILD_CONTEXT=ci" >> $GITHUB_ENV
@@ -34,24 +34,18 @@ jobs:
       - name: Assigning main context
           if: github.head_ref == '' && startsWith(github.ref, 'refs/tags/v')
                 - run: echo "BUILD_CONTEXT=main" >> $GITHUB_ENV
-      #
-      # Start
       - uses: mheap/github-action-required-labels@v4
         if: env.BUILD_CONTEXT == ci
         with:
           mode: minimum
           count: 1
           labels: "ok-to-test, lgtm, approved"
-      #
-      # Checkouts
       - uses: actions/checkout@v3
         if: env.BUILD_CONTEXT == ci
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/checkout@v3
         if: env.BUILD_CONTEXT == main ||  env.BUILD_CONTEXT == tag
-      #
-      # variable logging
       - name: Log reference variables
         run: |
           echo "GITHUB.REF: ${{ github.ref }}"
@@ -59,8 +53,6 @@ jobs:
           echo "SHA: ${{ github.event.pull_request.head.sha }}"
           echo "MAIN IMAGE AT: ${{ vars.QUAY_RELEASE_REPO }}:latest"
           echo "CI IMAGE AT: quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}"
-      #
-      # Setting environments
       - name: Set CI environment
         if:  env.BUILD_CONTEXT == ci
         run: | 
@@ -76,8 +68,6 @@ jobs:
         run: |
           echo "TAG=${github.ref#refs/*/}" >> $GITHUB_ENV
           echo "IMAGE_NAME=${{ vars.QUAY_RELEASE_REPO }}" >> $GITHUB_ENV
-      #
-      # Docker
       - name: Pull prerequisite images
         run: |
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
