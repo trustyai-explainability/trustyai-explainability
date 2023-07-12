@@ -3,7 +3,6 @@ package org.kie.trustyai.explainability.local.tssaliency;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,15 +10,10 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import javax.print.attribute.standard.NumberOfInterveningJobs;
-import javax.xml.crypto.dsig.keyinfo.X509Data;
-
-import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.random.NormalizedRandomGenerator;
 import org.kie.trustyai.explainability.local.LocalExplainer;
+import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureImportance;
 import org.kie.trustyai.explainability.model.Output;
@@ -32,9 +26,8 @@ import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.SaliencyResults.SourceExplainer;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
-import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 
-public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
+public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults> {
 
     private double[] baseValue; // check
     private int ng; // Number of samples for gradient estimation
@@ -52,10 +45,18 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
     }
 
     @Override
-    public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model,
+    public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model, Consumer<SaliencyResults> intermediateResultsConsumer) {
+        throw new UnsupportedOperationException();
+     }
+
+    @Override
+    public CompletableFuture<SaliencyResults> explainAsync(List<Prediction> predictions, PredictionProvider model,
             Consumer<SaliencyResults> intermediateResultsConsumer) {
 
         try {
+
+            final Prediction prediction = predictions.get(0);
+
             PredictionInput predictionInputs = prediction.getInput();
 
             PredictionOutput predictionOutput = prediction.getOutput();
@@ -160,7 +161,7 @@ public class TSSaliencyExplainer implements LocalExplainer<SaliencyResults> {
             List<FeatureImportance> featureImportances = new ArrayList<FeatureImportance>(1);
             featureImportances.add(featureImportance);
 
-            Saliency saliency = new Saliency(output, featureImportances);
+            final Saliency saliency = new Saliency(output, featureImportances);
             saliencies.put("result", saliency);
 
             CompletableFuture<SaliencyResults> retval = new CompletableFuture<SaliencyResults>();
