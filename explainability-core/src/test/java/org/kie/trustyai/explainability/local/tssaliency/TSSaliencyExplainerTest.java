@@ -133,10 +133,13 @@ public class TSSaliencyExplainerTest {
 
             Prediction prediction = new SimplePrediction(predictionInput, predictionOutput, uuid);
 
+            List<Prediction> predictions = new ArrayList<Prediction>(1);
+            predictions.add(prediction);
+
             TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 1000, 50, 0);
 
             for (int i = 0; i < 10; i++) {
-                CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(prediction,
+                CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(predictions,
                         model,
                         null);
                 SaliencyResults saliencyResults = saliencyResultsCompletable.get();
@@ -145,7 +148,7 @@ public class TSSaliencyExplainerTest {
             int REPS = 10;
             long startNanos = System.nanoTime();
             for (int i = 0; i < REPS; i++) {
-                CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(prediction,
+                CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(predictions,
                         model,
                         null);
                 SaliencyResults saliencyResults = saliencyResultsCompletable.get();

@@ -33,8 +33,6 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
     private int ng; // Number of samples for gradient estimation
     public int nalpha; // Number of steps in convex path
     private int randomSeed;
-    private long totalNormalCount = 0;
-    private long totalNormalTime = 0;
 
     public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed) {
         this.baseValue = baseValue;
