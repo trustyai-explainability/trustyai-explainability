@@ -172,7 +172,7 @@ public class TSSaliencyExplainerTest {
 
     private static void printResults(SaliencyResults saliencyResults) {
         Map<String, Saliency> saliencyMap = saliencyResults.getSaliencies();
-        Saliency saliency = saliencyMap.get("result");
+        Saliency saliency = saliencyMap.get("y0");
         List<FeatureImportance> featureImportances = saliency.getPerFeatureImportance();
         FeatureImportance featureImportance = featureImportances.get(0);
 

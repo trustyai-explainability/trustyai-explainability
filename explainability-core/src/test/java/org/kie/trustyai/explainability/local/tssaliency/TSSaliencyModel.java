@@ -52,6 +52,7 @@ public class TSSaliencyModel implements PredictionProvider {
 
         List<PredictionOutput> outputs = new ArrayList<PredictionOutput>(numInputs);
 
+        int index = 0;
         for (PredictionInput input : inputs) {
             List<Feature> features = input.getFeatures();
 
@@ -59,7 +60,7 @@ public class TSSaliencyModel implements PredictionProvider {
 
             double y = compute(features);
 
-            Output output = new Output("y", Type.NUMBER, new Value(null), y);
+            Output output = new Output("y" + index, Type.NUMBER, new Value(null), y);
 
             List<Output> outputList = new ArrayList<Output>(1);
             outputList.add(output);
@@ -67,6 +68,7 @@ public class TSSaliencyModel implements PredictionProvider {
             PredictionOutput predOut = new PredictionOutput(outputList);
 
             outputs.add(predOut);
+            index += 1;
         }
 
         retval.complete(outputs);
