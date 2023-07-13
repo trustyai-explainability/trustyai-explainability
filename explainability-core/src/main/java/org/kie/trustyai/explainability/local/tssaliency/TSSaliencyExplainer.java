@@ -12,7 +12,6 @@ import java.util.function.Consumer;
 
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.kie.trustyai.explainability.local.LocalExplainer;
 import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureImportance;
@@ -43,9 +42,14 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
     }
 
     @Override
-    public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model, Consumer<SaliencyResults> intermediateResultsConsumer) {
-        throw new UnsupportedOperationException();
-     }
+    public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model,
+            Consumer<SaliencyResults> intermediateResultsConsumer) {
+        List<Prediction> predictionList = new ArrayList<Prediction>(1);
+
+        predictionList.add(prediction);
+
+        return explainAsync(predictionList, model, intermediateResultsConsumer);
+    }
 
     @Override
     public CompletableFuture<SaliencyResults> explainAsync(List<Prediction> predictions, PredictionProvider model,
@@ -53,114 +57,117 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
         try {
 
-            final Prediction prediction = predictions.get(0);
-
-            PredictionInput predictionInputs = prediction.getInput();
-
-            PredictionOutput predictionOutput = prediction.getOutput();
-
-            // RealVector pi =
-            // MatrixUtilsExtensions.vectorFromPredictionInput(predictionInputs);
-
-            List<Output> outputs = predictionOutput.getOutputs();
-            Output output = outputs.get(0);
-
-            // List<Feature> features = predictionInputs.getFeatures();
-
-            double[][] x = matrixFromFeatures(predictionInputs);
-
-            RealMatrix pi = MatrixUtils.createRealMatrix(x);
-
-            // Feature[] featuresArray = features.toArray(new Feature[0]);
-            // int T = featuresArray.length;
-
-            // Feature feature0 = featuresArray[0];
-            // assert feature0.getType() == Type.VECTOR;
-
-            // Value feature0Value = feature0.getValue();
-
-            // double[] feature0Values = feature0Value.asVector();
-            // int F = feature0Values.length;
-
-            int T = x.length;
-            int F = x[0].length;
-
-            // alpha = [ n(alpha) ] / n(alpha)
-            double[] alpha = new double[nalpha];
-            for (int s = 0; s < nalpha; s++) {
-                alpha[s] = s / ((double) nalpha - 1);
-            }
-
-            // double[][] x = new double[T][F];
-            // for (int t = 0; t < T; t++) {
-            // Feature feature = featuresArray[t];
-            // Value value = feature.getValue();
-            // double[] elements = value.asVector();
-
-            // for (int f = 0; f < F; f++) {
-            // x[t][f] = elements[f];
-            // }
-            // }
-
-            if (baseValue.length == 0) {
-                baseValue = calcBaseValue(x);
-            }
-
-            // SCORE = 0
-            double[][] score = new double[T][F];
-            for (int t = 0; t < T; t++) {
-                for (int f = 0; f < F; f++) {
-                    score[t][f] = 0.0;
-                }
-            }
-
-            int numberCores = Runtime.getRuntime().availableProcessors();
-
-            TSSaliencyThreadInfo[] threadInfo = new TSSaliencyThreadInfo[numberCores];
-            for (int t = 0; t < numberCores; t++) {
-                threadInfo[t] = new TSSaliencyThreadInfo();
-                threadInfo[t].alphaList = new LinkedList<Integer>();
-                // alphaList[t] = new LinkedList<Integer>();
-            }
-
-            // int currentThreadNumber = 0;
-            for (int i = 0; i < nalpha; i++) {
-                threadInfo[i % numberCores].alphaList.add(Integer.valueOf(i));
-            }
-
-            for (int t = 0; t < numberCores; t++) {
-                threadInfo[t].runner = new TSSaliencyRunner(x, alpha, baseValue, score, model, this,
-                        threadInfo[t].alphaList);
-
-                threadInfo[t].thread = new Thread(threadInfo[t].runner, "Runner" + t);
-                threadInfo[t].thread.start();
-            }
-
-            for (int i = 0; i < numberCores; i++) {
-                threadInfo[i].thread.join();
-            }
-
-            // IG(t,j) = x(t,j) * SCORE(t,j)
-
             Map<String, Saliency> saliencies = new HashMap<String, Saliency>();
 
             SaliencyResults saliencyResults = new SaliencyResults(saliencies, SourceExplainer.TSSALIENCY);
 
-            double[][] scoreResult = new double[T][F];
-            for (int t = 0; t < T; t++) {
-                for (int f = 0; f < F; f++) {
-                    // String name = "IG[" + t + "][" + f + "]";
-                    scoreResult[t][f] = (x[t][f] - baseValue[f]) * score[t][f];
+            for (Prediction prediction : predictions) {
+
+                PredictionInput predictionInputs = prediction.getInput();
+
+                PredictionOutput predictionOutput = prediction.getOutput();
+
+                // RealVector pi =
+                // MatrixUtilsExtensions.vectorFromPredictionInput(predictionInputs);
+
+                List<Output> outputs = predictionOutput.getOutputs();
+                Output output = outputs.get(0);
+
+                // List<Feature> features = predictionInputs.getFeatures();
+
+                double[][] x = matrixFromFeatures(predictionInputs);
+
+                RealMatrix pi = MatrixUtils.createRealMatrix(x);
+
+                // Feature[] featuresArray = features.toArray(new Feature[0]);
+                // int T = featuresArray.length;
+
+                // Feature feature0 = featuresArray[0];
+                // assert feature0.getType() == Type.VECTOR;
+
+                // Value feature0Value = feature0.getValue();
+
+                // double[] feature0Values = feature0Value.asVector();
+                // int F = feature0Values.length;
+
+                int T = x.length;
+                int F = x[0].length;
+
+                // alpha = [ n(alpha) ] / n(alpha)
+                double[] alpha = new double[nalpha];
+                for (int s = 0; s < nalpha; s++) {
+                    alpha[s] = s / ((double) nalpha - 1);
                 }
+
+                // double[][] x = new double[T][F];
+                // for (int t = 0; t < T; t++) {
+                // Feature feature = featuresArray[t];
+                // Value value = feature.getValue();
+                // double[] elements = value.asVector();
+
+                // for (int f = 0; f < F; f++) {
+                // x[t][f] = elements[f];
+                // }
+                // }
+
+                if (baseValue.length == 0) {
+                    baseValue = calcBaseValue(x);
+                }
+
+                // SCORE = 0
+                double[][] score = new double[T][F];
+                for (int t = 0; t < T; t++) {
+                    for (int f = 0; f < F; f++) {
+                        score[t][f] = 0.0;
+                    }
+                }
+
+                int numberCores = Runtime.getRuntime().availableProcessors();
+
+                TSSaliencyThreadInfo[] threadInfo = new TSSaliencyThreadInfo[numberCores];
+                for (int t = 0; t < numberCores; t++) {
+                    threadInfo[t] = new TSSaliencyThreadInfo();
+                    threadInfo[t].alphaList = new LinkedList<Integer>();
+                    // alphaList[t] = new LinkedList<Integer>();
+                }
+
+                // int currentThreadNumber = 0;
+                for (int i = 0; i < nalpha; i++) {
+                    threadInfo[i % numberCores].alphaList.add(Integer.valueOf(i));
+                }
+
+                for (int t = 0; t < numberCores; t++) {
+                    threadInfo[t].runner = new TSSaliencyRunner(x, alpha, baseValue, score, model, this,
+                            threadInfo[t].alphaList);
+
+                    threadInfo[t].thread = new Thread(threadInfo[t].runner, "Runner" + t);
+                    threadInfo[t].thread.start();
+                }
+
+                for (int i = 0; i < numberCores; i++) {
+                    threadInfo[i].thread.join();
+                }
+
+                // IG(t,j) = x(t,j) * SCORE(t,j)
+
+                double[][] scoreResult = new double[T][F];
+                for (int t = 0; t < T; t++) {
+                    for (int f = 0; f < F; f++) {
+                        // String name = "IG[" + t + "][" + f + "]";
+                        scoreResult[t][f] = (x[t][f] - baseValue[f]) * score[t][f];
+                    }
+                }
+
+                // assume 1 Feature in predictionInputs
+                
+                FeatureImportance featureImportance = new FeatureImportance(predictionInputs.getFeatures().get(0),
+                        scoreResult, 0.0);
+                List<FeatureImportance> featureImportances = new ArrayList<FeatureImportance>(1);
+                featureImportances.add(featureImportance);
+
+                final Saliency saliency = new Saliency(output, featureImportances);
+                saliencies.put(output.getName(), saliency);
             }
-
-            FeatureImportance featureImportance = new FeatureImportance(predictionInputs.getFeatures().get(0),
-                    scoreResult, 0.0);
-            List<FeatureImportance> featureImportances = new ArrayList<FeatureImportance>(1);
-            featureImportances.add(featureImportance);
-
-            final Saliency saliency = new Saliency(output, featureImportances);
-            saliencies.put(output.getName(), saliency);
 
             CompletableFuture<SaliencyResults> retval = new CompletableFuture<SaliencyResults>();
 

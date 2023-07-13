@@ -96,7 +96,7 @@ public class TSSaliencyExplainerTest {
 
             List<PredictionInput> inputs = new ArrayList<PredictionInput>(data.size());
 
-            int count = 0;
+            // int count = 0;
             for (Feature datum : data) {
 
                 assert datum.getType() == Type.VECTOR;
