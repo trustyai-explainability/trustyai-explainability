@@ -111,6 +111,7 @@ function schedule_and_check_request(){
         --header 'Content-Type: application/json' \
         --data "{
                   \"modelId\": \"$MODEL\",
+                  \"requestName\": \"$MODEL-$METRIC_UPPERCASE\",
                   \"protectedAttribute\": \"customer_data_input-3\",
                   \"favorableOutcome\":  0,
                   \"outcomeName\": \"predict\",
@@ -165,6 +166,16 @@ function test_prometheus_scraping(){
     os::cmd::try_until_text "curl -X GET -kG \"https://$THANOS_QUERIER_HOST/api/v1/query?\" --data-urlencode \"query=trustyai_dir{namespace='opendatahub-model'}\" -H 'Authorization: Bearer $TOKEN' | jq '.data.result[0].metric.protected'" "customer_data_input-3" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
+function enable_dashboard(){
+    os::cmd::expect_success "oc project ${ODHPROJECT}" || eval "$FAILURE_HANDLING"
+    os::cmd::expect_success "oc patch OdhDashboardConfig/odh-dashboard-config -p '{"spec":{\"dashboardConfig\":{\"modelMetricsNamespace\": \"opendatahub\"}}}' --type='merge' -n opendatahub" || eval "$FAILURE_HANDLING"
+
+    os::cmd::expect_success "oc project ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
+    os::cmd::expect_success "oc label $(oc get inferenceservice -o name) 'opendatahub.io/dashboard=true'" || eval "$FAILURE_HANDLING"
+    os::cmd::expect_success "oc label $(oc get servingruntime -o name) 'opendatahub.io/dashboard=true'" || eval "$FAILURE_HANDLING"
+    os::cmd::expect_success "oc label namespace opendatahub-model 'opendatahub.io/dashboard=true'" || eval "$FAILURE_HANDLING"
+}
+
 function local_teardown_wait(){
   header "Local test suite finished, pausing before teardown for any manual cluster inspection"
   echo -n "Hit enter to begin teardown: "; read
@@ -207,7 +218,7 @@ function teardown_trustyai_test() {
 
 if [ $TEARDOWN = false ]; then
   setup_monitoring
-  [ $FAILURE = false ] && install_trustyai_operator              || echo -e "\033[0;31mSkipping TrustyAI-Operator install due to previous failure\033[0m"
+  [ $FAILURE = false ] && install_trustyai_operator     || echo -e "\033[0;31mSkipping TrustyAI-Operator install due to previous failure\033[0m"
   [ $FAILURE = false ] && deploy_model                  || echo -e "\033[0;31mSkipping model deployment due to previous failure\033[0m"
   [ $FAILURE = false ] && check_trustyai_resources      || echo -e "\033[0;31mSkipping TrustyAI resource check due to previous failure\033[0m"
   [ $FAILURE = false ] && check_mm_resources            || echo -e "\033[0;31mSkipping ModelMesh resource check due to previous failure\033[0m"
@@ -215,7 +226,7 @@ if [ $TEARDOWN = false ]; then
   [ $FAILURE = false ] && send_data                     || echo -e "\033[0;31mSkipping data generation due to previous failure\033[0m"
   [ $FAILURE = false ] && schedule_and_check_request    || echo -e "\033[0;31mSkipping metric scheduling due to previous failure\033[0m\033[0m"
   [ $FAILURE = false ] && test_prometheus_scraping      || echo -e "\033[0;31mSkipping Prometheus data check due to previous failure\033[0m\033[0m"
-
+  [ $FAILURE = false ] && enable_dashboard              || echo -e "\033[0;31mSkipping dashboard enablement due to previous failure\033[0m\033[0m"
   [ $LOCAL = true ] && local_teardown_wait
 fi
 teardown_trustyai_test
