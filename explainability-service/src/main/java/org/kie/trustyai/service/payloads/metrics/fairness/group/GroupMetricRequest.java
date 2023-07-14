@@ -1,30 +1,37 @@
 package org.kie.trustyai.service.payloads.metrics.fairness.group;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.node.ValueNode;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.values.ReconcilableFeature;
+import org.kie.trustyai.service.payloads.values.ReconcilableOutput;
+import org.kie.trustyai.service.payloads.values.ReconcilerMatcher;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 public class GroupMetricRequest extends BaseMetricRequest {
 
+    // fields to be reconciled against dataset metadata
     private String protectedAttribute;
-    private ValueNode favorableOutcome;
     private String outcomeName;
 
-    private ValueNode privilegedAttribute;
-    private ValueNode unprivilegedAttribute;
+    @ReconcilerMatcher(nameProvider="getProtectedAttribute")
+    public ReconcilableFeature privilegedAttribute;
+
+    @ReconcilerMatcher(nameProvider="getProtectedAttribute")
+    public ReconcilableFeature unprivilegedAttribute;
+
+    @ReconcilerMatcher(nameProvider="getOutcomeName")
+    public ReconcilableOutput favorableOutcome;
 
     private Double thresholdDelta;
-
-    private Integer batchSize;
 
     public GroupMetricRequest() {
         // Public default no-argument constructor
         super();
     }
-
 
     public String getProtectedAttribute() {
         return protectedAttribute;
@@ -42,28 +49,28 @@ public class GroupMetricRequest extends BaseMetricRequest {
         this.outcomeName = outcomeName;
     }
 
-    public ValueNode getFavorableOutcome() {
+    public ReconcilableOutput getFavorableOutcome() {
         return favorableOutcome;
     }
 
     // raw getters and setters  ================================================
-    public void setFavorableOutcome(ValueNode favorableOutcome) {
+    public void setFavorableOutcome(ReconcilableOutput favorableOutcome) {
         this.favorableOutcome = favorableOutcome;
     }
 
-    public ValueNode getPrivilegedAttribute() {
+    public ReconcilableFeature getPrivilegedAttribute() {
         return privilegedAttribute;
     }
 
-    public void setPrivilegedAttribute(ValueNode privilegedAttribute) {
+    public void setPrivilegedAttribute(ReconcilableFeature privilegedAttribute) {
         this.privilegedAttribute = privilegedAttribute;
     }
 
-    public ValueNode getUnprivilegedAttribute() {
+    public ReconcilableFeature getUnprivilegedAttribute() {
         return unprivilegedAttribute;
     }
 
-    public void setUnprivilegedAttribute(ValueNode unprivilegedAttribute) {
+    public void setUnprivilegedAttribute(ReconcilableFeature unprivilegedAttribute) {
         this.unprivilegedAttribute = unprivilegedAttribute;
     }
 
@@ -75,14 +82,16 @@ public class GroupMetricRequest extends BaseMetricRequest {
         this.thresholdDelta = thresholdDelta;
     }
 
-    public Integer getBatchSize() {
-        return batchSize;
+    public Map<String, String> retrieveTags(){
+        Map<String, String> tags = new HashMap<>();
+        tags.put("outcome", this.getOutcomeName());
+        tags.put("favorable_value", this.getFavorableOutcome().toString());
+        tags.put("protected", this.getProtectedAttribute());
+        tags.put("privileged", this.getPrivilegedAttribute().toString());
+        tags.put("unprivileged", this.getUnprivilegedAttribute().toString());
+        tags.put("batch_size", String.valueOf(this.getBatchSize()));
+        return tags;
     }
-
-    public void setBatchSize(Integer batchSize) {
-        this.batchSize = batchSize;
-    }
-
 
     @Override
     public boolean equals(Object o) {
@@ -98,7 +107,7 @@ public class GroupMetricRequest extends BaseMetricRequest {
                 && unprivilegedAttribute.equals(that.unprivilegedAttribute)
                 && this.getMetricName().equals(that.getMetricName())
                 && Objects.equals(thresholdDelta, that.thresholdDelta)
-                && Objects.equals(batchSize, that.batchSize);
+                && Objects.equals(getBatchSize(), that.getBatchSize());
     }
 
     @Override
@@ -109,7 +118,7 @@ public class GroupMetricRequest extends BaseMetricRequest {
                 privilegedAttribute,
                 unprivilegedAttribute,
                 thresholdDelta,
-                batchSize,
+                getBatchSize(),
                 this.getMetricName());
     }
 }

@@ -1,4 +1,6 @@
-package org.kie.trustyai.service.validators.metrics.fairness.group;
+package org.kie.trustyai.service.validators.metrics;
+
+import org.kie.trustyai.service.validators.metrics.fairness.group.BaseGroupMetricRequestValidator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,7 +13,7 @@ import javax.validation.Payload;
 @Target({ ElementType.PARAMETER, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = BaseGroupMetricRequestValidator.class)
-public @interface ValidGroupBaseMetricRequest {
+public @interface ValidBaseMetricRequest {
     String message() default "The supplied metric request details are not valid.";
 
     Class<?>[] groups() default {};

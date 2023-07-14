@@ -18,7 +18,6 @@ import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.ReconciledGroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

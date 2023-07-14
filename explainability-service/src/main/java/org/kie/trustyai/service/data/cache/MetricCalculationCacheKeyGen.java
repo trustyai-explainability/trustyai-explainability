@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.ReconciledGroupMetricRequest;
 
 import io.quarkus.cache.CacheKeyGenerator;
 import io.quarkus.cache.CompositeCacheKey;

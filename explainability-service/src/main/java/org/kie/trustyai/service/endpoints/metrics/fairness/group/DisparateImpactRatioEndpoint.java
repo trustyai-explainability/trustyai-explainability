@@ -12,7 +12,7 @@ import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.ReconciledGroupMetricRequest;
+import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 import javax.ws.rs.Path;
 import java.util.List;
@@ -51,20 +51,20 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
 
     @Override
     @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public Number calculate(Dataframe dataframe, ReconciledGroupMetricRequest request) {
+    public Number calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
 
-            final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute());
+            final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute().getTypeToReconcile().get());
 
             final Dataframe privileged = dataframe.filterByColumnValue(protectedIndex,
                     value -> value.equals(privilegedAttr));
-            final Value unprivilegedAttr = PayloadConverter.convertToValue(request.getUnprivilegedAttribute());
+            final Value unprivilegedAttr = PayloadConverter.convertToValue(request.getUnprivilegedAttribute().getTypeToReconcile().get());
             final Dataframe unprivileged = dataframe.filterByColumnValue(protectedIndex,
                     value -> value.equals(unprivilegedAttr));
-            final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
-            final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getType());
+            final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome().getTypeToReconcile().get());
+            final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getTypeToReconcile().get().getType());
             return DisparateImpactRatio.calculate(privileged, unprivileged,
                     List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
         } catch (Exception e) {

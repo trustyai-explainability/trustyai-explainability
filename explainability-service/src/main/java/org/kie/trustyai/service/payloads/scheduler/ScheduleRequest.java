@@ -1,18 +1,18 @@
 package org.kie.trustyai.service.payloads.scheduler;
 
-import java.util.UUID;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
-import org.kie.trustyai.service.payloads.metrics.ReconciledBaseMetricRequest;
+import java.util.UUID;
 
 public class ScheduleRequest {
     public UUID id;
-    public ReconciledBaseMetricRequest request;
+    public BaseMetricRequest request;
 
     public ScheduleRequest() {
 
     }
 
-    public ScheduleRequest(UUID id, ReconciledBaseMetricRequest request) {
+    public ScheduleRequest(UUID id, BaseMetricRequest request) {
         this.id = id;
         this.request = request;
     }

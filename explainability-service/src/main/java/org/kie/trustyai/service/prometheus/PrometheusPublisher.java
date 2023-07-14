@@ -1,6 +1,5 @@
 package org.kie.trustyai.service.prometheus;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +11,6 @@ import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
-import org.kie.trustyai.service.payloads.metrics.ReconciledBaseMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.ReconciledGroupMetricRequest;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -21,6 +18,8 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 @Singleton
 public class PrometheusPublisher {
@@ -42,8 +41,8 @@ public class PrometheusPublisher {
 
     }
 
-    private Iterable<Tag> generateTags(String modelName, UUID id, ReconciledBaseMetricRequest request) {
-        List<Tag> tags = request.getTags().entrySet().stream()
+    private Iterable<Tag> generateTags(String modelName, UUID id, BaseMetricRequest request) {
+        List<Tag> tags = request.retrieveTags().entrySet().stream()
                 .map(e -> Tag.of(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
         tags.add(Tag.of("request", id.toString()));
@@ -51,7 +50,7 @@ public class PrometheusPublisher {
         return Tags.of(tags);
     }
 
-    public void gauge(ReconciledGroupMetricRequest request, String modelName, UUID id, double value) {
+    public void gauge(@ValidReconciledMetricRequest BaseMetricRequest request, String modelName, UUID id, double value) {
 
         values.put(id, new AtomicDouble(value));
 

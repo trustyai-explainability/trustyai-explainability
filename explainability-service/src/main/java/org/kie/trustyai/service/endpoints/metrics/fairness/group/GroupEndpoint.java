@@ -15,17 +15,17 @@ import org.kie.trustyai.service.endpoints.metrics.MetricsEndpoint;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.definitions.GroupDefinitionRequest;
-import org.kie.trustyai.service.payloads.definitions.ReconciledGroupDefinitionRequest;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
-import org.kie.trustyai.service.payloads.metrics.ReconciledBaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.ReconciledGroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
-import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupBaseMetricRequest;
+import org.kie.trustyai.service.validators.metrics.ValidBaseMetricRequest;
+import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -72,18 +72,20 @@ public abstract class GroupEndpoint implements MetricsEndpoint {
 
     public abstract MetricThreshold thresholdFunction(Number delta, Number metricValue);
 
-    public abstract Number calculate(Dataframe dataframe, ReconciledGroupMetricRequest request);
+    public abstract Number calculate(Dataframe dataframe, @ValidBaseMetricRequest @ValidReconciledMetricRequest BaseMetricRequest request);
 
     public abstract String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, Number metricvalue);
 
     public abstract String getGeneralDefinition();
 
-    public String getSpecificDefinition(Number metricValue, ReconciledGroupMetricRequest request) {
+    public String getSpecificDefinition(Number metricValue, @ValidBaseMetricRequest @ValidReconciledMetricRequest GroupMetricRequest request) {
         final String outcomeName = request.getOutcomeName();
-        final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome());
+
+        PayloadConverter.convertToValue(request.getFavorableOutcome().getTypeToReconcile().get());
+        final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome().getTypeToReconcile().get());
         final String protectedAttribute = request.getProtectedAttribute();
-        final String privileged = PayloadConverter.convertToValue(request.getPrivilegedAttribute()).toString();
-        final String unprivileged = PayloadConverter.convertToValue(request.getUnprivilegedAttribute()).toString();
+        final String privileged = PayloadConverter.convertToValue(request.getPrivilegedAttribute().getTypeToReconcile().get()).toString();
+        final String unprivileged = PayloadConverter.convertToValue(request.getUnprivilegedAttribute().getTypeToReconcile().get()).toString();
         return specificDefinitionFunction(outcomeName, favorableOutcomeAttr, protectedAttribute, privileged, unprivileged, metricValue);
     };
 
@@ -91,30 +93,30 @@ public abstract class GroupEndpoint implements MetricsEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response response(@ValidGroupBaseMetricRequest GroupMetricRequest rawRequest) throws DataframeCreateException {
+    public Response response(@ValidBaseMetricRequest GroupMetricRequest request) throws DataframeCreateException {
 
         final Dataframe dataframe;
         final Metadata metadata;
         try {
-            dataframe = dataSource.get().getDataframe(rawRequest.getModelId());
-            metadata = dataSource.get().getMetadata(rawRequest.getModelId());
+            dataframe = dataSource.get().getDataframe(request.getModelId());
+            metadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + rawRequest.getModelId() + ": " + e.getMessage(), e);
+            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
-        ReconciledGroupMetricRequest reconciledMetricRequest = ReconciledGroupMetricRequest.reconcile(rawRequest, metadata);
+        RequestReconciler.reconcile(request, metadata);
 
         final double metricValue;
         try {
-            metricValue = this.calculate(dataframe, reconciledMetricRequest).doubleValue();
+            metricValue = this.calculate(dataframe, request).doubleValue();
         } catch (MetricCalculationException e) {
-            LOG.error("Error calculating metric for model " + reconciledMetricRequest.getModelId() + ": " + e.getMessage(), e);
+            LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
-        final String metricDefinition = this.getSpecificDefinition(metricValue, reconciledMetricRequest);
+        final String metricDefinition = this.getSpecificDefinition(metricValue, request);
 
-        MetricThreshold thresholds = thresholdFunction(reconciledMetricRequest.getThresholdDelta(), metricValue);
+        MetricThreshold thresholds = thresholdFunction(request.getThresholdDelta(), metricValue);
         final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue, metricDefinition, thresholds, name.toLowerCase());
         return Response.ok(dirObj).build();
     }
@@ -131,23 +133,21 @@ public abstract class GroupEndpoint implements MetricsEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/definition")
     public Response getSpecificDefinition(GroupDefinitionRequest request) {
-        final ReconciledGroupMetricRequest reconciledMetricRequest;
         try {
-            reconciledMetricRequest = ReconciledGroupMetricRequest.reconcile(request, dataSource);
+            RequestReconciler.reconcile(request, dataSource);
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
-        ReconciledGroupDefinitionRequest reconciledDefinitionRequest = new ReconciledGroupDefinitionRequest(reconciledMetricRequest, request.metricValue);
-        return Response.ok(this.getSpecificDefinition(request.getMetricValue(), reconciledDefinitionRequest)).build();
+        return Response.ok(this.getSpecificDefinition(request.getMetricValue(), request)).build();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
-    public Response createRequest(@ValidGroupBaseMetricRequest GroupMetricRequest request) {
+    public Response createRequest(@ValidBaseMetricRequest GroupMetricRequest request) {
 
         final UUID id = UUID.randomUUID();
 
@@ -158,14 +158,13 @@ public abstract class GroupEndpoint implements MetricsEndpoint {
         }
         request.setMetricName(getMetricName());
 
-        final ReconciledGroupMetricRequest reconciledMetricRequest;
         try {
-            reconciledMetricRequest = ReconciledGroupMetricRequest.reconcile(request, dataSource);
+            RequestReconciler.reconcile(request, dataSource);
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
-        scheduler.register(reconciledMetricRequest.getMetricName(), id, reconciledMetricRequest);
+        scheduler.register(request.getMetricName(), id, request);
 
         final BaseScheduledResponse response =
                 new BaseScheduledResponse(id);
@@ -197,7 +196,7 @@ public abstract class GroupEndpoint implements MetricsEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response listRequests() {
         final ScheduleList scheduleList = new ScheduleList();
-        for (Map.Entry<UUID, ReconciledBaseMetricRequest> entry : scheduler.getRequests(this.name).entrySet()) {
+        for (Map.Entry<UUID, BaseMetricRequest> entry : scheduler.getRequests(this.name).entrySet()) {
             scheduleList.requests.add(new ScheduleRequest(entry.getKey(), entry.getValue()));
         }
         return Response.ok(scheduleList).build();
