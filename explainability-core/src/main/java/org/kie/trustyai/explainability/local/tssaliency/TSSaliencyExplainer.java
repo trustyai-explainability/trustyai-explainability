@@ -1,12 +1,10 @@
 package org.kie.trustyai.explainability.local.tssaliency;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -17,6 +15,8 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.Well19937c;
 import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureImportance;
@@ -36,13 +36,13 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
     private RealVector baseValue; // check
     final private int ng; // Number of samples for gradient estimation
     final public int nalpha; // Number of steps in convex path
-    final private int randomSeed;
+    final private RandomGenerator randomGenerator;
 
     public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed) {
         this.baseValue = new ArrayRealVector(baseValue);
         this.ng = ng;
         this.nalpha = nalpha;
-        this.randomSeed = randomSeed;
+        this.randomGenerator = new Well19937c(randomSeed);
     }
 
     @Override
@@ -86,6 +86,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 final Value feature0Value = feature0.getValue();
 
                 final double[] feature0Values = feature0Value.asVector();
+
                 // F is the number of features
                 final int F = feature0Values.length;
 
@@ -123,23 +124,16 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 for (int t = 0; t < numberCores; t++) {
                     threadInfo[t] = new TSSaliencyThreadInfo();
                     threadInfo[t].alphaList = new LinkedList<Integer>();
-                    // alphaList[t] = new LinkedList<Integer>();
                 }
 
-                // int currentThreadNumber = 0;
                 for (int i = 0; i < nalpha; i++) {
                     threadInfo[i % numberCores].alphaList.add(Integer.valueOf(i));
                 }
 
-                // Elements are initialised with zero anyway
+                // Elements are initialised with zero
                 RealMatrix score = MatrixUtils.createRealMatrix(T, F);
 
                 for (int t = 0; t < numberCores; t++) {
-
-                    // public TSSaliencyRunner(RealMatrix x, RealVector alphaArray, RealVector
-                    // baseValue, RealMatrix score,
-                    // PredictionProvider model,
-                    // TSSaliencyExplainer explainer, List<Integer> alphaList)
 
                     threadInfo[t].runner = new TSSaliencyRunner(x, alpha, baseValueMatrix, score, model, this,
                             threadInfo[t].alphaList);
@@ -152,8 +146,6 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                     threadInfo[i].thread.join();
                 }
 
-                // System.out.println(score.toString());
-
                 // IG(t,j) = x(t,j) * SCORE(t,j)
 
                 final RealMatrix xMinusBaseValue = x.subtract(baseValueMatrix);
@@ -162,9 +154,6 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 final RealMatrix fscore = score;
                 IntStream.range(0, T).forEach(
                         t -> scoreResult.setRowVector(t, xMinusBaseValue.getRowVector(t).ebeMultiply(fscore.getRowVector(t))));
-
-                        // scoreResult[t][f] = (x[t][f] - baseValue[f]) * score[t][f];
-
 
                 // assume 1 Feature in predictionInputs
 
@@ -182,12 +171,6 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
             retval.complete(saliencyResults);
 
-            // System.out.println("normal avg time = " + ((double) totalNormalTime) /
-            // totalNormalCount);
-            // System.out.println("normal total time = " + ((double) totalNormalTime) /
-            // 1e9);
-            // System.out.println("normal total calls = " + totalNormalCount);
-
             return retval;
         } catch (
 
@@ -195,39 +178,6 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
             e.printStackTrace();
             return null;
         }
-    }
-
-    // public static RealMatrix realMatrixFromFeatures(List<Feature> ps) {
-    // // return MatrixUtils.createRealMatrix(
-    // double[][] vect = ps.stream()
-    // // .map(p -> p.toArray(new Feature[0]))
-
-    // .map(f -> f.getValue().asVector()).toArray(double[][]::new);
-
-    // // .map(p -> p.getFeatures().stream()
-    // // .mapToDouble(f -> f.getValue().asNumber())
-    // // .toArray())
-    // // .toArray(double[][]::new));
-
-    // return MatrixUtils.createRealMatrix(vect);
-    // }
-
-    public static double[][] matrixFromFeatures(PredictionInput pi) {
-
-        List<Feature> ps = pi.getFeatures();
-
-        // return MatrixUtils.createRealMatrix(
-        double[][] vect = ps.stream()
-                // .map(p -> p.toArray(new Feature[0]))
-
-                .map(f -> f.getValue().asVector()).toArray(double[][]::new);
-
-        // .map(p -> p.getFeatures().stream()
-        // .mapToDouble(f -> f.getValue().asNumber())
-        // .toArray())
-        // .toArray(double[][]::new));
-
-        return vect;
     }
 
     private RealVector calcBaseValue(Feature[] featuresArray, int T, int numberFeatures) {
@@ -259,22 +209,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
         int T = x.getRowDimension();
         int F = x.getColumnDimension();
 
-        // gradientSamples mu
-        final NormalDistribution N = new NormalDistribution(0.0, SIGMA);
-
-        // long totalNormalCount = 0;
-        // long totalNormalTime = 0;
-
-        // double[] x = baseValue;
-        // gradientSamples mu
-
-        // NormalDistribution N = new NormalDistribution(0.0, SIGMA);
-        // Random r = new Random();
-        // N.reseedRandomGenerator(randomSeed);
-
-        // Sample ng independent data points from the unit sphere
-
-        // double U[][][] = new double[ng][T][F];
+        final NormalDistribution N = new NormalDistribution(randomGenerator, 0.0, SIGMA);
 
         final RealMatrix[] U = new RealMatrix[ng];
         for (int i = 0; i < ng; i++) {
@@ -282,8 +217,6 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
         }
 
         for (int n = 0; n < ng; n++) {
-
-            // long startNano = System.nanoTime();
 
             double sum = 0.0;
             for (int t = 0; t < T; t++) {
@@ -302,11 +235,6 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                     U[n].setEntry(t, f, U[n].getEntry(t, f) / L2norm);
                 }
             }
-
-            // long endNano = System.nanoTime();
-
-            // double time = (endNano - startNano) / 1e9;
-            // System.out.println(n + " monte carlo inner time = " + time);
         }
 
         double[] diff = new double[ng];
@@ -364,42 +292,15 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
         for (int i = 0; i < results.size() - 1; i++) {
             PredictionOutput fxDeltaPredictionOutput = results.get(i);
-            // PredictionOutput fxPredictionOutput = results.get(i + 1);
 
             List<Output> fxDeltas = fxDeltaPredictionOutput.getOutputs();
-            // ListOutput fxs = fxPredictionOutput.getOutputs();
 
             Output[] fxDelta = fxDeltas.toArray(new Output[0]);
-            // Output[] fx = fxs.toArray(new Output[0]);
 
             double fxDeltaScore = fxDelta[0].getScore();
 
             diff[i] = fxDeltaScore - fxScore;
         }
-
-        // // model prediction for original x
-        // PredictionOutput fxPredictionOutput = results.get(results.size() - 1);
-        // List<Output> fxs = fxPredictionOutput.getOutputs();
-        // Output[] fx = fxs.toArray(new Output[0]);
-        // double fxScore = fx[0].getScore();
-
-        // for (int i = 0; i < results.size() - 1; i++) {
-
-        //     // PredictionOutput fxPredictionOutput = results.get(results.size() - 1);
-        //     // List<Output> fxs = fxPredictionOutput.getOutputs();
-        //     // Output[] fx = fxs.toArray(new Output[0]);
-        //     // double fxScore = fx[0].getScore();
-
-        //     PredictionOutput fxDeltaPredictionOutput = results.get(i);
-
-        //     List<Output> fxDeltas = fxDeltaPredictionOutput.getOutputs();
-
-        //     Output[] fxDelta = fxDeltas.toArray(new Output[0]);
-
-        //     double fxDeltaScore = fxDelta[0].getScore();
-
-        //     diff[i] = fxDeltaScore - fxScore;
-        // }
 
         // g(t,j) = (T * F) / ng * sum(ng) (diff * U) / MU)
 
