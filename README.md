@@ -1,6 +1,6 @@
 # TrustyAI Explainability
 This repo is the main hub for TrustyAI, containing the core Java library as well as various pieces
-to support the [TrustyAI Service](https://github.com/trustyai-explainability/trustyai-explainability/tree/main/explainability-service)
+to support the [TrustyAI Service](https://github.com/trustyai-explainability/trustyai-explainability/tree/main/explainability-service), [TrustyAI Operator](https://github.com/trustyai-explainability/trustyai-service-operator), 
 and [TrustyAI Python Library](https://github.com/trustyai-explainability/trustyai-explainability-python). 
 
 # Overview
