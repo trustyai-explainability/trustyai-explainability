@@ -37,8 +37,8 @@ public class TSSaliencyRunner implements Runnable {
             
             for (Integer I : alphaList) {
 
-                int i = I.intValue();
-                double alpha = alphaArray.getEntry(i);
+                final int i = I.intValue();
+                final double alpha = alphaArray.getEntry(i);
 
                 // Compute affine sample:
                 // s = alpha(i) * X + (1 - alpha(i)) * (1(T) * transpose(b))
@@ -67,7 +67,7 @@ public class TSSaliencyRunner implements Runnable {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new IllegalStateException();
+            throw new IllegalStateException(e);
         }
     }
 }

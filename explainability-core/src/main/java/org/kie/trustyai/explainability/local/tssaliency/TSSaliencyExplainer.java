@@ -52,7 +52,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
     @Override
     public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model,
             Consumer<SaliencyResults> intermediateResultsConsumer) {
-        List<Prediction> predictionList = new ArrayList<Prediction>(1);
+        final List<Prediction> predictionList = new ArrayList<Prediction>(1);
 
         predictionList.add(prediction);
 
@@ -65,18 +65,18 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
         try {
 
-            Map<String, Saliency> saliencies = new HashMap<String, Saliency>();
+            final Map<String, Saliency> saliencies = new HashMap<String, Saliency>();
 
-            SaliencyResults saliencyResults = new SaliencyResults(saliencies, SourceExplainer.TSSALIENCY);
+            final SaliencyResults saliencyResults = new SaliencyResults(saliencies, SourceExplainer.TSSALIENCY);
 
             for (Prediction prediction : predictions) {
 
-                PredictionInput predictionInputs = prediction.getInput();
+                final PredictionInput predictionInputs = prediction.getInput();
 
-                PredictionOutput predictionOutput = prediction.getOutput();
+                final PredictionOutput predictionOutput = prediction.getOutput();
 
-                List<Output> outputs = predictionOutput.getOutputs();
-                Output output = outputs.get(0);
+                final List<Output> outputs = predictionOutput.getOutputs();
+                final Output output = outputs.get(0);
 
                 final List<Feature> features = predictionInputs.getFeatures();
 
@@ -112,7 +112,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 for (int t = 0; t < T; t++) {
                     final Feature feature = featuresArray[t];
                     final Value value = feature.getValue();
-                    double[] elements = value.asVector();
+                    final double[] elements = value.asVector();
                     x.setRow(t, elements);
                 }
 
@@ -122,9 +122,9 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                     baseValueMatrix.setRowVector(rowIndex, baseValue);
                 }
 
-                int numberCores = Runtime.getRuntime().availableProcessors();
+                final int numberCores = Runtime.getRuntime().availableProcessors();
 
-                TSSaliencyThreadInfo[] threadInfo = new TSSaliencyThreadInfo[numberCores];
+                final TSSaliencyThreadInfo[] threadInfo = new TSSaliencyThreadInfo[numberCores];
                 for (int t = 0; t < numberCores; t++) {
                     threadInfo[t] = new TSSaliencyThreadInfo();
                     threadInfo[t].alphaList = new LinkedList<Integer>();
@@ -135,7 +135,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 }
 
                 // Elements are initialised with zero
-                RealMatrix score = MatrixUtils.createRealMatrix(T, F);
+                final RealMatrix score = MatrixUtils.createRealMatrix(T, F);
 
                 for (int t = 0; t < numberCores; t++) {
 
@@ -165,14 +165,14 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 final FeatureImportance featureImportance = new FeatureImportance(predictionInputs.getFeatures().get(0),
                         scoreResult.getData(), 0.0);
 
-                List<FeatureImportance> featureImportances = new ArrayList<FeatureImportance>(1);
+                final List<FeatureImportance> featureImportances = new ArrayList<FeatureImportance>(1);
                 featureImportances.add(featureImportance);
 
                 final Saliency saliency = new Saliency(output, featureImportances);
                 saliencies.put(output.getName(), saliency);
             }
 
-            CompletableFuture<SaliencyResults> retval = new CompletableFuture<SaliencyResults>();
+            final CompletableFuture<SaliencyResults> retval = new CompletableFuture<SaliencyResults>();
 
             retval.complete(saliencyResults);
 
@@ -181,7 +181,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
         Exception e) {
             e.printStackTrace();
-            return null;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -193,11 +193,11 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
         for (int t = 0; t < T; t++) {
 
-            Feature feature = featuresArray[t];
+            final Feature feature = featuresArray[t];
             assert feature.getType() == Type.VECTOR;
 
             final Value featureValue = feature.getValue();
-            double[] featureArray = featureValue.asVector();
+            final double[] featureArray = featureValue.asVector();
             assert featureArray.length == numberFeatures;
 
             retval = retval.add(new ArrayRealVector(featureArray));
@@ -208,8 +208,8 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
     public RealMatrix monteCarloGradient(RealMatrix x, PredictionProvider model) throws Exception {
 
-        int T = x.getRowDimension();
-        int F = x.getColumnDimension();
+        final int T = x.getRowDimension();
+        final int F = x.getColumnDimension();
 
         final NormalDistribution N = new NormalDistribution(randomGenerator, 0.0, sigma);
 
@@ -229,7 +229,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 }
             }
 
-            double L2norm = Math.sqrt(sum);
+            final double L2norm = Math.sqrt(sum);
 
             for (int t = 0; t < T; t++) {
                 for (int f = 0; f < F; f++) {
@@ -239,67 +239,67 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
             }
         }
 
-        double[] diff = new double[ng];
+        final double[] diff = new double[ng];
 
-        List<PredictionInput> inputs = new LinkedList<PredictionInput>();
+        final List<PredictionInput> inputs = new LinkedList<PredictionInput>();
 
         for (int n = 0; n < ng; n++) {
 
             // dfs = f(x + u * sample) - f(x)
 
-            List<Feature> features2delta = new LinkedList<Feature>();
+            final List<Feature> features2delta = new LinkedList<Feature>();
 
             for (int t = 0; t < T; t++) {
 
-                double[] feature3Array = new double[F];
+                final double[] feature3Array = new double[F];
 
                 for (int f = 0; f < F; f++) {
                     feature3Array[f] = x.getEntry(t, f) + mu * U[n].getEntry(t, f);
                 }
 
-                Feature feature3 = new Feature("xdelta" + t, Type.VECTOR, new Value(feature3Array));
+                final Feature feature3 = new Feature("xdelta" + t, Type.VECTOR, new Value(feature3Array));
                 features2delta.add(feature3);
             }
 
-            PredictionInput inputDelta = new PredictionInput(features2delta);
+            final PredictionInput inputDelta = new PredictionInput(features2delta);
             inputs.add(inputDelta);
 
         }
 
-        List<Feature> features2 = new LinkedList<Feature>();
+        final List<Feature> features2 = new LinkedList<Feature>();
 
         for (int t = 0; t < T; t++) {
 
-            double[] feature3Array = new double[F];
+            final double[] feature3Array = new double[F];
 
             for (int f = 0; f < F; f++) {
                 feature3Array[f] = x.getEntry(t, f);
             }
 
-            Feature feature3 = new Feature("x" + t, Type.VECTOR, new Value(feature3Array));
+            final Feature feature3 = new Feature("x" + t, Type.VECTOR, new Value(feature3Array));
             features2.add(feature3);
         }
 
-        PredictionInput input = new PredictionInput(features2);
+        final PredictionInput input = new PredictionInput(features2);
         inputs.add(input);
 
         final CompletableFuture<List<PredictionOutput>> result = model.predictAsync(inputs);
         final List<PredictionOutput> results = result.get();
 
         // model prediction for original x
-        PredictionOutput fxPredictionOutput = results.get(results.size() - 1);
-        List<Output> fxs = fxPredictionOutput.getOutputs();
-        Output[] fx = fxs.toArray(new Output[0]);
-        double fxScore = fx[0].getScore();
+        final PredictionOutput fxPredictionOutput = results.get(results.size() - 1);
+        final List<Output> fxs = fxPredictionOutput.getOutputs();
+        final Output[] fx = fxs.toArray(new Output[0]);
+        final double fxScore = fx[0].getScore();
 
         for (int i = 0; i < results.size() - 1; i++) {
-            PredictionOutput fxDeltaPredictionOutput = results.get(i);
+            final PredictionOutput fxDeltaPredictionOutput = results.get(i);
 
-            List<Output> fxDeltas = fxDeltaPredictionOutput.getOutputs();
+            final List<Output> fxDeltas = fxDeltaPredictionOutput.getOutputs();
 
-            Output[] fxDelta = fxDeltas.toArray(new Output[0]);
+            final Output[] fxDelta = fxDeltas.toArray(new Output[0]);
 
-            double fxDeltaScore = fxDelta[0].getScore();
+            final double fxDeltaScore = fxDelta[0].getScore();
 
             diff[i] = fxDeltaScore - fxScore;
         }
@@ -308,7 +308,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
         final RealMatrix retval = MatrixUtils.createRealMatrix(T, F);
 
-        double mult = (double) (T * F) / ng;
+        final double mult = (double) (T * F) / ng;
 
         for (int t = 0; t < T; t++) {
             for (int f = 0; f < F; f++) {
@@ -316,8 +316,8 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 double gsum = 0.0;
 
                 for (int n = 0; n < ng; n++) {
-                    double term = diff[n] * U[n].getEntry(t, f);
-                    double term2 = term / mu;
+                    final double term = diff[n] * U[n].getEntry(t, f);
+                    final double term2 = term / mu;
                     gsum += term2;
                 }
 
