@@ -33,12 +33,12 @@ import org.kie.trustyai.explainability.model.Value;
 
 public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults> {
 
-    private RealVector baseValue; // check
+    private RealVector baseValue; // Feature’s base values
     final private int ng; // Number of samples for gradient estimation
     final public int nalpha; // Number of steps in convex path
-    final private RandomGenerator randomGenerator;
-    final double sigma;
-    final double mu;
+    final private RandomGenerator randomGenerator; // random number generatr
+    final double sigma; // standard deviation
+    final double mu; // Step size for gradient estimation
 
     public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed, double sigma, double mu) {
         this.baseValue = new ArrayRealVector(baseValue);
