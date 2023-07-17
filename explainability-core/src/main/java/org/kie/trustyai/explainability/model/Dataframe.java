@@ -680,7 +680,7 @@ public class Dataframe {
 
     /**
      * Return the outputs in a specific row
-     * 
+     *
      * @param row The specified row
      * @return A {@link List} of {@link Output}
      */
@@ -912,8 +912,8 @@ public class Dataframe {
         return filterByRowIndex(rowIndexes);
     }
 
-    public Dataframe filterOutSyntheticRows() {
-        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> !internalData.synthetics.get(rowNumber))
+    public Dataframe filterRowsBySynthetic(boolean synthetic) {
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.synthetics.get(rowNumber) == synthetic)
                 .boxed().collect(Collectors.toList());
         return filterByRowIndex(rowIndexes);
     }
@@ -941,7 +941,7 @@ public class Dataframe {
 
     /**
      * Return the last n rows of the {@link Dataframe}.
-     * 
+     *
      * @param n Number of rows to return
      * @return A copy of the dataframe with only the last n rows.
      */
