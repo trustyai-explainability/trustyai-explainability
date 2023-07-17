@@ -1,25 +1,30 @@
 package org.kie.trustyai.explainability.local.tssaliency;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 
 public class TSSaliencyRunner implements Runnable {
 
-    private double[][] x;
-    private double[] alphaArray;
-    private double[] baseValue;
-    private double[][] score;
+    private RealMatrix x;
+    private RealVector alphaArray;
+    private RealMatrix baseValueMatrix;
+    private RealMatrix score;
     private PredictionProvider model;
     private TSSaliencyExplainer explainer;
     private List<Integer> alphaList;
 
-    public TSSaliencyRunner(double[][] x, double[] alphaArray, double[] baseValue, double[][] score,
+    public TSSaliencyRunner(RealMatrix x, RealVector alphaArray, RealMatrix baseValueMatrix, RealMatrix score,
             PredictionProvider model,
             TSSaliencyExplainer explainer, List<Integer> alphaList) {
         this.x = x;
         this.alphaArray = alphaArray;
-        this.baseValue = baseValue;
+        this.baseValueMatrix = baseValueMatrix;
         this.score = score;
         this.model = model;
         this.explainer = explainer;
@@ -35,37 +40,40 @@ public class TSSaliencyRunner implements Runnable {
 
             long startTime = System.nanoTime();
 
-            int T = x.length;
-            int F = x[0].length;
+            int T = x.getRowDimension();
+            int F = x.getColumnDimension();
 
             for (Integer I : alphaList) {
 
                 int i = I.intValue();
-                double alpha = alphaArray[i];
+                double alpha = alphaArray.getEntry(i);
 
+                // Compute affine sample:
                 // s = alpha(i) * X + (1 - alpha(i)) * (1(T) * transpose(b))
 
-                double[][] s = new double[T][F];
-                for (int t = 0; t < T; t++) {
+                final RealMatrix alphaX = x.scalarMultiply(alpha); // Multiply each element of x by alpha[i]
 
-                    for (int f = 0; f < F; f++) {
-                        s[t][f] = alpha * x[t][f] + (1.0 - alpha) * baseValue[f];
-                    }
-                }
+                // Multiply each element of baseValue by (1 - alpha[i])
+                final RealMatrix oneMinusAlphaBaseValue = baseValueMatrix.scalarMultiply(1.0 - alpha);
+                final RealMatrix s = alphaX.add(oneMinusAlphaBaseValue); // Add the results together
 
                 // Compute Monte Carlo gradient (per time and feature dimension):
 
                 // g = MC_GRADIENT(s; f; ng)
-                double[][] g = explainer.monteCarloGradient(s, model);
+                // g is also an array of doubles, where each element is a timepoint
+                final RealMatrix g = explainer.monteCarloGradient(s, model);
 
                 // Update Score:
 
+                final RealMatrix gDivNalpha = g.scalarMultiply(1.0 / explainer.nalpha); // Divide g by nalpha
+
+                // System.out.println(gDivNalpha.toString());
+
                 synchronized (score) {
-                    for (int t = 0; t < T; t++) {
-                        for (int f = 0; f < F; f++) {
-                            score[t][f] = score[t][f] + g[t][f] / explainer.nalpha;
-                        }
-                    }
+                    IntStream.range(0, T).forEach(
+                        t -> score.setRowVector(t, score.getRowVector(t).add(gDivNalpha.getRowVector(t))));
+
+                    // System.out.println(score.toString());
                 }
 
             }
@@ -74,13 +82,12 @@ public class TSSaliencyRunner implements Runnable {
 
             double processingms = (endTime - startTime) / 1000000.0;
 
-            String alphas = "";
-            for (Integer I : alphaList) {
-                alphas += I.toString() + ",";
-            }
+            // String alphas = "";
+            // for (Integer I : alphaList) {
+            //     alphas += I.toString() + ",";
+            // }
 
-            // System.out.println(
-            //         "thread " + Thread.currentThread().getName() + " done " + alphas + " process " + processingms);
+            // System.out.println("thread " + Thread.currentThread().getName() + " done " + alphas + " processing " + processingms);
 
         } catch (Exception e) {
             e.printStackTrace();

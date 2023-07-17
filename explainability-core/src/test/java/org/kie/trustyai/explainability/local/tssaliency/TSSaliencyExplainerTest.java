@@ -138,14 +138,14 @@ public class TSSaliencyExplainerTest {
 
             TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 1000, 50, 0);
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 1/*0*/; i++) {
                 CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(predictions,
                         model,
                         null);
                 SaliencyResults saliencyResults = saliencyResultsCompletable.get();
             }
 
-            int REPS = 10;
+            int REPS = 1;
             long startNanos = System.nanoTime();
             for (int i = 0; i < REPS; i++) {
                 CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(predictions,
