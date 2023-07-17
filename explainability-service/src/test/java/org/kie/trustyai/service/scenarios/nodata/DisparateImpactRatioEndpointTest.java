@@ -68,7 +68,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No metadadata found for model=" + payload.getModelId()));
+                .body(containsString("No metadata found for model=" + payload.getModelId()));
     }
 
     @Test
@@ -81,7 +81,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No metadadata found for model=" + payload.getModelId()));
+                .body(containsString("No metadata found for model=" + payload.getModelId()));
     }
 
     @Test
@@ -94,7 +94,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No metadadata found for model=" + payload.getModelId()));
+                .body(containsString("No metadata found for model=" + payload.getModelId()));
 
     }
 

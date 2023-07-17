@@ -143,7 +143,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("Got '\\\"male\\\"', expected object compatible with 'INT32'"));
+                .body(containsString("Invalid type for output: got 'male', expected object compatible with 'INT32'"));
     }
 
     @Test
@@ -177,6 +177,41 @@ class DisparateImpactRatioEndpointTest {
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .body(any(String.class));
 
+    }
+
+    @Test
+    void postManyWrongNames() throws JsonProcessingException {
+        datasource.get().reset();
+
+        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectManyWrongNames();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .body(allOf(
+                        containsString("No output found with name=icnome for model=example1"),
+                        containsString("No protected attribute found with name=city for model=example1")));
+    }
+
+    @Test
+    void postManyWrongTypes() throws JsonProcessingException {
+        datasource.get().reset();
+
+        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectManyWrongTypes();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .body(allOf(
+                        containsString("Invalid type for output: got 'approved-doesnt-exist', expected object compatible with 'INT32'"),
+                        containsString("Received invalid type for privileged attribute: got 'lemons', expected object compatible with 'INT32'"),
+                        containsString("Received invalid type for unprivileged attribute: got '1.5', expected object compatible with 'INT32'")));
     }
 
     @Test
@@ -291,7 +326,7 @@ class DisparateImpactRatioEndpointTest {
                 .when()
                 .post("/request")
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("Got '\\\"male\\\"', expected object compatible with 'INT32'"));
+                .body(containsString("got 'male', expected object compatible with 'INT32'"));
 
         ScheduleList scheduleList = given()
                 .when()

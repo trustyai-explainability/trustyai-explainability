@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.kie.trustyai.service.payloads.BaseMetricRequest;
 
+import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
@@ -56,6 +57,28 @@ public class RequestPayloadGenerator {
         request.setOutcomeName("income");
         request.setPrivilegedAttribute(IntNode.valueOf(1));
         request.setUnprivilegedAttribute(IntNode.valueOf(0));
+        request.setModelId(MODEL_ID);
+        return request;
+    }
+
+    public static BaseMetricRequest incorrectManyWrongNames() {
+        BaseMetricRequest request = new BaseMetricRequest();
+        request.setProtectedAttribute("city");
+        request.setFavorableOutcome(TextNode.valueOf("approved"));
+        request.setOutcomeName("icnome");
+        request.setPrivilegedAttribute(IntNode.valueOf(1));
+        request.setUnprivilegedAttribute(IntNode.valueOf(0));
+        request.setModelId(MODEL_ID);
+        return request;
+    }
+
+    public static BaseMetricRequest incorrectManyWrongTypes() {
+        BaseMetricRequest request = new BaseMetricRequest();
+        request.setProtectedAttribute("gender");
+        request.setFavorableOutcome(TextNode.valueOf("approved-doesnt-exist"));
+        request.setOutcomeName("income");
+        request.setPrivilegedAttribute(TextNode.valueOf("lemons"));
+        request.setUnprivilegedAttribute(DoubleNode.valueOf(1.5));
         request.setModelId(MODEL_ID);
         return request;
     }

@@ -69,7 +69,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No metadadata found for model=" + payload.getModelId()));
+                .body(containsString("No metadata found for model=" + payload.getModelId()));
 
     }
 
@@ -84,7 +84,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No metadadata found for model=" + payload.getModelId()));
+                .body(containsString("No metadata found for model=" + payload.getModelId()));
     }
 
     @Test
@@ -121,7 +121,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .when()
                 .post("/request")
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No metadadata found for model=" + payload.getModelId()));
+                .body(containsString("No metadata found for model=" + payload.getModelId()));
 
         ScheduleList scheduleList = given()
                 .when()
