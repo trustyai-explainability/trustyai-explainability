@@ -37,12 +37,16 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
     final private int ng; // Number of samples for gradient estimation
     final public int nalpha; // Number of steps in convex path
     final private RandomGenerator randomGenerator;
+    final double sigma;
+    final double mu;
 
-    public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed) {
+    public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed, double sigma, double mu) {
         this.baseValue = new ArrayRealVector(baseValue);
         this.ng = ng;
         this.nalpha = nalpha;
         this.randomGenerator = new Well19937c(randomSeed);
+        this.sigma = sigma;
+        this.mu = mu;
     }
 
     @Override
@@ -153,7 +157,8 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 final RealMatrix scoreResult = MatrixUtils.createRealMatrix(T, F);
                 final RealMatrix fscore = score;
                 IntStream.range(0, T).forEach(
-                        t -> scoreResult.setRowVector(t, xMinusBaseValue.getRowVector(t).ebeMultiply(fscore.getRowVector(t))));
+                        t -> scoreResult.setRowVector(t,
+                                xMinusBaseValue.getRowVector(t).ebeMultiply(fscore.getRowVector(t))));
 
                 // assume 1 Feature in predictionInputs
 
@@ -203,13 +208,10 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
     public RealMatrix monteCarloGradient(RealMatrix x, PredictionProvider model) throws Exception {
 
-        final double SIGMA = 10.0;
-        final double MU = 0.01;
-
         int T = x.getRowDimension();
         int F = x.getColumnDimension();
 
-        final NormalDistribution N = new NormalDistribution(randomGenerator, 0.0, SIGMA);
+        final NormalDistribution N = new NormalDistribution(randomGenerator, 0.0, sigma);
 
         final RealMatrix[] U = new RealMatrix[ng];
         for (int i = 0; i < ng; i++) {
@@ -252,7 +254,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 double[] feature3Array = new double[F];
 
                 for (int f = 0; f < F; f++) {
-                    feature3Array[f] = x.getEntry(t, f) + MU * U[n].getEntry(t, f);
+                    feature3Array[f] = x.getEntry(t, f) + mu * U[n].getEntry(t, f);
                 }
 
                 Feature feature3 = new Feature("xdelta" + t, Type.VECTOR, new Value(feature3Array));
@@ -315,7 +317,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
                 for (int n = 0; n < ng; n++) {
                     double term = diff[n] * U[n].getEntry(t, f);
-                    double term2 = term / MU;
+                    double term2 = term / mu;
                     gsum += term2;
                 }
 
