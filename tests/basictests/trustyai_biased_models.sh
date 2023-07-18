@@ -38,6 +38,7 @@ function install_trustyai_operator(){
   oc apply -f ${RESOURCEDIR}/trustyai/trustyai_operator_configmap.yaml || eval "$FAILURE_HANDLING"
   oc apply -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get deployment trustyai-operator" "trustyai-operator" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc get pods | grep trustyai-service-operator" "2/2" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function deploy_model() {
