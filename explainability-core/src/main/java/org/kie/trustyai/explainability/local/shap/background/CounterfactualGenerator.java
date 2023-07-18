@@ -286,7 +286,7 @@ public class CounterfactualGenerator {
             final TerminationConfig terminationConfig =
                     new TerminationConfig().withScoreCalculationCountLimit(this.stepCount);
             final SolverConfig solverConfig = SolverConfigBuilder
-                    .builder().withTerminationConfig(terminationConfig).build();
+                    .builder().build().withRandomSeed(pc.getSeed().orElse(0L)).withTerminationConfig(terminationConfig);
             if (this.counterfactualConfig == null) {
                 this.counterfactualConfig = new CounterfactualConfig()
                         .withSolverConfig(solverConfig);

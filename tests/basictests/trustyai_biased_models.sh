@@ -202,7 +202,7 @@ function teardown_trustyai_test() {
   oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_operator_configmap.yaml"  || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml"  || eval "$FAILURE_HANDLING"
-  os::cmd::expect_success "oc delete deployment trustyai-service-operator-controller-manager"  || eval "$FAILURE_HANDLING"
+  oc delete deployment trustyai-service-operator-controller-manager  || echo "No trustyai operator deployment found"
 }
 
 if [ $TEARDOWN = false ]; then

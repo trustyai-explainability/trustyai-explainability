@@ -4,8 +4,7 @@ on:
     branches:
       - main
     tags:
-      - v*-rhods
-      - v*-odh
+      - v*
     paths-ignore:
       - 'LICENSE'
       - '**/.gitignore'
@@ -24,67 +23,65 @@ jobs:
   # Ensure that tests pass before publishing a new image.
   build-and-push-ci:
     runs-on: ubuntu-latest
-    steps:
-      # Assign context variable for switch between main/ci runs
+    steps: # Assign context variable for various action contexts (tag, main, CI)
       - name: Assigning CI context
-        if: github.head_ref != '' && github.head_ref != 'main' && !startsWith(github.ref, 'refs/tags/v'))
-        - run: echo "BUILD_CONTEXT=ci" >> $GITHUB_ENV
+        if: github.head_ref != '' && github.head_ref != 'main' && !startsWith(github.ref, 'refs/tags/v')
+        run: echo "BUILD_CONTEXT=ci" >> $GITHUB_ENV
       - name: Assigning tag context
         if: github.head_ref == '' && startsWith(github.ref, 'refs/tags/v')
-        - run: echo "BUILD_CONTEXT=tag" >> $GITHUB_ENV
+        run: echo "BUILD_CONTEXT=tag" >> $GITHUB_ENV
       - name: Assigning main context
-          if: github.head_ref == '' && startsWith(github.ref, 'refs/tags/v')
-                - run: echo "BUILD_CONTEXT=main" >> $GITHUB_ENV
+        if: github.head_ref == '' && github.ref == 'refs/heads/main'
+        run: echo "BUILD_CONTEXT=main" >> $GITHUB_ENV
       #
-      # Start
+      # Run checkouts
       - uses: mheap/github-action-required-labels@v4
-        if: env.BUILD_CONTEXT == ci
+        if: env.BUILD_CONTEXT == 'ci'
         with:
           mode: minimum
           count: 1
           labels: "ok-to-test, lgtm, approved"
-      #
-      # Checkouts
       - uses: actions/checkout@v3
-        if: env.BUILD_CONTEXT == ci
+        if: env.BUILD_CONTEXT == 'ci'
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/checkout@v3
-        if: env.BUILD_CONTEXT == main ||  env.BUILD_CONTEXT == tag
+        if: env.BUILD_CONTEXT == 'main' ||  env.BUILD_CONTEXT == 'tag'
       #
-      # variable logging
+      # Print variables for debugging
       - name: Log reference variables
         run: |
+          echo "CONTEXT: ${{ env.BUILD_CONTEXT }}"
           echo "GITHUB.REF: ${{ github.ref }}"
           echo "GITHUB.HEAD_REF: ${{ github.head_ref }}"
           echo "SHA: ${{ github.event.pull_request.head.sha }}"
           echo "MAIN IMAGE AT: ${{ vars.QUAY_RELEASE_REPO }}:latest"
           echo "CI IMAGE AT: quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}"
       #
-      # Setting environments
+      # Set environments depending on context
       - name: Set CI environment
-        if:  env.BUILD_CONTEXT == ci
+        if:  env.BUILD_CONTEXT == 'ci'
         run: | 
           echo "TAG=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
           echo "IMAGE_NAME=quay.io/trustyai/trustyai-service-ci" >> $GITHUB_ENV
       - name: Set main-branch environment
-        if:  env.BUILD_CONTEXT == main
+        if:  env.BUILD_CONTEXT == 'main'
         run: |
           echo "TAG=latest" >> $GITHUB_ENV
           echo "IMAGE_NAME=${{ vars.QUAY_RELEASE_REPO }}" >> $GITHUB_ENV
-      - name: Set tagh environment
-        if: env.BUILD_CONTEXT == tag
+      - name: Set tag environment
+        if: env.BUILD_CONTEXT == 'tag'
         run: |
-          echo "TAG=${github.ref#refs/*/}" >> $GITHUB_ENV
+          echo "TAG=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "IMAGE_NAME=${{ vars.QUAY_RELEASE_REPO }}" >> $GITHUB_ENV
       #
-      # Docker
+      # Run docker commands
       - name: Pull prerequisite images
         run: |
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
           docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
       - name: Put expiry date on CI-tagged image
-        if:  env.BUILD_CONTEXT == ci
+        if:  env.BUILD_CONTEXT == 'ci'
         run: sed -i 's#summary="odh-trustyai-service\"#summary="odh-trustyai-service" \\ \n      quay.expires-after=7d#' Dockerfile
       - name: Build image
         run: docker build -t ${{ env.IMAGE_NAME }}:$TAG .
