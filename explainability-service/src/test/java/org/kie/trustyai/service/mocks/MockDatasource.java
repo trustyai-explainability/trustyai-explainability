@@ -1,10 +1,8 @@
 package org.kie.trustyai.service.mocks;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
@@ -41,10 +39,6 @@ public class MockDatasource extends DataSource {
         final Random random = new Random();
         for (int i = 0; i < observations; i++) {
             final List<Feature> featureList = List.of(
-                    // Metadata
-                    FeatureFactory.newObjectFeature(MetadataUtils.ID_FIELD, UUID.randomUUID()),
-                    FeatureFactory.newObjectFeature(MetadataUtils.TIMESTAMP_FIELD, LocalDateTime.now()),
-
                     // guarantee feature diversity for age is min(observations, featureDiversity)
                     FeatureFactory.newNumericalFeature("age", i % featureDiversity),
                     FeatureFactory.newNumericalFeature("gender", random.nextBoolean() ? 1 : 0),

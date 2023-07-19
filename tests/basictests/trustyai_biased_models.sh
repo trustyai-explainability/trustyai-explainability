@@ -38,6 +38,7 @@ function install_trustyai_operator(){
   oc apply -f ${RESOURCEDIR}/trustyai/trustyai_operator_configmap.yaml || eval "$FAILURE_HANDLING"
   oc apply -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get deployment trustyai-operator" "trustyai-operator" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc get pods | grep trustyai-service-operator" "2/2" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function deploy_model() {
@@ -93,7 +94,7 @@ function check_communication(){
 function send_data(){
     header "Sending some data for TrustyAI (this will take a minute or two)"
     oc project $MM_NAMESPACE
-    $RESOURCEDIR/utils/send_data_batch $RESOURCEDIR/data/loan_default/batch_01.json || eval "$FAILURE_HANDLING"
+    $RESOURCEDIR/utils/send_data_batch $RESOURCEDIR/data/loan_default_batched/batch_01.json || eval "$FAILURE_HANDLING"
 }
 
 
@@ -124,33 +125,35 @@ function schedule_and_check_request(){
   [ $FAILURE = false ] && REQUESTS_CREATED=true
 }
 
-function send_more_data(){
-    header "Sending some data for TrustyAI (this will take a minute or two)"
-    oc project $MM_NAMESPACE
-
-  LOOP_IDX=1
-  for batch in "$RESOURCEDIR"/data/loan_default/*.json
-  do
-      if [ "$batch" = "training_data.json" ]; then
-        :
-      elif [ "$batch" = "batch_01.json" ]; then
-        :
-      elif [ "$batch" = "dummy_data.json" ]; then
-         :
-      else
-        echo "===== Deployment Day $LOOP_IDX ====="
-        "$RESOURCEDIR"/utils/send_data_batch "$batch" || eval "$FAILURE_HANDLING"
-
-        for i in {1..5}
-        do
-          echo -ne "\rSleeping for rest of day...$((5 - $i))"
-          sleep 1
-        done
-        echo
-      fi
-      let "LOOP_IDX++"
-    done
-}
+# this function may be useful if we want to vary the metric values over the course of the test, so preserving just in case
+# ========
+#function send_more_data(){
+#    header "Sending some data for TrustyAI (this will take a minute or two)"
+#    oc project $MM_NAMESPACE
+#
+#  LOOP_IDX=1
+#  for batch in "$RESOURCEDIR"/data/loan_default_batched/*.json
+#  do
+#      if [ "$batch" = "training_data.json" ]; then
+#        :
+#      elif [ "$batch" = "batch_01.json" ]; then
+#        :
+#      elif [ "$batch" = "dummy_data.json" ]; then
+#         :
+#      else
+#        echo "===== Deployment Day $LOOP_IDX ====="
+#        "$RESOURCEDIR"/utils/send_data_batch "$batch" || eval "$FAILURE_HANDLING"
+#
+#        for i in {1..5}
+#        do
+#          echo -ne "\rSleeping for rest of day...$((5 - $i))"
+#          sleep 1
+#        done
+#        echo
+#      fi
+#      let "LOOP_IDX++"
+#    done
+#}
 
 
 function test_prometheus_scraping(){
@@ -200,7 +203,7 @@ function teardown_trustyai_test() {
   oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_operator_configmap.yaml"  || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml"  || eval "$FAILURE_HANDLING"
-  os::cmd::expect_success "oc delete deployment trustyai-service-operator-controller-manager"  || eval "$FAILURE_HANDLING"
+  oc delete deployment trustyai-service-operator-controller-manager  || echo "No trustyai operator deployment found"
 }
 
 if [ $TEARDOWN = false ]; then

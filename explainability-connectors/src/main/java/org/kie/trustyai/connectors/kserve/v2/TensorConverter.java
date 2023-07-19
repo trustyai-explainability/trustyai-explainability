@@ -172,12 +172,12 @@ public class TensorConverter {
     }
 
     public static List<PredictionInput> parseKserveModelInferRequest(ModelInferRequest data, Optional<List<String>> featureNames, boolean isBatch) {
-        final int count = data.getInputsCount();
+        final int count = Math.max(data.getInputsCount(), data.getRawInputContentsCount());
         boolean raw = data.getRawInputContentsCount() > 0;
 
         if (count == 1) { // The NP codec case
             final ModelInferRequest.InferInputTensor tensor = data.getInputs(0);
-            final List<Long> shape = tensor.getShapeList();
+            List<Long> shape = tensor.getShapeList();
             final int firstShape = shape.get(0).intValue();
 
             if (firstShape < 2) {
@@ -214,16 +214,25 @@ public class TensorConverter {
                 }
             } else {
                 // NP-batch
-                final int secondShape = shape.get(1).intValue();
                 final List<PredictionInput> predictionInputs = new ArrayList<>();
-
-                for (int batch = 0; batch < firstShape; batch++) {
-                    final List<Feature> features = new ArrayList<>();
-                    for (int featureIndex = 0; featureIndex < secondShape; featureIndex++) {
-                        String name = featureNames.isPresent() ? featureNames.get().get(featureIndex) : tensor.getName() + "-" + featureIndex;
-                        features.add(rawHandlerSingle(data, tensor, name, secondShape * batch + featureIndex, raw));
+                if (shape.size() == 1) {
+                    for (int batch = 0; batch < firstShape; batch++) {
+                        final List<Feature> features = new ArrayList<>();
+                        String name = featureNames.isPresent() ? featureNames.get().get(0) : tensor.getName();
+                        features.add(rawHandlerSingle(data, tensor, name, batch, raw));
+                        predictionInputs.add(new PredictionInput(features));
                     }
-                    predictionInputs.add(new PredictionInput(features));
+                } else {
+                    final int secondShape = shape.get(1).intValue();
+
+                    for (int batch = 0; batch < firstShape; batch++) {
+                        final List<Feature> features = new ArrayList<>();
+                        for (int featureIndex = 0; featureIndex < secondShape; featureIndex++) {
+                            String name = featureNames.isPresent() ? featureNames.get().get(featureIndex) : tensor.getName() + "-" + featureIndex;
+                            features.add(rawHandlerSingle(data, tensor, name, secondShape * batch + featureIndex, raw));
+                        }
+                        predictionInputs.add(new PredictionInput(features));
+                    }
                 }
                 logger.debug("Using NP codec (batch)");
 
@@ -309,7 +318,7 @@ public class TensorConverter {
     }
 
     public static List<PredictionOutput> parseKserveModelInferResponse(ModelInferResponse data, int enforcedFirstDimension, Optional<List<String>> featureNames, boolean isBatch) {
-        final int count = data.getOutputsCount();
+        final int count = Math.max(data.getOutputsCount(), data.getRawOutputContentsCount());
         boolean raw = data.getRawOutputContentsCount() > 0;
 
         if (count == 1) { // The NP codec case
@@ -347,18 +356,28 @@ public class TensorConverter {
                 }
             } else {
                 // NP-batch
-                final int secondShape = shape.get(1).intValue();
                 final List<PredictionOutput> predictionOutputs = new ArrayList<>();
+                if (shape.size() == 1) {
 
-                for (int batch = 0; batch < firstShape; batch++) {
-                    final List<Output> outputs = new ArrayList<>();
-                    for (int featureIndex = 0; featureIndex < secondShape; featureIndex++) {
-                        String name = featureNames.isPresent() ? featureNames.get().get(featureIndex) : tensor.getName() + "-" + featureIndex;
-                        outputs.add(rawHandlerSingle(data, tensor, name, secondShape * batch + featureIndex, raw));
+                    for (int batch = 0; batch < firstShape; batch++) {
+                        final List<Output> outputs = new ArrayList<>();
+                        String name = featureNames.isPresent() ? featureNames.get().get(0) : tensor.getName();
+                        outputs.add(rawHandlerSingle(data, tensor, name, batch, raw));
+                        predictionOutputs.add(new PredictionOutput(outputs));
                     }
-                    predictionOutputs.add(new PredictionOutput(outputs));
+                } else {
+                    logger.debug("Using NP codec (batch)");
+                    final int secondShape = shape.get(1).intValue();
+
+                    for (int batch = 0; batch < firstShape; batch++) {
+                        final List<Output> outputs = new ArrayList<>();
+                        for (int featureIndex = 0; featureIndex < secondShape; featureIndex++) {
+                            String name = featureNames.isPresent() ? featureNames.get().get(featureIndex) : tensor.getName() + "-" + featureIndex;
+                            outputs.add(rawHandlerSingle(data, tensor, name, secondShape * batch + featureIndex, raw));
+                        }
+                        predictionOutputs.add(new PredictionOutput(outputs));
+                    }
                 }
-                logger.debug("Using NP codec (batch)");
                 return predictionOutputs;
             }
 
@@ -416,7 +435,7 @@ public class TensorConverter {
             }
 
         } else {
-            throw new IllegalArgumentException("Data inputs count not supported: " + count);
+            throw new IllegalArgumentException("Data outputs count not supported: " + count);
         }
     }
 
