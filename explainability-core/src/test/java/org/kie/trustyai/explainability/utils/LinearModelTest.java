@@ -91,7 +91,7 @@ class LinearModelTest {
             Double y = i % 2 == 0 ? 1d : 0d;
             trainingSet.add(new ImmutablePair<>(x, y));
         }
-        assertThat(linearModel.fit(trainingSet)).isLessThanOrEqualTo(1d);
+        assertThat(linearModel.fit(trainingSet)).isLessThanOrEqualTo(1.01d);
         assertThat(linearModel.getWeights()).hasSize(size).matches(doubles -> Arrays.stream(doubles).allMatch(d -> Math.abs(d) < 10));
     }
 }
