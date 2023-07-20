@@ -4,28 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilerMatcher;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
         property = "@type",
-        defaultImpl = GroupMetricRequest.class
-)
+        defaultImpl = GroupMetricRequest.class)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = GroupMetricRequest.class, name = "GroupMetricRequest")
 })
 public class GroupMetricRequest extends BaseMetricRequest {
-
 
     // fields to be reconciled against dataset metadata
     private String protectedAttribute;

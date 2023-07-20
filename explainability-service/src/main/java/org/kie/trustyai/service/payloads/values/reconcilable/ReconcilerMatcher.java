@@ -5,7 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 
 // use this annotation to describe a metric request field that must align with a specific type in the service metadata

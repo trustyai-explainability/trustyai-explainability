@@ -14,7 +14,6 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
-import org.kie.trustyai.service.prometheus.PrometheusPublisher;
 
 @ApplicationScoped
 public class GroupMetricRequestValidator implements ConstraintValidator<ValidGroupMetricRequest, GroupMetricRequest> {
@@ -50,7 +49,7 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
             }
             // Outcome name guaranteed to exist
             final SchemaItem outcomeSchema = metadata.getOutputSchema().getItems().get(outcomeName);
-            LOG.info("trying to validate: "+request.getFavorableOutcome());
+            LOG.info("trying to validate: " + request.getFavorableOutcome());
             if (!PayloadConverter.checkValueType(outcomeSchema.getType(), request.getFavorableOutcome().getRawValueNode())) {
                 context.buildConstraintViolationWithTemplate(
                         "Invalid type for outcome. Got '" + request.getFavorableOutcome() + "', expected object compatible with '" + outcomeSchema.getType().toString() + "'").addConstraintViolation();

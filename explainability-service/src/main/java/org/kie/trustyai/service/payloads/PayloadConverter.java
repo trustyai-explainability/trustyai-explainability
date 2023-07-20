@@ -1,13 +1,11 @@
 package org.kie.trustyai.service.payloads;
 
-import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.payloads.values.TypedValue;
 
 import com.fasterxml.jackson.databind.node.ValueNode;
-import org.kie.trustyai.service.prometheus.PrometheusPublisher;
 
 import static org.kie.trustyai.service.payloads.values.DataType.*;
 

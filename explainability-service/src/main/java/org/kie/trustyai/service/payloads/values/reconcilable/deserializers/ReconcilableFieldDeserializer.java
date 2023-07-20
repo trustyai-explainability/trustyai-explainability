@@ -9,13 +9,13 @@ import org.kie.trustyai.service.payloads.values.TypedValue;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableField;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
+import org.kie.trustyai.service.prometheus.PrometheusPublisher;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ValueNode;
-import org.kie.trustyai.service.prometheus.PrometheusPublisher;
 
 // deserializers ReconcilableFields; is the inverse of the ReconcilableFieldSerializer
 public class ReconcilableFieldDeserializer extends StdDeserializer<ReconcilableField> {
@@ -25,7 +25,6 @@ public class ReconcilableFieldDeserializer extends StdDeserializer<ReconcilableF
 
     private static final Logger LOG = Logger.getLogger(PrometheusPublisher.class);
 
-
     public ReconcilableFieldDeserializer(Class<?> vc) {
         super(vc);
     }
@@ -33,10 +32,10 @@ public class ReconcilableFieldDeserializer extends StdDeserializer<ReconcilableF
     @Override
     public ReconcilableField deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode node = jp.getCodec().readTree(jp);
-        LOG.info("trying to deserialize: "+node);
+        LOG.info("trying to deserialize: " + node);
         ReconcilableField rf;
         JsonNode value = node.get("value");
-        LOG.info("deserialize value:"+ value);
+        LOG.info("deserialize value:" + value);
 
         if (node.get("category").asText().equals("feature")) {
             rf = new ReconcilableFeature((ValueNode) value);

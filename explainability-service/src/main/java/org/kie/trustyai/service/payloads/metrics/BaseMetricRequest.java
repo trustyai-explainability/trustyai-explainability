@@ -2,18 +2,18 @@ package org.kie.trustyai.service.payloads.metrics;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type")
-//@JsonSubTypes({
-//        @JsonSubTypes.Type(value = GroupMetricRequest.class, name = "GroupMetricRequest"),
-//        @JsonSubTypes.Type(value = IdentityMetricRequest.class, name = "IdentityMetricRequest")
-//})
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = GroupMetricRequest.class, name = "GroupMetricRequest"),
+        @JsonSubTypes.Type(value = IdentityMetricRequest.class, name = "IdentityMetricRequest")
+})
 @JsonTypeName("BaseMetricRequest")
 public abstract class BaseMetricRequest {
     private String modelId;

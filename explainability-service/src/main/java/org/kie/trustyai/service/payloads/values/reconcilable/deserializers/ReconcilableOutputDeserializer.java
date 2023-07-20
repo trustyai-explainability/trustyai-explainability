@@ -1,24 +1,23 @@
 package org.kie.trustyai.service.payloads.values.reconcilable.deserializers;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import org.jboss.logging.Logger;
+import org.kie.trustyai.service.payloads.values.DataType;
+import org.kie.trustyai.service.payloads.values.TypedValue;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ValueNode;
-import org.jboss.logging.Logger;
-import org.kie.trustyai.service.payloads.values.DataType;
-import org.kie.trustyai.service.payloads.values.TypedValue;
-import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
-import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
-import org.kie.trustyai.service.prometheus.PrometheusPublisher;
-import org.kie.trustyai.service.validators.metrics.fairness.group.GroupMetricRequestValidator;
-
-import java.io.IOException;
-import java.util.Optional;
 
 // deserializers ReconcilableFields; is the inverse of the ReconcilableFieldSerializer
 public class ReconcilableOutputDeserializer extends StdDeserializer<ReconcilableOutput> {
     private static final Logger LOG = Logger.getLogger(ReconcilableOutputDeserializer.class);
+
     public ReconcilableOutputDeserializer() {
         this(null);
     }
@@ -48,7 +47,7 @@ public class ReconcilableOutputDeserializer extends StdDeserializer<Reconcilable
         } else {
             rf = new ReconcilableOutput((ValueNode) node);
         }
-        LOG.info("Returning: "+rf.getRawValueNode());
+        LOG.info("Returning: " + rf.getRawValueNode());
         return rf;
     }
 }

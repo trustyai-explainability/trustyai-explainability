@@ -3,19 +3,18 @@ package org.kie.trustyai.service.payloads.metrics.identity;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
         property = "@type",
-        defaultImpl = IdentityMetricRequest.class
-)
+        defaultImpl = IdentityMetricRequest.class)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = IdentityMetricRequest.class, name = "IdentityMetricRequest")
 })

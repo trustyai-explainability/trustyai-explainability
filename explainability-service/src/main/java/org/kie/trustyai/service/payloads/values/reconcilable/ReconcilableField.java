@@ -3,9 +3,7 @@ package org.kie.trustyai.service.payloads.values.reconcilable;
 import java.util.Optional;
 
 import org.kie.trustyai.service.payloads.values.TypedValue;
-import org.kie.trustyai.service.payloads.values.reconcilable.serializers.ReconcilableFieldSerializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ValueNode;
 
 public abstract class ReconcilableField {
