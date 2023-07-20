@@ -43,6 +43,7 @@ class FairnessMetricsUtilsTest {
 
     private static Dataframe createUnbiasedNumericDataframe(int observations, int groups, int outcomes) {
         final Random random = new Random();
+        random.setSeed(0);
         final List<Prediction> predictions = new ArrayList<>();
         for (int i = 0; i < observations; i++) {
             final PredictionInput predictionInput = new PredictionInput(List.of(
@@ -58,6 +59,7 @@ class FairnessMetricsUtilsTest {
 
     private static Dataframe createBiasedNumericDataframe(int observations, int groups, int biasedAgainst, double probability) {
         final Random random = new Random();
+        random.setSeed(0);
         final List<Prediction> predictions = new ArrayList<>();
         for (int i = 0; i < observations; i++) {
             final int group = random.nextInt(groups);
@@ -229,7 +231,6 @@ class FairnessMetricsUtilsTest {
         Predicate<PredictionInput> inputSelector = predictionInput -> predictionInput.getFeatures().get(2).getValue().asString().equals("M");
         Predicate<PredictionOutput> outputSelector = predictionOutput -> (boolean) predictionOutput.getOutputs().get(0).getValue().getUnderlyingObject();
         double aod = GroupAverageOddsDifference.calculate(inputSelector, outputSelector, dataset, model);
-        System.out.println(aod);
         assertThat(aod).isBetween(-0.3, -0.1);
     }
 
@@ -257,7 +258,6 @@ class FairnessMetricsUtilsTest {
         final List<PredictionOutput> predictedOutputs = model.predictAsync(inputs).get();
         final Dataframe truth = Dataframe.createFrom(inputs, predictedOutputs);
         double aod = GroupAverageOddsDifference.calculate(test, truth, List.of(2), List.of(new Value("M")), List.of(new Value(true)));
-        System.out.println(aod);
         assertThat(aod).isBetween(-0.3, -0.1);
     }
 
@@ -285,7 +285,6 @@ class FairnessMetricsUtilsTest {
         final List<PredictionOutput> predictedOutputs = model.predictAsync(inputs).get();
         final Dataframe truth = Dataframe.createFrom(inputs, predictedOutputs);
         double aod = GroupAveragePredictiveValueDifference.calculate(test, truth, List.of(2), List.of(new Value("M")), List.of(new Value(true)));
-        System.out.println(aod);
         assertThat(aod).isBetween(-0.15, 0.15);
     }
 
@@ -440,7 +439,6 @@ class FairnessMetricsUtilsTest {
             final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(group));
             final Dataframe unprivileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
             final double dir = DisparateImpactRatio.calculate(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(1), 1.0)));
-            System.out.println(dir);
             assertTrue(dir < 1.0 + epsilon);
             assertTrue(dir > 1.0 - epsilon);
         }
@@ -448,7 +446,6 @@ class FairnessMetricsUtilsTest {
             final Dataframe privileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(1));
             final Dataframe unprivileged = unbiased.filterByColumnValue(3, value -> value.getUnderlyingObject().equals(0));
             final double dir = DisparateImpactRatio.calculate(privileged, unprivileged, List.of(new Output("outcome", Type.NUMBER, new Value(i), 1.0)));
-            System.out.println(dir);
             assertTrue(dir < 1.0 + epsilon);
             assertTrue(dir > 1.0 - epsilon);
         }
