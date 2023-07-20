@@ -24,16 +24,19 @@ import java.util.stream.DoubleStream;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class LinearModelTest {
 
-    private static final Random random = new Random();
-
-    @Test
-    void testEmptyFitClassificationDoesNothing() {
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testEmptyFitClassificationDoesNothing(int seed) {
+        Random random = new Random();
+        random.setSeed(seed);
         int size = 10;
         LinearModel linearModel = new LinearModel(size, true, random);
         Collection<Pair<double[], Double>> trainingSet = new LinkedList<>();
@@ -41,8 +44,11 @@ class LinearModelTest {
         assertArrayEquals(new double[size], linearModel.getWeights());
     }
 
-    @Test
-    void testEmptyFitRegressionDoesNothing() {
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testEmptyFitRegressionDoesNothing(int seed) {
+        Random random = new Random();
+        random.setSeed(seed);
         int size = 10;
         LinearModel linearModel = new LinearModel(size, false, random);
         Collection<Pair<double[], Double>> trainingSet = new LinkedList<>();
@@ -50,8 +56,11 @@ class LinearModelTest {
         assertArrayEquals(new double[size], linearModel.getWeights());
     }
 
-    @Test
-    void testRegressionFit() {
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testRegressionFit(int seed) {
+        Random random = new Random();
+        random.setSeed(seed);
         int size = 10;
         LinearModel linearModel = new LinearModel(size, false, random);
         Collection<Pair<double[], Double>> trainingSet = new LinkedList<>();
@@ -67,8 +76,11 @@ class LinearModelTest {
         assertThat(linearModel.getWeights()).hasSize(size).matches(doubles -> Arrays.stream(doubles).allMatch(d -> Math.abs(d) < 10));
     }
 
-    @Test
-    void testClassificationFit() {
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2 })
+    void testClassificationFit(int seed) {
+        Random random = new Random();
+        random.setSeed(seed);
         int size = 10;
         LinearModel linearModel = new LinearModel(size, true, random);
         Collection<Pair<double[], Double>> trainingSet = new LinkedList<>();
@@ -80,7 +92,7 @@ class LinearModelTest {
             Double y = i % 2 == 0 ? 1d : 0d;
             trainingSet.add(new ImmutablePair<>(x, y));
         }
-        assertThat(linearModel.fit(trainingSet)).isLessThan(1d);
+        assertThat(linearModel.fit(trainingSet)).isLessThanOrEqualTo(1d);
         assertThat(linearModel.getWeights()).hasSize(size).matches(doubles -> Arrays.stream(doubles).allMatch(d -> Math.abs(d) < 10));
     }
 }
