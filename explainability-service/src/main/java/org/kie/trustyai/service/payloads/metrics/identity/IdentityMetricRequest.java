@@ -5,11 +5,9 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 @JsonTypeInfo(
@@ -23,8 +21,8 @@ import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricReque
 })
 public class IdentityMetricRequest extends BaseMetricRequest {
     private String columnName;
-    private double lowerThresh;
-    private double upperThresh;
+    private double lowerThreshold;
+    private double upperThreshold;
 
     public IdentityMetricRequest() {
         // Public default no-argument constructor
@@ -39,20 +37,20 @@ public class IdentityMetricRequest extends BaseMetricRequest {
         this.columnName = columnName;
     }
 
-    public double getLowerThresh() {
-        return lowerThresh;
+    public double getLowerThreshold() {
+        return lowerThreshold;
     }
 
-    public void setLowerThresh(double lowerThresh) {
-        this.lowerThresh = lowerThresh;
+    public void setLowerThreshold(double lowerThreshold) {
+        this.lowerThreshold = lowerThreshold;
     }
 
-    public double getUpperThresh() {
-        return upperThresh;
+    public double getUpperThreshold() {
+        return upperThreshold;
     }
 
-    public void setUpperThresh(double upperThresh) {
-        this.upperThresh = upperThresh;
+    public void setUpperThreshold(double upperThreshold) {
+        this.upperThreshold = upperThreshold;
     }
 
     @Override

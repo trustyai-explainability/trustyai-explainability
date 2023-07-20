@@ -107,8 +107,8 @@ class IdentityEndpointTest {
 
         // with large threshold, the DIR is inside bounds
         IdentityMetricRequest payload = RequestPayloadGenerator.correctIdentityInput();
-        payload.setLowerThresh(-100.);
-        payload.setUpperThresh(100.);
+        payload.setLowerThreshold(-100.);
+        payload.setUpperThreshold(100.);
         BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -124,8 +124,8 @@ class IdentityEndpointTest {
 
         // with inverted thresholds, the DIR is guaranteed outside bounds
         payload = RequestPayloadGenerator.correctIdentityInput();
-        payload.setLowerThresh(100.);
-        payload.setUpperThresh(-100.);
+        payload.setLowerThreshold(100.);
+        payload.setUpperThreshold(-100.);
         response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -440,8 +440,8 @@ class IdentityEndpointTest {
         // Perform multiple schedule requests
         for (Double thresh : threshs) {
             final IdentityMetricRequest payload = RequestPayloadGenerator.correctIdentityInput();
-            payload.setLowerThresh(thresh);
-            payload.setUpperThresh(thresh * 10);
+            payload.setLowerThreshold(thresh);
+            payload.setUpperThreshold(thresh * 10);
             BaseScheduledResponse scheduledResponse = given()
                     .contentType(ContentType.JSON)
                     .body(payload)
@@ -462,8 +462,8 @@ class IdentityEndpointTest {
         // check that names are as expected
         for (int i = 0; i < scheduleList.requests.size(); i++) {
             UUID returnedID = scheduleList.requests.get(i).id;
-            assertEquals(threshIDs.get(returnedID), ((IdentityMetricRequest) scheduleList.requests.get(i).request).getLowerThresh());
-            assertEquals(threshIDs.get(returnedID) * 10, ((IdentityMetricRequest) scheduleList.requests.get(i).request).getUpperThresh());
+            assertEquals(threshIDs.get(returnedID), ((IdentityMetricRequest) scheduleList.requests.get(i).request).getLowerThreshold());
+            assertEquals(threshIDs.get(returnedID) * 10, ((IdentityMetricRequest) scheduleList.requests.get(i).request).getUpperThreshold());
 
             // delete the corresponding request
             final ScheduleId thisRequestId = new ScheduleId();

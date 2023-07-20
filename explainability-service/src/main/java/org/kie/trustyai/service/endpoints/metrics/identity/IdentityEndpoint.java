@@ -82,7 +82,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
         }
         final String metricDefinition = this.getSpecificDefinitionFunction(request);
 
-        MetricThreshold thresholds = thresholdFunction(request.getLowerThresh(), request.getUpperThresh(), metricValue);
+        MetricThreshold thresholds = thresholdFunction(request.getLowerThreshold(), request.getUpperThreshold(), metricValue);
         final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue, metricDefinition, thresholds, super.getMetricName());
         return Response.ok(dirObj).build();
     }
