@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,11 @@ class UniversalListingEndpointTest {
         final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+    }
+
+    @AfterEach
+    void clean() {
+        scheduler.get().getAllRequests().clear();
     }
 
     @DisplayName("Check multi-metrics requests are returned")

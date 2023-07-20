@@ -1,8 +1,6 @@
 # Metrics Onboarding Guide
-
-## New Metric Category
-To add a new metric category (i.e., adding a metric that does not exist in the current metric taxonomy), follow
-these steps
+To add a new metric/metriccategory (i.e., adding a metric that does not exist in the current metric taxonomy), follow
+these steps. See the `fairness/group` and `identity` metric packages for examples. 
 
 #### 1: Metric Request Payloads
 * Create a package `payloads/metrics/{$taxonomy/path}`.
@@ -11,6 +9,7 @@ This will contain the request payload super+subclass(es) for metrics within the 
 receive the necessary information to correctly process the metric requests. 
 
 * Create a general/abstract class for all metric requests of the new category: `payloads/metrics/{$taxonomy/path}/$GENERIC_TAXONOMY_REQUEST.java`
+* Add this generic class to the `@JsonSubTypes` annotation of `BaseMetricRequest`.
 * Create extending/implementing classes for individual metrics within the category, if needed:
   * `payloads/metrics/{$taxonomy/path}/$TAXONOMY_METRIC_1_REQUEST.java` extends/implements `$GENERIC_TAXONOMY_REQUEST`
   * `payloads/metrics/{$taxonomy/path}/$TAXONOMY_METRIC_2_REQUEST.java` extends/implements `$GENERIC_TAXONOMY_REQUEST`
@@ -43,7 +42,6 @@ public String getProtectedAttributeName() {
 }
 ```
 therefore providing every `ReconcilableFeature/Output` with a corresponding source of dataframe column names. 
-
 
 #### 2: Endpoints
 * Create a package `endpoints/metrics/{$taxonomy/path}`

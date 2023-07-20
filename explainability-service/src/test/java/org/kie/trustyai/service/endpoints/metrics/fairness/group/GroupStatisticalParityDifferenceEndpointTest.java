@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.endpoints.metrics.fairness.group.GroupStatisticalParityDifferenceEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
@@ -61,7 +60,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
     @AfterEach
     void clearRequests() {
         // prevent a failing test from failing other tests erroneously
-        scheduler.get().getAllRequestsFlat().clear();
+        scheduler.get().getAllRequests().clear();
     }
 
     @Test

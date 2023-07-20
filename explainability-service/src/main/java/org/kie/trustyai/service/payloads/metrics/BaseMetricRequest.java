@@ -3,13 +3,15 @@ package org.kie.trustyai.service.payloads.metrics;
 import java.util.Map;
 
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = GroupMetricRequest.class, name = "GroupMetricRequest")
+        @JsonSubTypes.Type(value = GroupMetricRequest.class, name = "GroupMetricRequest"),
+        @JsonSubTypes.Type(value = IdentityMetricRequest.class, name = "IdentityMetricRequest")
 })
 public abstract class BaseMetricRequest {
     private String modelId;

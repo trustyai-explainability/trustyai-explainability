@@ -1,10 +1,11 @@
 package org.kie.trustyai.service.payloads.metrics.identity;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 public class IdentityMetricRequest extends BaseMetricRequest {

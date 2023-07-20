@@ -1,6 +1,10 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group.legacy;
 
-import io.quarkus.cache.CacheResult;
+import java.util.List;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.Path;
+
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
@@ -16,9 +20,7 @@ import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Path;
-import java.util.List;
+import io.quarkus.cache.CacheResult;
 
 @ApplicationScoped
 @Tag(name = "Statistical Parity Difference Endpoint (Legacy)", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +

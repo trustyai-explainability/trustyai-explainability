@@ -62,7 +62,6 @@ public class RequestReconciler {
                 ReconcilableOutput fieldValue;
                 try {
                     fieldValue = (ReconcilableOutput) f.get(request);
-                    System.out.println(f.toString() + ": " + fieldValue + fieldValue.getClass());
                     if (fieldValue.getReconciledType().isPresent()) {
                         continue;
                     }

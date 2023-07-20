@@ -1,17 +1,16 @@
 package org.kie.trustyai.service.validators.metrics.identity;
 
-import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.data.metadata.Metadata;
-import org.kie.trustyai.service.payloads.PayloadConverter;
-import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
-import org.kie.trustyai.service.payloads.service.SchemaItem;
+import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.util.Objects;
+
+import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 
 @ApplicationScoped
 public class IdentityMetricRequestValidator implements ConstraintValidator<ValidIdentityMetricRequest, IdentityMetricRequest> {

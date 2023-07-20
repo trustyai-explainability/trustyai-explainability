@@ -1,10 +1,14 @@
 package org.kie.trustyai.service.endpoints.metrics.identity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,24 +17,21 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.endpoints.metrics.fairness.group.DisparateImpactRatioEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
@@ -67,7 +68,7 @@ class IdentityEndpointTest {
 
     @AfterEach
     void clearRequests() {
-        scheduler.get().getAllRequestsFlat().clear();
+        scheduler.get().getAllRequests().clear();
     }
 
     @Test
@@ -84,14 +85,6 @@ class IdentityEndpointTest {
 
         final IdentityMetricRequest payload = RequestPayloadGenerator.correctIdentityInput();
 
-        System.out.println(given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post()
-                .then()
-                .extract()
-                .body().asString());
-
         final BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -103,6 +96,8 @@ class IdentityEndpointTest {
 
         assertEquals("metric", response.getType());
         assertEquals("IDENTITY", response.getName());
+        // check gender mean is between 0 and 1 (should be close to 0.5)
+        assertTrue(0 < response.getValue() && response.getValue() < 1);
         assertFalse(Double.isNaN(response.getValue()));
     }
 
@@ -127,10 +122,10 @@ class IdentityEndpointTest {
         assertEquals("IDENTITY", response.getName());
         assertFalse(response.getThresholds().outsideBounds);
 
-        // with negative threshold, the DIR is guaranteed outside bounds
+        // with inverted thresholds, the DIR is guaranteed outside bounds
         payload = RequestPayloadGenerator.correctIdentityInput();
-        payload.setLowerThresh(-100.);
-        payload.setUpperThresh(100.);
+        payload.setLowerThresh(100.);
+        payload.setUpperThresh(-100.);
         response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -158,9 +153,8 @@ class IdentityEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("Got '\\\"male\\\"', expected object compatible with 'INT32'"));
+                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST"));
     }
-
 
     @Test
     void postUnknownType() throws JsonProcessingException {
@@ -191,7 +185,7 @@ class IdentityEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        final IdentityMetricRequest payload = RequestPayloadGenerator.correctIdentityInput();
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -273,7 +267,7 @@ class IdentityEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        final IdentityMetricRequest payload = RequestPayloadGenerator.correctIdentityInput();
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -284,14 +278,14 @@ class IdentityEndpointTest {
 
         assertNotNull(firstRequest.getRequestId());
 
-        final GroupMetricRequest wrongPayload = RequestPayloadGenerator.incorrectType();
+        final IdentityMetricRequest wrongPayload = RequestPayloadGenerator.incorrectIdentityInput();
         given()
                 .contentType(ContentType.JSON)
                 .body(wrongPayload)
                 .when()
                 .post("/request")
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("Got '\\\"male\\\"', expected object compatible with 'INT32'"));
+                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST"));
 
         ScheduleList scheduleList = given()
                 .when()
@@ -318,7 +312,7 @@ class IdentityEndpointTest {
     }
 
     @Test
-    void requestUnknowType() {
+    void requestUnknownType() {
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
@@ -329,7 +323,7 @@ class IdentityEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        final IdentityMetricRequest payload = RequestPayloadGenerator.correctIdentityInput();
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -385,7 +379,8 @@ class IdentityEndpointTest {
 
         // Perform multiple schedule requests
         for (String name : names) {
-            final GroupMetricRequest payload = RequestPayloadGenerator.named(name);
+            IdentityMetricRequest payload = RequestPayloadGenerator.correctIdentityInput();
+            payload.setRequestName(name);
             BaseScheduledResponse scheduledResponse = given()
                     .contentType(ContentType.JSON)
                     .body(payload)
@@ -444,8 +439,9 @@ class IdentityEndpointTest {
 
         // Perform multiple schedule requests
         for (Double thresh : threshs) {
-            final GroupMetricRequest payload = RequestPayloadGenerator.correct();
-            payload.setThresholdDelta(thresh);
+            final IdentityMetricRequest payload = RequestPayloadGenerator.correctIdentityInput();
+            payload.setLowerThresh(thresh);
+            payload.setUpperThresh(thresh * 10);
             BaseScheduledResponse scheduledResponse = given()
                     .contentType(ContentType.JSON)
                     .body(payload)
@@ -466,7 +462,8 @@ class IdentityEndpointTest {
         // check that names are as expected
         for (int i = 0; i < scheduleList.requests.size(); i++) {
             UUID returnedID = scheduleList.requests.get(i).id;
-            assertEquals(threshIDs.get(returnedID), ((GroupMetricRequest) scheduleList.requests.get(i).request).getThresholdDelta());
+            assertEquals(threshIDs.get(returnedID), ((IdentityMetricRequest) scheduleList.requests.get(i).request).getLowerThresh());
+            assertEquals(threshIDs.get(returnedID) * 10, ((IdentityMetricRequest) scheduleList.requests.get(i).request).getUpperThresh());
 
             // delete the corresponding request
             final ScheduleId thisRequestId = new ScheduleId();

@@ -1,6 +1,16 @@
 package org.kie.trustyai.service.endpoints.metrics.identity;
 
-import io.quarkus.cache.CacheResult;
+import java.util.List;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
@@ -15,15 +25,7 @@ import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 import org.kie.trustyai.service.validators.metrics.identity.ValidIdentityMetricRequest;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.List;
+import io.quarkus.cache.CacheResult;
 
 @ApplicationScoped
 @Tag(name = "Identity Endpoint", description = "The identity endpoint simply returns a mean of a model's last N feature or output values. This is useful" +
@@ -34,7 +36,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
         super("IDENTITY");
     }
 
-    public MetricThreshold thresholdFunction(Number lowerBound, Number upperBound, Number metricValue){
+    public MetricThreshold thresholdFunction(Number lowerBound, Number upperBound, Number metricValue) {
         return new MetricThreshold(lowerBound.doubleValue(), upperBound.doubleValue(), metricValue.doubleValue());
     }
 
@@ -44,15 +46,14 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
         return vs.stream().mapToDouble(Value::asNumber).sum() / ((double) vs.size());
     }
 
-    public String getGeneralDefinition(){
+    public String getGeneralDefinition() {
         return "This metric simply returns a mean of a model's last N feature or output values.";
     }
 
-    public String getSpecificDefinitionFunction(IdentityMetricRequest request){
+    public String getSpecificDefinitionFunction(IdentityMetricRequest request) {
         return String.format("This metric simply returns a mean of the last N values of %s from inference data of model=%s.",
                 request.getColumnName(),
-                request.getModelId()
-        );
+                request.getModelId());
     }
 
     @POST
