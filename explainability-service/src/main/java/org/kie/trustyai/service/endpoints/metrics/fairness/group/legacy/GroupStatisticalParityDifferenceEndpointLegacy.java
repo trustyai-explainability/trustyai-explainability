@@ -1,50 +1,49 @@
-package org.kie.trustyai.service.endpoints.metrics.fairness.group;
+package org.kie.trustyai.service.endpoints.metrics.fairness.group.legacy;
 
-import java.util.List;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Path;
-
+import io.quarkus.cache.CacheResult;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.metrics.fairness.FairnessDefinitions;
-import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
+import org.kie.trustyai.metrics.fairness.group.GroupStatisticalParityDifference;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
+import org.kie.trustyai.service.endpoints.metrics.fairness.group.GroupEndpoint;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
-import io.quarkus.cache.CacheResult;
+import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.Path;
+import java.util.List;
 
 @ApplicationScoped
-@Tag(name = "Disparate Impact Ratio Endpoint", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
-        "classifications by calculating the ratio between the proportion of the majority and protected classes getting" +
-        " a particular outcome.")
-@Path("/metrics/group/fairness/dir")
-public class DisparateImpactRatioEndpoint extends GroupEndpoint {
+@Tag(name = "Statistical Parity Difference Endpoint (Legacy)", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
+        "difference between the proportion of the majority and protected classes getting a particular outcome. This endpoint will be moving to /metrics/group/fairness/spd in a later release.")
+@Path("/metrics/spd")
+@Deprecated(forRemoval = true)
+public class GroupStatisticalParityDifferenceEndpointLegacy extends GroupEndpoint {
     @Override
     public MetricThreshold thresholdFunction(Number delta, Number metricValue) {
         if (delta == null) {
             return new MetricThreshold(
-                    metricsConfig.dir().thresholdLower(),
-                    metricsConfig.dir().thresholdUpper(),
+                    metricsConfig.spd().thresholdLower(),
+                    metricsConfig.spd().thresholdUpper(),
                     metricValue.doubleValue());
         } else {
             return new MetricThreshold(
-                    1 - delta.doubleValue(),
-                    1 + delta.doubleValue(),
+                    0 - delta.doubleValue(),
+                    delta.doubleValue(),
                     metricValue.doubleValue());
         }
     }
 
     @Override
     public String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, Number metricValue) {
-        return FairnessDefinitions.defineGroupDisparateImpactRatio(
+        return FairnessDefinitions.defineGroupStatisticalParityDifference(
                 protectedAttribute,
                 privileged,
                 unprivileged,
@@ -69,7 +68,7 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
                     value -> value.equals(unprivilegedAttr));
             final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome().getReconciledType().get());
             final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getReconciledType().get().getType());
-            return DisparateImpactRatio.calculate(privileged, unprivileged,
+            return GroupStatisticalParityDifference.calculate(privileged, unprivileged,
                     List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
         } catch (Exception e) {
             throw new MetricCalculationException(e.getMessage(), e);
@@ -81,7 +80,8 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
         return FairnessDefinitions.defineGroupStatisticalParityDifference();
     }
 
-    public DisparateImpactRatioEndpoint() {
-        super("DIR");
+    public GroupStatisticalParityDifferenceEndpointLegacy() {
+        super("SPD");
     }
+
 }

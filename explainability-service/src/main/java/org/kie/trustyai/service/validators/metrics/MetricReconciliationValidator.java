@@ -1,18 +1,15 @@
 package org.kie.trustyai.service.validators.metrics;
 
-import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
-import org.kie.trustyai.service.payloads.values.ReconcilableFeature;
-import org.kie.trustyai.service.payloads.values.ReconcilableOutput;
-import org.kie.trustyai.service.payloads.values.ReconcilerMatcher;
+import java.lang.reflect.Field;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.lang.reflect.Field;
+
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilerMatcher;
 
 @ApplicationScoped
 public class MetricReconciliationValidator implements ConstraintValidator<ValidReconciledMetricRequest, BaseMetricRequest> {
@@ -28,19 +25,19 @@ public class MetricReconciliationValidator implements ConstraintValidator<ValidR
             if (f.getType().isAssignableFrom(ReconcilableFeature.class) && f.isAnnotationPresent(ReconcilerMatcher.class)) {
                 try {
                     ReconcilableFeature fieldValue = (ReconcilableFeature) f.get(request);
-                    if (fieldValue.getTypeToReconcile().isEmpty()) {
+                    if (fieldValue.getReconciledType().isEmpty()) {
                         return false;
                     }
-                } catch (IllegalAccessException e){
+                } catch (IllegalAccessException e) {
                     return false;
                 }
             } else if (f.getType().isAssignableFrom(ReconcilableOutput.class) && f.isAnnotationPresent(ReconcilerMatcher.class)) {
                 try {
                     ReconcilableOutput fieldValue = (ReconcilableOutput) f.get(request);
-                    if (fieldValue.getTypeToReconcile().isEmpty()) {
+                    if (fieldValue.getReconciledType().isEmpty()) {
                         return false;
                     }
-                } catch (IllegalAccessException e){
+                } catch (IllegalAccessException e) {
                     return false;
                 }
             }

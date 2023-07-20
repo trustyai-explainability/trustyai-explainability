@@ -15,11 +15,12 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
+import org.kie.trustyai.service.endpoints.metrics.MetricsDirectory;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 
 import io.quarkus.scheduler.Scheduled;
-import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.MetricReconciler;
-import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
 
 @Singleton
 public class PrometheusScheduler {
@@ -34,18 +35,30 @@ public class PrometheusScheduler {
     @Inject
     ServiceConfig serviceConfig;
 
-    public Map<UUID, BaseMetricRequest> getRequests(String metricName) {
-        return this.requests.get(metricName);
+    private final MetricsDirectory metricsDirectory = new MetricsDirectory();
+
+    public MetricsDirectory getMetricsDirectory() {
+        return metricsDirectory;
     }
 
+    public Map<UUID, BaseMetricRequest> getRequests(String metricName) {
+        if (requests.containsKey(metricName)) {
+            return this.requests.get(metricName);
+        } else {
+            return new ConcurrentHashMap<>();
+        }
+    }
 
-    public Map<UUID, BaseMetricRequest> getAllRequests() {
-        // extend this with other metrics when more are added=
+    public Map<UUID, BaseMetricRequest> getAllRequestsFlat() {
         ConcurrentHashMap<UUID, BaseMetricRequest> result = new ConcurrentHashMap<>();
-        for (Map.Entry<String, ConcurrentHashMap<UUID, BaseMetricRequest>> metricDict : requests.entrySet()){
+        for (Map.Entry<String, ConcurrentHashMap<UUID, BaseMetricRequest>> metricDict : requests.entrySet()) {
             result.putAll(metricDict.getValue());
         }
         return result;
+    }
+
+    public ConcurrentHashMap<String, ConcurrentHashMap<UUID, BaseMetricRequest>> getAllRequests() {
+        return requests;
     }
 
     @Scheduled(every = "{service.metrics-schedule}")
@@ -58,7 +71,7 @@ public class PrometheusScheduler {
 
                     final Predicate<Map.Entry<UUID, BaseMetricRequest>> filterByModelId = request -> request.getValue().getModelId().equals(modelId);
 
-                    Set<Map.Entry<UUID, BaseMetricRequest>> requestsSet = getAllRequests().entrySet();
+                    Set<Map.Entry<UUID, BaseMetricRequest>> requestsSet = getAllRequestsFlat().entrySet();
 
                     // Determine maximum batch requested. All other batches as sub-batches of this one.
                     final int maxBatchSize = requestsSet.stream()
@@ -68,9 +81,11 @@ public class PrometheusScheduler {
                     final Dataframe df = dataSource.get().getDataframe(modelId, maxBatchSize);
 
                     requestsSet.forEach(entry -> {
+                        // entry value: BaseMetricRequest
                         final Dataframe batch = df.tail(Math.min(df.getRowDimension(), entry.getValue().getBatchSize()));
-                        final double spd = entry.getValue().calculate(batch, entry.getValue());
-                        publisher.gauge(entry.getValue(), modelId, entry.getKey(), spd);
+                        String metricName = entry.getValue().getMetricName();
+                        final double value = metricsDirectory.getCalculator(metricName).apply(batch, (GroupMetricRequest) entry.getValue());
+                        publisher.gauge(entry.getValue(), modelId, entry.getKey(), value);
                     });
                 }
             } catch (DataframeCreateException e) {
@@ -84,13 +99,12 @@ public class PrometheusScheduler {
     }
 
     public void register(String metricName, UUID id, BaseMetricRequest request) {
-        if (!requests.containsKey(metricName)){
+        if (!requests.containsKey(metricName)) {
             requests.put(metricName, new ConcurrentHashMap<>());
         }
         RequestReconciler.reconcile(request, dataSource);
         requests.get(metricName).put(id, request);
     }
-
 
     public boolean hasRequests() {
         return !requests.isEmpty();
@@ -102,7 +116,7 @@ public class PrometheusScheduler {
      * @return Unique models ids
      */
     public Set<String> getModelIds() {
-        return Stream.of(getAllRequests().values())
+        return Stream.of(getAllRequestsFlat().values())
                 .flatMap(Collection::stream)
                 .map(BaseMetricRequest::getModelId)
                 .collect(Collectors.toSet());

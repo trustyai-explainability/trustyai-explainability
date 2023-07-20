@@ -66,8 +66,8 @@ class ServiceMetadataEndpointTest {
                 });
 
         assertEquals(1, serviceMetadata.size());
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.dir);
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.spd);
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
         assertEquals(2, serviceMetadata.get(0).getData().getObservations());
         assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
@@ -97,8 +97,8 @@ class ServiceMetadataEndpointTest {
                 });
 
         assertEquals(1, serviceMetadata.size());
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.dir);
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.spd);
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
         assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
 
         // check column values
@@ -123,8 +123,8 @@ class ServiceMetadataEndpointTest {
                 });
 
         assertEquals(1, serviceMetadata.size());
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.dir);
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.spd);
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
         assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
 
         // check column values

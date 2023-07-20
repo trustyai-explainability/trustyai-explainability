@@ -1,46 +1,54 @@
-package org.kie.trustyai.service.endpoints.metrics;
+package org.kie.trustyai.service.endpoints.metrics.identity;
 
-import java.util.Map;
-
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.http.ContentType;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.endpoints.metrics.fairness.group.GroupStatisticalParityDifferenceEndpoint;
+import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
+import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
+import org.kie.trustyai.service.endpoints.metrics.fairness.group.DisparateImpactRatioEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.dir.DisparateImpactRatioResponseGroup;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.spd.GroupStatisticalParityDifferenceResponseGroup;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.http.ContentType;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestProfile(MetricsEndpointTestProfile.class)
-@TestHTTPEndpoint(GroupStatisticalParityDifferenceEndpoint.class)
-class GroupStatisticalParityDifferenceEndpointTest {
+@TestHTTPEndpoint(IdentityEndpoint.class)
+class IdentityEndpointTest {
 
     private static final String MODEL_ID = "example1";
+    private static final int N_SAMPLES = 100;
     @Inject
     Instance<MockDatasource> datasource;
     @Inject
@@ -52,67 +60,77 @@ class GroupStatisticalParityDifferenceEndpointTest {
     @BeforeEach
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }
 
     @AfterEach
     void clearRequests() {
-        // prevent a failing test from failing other tests erroneously
-        scheduler.get().getDirRequests().clear();
-        scheduler.get().getSpdRequests().clear();
+        scheduler.get().getAllRequestsFlat().clear();
     }
 
     @Test
     void get() {
         when().get()
                 .then()
-                .statusCode(405)
+                .statusCode(Response.Status.METHOD_NOT_ALLOWED.getStatusCode())
                 .body(is(""));
     }
 
     @Test
-    void postCorrect() {
-        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+    void postCorrect() throws JsonProcessingException {
+        datasource.get().reset();
 
-        final GroupStatisticalParityDifferenceResponseGroup response = given()
+        final IdentityMetricRequest payload = RequestPayloadGenerator.correctIdentityInput();
+
+        System.out.println(given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
-                .statusCode(200)
                 .extract()
-                .body().as(GroupStatisticalParityDifferenceResponseGroup.class);
+                .body().asString());
 
-        assertEquals("metric", response.getType());
-        assertEquals("SPD", response.getName());
-        assertFalse(Double.isNaN(response.getValue()));
-    }
-
-    @Test
-    void postThresh() throws JsonProcessingException {
-        datasource.get();
-
-        // with large threshold, the DIR is inside bounds
-        GroupMetricRequest payload = RequestPayloadGenerator.correct();
-        payload.setThresholdDelta(.5);
-        DisparateImpactRatioResponseGroup response = given()
+        final BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(DisparateImpactRatioResponseGroup.class);
+                .body().as(BaseMetricResponse.class);
 
         assertEquals("metric", response.getType());
-        assertEquals("SPD", response.getName());
+        assertEquals("IDENTITY", response.getName());
+        assertFalse(Double.isNaN(response.getValue()));
+    }
+
+    @Test
+    void postThresh() throws JsonProcessingException {
+        datasource.get().reset();
+
+        // with large threshold, the DIR is inside bounds
+        IdentityMetricRequest payload = RequestPayloadGenerator.correctIdentityInput();
+        payload.setLowerThresh(-100.);
+        payload.setUpperThresh(100.);
+        BaseMetricResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("IDENTITY", response.getName());
         assertFalse(response.getThresholds().outsideBounds);
 
-        // with negative threshold, every SPD is outside bounds
-        payload = RequestPayloadGenerator.correct();
-        payload.setThresholdDelta(-1.);
+        // with negative threshold, the DIR is guaranteed outside bounds
+        payload = RequestPayloadGenerator.correctIdentityInput();
+        payload.setLowerThresh(-100.);
+        payload.setUpperThresh(100.);
         response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
@@ -120,17 +138,19 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(DisparateImpactRatioResponseGroup.class);
+                .body().as(BaseMetricResponse.class);
 
         assertEquals("metric", response.getType());
-        assertEquals("SPD", response.getName());
+        assertEquals("IDENTITY", response.getName());
         assertTrue(response.getThresholds().outsideBounds);
     }
 
     @Test
-    @DisplayName("SPD request with incorrect type")
-    void postIncorrectType() {
-        final GroupMetricRequest payload = RequestPayloadGenerator.incorrectType();
+    @DisplayName("IDENTITY request incorrectly typed")
+    void postIncorrectType() throws JsonProcessingException {
+        datasource.get().reset();
+
+        final IdentityMetricRequest payload = RequestPayloadGenerator.incorrectIdentityInput();
 
         given()
                 .contentType(ContentType.JSON)
@@ -141,23 +161,11 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .body(containsString("Got '\\\"male\\\"', expected object compatible with 'INT32'"));
     }
 
-    @Test
-    @DisplayName("SPD request with incorrect input")
-    void postIncorrectInput() {
-        final GroupMetricRequest payload = RequestPayloadGenerator.incorrectInput();
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post()
-                .then()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .body(containsString("No protected attribute found with name=city"));
-
-    }
 
     @Test
-    void postUnknownType() {
+    void postUnknownType() throws JsonProcessingException {
+        datasource.get().reset();
+
         final Map<String, Object> payload = RequestPayloadGenerator.unknownType();
 
         given()
@@ -171,13 +179,14 @@ class GroupStatisticalParityDifferenceEndpointTest {
     }
 
     @Test
-    void listSchedules() {
+    void listSchedules() throws JsonProcessingException {
+        datasource.get().reset();
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
                 .when()
                 .get("/requests")
-                .then().statusCode(200).extract().body().as(ScheduleList.class);
+                .then().statusCode(Response.Status.OK.getStatusCode()).extract().body().as(ScheduleList.class);
 
         assertEquals(0, emptyList.requests.size());
 
@@ -188,7 +197,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .body(payload)
                 .when()
                 .post("/request")
-                .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
+                .then().statusCode(Response.Status.OK.getStatusCode()).extract().body().as(BaseScheduledResponse.class);
 
         assertNotNull(firstRequest.getRequestId());
 
@@ -197,14 +206,14 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .body(payload)
                 .when()
                 .post("/request")
-                .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
+                .then().statusCode(Response.Status.OK.getStatusCode()).extract().body().as(BaseScheduledResponse.class);
 
         assertNotNull(secondRequest.getRequestId());
 
         ScheduleList scheduleList = given()
                 .when()
                 .get("/requests")
-                .then().statusCode(200).extract().body().as(ScheduleList.class);
+                .then().statusCode(Response.Status.OK.getStatusCode()).extract().body().as(ScheduleList.class);
 
         // Correct number of active requests
         assertEquals(2, scheduleList.requests.size());
@@ -213,12 +222,12 @@ class GroupStatisticalParityDifferenceEndpointTest {
         final ScheduleId firstRequestId = new ScheduleId();
         firstRequestId.requestId = firstRequest.getRequestId();
         given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
-                .then().statusCode(200).body(is("Removed"));
+                .then().statusCode(Response.Status.OK.getStatusCode()).body(is("Removed"));
 
         scheduleList = given()
                 .when()
                 .get("/requests")
-                .then().statusCode(200).extract().body().as(ScheduleList.class);
+                .then().statusCode(Response.Status.OK.getStatusCode()).extract().body().as(ScheduleList.class);
 
         // Correct number of active requests
         assertEquals(1, scheduleList.requests.size());
@@ -227,12 +236,12 @@ class GroupStatisticalParityDifferenceEndpointTest {
         final ScheduleId secondRequestId = new ScheduleId();
         secondRequestId.requestId = secondRequest.getRequestId();
         given().contentType(ContentType.JSON).when().body(secondRequestId).delete("/request")
-                .then().statusCode(200).body(is("Removed"));
+                .then().statusCode(Response.Status.OK.getStatusCode()).body(is("Removed"));
 
         scheduleList = given()
                 .when()
                 .get("/requests")
-                .then().statusCode(200).extract().body().as(ScheduleList.class);
+                .then().statusCode(Response.Status.OK.getStatusCode()).extract().body().as(ScheduleList.class);
 
         // Correct number of active requests
         assertEquals(0, scheduleList.requests.size());
@@ -246,7 +255,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
         scheduleList = given()
                 .when()
                 .get("/requests")
-                .then().statusCode(200).extract().body().as(ScheduleList.class);
+                .then().statusCode(Response.Status.OK.getStatusCode()).extract().body().as(ScheduleList.class);
 
         // Correct number of active requests
         assertEquals(0, scheduleList.requests.size());
@@ -270,7 +279,8 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .body(payload)
                 .when()
                 .post("/request")
-                .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
+                .then()
+                .statusCode(200).extract().body().as(BaseScheduledResponse.class);
 
         assertNotNull(firstRequest.getRequestId());
 
@@ -359,6 +369,125 @@ class GroupStatisticalParityDifferenceEndpointTest {
         // Correct number of active requests
         assertEquals(0, scheduleList.requests.size());
 
+    }
+
+    @Test
+    void listNames() {
+        // No schedule request made yet
+        final ScheduleList emptyList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+        assertEquals(0, emptyList.requests.size());
+
+        List<String> names = List.of("name1", "name2", "name3");
+        Map<UUID, String> nameIDs = new HashMap<>();
+
+        // Perform multiple schedule requests
+        for (String name : names) {
+            final GroupMetricRequest payload = RequestPayloadGenerator.named(name);
+            BaseScheduledResponse scheduledResponse = given()
+                    .contentType(ContentType.JSON)
+                    .body(payload)
+                    .when()
+                    .post("/request")
+                    .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(BaseScheduledResponse.class);
+            nameIDs.put(scheduledResponse.getRequestId(), name);
+        }
+
+        ScheduleList scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(3, scheduleList.requests.size());
+
+        // check that names are as expected
+        for (int i = 0; i < scheduleList.requests.size(); i++) {
+            UUID returnedID = scheduleList.requests.get(i).id;
+            assertEquals(nameIDs.get(returnedID), scheduleList.requests.get(i).request.getRequestName());
+
+            // delete the corresponding request
+            final ScheduleId thisRequestId = new ScheduleId();
+            thisRequestId.requestId = returnedID;
+            given()
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .body(thisRequestId)
+                    .delete("/request")
+                    .then()
+                    .statusCode(200)
+                    .body(is("Removed"));
+        }
+
+        scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(0, scheduleList.requests.size());
+    }
+
+    @Test
+    void listThresholds() {
+        // No schedule request made yet
+        final ScheduleList emptyList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+        assertEquals(0, emptyList.requests.size());
+
+        List<Double> threshs = List.of(.1, .05, .5);
+        Map<UUID, Double> threshIDs = new HashMap<>();
+
+        // Perform multiple schedule requests
+        for (Double thresh : threshs) {
+            final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+            payload.setThresholdDelta(thresh);
+            BaseScheduledResponse scheduledResponse = given()
+                    .contentType(ContentType.JSON)
+                    .body(payload)
+                    .when()
+                    .post("/request")
+                    .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(BaseScheduledResponse.class);
+            threshIDs.put(scheduledResponse.getRequestId(), thresh);
+        }
+
+        ScheduleList scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(3, scheduleList.requests.size());
+
+        // check that names are as expected
+        for (int i = 0; i < scheduleList.requests.size(); i++) {
+            UUID returnedID = scheduleList.requests.get(i).id;
+            assertEquals(threshIDs.get(returnedID), ((GroupMetricRequest) scheduleList.requests.get(i).request).getThresholdDelta());
+
+            // delete the corresponding request
+            final ScheduleId thisRequestId = new ScheduleId();
+            thisRequestId.requestId = returnedID;
+            given()
+                    .contentType(ContentType.JSON)
+                    .when()
+                    .body(thisRequestId)
+                    .delete("/request")
+                    .then()
+                    .statusCode(200)
+                    .body(is("Removed"));
+        }
+
+        scheduleList = given()
+                .when()
+                .get("/requests")
+                .then().statusCode(RestResponse.StatusCode.OK).extract().body().as(ScheduleList.class);
+
+        // Correct number of active requests
+        assertEquals(0, scheduleList.requests.size());
     }
 
 }

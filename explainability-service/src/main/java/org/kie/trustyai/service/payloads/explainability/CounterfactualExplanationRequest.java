@@ -15,8 +15,6 @@
  */
 package org.kie.trustyai.service.payloads.explainability;
 
-import org.kie.trustyai.service.payloads.explainability.LocalExplanationRequest;
-
 import java.util.Map;
 
 public class CounterfactualExplanationRequest extends LocalExplanationRequest {

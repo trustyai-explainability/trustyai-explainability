@@ -1,8 +1,8 @@
 package org.kie.trustyai.service.payloads.scheduler;
 
-import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-
 import java.util.UUID;
+
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
 public class ScheduleRequest {
     public UUID id;

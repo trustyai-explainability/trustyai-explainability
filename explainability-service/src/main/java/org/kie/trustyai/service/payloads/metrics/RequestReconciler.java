@@ -1,18 +1,18 @@
 package org.kie.trustyai.service.payloads.metrics;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
+
+import javax.enterprise.inject.Instance;
+
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.values.DataType;
-import org.kie.trustyai.service.payloads.values.ReconcilableFeature;
-import org.kie.trustyai.service.payloads.values.ReconcilableOutput;
-import org.kie.trustyai.service.payloads.values.ReconcilerMatcher;
 import org.kie.trustyai.service.payloads.values.TypedValue;
-
-import javax.enterprise.inject.Instance;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Optional;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilerMatcher;
 
 public class RequestReconciler {
 
@@ -28,7 +28,7 @@ public class RequestReconciler {
                 ReconcilableFeature fieldValue;
                 try {
                     fieldValue = (ReconcilableFeature) f.get(request);
-                    if (fieldValue.getTypeToReconcile().isPresent()){
+                    if (fieldValue.getReconciledType().isPresent()) {
                         continue;
                     }
                 } catch (IllegalAccessException e) {
@@ -53,7 +53,7 @@ public class RequestReconciler {
                 tv.setValue(fieldValue.getRawValueNode());
 
                 try {
-                    ((ReconcilableFeature) f.get(request)).setTypeToReconcile(Optional.of(tv));
+                    ((ReconcilableFeature) f.get(request)).setReconciledType(Optional.of(tv));
                 } catch (IllegalAccessException e) {
                     throw new IllegalArgumentException("Reconciled field " + f.getName() + " does not have public access:" + e);
                 }
@@ -62,7 +62,8 @@ public class RequestReconciler {
                 ReconcilableOutput fieldValue;
                 try {
                     fieldValue = (ReconcilableOutput) f.get(request);
-                    if (fieldValue.getTypeToReconcile().isPresent()){
+                    System.out.println(f.toString() + ": " + fieldValue + fieldValue.getClass());
+                    if (fieldValue.getReconciledType().isPresent()) {
                         continue;
                     }
                 } catch (IllegalAccessException e) {
@@ -87,7 +88,7 @@ public class RequestReconciler {
                 tv.setValue(fieldValue.getRawValueNode());
 
                 try {
-                    ((ReconcilableOutput) f.get(request)).setTypeToReconcile(Optional.of(tv));
+                    ((ReconcilableOutput) f.get(request)).setReconciledType(Optional.of(tv));
                 } catch (IllegalAccessException e) {
                     throw new IllegalArgumentException("Reconciled field " + f.getName() + " does not have public access:" + e);
                 }

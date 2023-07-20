@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.metrics;
+package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
 import java.util.Map;
 import java.util.UUID;
@@ -13,13 +13,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
-import org.kie.trustyai.service.endpoints.metrics.fairness.group.GroupStatisticalParityDifferenceEndpoint;
+import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
+import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
+import org.kie.trustyai.service.endpoints.metrics.fairness.group.DisparateImpactRatioEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -32,11 +37,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(MetricsEndpointTestProfile.class)
-@TestHTTPEndpoint(GroupStatisticalParityDifferenceEndpoint.class)
-class GroupStatisticalParityDifferenceRequestsEndpointTest {
+@TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
+class DisparateImpactRatioRequestsEndpointTest {
 
-    private static final String MODEL_ID = "example1";
     private static final int N_SAMPLES = 100;
+    private static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
 
@@ -50,12 +55,8 @@ class GroupStatisticalParityDifferenceRequestsEndpointTest {
     Instance<ServiceConfig> serviceConfig;
 
     @BeforeEach
-    void populateStorage() {
-        // Empty mock storage
+    void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
-        // Clear any requests between tests
-        scheduler.get().getDirRequests().clear();
-        scheduler.get().getSpdRequests().clear();
         final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
@@ -79,9 +80,9 @@ class GroupStatisticalParityDifferenceRequestsEndpointTest {
                 .body().as(BaseScheduledResponse.class);
 
         // Get stored request
-        final ReconciledGroupMetricRequest request = scheduler
+        final GroupMetricRequest request = (GroupMetricRequest) scheduler
                 .get()
-                .getSpdRequests()
+                .getRequests("DIR")
                 .get(response.getRequestId());
 
         final int defaultBatchSize = serviceConfig.get().batchSize().getAsInt();
@@ -109,9 +110,9 @@ class GroupStatisticalParityDifferenceRequestsEndpointTest {
                 .body().as(BaseScheduledResponse.class);
 
         // Get stored request
-        final ReconciledGroupMetricRequest request = scheduler
+        final GroupMetricRequest request = (GroupMetricRequest) scheduler
                 .get()
-                .getSpdRequests()
+                .getRequests("DIR")
                 .get(response.getRequestId());
 
         assertEquals(BATCH_SIZE, request.getBatchSize());
@@ -137,9 +138,9 @@ class GroupStatisticalParityDifferenceRequestsEndpointTest {
                 .body(containsString("Request batch size must be bigger than 0."));
 
         // Get stored request
-        final Map<UUID, ReconciledGroupMetricRequest> requests = scheduler
+        final Map<UUID, BaseMetricRequest> requests = scheduler
                 .get()
-                .getDirRequests();
+                .getRequests("DIR");
 
         assertTrue(requests.isEmpty());
     }

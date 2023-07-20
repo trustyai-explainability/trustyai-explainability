@@ -10,18 +10,17 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.PayloadConverter;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
-import org.kie.trustyai.service.validators.metrics.ValidBaseMetricRequest;
 
 @ApplicationScoped
-public class BaseGroupMetricRequestValidator implements ConstraintValidator<ValidBaseMetricRequest, GroupMetricRequest> {
+public class GroupMetricRequestValidator implements ConstraintValidator<ValidGroupMetricRequest, GroupMetricRequest> {
     @Inject
     Instance<DataSource> dataSource;
 
     @Override
-    public void initialize(ValidBaseMetricRequest constraintAnnotation) {
+    public void initialize(ValidGroupMetricRequest constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 

@@ -32,9 +32,13 @@ public class BaseMetricResponse {
         return timestamp;
     }
 
-    public String getName() { return this.getName(); }
+    public String getName() {
+        return this.name;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Double getValue() {
         return value;
@@ -58,5 +62,13 @@ public class BaseMetricResponse {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public MetricThreshold getThresholds() {
+        return threshold;
+    }
+
+    public void setThresholds(MetricThreshold threshold) {
+        this.threshold = threshold;
     }
 }

@@ -4,11 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.values.ReconcilableFeature;
-import org.kie.trustyai.service.payloads.values.ReconcilableOutput;
-import org.kie.trustyai.service.payloads.values.ReconcilerMatcher;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilerMatcher;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 public class GroupMetricRequest extends BaseMetricRequest {
@@ -17,13 +18,14 @@ public class GroupMetricRequest extends BaseMetricRequest {
     private String protectedAttribute;
     private String outcomeName;
 
-    @ReconcilerMatcher(nameProvider="getProtectedAttribute")
+    // For any request-provider value that needs to be validated against feature/output types
+    @ReconcilerMatcher(nameProvider = "getProtectedAttribute")
     public ReconcilableFeature privilegedAttribute;
 
-    @ReconcilerMatcher(nameProvider="getProtectedAttribute")
+    @ReconcilerMatcher(nameProvider = "getProtectedAttribute")
     public ReconcilableFeature unprivilegedAttribute;
 
-    @ReconcilerMatcher(nameProvider="getOutcomeName")
+    @ReconcilerMatcher(nameProvider = "getOutcomeName")
     public ReconcilableOutput favorableOutcome;
 
     private Double thresholdDelta;
@@ -33,6 +35,7 @@ public class GroupMetricRequest extends BaseMetricRequest {
         super();
     }
 
+    // Getters and Setterers ================================================
     public String getProtectedAttribute() {
         return protectedAttribute;
     }
@@ -53,7 +56,6 @@ public class GroupMetricRequest extends BaseMetricRequest {
         return favorableOutcome;
     }
 
-    // raw getters and setters  ================================================
     public void setFavorableOutcome(ReconcilableOutput favorableOutcome) {
         this.favorableOutcome = favorableOutcome;
     }
@@ -82,7 +84,8 @@ public class GroupMetricRequest extends BaseMetricRequest {
         this.thresholdDelta = thresholdDelta;
     }
 
-    public Map<String, String> retrieveTags(){
+    // Tag Retrieval
+    public Map<String, String> retrieveTags() {
         Map<String, String> tags = new HashMap<>();
         tags.put("outcome", this.getOutcomeName());
         tags.put("favorable_value", this.getFavorableOutcome().toString());

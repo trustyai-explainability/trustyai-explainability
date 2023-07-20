@@ -11,6 +11,8 @@ import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
@@ -18,8 +20,6 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
-import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 @Singleton
 public class PrometheusPublisher {
@@ -56,7 +56,7 @@ public class PrometheusPublisher {
 
         final Iterable<Tag> tags = generateTags(modelName, id, request);
 
-        createOrUpdateGauge("trustyai_"+request.getMetricName().toLowerCase(), tags, id);
+        createOrUpdateGauge("trustyai_" + request.getMetricName().toLowerCase(), tags, id);
 
         LOG.info(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
     }

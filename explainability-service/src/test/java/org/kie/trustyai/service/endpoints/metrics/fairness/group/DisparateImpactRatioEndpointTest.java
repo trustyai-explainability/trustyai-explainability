@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.metrics;
+package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,12 +15,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
+import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
+import org.kie.trustyai.service.endpoints.metrics.fairness.group.DisparateImpactRatioEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.dir.DisparateImpactRatioResponseGroup;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
@@ -61,8 +64,7 @@ class DisparateImpactRatioEndpointTest {
 
     @AfterEach
     void clearRequests() {
-        scheduler.get().getDirRequests().clear();
-        scheduler.get().getSpdRequests().clear();
+        scheduler.get().getAllRequestsFlat().clear();
     }
 
     @Test
@@ -79,14 +81,14 @@ class DisparateImpactRatioEndpointTest {
 
         final GroupMetricRequest payload = RequestPayloadGenerator.correct();
 
-        final DisparateImpactRatioResponseGroup response = given()
+        final BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(DisparateImpactRatioResponseGroup.class);
+                .body().as(BaseMetricResponse.class);
 
         assertEquals("metric", response.getType());
         assertEquals("DIR", response.getName());
@@ -100,14 +102,14 @@ class DisparateImpactRatioEndpointTest {
         // with large threshold, the DIR is inside bounds
         GroupMetricRequest payload = RequestPayloadGenerator.correct();
         payload.setThresholdDelta(.5);
-        DisparateImpactRatioResponseGroup response = given()
+        BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(DisparateImpactRatioResponseGroup.class);
+                .body().as(BaseMetricResponse.class);
 
         assertEquals("metric", response.getType());
         assertEquals("DIR", response.getName());
@@ -123,7 +125,7 @@ class DisparateImpactRatioEndpointTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
-                .body().as(DisparateImpactRatioResponseGroup.class);
+                .body().as(BaseMetricResponse.class);
 
         assertEquals("metric", response.getType());
         assertEquals("DIR", response.getName());
@@ -280,7 +282,8 @@ class DisparateImpactRatioEndpointTest {
                 .body(payload)
                 .when()
                 .post("/request")
-                .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
+                .then()
+                .statusCode(200).extract().body().as(BaseScheduledResponse.class);
 
         assertNotNull(firstRequest.getRequestId());
 
@@ -466,7 +469,7 @@ class DisparateImpactRatioEndpointTest {
         // check that names are as expected
         for (int i = 0; i < scheduleList.requests.size(); i++) {
             UUID returnedID = scheduleList.requests.get(i).id;
-            assertEquals(threshIDs.get(returnedID), scheduleList.requests.get(i).request.getThresholdDelta());
+            assertEquals(threshIDs.get(returnedID), ((GroupMetricRequest) scheduleList.requests.get(i).request).getThresholdDelta());
 
             // delete the corresponding request
             final ScheduleId thisRequestId = new ScheduleId();
