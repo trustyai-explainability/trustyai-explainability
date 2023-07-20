@@ -3,7 +3,6 @@ package org.kie.trustyai.service.endpoints.service;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
-import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.service.NameMapping;
@@ -29,7 +27,6 @@ import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -72,10 +69,7 @@ class ServiceMetadataEndpointTest {
         assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
-        assertEquals(dataframe.getInputNames()
-                .stream()
-                .filter(name -> !name.equals(MetadataUtils.ID_FIELD))
-                .filter(name -> !name.equals(MetadataUtils.TIMESTAMP_FIELD)).collect(Collectors.toSet()),
+        assertEquals(new HashSet<>(dataframe.getInputNames()),
                 serviceMetadata.get(0).getData().getInputSchema().getItems().keySet());
         assertEquals(
                 new HashSet<>(dataframe.getOutputNames()),

@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Singleton
 public class DataSource {
     public static final String METADATA_FILENAME = "metadata.json";
+    public static final String INTERNAL_DATA_FILENAME = "internal_data.csv";
     private static final Logger LOG = Logger.getLogger(DataSource.class);
     protected final Set<String> knownModels = new HashSet<>();
     @Inject
@@ -42,10 +43,16 @@ public class DataSource {
     }
 
     public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
-
-        final ByteBuffer byteBuffer;
+        final ByteBuffer dataByteBuffer;
         try {
-            byteBuffer = storage.get().readData(modelId);
+            dataByteBuffer = storage.get().readData(modelId);
+        } catch (StorageReadException e) {
+            throw new DataframeCreateException(e.getMessage());
+        }
+
+        final ByteBuffer internalDataByteBuffer;
+        try {
+            internalDataByteBuffer = storage.get().read(modelId + "-" + INTERNAL_DATA_FILENAME);
         } catch (StorageReadException e) {
             throw new DataframeCreateException(e.getMessage());
         }
@@ -58,12 +65,10 @@ public class DataSource {
             throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
         }
 
-        final Dataframe dataframe = parser.toDataframe(byteBuffer, metadata);
-        return dataframe;
+        return parser.toDataframe(dataByteBuffer, internalDataByteBuffer, metadata);
     }
 
     public Dataframe getDataframe(final String modelId, int batchSize) throws DataframeCreateException {
-
         final ByteBuffer byteBuffer;
         try {
             byteBuffer = storage.get().readData(modelId, batchSize);
@@ -71,6 +76,13 @@ public class DataSource {
             throw new DataframeCreateException(e.getMessage());
         }
 
+        final ByteBuffer internalDataByteBuffer;
+        try {
+            internalDataByteBuffer = storage.get().read(modelId + "-" + INTERNAL_DATA_FILENAME);
+        } catch (StorageReadException e) {
+            throw new DataframeCreateException(e.getMessage());
+        }
+
         // Fetch metadata, if not yet read
         final Metadata metadata;
         try {
@@ -79,13 +91,10 @@ public class DataSource {
             throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
         }
 
-        final Dataframe dataframe = parser.toDataframe(byteBuffer, metadata);
-
-        return dataframe;
+        return parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
     }
 
     public void saveDataframe(final Dataframe dataframe, final String modelId) throws InvalidSchemaException {
-
         // Add to known models
         this.knownModels.add(modelId);
 
@@ -128,10 +137,13 @@ public class DataSource {
             }
         }
 
+        ByteBuffer[] byteBuffers = parser.toByteBuffers(dataframe, false);
         if (!storage.get().dataExists(modelId)) {
-            storage.get().saveData(parser.toByteBuffer(dataframe, false), modelId);
+            storage.get().saveData(byteBuffers[0], modelId);
+            storage.get().save(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
         } else {
-            storage.get().appendData(parser.toByteBuffer(dataframe, false), modelId);
+            storage.get().appendData(byteBuffers[0], modelId);
+            storage.get().append(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
         }
 
     }

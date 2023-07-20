@@ -10,5 +10,9 @@ public interface DataParser {
 
     Dataframe toDataframe(ByteBuffer inputs, Metadata metadata) throws DataframeCreateException;
 
+    Dataframe toDataframe(ByteBuffer inputs, ByteBuffer internalData, Metadata metadata) throws DataframeCreateException;
+
     ByteBuffer toByteBuffer(Dataframe dataframe, boolean includeHeader);
+
+    ByteBuffer[] toByteBuffers(Dataframe dataframe, boolean includeHeader);
 }

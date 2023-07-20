@@ -36,15 +36,24 @@ public class Dataframe {
 
     private final List<List<Value>> data;
     private final Metadata metadata;
+    private final InternalData internalData;
 
     Dataframe() {
         this.data = new ArrayList<>(new ArrayList<>());
         this.metadata = new Metadata();
+        this.internalData = new InternalData();
     }
 
     Dataframe(List<List<Value>> data, Metadata metadata) {
         this.data = new ArrayList<>(data);
         this.metadata = metadata;
+        this.internalData = new InternalData();
+    }
+
+    Dataframe(List<List<Value>> data, Metadata metadata, InternalData internalData) {
+        this.data = new ArrayList<>(data);
+        this.metadata = metadata;
+        this.internalData = internalData;
     }
 
     /**
@@ -140,9 +149,9 @@ public class Dataframe {
             for (int col = 0; col < inputsSize; col++) {
                 df.data.get(col).add(currentInputs.get(col).getValue());
             }
-            df.metadata.synthetics.add(false);
-            df.metadata.ids.add(UUID.randomUUID().toString());
-            df.metadata.timestamps.add(LocalDateTime.now());
+            df.internalData.synthetics.add(false);
+            df.internalData.ids.add(UUID.randomUUID().toString());
+            df.internalData.timestamps.add(LocalDateTime.now());
         });
 
         return df;
@@ -168,31 +177,38 @@ public class Dataframe {
     }
 
     public static Dataframe createFrom(Prediction prediction, PredictionMetadata predictionMetadata) {
+        return createWithMetadata(List.of(prediction), List.of(predictionMetadata));
+    }
+
+    public static Dataframe createWithMetadata(List<Prediction> predictions, List<PredictionMetadata> predictionsMetadata) {
         final Dataframe df = new Dataframe();
+        if (predictions.isEmpty()) {
+            return df;
+        } else {
+            // Process inputs metadata
+            for (Feature feature : predictions.get(0).getInput().getFeatures()) {
+                df.metadata.names.add(feature.getName());
+                df.metadata.types.add(feature.getType());
+                df.metadata.constrained.add(feature.isConstrained());
+                df.metadata.domains.add(feature.getDomain());
+                df.metadata.inputs.add(true);
+                df.data.add(new ArrayList<>());
+            }
+            // Process outputs metadata
+            for (Output output : predictions.get(0).getOutput().getOutputs()) {
+                df.metadata.names.add(output.getName());
+                df.metadata.types.add(output.getType());
+                df.metadata.constrained.add(true);
+                df.metadata.domains.add(EmptyFeatureDomain.create());
+                df.metadata.inputs.add(false);
+                df.data.add(new ArrayList<>());
+            }
 
-        // Process inputs metadata
-        for (Feature feature : prediction.getInput().getFeatures()) {
-            df.metadata.names.add(feature.getName());
-            df.metadata.types.add(feature.getType());
-            df.metadata.constrained.add(feature.isConstrained());
-            df.metadata.domains.add(feature.getDomain());
-            df.metadata.inputs.add(true);
-            df.data.add(new ArrayList<>());
+            // Copy data
+            df.addPredictions(predictions, predictionsMetadata);
+
+            return df;
         }
-        // Process outputs metadata
-        for (Output output : prediction.getOutput().getOutputs()) {
-            df.metadata.names.add(output.getName());
-            df.metadata.types.add(output.getType());
-            df.metadata.constrained.add(true);
-            df.metadata.domains.add(EmptyFeatureDomain.create());
-            df.metadata.inputs.add(false);
-            df.data.add(new ArrayList<>());
-        }
-
-        // Copy data
-        df.addPredictions(List.of(prediction), List.of(predictionMetadata));
-
-        return df;
     }
 
     /**
@@ -283,13 +299,13 @@ public class Dataframe {
 
                 if (alignedMetadata) {
                     PredictionMetadata predictionMetadata = predictionsMetadata.get(i);
-                    metadata.synthetics.add(predictionMetadata.isSynthetic());
-                    metadata.ids.add(predictionMetadata.getId());
-                    metadata.timestamps.add(predictionMetadata.getPredictionTime());
+                    internalData.synthetics.add(predictionMetadata.isSynthetic());
+                    internalData.ids.add(predictionMetadata.getId());
+                    internalData.timestamps.add(predictionMetadata.getPredictionTime());
                 } else {
-                    metadata.synthetics.add(false);
-                    metadata.ids.add(currentPrediction.getExecutionId().toString());
-                    metadata.timestamps.add(LocalDateTime.now());
+                    internalData.synthetics.add(false);
+                    internalData.ids.add(currentPrediction.getExecutionId().toString());
+                    internalData.timestamps.add(LocalDateTime.now());
                 }
             });
         }
@@ -777,7 +793,7 @@ public class Dataframe {
     public Dataframe copy() {
         return new Dataframe(
                 this.data.stream().map(ArrayList::new).collect(Collectors.toCollection(ArrayList::new)),
-                metadata.copy());
+                metadata.copy(), internalData.copy());
     }
 
     /**
@@ -837,19 +853,18 @@ public class Dataframe {
      * @return A filtered {@link Dataframe}.
      */
     public Dataframe filterByRowIndex(List<Integer> rows) {
-
-        List<LocalDateTime> timestamps = rows.stream().map(metadata.timestamps::get).collect(Collectors.toList());
-        List<String> ids = rows.stream().map(metadata.ids::get).collect(Collectors.toList());
-        List<Boolean> synthetics = rows.stream().map(metadata.synthetics::get).collect(Collectors.toList());
-        Metadata metadataCopy = new Metadata(metadata.names, metadata.types, metadata.constrained, metadata.domains,
-                metadata.inputs, synthetics, ids, timestamps);
+        List<LocalDateTime> timestamps = rows.stream().map(internalData.timestamps::get).collect(Collectors.toList());
+        List<String> ids = rows.stream().map(internalData.ids::get).collect(Collectors.toList());
+        List<Boolean> synthetics = rows.stream().map(internalData.synthetics::get).collect(Collectors.toList());
+        Metadata metadataCopy = this.metadata.copy();
+        InternalData internalDataFiltered = new InternalData(synthetics, ids, timestamps);
 
         final List<List<Value>> dataCopy = columnIndexStream().mapToObj(col -> {
             final List<Value> column = data.get(col);
             return rows.stream().map(column::get).collect(Collectors.toCollection(ArrayList::new));
         }).collect(Collectors.toCollection(ArrayList::new));
 
-        return new Dataframe(dataCopy, metadataCopy);
+        return new Dataframe(dataCopy, metadataCopy, internalDataFiltered);
     }
 
     /**
@@ -892,20 +907,20 @@ public class Dataframe {
     }
 
     public Dataframe filterRowsById(String id) {
-        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> metadata.ids.get(rowNumber).equals(id))
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.ids.get(rowNumber).equals(id))
                 .boxed().collect(Collectors.toList());
         return filterByRowIndex(rowIndexes);
     }
 
     public Dataframe filterOutSyntheticRows() {
-        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> !metadata.synthetics.get(rowNumber))
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> !internalData.synthetics.get(rowNumber))
                 .boxed().collect(Collectors.toList());
         return filterByRowIndex(rowIndexes);
     }
 
     public Dataframe filterRowsByTimeRange(LocalDateTime lowerBound, LocalDateTime upperBound) {
-        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> metadata.timestamps.get(rowNumber)
-                .isBefore(upperBound) && metadata.timestamps.get(rowNumber).isAfter(lowerBound)).boxed()
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.timestamps.get(rowNumber)
+                .isBefore(upperBound) && internalData.timestamps.get(rowNumber).isAfter(lowerBound)).boxed()
                 .collect(Collectors.toList());
         return filterByRowIndex(rowIndexes);
     }
@@ -1049,6 +1064,18 @@ public class Dataframe {
         return predictions;
     }
 
+    public List<String> getIds() {
+        return Collections.unmodifiableList(internalData.ids);
+    }
+
+    public List<LocalDateTime> getTimestamps() {
+        return Collections.unmodifiableList(internalData.timestamps);
+    }
+
+    public List<Boolean> getSynthetics() {
+        return Collections.unmodifiableList(internalData.synthetics);
+    }
+
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
@@ -1075,25 +1102,18 @@ public class Dataframe {
         private final List<Boolean> constrained;
         private final List<FeatureDomain> domains;
         private final List<Boolean> inputs;
-        private final List<Boolean> synthetics;
-        private final List<String> ids;
-        private final List<LocalDateTime> timestamps;
 
         private Metadata() {
-            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         }
 
         private Metadata(List<String> names, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains,
-                List<Boolean> inputs, List<Boolean> synthetics, List<String> ids, List<LocalDateTime> timestamps) {
+                List<Boolean> inputs) {
             this.names = new ArrayList<>(names);
             this.types = new ArrayList<>(types);
             this.constrained = new ArrayList<>(constrained);
             this.domains = new ArrayList<>(domains);
             this.inputs = new ArrayList<>(inputs);
-            this.synthetics = synthetics;
-            this.ids = ids;
-            this.timestamps = timestamps;
         }
 
         public void remove(int column) {
@@ -1102,9 +1122,6 @@ public class Dataframe {
             constrained.remove(column);
             domains.remove(column);
             inputs.remove(column);
-            synthetics.remove(column);
-            ids.remove(column);
-            timestamps.remove(column);
         }
 
         public Metadata copy() {
@@ -1113,11 +1130,31 @@ public class Dataframe {
                     new ArrayList<>(this.types),
                     new ArrayList<>(this.constrained),
                     new ArrayList<>(this.domains),
-                    new ArrayList<>(this.inputs),
-                    new ArrayList<>(this.synthetics),
-                    new ArrayList<>(this.ids),
-                    new ArrayList<>(this.timestamps));
+                    new ArrayList<>(this.inputs));
         }
 
+    }
+
+    private class InternalData {
+        private final List<Boolean> synthetics;
+        private final List<String> ids;
+        private final List<LocalDateTime> timestamps;
+
+        InternalData() {
+            this.synthetics = new ArrayList<>();
+            this.ids = new ArrayList<>();
+            this.timestamps = new ArrayList<>();
+        }
+
+        InternalData(List<Boolean> synthetics, List<String> ids, List<LocalDateTime> timestamps) {
+            this.synthetics = synthetics;
+            this.ids = ids;
+            this.timestamps = timestamps;
+        }
+
+        InternalData copy() {
+            return new InternalData(new ArrayList<>(this.synthetics), new ArrayList<>(this.ids),
+                    new ArrayList<>(this.timestamps));
+        }
     }
 }
