@@ -31,7 +31,6 @@ public class ReconcilableFieldSerializer extends StdSerializer<ReconcilableField
             jgen.writeStringField("type", "null");
         }
         jgen.writeObjectField("value", value.getRawValueNode());
-        jgen.writeStringField("category", value.getCategory());
         jgen.writeEndObject();
 
     }

@@ -3,11 +3,24 @@ package org.kie.trustyai.service.payloads.metrics.identity;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 
 @JsonPropertyOrder({ "protected", "favorable" })
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "@type",
+        defaultImpl = IdentityMetricRequest.class
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = IdentityMetricRequest.class, name = "IdentityMetricRequest")
+})
 public class IdentityMetricRequest extends BaseMetricRequest {
     private String columnName;
     private double lowerThresh;

@@ -8,16 +8,13 @@ import org.kie.trustyai.service.payloads.values.reconcilable.serializers.Reconci
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ValueNode;
 
-@JsonSerialize(using = ReconcilableFieldSerializer.class)
 public abstract class ReconcilableField {
     final ValueNode rawValueNode;
     private Optional<TypedValue> reconciledType;
-    private final String category;
 
-    protected ReconcilableField(ValueNode rawValueNode, String category) {
+    protected ReconcilableField(ValueNode rawValueNode) {
         this.rawValueNode = rawValueNode;
         this.reconciledType = Optional.empty();
-        this.category = category;
     }
 
     public ValueNode getRawValueNode() {
@@ -32,11 +29,7 @@ public abstract class ReconcilableField {
         this.reconciledType = reconciledType;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
     public String toString() {
-        return rawValueNode.toString();
+        return this.getRawValueNode().toString();
     }
 }
