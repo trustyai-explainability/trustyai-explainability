@@ -13,10 +13,11 @@ jobs:
       matrix:
         # configure with [ 'ubuntu-latest', 'windows-latest' ] to enable Windows builds
         include:
-          - {os: ubuntu-latest, shell: bash }
+          - { os: ubuntu-latest, shell: bash }
         #  - {os: windows-latest, shell: cmd }
         java-version: [ 11, 17 ]
-        maven-version: [ '3.6.3', '3.8.6' ]
+        # Maven maintained core versions, https://maven.apache.org/docs/history.html
+        maven-version: [ '3.6.3', '3.8.8', '3.9.2' ]
       fail-fast: false
     # https://docs.github.com/en/actions/using-jobs/setting-default-values-for-jobs#setting-default-shell-and-working-directory
     defaults:
