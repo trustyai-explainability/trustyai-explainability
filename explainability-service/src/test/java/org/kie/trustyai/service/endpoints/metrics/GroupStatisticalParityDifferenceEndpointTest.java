@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.endpoints.metrics;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import javax.enterprise.inject.Instance;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
@@ -40,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GroupStatisticalParityDifferenceEndpointTest {
 
     private static final String MODEL_ID = "example1";
+    private static final int N_SAMPLES = 100;
     @Inject
     Instance<MockDatasource> datasource;
     @Inject
@@ -358,6 +362,45 @@ class GroupStatisticalParityDifferenceEndpointTest {
         // Correct number of active requests
         assertEquals(0, scheduleList.requests.size());
 
+    }
+
+    @Test
+    void postCorrectFilteringSynthetic() throws JsonProcessingException {
+        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+
+        final GroupStatisticalParityDifferenceResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().as(GroupStatisticalParityDifferenceResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("SPD", response.getName());
+        Double value = response.getValue();
+        assertFalse(Double.isNaN(value));
+
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        Prediction prediction = dataframe.asPredictions().get(0);
+        PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), true);
+        Dataframe newDataframe = Dataframe.createFrom(prediction, predictionMetadata);
+
+        datasource.get().saveDataframe(newDataframe, MODEL_ID);
+
+        final GroupStatisticalParityDifferenceResponse responseSecond = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(GroupStatisticalParityDifferenceResponse.class);
+
+        assertEquals("metric", responseSecond.getType());
+        assertEquals("SPD", responseSecond.getName());
+        assertEquals(value, responseSecond.getValue());
     }
 
 }

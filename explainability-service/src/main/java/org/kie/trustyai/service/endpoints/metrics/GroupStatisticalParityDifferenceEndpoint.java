@@ -84,7 +84,7 @@ public class GroupStatisticalParityDifferenceEndpoint implements MetricsEndpoint
         final Dataframe dataframe;
         final Metadata metadata;
         try {
-            dataframe = dataSource.get().getDataframe(request.getModelId());
+            dataframe = dataSource.get().getDataframe(request.getModelId()).filterRowsBySynthetic(false);
             metadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
