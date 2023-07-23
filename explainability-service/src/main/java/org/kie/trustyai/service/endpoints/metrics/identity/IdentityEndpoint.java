@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
@@ -19,6 +20,7 @@ import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
@@ -32,6 +34,7 @@ import io.quarkus.cache.CacheResult;
         "for tracking the model's feature and output trends, or if the model contains diagnostic metrics as part of its inference output.")
 @Path("/metrics/identity")
 public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
+    protected static final Logger LOG = Logger.getLogger(IdentityEndpoint.class);
     public IdentityEndpoint() {
         super("IDENTITY");
     }
@@ -40,10 +43,12 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
         return new MetricThreshold(lowerBound.doubleValue(), upperBound.doubleValue(), metricValue.doubleValue());
     }
 
-    @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public double calculate(Dataframe dataframe, IdentityMetricRequest request) {
-        List<Value> vs = dataframe.getColumn(dataframe.getColumnNames().indexOf(request.getColumnName()));
-        return vs.stream().mapToDouble(Value::asNumber).sum() / ((double) vs.size());
+    @Override
+    @CacheResult(cacheName = "metrics-calculator-identity", keyGenerator = MetricCalculationCacheKeyGen.class)
+    public double calculate(Dataframe dataframe, BaseMetricRequest request) {
+        List<Value> vs = dataframe.getColumn(dataframe.getColumnNames().indexOf(((IdentityMetricRequest) request).getColumnName()));
+        double value = vs.stream().mapToDouble(Value::asNumber).sum() / ((double) vs.size());
+        return value;
     }
 
     public String getGeneralDefinition() {

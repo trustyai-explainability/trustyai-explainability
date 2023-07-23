@@ -15,8 +15,10 @@ import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.payloads.PayloadConverter;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 import io.quarkus.cache.CacheResult;
@@ -54,23 +56,24 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
     };
 
     @Override
-    @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public double calculate(Dataframe dataframe, @ValidReconciledMetricRequest GroupMetricRequest request) {
+    @CacheResult(cacheName = "metrics-calculator-dir", keyGenerator = MetricCalculationCacheKeyGen.class)
+    public double calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
+        GroupMetricRequest gmRequest = (GroupMetricRequest) request;
         try {
-            final int protectedIndex = dataframe.getColumnNames().indexOf(request.getProtectedAttribute());
+            final int protectedIndex = dataframe.getColumnNames().indexOf(gmRequest.getProtectedAttribute());
 
-            final Value privilegedAttr = PayloadConverter.convertToValue(request.getPrivilegedAttribute().getReconciledType().get());
+            final Value privilegedAttr = PayloadConverter.convertToValue(gmRequest.getPrivilegedAttribute().getReconciledType().get());
 
             final Dataframe privileged = dataframe.filterByColumnValue(protectedIndex,
                     value -> value.equals(privilegedAttr));
-            final Value unprivilegedAttr = PayloadConverter.convertToValue(request.getUnprivilegedAttribute().getReconciledType().get());
+            final Value unprivilegedAttr = PayloadConverter.convertToValue(gmRequest.getUnprivilegedAttribute().getReconciledType().get());
             final Dataframe unprivileged = dataframe.filterByColumnValue(protectedIndex,
                     value -> value.equals(unprivilegedAttr));
-            final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome().getReconciledType().get());
-            final Type favorableOutcomeAttrType = PayloadConverter.convertToType(request.getFavorableOutcome().getReconciledType().get().getType());
+            final Value favorableOutcomeAttr = PayloadConverter.convertToValue(gmRequest.getFavorableOutcome().getReconciledType().get());
+            final Type favorableOutcomeAttrType = PayloadConverter.convertToType(gmRequest.getFavorableOutcome().getReconciledType().get().getType());
             return DisparateImpactRatio.calculate(privileged, unprivileged,
-                    List.of(new Output(request.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+                    List.of(new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
         } catch (Exception e) {
             throw new MetricCalculationException(e.getMessage(), e);
         }

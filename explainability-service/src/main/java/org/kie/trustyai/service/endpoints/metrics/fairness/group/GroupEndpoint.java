@@ -15,7 +15,6 @@ import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
-import org.kie.trustyai.service.endpoints.metrics.MetricsEndpoint;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.definitions.GroupDefinitionRequest;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
@@ -27,7 +26,7 @@ import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetr
 
 import io.quarkus.cache.CacheResult;
 
-public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> implements MetricsEndpoint {
+public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     protected GroupEndpoint(String name) {
         super(name);
     }
@@ -35,9 +34,6 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> imp
     public abstract MetricThreshold thresholdFunction(Number delta, Number metricValue);
 
     public abstract String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, Number metricvalue);
-
-    @CacheResult(cacheName = "metrics-calculator", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public abstract double calculate(Dataframe dataframe, @ValidReconciledMetricRequest GroupMetricRequest request);
 
     public abstract String getGeneralDefinition();
 

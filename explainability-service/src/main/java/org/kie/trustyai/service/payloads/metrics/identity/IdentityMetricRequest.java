@@ -55,8 +55,7 @@ public class IdentityMetricRequest extends BaseMetricRequest {
     @Override
     public Map<String, String> retrieveTags() {
         Map<String, String> tags = new HashMap<>();
-        tags.put("outcome", this.getColumnName());
-        tags.put("feature", this.getColumnName());
+        tags.put("column", this.getColumnName());
         return tags;
     }
 }

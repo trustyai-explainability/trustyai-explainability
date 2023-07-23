@@ -28,8 +28,9 @@ import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
+import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
-public abstract class BaseEndpoint<T extends BaseMetricRequest> implements MetricsEndpoint {
+public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     protected static final Logger LOG = Logger.getLogger(BaseEndpoint.class);
 
     @Inject
@@ -44,11 +45,6 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> implements Metri
     @Inject
     protected ServiceConfig serviceConfig;
 
-    @Override
-    public double calculate(Dataframe dataframe, BaseMetricRequest request) {
-        return 0;
-    }
-
     private final String name;
 
     protected BaseEndpoint() {
@@ -59,7 +55,6 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> implements Metri
         this.name = name;
     }
 
-    @Override
     public String getMetricName() {
         return this.name;
     }
@@ -82,7 +77,6 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> implements Metri
         }
     }
 
-    @Override
     @GET
     @Path("/requests")
     @Produces(MediaType.APPLICATION_JSON)
@@ -95,7 +89,7 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> implements Metri
     }
 
     // call this after the request type has been validated
-    protected Response createRequestGeneric(T request) {
+    protected Response createRequestGeneric(BaseMetricRequest request) {
 
         final UUID id = UUID.randomUUID();
 
@@ -120,4 +114,6 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> implements Metri
 
         return Response.ok().entity(response).build();
     }
+
+    public abstract double calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request);
 }
