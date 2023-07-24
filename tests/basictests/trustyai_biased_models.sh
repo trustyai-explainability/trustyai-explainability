@@ -65,7 +65,6 @@ function check_trustyai_resources() {
   os::cmd::try_until_text "oc get deployment trustyai-service" "trustyai-service" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get route trustyai-service-route" "trustyai-service-route" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get pod | grep trustyai-service" "1/1" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-
 }
 
 function check_mm_resources() {
@@ -203,7 +202,6 @@ function teardown_trustyai_test() {
   oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_operator_configmap.yaml"  || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml"  || eval "$FAILURE_HANDLING"
-  oc delete deployment trustyai-service-operator-controller-manager  || echo "No trustyai operator deployment found"
 }
 
 if [ $TEARDOWN = false ]; then
