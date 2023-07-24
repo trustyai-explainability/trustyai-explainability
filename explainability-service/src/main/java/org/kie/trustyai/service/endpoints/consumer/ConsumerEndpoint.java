@@ -24,6 +24,8 @@ import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
 
+import io.cloudevents.CloudEvent;
+
 @Path("/consumer/kserve/v2")
 public class ConsumerEndpoint {
 
@@ -33,6 +35,13 @@ public class ConsumerEndpoint {
 
     @Inject
     InferencePayloadReconciler reconciler;
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/logger")
+    public void logInference(CloudEvent jsonEvent) {
+        System.out.println(jsonEvent);
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
