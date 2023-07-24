@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
@@ -492,4 +495,41 @@ class DisparateImpactRatioEndpointTest {
         assertEquals(0, scheduleList.requests.size());
     }
 
+    @Test
+    void postCorrectFilteringSynthetic() throws JsonProcessingException {
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseMetricResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        Double value = response.getValue();
+        assertEquals("metric", response.getType());
+        assertEquals("DIR", response.getName());
+        assertFalse(Double.isNaN(value));
+
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        Prediction prediction = dataframe.asPredictions().get(0);
+        PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), true);
+        Dataframe newDataframe = Dataframe.createFrom(prediction, predictionMetadata);
+
+        datasource.get().saveDataframe(newDataframe, MODEL_ID);
+
+        final BaseMetricResponse responseSecond = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        assertEquals("metric", responseSecond.getType());
+        assertEquals("DIR", responseSecond.getName());
+        assertEquals(value, responseSecond.getValue());
+    }
 }
