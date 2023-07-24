@@ -10,7 +10,6 @@ import javax.ws.rs.core.Response;
 
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
-import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.data.metadata.Metadata;
@@ -23,8 +22,6 @@ import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
-
-import io.quarkus.cache.CacheResult;
 
 public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     protected GroupEndpoint(String name) {
@@ -56,7 +53,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
         final Dataframe dataframe;
         final Metadata metadata;
         try {
-            dataframe = super.dataSource.get().getDataframe(request.getModelId());
+            dataframe = super.dataSource.get().getDataframe(request.getModelId()).filterRowsBySynthetic(false);
             metadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);

@@ -82,13 +82,13 @@ public class ServiceMetadataEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response labelSchema(NameMapping nameMapping) throws JsonProcessingException {
 
-        if (!dataSource.get().getKnownModels().contains(nameMapping.getModelID())) {
+        if (!dataSource.get().getKnownModels().contains(nameMapping.getModelId())) {
             return Response.serverError()
                     .status(Response.Status.BAD_REQUEST)
-                    .entity("Model ID " + nameMapping.getModelID() + " does not exist in TrustyAI metadata.")
+                    .entity("Model ID " + nameMapping.getModelId() + " does not exist in TrustyAI metadata.")
                     .build();
         }
-        final Metadata metadata = dataSource.get().getMetadata(nameMapping.getModelID());
+        final Metadata metadata = dataSource.get().getMetadata(nameMapping.getModelId());
 
         // validation
         Schema inputSchema = metadata.getInputSchema();

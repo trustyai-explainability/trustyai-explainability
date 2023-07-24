@@ -25,6 +25,18 @@ public class Schema {
         return items;
     }
 
+    public Map<String, SchemaItem> getNameMappedItems() {
+        Map<String, SchemaItem> returnMap = new HashMap<>();
+        for (Map.Entry<String, SchemaItem> entry : items.entrySet()) {
+            if (nameMapping.containsKey(entry.getKey())) {
+                returnMap.put(nameMapping.get(entry.getKey()), entry.getValue());
+            } else {
+                returnMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return returnMap;
+    }
+
     public Map<String, String> getNameMapping() {
         return nameMapping;
     }

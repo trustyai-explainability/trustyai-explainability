@@ -35,6 +35,7 @@ import io.quarkus.cache.CacheResult;
 @Path("/metrics/identity")
 public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
     protected static final Logger LOG = Logger.getLogger(IdentityEndpoint.class);
+
     public IdentityEndpoint() {
         super("IDENTITY");
     }
@@ -69,7 +70,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
         final Dataframe dataframe;
         final Metadata metadata;
         try {
-            dataframe = super.dataSource.get().getDataframe(request.getModelId());
+            dataframe = super.dataSource.get().getDataframe(request.getModelId()).filterRowsBySynthetic(false);
             metadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);

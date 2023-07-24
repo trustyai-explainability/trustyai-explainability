@@ -38,7 +38,7 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
             final String outcomeName = request.getOutcomeName();
 
             // Outcome name is not present
-            if (!metadata.getOutputSchema().getItems().containsKey(outcomeName)) {
+            if (!metadata.getOutputSchema().getNameMappedItems().containsKey(outcomeName)) {
                 context.buildConstraintViolationWithTemplate("No outcome found with name=" + outcomeName).addConstraintViolation();
                 return false;
             }
@@ -48,7 +48,7 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
                 return false;
             }
             // Outcome name guaranteed to exist
-            final SchemaItem outcomeSchema = metadata.getOutputSchema().getItems().get(outcomeName);
+            final SchemaItem outcomeSchema = metadata.getOutputSchema().getNameMappedItems().get(outcomeName);
             LOG.info("trying to validate: " + request.getFavorableOutcome());
             if (!PayloadConverter.checkValueType(outcomeSchema.getType(), request.getFavorableOutcome().getRawValueNode())) {
                 context.buildConstraintViolationWithTemplate(
