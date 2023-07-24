@@ -56,6 +56,7 @@ public class IdentityMetricRequest extends BaseMetricRequest {
     public Map<String, String> retrieveTags() {
         Map<String, String> tags = new HashMap<>();
         tags.put("column", this.getColumnName());
+        tags.put("batch_size", String.valueOf(this.getBatchSize()));
         return tags;
     }
 }
