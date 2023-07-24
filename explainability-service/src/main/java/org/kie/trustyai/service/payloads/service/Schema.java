@@ -17,12 +17,31 @@ public class Schema {
         this.items = items;
     }
 
+    public Schema(Map<String, SchemaItem> items, Map<String, String> nameMapping) {
+        this.items = items;
+        this.nameMapping = nameMapping;
+    }
+
     public static Schema from(Map<String, SchemaItem> items) {
         return new Schema(items);
     }
 
     public Map<String, SchemaItem> getItems() {
         return items;
+    }
+
+    //@CacheResult(cacheName = "schema-name-mapped-items", keyGenerator = SchemaNameMappingCacheKeyGen.class)
+    public Map<String, SchemaItem> retrieveNameMappedItems() {
+        Map<String, SchemaItem> returnMap = new HashMap<>();
+        System.out.println("getting name mapped items: "+nameMapping);
+        for (Map.Entry<String, SchemaItem> entry : items.entrySet()){
+            if (nameMapping.containsKey(entry.getKey())){
+                returnMap.put(nameMapping.get(entry.getKey()), entry.getValue());
+            } else {
+                returnMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return returnMap;
     }
 
     public Map<String, String> getNameMapping() {
@@ -45,6 +64,6 @@ public class Schema {
 
     @Override
     public int hashCode() {
-        return Objects.hash(items);
+        return Objects.hash(items, nameMapping);
     }
 }

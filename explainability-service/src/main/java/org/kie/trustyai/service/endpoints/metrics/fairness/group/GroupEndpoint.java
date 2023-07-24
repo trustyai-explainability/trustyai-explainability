@@ -56,7 +56,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
         final Dataframe dataframe;
         final Metadata metadata;
         try {
-            dataframe = super.dataSource.get().getDataframe(request.getModelId());
+            dataframe = super.dataSource.get().getDataframe(request.getModelId()).filterRowsBySynthetic(false);
             metadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);

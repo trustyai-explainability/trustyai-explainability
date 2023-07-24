@@ -4,18 +4,18 @@ import java.util.Map;
 import java.util.Objects;
 
 public class NameMapping {
-    private final String modelID;
+    private final String modelId;
     private final Map<String, String> inputMapping;
     private final Map<String, String> outputMapping;
 
-    public NameMapping(String modelID, Map<String, String> inputMapping, Map<String, String> outputMapping) {
-        this.modelID = modelID;
+    public NameMapping(String modelId, Map<String, String> inputMapping, Map<String, String> outputMapping) {
+        this.modelId = modelId;
         this.inputMapping = inputMapping;
         this.outputMapping = outputMapping;
     }
 
-    public String getModelID() {
-        return modelID;
+    public String getModelId() {
+        return modelId;
     }
 
     public Map<String, String> getInputMapping() {
@@ -33,11 +33,11 @@ public class NameMapping {
         if (o == null || getClass() != o.getClass())
             return false;
         NameMapping that = (NameMapping) o;
-        return modelID.equals(that.modelID) && inputMapping.equals(that.inputMapping) && outputMapping.equals(that.outputMapping);
+        return modelId.equals(that.modelId) && inputMapping.equals(that.inputMapping) && outputMapping.equals(that.outputMapping);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(modelID, inputMapping, outputMapping);
+        return Objects.hash(modelId, inputMapping, outputMapping);
     }
 }

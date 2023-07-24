@@ -100,6 +100,7 @@ public class DataSource {
 
         if (!hasMetadata(modelId)) {
             // If metadata is not present, create it
+            System.out.println("Creating new metadata");
             final Metadata metadata = new Metadata();
             metadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
             metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
@@ -159,10 +160,13 @@ public class DataSource {
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer byteBuffer;
         try {
+            System.out.println("string val: "+mapper.writeValueAsString(metadata));
             byteBuffer = ByteBuffer.wrap(mapper.writeValueAsString(metadata).getBytes());
+            System.out.println("within save:"+ new String(byteBuffer.array(), StandardCharsets.UTF_8));
         } catch (JsonProcessingException e) {
             throw new StorageWriteException("Could not save metadata: " + e.getMessage());
         }
+
         storage.get().save(byteBuffer, modelId + "-" + METADATA_FILENAME);
     }
 
@@ -171,7 +175,10 @@ public class DataSource {
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer metadataBytes = storage.get().read(modelId + "-" + METADATA_FILENAME);
         try {
-            return mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), Metadata.class);
+            System.out.println("post save string val: "+ new String(metadataBytes.array(), StandardCharsets.UTF_8));
+            Metadata m = mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), Metadata.class);
+            System.out.println("postsave: "+m.getInputSchema().getNameMapping());
+            return m;
         } catch (JsonProcessingException e) {
             LOG.error("Could not parse metadata: " + e.getMessage());
             throw new StorageReadException(e.getMessage());
