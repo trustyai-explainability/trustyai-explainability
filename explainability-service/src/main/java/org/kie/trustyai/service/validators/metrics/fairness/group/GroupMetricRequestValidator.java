@@ -41,7 +41,7 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
             System.out.println(metadata.getInputSchema().retrieveNameMappedItems().keySet());
             System.out.println(metadata.getOutputSchema().retrieveNameMappedItems().keySet());
 
-            LOG.info("metadata schema: "+metadata.getInputSchema().retrieveNameMappedItems().keySet());
+            LOG.info("metadata schema: " + metadata.getInputSchema().retrieveNameMappedItems().keySet());
 
             if (!metadata.getOutputSchema().retrieveNameMappedItems().containsKey(outcomeName)) {
                 context.buildConstraintViolationWithTemplate("No outcome found with name=" + outcomeName).addConstraintViolation();

@@ -6,7 +6,6 @@ import java.util.function.BiFunction;
 
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 public class MetricsDirectory {

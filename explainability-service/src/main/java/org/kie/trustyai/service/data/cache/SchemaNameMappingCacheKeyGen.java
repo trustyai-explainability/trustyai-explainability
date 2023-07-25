@@ -1,17 +1,15 @@
 package org.kie.trustyai.service.data.cache;
 
-import io.quarkus.cache.CacheKeyGenerator;
-import io.quarkus.cache.CompositeCacheKey;
-import org.jboss.logging.Logger;
-import org.kie.trustyai.service.data.storage.Storage;
-import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.service.Schema;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
 import java.lang.reflect.Method;
 import java.util.Map;
+
+import javax.enterprise.context.ApplicationScoped;
+
+import org.jboss.logging.Logger;
+import org.kie.trustyai.service.payloads.service.Schema;
+
+import io.quarkus.cache.CacheKeyGenerator;
+import io.quarkus.cache.CompositeCacheKey;
 
 @ApplicationScoped
 public class SchemaNameMappingCacheKeyGen implements CacheKeyGenerator {

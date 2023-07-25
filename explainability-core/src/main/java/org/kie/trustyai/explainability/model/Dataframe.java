@@ -68,6 +68,7 @@ public class Dataframe {
         // Process inputs metadata
         for (Feature feature : prediction.getInput().getFeatures()) {
             df.metadata.names.add(feature.getName());
+            df.metadata.nameAliases.add(null);
             df.metadata.types.add(feature.getType());
             df.metadata.constrained.add(feature.isConstrained());
             df.metadata.domains.add(feature.getDomain());
@@ -77,6 +78,7 @@ public class Dataframe {
         // Process outputs metadata
         for (Output output : prediction.getOutput().getOutputs()) {
             df.metadata.names.add(output.getName());
+            df.metadata.nameAliases.add(null);
             df.metadata.types.add(output.getType());
             df.metadata.constrained.add(true);
             df.metadata.domains.add(EmptyFeatureDomain.create());
@@ -134,6 +136,7 @@ public class Dataframe {
         // Process inputs metadata
         for (Feature feature : inputs.get(0).getFeatures()) {
             df.metadata.names.add(feature.getName());
+            df.metadata.nameAliases.add(null);
             df.metadata.types.add(feature.getType());
             df.metadata.constrained.add(feature.isConstrained());
             df.metadata.domains.add(feature.getDomain());
@@ -1025,6 +1028,7 @@ public class Dataframe {
         data.add(new ArrayList<>(values));
 
         metadata.names.add(name);
+        metadata.nameAliases.add(null);
         metadata.types.add(type);
         metadata.constrained.add(true);
         metadata.domains.add(EmptyFeatureDomain.create());

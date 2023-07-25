@@ -35,6 +35,7 @@ import io.quarkus.cache.CacheResult;
 @Path("/metrics/identity")
 public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
     protected static final Logger LOG = Logger.getLogger(IdentityEndpoint.class);
+
     public IdentityEndpoint() {
         super("IDENTITY");
     }

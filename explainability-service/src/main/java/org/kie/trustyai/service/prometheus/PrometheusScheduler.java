@@ -18,7 +18,6 @@ import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.endpoints.metrics.MetricsDirectory;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
-import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 
 import io.quarkus.scheduler.Scheduled;
 

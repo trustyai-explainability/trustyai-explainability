@@ -33,9 +33,9 @@ public class Schema {
     //@CacheResult(cacheName = "schema-name-mapped-items", keyGenerator = SchemaNameMappingCacheKeyGen.class)
     public Map<String, SchemaItem> retrieveNameMappedItems() {
         Map<String, SchemaItem> returnMap = new HashMap<>();
-        System.out.println("getting name mapped items: "+nameMapping);
-        for (Map.Entry<String, SchemaItem> entry : items.entrySet()){
-            if (nameMapping.containsKey(entry.getKey())){
+        System.out.println("getting name mapped items: " + nameMapping);
+        for (Map.Entry<String, SchemaItem> entry : items.entrySet()) {
+            if (nameMapping.containsKey(entry.getKey())) {
                 returnMap.put(nameMapping.get(entry.getKey()), entry.getValue());
             } else {
                 returnMap.put(entry.getKey(), entry.getValue());
