@@ -86,19 +86,23 @@ TRIES=0
 SUCCESS_ALPHA=false
 SUCCESS_BETA=false
 
-while [ "$SUCCESS_ALPHA" != true ] && [ "$SUCCESS_BETA" != true ]; do
+while [ "$SUCCESS_ALPHA" != true ] || [ "$SUCCESS_BETA" != true ]; do
   if [ $TRIES -gt 4 ]; then
-    echo "\n\033[0;31mERROR: Send data batch timeout\033[0m"
+    echo -e "\n\033[0;31mERROR: Send data batch timeout\033[0m"
     exit 1
   else
-    echo "Data batch transmission (tried $TRIES times)"
+    echo "Data batch transmission (ATTEMPT $TRIES)"
   fi
 
-  curl -k https://$INFER_ROUTE_ALPHA/infer -d @$1 > /dev/null 2>&1
-  curl -k https://$INFER_ROUTE_BETA/infer -d @$1 > /dev/null 2>&1
+  if [ "$SUCCESS_ALPHA" != true ]; then
+    curl -k https://$INFER_ROUTE_ALPHA/infer -d @$1 > /dev/null 2>&1
+    ( check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_ALPHA )) $MODEL_ALPHA; ) && SUCCESS_ALPHA=true
+  fi;
 
-  ( check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_ALPHA )) $MODEL_ALPHA; ) && SUCCESS_ALPHA=true
-  ( check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_BETA )) $MODEL_BETA; ) && SUCCESS_BETA=true
+  if [ "$SUCCESS_BETA" != true ]; then
+    curl -k https://$INFER_ROUTE_BETA/infer -d @$1 > /dev/null 2>&1
+    ( check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_BETA )) $MODEL_BETA; ) && SUCCESS_BETA=true
+  fi;
 
   ((TRIES=TRIES+1))
 done
