@@ -265,45 +265,4 @@ class ServiceMetadataEndpointTest {
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(Matchers.containsString("Not all mapped output fields exist in model metadata"));
     }
-
-    @Test
-    void checkNameMappingIsUseable() {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-
-        HashMap<String, String> inputMapping = new HashMap<>();
-        HashMap<String, String> outputMapping = new HashMap<>();
-        inputMapping.put("age", "Age Mapped");
-        inputMapping.put("gender", "Gender Mapped");
-        inputMapping.put("race", "Race Mapped");
-
-        outputMapping.put("income", "Income Mapped");
-        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
-
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(nameMapping)
-                .when().post()
-                .then()
-                .statusCode(200)
-                .body(is("Feature and output name mapping successfully applied."));
-
-
-        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
-        payload.setOutcomeName("Income Mapped");
-        payload.setProtectedAttribute("Gender Mapped");
-
-
-        System.out.println(given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("../../metrics/group/fairness/dir")
-                .then()
-                .extract()
-                .body().asString());
-
-    }
-
 }

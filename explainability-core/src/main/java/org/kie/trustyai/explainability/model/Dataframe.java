@@ -188,6 +188,7 @@ public class Dataframe {
             // Process inputs metadata
             for (Feature feature : predictions.get(0).getInput().getFeatures()) {
                 df.metadata.names.add(feature.getName());
+                df.metadata.nameAliases.add(null);
                 df.metadata.types.add(feature.getType());
                 df.metadata.constrained.add(feature.isConstrained());
                 df.metadata.domains.add(feature.getDomain());
@@ -197,6 +198,7 @@ public class Dataframe {
             // Process outputs metadata
             for (Output output : predictions.get(0).getOutput().getOutputs()) {
                 df.metadata.names.add(output.getName());
+                df.metadata.nameAliases.add(null);
                 df.metadata.types.add(output.getType());
                 df.metadata.constrained.add(true);
                 df.metadata.domains.add(EmptyFeatureDomain.create());
@@ -653,7 +655,11 @@ public class Dataframe {
      * @return A {@link List} with the column names
      */
     public List<String> getColumnNames() {
-        return metadata.names;
+        return metadata.getNames();
+    }
+
+    public void setColumnAliases(Map<String, String> aliases) {
+        metadata.setNameAliases(aliases);
     }
 
     /**
@@ -662,7 +668,7 @@ public class Dataframe {
      * @return A {@link List} with the column names
      */
     public List<String> getColumnNames(List<Integer> indices) {
-        return indices.stream().map(metadata.names::get).collect(Collectors.toCollection(ArrayList::new));
+        return indices.stream().map(metadata::getNames).collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -690,7 +696,7 @@ public class Dataframe {
         final List<Value> rowValues = getRow(row);
         final List<Integer> outputIndices = getOutputsIndices();
         return outputIndices.stream()
-                .map(i -> new Output(metadata.names.get(i), metadata.types.get(i), rowValues.get(i), 0.0))
+                .map(i -> new Output(metadata.getNames(i), metadata.types.get(i), rowValues.get(i), 0.0))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -708,9 +714,9 @@ public class Dataframe {
         return inputIndices.stream()
                 .map(i -> {
                     if (metadata.constrained.get(i)) {
-                        return new Feature(metadata.names.get(i), metadata.types.get(i), rowValues.get(i));
+                        return new Feature(metadata.getNames(i), metadata.types.get(i), rowValues.get(i));
                     } else {
-                        return new Feature(metadata.names.get(i), metadata.types.get(i), rowValues.get(i), metadata.constrained.get(i), metadata.domains.get(i));
+                        return new Feature(metadata.getNames(i), metadata.types.get(i), rowValues.get(i), metadata.constrained.get(i), metadata.domains.get(i));
                     }
 
                 })
@@ -730,7 +736,7 @@ public class Dataframe {
         final List<Integer> outputIndices = getOutputsIndices();
         return outputIndices.stream()
                 .map(i -> {
-                    return new Output(metadata.names.get(i), metadata.types.get(i), rowValues.get(i), 0.0);
+                    return new Output(metadata.getNames(i), metadata.types.get(i), rowValues.get(i), 0.0);
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -806,7 +812,7 @@ public class Dataframe {
         validateColumnIndex(column);
         final Type type = metadata.types.get(column);
         final List<Value> values = data.get(column);
-        final String name = metadata.names.get(column);
+        final String name = metadata.getNames(column);
         final FeatureDomain domain = metadata.domains.get(column);
 
         // Map each type to its corresponding feature generator
@@ -842,7 +848,7 @@ public class Dataframe {
 
         return data.get(column)
                 .stream()
-                .map(v -> new Output(metadata.names.get(column), metadata.types.get(column), v, 0.0))
+                .map(v -> new Output(metadata.getNames(column), metadata.types.get(column), v, 0.0))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -1081,7 +1087,7 @@ public class Dataframe {
         final StringBuilder builder = new StringBuilder();
         builder.append("Dataframe [").append(getRowDimension()).append("x").append(getColumnDimension()).append("]\n");
         for (int i = 0; i < getColumnDimension(); i++) {
-            builder.append("\tColumn ").append(i).append(" (").append(metadata.names.get(i)).append(")\n");
+            builder.append("\tColumn ").append(i).append(" (").append(metadata.names.get(i)).append("-> ").append(metadata.nameAliases.get(i)).append(")\n");
             builder.append("\t\tType: ").append(metadata.types.get(i)).append("\n");
             builder.append("\t\tDomain: ");
             final FeatureDomain domain = metadata.domains.get(i);
@@ -1098,18 +1104,20 @@ public class Dataframe {
 
     class Metadata {
         private final List<String> names;
+        private List<String> nameAliases;
         private final List<Type> types;
         private final List<Boolean> constrained;
         private final List<FeatureDomain> domains;
         private final List<Boolean> inputs;
 
         private Metadata() {
-            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         }
 
-        private Metadata(List<String> names, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains,
+        private Metadata(List<String> names, List<String> nameAliases, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains,
                 List<Boolean> inputs) {
             this.names = new ArrayList<>(names);
+            this.nameAliases = new ArrayList<>(nameAliases);
             this.types = new ArrayList<>(types);
             this.constrained = new ArrayList<>(constrained);
             this.domains = new ArrayList<>(domains);
@@ -1118,6 +1126,7 @@ public class Dataframe {
 
         public void remove(int column) {
             names.remove(column);
+            nameAliases.remove(column);
             types.remove(column);
             constrained.remove(column);
             domains.remove(column);
@@ -1127,12 +1136,44 @@ public class Dataframe {
         public Metadata copy() {
             return new Metadata(
                     new ArrayList<>(this.names),
+                    new ArrayList<>(this.nameAliases),
                     new ArrayList<>(this.types),
                     new ArrayList<>(this.constrained),
                     new ArrayList<>(this.domains),
                     new ArrayList<>(this.inputs));
         }
 
+        private List<String> getNames() {
+            List<String> out = new ArrayList<>();
+            for (int i = 0; i < this.names.size(); i++) {
+                if (this.nameAliases.get(i) != null) {
+                    out.add(this.nameAliases.get(i));
+                } else {
+                    out.add(this.names.get(i));
+                }
+            }
+            return out;
+        }
+
+        private String getNames(int i) {
+            if (this.nameAliases.get(i) != null) {
+                return this.nameAliases.get(i);
+            } else {
+                return this.names.get(i);
+            }
+        }
+
+        private void setNameAliases(Map<String, String> aliases) {
+            List<String> newAliases = new ArrayList<>();
+            for (String name : names) {
+                if (aliases.containsKey(name)) {
+                    newAliases.add(aliases.get(name));
+                } else {
+                    newAliases.add(null);
+                }
+            }
+            this.nameAliases = newAliases;
+        }
     }
 
     private class InternalData {

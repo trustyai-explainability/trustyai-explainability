@@ -2,13 +2,16 @@ package org.kie.trustyai.service.data;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.checkerframework.checker.units.qual.A;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -42,6 +45,13 @@ public class DataSource {
         return knownModels;
     }
 
+    private Map<String, String> getJointNameAliases(Metadata metadata){
+        HashMap<String, String> jointMapping = new HashMap<>();
+        jointMapping.putAll(metadata.getInputSchema().getNameMapping());
+        jointMapping.putAll(metadata.getOutputSchema().getNameMapping());
+        return jointMapping;
+    }
+
     public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
         final ByteBuffer dataByteBuffer;
         try {
@@ -65,7 +75,9 @@ public class DataSource {
             throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
         }
 
-        return parser.toDataframe(dataByteBuffer, internalDataByteBuffer, metadata);
+        Dataframe df = parser.toDataframe(dataByteBuffer, internalDataByteBuffer, metadata);
+        df.setColumnAliases(getJointNameAliases(metadata));
+        return df;
     }
 
     public Dataframe getDataframe(final String modelId, int batchSize) throws DataframeCreateException {
@@ -91,6 +103,8 @@ public class DataSource {
             throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
         }
 
+        Dataframe df = parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
+        df.setColumnAliases(getJointNameAliases(metadata));
         return parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
     }
 
@@ -175,6 +189,7 @@ public class DataSource {
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer metadataBytes = storage.get().read(modelId + "-" + METADATA_FILENAME);
         try {
+            LOG.info("post save string val: "+ new String(metadataBytes.array(), StandardCharsets.UTF_8));
             System.out.println("post save string val: "+ new String(metadataBytes.array(), StandardCharsets.UTF_8));
             Metadata m = mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), Metadata.class);
             System.out.println("postsave: "+m.getInputSchema().getNameMapping());
