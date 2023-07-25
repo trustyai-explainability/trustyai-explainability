@@ -11,6 +11,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.checkerframework.checker.units.qual.A;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -44,7 +45,7 @@ public class DataSource {
         return knownModels;
     }
 
-    private Map<String, String> getJointNameAliases(Metadata metadata) {
+    private Map<String, String> getJointNameAliases(Metadata metadata){
         HashMap<String, String> jointMapping = new HashMap<>();
         jointMapping.putAll(metadata.getInputSchema().getNameMapping());
         jointMapping.putAll(metadata.getOutputSchema().getNameMapping());
@@ -113,7 +114,6 @@ public class DataSource {
 
         if (!hasMetadata(modelId)) {
             // If metadata is not present, create it
-            System.out.println("Creating new metadata");
             final Metadata metadata = new Metadata();
             metadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
             metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
@@ -173,9 +173,7 @@ public class DataSource {
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer byteBuffer;
         try {
-            System.out.println("string val: " + mapper.writeValueAsString(metadata));
             byteBuffer = ByteBuffer.wrap(mapper.writeValueAsString(metadata).getBytes());
-            System.out.println("within save:" + new String(byteBuffer.array(), StandardCharsets.UTF_8));
         } catch (JsonProcessingException e) {
             throw new StorageWriteException("Could not save metadata: " + e.getMessage());
         }
@@ -188,11 +186,7 @@ public class DataSource {
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer metadataBytes = storage.get().read(modelId + "-" + METADATA_FILENAME);
         try {
-            LOG.info("post save string val: " + new String(metadataBytes.array(), StandardCharsets.UTF_8));
-            System.out.println("post save string val: " + new String(metadataBytes.array(), StandardCharsets.UTF_8));
-            Metadata m = mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), Metadata.class);
-            System.out.println("postsave: " + m.getInputSchema().getNameMapping());
-            return m;
+            return mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), Metadata.class);
         } catch (JsonProcessingException e) {
             LOG.error("Could not parse metadata: " + e.getMessage());
             throw new StorageReadException(e.getMessage());

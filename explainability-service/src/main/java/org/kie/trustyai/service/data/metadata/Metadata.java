@@ -13,7 +13,6 @@ public class Metadata {
     private String modelId;
 
     public Metadata() {
-        System.out.println("Metadata creation");
     }
 
     public Schema getOutputSchema() {
