@@ -20,12 +20,14 @@ INFER_ROUTE_BETA=$(oc get route demo-loan-nn-onnx-beta --template={{.spec.host}}
 
 check_for_reception () {
   CHECKS=0
+  THRESHOLD=${3:-950}
+  MAX_RETRIES=${4:-5}
   while true
   do
-    THRESH=$(( $1 * 950 / 1000 ))
+    THRESH=$(( $1 * $THRESHOLD / 1000 ))
     N_OBS=$(get_counter "$2")
     echo -ne "\r - Making sure TrustyAI $2 dataset contains at least $THRESH points, has $N_OBS (tried $CHECKS times)";
-    if [ $CHECKS -gt 4 ]; then
+    if [ $CHECKS -ge $MAX_RETRIES ]; then
       echo -e "\033[0;31m [timeout]\033[0m"
       exit 1
     elif [ $N_OBS -gt $THRESH ]; then
