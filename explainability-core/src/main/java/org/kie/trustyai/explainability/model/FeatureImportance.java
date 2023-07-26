@@ -17,10 +17,6 @@ package org.kie.trustyai.explainability.model;
 
 import java.util.Objects;
 
-import javax.print.DocFlavor.SERVICE_FORMATTED;
-
-import org.apache.commons.math3.linear.MatrixDimensionMismatchException;
-
 /**
  * The importance associated to a given {@link Feature}.
  * This is usually the output of an explanation algorithm (local or global).
