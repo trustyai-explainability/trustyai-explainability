@@ -22,6 +22,7 @@ import org.kie.trustyai.connectors.kserve.v2.KServeV2GRPCPredictionProvider;
 import org.kie.trustyai.explainability.local.tssaliency.TSSaliencyExplainer;
 import org.kie.trustyai.explainability.local.tssaliency.TSSaliencyModelWrapper;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.utils.TimeseriesUtils;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 import org.kie.trustyai.service.payloads.requests.explainers.ModelConfig;
@@ -45,7 +46,9 @@ public class TSSaliencyEndpoint extends ExplainerEndpoint {
         // Instantiate the model from the request
         final ModelConfig modelConfig = request.getModelConfig();
         final KServeConfig kServeConfig = KServeConfig.create(modelConfig.getTarget(), modelConfig.getName(), modelConfig.getVersion(), CodecParameter.NP);
-        final PredictionProvider originalModel = KServeV2GRPCPredictionProvider.forTarget(kServeConfig, new ArrayList<>(request.getData().keySet()), new HashMap<>());
+        final Map<String, String> optionalParameters = new HashMap<>();
+        optionalParameters.put(BIAS_IGNORE_PARAM, "true");
+        final PredictionProvider originalModel = KServeV2GRPCPredictionProvider.forTarget(kServeConfig, new ArrayList<>(request.getData().keySet()), optionalParameters);
         final PredictionProvider wrappedModel = new TSSaliencyModelWrapper(originalModel);
 
         // Convert the request data to Prediction Inputs
@@ -86,7 +89,7 @@ public class TSSaliencyEndpoint extends ExplainerEndpoint {
 
         final List<Prediction> predictions = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            predictions.add(new SimplePrediction(TSSaliencyModelWrapper.featureListTofeatureVector(inputs.get(i)), results.get(i)));
+            predictions.add(new SimplePrediction(TimeseriesUtils.featureListTofeatureVector(inputs.get(i)), results.get(i)));
         }
 
         final int randomSeed = new Random().nextInt();
@@ -104,7 +107,7 @@ public class TSSaliencyEndpoint extends ExplainerEndpoint {
         } catch (InterruptedException | ExecutionException e) {
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-        LOG.info("Saliency results: " + explanation);
+        LOG.debug("Saliency results: " + explanation);
         final Map<String, Saliency> saliencyMap = explanation.getSaliencies();
         return Response.serverError().status(Response.Status.OK).entity(saliencyMap).build();
     }
