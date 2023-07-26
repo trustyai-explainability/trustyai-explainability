@@ -5,18 +5,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 
 public class TSSaliencyModel implements PredictionProvider {
 
     int NUM_RANDOM = 7 * 120;
-    
+
     Double random[];
 
     // FIXME Handle changes
@@ -27,14 +21,11 @@ public class TSSaliencyModel implements PredictionProvider {
 
         random = new Double[NUM_RANDOM];
 
-        System.out.println("random coefs:");
-
         for (int i = 0; i < NUM_RANDOM; i++) {
             random[i] = rng.nextDouble();
             // System.out.print(random[i] + ",");
         }
 
-        System.out.println();
     }
 
     /**
@@ -48,15 +39,12 @@ public class TSSaliencyModel implements PredictionProvider {
         CompletableFuture<List<PredictionOutput>> retval = new CompletableFuture<List<PredictionOutput>>();
 
         int numInputs = inputs.size();
-        // System.out.println("numInputs = " + numInputs);
 
         List<PredictionOutput> outputs = new ArrayList<PredictionOutput>(numInputs);
 
         int index = 0;
         for (PredictionInput input : inputs) {
             List<Feature> features = input.getFeatures();
-
-            // System.out.println("features.size() = " + features.size());
 
             double y = compute(features);
 
@@ -87,19 +75,18 @@ public class TSSaliencyModel implements PredictionProvider {
         double sum = 0.0;
         int randomIndex = 0;
         for (Feature feature : features) { // iterate through features vectpr
-            // System.out.println("feature = " + feature);
 
-            assert feature.getType() == Type.VECTOR; 
+            assert feature.getType() == Type.VECTOR;
 
             Value value = feature.getValue();
 
             double[] elements = value.asVector();
-            
+
             for (double element : elements) {
                 assert randomIndex <= NUM_RANDOM;
-                
+
                 sum += element * random[randomIndex];
-                
+
                 randomIndex += 1;
             }
         }

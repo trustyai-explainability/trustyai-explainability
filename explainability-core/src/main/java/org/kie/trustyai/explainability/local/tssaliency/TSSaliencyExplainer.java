@@ -1,44 +1,26 @@
 package org.kie.trustyai.explainability.local.tssaliency;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureImportance;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Saliency;
-import org.kie.trustyai.explainability.model.SaliencyResults;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.SaliencyResults.SourceExplainer;
-import org.kie.trustyai.explainability.model.Type;
-import org.kie.trustyai.explainability.model.Value;
 
 public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults> {
 
-    private RealVector baseValue; // Feature’s base values
-    final private int ng; // Number of samples for gradient estimation
     final public int nalpha; // Number of steps in convex path
-    final private RandomGenerator randomGenerator; // random number generatr
     final double sigma; // standard deviation
     final double mu; // Step size for gradient estimation
+    final private int ng; // Number of samples for gradient estimation
+    final private RandomGenerator randomGenerator; // random number generatr
+    private RealVector baseValue; // Feature’s base values
 
     public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed, double sigma, double mu) {
         this.baseValue = new ArrayRealVector(baseValue);

@@ -34,7 +34,7 @@ public class TSSaliencyRunner implements Runnable {
         try {
 
             final int T = x.getRowDimension();
-            
+
             for (Integer I : alphaList) {
 
                 final int i = I.intValue();
@@ -61,7 +61,7 @@ public class TSSaliencyRunner implements Runnable {
 
                 synchronized (score) {
                     IntStream.range(0, T).forEach(
-                        t -> score.setRowVector(t, score.getRowVector(t).add(gDivNalpha.getRowVector(t))));
+                            t -> score.setRowVector(t, score.getRowVector(t).add(gDivNalpha.getRowVector(t))));
                 }
 
             }
