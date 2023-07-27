@@ -8,6 +8,16 @@ spec:
         repoRef:
           name: manifests
           path: config
+        parameters:
+          parameters:
+            - name: trustyaiServiceImageName
+              value: quay.io/trustyai/trustyai-service
+            - name: trustyaiServiceImageTag
+              value: latest
+            - name: trustyaiOperatorImageName
+              value: quay.io/trustyai/trustyai-service-operator
+            - name: trustyai/OperatorImageTag
+              value: latest
       name: trustyai-service-operator
   repos:
     - name: manifests
