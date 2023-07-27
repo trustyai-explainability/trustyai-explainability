@@ -61,11 +61,8 @@ else
     sed -i "s#value: \"quay.io/trustyai/trustyai-service\"#value: \"quay.io/trustyai/trustyai-service-ci\"#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
     sed -i "s#value: \"serviceTagPlaceholder\"#value: \"${BRANCH_SHA}\"#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 
-    # Applying the following configmap to operator
-    cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml > ${ARTIFACT_DIR}/trustyai_operator_configmap.yaml
-
-    echo "TrustyAI Operator Custom Image ConfigMap"
-    cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
+    echo "TrustyAI Operator KFDEF"
+    cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
   fi
 fi
 
