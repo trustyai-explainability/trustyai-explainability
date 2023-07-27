@@ -43,8 +43,10 @@ fi
 popd
 ## Point manifests repo uri in the KFDEF to the manifests in the PR
 pushd ~/kfdef
+sed -i "s#value: \"operatorTagPlaceholder\"#value: latest#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 if [ -z "$PULL_NUMBER" ]; then
   echo "No pull number, not modifying ${KFDEF_FILENAME}"
+      sed -i "s#value: \"serviceTagPlaceholder\"#value: latest#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 else
   if [ $REPO_NAME == "trustyai-explainability" ]; then
     echo "Setting manifests in kfctl_openshift to use pull number: $PULL_NUMBER"
@@ -57,7 +59,7 @@ else
 
     echo "Setting TrustyAI operator configmap to use PR image"
     sed -i "s#value: \"quay.io/trustyai/trustyai-service\"#value: \"quay.io/trustyai/trustyai-service-ci\"#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
-    sed -i "s#value: \"latest\"#value: \"${BRANCH_SHA}\"#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
+    sed -i "s#value: \"serviceTagPlaceholder\"#value: \"${BRANCH_SHA}\"#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 
     # Applying the following configmap to operator
     cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml > ${ARTIFACT_DIR}/trustyai_operator_configmap.yaml
@@ -97,6 +99,7 @@ else
 
   echo "Creating the following KfDef"
   cat ./${KFDEF_FILENAME} > ${ARTIFACT_DIR}/${KFDEF_FILENAME}
+  cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml > ${ARTIFACT_DIR}/operator_kfdef.yaml
 
   oc apply -f ./${KFDEF_FILENAME}
   kfctl_result=$?
