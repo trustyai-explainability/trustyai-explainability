@@ -25,19 +25,23 @@ class DataframeTest {
 
         final List<Prediction> predictions = new ArrayList<>();
         for (int i = 0; i < noOfPredictions; i++) {
-            final List<Feature> features = new ArrayList<>();
-            features.add(FeatureFactory.newNumericalFeature("num-1", Math.random() * 100, NumericalFeatureDomain.create(0, 100)));
-            features.add(FeatureFactory.newBooleanFeature("bool-2", new Random().nextBoolean(), ObjectFeatureDomain.create(Set.of(true, false))));
-            features.add(FeatureFactory.newNumericalFeature("num-3", 1000.0 + Math.random() * 20.0));
-            final PredictionInput input = new PredictionInput(features);
-
-            final Output outputA = new Output("pred-1", Type.NUMBER, new Value(Math.random()), 0.0);
-            final PredictionOutput output = new PredictionOutput(List.of(outputA));
-
-            final Prediction prediction = new SimplePrediction(input, output);
+            final Prediction prediction = createTestPrediction();
             predictions.add(prediction);
         }
         return Dataframe.createFrom(predictions);
+    }
+
+    private static Prediction createTestPrediction() {
+        final List<Feature> features = new ArrayList<>();
+        features.add(FeatureFactory.newNumericalFeature("num-1", Math.random() * 100, NumericalFeatureDomain.create(0, 100)));
+        features.add(FeatureFactory.newBooleanFeature("bool-2", new Random().nextBoolean(), ObjectFeatureDomain.create(Set.of(true, false))));
+        features.add(FeatureFactory.newNumericalFeature("num-3", 1000.0 + Math.random() * 20.0));
+        final PredictionInput input = new PredictionInput(features);
+
+        final Output outputA = new Output("pred-1", Type.NUMBER, new Value(Math.random()), 0.0);
+        final PredictionOutput output = new PredictionOutput(List.of(outputA));
+
+        return new SimplePrediction(input, output);
     }
 
     public static Dataframe createTestDataframe() {
@@ -627,6 +631,15 @@ class DataframeTest {
     }
 
     @Test
+    void testDataFrameFromPredictionAndMetadata() {
+        Prediction prediction = createTestPrediction();
+        PredictionMetadata metadata = new PredictionMetadata("123", LocalDateTime.now(), false);
+        Dataframe dataframe = Dataframe.createFrom(prediction, metadata);
+        assertThat(dataframe).isNotNull();
+        assertThat(dataframe.getRowDimension()).isEqualTo(1);
+    }
+
+    @Test
     void testDataframeWithPredictionMetadata() {
         Dataframe df = createTestDataframe();
         assertThat(df).isNotNull();
@@ -636,7 +649,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), true));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), true));
             idx++;
         }
         df.addPredictions(predictions, metadata);
@@ -645,20 +658,21 @@ class DataframeTest {
 
     @Test
     void testFilteringDataframeSynthetic() {
-        Dataframe df = createTestDataframe(10);
+        Dataframe df = createTestDataframe(3);
         assertThat(df).isNotNull();
         assertThat(df.getRows()).isNotNull();
-        assertThat(df.getRows().size()).isEqualTo(10);
-        List<Prediction> predictions = createTestDataframe(10).asPredictions();
+        assertThat(df.getRows().size()).isEqualTo(3);
+        List<Prediction> predictions = createTestDataframe(7).asPredictions();
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), true));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), true));
             idx++;
         }
         df.addPredictions(predictions, metadata);
-        assertThat(df.getRows().size()).isEqualTo(20);
-        assertThat(df.filterOutSyntheticRows().getRowDimension()).isEqualTo(10);
+        assertThat(df.getRows().size()).isEqualTo(10);
+        assertThat(df.filterRowsBySynthetic(false).getRowDimension()).isEqualTo(3);
+        assertThat(df.filterRowsBySynthetic(true).getRowDimension()).isEqualTo(7);
     }
 
     @Test
@@ -672,7 +686,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), false));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), false));
             idx++;
         }
         df.addPredictions(predictions, metadata);
@@ -690,7 +704,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), "fake-model", LocalDateTime.now(), false));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), false));
             idx++;
         }
         df.addPredictions(predictions, metadata);

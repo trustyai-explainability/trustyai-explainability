@@ -13,10 +13,6 @@ import org.kie.trustyai.service.payloads.values.DataType;
 
 public class MetadataUtils {
 
-    public static final String ID_FIELD = "_id";
-    public static final String TIMESTAMP_FIELD = "_timestamp";
-    public static final String METADATA = "_metadata";
-
     private MetadataUtils() {
 
     }
@@ -57,9 +53,6 @@ public class MetadataUtils {
         return Schema.from(dataframe
                 .getInputsIndices()
                 .stream()
-                .filter(i -> !dataframe.getColumnNames().get(i).equals(ID_FIELD))
-                .filter(i -> !dataframe.getColumnNames().get(i).equals(TIMESTAMP_FIELD))
-                .filter(i -> !dataframe.getColumnNames().get(i).equals(METADATA))
                 .map(i -> extractRowSchema(dataframe, i))
                 .collect(Collectors.toMap(SchemaItem::getName, Function.identity())));
     }

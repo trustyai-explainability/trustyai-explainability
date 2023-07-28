@@ -20,62 +20,91 @@ INFER_ROUTE_BETA=$(oc get route demo-loan-nn-onnx-beta --template={{.spec.host}}
 
 check_for_reception () {
   CHECKS=0
+  THRESHOLD=${3:-950}
+  MAX_RETRIES=${4:-5}
   while true
   do
-    THRESH=$(( $1 * 250 / 1000 ))
-    N_OBS=$(oc exec $TRUSTY_POD  -c trustyai-service -- bash -c "cat /inputs/$2-metadata.json"  | jq .observations)
-    echo -ne "\rMaking sure TrustyAI $2 dataset contains at least $THRESH points, has $N_OBS (tried $CHECKS times)";
-    if (( $CHECKS > 10)); then
-      echo "\033[0;31mERROR: Message reception timeout\033[0m"
+    THRESH=$(( $1 * $THRESHOLD / 1000 ))
+    N_OBS=$(get_counter "$2")
+    echo -ne "\r - Making sure TrustyAI $2 dataset contains at least $THRESH points, has $N_OBS (tried $CHECKS times)";
+    if [ $CHECKS -ge $MAX_RETRIES ]; then
+      echo -e "\033[0;31m [timeout]\033[0m"
       exit 1
-    elif (( $N_OBS > $THRESH )); then
+    elif [ $N_OBS -gt $THRESH ]; then
       break
     else
       ((CHECKS=CHECKS+1))
       sleep 1
     fi
   done
-  echo " [done]"
+  echo -e "\033[0;32m [done]\033[0m"
 }
 
-# Init first dataset counter
-if [[ -z $(oc exec $TRUSTY_POD -c trustyai-service -- bash -c "ls /inputs/ | grep $MODEL_ALPHA") ]]; then
-  START_OBS_ALPHA=0
-else
-  START_OBS_ALPHA=$(oc exec $TRUSTY_POD -c trustyai-service -- bash -c "cat /inputs/$MODEL_ALPHA-metadata.json"  | jq .observations)
-fi
+get_counter () {
+  FILE_PRESENT=$(oc exec $TRUSTY_POD -c trustyai-service -- bash -c "ls /inputs/ | grep $1 || echo ''")
+  if [[ -z $FILE_PRESENT ]]; then
+    echo 0
+  else
+    echo $(oc exec $TRUSTY_POD -c trustyai-service -- bash -c "cat /inputs/$1-metadata.json"  | jq .observations)
+  fi
+}
+
+# Init dataset counters
+START_OBS_ALPHA=$(get_counter $MODEL_ALPHA)
 echo "$START_OBS_ALPHA datapoints already in ALPHA dataset"
 
-# Init second dataset counter
-if [[ -z $(oc exec $TRUSTY_POD  -c trustyai-service -- bash -c "ls /inputs/ | grep $MODEL_BETA") ]]; then
-  START_OBS_BETA=0
-else
-  START_OBS_BETA=$(oc exec $TRUSTY_POD -c trustyai-service -- bash -c "cat /inputs/$MODEL_BETA-metadata.json"  | jq .observations)
-fi
+START_OBS_BETA=$(get_counter $MODEL_BETA)
 echo "$START_OBS_BETA datapoints already in BETA dataset"
 
 
-for data in $(cat $1 | jq -c '.[]')
-do
-  if [ $(($LOOP_IDX % $BATCH_SIZE)) -eq 0 ] && [ $LOOP_IDX -gt 0 ]; then
-    echo
-    check_for_reception $(( $LOOP_IDX + $START_OBS_ALPHA )) $MODEL_ALPHA
-    check_for_reception $(( $LOOP_IDX + $START_OBS_BETA )) $MODEL_BETA
+# ========
+# this script is useful for sending many inferences one-by-one, so is preserved below
+# ========
+#for data in $(cat $1 | jq -c '.[]')
+#do
+#  if [ $(($LOOP_IDX % $BATCH_SIZE)) -eq 0 ] && [ $LOOP_IDX -gt 0 ]; then
+#    echo
+#    check_for_reception $(( $LOOP_IDX + $START_OBS_ALPHA )) $MODEL_ALPHA
+#    check_for_reception $(( $LOOP_IDX + $START_OBS_BETA )) $MODEL_BETA
+#  fi
+#
+#  echo -ne "\rSent datapoint $(( $LOOP_IDX + 1 )) of $THRESHOLD"
+#  curl -k https://$INFER_ROUTE_ALPHA/infer -d $data > /dev/null 2>&1  &
+#  curl -k https://$INFER_ROUTE_BETA/infer -d $data > /dev/null 2>&1  &
+#
+#  sleep $PAUSE_TIME
+#
+#  if [[ "$LOOP_IDX" -ge $(( $THRESHOLD - 1 )) ]]; then
+#    echo -e "\nAll datapoints sent"
+#    break
+#  fi
+#
+#  let "LOOP_IDX++"
+#done
+# ========
+
+# batched version of the scr
+TRIES=0
+SUCCESS_ALPHA=false
+SUCCESS_BETA=false
+
+while [ "$SUCCESS_ALPHA" != true ] || [ "$SUCCESS_BETA" != true ]; do
+  if [ $TRIES -gt 4 ]; then
+    echo -e "\n\033[0;31mERROR: Send data batch timeout\033[0m"
+    exit 1
+  else
+    echo "Data batch transmission (ATTEMPT $TRIES)"
   fi
 
-  echo -ne "\rSent datapoint $(( $LOOP_IDX + 1 )) of $THRESHOLD"
-  curl -k https://$INFER_ROUTE_ALPHA/infer -d $data > /dev/null 2>&1  &
-  curl -k https://$INFER_ROUTE_BETA/infer -d $data > /dev/null 2>&1  &
+  if [ "$SUCCESS_ALPHA" != true ]; then
+    curl -k https://$INFER_ROUTE_ALPHA/infer -d @$1 > /dev/null 2>&1
+    ( check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_ALPHA )) $MODEL_ALPHA; ) && SUCCESS_ALPHA=true
+  fi;
 
-  sleep $PAUSE_TIME
+  if [ "$SUCCESS_BETA" != true ]; then
+    curl -k https://$INFER_ROUTE_BETA/infer -d @$1 > /dev/null 2>&1
+    ( check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_BETA )) $MODEL_BETA; ) && SUCCESS_BETA=true
+  fi;
 
-  if [[ "$LOOP_IDX" -ge $(( $THRESHOLD - 1 )) ]]; then
-    echo -e "\nAll datapoints sent"
-    break
-  fi
-
-  let "LOOP_IDX++"
+  ((TRIES=TRIES+1))
 done
-
-check_for_reception $(( $LOOP_IDX + $START_OBS_ALPHA + 1)) $MODEL_ALPHA
-check_for_reception $(( $LOOP_IDX + $START_OBS_BETA + 1)) $MODEL_BETA

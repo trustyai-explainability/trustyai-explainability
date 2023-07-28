@@ -30,3 +30,4 @@ pom.xml.next
 release-pom.xml
 __pycache__
 *.egg-info
+commons-math3-3.6.1

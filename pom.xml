@@ -57,7 +57,7 @@
 
         <kogito.formatter.version>${version.org.kie.kogito}</kogito.formatter.version>
         <formatter.plugin.version>2.13.0</formatter.plugin.version>
-        <impsort.plugin.version>1.5.0</impsort.plugin.version>
+        <impsort.plugin.version>1.9.0</impsort.plugin.version>
 
         <nexus.staging.plugin.version>1.6.6</nexus.staging.plugin.version>
 
