@@ -8,6 +8,8 @@ import jep.python.PyObject;
 
 public abstract class ExternalPythonExplainer<T> extends ExternalPythonClass {
 
+    private final static String EXPLAIN_METHOD = "explain";
+
     public T invoke(Map<String, Object> arguments, SubInterpreter interpreter) {
 
         interpreter.exec("from " + getNamespace() + " import " + getName());
@@ -19,7 +21,7 @@ public abstract class ExternalPythonExplainer<T> extends ExternalPythonClass {
             explainer = (PyObject) callable.call(getConstructionArgs());
         }
 
-        final PyCallable explain = (PyCallable) explainer.getAttr("explain");
+        final PyCallable explain = (PyCallable) explainer.getAttr(EXPLAIN_METHOD);
 
         return (T) explain.call(arguments);
     }

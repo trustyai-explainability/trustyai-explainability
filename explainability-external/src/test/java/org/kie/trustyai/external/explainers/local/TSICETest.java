@@ -3,26 +3,57 @@ package org.kie.trustyai.external.explainers.local;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.external.interfaces.PassthroughPythonPredictionProvider;
 import org.kie.trustyai.external.utils.PrepareDatasets;
-import org.kie.trustyai.external.utils.PythonWrapper;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.kie.trustyai.external.utils.PythonRuntimeManager;
 
 import jep.SubInterpreter;
 import jep.python.PyCallable;
 import jep.python.PyObject;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class TSICETest {
 
     @Test
+    @DisplayName("Test TSICE explainer construction only")
+    void testConstruction() {
+        try (SubInterpreter sub = PythonRuntimeManager.INSTANCE.getSubInterpreter()) {
+            final int nObs = 100;
+            final Dataframe data = TimeseriesTest.createUnivariateDataframe(nObs, "timestamp", "sunspots");
+
+            final int observationLength = 24;
+            final int inputLength = 144;
+            final int forecastHorizon = 12;
+            final int nPerturbations = 250;
+
+            final List<TSICEExplainer.AnalyseFeature> featuresToAnalyse =
+                    List.of(TSICEExplainer.AnalyseFeature.MEAN, TSICEExplainer.AnalyseFeature.STD, TSICEExplainer.AnalyseFeature.MAX_VARIATION, TSICEExplainer.AnalyseFeature.TREND);
+
+            final TSICEExplainer tsice = new TSICEExplainer.Builder()
+                    .withInputLength(inputLength)
+                    .withForecastLookahead(forecastHorizon)
+                    .withNPerturbations(nPerturbations)
+                    .withFeaturesToAnalyze(featuresToAnalyse)
+                    .withExplanationWindowLength(observationLength)
+                    .withExplanationWindowStart(36).build(sub, "192.168.0.47:8080", "tsforda", "v0.1.0");
+
+            assertEquals("trustyaiexternal.algorithms.tsice", tsice.getNamespace());
+            assertEquals("TSICEExplainer", tsice.getName());
+        }
+    }
+
+    @Test
+    @Disabled("This test is disabled because it requires a running model")
     void explainAsyncTest() throws ExecutionException, InterruptedException {
 
-        try (SubInterpreter sub = PythonWrapper.INSTANCE.getSubInterpreter()) {
+        try (SubInterpreter sub = PythonRuntimeManager.INSTANCE.getSubInterpreter()) {
             final Dataframe sunspots = PrepareDatasets.getSunSpotsDataset();
 
             final int observationLength = 24;
@@ -30,15 +61,16 @@ class TSICETest {
             final int forecastHorizon = 12;
             final int nPerturbations = 250;
 
-            final List<TSICE.AnalyseFeature> featuresToAnalyse = List.of(TSICE.AnalyseFeature.MEAN, TSICE.AnalyseFeature.STD, TSICE.AnalyseFeature.MAX_VARIATION, TSICE.AnalyseFeature.TREND);
+            final List<TSICEExplainer.AnalyseFeature> featuresToAnalyse =
+                    List.of(TSICEExplainer.AnalyseFeature.MEAN, TSICEExplainer.AnalyseFeature.STD, TSICEExplainer.AnalyseFeature.MAX_VARIATION, TSICEExplainer.AnalyseFeature.TREND);
 
-            final TimeSeriesExplainer<TSICEExplanation> tsice = new TSICE.Builder()
+            final TimeSeriesExplainer<TSICEExplanation> tsice = new TSICEExplainer.Builder()
                     .withInputLength(inputLength)
                     .withForecastLookahead(forecastHorizon)
                     .withNPerturbations(nPerturbations)
                     .withFeaturesToAnalyze(featuresToAnalyse)
                     .withExplanationWindowLength(observationLength)
-                    .withExplanationWindowStart(36).build(sub, "192.168.0.47:8081", "model", "v0.1.0");
+                    .withExplanationWindowStart(36).build(sub, "192.168.0.47:8080", "tsforda", "v0.1.0");
 
             // We import the model from Python by using the passthrough prediction provider
             sub.exec("from trustyaiexternal.models.forecaster import create_model");
@@ -49,6 +81,47 @@ class TSICETest {
 
             // Request the explanation
             TSICEExplanation explanation = tsice.explainAsync(sunspots.tail(inputLength).asPredictions(), model).get();
+
+            assertEquals(1, explanation.getDataX().size());
+            assertEquals(inputLength, explanation.getDataX().get("sunspots").size());
+            assertEquals(featuresToAnalyse.size(), explanation.getFeatureNames().size());
+            assertEquals(featuresToAnalyse.size(), explanation.getFeatureValues().size());
+            assertEquals(nPerturbations, explanation.getSignedImpact().size());
+            assertEquals(nPerturbations, explanation.getTotalImpact().size());
+            assertEquals(featuresToAnalyse.size(), explanation.getCurrentFeatureValues().size());
+            assertEquals(nPerturbations, explanation.getPerturbations().size());
+        }
+
+    }
+
+    @Test
+    @DisplayName("Test TSICE explainer with a simple model")
+    @Disabled("This test is disabled because it requires a running model")
+    void simpleModel() throws ExecutionException, InterruptedException {
+
+        try (SubInterpreter sub = PythonRuntimeManager.INSTANCE.getSubInterpreter()) {
+
+            final int nObs = 100;
+            final Dataframe data = TimeseriesTest.createUnivariateDataframe(nObs, "timestamp", "sunspots");
+
+            final int observationLength = 10;
+            final int inputLength = 20;
+            final int forecastHorizon = 10;
+            final int nPerturbations = 20;
+
+            final List<TSICEExplainer.AnalyseFeature> featuresToAnalyse = List.of(TSICEExplainer.AnalyseFeature.MEAN);
+
+            final TimeSeriesExplainer<TSICEExplanation> tsice = new TSICEExplainer.Builder()
+                    .withInputLength(inputLength)
+                    .withForecastLookahead(forecastHorizon)
+                    .withNPerturbations(nPerturbations)
+                    .withFeaturesToAnalyze(featuresToAnalyse)
+                    .withExplanationWindowLength(observationLength)
+                    .withTimestampColumn("timestamp")
+                    .withExplanationWindowStart(2).build(sub, "192.168.0.47:8080", "tsforda", "v0.1.0");
+
+            // Request the explanation
+            TSICEExplanation explanation = tsice.explainAsync(data.tail(inputLength).asPredictions(), null).get();
 
             assertEquals(1, explanation.getDataX().size());
             assertEquals(inputLength, explanation.getDataX().get("sunspots").size());

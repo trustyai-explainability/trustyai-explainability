@@ -25,6 +25,10 @@ public class TsFrame {
     }
 
     public PyObject getTsFrame(final SubInterpreter interpreter) {
-        return Converter.dataframeToTsframe(dataframe, this.timestampColumn, this.format, interpreter);
+        if (dataframe.getColumnNames().contains(this.timestampColumn)) {
+            return Converter.dataframeToTsframe(dataframe, this.timestampColumn, this.format, interpreter);
+        } else {
+            throw new IllegalArgumentException("The dataframe does not contain the " + this.timestampColumn + " column");
+        }
     }
 }

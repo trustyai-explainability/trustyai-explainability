@@ -8,10 +8,11 @@ setup(
     author_email="rui@redhat.com",
     packages=["trustyaiexternal", "trustyaiexternal.algorithms", "trustyaiexternal.models"],
     install_requires=[
-        "pandas<=1.4.3",  # For AIX360 compatibility
+        "pandas~=1.5.3",
         "numpy",
         "jep==4.1.1",
-        "grpcio",
-        "protobuf==3.19.4",
+        "urllib3==1.26.0",
+        "requests",
+        "aix360 [default,tsice,tslime,tssaliency] @ https://github.com/Trusted-AI/AIX360/archive/refs/heads/master.zip"
     ],
 )

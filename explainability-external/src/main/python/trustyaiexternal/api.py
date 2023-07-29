@@ -1,13 +1,9 @@
 import logging
 from abc import ABC, abstractmethod
 from typing import List, Union
-
-import grpc
+import requests
 import numpy as np
 import pandas as pd
-
-import trustyaiexternal.proto_pb2 as proto_pb2
-import trustyaiexternal.proto_pb2_grpc as proto_pb2_grpc
 
 from aix360.algorithms.tsutils.tsframe import tsFrame
 
@@ -18,6 +14,7 @@ logging.warning(__file__)
 
 class Metric(ABC):
     """Base class for all metrics"""
+
     @abstractmethod
     def calculate(self, df: pd.DataFrame) -> float:
         pass
@@ -25,18 +22,23 @@ class Metric(ABC):
 
 class Explainer(ABC):
     """Base class for all explainers"""
-    def __init__(self, 
-                 model_name: str, 
-                 model_version: str, 
+
+    def __init__(self,
+                 model_name: str,
+                 model_version: str,
                  target: str):
-        self._model = GRPCModel(model_name=model_name, model_version=model_version, target=target)
+        self._model = ModelMeshWrapper(model_name=model_name,
+                                       model_version=model_version,
+                                       target=target)
 
     @abstractmethod
     def explain(self, point: pd.DataFrame) -> dict:
         pass
 
+
 class Converter:
     """Converts between different Python and Java data types"""
+
     @staticmethod
     def dataframe_from_array(x: np.ndarray, names: List[str]) -> pd.DataFrame:
         """Converts a numpy array to a pandas dataframe with the given column names
@@ -55,7 +57,7 @@ class Converter:
             x (dict): Java map
         """
         real_x = {}
-        x.forEach(lambda k,v: real_x.update({k:v}))
+        x.forEach(lambda k, v: real_x.update({k: v}))
         x = real_x
         return x
 
@@ -69,6 +71,14 @@ class Converter:
         return pd.DataFrame(data=Converter.convert_java_map_to_dict(x))
 
     @staticmethod
+    def tsframe_from_java(column_names: List[str], values: List[List], timestamp: str, format: str) -> pd.DataFrame:
+        """Converts a Java map to a time-series dataframe"""
+        df = pd.DataFrame(dict(zip(column_names, values)))
+        df[timestamp] = pd.to_datetime(df[timestamp], format=format)
+        result = tsFrame(df=df, timestamp_column=timestamp)  # type: ignore
+        return result
+
+    @staticmethod
     def tsframe_from_dataframe(x: dict, timestamp_column: str, format: str) -> pd.DataFrame:
         """Converts a Java map to a time-series dataframe
         
@@ -77,67 +87,65 @@ class Converter:
             timestamp_column (str): name of the timestamp column
             format (str): format of the timestamp column
         """
+        logging.info("Converting")
+        logging.info(x)
         df = pd.DataFrame(data=Converter.convert_java_map_to_dict(x))
         df[timestamp_column] = pd.to_datetime(df[timestamp_column], format=format)
-        return tsFrame(df=df, timestamp_column=timestamp_column) # type: ignore
+        result = tsFrame(df=df, timestamp_column=timestamp_column)  # type: ignore
+        logging.info(result)
+        return result
+
 
 class DummyModel:
     def predict(self, x: pd.DataFrame) -> pd.DataFrame:
         logging.warning(f"Dummy model received data: {x}")
         return x.tail(12)
 
-class GRPCModel:
-    """Wrapper for a GRPC model
-    
-    Connects to a GRPC model and provides a `predict` method to make predictions.
 
-    Args:
+class ModelMeshWrapper:
+    def __init__(self,
+                 target: str,
+                 model_name: str,
+                 model_version: str = None):
+        self.model_name = model_name
+        self.model_version = model_version
+        self._url = f"http://{target}/v2/models/{model_name}/infer"
 
-        model_name (str): name of the model
-        model_version (str): version of the model
-        target (str): target of the model (gRPC host and port)
-    """
-    def __init__(self, model_name: str, model_version: str, target: str = '0.0.0.0:8081'):
-        self.channel = grpc.insecure_channel(target)
-        self.stub = proto_pb2_grpc.GRPCInferenceServiceStub(self.channel)
-        self._model_name = model_name
-        self._model_version = model_version
-
-    def predict(self, x: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
-        """Generic predict method for GRPC models.
-        Aims at replacing a standard scikit-learn predict method.
-
-        Args:
-            x (Union[pd.DataFrame, np.ndarray]): input data, either a pandas dataframe or a numpy array
-        """
-        request = proto_pb2.ModelInferRequest()
-        request.model_name = self._model_name # type: ignore
-        request.model_version = self._model_version # type: ignore
-        request.id = "request_id" # type: ignore
-
-        if isinstance(x, pd.DataFrame):
-            data = x.to_numpy()
+    def _build_request(self, inputs: Union[pd.DataFrame, np.ndarray, List[List[float]]]):
+        if isinstance(inputs, np.ndarray):
+            shape = list(inputs.shape)
+            data = inputs.tolist()
+        elif isinstance(inputs, pd.DataFrame):
+            shape = [inputs.shape[0], inputs.shape[1]]
+            data = inputs.values.tolist()
         else:
-            data = x
+            raise TypeError("Unsupported data type. Please provide a numpy array or a pandas DataFrame.")
 
-        data = data.T
-        # print(data)
-        # print([data.shape[0], data.shape[1]])
-        input = proto_pb2.ModelInferRequest().InferInputTensor()
-        input.name = "input"
-        input.datatype = "FP64"
-        input.shape.extend([data.shape[1], data.shape[0]])
+        # TODO: Add parameters to avoid bias contamination
+        return {
+            'inputs': [
+                {
+                    "name": "input",
+                    "shape": shape,
+                    "datatype": "FP32",  # TODO: Take from the data
+                    "data": data
+                }
+            ]
+        }
 
-        logging.warning(f"Data shape is: {data.shape}")
+    def _parse_output(self, response) -> np.ndarray:
+        data = {}
+        for output in response['outputs']:
+            # reshape data according to its shape, then flatten it
+            data_array = np.array(output['data']).reshape(output['shape']).flatten()
+            data[output['name']] = data_array.tolist()
 
-        input_contents = proto_pb2.InferTensorContents(fp64_contents=[1.0]*144)
-        input.contents.MergeFrom(input_contents)
+        # construct DataFrame
+        df = pd.DataFrame(data)
+        return df.to_numpy()
 
-        request.inputs.extend([input])
-        print(request)
-        response = self.stub.ModelInfer(request)
-
-        output = response.outputs[0]
-        contents = output.contents.fp64_contents
-        return np.array(output.contents.fp64_contents).T
-
+    def predict(self, inputs: Union[pd.DataFrame, np.ndarray, List[List[float]]]) -> np.ndarray:
+        request = self._build_request(inputs)
+        response = requests.post(self._url, json=request)
+        result = self._parse_output(response.json())
+        return result

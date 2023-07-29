@@ -14,17 +14,21 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.external.interfaces.ExternalPythonExplainer;
 import org.kie.trustyai.external.interfaces.TsFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jep.SubInterpreter;
 
-public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implements TimeSeriesExplainer<TSICEExplanation> {
+public class TSICEExplainer extends ExternalPythonExplainer<Map<String, Object>> implements TimeSeriesExplainer<TSICEExplanation> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TSICEExplainer.class);
     private final String NAMESPACE = "trustyaiexternal.algorithms.tsice";
     private final String NAME = "TSICEExplainer";
-
     private final SubInterpreter interpreter;
 
-    public TSICE(Builder builder) {
+    private final String timestampColumn;
+
+    public TSICEExplainer(Builder builder) {
         super();
         this.interpreter = builder.interpreter;
         addConstructionArg("model_name", builder.modelName);
@@ -39,6 +43,9 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
         addConstructionArg("explanation_window_start", builder.explanationWindowStart);
         addConstructionArg("explanation_window_length", builder.explanationWindowLength);
         addConstructionArg("target", builder.modelTarget);
+        this.timestampColumn = builder.timestampColumn;
+        LOG.info("TSICE explainer created");
+
     }
 
     public CompletableFuture<TSICEExplanation> explainAsync(TsFrame dataframe, PredictionProvider model, Consumer<TSICEExplanation> intermediateResultsConsumer) {
@@ -48,6 +55,7 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
         try {
             result = this.invoke(args, interpreter);
         } catch (Throwable e) {
+            LOG.error("Error while invoking TSICE", e);
             throw new RuntimeException(e);
         }
         return CompletableFuture.completedFuture(new TSICEExplanation(result));
@@ -70,8 +78,8 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
 
     @Override
     public CompletableFuture<TSICEExplanation> explainAsync(List<Prediction> prediction, PredictionProvider model, Consumer<TSICEExplanation> intermediateResultsConsumer) {
-        Dataframe df = Dataframe.createFrom(prediction);
-        TsFrame tsFrame = new TsFrame(df, "month");
+        final Dataframe df = Dataframe.createFrom(prediction);
+        final TsFrame tsFrame = new TsFrame(df, this.timestampColumn);
         return explainAsync(tsFrame, model, intermediateResultsConsumer);
     }
 
@@ -112,8 +120,15 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
         private String modelTarget;
         private String modelName;
 
+        private String timestampColumn;
+
         private String modelVersion;
         private SubInterpreter interpreter;
+
+        public Builder withTimestampColumn(String timestampColumn) {
+            this.timestampColumn = timestampColumn;
+            return this;
+        }
 
         public Builder withInputLength(int inputLength) {
             this.inputLength = inputLength;
@@ -160,12 +175,12 @@ public class TSICE extends ExternalPythonExplainer<Map<String, Object>> implemen
             return this;
         }
 
-        public TSICE build(SubInterpreter interpreter, String modelTarget, String modelName, String version) {
+        public TSICEExplainer build(SubInterpreter interpreter, String modelTarget, String modelName, String version) {
             this.interpreter = interpreter;
             this.modelTarget = modelTarget;
             this.modelName = modelName;
             this.modelVersion = version;
-            return new TSICE(this);
+            return new TSICEExplainer(this);
         }
     }
 }

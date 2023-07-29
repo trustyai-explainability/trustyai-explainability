@@ -1,0 +1,30 @@
+### Send POST request with json body
+POST http://localhost:8080//explainers/timeseries/tslime
+Content-Type: application/json
+
+{
+  "model": {
+    "target": "192.168.0.47:8080",
+    "name": "tsforda",
+    "version": "v0.1.0"
+  },
+  "data": {
+    "x": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "timestampName": "timestamp",
+  "timestamps": [
+    "2020-01-01",
+    "2020-01-02",
+    "2020-01-03",
+    "2020-01-04",
+    "2020-01-05"
+  ],
+  "inputLength": 4,
+  "nPerturbations": 20
+}
