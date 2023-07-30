@@ -12,7 +12,6 @@ public abstract class ExternalPythonMetric {
     protected ExternalPythonMetric() {
         this.config = new JepConfig();
         config.addSharedModules("numpy", "pandas", "sklearn", "scipy", "grpc");
-        config.addIncludePaths("src/main/resources/python/trustyaiexternal");
     }
 
     public JepConfig getConfig() {

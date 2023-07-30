@@ -6,7 +6,7 @@ setup(
     description="TrustyAI external wrapper",
     author="Rui Vieira",
     author_email="rui@redhat.com",
-    packages=["trustyaiexternal", "trustyaiexternal.algorithms", "trustyaiexternal.models"],
+    packages=["trustyaiexternal", "trustyaiexternal.algorithms", "trustyaiexternal.api"],
     install_requires=[
         "pandas~=1.5.3",
         "numpy",

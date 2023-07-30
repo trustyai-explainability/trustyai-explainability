@@ -3,8 +3,10 @@ from typing import Optional, Union
 import pandas as pd
 from aix360.algorithms.tsice import TSICEExplainer as _TSICEExplainer
 from aix360.algorithms.tsutils.tsperturbers import TSPerturber
-from trustyaiexternal.api import Explainer
+
 import logging
+
+from trustyaiexternal.api.explainers import Explainer
 
 # Set up logging
 logging.basicConfig(level=logging.WARNING)

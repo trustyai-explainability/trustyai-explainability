@@ -4,8 +4,10 @@ import pandas as pd
 from aix360.algorithms.tslime import TSLimeExplainer as _TSLimeExplainer
 from aix360.algorithms.tslime.surrogate import LinearSurrogateModel
 from aix360.algorithms.tsutils.tsperturbers import TSPerturber
-from trustyaiexternal.api import Explainer
+
 import logging
+
+from trustyaiexternal.api.explainers import Explainer
 
 # Set up logging
 logging.basicConfig(level=logging.WARNING)

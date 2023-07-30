@@ -16,19 +16,21 @@ import jep.python.PyObject;
 
 public class Converter {
 
+    private static final String CONVERTER_IMPORT = "import trustyaiexternal.api.converters as converters";
+
     private Converter() {
         // Intentionally left blank
     }
 
     public static PyObject arrayToDataframe(Dataframe dataframe, SubInterpreter interpreter) {
-        interpreter.exec("import trustyaiexternal.api as api");
+        interpreter.exec(CONVERTER_IMPORT);
         final NDArrayConverter<double[]> array = new NDArrayConverter<>(dataframe);
-        PyCallable callable = (PyCallable) interpreter.getValue("api.Converter.dataframe_from_array");
+        PyCallable callable = (PyCallable) interpreter.getValue("converters.Converter.dataframe_from_array");
         return (PyObject) callable.call(array.getData(), dataframe.getColumnNames());
     }
 
     public static PyObject mapToDataframe(Dataframe dataframe, SubInterpreter interpreter) {
-        interpreter.exec("import trustyaiexternal.api as api");
+        interpreter.exec(CONVERTER_IMPORT);
         final Map<String, List<Object>> map = new HashMap<>();
         final int columnDimension = dataframe.getColumnDimension();
         final List<String> columnNames = dataframe.getColumnNames();
@@ -39,7 +41,7 @@ public class Converter {
             // Store the column name and data in the map
             map.put(columnNames.get(i), columnData);
         }
-        PyCallable callable = (PyCallable) interpreter.getValue("api.Converter.dataframe_from_map");
+        PyCallable callable = (PyCallable) interpreter.getValue("converters.Converter.dataframe_from_map");
         return (PyObject) callable.call(map);
     }
 
@@ -55,7 +57,7 @@ public class Converter {
      * @return A {@link PyObject} representing the tsFrame
      */
     public static PyObject dataframeToTsframe(Dataframe dataframe, String timestampColumn, String format, SubInterpreter sub) {
-        sub.exec("import trustyaiexternal.api as api");
+        sub.exec(CONVERTER_IMPORT);
 
         final int columnDimension = dataframe.getColumnDimension();
         final List<String> columnNames = dataframe.getColumnNames();
@@ -64,7 +66,7 @@ public class Converter {
                 .mapToObj(i -> dataframe.getColumn(i).stream().map(Value::getUnderlyingObject).collect(Collectors.toList()))
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        final PyCallable callable = (PyCallable) sub.getValue("api.Converter.tsframe_from_java");
+        final PyCallable callable = (PyCallable) sub.getValue("converters.Converter.tsframe_from_java");
         return (PyObject) callable.call(columnNames, values, timestampColumn, format);
     }
 }

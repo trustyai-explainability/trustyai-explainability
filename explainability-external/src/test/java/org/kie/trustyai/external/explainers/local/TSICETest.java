@@ -10,7 +10,6 @@ import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.external.interfaces.PassthroughPythonPredictionProvider;
-import org.kie.trustyai.external.utils.PrepareDatasets;
 import org.kie.trustyai.external.utils.PythonRuntimeManager;
 
 import jep.SubInterpreter;

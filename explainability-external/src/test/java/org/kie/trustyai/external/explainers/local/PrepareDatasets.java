@@ -1,4 +1,4 @@
-package org.kie.trustyai.external.utils;
+package org.kie.trustyai.external.explainers.local;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
