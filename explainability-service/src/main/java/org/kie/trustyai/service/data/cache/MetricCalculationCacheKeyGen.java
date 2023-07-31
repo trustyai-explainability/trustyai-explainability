@@ -8,8 +8,7 @@ import javax.inject.Inject;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.storage.Storage;
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.ReconciledMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
 import io.quarkus.cache.CacheKeyGenerator;
 import io.quarkus.cache.CompositeCacheKey;
@@ -27,14 +26,14 @@ public class MetricCalculationCacheKeyGen implements CacheKeyGenerator {
      * was already calculated, this will result in a cache hit for that metric.
      * If either the data or the request are new, the metric will fully calculated.
      * 
-     * @param method This refers to the calculation methods in {@link org.kie.trustyai.service.endpoints.metrics.MetricsCalculator}.
+     * @param method This refers to the calculation methods}.
      * @param methodParams Metric calculation parameters. Only {@link BaseMetricRequest} is used.
      * @return A composite cache key.
      */
     @Override
     public Object generate(Method method, Object... methodParams) {
 
-        final ReconciledMetricRequest request = (ReconciledMetricRequest) methodParams[1];
+        final BaseMetricRequest request = (BaseMetricRequest) methodParams[1];
         final String modelId = request.getModelId();
         LOG.debug("Creating cache key for model " + modelId);
         return new CompositeCacheKey(modelId, storage.get().getLastModified(modelId), request.hashCode());

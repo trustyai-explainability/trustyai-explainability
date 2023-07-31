@@ -3,7 +3,10 @@ package org.kie.trustyai.service.endpoints.service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -21,6 +24,7 @@ import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
@@ -54,8 +58,9 @@ public class ServiceMetadataEndpoint {
         for (String modelId : dataSource.get().getKnownModels()) {
             final ServiceMetadata serviceMetadata = new ServiceMetadata();
 
-            serviceMetadata.getMetrics().scheduledMetadata.dir = scheduler.getDirRequests().size();
-            serviceMetadata.getMetrics().scheduledMetadata.spd = scheduler.getSpdRequests().size();
+            for (Map.Entry<String, ConcurrentHashMap<UUID, BaseMetricRequest>> metricDict : scheduler.getAllRequests().entrySet()) {
+                serviceMetadata.getMetrics().scheduledMetadata.setCount(metricDict.getKey(), metricDict.getValue().size());
+            }
 
             try {
                 final Metadata metadata = dataSource.get().getMetadata(modelId);
@@ -77,13 +82,13 @@ public class ServiceMetadataEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response labelSchema(NameMapping nameMapping) throws JsonProcessingException {
 
-        if (!dataSource.get().getKnownModels().contains(nameMapping.getModelID())) {
+        if (!dataSource.get().getKnownModels().contains(nameMapping.getModelId())) {
             return Response.serverError()
                     .status(Response.Status.BAD_REQUEST)
-                    .entity("Model ID " + nameMapping.getModelID() + " does not exist in TrustyAI metadata.")
+                    .entity("Model ID " + nameMapping.getModelId() + " does not exist in TrustyAI metadata.")
                     .build();
         }
-        final Metadata metadata = dataSource.get().getMetadata(nameMapping.getModelID());
+        final Metadata metadata = dataSource.get().getMetadata(nameMapping.getModelId());
 
         // validation
         Schema inputSchema = metadata.getInputSchema();
