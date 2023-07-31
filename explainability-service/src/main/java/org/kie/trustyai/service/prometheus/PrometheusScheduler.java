@@ -41,11 +41,7 @@ public class PrometheusScheduler {
     }
 
     public Map<UUID, BaseMetricRequest> getRequests(String metricName) {
-        if (requests.containsKey(metricName)) {
-            return this.requests.get(metricName);
-        } else {
-            return new ConcurrentHashMap<>();
-        }
+        return this.requests.getOrDefault(metricName, new ConcurrentHashMap<>());
     }
 
     public Map<UUID, BaseMetricRequest> getAllRequestsFlat() {
