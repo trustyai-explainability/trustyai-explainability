@@ -9,10 +9,10 @@ setup(
     packages=["trustyaiexternal", "trustyaiexternal.algorithms", "trustyaiexternal.api"],
     install_requires=[
         "pandas~=1.5.3",
-        "numpy",
+        "numpy==1.25.1",
         "jep==4.1.1",
         "urllib3==1.26.0",
-        "requests",
+        "requests==2.31.0",
         "aix360 [default,tsice,tslime,tssaliency] @ https://github.com/Trusted-AI/AIX360/archive/refs/heads/master.zip"
     ],
 )
