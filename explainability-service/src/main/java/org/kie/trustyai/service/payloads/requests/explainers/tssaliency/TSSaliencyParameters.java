@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class TSSaliencyParameters {
 
-    private final double mu = 0.01;
+    private double mu = 0.01;
     @JsonProperty("numberSamples")
     private int nSamples = 50;
     @JsonProperty("numberSteps")

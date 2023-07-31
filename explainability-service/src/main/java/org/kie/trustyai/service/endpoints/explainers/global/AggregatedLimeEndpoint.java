@@ -34,9 +34,9 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.payloads.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.GlobalExplanationRequest;
-import org.kie.trustyai.service.payloads.SaliencyExplanationResponse;
+import org.kie.trustyai.service.payloads.explainability.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.explainability.GlobalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainability.SaliencyExplanationResponse;
 
 @Tag(name = "Aggregated LIME Explainer Endpoint")
 @Path("/explainers/global/lime")

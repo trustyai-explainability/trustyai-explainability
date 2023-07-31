@@ -317,6 +317,7 @@ e.g. `SERVICE_METRICS_SCHEDULE=10s`)
 which follows the [Quarkus syntax](https://quarkus.io/guides/scheduler-reference).
 
 You can also specify the bias threshold deltas in the request body:
+
 ```shell
 curl -X POST --location "http://{{host}}/metrics/spd/request" \
     -H "Content-Type: application/json" \
@@ -330,6 +331,7 @@ curl -X POST --location "http://{{host}}/metrics/spd/request" \
           \"unprivilegedAttribute\": 0.0
         }"
 ```
+
 This means that _this specific_ metric request will consider SPD values within +/-0.05 to be fair, and values outside
 those bounds to be unfair.
 
@@ -444,6 +446,56 @@ returns
 ```
 The SPD of 0.250000 indicates that the likelihood of Group:gender=1 receiving Outcome:income=1 was 25.000000 percentage points higher than that of Group:gender=0.%
 ```
+
+## Explainers
+
+The TrustyAI service provides local and globalsexplainers. The supported explainers are:
+
+- LIME
+- SHAP
+- Counterfactuals
+- TSSaliency
+- PDP
+
+### TSSaliency
+
+Assuming there's a ModelMesh-deployed model at host `$MODELSERVER` and using a standard `8081` port, with
+name `$MODELNAME` and
+version `$MODELVERSION`, a TSSaliency explainer can be invoked with:
+
+```shell
+curl -X POST --location "http://{{host}}:8080/explainers/local/tssaliency" \
+    -H "Content-Type: application/json" \
+    -d "{
+          \"model\": {
+            \"target\": "$MODELHOST:8081",
+            \"name\": $MODELNAME,
+            \"version\": $MODELVERSION
+          },
+          \"parameters\": {
+            \"numberSamples\": 100,
+            \"numberSteps\": 50,
+            \"sigma\": 20.0,
+            \"mu\": 0.1
+          },
+          \"data\": {
+            \"f1\": [
+              -0.14040239,
+              0.17164128,
+              0.30204415,
+              0.23280369,
+              0.033852769,
+              -0.22418335,
+              -0.46998698,
+              -0.64539614,
+              -0.61769196
+            ]
+          }
+      }"
+```
+
+Where `f1` is the time-series instance to be explained.
+The `parameters` section is optional and can be omitted, in which case the default values will be used.
 
 ## Prometheus
 
@@ -653,7 +705,9 @@ Will return, for instance
     }
 ]
 ```
+
 ## Defining Feature/Output Names
+
 ```bash
 curl -X POST --location "http://localhost:8080/q/info" \
     -H "Content-Type: application/json" \
@@ -671,7 +725,6 @@ curl -X POST --location "http://localhost:8080/q/info" \
             }
     }'
 ```
-
 
 # Data sources
 

@@ -13,7 +13,7 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.LocalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainability.LocalExplanationRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

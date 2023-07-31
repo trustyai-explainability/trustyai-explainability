@@ -25,8 +25,8 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
-import org.kie.trustyai.service.payloads.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.GlobalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainability.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.explainability.GlobalExplanationRequest;
 
 public abstract class GlobalExplainerEndpoint extends ExplainerEndpoint {
 

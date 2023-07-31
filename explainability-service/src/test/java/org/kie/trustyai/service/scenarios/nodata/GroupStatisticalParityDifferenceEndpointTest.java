@@ -10,11 +10,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.BaseTestProfile;
-import org.kie.trustyai.service.endpoints.metrics.GroupStatisticalParityDifferenceEndpoint;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
+import org.kie.trustyai.service.endpoints.metrics.fairness.group.GroupStatisticalParityDifferenceEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
@@ -61,7 +61,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
     @Test
     @DisplayName("SPD POST correct (no data)")
     void spdPostCorrect() {
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
 
         given()
                 .contentType(ContentType.JSON)
@@ -76,7 +76,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
     @Test
     @DisplayName("SPD POST incorrect type (no data)")
     void spdPostIncorrectType() {
-        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectType();
+        final GroupMetricRequest payload = RequestPayloadGenerator.incorrectType();
 
         given()
                 .contentType(ContentType.JSON)
@@ -90,7 +90,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
     @Test
     @DisplayName("SPD POST incorrect input (no data)")
     void spdPostIncorrectInput() {
-        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectInput();
+        final GroupMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
         given()
                 .contentType(ContentType.JSON)
@@ -114,7 +114,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)

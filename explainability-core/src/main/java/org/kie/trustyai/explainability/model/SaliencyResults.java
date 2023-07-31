@@ -33,7 +33,8 @@ public class SaliencyResults {
     public enum SourceExplainer {
         SHAP,
         LIME,
-        AGGREGATED_LIME
+        AGGREGATED_LIME,
+        TSSALIENCY
     }
 
     public SaliencyResults(Map<String, Saliency> saliencies, List<Pair<SimplePrediction, boolean[]>> availableCFs, SourceExplainer sourceExplainer) {
