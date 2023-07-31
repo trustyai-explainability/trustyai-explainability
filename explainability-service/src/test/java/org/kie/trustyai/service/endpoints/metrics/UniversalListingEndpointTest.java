@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +13,8 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 
@@ -41,11 +42,15 @@ class UniversalListingEndpointTest {
     @BeforeEach
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
-        scheduler.get().getDirRequests().clear();
-        scheduler.get().getSpdRequests().clear();
+        scheduler.get().getAllRequests().clear();
         final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+    }
+
+    @AfterEach
+    void clean() {
+        scheduler.get().getAllRequests().clear();
     }
 
     @DisplayName("Check multi-metrics requests are returned")
@@ -59,7 +64,7 @@ class UniversalListingEndpointTest {
         assertEquals(0, emptyList.requests.size());
 
         // Perform multiple schedule requests
-        final BaseMetricRequest payload = RequestPayloadGenerator.correct();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         final BaseScheduledResponse firstRequest = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
