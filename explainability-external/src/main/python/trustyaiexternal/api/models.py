@@ -26,11 +26,14 @@ class ModelMeshWrapper:
 
         # TODO: Add parameters to avoid bias contamination
         return {
+            'parameters': {
+                'bias-ignore': True
+            },
             'inputs': [
                 {
                     "name": "input",
                     "shape": shape,
-                    "datatype": "FP32",  # TODO: Take from the data
+                    "datatype": "FP64",
                     "data": data
                 }
             ]

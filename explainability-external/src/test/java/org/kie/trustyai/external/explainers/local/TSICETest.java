@@ -12,11 +12,11 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.external.interfaces.PassthroughPythonPredictionProvider;
 import org.kie.trustyai.external.utils.PythonRuntimeManager;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import jep.SubInterpreter;
 import jep.python.PyCallable;
 import jep.python.PyObject;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TSICETest {
 
@@ -103,10 +103,10 @@ class TSICETest {
             final int nObs = 100;
             final Dataframe data = TimeseriesTest.createUnivariateDataframe(nObs, "timestamp", "sunspots");
 
-            final int observationLength = 10;
-            final int inputLength = 20;
-            final int forecastHorizon = 10;
-            final int nPerturbations = 20;
+            final int observationLength = 24;
+            final int inputLength = 24;
+            final int forecastHorizon = 4;
+            final int nPerturbations = 10;
 
             final List<TSICEExplainer.AnalyseFeature> featuresToAnalyse = List.of(TSICEExplainer.AnalyseFeature.MEAN);
 
@@ -117,13 +117,13 @@ class TSICETest {
                     .withFeaturesToAnalyze(featuresToAnalyse)
                     .withExplanationWindowLength(observationLength)
                     .withTimestampColumn("timestamp")
-                    .withExplanationWindowStart(2).build(sub, "192.168.0.47:8080", "tsforda", "v0.1.0");
+                    .build(sub, "192.168.0.47:8080", "forecaster", "v0.1.0");
 
             // Request the explanation
             TSICEExplanation explanation = tsice.explainAsync(data.tail(inputLength).asPredictions(), null).get();
 
             assertEquals(1, explanation.getDataX().size());
-            assertEquals(inputLength, explanation.getDataX().get("sunspots").size());
+            assertEquals(nPerturbations, explanation.getDataX().get("sunspots").size());
             assertEquals(featuresToAnalyse.size(), explanation.getFeatureNames().size());
             assertEquals(featuresToAnalyse.size(), explanation.getFeatureValues().size());
             assertEquals(nPerturbations, explanation.getSignedImpact().size());

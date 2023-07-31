@@ -14,7 +14,7 @@ logging.warning(__file__)
 
 
 class TSLimeExplainer(Explainer):
-    """Time Series Lime Explainer"""
+    """Time Series TSLime Explainer"""
 
     def __init__(self, model_name: str,
                  model_version: str,

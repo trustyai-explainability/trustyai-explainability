@@ -9,9 +9,9 @@ import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.external.utils.PythonRuntimeManager;
 
-import jep.SubInterpreter;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import jep.SubInterpreter;
 
 class TSLimeTest {
 
@@ -55,13 +55,42 @@ class TSLimeTest {
             // Request the explanation
             final TSLimeExplanation explanation = tslime.explainAsync(data.tail(inputLength).asPredictions(), null).get();
 
-            //            assertEquals(inputLength * inputLength, explanation.getHistoryWeights().length);
-            //            assertEquals(inputLength, explanation.getModelPrediction().length);
-            //            assertEquals(inputLength * nPerturbations, explanation.getxPerturbations().length);
-            //            assertEquals(inputLength, explanation.getSurrogatePrediction().length);
+            assertEquals(inputLength * inputLength, ((double[]) explanation.getHistoryWeights()).length);
+            assertEquals(inputLength, ((double[]) explanation.getModelPrediction()).length);
+            assertEquals(inputLength * nPerturbations, ((double[]) explanation.getxPerturbations()).length);
+            assertEquals(inputLength, ((double[]) explanation.getSurrogatePrediction()).length);
         }
 
     }
 
-    // TODO: Test with multivariate data
+    @Test
+    @DisplayName("Test TSLime explainer with a simple multivariate model")
+    @Disabled("This test requires a running tsforda-mv model")
+    void simpleModelMultivariate() throws ExecutionException, InterruptedException {
+
+        try (SubInterpreter sub = PythonRuntimeManager.INSTANCE.getSubInterpreter()) {
+
+            final int nObs = 100;
+            final int dimensions = 2;
+            final Dataframe data = TimeseriesTest.createMultivariateDataframe(nObs, "timestamp", "sunspots", dimensions);
+
+            final int inputLength = 30;
+            final int nPerturbations = 100;
+
+            final TimeSeriesExplainer<TSLimeExplanation> tslime = new TSLimeExplainer.Builder()
+                    .withInputLength(inputLength)
+                    .withNPerturbations(nPerturbations)
+                    .withTimestampColumn("timestamp")
+                    .build(sub, "192.168.0.47:8080", "tsforda-mv", "v0.1.0");
+
+            // Request the explanation
+            final TSLimeExplanation explanation = tslime.explainAsync(data.tail(inputLength).asPredictions(), null).get();
+
+            assertEquals(dimensions * inputLength * inputLength, ((double[]) explanation.getHistoryWeights()).length);
+            assertEquals(inputLength, ((double[]) explanation.getModelPrediction()).length);
+            assertEquals(dimensions * inputLength * nPerturbations, ((double[]) explanation.getxPerturbations()).length);
+            assertEquals(inputLength, ((double[]) explanation.getSurrogatePrediction()).length);
+        }
+    }
+
 }

@@ -3,12 +3,10 @@ package org.kie.trustyai.external.explainers.local;
 import java.util.List;
 import java.util.Map;
 
-import jep.NDArray;
-
 public class TSICEExplanation {
 
     private final Map<String, Map<Object, Object>> dataX;
-    private final NDArray currentForecast;
+    private final Object currentForecast;
     private final List<String> featureNames;
     private final List<Object> featureValues;
     private final List<Object> signedImpact;
@@ -20,7 +18,7 @@ public class TSICEExplanation {
 
     public TSICEExplanation(Map<String, Object> explanation) {
         this.dataX = (Map<String, Map<Object, Object>>) explanation.get("data_x");
-        this.currentForecast = (NDArray) explanation.get("current_forecast");
+        this.currentForecast = explanation.get("current_forecast");
         this.featureNames = (List<String>) explanation.get("feature_names");
         this.featureValues = (List<Object>) explanation.get("feature_values");
         this.signedImpact = (List<Object>) explanation.get("signed_impact");
