@@ -78,24 +78,24 @@ public class RequestPayloadGenerator {
         return request;
     }
 
-    public static BaseMetricRequest incorrectManyWrongNames() {
-        BaseMetricRequest request = new BaseMetricRequest();
+    public static GroupMetricRequest incorrectManyWrongNames() {
+        GroupMetricRequest request = new GroupMetricRequest();
         request.setProtectedAttribute("city");
-        request.setFavorableOutcome(TextNode.valueOf("approved"));
+        request.setFavorableOutcome(new ReconcilableOutput(TextNode.valueOf("approved")));
         request.setOutcomeName("icnome");
-        request.setPrivilegedAttribute(IntNode.valueOf(1));
-        request.setUnprivilegedAttribute(IntNode.valueOf(0));
+        request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+        request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
         request.setModelId(MODEL_ID);
         return request;
     }
 
-    public static BaseMetricRequest incorrectManyWrongTypes() {
-        BaseMetricRequest request = new BaseMetricRequest();
+    public static GroupMetricRequest incorrectManyWrongTypes() {
+        GroupMetricRequest request = new GroupMetricRequest();
         request.setProtectedAttribute("gender");
-        request.setFavorableOutcome(TextNode.valueOf("approved-doesnt-exist"));
+        request.setFavorableOutcome(new ReconcilableOutput(TextNode.valueOf("approved-doesnt-exist")));
         request.setOutcomeName("income");
-        request.setPrivilegedAttribute(TextNode.valueOf("lemons"));
-        request.setUnprivilegedAttribute(DoubleNode.valueOf(1.5));
+        request.setPrivilegedAttribute(new ReconcilableFeature(TextNode.valueOf("lemons")));
+        request.setUnprivilegedAttribute(new ReconcilableFeature(DoubleNode.valueOf(1.5)));
         request.setModelId(MODEL_ID);
         return request;
     }

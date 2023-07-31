@@ -187,7 +187,7 @@ class DisparateImpactRatioEndpointTest {
     void postManyWrongNames() throws JsonProcessingException {
         datasource.get().reset();
 
-        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectManyWrongNames();
+        final GroupMetricRequest payload = RequestPayloadGenerator.incorrectManyWrongNames();
 
         given()
                 .contentType(ContentType.JSON)
@@ -204,7 +204,7 @@ class DisparateImpactRatioEndpointTest {
     void postManyWrongTypes() throws JsonProcessingException {
         datasource.get().reset();
 
-        final BaseMetricRequest payload = RequestPayloadGenerator.incorrectManyWrongTypes();
+        final GroupMetricRequest payload = RequestPayloadGenerator.incorrectManyWrongTypes();
 
         given()
                 .contentType(ContentType.JSON)
