@@ -81,6 +81,7 @@ public class RequestReconciler {
                     throw new IllegalArgumentException("Method " + f.getName() + "was declared as the name source of the reconciled output, but returns exception:" + e);
                 }
 
+
                 DataType fieldDataType = metadata.getOutputSchema().retrieveNameMappedItems().get(name).getType();
                 TypedValue tv = new TypedValue();
                 tv.setType(fieldDataType);

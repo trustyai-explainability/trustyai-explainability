@@ -41,11 +41,7 @@ public class PrometheusScheduler {
     }
 
     public Map<UUID, BaseMetricRequest> getRequests(String metricName) {
-        if (requests.containsKey(metricName)) {
-            return this.requests.get(metricName);
-        } else {
-            return new ConcurrentHashMap<>();
-        }
+        return this.requests.getOrDefault(metricName, new ConcurrentHashMap<>());
     }
 
     public Map<UUID, BaseMetricRequest> getAllRequestsFlat() {
@@ -69,8 +65,7 @@ public class PrometheusScheduler {
                 for (final String modelId : getModelIds()) {
 
                     final Predicate<Map.Entry<UUID, BaseMetricRequest>> filterByModelId = request -> request.getValue().getModelId().equals(modelId);
-
-                    Set<Map.Entry<UUID, BaseMetricRequest>> requestsSet = getAllRequestsFlat().entrySet();
+                    List<Map.Entry<UUID, BaseMetricRequest>> requestsSet = getAllRequestsFlat().entrySet().stream().filter(filterByModelId).collect(Collectors.toList());
 
                     // Determine maximum batch requested. All other batches as sub-batches of this one.
                     final int maxBatchSize = requestsSet.stream()
