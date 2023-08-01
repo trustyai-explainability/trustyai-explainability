@@ -119,9 +119,7 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
             }
 
             if (validAttributeName) {
-                System.out.println("checking attribute: " + protectedAttribute + ": " + request.getPrivilegedAttribute().getRawValueNode());
                 result = validateAttribute(request, context, metadata, protectedAttribute, modelId) && result;
-                System.out.println(result);
             }
             if (Objects.nonNull(request.getBatchSize()) && request.getBatchSize() <= 0) {
                 context.buildConstraintViolationWithTemplate("Request batch size must be bigger than 0.").addConstraintViolation();
