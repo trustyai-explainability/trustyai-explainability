@@ -27,56 +27,105 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
+    // check to see if the provided output name is in the output schema
+    private boolean validateOutputName(ConstraintValidatorContext context, Metadata metadata, String outcomeName, String modelId) {
+        if (!metadata.getOutputSchema().getItems().containsKey(outcomeName)) {
+            context.buildConstraintViolationWithTemplate("No output found with name=" + outcomeName + " for model=" + modelId)
+                    .addPropertyNode(modelId)
+                    .addConstraintViolation();
+            return false;
+        }
+        return true;
+    }
+
+    // check to see if the provided output value has a compatible type
+    private boolean validateOutput(GroupMetricRequest request, ConstraintValidatorContext context, Metadata metadata, String outcomeName, String modelId) {
+        // Output name guaranteed to exist
+        final SchemaItem outcomeSchema = metadata.getOutputSchema().getItems().get(outcomeName);
+        if (!PayloadConverter.checkValueType(outcomeSchema.getType(), request.getFavorableOutcome().getRawValueNode())) {
+            context.buildConstraintViolationWithTemplate(
+                    String.format(
+                            "Invalid type for output: got '%s', expected object compatible with '%s'",
+                            request.getFavorableOutcome().getRawValueNode().asText(), outcomeSchema.getType().toString()))
+                    .addPropertyNode(modelId)
+                    .addConstraintViolation();
+            return false;
+        }
+        return true;
+    }
+
+    // check to see if the provided attribute name is in the input schema
+    private boolean validateAttributeName(ConstraintValidatorContext context, Metadata metadata, String protectedAttribute, String modelId) {
+        if (!metadata.getInputSchema().getItems().containsKey(protectedAttribute)) {
+            context.buildConstraintViolationWithTemplate("No protected attribute found with name=" + protectedAttribute + " for model=" + modelId)
+                    .addPropertyNode(modelId)
+                    .addConstraintViolation();
+            return false;
+        }
+        return true;
+    }
+
+    // check to see if the provided attribute values have a compatible type
+    private boolean validateAttribute(GroupMetricRequest request, ConstraintValidatorContext context, Metadata metadata, String protectedAttribute, String modelId) {
+        // Protected attribute guaranteed to exist
+        final SchemaItem protectedAttrSchema = metadata.getInputSchema().getItems().get(protectedAttribute);
+        boolean result = true;
+        if (!PayloadConverter.checkValueType(protectedAttrSchema.getType(), request.getPrivilegedAttribute().getRawValueNode())) {
+            context.buildConstraintViolationWithTemplate(
+                    String.format(
+                            "Received invalid type for privileged attribute: got '%s', expected object compatible with '%s'",
+                            request.getPrivilegedAttribute().getRawValueNode().asText(), protectedAttrSchema.getType().toString()))
+                    .addPropertyNode(modelId)
+                    .addPropertyNode(protectedAttribute)
+                    .addConstraintViolation();
+            result = false;
+        }
+        if (!PayloadConverter.checkValueType(protectedAttrSchema.getType(), request.getUnprivilegedAttribute().getRawValueNode())) {
+            context.buildConstraintViolationWithTemplate(
+                    String.format(
+                            "Received invalid type for unprivileged attribute: got '%s', expected object compatible with '%s'",
+                            request.getUnprivilegedAttribute().getRawValueNode().asText(), protectedAttrSchema.getType().toString()))
+                    .addPropertyNode(modelId)
+                    .addPropertyNode(protectedAttribute)
+                    .addConstraintViolation();
+            result = false;
+        }
+        return result;
+    }
+
     @Override
     public boolean isValid(GroupMetricRequest request, ConstraintValidatorContext context) {
         final String modelId = request.getModelId();
+        boolean result = true;
+
         if (!dataSource.get().hasMetadata(modelId)) {
-            context.buildConstraintViolationWithTemplate("No metadadata found for model=" + modelId).addConstraintViolation();
-            return false;
+            context.buildConstraintViolationWithTemplate("No metadata found for model=" + modelId)
+                    .addConstraintViolation();
+            result = false;
         } else {
             final Metadata metadata = dataSource.get().getMetadata(modelId);
             final String outcomeName = request.getOutcomeName();
-
-            // Outcome name is not present
-            if (!metadata.getOutputSchema().getNameMappedItems().containsKey(outcomeName)) {
-                context.buildConstraintViolationWithTemplate("No outcome found with name=" + outcomeName).addConstraintViolation();
-                return false;
-            }
             final String protectedAttribute = request.getProtectedAttribute();
-            if (!metadata.getInputSchema().getItems().containsKey(protectedAttribute)) {
-                context.buildConstraintViolationWithTemplate("No protected attribute found with name=" + protectedAttribute).addConstraintViolation();
-                return false;
+
+            // Outcome name or attribute name not present
+            boolean validOutputName = validateOutputName(context, metadata, outcomeName, modelId);
+            boolean validAttributeName = validateAttributeName(context, metadata, protectedAttribute, modelId);
+
+            // set result to failure if either above are false
+            result = validOutputName && validAttributeName;
+
+            if (validOutputName) {
+                result = validateOutput(request, context, metadata, outcomeName, modelId) && result;
             }
-            // Outcome name guaranteed to exist
-            final SchemaItem outcomeSchema = metadata.getOutputSchema().getNameMappedItems().get(outcomeName);
-            LOG.info("trying to validate: " + request.getFavorableOutcome());
-            if (!PayloadConverter.checkValueType(outcomeSchema.getType(), request.getFavorableOutcome().getRawValueNode())) {
-                context.buildConstraintViolationWithTemplate(
-                        "Invalid type for outcome. Got '" + request.getFavorableOutcome() + "', expected object compatible with '" + outcomeSchema.getType().toString() + "'").addConstraintViolation();
-                return false;
-            }
-            // Protected attribute guaranteed to exist
-            final SchemaItem protectedAttrSchema = metadata.getInputSchema().getItems().get(protectedAttribute);
-            if (!PayloadConverter.checkValueType(protectedAttrSchema.getType(), request.getPrivilegedAttribute().getRawValueNode())) {
-                context.buildConstraintViolationWithTemplate(
-                        "Invalid type for privileged attribute. Got '" + request.getPrivilegedAttribute() + "', expected object compatible with ''" + protectedAttrSchema.getType().toString() + "'")
-                        .addConstraintViolation();
-                return false;
-            }
-            if (!PayloadConverter.checkValueType(protectedAttrSchema.getType(), request.getUnprivilegedAttribute().getRawValueNode())) {
-                context.buildConstraintViolationWithTemplate(
-                        "Invalid type for unprivileged attribute. Got '" + request.getUnprivilegedAttribute() + "', expected object compatible with ''" + protectedAttrSchema.getType().toString()
-                                + "'")
-                        .addConstraintViolation();
-                return false;
+
+            if (validAttributeName) {
+                result = validateAttribute(request, context, metadata, protectedAttribute, modelId) && result;
             }
             if (Objects.nonNull(request.getBatchSize()) && request.getBatchSize() <= 0) {
-                context.buildConstraintViolationWithTemplate(
-                        "Request batch size must be bigger than 0.")
-                        .addConstraintViolation();
-                return false;
+                context.buildConstraintViolationWithTemplate("Request batch size must be bigger than 0.").addConstraintViolation();
+                result = false;
             }
         }
-        return true;
+        return result;
     }
 }
