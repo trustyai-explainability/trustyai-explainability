@@ -44,9 +44,9 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
         final SchemaItem outcomeSchema = metadata.getOutputSchema().retrieveNameMappedItems().get(outcomeName);
         if (!PayloadConverter.checkValueType(outcomeSchema.getType(), request.getFavorableOutcome().getRawValueNode())) {
             context.buildConstraintViolationWithTemplate(
-                            String.format(
-                                    "Invalid type for output: got '%s', expected object compatible with '%s'",
-                                    request.getFavorableOutcome().getRawValueNode().asText(), outcomeSchema.getType().toString()))
+                    String.format(
+                            "Invalid type for output: got '%s', expected object compatible with '%s'",
+                            request.getFavorableOutcome().getRawValueNode().asText(), outcomeSchema.getType().toString()))
                     .addPropertyNode(modelId)
                     .addConstraintViolation();
             return false;
@@ -72,9 +72,9 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
         boolean result = true;
         if (!PayloadConverter.checkValueType(protectedAttrSchema.getType(), request.getPrivilegedAttribute().getRawValueNode())) {
             context.buildConstraintViolationWithTemplate(
-                            String.format(
-                                    "Received invalid type for privileged attribute: got '%s', expected object compatible with '%s'",
-                                    request.getPrivilegedAttribute().getRawValueNode().asText(), protectedAttrSchema.getType().toString()))
+                    String.format(
+                            "Received invalid type for privileged attribute: got '%s', expected object compatible with '%s'",
+                            request.getPrivilegedAttribute().getRawValueNode().asText(), protectedAttrSchema.getType().toString()))
                     .addPropertyNode(modelId)
                     .addPropertyNode(protectedAttribute)
                     .addConstraintViolation();
@@ -82,9 +82,9 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
         }
         if (!PayloadConverter.checkValueType(protectedAttrSchema.getType(), request.getUnprivilegedAttribute().getRawValueNode())) {
             context.buildConstraintViolationWithTemplate(
-                            String.format(
-                                    "Received invalid type for unprivileged attribute: got '%s', expected object compatible with '%s'",
-                                    request.getUnprivilegedAttribute().getRawValueNode().asText(), protectedAttrSchema.getType().toString()))
+                    String.format(
+                            "Received invalid type for unprivileged attribute: got '%s', expected object compatible with '%s'",
+                            request.getUnprivilegedAttribute().getRawValueNode().asText(), protectedAttrSchema.getType().toString()))
                     .addPropertyNode(modelId)
                     .addPropertyNode(protectedAttribute)
                     .addConstraintViolation();
