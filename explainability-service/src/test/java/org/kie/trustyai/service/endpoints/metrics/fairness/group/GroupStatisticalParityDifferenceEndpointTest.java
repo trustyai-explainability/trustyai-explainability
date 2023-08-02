@@ -141,7 +141,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("Got '\\\"male\\\"', expected object compatible with 'INT32'"));
+                .body(containsString("got 'male', expected object compatible with 'INT32'"));
     }
 
     @Test
@@ -284,7 +284,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
                 .when()
                 .post("/request")
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("Got '\\\"male\\\"', expected object compatible with 'INT32'"));
+                .body(containsString("got 'male', expected object compatible with 'INT32'"));
 
         ScheduleList scheduleList = given()
                 .when()

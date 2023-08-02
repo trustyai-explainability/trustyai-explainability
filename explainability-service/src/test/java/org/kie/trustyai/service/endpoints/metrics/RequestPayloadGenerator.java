@@ -8,6 +8,7 @@ import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 
+import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
@@ -73,6 +74,28 @@ public class RequestPayloadGenerator {
     public static IdentityMetricRequest incorrectIdentityInput() {
         IdentityMetricRequest request = new IdentityMetricRequest();
         request.setColumnName("THIS_FIELD_DOES_NOT_EXIST");
+        request.setModelId(MODEL_ID);
+        return request;
+    }
+
+    public static GroupMetricRequest incorrectManyWrongNames() {
+        GroupMetricRequest request = new GroupMetricRequest();
+        request.setProtectedAttribute("city");
+        request.setFavorableOutcome(new ReconcilableOutput(TextNode.valueOf("approved")));
+        request.setOutcomeName("icnome");
+        request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+        request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
+        request.setModelId(MODEL_ID);
+        return request;
+    }
+
+    public static GroupMetricRequest incorrectManyWrongTypes() {
+        GroupMetricRequest request = new GroupMetricRequest();
+        request.setProtectedAttribute("gender");
+        request.setFavorableOutcome(new ReconcilableOutput(TextNode.valueOf("approved-doesnt-exist")));
+        request.setOutcomeName("income");
+        request.setPrivilegedAttribute(new ReconcilableFeature(TextNode.valueOf("lemons")));
+        request.setUnprivilegedAttribute(new ReconcilableFeature(DoubleNode.valueOf(1.5)));
         request.setModelId(MODEL_ID);
         return request;
     }
