@@ -10,11 +10,11 @@ spec:
           path: config
         parameters:
           - name: trustyaiServiceImageName
-            value: quay.io/trustyai/trustyai-service
+            value: serviceImagePlaceholder
           - name: trustyaiServiceImageTag
             value: serviceTagPlaceholder
           - name: trustyaiOperatorImageName
-            value: quay.io/trustyai/trustyai-service-operator
+            value: operatorImagePlaceholder
           - name: trustyai/OperatorImageTag
             value: operatorTagPlaceholder
       name: trustyai-service-operator
