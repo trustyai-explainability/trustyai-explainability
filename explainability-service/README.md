@@ -67,9 +67,9 @@ curl -X POST --location "http://localhost:8080/metrics/spd/request" \
     -d "{
             \"modelId\": \"example-model-1\",
             \"requestName\": \"lala\",
-            \"protectedAttribute\": \"input-2\",
+            \"protectedAttribute\": \"inputs-2\",
             \"favorableOutcome\":  1.0,
-            \"outcomeName\": \"output-0\",
+            \"outcomeName\": \"outputs-0\",
             \"privilegedAttribute\": 1.0,
             \"unprivilegedAttribute\": 0.0
         }"
@@ -135,8 +135,8 @@ After a few seconds, you will start seeing the logs showing both the payload sen
 ```text
 generator         | Sending data
 trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) Got payload on the consumer
-trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) [Feature{name='input-0', type=number, value=22.0}, Feature{name='input-1', type=number, value=5.0}, Feature{name='input-2', type=number, value=1.0}]
-trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) [Output{value=1.0, type=number, score=1.0, name='output-0'}]
+trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) [Feature{name='inputs-0', type=number, value=22.0}, Feature{name='inputs-1', type=number, value=5.0}, Feature{name='inputs-2', type=number, value=1.0}]
+trustyai-service  | 2023-02-18 12:22:13,572 INFO  [org.kie.tru.ser.end.con.ConsumerEndpoint] (executor-thread-1) [Output{value=1.0, type=number, score=1.0, name='outputs-0'}]
 trustyai-service  | 2023-02-18 12:22:18,001 INFO  [org.kie.tru.ser.dat.par.CSVParser] (executor-thread-1) Creating dataframe from CSV data
 trustyai-service  | 2023-02-18 12:22:18,001 INFO  [org.kie.tru.ser.dat.DataSource] (executor-thread-1) Batching with 5000 rows. Passing 73 rows
 ```
@@ -216,9 +216,9 @@ curl -X POST --location "http://{{host}}/metrics/spd" \
     -H "Content-Type: application/json" \
     -d "{
           \"modelId\": \"example-model-1\",
-          \"protectedAttribute\": \"input-2\",
+          \"protectedAttribute\": \"inputs-2\",
           \"favorableOutcome\": 1.0,
-          \"outcomeName\": \"output-0\",
+          \"outcomeName\": \"outputs-0\",
           \"privilegedAttribute\": 1.0,
           \"unprivilegedAttribute\": 0.0
         }"
@@ -253,9 +253,9 @@ curl -X POST --location "http://{{host}}/metrics/dir" \
     -H "Content-Type: application/json" \
     -d "{
           \"modelId\": \"example-model-1\",
-          \"protectedAttribute\": \"input-2\",
+          \"protectedAttribute\": \"inputs-2\",
           \"favorableOutcome\": 1.0,
-          \"outcomeName\": \"output-0\",
+          \"outcomeName\": \"outputs-0\",
           \"privilegedAttribute\": 1.0,
           \"unprivilegedAttribute\": 0.0
         }"
@@ -291,9 +291,9 @@ curl -X POST --location "http://{{host}}/metrics/spd/request" \
     -H "Content-Type: application/json" \
     -d "{
           \"modelId\": \"example-model-1\",
-          \"protectedAttribute\": \"input-2\",
+          \"protectedAttribute\": \"inputs-2\",
           \"favorableOutcome\": 1.0
-          \"outcomeName\": \"output-0\",
+          \"outcomeName\": \"outputs-0\",
           \"privilegedAttribute\": 1.0,
           \"unprivilegedAttribute\": 0.0
         }"
@@ -324,9 +324,9 @@ curl -X POST --location "http://{{host}}/metrics/spd/request" \
     -d "{
           \"modelId\": \"example-model-1\",
           \"thresholdDelta\": 0.05,
-          \"protectedAttribute\": \"input-2\",
+          \"protectedAttribute\": \"inputs-2\",
           \"favorableOutcome\": 1.0,
-          \"outcomeName\": \"output-0\",
+          \"outcomeName\": \"outputs-0\",
           \"privilegedAttribute\": 1.0,
           \"unprivilegedAttribute\": 0.0
         }"
@@ -343,9 +343,9 @@ curl -X POST --location "http://{{host}}/metrics/spd/request" \
     -d "{
           \"modelId\": \"example-model-1\",
           \"batchSize\": 1000,
-          \"protectedAttribute\": \"input-2\",
+          \"protectedAttribute\": \"inputs-2\",
           \"favorableOutcome\": 1.0,
-          \"outcomeName\": \"output-0\",
+          \"outcomeName\": \"outputs-0\",
           \"privilegedAttribute\": 1.0,
           \"unprivilegedAttribute\": 0.0
         }"
@@ -386,12 +386,12 @@ content-length: 271
     {
       "id": "ab46d639-6567-438b-a0aa-44ee9fd423a3",
       "request": {
-        "protectedAttribute": "input-2",
+        "protectedAttribute": "inputs-2",
         "favorableOutcome": {
           "type": "DOUBLE",
           "value": 1.0
       },
-      "outcomeName": "output-0",
+      "outcomeName": "outputs-0",
       "privilegedAttribute": {
         "type": "DOUBLE",
         "value": 1.0
@@ -575,26 +575,26 @@ Will return, for instance
         "data": {
             "inputSchema": {
                 "items": {
-                    "input-0": {
+                    "inputs-0": {
                         "type": "DOUBLE",
                         "name": "input-0",
                         "index": 1
                     }, 
                 },
                 nameMapping: {
-                    "input-0": "Age",
+                    "inputs-0": "Age",
                 }
             },
             "outputSchema": {
                 "items": {
-                    "output-0": {
+                    "outputs-0": {
                         "type": "INT32",
                         "name": "output-0",
                         "index": 5
                     }
                 },
                 "nameMapping:" {
-                    "output-0": "Income",
+                    "outputs-0": "Income",
                 }
             },
             "observations": 105,
@@ -611,32 +611,32 @@ Will return, for instance
         "data": {
             "inputSchema": {
                 "items": {
-                    "input-0": {
+                    "inputs-0": {
                         "type": "DOUBLE",
-                        "name": "input-0",
+                        "name": "inputs-0",
                         "index": 1
                     },
-                     "input-1": {
+                     "inputs-1": {
                         "type": "DOUBLE",
-                        "name": "input-1",
+                        "name": "inputs-1",
                         "index": 2
                     }              
                 },
                 nameMapping: {
-                    "input-0": "Age",
-                    "input-2": "Race",
+                    "inputs-0": "Age",
+                    "inputs-2": "Race",
                 }
             },
             "outputSchema": {
                 "items": {
-                    "output-0": {
+                    "outputs-0": {
                         "type": "INT32",
-                        "name": "output-0",
+                        "name": "outputs-0",
                         "index": 5
                     }
                 },
                 "nameMapping:" {
-                    "output-0": "Income",
+                    "outputs-0": "Income",
                 }
             },
             "observations": 105,
@@ -653,50 +653,50 @@ Will return, for instance
         "data": {
             "inputSchema": {
                 "items": {
-                    "input-0": {
+                    "inputs-0": {
                         "type": "DOUBLE",
-                        "name": "input-0",
+                        "name": "inputs-0",
                         "index": 1
                     },
-                     "input-1": {
+                     "inputs-1": {
                         "type": "DOUBLE",
-                        "name": "input-1",
+                        "name": "inputs-1",
                         "index": 2
                     },
                     "input-2": {
                         "type": "DOUBLE",
-                        "name": "input-1",
+                        "name": "inputs-1",
                         "index": 3
                     },
-                    "input-3": {
+                    "inputs-3": {
                         "type": "DOUBLE",
-                        "name": "input-3",
+                        "name": "inputs-3",
                         "index": 4
                     }
                 },
                 nameMapping: {
-                    "input-0": "Age",
-                    "input-2": "Race",
-                    "input-3": "Gender",
-                    "input-4": "Employment",
+                    "inputs-0": "Age",
+                    "inputs-2": "Race",
+                    "inputs-3": "Gender",
+                    "inputs-4": "Employment",
                 }
             },
             "outputSchema": {
                 "items": {
-                    "output-0": {
+                    "outputs-0": {
                         "type": "INT32",
-                        "name": "output-0",
+                        "name": "outputs-0",
                         "index": 5
                     },
-                    "output-1": {
+                    "outputs-1": {
                             "type": "INT32",
-                            "name": "output-1",
+                            "name": "outputs-1",
                             "index": 6
                     }
                 },
                 "nameMapping:" {
-                    "output-0": "Income",
-                    "output-1": "Credit Score",
+                    "outputs-0": "Income",
+                    "outputs-1": "Credit Score",
                 }
             },
             "observations": 85,
@@ -715,13 +715,13 @@ curl -X POST --location "http://localhost:8080/q/info" \
         "modelId": "example-model-1", 
         "inputMapping": 
             {
-                "input-0": "age", 
-                "input-1": "race",
-                "input-2": "gender"
+                "inputs-0": "age", 
+                "inputs-1": "race",
+                "inputs-2": "gender"
             },
         "outputMapping": 
             {
-                "output-0": "predictedIncome=high"
+                "outputs-0": "predictedIncome=high"
             }
     }'
 ```

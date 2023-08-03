@@ -11,6 +11,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.checkerframework.checker.units.qual.A;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -44,7 +45,7 @@ public class DataSource {
         return knownModels;
     }
 
-    private Map<String, String> getJointNameAliases(Metadata metadata) {
+    private Map<String, String> getJointNameAliases(Metadata metadata){
         HashMap<String, String> jointMapping = new HashMap<>();
         jointMapping.putAll(metadata.getInputSchema().getNameMapping());
         jointMapping.putAll(metadata.getOutputSchema().getNameMapping());
@@ -104,7 +105,7 @@ public class DataSource {
 
         Dataframe df = parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
         df.setColumnAliases(getJointNameAliases(metadata));
-        return parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
+        return df;
     }
 
     public void saveDataframe(final Dataframe dataframe, final String modelId) throws InvalidSchemaException {
