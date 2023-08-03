@@ -47,7 +47,6 @@ public class ReconcilableOutputDeserializer extends StdDeserializer<Reconcilable
         } else {
             rf = new ReconcilableOutput((ValueNode) node);
         }
-        LOG.info("Returning: " + rf.getRawValueNode());
         return rf;
     }
 }

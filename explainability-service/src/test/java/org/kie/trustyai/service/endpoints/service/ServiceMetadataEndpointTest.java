@@ -260,5 +260,4 @@ class ServiceMetadataEndpointTest {
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(Matchers.containsString("Not all mapped output fields exist in model metadata"));
     }
-
 }

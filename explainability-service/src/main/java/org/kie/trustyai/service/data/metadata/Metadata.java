@@ -13,7 +13,6 @@ public class Metadata {
     private String modelId;
 
     public Metadata() {
-
     }
 
     public Schema getOutputSchema() {

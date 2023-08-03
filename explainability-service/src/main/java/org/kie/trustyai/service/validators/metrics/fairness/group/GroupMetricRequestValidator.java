@@ -29,7 +29,7 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
 
     // check to see if the provided output name is in the output schema
     private boolean validateOutputName(ConstraintValidatorContext context, Metadata metadata, String outcomeName, String modelId) {
-        if (!metadata.getOutputSchema().getItems().containsKey(outcomeName)) {
+        if (!metadata.getOutputSchema().retrieveNameMappedItems().containsKey(outcomeName)) {
             context.buildConstraintViolationWithTemplate("No output found with name=" + outcomeName + " for model=" + modelId)
                     .addPropertyNode(modelId)
                     .addConstraintViolation();
@@ -41,7 +41,7 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
     // check to see if the provided output value has a compatible type
     private boolean validateOutput(GroupMetricRequest request, ConstraintValidatorContext context, Metadata metadata, String outcomeName, String modelId) {
         // Output name guaranteed to exist
-        final SchemaItem outcomeSchema = metadata.getOutputSchema().getItems().get(outcomeName);
+        final SchemaItem outcomeSchema = metadata.getOutputSchema().retrieveNameMappedItems().get(outcomeName);
         if (!PayloadConverter.checkValueType(outcomeSchema.getType(), request.getFavorableOutcome().getRawValueNode())) {
             context.buildConstraintViolationWithTemplate(
                     String.format(
@@ -56,7 +56,7 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
 
     // check to see if the provided attribute name is in the input schema
     private boolean validateAttributeName(ConstraintValidatorContext context, Metadata metadata, String protectedAttribute, String modelId) {
-        if (!metadata.getInputSchema().getItems().containsKey(protectedAttribute)) {
+        if (!metadata.getInputSchema().retrieveNameMappedItems().containsKey(protectedAttribute)) {
             context.buildConstraintViolationWithTemplate("No protected attribute found with name=" + protectedAttribute + " for model=" + modelId)
                     .addPropertyNode(modelId)
                     .addConstraintViolation();
@@ -68,7 +68,7 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
     // check to see if the provided attribute values have a compatible type
     private boolean validateAttribute(GroupMetricRequest request, ConstraintValidatorContext context, Metadata metadata, String protectedAttribute, String modelId) {
         // Protected attribute guaranteed to exist
-        final SchemaItem protectedAttrSchema = metadata.getInputSchema().getItems().get(protectedAttribute);
+        final SchemaItem protectedAttrSchema = metadata.getInputSchema().retrieveNameMappedItems().get(protectedAttribute);
         boolean result = true;
         if (!PayloadConverter.checkValueType(protectedAttrSchema.getType(), request.getPrivilegedAttribute().getRawValueNode())) {
             context.buildConstraintViolationWithTemplate(
