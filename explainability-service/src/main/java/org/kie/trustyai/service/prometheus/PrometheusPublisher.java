@@ -2,6 +2,7 @@ package org.kie.trustyai.service.prometheus;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,10 +36,22 @@ public class PrometheusPublisher {
         this.values = new HashMap<>();
     }
 
+
     private void createOrUpdateGauge(String name, Iterable<Tag> tags, UUID id) {
         Gauge.builder(name, new AtomicDouble(), value -> values.get(id).doubleValue())
                 .tags(tags).strongReference(true).register(registry);
+    }
 
+    public void removeGauge(String name, UUID id){
+        List<Gauge> gaugesToDelete = registry.get("trustyai_"+name.toLowerCase())
+                .gauges().stream().filter(
+                        gauge -> gauge.getId().getTags().stream()
+                                .anyMatch(t -> t.getKey().equals("request") && t.getValue().equals(id.toString()))
+                )
+                .collect(Collectors.toList());
+        for (Gauge g: gaugesToDelete){
+            registry.remove(g);
+        }
     }
 
     private Iterable<Tag> generateTags(String modelName, UUID id, BaseMetricRequest request) {

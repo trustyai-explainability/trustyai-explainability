@@ -66,9 +66,8 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     public Response deleteRequest(ScheduleId request) {
 
         final UUID id = request.requestId;
-
         if (scheduler.getRequests(this.name).containsKey(id)) {
-            scheduler.getRequests(this.name).remove(request.requestId);
+            scheduler.delete(this.name, request.requestId);
             LOG.info("Removing scheduled request id=" + id);
             return RestResponse.ResponseBuilder.ok("Removed").build().toResponse();
         } else {
