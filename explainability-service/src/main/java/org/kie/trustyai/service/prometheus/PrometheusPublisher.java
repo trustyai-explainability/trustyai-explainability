@@ -1,8 +1,8 @@
 package org.kie.trustyai.service.prometheus;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,6 +21,7 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.search.Search;
 
 @Singleton
 public class PrometheusPublisher {
@@ -37,20 +38,15 @@ public class PrometheusPublisher {
         this.values = new HashMap<>();
     }
 
-
     private void createOrUpdateGauge(String name, Iterable<Tag> tags, UUID id) {
         Gauge.builder(name, new AtomicDouble(), value -> values.get(id).doubleValue())
                 .tags(tags).strongReference(true).register(registry);
     }
 
-    public void removeGauge(String name, UUID id){
-        List<Gauge> gaugesToDelete = registry.get(METRIC_PREFIX+name.toLowerCase())
-                .gauges().stream().filter(
-                        gauge -> gauge.getId().getTags().stream()
-                                .anyMatch(t -> t.getKey().equals("request") && t.getValue().equals(id.toString()))
-                )
-                .collect(Collectors.toList());
-        for (Gauge g: gaugesToDelete){
+    public void removeGauge(String name, UUID id) {
+        Search s = this.registry.find(METRIC_PREFIX + name.toLowerCase());
+        Collection<Gauge> gaugesToDelete = s.tags(List.of(Tag.of("request", id.toString()))).gauges();
+        for (Gauge g : gaugesToDelete) {
             registry.remove(g);
         }
     }
@@ -70,6 +66,7 @@ public class PrometheusPublisher {
 
         final Iterable<Tag> tags = generateTags(modelName, id, request);
 
+        System.out.println("creating metric called " + METRIC_PREFIX + request.getMetricName().toLowerCase());
         createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, id);
 
         LOG.info(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));

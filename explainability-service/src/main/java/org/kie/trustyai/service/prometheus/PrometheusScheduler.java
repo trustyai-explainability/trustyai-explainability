@@ -101,7 +101,7 @@ public class PrometheusScheduler {
         requests.get(metricName).put(id, request);
     }
 
-    public void delete(String metricName, UUID id){
+    public void delete(String metricName, UUID id) {
         getRequests(metricName).remove(id);
         this.getPublisher().removeGauge(metricName, id);
     }
