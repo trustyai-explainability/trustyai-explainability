@@ -27,6 +27,7 @@ public class PrometheusPublisher {
     private static final Logger LOG = Logger.getLogger(PrometheusPublisher.class);
     private final MeterRegistry registry;
     private final Map<UUID, AtomicDouble> values;
+    private static final String METRIC_PREFIX = "trustyai_";
 
     @Inject
     ServiceConfig serviceConfig;
@@ -43,7 +44,7 @@ public class PrometheusPublisher {
     }
 
     public void removeGauge(String name, UUID id){
-        List<Gauge> gaugesToDelete = registry.get("trustyai_"+name.toLowerCase())
+        List<Gauge> gaugesToDelete = registry.get(METRIC_PREFIX+name.toLowerCase())
                 .gauges().stream().filter(
                         gauge -> gauge.getId().getTags().stream()
                                 .anyMatch(t -> t.getKey().equals("request") && t.getValue().equals(id.toString()))
@@ -69,7 +70,7 @@ public class PrometheusPublisher {
 
         final Iterable<Tag> tags = generateTags(modelName, id, request);
 
-        createOrUpdateGauge("trustyai_" + request.getMetricName().toLowerCase(), tags, id);
+        createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, id);
 
         LOG.info(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
     }
