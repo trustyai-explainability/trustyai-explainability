@@ -32,7 +32,7 @@ public class IdentityMetricRequestValidator implements ConstraintValidator<Valid
             final Metadata metadata = dataSource.get().getMetadata(modelId);
             final String columnName = request.getColumnName();
             // Outcome name is not present
-            if (!metadata.getOutputSchema().getNameMappedItems().containsKey(columnName) && !metadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
+            if (!metadata.getOutputSchema().retrieveNameMappedItems().containsKey(columnName) && !metadata.getInputSchema().retrieveNameMappedItems().containsKey(columnName)) {
                 context.buildConstraintViolationWithTemplate("No feature or output found with name=" + columnName).addConstraintViolation();
                 return false;
             }

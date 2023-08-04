@@ -54,6 +54,8 @@ function deploy_model() {
 
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/models/model0_onnx.yaml  -n ${MM_NAMESPACE}"  || eval "$FAILURE_HANDLING"
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/models/model1_onnx.yaml  -n ${MM_NAMESPACE}"  || eval "$FAILURE_HANDLING"
+    echo "Waiting 30s for model deployments to stabilize"
+    sleep 30
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/trustyai/trustyai_crd.yaml -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
 }
 

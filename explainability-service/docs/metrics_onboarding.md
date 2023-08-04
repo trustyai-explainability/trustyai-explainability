@@ -1,6 +1,6 @@
 # Metrics Onboarding Guide
 To add a new metric/metriccategory (i.e., adding a metric that does not exist in the current metric taxonomy), follow
-these steps. See the `fairness/group` and `identity` metric packages for examples and [ADR-0002](https://github.com/trustyai-explainability/community/blob/main/adr/ADR-0002-metrics-and-xai-namespaces.md) for more information. 
+these steps. See the `fairness/group` and `identity` metric packages for examples and [ADR-0002](https://github.com/trustyai-explainability/community/blob/main/adr/ADR-0002-metrics-and-xai-namespaces.md) for more information.
 
 #### 1: Metric Request Payloads
 * Create a package `payloads/metrics/{$taxonomy/path}`.

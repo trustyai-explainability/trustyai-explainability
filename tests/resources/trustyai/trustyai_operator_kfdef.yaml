@@ -15,7 +15,7 @@ spec:
             value: serviceTagPlaceholder
           - name: trustyaiOperatorImageName
             value: operatorImagePlaceholder
-          - name: trustyai/OperatorImageTag
+          - name: trustyaiOperatorImageTag
             value: operatorTagPlaceholder
       name: trustyai-service-operator
   repos:

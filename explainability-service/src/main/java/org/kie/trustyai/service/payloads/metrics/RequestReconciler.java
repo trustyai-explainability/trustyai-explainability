@@ -47,7 +47,7 @@ public class RequestReconciler {
                     throw new IllegalArgumentException("Method " + f.getName() + "was declared as the name source of the reconciled feature, but returns exception:" + e);
                 }
 
-                DataType fieldDataType = metadata.getInputSchema().getItems().get(name).getType();
+                DataType fieldDataType = metadata.getInputSchema().retrieveNameMappedItems().get(name).getType();
                 TypedValue tv = new TypedValue();
                 tv.setType(fieldDataType);
                 tv.setValue(fieldValue.getRawValueNode());
@@ -81,7 +81,7 @@ public class RequestReconciler {
                     throw new IllegalArgumentException("Method " + f.getName() + "was declared as the name source of the reconciled output, but returns exception:" + e);
                 }
 
-                DataType fieldDataType = metadata.getOutputSchema().getItems().get(name).getType();
+                DataType fieldDataType = metadata.getOutputSchema().retrieveNameMappedItems().get(name).getType();
                 TypedValue tv = new TypedValue();
                 tv.setType(fieldDataType);
                 tv.setValue(fieldValue.getRawValueNode());
