@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.prometheus;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +21,14 @@ import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.search.Search;
 
 @Singleton
 public class PrometheusPublisher {
     private static final Logger LOG = Logger.getLogger(PrometheusPublisher.class);
     private final MeterRegistry registry;
     private final Map<UUID, AtomicDouble> values;
+    private static final String METRIC_PREFIX = "trustyai_";
 
     @Inject
     ServiceConfig serviceConfig;
@@ -38,7 +41,14 @@ public class PrometheusPublisher {
     private void createOrUpdateGauge(String name, Iterable<Tag> tags, UUID id) {
         Gauge.builder(name, new AtomicDouble(), value -> values.get(id).doubleValue())
                 .tags(tags).strongReference(true).register(registry);
+    }
 
+    public void removeGauge(String name, UUID id) {
+        Search s = this.registry.find(METRIC_PREFIX + name.toLowerCase());
+        Collection<Gauge> gaugesToDelete = s.tags(List.of(Tag.of("request", id.toString()))).gauges();
+        for (Gauge g : gaugesToDelete) {
+            registry.remove(g);
+        }
     }
 
     private Iterable<Tag> generateTags(String modelName, UUID id, BaseMetricRequest request) {
@@ -56,7 +66,8 @@ public class PrometheusPublisher {
 
         final Iterable<Tag> tags = generateTags(modelName, id, request);
 
-        createOrUpdateGauge("trustyai_" + request.getMetricName().toLowerCase(), tags, id);
+        System.out.println("creating metric called " + METRIC_PREFIX + request.getMetricName().toLowerCase());
+        createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, id);
 
         LOG.info(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
     }
