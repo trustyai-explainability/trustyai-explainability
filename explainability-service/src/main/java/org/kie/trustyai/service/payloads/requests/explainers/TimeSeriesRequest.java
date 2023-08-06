@@ -18,6 +18,8 @@ public class TimeSeriesRequest {
     private String predictionId;
 
     private Map<String, List<Double>> data;
+    private List<Object> timestamps;
+    private String timestampName;
 
     public String getPredictionId() {
         return predictionId;
@@ -41,5 +43,21 @@ public class TimeSeriesRequest {
 
     public void setModelConfig(ModelConfig modelConfig) {
         this.modelConfig = modelConfig;
+    }
+
+    public List<Object> getTimestamps() {
+        return timestamps;
+    }
+
+    public void setTimestamps(List<Object> timestamps) {
+        this.timestamps = timestamps;
+    }
+
+    public String getTimestampName() {
+        return timestampName;
+    }
+
+    public void setTimestampName(String timestampName) {
+        this.timestampName = timestampName;
     }
 }

@@ -54,6 +54,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.kie.trustyai</groupId>
+            <artifactId>explainability-external</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.quarkiverse.minio</groupId>
             <artifactId>quarkus-minio</artifactId>
             <version>2.10.3</version>
