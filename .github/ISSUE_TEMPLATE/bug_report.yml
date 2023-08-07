@@ -1,59 +1,34 @@
-name: Bug Report
-description: Report a bug in TrustyAI
+---
+name: Bug report
+about: Create a report to help us improve
+title: ''
 labels: kind/bug
-body:
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for taking the time to fill out this bug report! 
-        The preferred method to file a bug is [our JIRA board](https://issues.redhat.com/projects/FAI). You are still allowed to submit a GitHub issue, but you may experience delays in the feedback.
-  - type: textarea
-    validations:
-      required: true
-    attributes:
-      label: Describe the bug
-      description: >-
-        Describe the issue you are experiencing here to communicate to the
-        maintainers. Tell us what you were trying to do and what happened.
-        Provide a clear and concise description of what the problem is.
-  - type: textarea
-    attributes:
-      label: Expected behavior
-      description: >-
-        Describe the expected behavior clearly and concisely.
-  - type: textarea
-    attributes:
-      label: Actual behavior
-      description: >-
-        Describe the actual behavior clearly and concisely.
-  - type: textarea
-    attributes:
-      label: How to Reproduce?
-      description: >-
-        Link to a small reproducer (preferably a Maven project) or attach an archive containing the reproducer to the issue.
-      placeholder: |
-        Reproducer:
-        Steps to reproduce the behavior:
-        1. 
-        2. 
-        3.
-  - type: markdown
-    attributes:
-      value: |
-        ## Environment
-  - type: input
-    attributes:
-      label: Output of `uname -a` or `ver`
-  - type: input
-    attributes:
-      label:  Output of `java -version`
-  - type: input
-    attributes:
-      label: TrustyAI version or git rev
-  - type: textarea
-    attributes:
-      label: Additional information
-      description: >
-        If you have any additional information for us, use the field below.
-        Please note, you can attach screenshots or screen recordings here, by
-        dragging and dropping files in the field below.
+assignees: ''
+---
+
+**Describe the bug**
+A clear and concise description of what the bug is and how often it occurs
+
+**Steps To Reproduce**
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
+
+**Expected behavior**
+A clear and concise description of what you expected to happen.
+
+**Workaround (if any)**
+Any manual steps that allow you to resolve the issue
+
+**TrustyAI version**
+Please attach TrustyAI version or commit used.
+
+**OpenShift Version**
+(If applicable) Please attach OpenShift version used.
+Version #: 
+Provider (Baremetal, OpenStack, RHV, AWS, OKD, CodeReady Containers, ...):
+
+**Additional context**
+Add any other context about the problem here.

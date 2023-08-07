@@ -1,11 +1,11 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Jira
-    url: https://issues.redhat.com/projects/FAI
-    about: TrustyAI Jira Board
+  - name: Issues
+    url: https://github.com/trustyai-explainability/trustyai-explainability/issues
+    about: trustyai-explainability issues board
   - name: Question
     url: https://stackoverflow.com/questions/ask?tags=trustyai
     about: I have a question about how to use TrustyAI.
   - name: TrustyAI Slack chat
-    url: https://coreos.slack.com/archives/C04AR71PEKE
+    url: https://odh-io.slack.com/archives/C03UFCVFFEY
     about: If you prefer live chat with the developers, we have a Slack chat where we all hang out.
