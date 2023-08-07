@@ -2,9 +2,11 @@
 name: Feature request
 about: Suggest an idea for this project
 title: ''
-labels: kind/enhancement
+labels: 'kind/enhancement'
 assignees: ''
+
 ---
+
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Example. Instead of [CURRENT FEATURE], I think it would be helpful to implement [EXPLANATION OF NEW FEATURE].
 
