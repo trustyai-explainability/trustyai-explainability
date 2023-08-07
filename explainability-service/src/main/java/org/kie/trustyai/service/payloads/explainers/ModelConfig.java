@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.payloads.requests.explainers;
+package org.kie.trustyai.service.payloads.explainers;
 
 /**
  * This class is used to configure the model endpoint to be used for the explanation.

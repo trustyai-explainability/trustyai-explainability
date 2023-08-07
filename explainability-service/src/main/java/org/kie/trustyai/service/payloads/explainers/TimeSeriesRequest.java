@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.payloads.requests.explainers;
+package org.kie.trustyai.service.payloads.explainers;
 
 import java.util.List;
 import java.util.Map;

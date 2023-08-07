@@ -1,6 +1,5 @@
 package org.kie.trustyai.service.mocks;
 
-import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -11,11 +10,6 @@ public class MockMemoryServiceConfig implements ServiceConfig {
     @Override
     public OptionalInt batchSize() {
         return OptionalInt.of(5000);
-    }
-
-    @Override
-    public Optional<String> kserveTarget() {
-        return Optional.empty();
     }
 
     @Override
