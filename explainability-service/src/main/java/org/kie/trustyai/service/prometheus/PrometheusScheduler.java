@@ -32,7 +32,6 @@ public class PrometheusScheduler {
     @Inject
     protected PrometheusPublisher publisher;
 
-
     @Inject
     ServiceConfig serviceConfig;
 

@@ -18,7 +18,6 @@ import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -44,7 +43,6 @@ public class PrometheusPublisher {
         Gauge.builder(name, new AtomicDouble(), value -> values.get(id).doubleValue())
                 .tags(tags).strongReference(true).register(registry);
     }
-
 
     public void removeGauge(String name, UUID id) {
         Search s = this.registry.find(METRIC_PREFIX + name.toLowerCase());
@@ -84,5 +82,3 @@ public class PrometheusPublisher {
         LOG.info(String.format("Scheduled request for %s id=%s, value=%f", metricName, id, value));
     }
 }
-
-
