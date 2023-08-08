@@ -64,7 +64,6 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/request")
     public Response deleteRequest(ScheduleId request) {
-
         final UUID id = request.requestId;
         if (scheduler.getRequests(this.name).containsKey(id)) {
             scheduler.delete(this.name, request.requestId);
