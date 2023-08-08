@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.endpoints.metrics.identity;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.Consumes;
@@ -70,7 +71,12 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
         final Dataframe dataframe;
         final Metadata metadata;
         try {
-            dataframe = super.dataSource.get().getDataframe(request.getModelId()).filterRowsBySynthetic(false);
+            if (Objects.isNull(request.getBatchSize())) {
+                final int defaultBatchSize = serviceConfig.batchSize().getAsInt();
+                LOG.warn("Request batch size is empty. Using the default value of " + defaultBatchSize);
+                request.setBatchSize(defaultBatchSize);
+            }
+            dataframe = super.dataSource.get().getDataframe(request.getModelId(), request.getBatchSize()).filterRowsBySynthetic(false);
             metadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
