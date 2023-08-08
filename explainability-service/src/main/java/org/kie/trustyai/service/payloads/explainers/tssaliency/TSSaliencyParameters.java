@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.payloads.requests.explainers.tssaliency;
+package org.kie.trustyai.service.payloads.explainers.tssaliency;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

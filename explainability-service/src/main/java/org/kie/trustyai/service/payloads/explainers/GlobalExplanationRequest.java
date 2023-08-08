@@ -13,27 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.service.payloads.explainability;
+package org.kie.trustyai.service.payloads.explainers;
 
 public class GlobalExplanationRequest {
 
-    private String modelId;
+    private ModelConfig modelConfig;
 
-    private String modelVersion;
-
-    public String getModelId() {
-        return modelId;
+    public ModelConfig getModelConfig() {
+        return modelConfig;
     }
 
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
-    }
-
-    public String getModelVersion() {
-        return modelVersion;
-    }
-
-    public void setModelVersion(String modelVersion) {
-        this.modelVersion = modelVersion;
+    public void setModelConfig(ModelConfig modelConfig) {
+        this.modelConfig = modelConfig;
     }
 }

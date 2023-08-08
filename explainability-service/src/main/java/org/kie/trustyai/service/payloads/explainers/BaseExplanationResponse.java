@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.payloads.explainability;
+package org.kie.trustyai.service.payloads.explainers;
 
 import java.util.Date;
 
