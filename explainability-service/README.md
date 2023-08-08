@@ -49,14 +49,14 @@ mvn clean install -Dquarkus.container-image.build=true
 To run this demo, first build the remaining images using:
 
 ```shell
-$ cd demo
-$ docker compose -f compose-generator-memory-single-model.yaml build
+cd demo
+docker compose -f compose-partial-memory-multi-model.yaml build
 ```
 
 Finally, run the demo using:
 
 ```shell
-$ docker compose -f compose-generator-memory-single-model.yaml up
+docker compose -f compose-partial-memory-multi-model.yaml up
 ```
 
 Issue a metric request to, for instance:
@@ -109,8 +109,8 @@ The service then parses the data and saves it into storage.
 To run it, start by building the necessary images with:
 
 ```shell
-$ cd demo
-$ docker compose -f compose-generator-pvc-multi-model.yaml build
+cd demo
+docker compose -f compose-partial-pvc-single-model.yaml build
 ```
 
 This demo uses a Docker bind mount, which on the host can be created with:
@@ -127,7 +127,7 @@ mkdir -p ~/volumes/pvc/inputs
 The demo can then be started with:
 
 ```shell
-docker compose -f compose-generator-pvc-multi-model.yaml.yml up
+docker compose -f compose-partial-pvc-single-model.yaml up
 ```
 
 After a few seconds, you will start seeing the logs showing both the payload sent
