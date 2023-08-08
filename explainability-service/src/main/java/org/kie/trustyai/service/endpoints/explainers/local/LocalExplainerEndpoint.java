@@ -28,18 +28,16 @@ import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
-import org.kie.trustyai.service.payloads.explainability.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.explainability.LocalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
 
 public abstract class LocalExplainerEndpoint extends ExplainerEndpoint {
 
     protected Response processRequest(LocalExplanationRequest request, DataSource dataSource, ServiceConfig serviceConfig) {
         try {
-            String modelId = request.getModelId();
-            String modelVersion = request.getModelVersion();
-            PredictionProvider model = getModel(serviceConfig, modelId, modelVersion);
+            PredictionProvider model = getModel(request.getModelConfig());
 
-            Dataframe dataframe = dataSource.getDataframe(modelId);
+            Dataframe dataframe = dataSource.getDataframe(request.getModelConfig().getName());
             List<Prediction> predictions = dataframe.asPredictions();
             // TODO: check if we can fetch and use the prediction/payload id rather than an hash
             Predicate<Prediction> idFilter = prediction -> prediction.getInput().hashCode() == Integer.parseInt(request.getPredictionId());

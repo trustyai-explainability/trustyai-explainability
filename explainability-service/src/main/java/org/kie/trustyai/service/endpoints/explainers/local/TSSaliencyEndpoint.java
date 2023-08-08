@@ -25,9 +25,9 @@ import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.TimeseriesUtils;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
-import org.kie.trustyai.service.payloads.requests.explainers.ModelConfig;
-import org.kie.trustyai.service.payloads.requests.explainers.tssaliency.TSSaliencyParameters;
-import org.kie.trustyai.service.payloads.requests.explainers.tssaliency.TSSaliencyRequest;
+import org.kie.trustyai.service.payloads.explainers.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyParameters;
+import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyRequest;
 
 @Tag(name = "TSSaliency Explainer Endpoint")
 @Path("/explainers/local/tssaliency")

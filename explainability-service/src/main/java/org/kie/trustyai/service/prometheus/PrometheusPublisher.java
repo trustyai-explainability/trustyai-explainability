@@ -71,12 +71,8 @@ public class PrometheusPublisher {
     }
 
     public void gauge(@ValidReconciledMetricRequest BaseMetricRequest request, String modelName, UUID id, double value) {
-
         values.put(id, new AtomicDouble(value));
-
         final Iterable<Tag> tags = generateTags(modelName, id, request);
-
-        System.out.println("creating metric called " + METRIC_PREFIX + request.getMetricName().toLowerCase());
         createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, id);
         LOG.info(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
     }

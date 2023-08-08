@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.service.payloads.explainability;
+package org.kie.trustyai.service.payloads.explainers;
 
 import java.util.ArrayList;
 import java.util.List;

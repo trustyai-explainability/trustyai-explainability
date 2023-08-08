@@ -1,6 +1,6 @@
-package org.kie.trustyai.service.payloads.requests.explainers.tssaliency;
+package org.kie.trustyai.service.payloads.explainers.tssaliency;
 
-import org.kie.trustyai.service.payloads.requests.explainers.TimeSeriesRequest;
+import org.kie.trustyai.service.payloads.explainers.TimeSeriesRequest;
 
 /**
  * Request for a time-series TSSaliency explanation.
