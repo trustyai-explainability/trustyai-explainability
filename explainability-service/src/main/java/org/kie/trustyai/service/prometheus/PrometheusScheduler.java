@@ -29,7 +29,7 @@ public class PrometheusScheduler {
     @Inject
     Instance<DataSource> dataSource;
     @Inject
-    PrometheusPublisher publisher;
+    protected PrometheusPublisher publisher;
 
     @Inject
     ServiceConfig serviceConfig;
@@ -41,7 +41,7 @@ public class PrometheusScheduler {
     }
 
     public Map<UUID, BaseMetricRequest> getRequests(String metricName) {
-        return this.requests.getOrDefault(metricName, new ConcurrentHashMap<>());
+        return Collections.unmodifiableMap(this.requests.getOrDefault(metricName, new ConcurrentHashMap<>()));
     }
 
     public Map<UUID, BaseMetricRequest> getAllRequestsFlat() {
@@ -89,7 +89,7 @@ public class PrometheusScheduler {
         }
     }
 
-    public PrometheusPublisher getPublisher() {
+    private PrometheusPublisher getPublisher() {
         return publisher;
     }
 
@@ -102,7 +102,7 @@ public class PrometheusScheduler {
     }
 
     public void delete(String metricName, UUID id) {
-        getRequests(metricName).remove(id);
+        this.requests.getOrDefault(metricName, new ConcurrentHashMap<>()).remove(id);
         this.getPublisher().removeGauge(metricName, id);
     }
 
