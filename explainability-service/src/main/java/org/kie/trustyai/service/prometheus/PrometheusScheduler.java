@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.prometheus;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
@@ -31,6 +32,7 @@ public class PrometheusScheduler {
     @Inject
     PrometheusPublisher publisher;
 
+
     @Inject
     ServiceConfig serviceConfig;
 
@@ -58,12 +60,17 @@ public class PrometheusScheduler {
 
     @Scheduled(every = "{service.metrics-schedule}")
     void calculate() {
+        try {
+            // global service statistic
+            DataSource ds = dataSource.get();
+            publisher.gauge("", "MODEL_COUNT", UUID.nameUUIDFromBytes("model_count".getBytes(StandardCharsets.UTF_8)), ds.getKnownModels().size());
 
-        if (hasRequests()) {
+            Set<String> requestedModels = getModelIds();
+            for (final String modelId : ds.getKnownModels()) {
+                // global model statistics
+                publisher.gauge(modelId, "MODEL_OBSERVATIONS", UUID.nameUUIDFromBytes(modelId.getBytes(StandardCharsets.UTF_8)), ds.getMetadata(modelId).getObservations());
 
-            try {
-                for (final String modelId : getModelIds()) {
-
+                if (hasRequests() && requestedModels.contains(modelId)) {
                     final Predicate<Map.Entry<UUID, BaseMetricRequest>> filterByModelId = request -> request.getValue().getModelId().equals(modelId);
                     List<Map.Entry<UUID, BaseMetricRequest>> requestsSet = getAllRequestsFlat().entrySet().stream().filter(filterByModelId).collect(Collectors.toList());
 
@@ -71,8 +78,7 @@ public class PrometheusScheduler {
                     final int maxBatchSize = requestsSet.stream()
                             .mapToInt(entry -> entry.getValue().getBatchSize()).max()
                             .orElse(serviceConfig.batchSize().getAsInt());
-
-                    final Dataframe df = dataSource.get().getDataframe(modelId, maxBatchSize);
+                    final Dataframe df = ds.getDataframe(modelId, maxBatchSize);
 
                     requestsSet.forEach(entry -> {
                         // entry value: BaseMetricRequest
@@ -83,11 +89,12 @@ public class PrometheusScheduler {
                         publisher.gauge(entry.getValue(), modelId, entry.getKey(), value);
                     });
                 }
-            } catch (DataframeCreateException e) {
-                LOG.error(e.getMessage());
             }
+        } catch (DataframeCreateException e) {
+            LOG.error(e.getMessage());
         }
     }
+
 
     public PrometheusPublisher getPublisher() {
         return publisher;

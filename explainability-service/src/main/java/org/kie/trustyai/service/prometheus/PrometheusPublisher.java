@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.prometheus;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -43,6 +45,7 @@ public class PrometheusPublisher {
                 .tags(tags).strongReference(true).register(registry);
     }
 
+
     public void removeGauge(String name, UUID id) {
         Search s = this.registry.find(METRIC_PREFIX + name.toLowerCase());
         Collection<Gauge> gaugesToDelete = s.tags(List.of(Tag.of("request", id.toString()))).gauges();
@@ -52,11 +55,18 @@ public class PrometheusPublisher {
     }
 
     private Iterable<Tag> generateTags(String modelName, UUID id, BaseMetricRequest request) {
-        List<Tag> tags = request.retrieveTags().entrySet().stream()
-                .map(e -> Tag.of(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
+        List<Tag> tags;
+        if (request != null) {
+            tags = request.retrieveTags().entrySet().stream()
+                    .map(e -> Tag.of(e.getKey(), e.getValue()))
+                    .collect(Collectors.toList());
+        } else {
+            tags = new ArrayList<>();
+        }
         tags.add(Tag.of("request", id.toString()));
-        tags.add(Tag.of("model", modelName));
+        if (!modelName.isEmpty()) {
+            tags.add(Tag.of("model", modelName));
+        }
         return Tags.of(tags);
     }
 
@@ -68,7 +78,15 @@ public class PrometheusPublisher {
 
         System.out.println("creating metric called " + METRIC_PREFIX + request.getMetricName().toLowerCase());
         createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, id);
-
         LOG.info(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
     }
+
+    public void gauge(String modelName, String metricName, UUID id, double value) {
+        values.put(id, new AtomicDouble(value));
+        final Iterable<Tag> tags = generateTags(modelName, id, null);
+        createOrUpdateGauge(METRIC_PREFIX + metricName.toLowerCase(), tags, id);
+        LOG.info(String.format("Scheduled request for %s id=%s, value=%f", metricName, id, value));
+    }
 }
+
+
