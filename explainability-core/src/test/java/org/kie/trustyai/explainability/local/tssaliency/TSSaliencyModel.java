@@ -48,7 +48,7 @@ public class TSSaliencyModel implements PredictionProvider {
 
             double y = compute(features);
 
-            Output output = new Output("y" + index, Type.NUMBER, new Value(null), y);
+            Output output = new Output("y" + index, Type.NUMBER, new Value(y), 1.0);
 
             List<Output> outputList = new ArrayList<Output>(1);
             outputList.add(output);
