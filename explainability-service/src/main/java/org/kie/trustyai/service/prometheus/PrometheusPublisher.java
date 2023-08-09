@@ -55,17 +55,17 @@ public class PrometheusPublisher {
     private Iterable<Tag> generateTags(String modelName, UUID id, BaseMetricRequest request) {
         List<Tag> tags;
         if (request != null) {
-          Map<String, String> tagMap = request.retrieveDefaultTags();
-          tagMap.putAll(request.retrieveTags());
-          List<Tag> tags = tagMap.entrySet().stream()
-                  .map(e -> Tag.of(e.getKey(), e.getValue()))
-                  .collect(Collectors.toList());
-          tags.add(Tag.of("request", id.toString()));
+            Map<String, String> tagMap = request.retrieveDefaultTags();
+            tagMap.putAll(request.retrieveTags());
+            tags = tagMap.entrySet().stream()
+                    .map(e -> Tag.of(e.getKey(), e.getValue()))
+                    .collect(Collectors.toList());
+            tags.add(Tag.of("request", id.toString()));
         } else {
             tags = new ArrayList<>();
             if (!modelName.isEmpty()) {
-              // populate the model name if not coming via a request object
-              tags.add(Tag.of("model", modelName));
+                // populate the model name if not coming via a request object
+                tags.add(Tag.of("model", modelName));
             }
         }
         tags.add(Tag.of("request", id.toString()));
