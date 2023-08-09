@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.prometheus;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -52,11 +53,21 @@ public class PrometheusPublisher {
     }
 
     private Iterable<Tag> generateTags(String modelName, UUID id, BaseMetricRequest request) {
-        Map<String, String> tagMap = request.retrieveDefaultTags();
-        tagMap.putAll(request.retrieveTags());
-        List<Tag> tags = tagMap.entrySet().stream()
-                .map(e -> Tag.of(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
+        List<Tag> tags;
+        if (request != null) {
+          Map<String, String> tagMap = request.retrieveDefaultTags();
+          tagMap.putAll(request.retrieveTags());
+          List<Tag> tags = tagMap.entrySet().stream()
+                  .map(e -> Tag.of(e.getKey(), e.getValue()))
+                  .collect(Collectors.toList());
+          tags.add(Tag.of("request", id.toString()));
+        } else {
+            tags = new ArrayList<>();
+            if (!modelName.isEmpty()) {
+              // populate the model name if not coming via a request object
+              tags.add(Tag.of("model", modelName));
+            }
+        }
         tags.add(Tag.of("request", id.toString()));
         return Tags.of(tags);
     }
@@ -65,6 +76,13 @@ public class PrometheusPublisher {
         values.put(id, new AtomicDouble(value));
         final Iterable<Tag> tags = generateTags(modelName, id, request);
         createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, id);
-        LOG.info(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
+        LOG.debug(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
+    }
+
+    public void gauge(String modelName, String metricName, UUID id, double value) {
+        values.put(id, new AtomicDouble(value));
+        final Iterable<Tag> tags = generateTags(modelName, id, null);
+        createOrUpdateGauge(METRIC_PREFIX + metricName.toLowerCase(), tags, id);
+        LOG.debug(String.format("Scheduled request for %s id=%s, value=%f", metricName, id, value));
     }
 }
