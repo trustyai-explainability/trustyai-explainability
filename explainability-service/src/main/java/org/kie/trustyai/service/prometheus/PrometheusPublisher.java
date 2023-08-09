@@ -52,11 +52,12 @@ public class PrometheusPublisher {
     }
 
     private Iterable<Tag> generateTags(String modelName, UUID id, BaseMetricRequest request) {
-        List<Tag> tags = request.retrieveTags().entrySet().stream()
+        Map<String, String> tagMap = request.retrieveDefaultTags();
+        tagMap.putAll(request.retrieveTags());
+        List<Tag> tags = tagMap.entrySet().stream()
                 .map(e -> Tag.of(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
         tags.add(Tag.of("request", id.toString()));
-        tags.add(Tag.of("model", modelName));
         return Tags.of(tags);
     }
 
