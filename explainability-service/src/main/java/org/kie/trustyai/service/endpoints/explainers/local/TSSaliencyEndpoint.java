@@ -34,7 +34,7 @@ import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyRequest
 public class TSSaliencyEndpoint extends ExplainerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(TSSaliencyEndpoint.class);
-    private static double[] DEFAULT_BASE_VALUE = new double[0];
+    private static Optional<double[]> DEFAULT_BASE_VALUE = Optional.empty();
     @Inject
     ServiceConfig serviceConfig;
 
