@@ -3,6 +3,7 @@ package org.kie.trustyai.service.endpoints.service;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -10,17 +11,21 @@ import javax.inject.Inject;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.IntNode;
 
-import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.common.mapper.TypeRef;
@@ -28,24 +33,24 @@ import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(BaseTestProfile.class)
-@TestHTTPEndpoint(ServiceMetadataEndpoint.class)
 class ServiceMetadataEndpointTest {
 
     private static final String MODEL_ID = "example1";
+    private final String metadataUrl = "/info";
     @Inject
     Instance<MockDatasource> datasource;
+
     @Inject
-    Instance<MockMemoryStorage> storage;
+    Instance<MockPrometheusScheduler> scheduler;
 
     @BeforeEach
     void clearStorage() {
-        storage.get().emptyStorage();
+        datasource.get().empty();
+        scheduler.get().empty();
     }
 
     @Test
@@ -55,7 +60,7 @@ class ServiceMetadataEndpointTest {
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -83,7 +88,7 @@ class ServiceMetadataEndpointTest {
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -109,7 +114,7 @@ class ServiceMetadataEndpointTest {
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -132,7 +137,7 @@ class ServiceMetadataEndpointTest {
     void getNoObservations() {
         datasource.get().empty();
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
@@ -160,13 +165,13 @@ class ServiceMetadataEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
-                .when().post()
+                .when().post(metadataUrl)
                 .then()
                 .statusCode(200)
                 .body(is("Feature and output name mapping successfully applied."));
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
@@ -198,13 +203,13 @@ class ServiceMetadataEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
-                .when().post()
+                .when().post(metadataUrl)
                 .then()
                 .statusCode(200)
                 .body(is("Feature and output name mapping successfully applied."));
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
@@ -235,7 +240,7 @@ class ServiceMetadataEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
-                .when().post()
+                .when().post(metadataUrl)
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(Matchers.containsString("Not all mapped input fields exist in model metadata"));
@@ -255,9 +260,220 @@ class ServiceMetadataEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
-                .when().post()
+                .when().post(metadataUrl)
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(Matchers.containsString("Not all mapped output fields exist in model metadata"));
     }
+
+    @Test
+    @DisplayName("Test individual metric request with different counts")
+    void testIndividualMetricRequestCountsDifferent() {
+        final int modelANobs = 2000;
+        final Dataframe dataframeA = datasource.get().generateRandomDataframe(modelANobs);
+        final String MODEL_A = "example-model-a";
+        datasource.get().saveDataframe(dataframeA, MODEL_A);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeA), MODEL_A);
+
+        final int modelBNobs = 3000;
+        final Dataframe dataframeB = datasource.get().generateRandomDataframe(modelBNobs);
+        final String MODEL_B = "example-model-b";
+        datasource.get().saveDataframe(dataframeB, MODEL_B);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeB), MODEL_B);
+
+        final int nRequestsModelA = 3;
+        final int nRequestsModelB = 2;
+
+        // Register a different number of metric requests for each model
+        IntStream.range(0, nRequestsModelA).forEach(i -> {
+            GroupMetricRequest request = new GroupMetricRequest();
+            request.setProtectedAttribute("gender");
+            request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(1)));
+            request.setOutcomeName("income");
+            request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+            request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
+            request.setModelId(MODEL_A);
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(request)
+                    .when()
+                    .post("/metrics/group/fairness/spd/request");
+        });
+        IntStream.range(0, nRequestsModelB).forEach(i -> {
+            GroupMetricRequest request = new GroupMetricRequest();
+            request.setProtectedAttribute("gender");
+            request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(1)));
+            request.setOutcomeName("income");
+            request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+            request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
+            request.setModelId(MODEL_B);
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(request)
+                    .when()
+                    .post("/metrics/group/fairness/spd/request");
+        });
+
+        final List<ServiceMetadata> serviceMetadata = given()
+                .when().get(metadataUrl)
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                });
+
+        final String info = given()
+                .when().get("/info")
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().asString();
+
+        assertEquals(2, serviceMetadata.size());
+        // Model A
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(nRequestsModelA, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelANobs, serviceMetadata.get(0).getData().getObservations());
+        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
+        // Model B
+        assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(nRequestsModelB, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelBNobs, serviceMetadata.get(1).getData().getObservations());
+        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertFalse(serviceMetadata.get(1).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(1).getData().getInputSchema().getItems().isEmpty());
+
+    }
+
+    @Test
+    @DisplayName("Test individual metric request with same counts")
+    void testIndividualMetricRequestCountsSame() {
+        final int modelANobs = 2000;
+        final Dataframe dataframeA = datasource.get().generateRandomDataframe(modelANobs);
+        final String MODEL_A = "example-model-a";
+        datasource.get().saveDataframe(dataframeA, MODEL_A);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeA), MODEL_A);
+
+        final int modelBNobs = 3000;
+        final Dataframe dataframeB = datasource.get().generateRandomDataframe(modelBNobs);
+        final String MODEL_B = "example-model-b";
+        datasource.get().saveDataframe(dataframeB, MODEL_B);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeB), MODEL_B);
+
+        final int nRequestsModelA = 7;
+        final int nRequestsModelB = 7;
+
+        // Register a different number of metric requests for each model
+        IntStream.range(0, nRequestsModelA).forEach(i -> {
+            GroupMetricRequest request = new GroupMetricRequest();
+            request.setProtectedAttribute("gender");
+            request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(1)));
+            request.setOutcomeName("income");
+            request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+            request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
+            request.setModelId(MODEL_A);
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(request)
+                    .when()
+                    .post("/metrics/group/fairness/spd/request");
+        });
+        IntStream.range(0, nRequestsModelB).forEach(i -> {
+            GroupMetricRequest request = new GroupMetricRequest();
+            request.setProtectedAttribute("gender");
+            request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(1)));
+            request.setOutcomeName("income");
+            request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+            request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
+            request.setModelId(MODEL_B);
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(request)
+                    .when()
+                    .post("/metrics/group/fairness/spd/request");
+        });
+
+        final List<ServiceMetadata> serviceMetadata = given()
+                .when().get(metadataUrl)
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                });
+
+        final String info = given()
+                .when().get("/info")
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().asString();
+
+        assertEquals(2, serviceMetadata.size());
+        // Model A
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(nRequestsModelA, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelANobs, serviceMetadata.get(0).getData().getObservations());
+        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
+        // Model B
+        assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(nRequestsModelB, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelBNobs, serviceMetadata.get(1).getData().getObservations());
+        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertFalse(serviceMetadata.get(1).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(1).getData().getInputSchema().getItems().isEmpty());
+
+    }
+
+    @Test
+    @DisplayName("Test individual metric request with no requests")
+    void testIndividualMetricRequestCountsNone() {
+        final int modelANobs = 2000;
+        final Dataframe dataframeA = datasource.get().generateRandomDataframe(modelANobs);
+        final String MODEL_A = "example-model-a";
+        datasource.get().saveDataframe(dataframeA, MODEL_A);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeA), MODEL_A);
+
+        final int modelBNobs = 3000;
+        final Dataframe dataframeB = datasource.get().generateRandomDataframe(modelBNobs);
+        final String MODEL_B = "example-model-b";
+        datasource.get().saveDataframe(dataframeB, MODEL_B);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeB), MODEL_B);
+
+        final List<ServiceMetadata> serviceMetadata = given()
+                .when().get(metadataUrl)
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                });
+
+        final String info = given()
+                .when().get("/info")
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().asString();
+
+        assertEquals(2, serviceMetadata.size());
+        // Model A
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelANobs, serviceMetadata.get(0).getData().getObservations());
+        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
+        // Model B
+        assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelBNobs, serviceMetadata.get(1).getData().getObservations());
+        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertFalse(serviceMetadata.get(1).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(1).getData().getInputSchema().getItems().isEmpty());
+
+    }
+
 }

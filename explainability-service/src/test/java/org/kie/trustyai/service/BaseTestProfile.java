@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
 
@@ -27,8 +28,7 @@ public class BaseTestProfile implements QuarkusTestProfile {
 
     @Override
     public Set<Class<?>> getEnabledAlternatives() {
-        return Set.of(MockDatasource.class, MockMemoryStorage.class);
-
+        return Set.of(MockDatasource.class, MockMemoryStorage.class, MockPrometheusScheduler.class);
     }
 
 }
