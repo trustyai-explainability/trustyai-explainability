@@ -1,4 +1,4 @@
-FROM python:3.10-slim-buster
+FROM registry.access.redhat.com/ubi8/python-311:latest
 
 WORKDIR /generator
 
