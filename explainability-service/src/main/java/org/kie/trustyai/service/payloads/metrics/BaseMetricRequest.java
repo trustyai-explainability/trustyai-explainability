@@ -60,7 +60,9 @@ public abstract class BaseMetricRequest {
 
     public Map<String, String> retrieveDefaultTags() {
         HashMap<String, String> output = new HashMap<>();
-        output.put("requestName", requestName);
+        if (requestName != null) {
+            output.put("requestName", requestName);
+        }
         output.put("metricName", metricName);
         output.put("model", modelId);
         return output;
