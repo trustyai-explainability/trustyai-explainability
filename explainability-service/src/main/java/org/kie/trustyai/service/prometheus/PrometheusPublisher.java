@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.prometheus;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -52,11 +53,18 @@ public class PrometheusPublisher {
     }
 
     private Iterable<Tag> generateTags(String modelName, UUID id, BaseMetricRequest request) {
-        List<Tag> tags = request.retrieveTags().entrySet().stream()
-                .map(e -> Tag.of(e.getKey(), e.getValue()))
-                .collect(Collectors.toList());
+        List<Tag> tags;
+        if (request != null) {
+            tags = request.retrieveTags().entrySet().stream()
+                    .map(e -> Tag.of(e.getKey(), e.getValue()))
+                    .collect(Collectors.toList());
+        } else {
+            tags = new ArrayList<>();
+        }
         tags.add(Tag.of("request", id.toString()));
-        tags.add(Tag.of("model", modelName));
+        if (!modelName.isEmpty()) {
+            tags.add(Tag.of("model", modelName));
+        }
         return Tags.of(tags);
     }
 
@@ -64,6 +72,13 @@ public class PrometheusPublisher {
         values.put(id, new AtomicDouble(value));
         final Iterable<Tag> tags = generateTags(modelName, id, request);
         createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, id);
-        LOG.info(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
+        LOG.debug(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
+    }
+
+    public void gauge(String modelName, String metricName, UUID id, double value) {
+        values.put(id, new AtomicDouble(value));
+        final Iterable<Tag> tags = generateTags(modelName, id, null);
+        createOrUpdateGauge(METRIC_PREFIX + metricName.toLowerCase(), tags, id);
+        LOG.debug(String.format("Scheduled request for %s id=%s, value=%f", metricName, id, value));
     }
 }
