@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.payloads.metrics;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
@@ -55,6 +56,16 @@ public abstract class BaseMetricRequest {
 
     public void setBatchSize(Integer batchSize) {
         this.batchSize = batchSize;
+    }
+
+    public Map<String, String> retrieveDefaultTags() {
+        HashMap<String, String> output = new HashMap<>();
+        if (requestName != null) {
+            output.put("requestName", requestName);
+        }
+        output.put("metricName", metricName);
+        output.put("model", modelId);
+        return output;
     }
 
     public abstract Map<String, String> retrieveTags();
