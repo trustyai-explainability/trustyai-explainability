@@ -11,16 +11,19 @@ import javax.inject.Inject;
 
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import io.quarkus.arc.Priority;
 import io.quarkus.test.Mock;
 
 @Mock
 @Alternative
 @ApplicationScoped
+@Priority(1)
 public class MockDatasource extends DataSource {
 
     private static final String MODEL_ID = "example1";
@@ -75,4 +78,8 @@ public class MockDatasource extends DataSource {
         this.knownModels.clear();
     }
 
+    @Override
+    public void saveDataframe(Dataframe dataframe, String modelId) throws InvalidSchemaException {
+        super.saveDataframe(dataframe, modelId);
+    }
 }

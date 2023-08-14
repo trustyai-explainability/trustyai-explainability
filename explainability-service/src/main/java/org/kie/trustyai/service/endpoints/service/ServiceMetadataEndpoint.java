@@ -1,20 +1,12 @@
 package org.kie.trustyai.service.endpoints.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -32,6 +24,7 @@ import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+@ApplicationScoped
 @Path("/info")
 public class ServiceMetadataEndpoint {
 
@@ -59,7 +52,12 @@ public class ServiceMetadataEndpoint {
             final ServiceMetadata serviceMetadata = new ServiceMetadata();
 
             for (Map.Entry<String, ConcurrentHashMap<UUID, BaseMetricRequest>> metricDict : scheduler.getAllRequests().entrySet()) {
-                serviceMetadata.getMetrics().scheduledMetadata.setCount(metricDict.getKey(), metricDict.getValue().size());
+                metricDict.getValue().values().forEach(metric -> {
+                    if (metric.getModelId().equals(modelId)) {
+                        final String metricName = metricDict.getKey();
+                        serviceMetadata.getMetrics().scheduledMetadata.setCount(metricName, serviceMetadata.getMetrics().scheduledMetadata.getCount(metricName) + 1);
+                    }
+                });
             }
 
             try {

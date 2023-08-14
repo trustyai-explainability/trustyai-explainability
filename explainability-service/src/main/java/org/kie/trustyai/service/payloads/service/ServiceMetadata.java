@@ -8,7 +8,7 @@ public class ServiceMetadata {
     private Metadata data = new Metadata();
 
     public ServiceMetadata() {
-
+        // empty constructor
     }
 
     public ServiceMetricsMetadata getMetrics() {
