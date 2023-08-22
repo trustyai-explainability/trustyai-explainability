@@ -11,12 +11,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
+import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
@@ -76,6 +79,48 @@ public class ServiceMetadataEndpoint {
     }
 
     @POST
+    @Path("/tags")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response labelSchema(DataTagging dataTagging) throws JsonProcessingException {
+
+        if (!dataSource.get().getKnownModels().contains(dataTagging.getModelId())) {
+            return Response.serverError()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Model ID " + dataTagging.getModelId() + " does not exist in TrustyAI metadata.")
+                    .build();
+        }
+
+        try {
+            EnumMap<DatapointSource, List<List<Integer>>> tagMapping = new EnumMap<>(DatapointSource.class);
+            for (String tag : dataTagging.getDataTagging().keySet()) {
+                DatapointSource dpSource;
+                try {
+                    dpSource = DatapointSource.valueOf(tag);
+                } catch (IllegalArgumentException e) {
+                    return Response.serverError()
+                            .entity("Provided datapoint tag=" + tag + " is not valid. Must be one of " + Arrays.toString(DatapointSource.values()))
+                            .status(Response.Status.BAD_REQUEST)
+                            .build();
+                }
+                tagMapping.put(dpSource, dataTagging.getDataTagging().get(tag));
+            }
+
+            Dataframe df = dataSource.get().getDataframe(dataTagging.getModelId());
+            df.tagDataPoints(tagMapping);
+            dataSource.get().saveDataframe(df, dataTagging.getModelId(), true);
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            return Response.serverError()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+        }
+
+        return Response.ok().entity("Datapoints successfully tagged.").build();
+    }
+
+    @POST
+    @Path("/names")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response labelSchema(NameMapping nameMapping) throws JsonProcessingException {
