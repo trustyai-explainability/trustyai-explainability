@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.payloads.consumer.upload;
+package org.kie.trustyai.service.data.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +13,9 @@ import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
+import org.kie.trustyai.service.payloads.data.upload.ModelInferRequestPayload;
+import org.kie.trustyai.service.payloads.data.upload.ModelInferResponsePayload;
+import org.kie.trustyai.service.payloads.data.upload.TensorPayload;
 
 import com.google.protobuf.ByteString;
 

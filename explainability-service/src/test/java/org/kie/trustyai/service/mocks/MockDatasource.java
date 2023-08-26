@@ -39,7 +39,7 @@ public class MockDatasource extends DataSource {
 
     public Dataframe generateRandomDataframe(int observations, int featureDiversity) {
         final List<Prediction> predictions = new ArrayList<>();
-        final Random random = new Random();
+        final Random random = new Random(0);
         for (int i = 0; i < observations; i++) {
             final List<Feature> featureList = List.of(
                     // guarantee feature diversity for age is min(observations, featureDiversity)
@@ -50,6 +50,33 @@ public class MockDatasource extends DataSource {
 
             final List<Output> outputList = List.of(
                     new Output("income", Type.NUMBER, new Value(random.nextBoolean() ? 1 : 0), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
+    }
+
+    public Dataframe generateRandomTextDataframe(int observations) {
+        return generateRandomTextDataframe(observations, 0);
+    }
+
+    public Dataframe generateRandomTextDataframe(int observations, int seed) {
+        final List<Prediction> predictions = new ArrayList<>();
+        List<String> makes = List.of("Ford", "Chevy", "Dodge", "GMC", "Buick");
+        List<String> colors = List.of("Red", "Blue", "White", "Black", "Purple", "Green", "Yellow");
+
+        final Random random = new Random(seed);
+
+        for (int i = 0; i < observations; i++) {
+            final List<Feature> featureList = List.of(
+                    // guarantee feature diversity for age is min(observations, featureDiversity)
+                    FeatureFactory.newNumericalFeature("year", 1970 + i % 50),
+                    FeatureFactory.newCategoricalFeature("make", makes.get(i % makes.size())),
+                    FeatureFactory.newCategoricalFeature("color", colors.get(i % colors.size())));
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+
+            final List<Output> outputList = List.of(
+                    new Output("value", Type.NUMBER, new Value(random.nextDouble() * 50), 1.0));
             final PredictionOutput predictionOutput = new PredictionOutput(outputList);
             predictions.add(new SimplePrediction(predictionInput, predictionOutput));
         }

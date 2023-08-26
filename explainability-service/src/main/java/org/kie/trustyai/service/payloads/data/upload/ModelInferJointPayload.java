@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.payloads.consumer.upload;
+package org.kie.trustyai.service.payloads.data.upload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

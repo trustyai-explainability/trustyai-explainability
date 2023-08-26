@@ -907,6 +907,42 @@ public class Dataframe {
         return filterByRowIndex(rowIndices);
     }
 
+    /**
+     * Return a new {@link Dataframe} for which only the rows where the specified *internal* column satisfy the {@link Predicate<Value>}.
+     *
+     * @param column Internal Column to use for filtering
+     * @param predicate {@link Predicate<Value>} to select rows
+     * @return A new {@link Dataframe}
+     */
+    public Dataframe filterByInternalColumnValue(InternalColumn column, Predicate<Value> predicate) {
+        List<Value> values = new ArrayList<>();
+        switch (column) {
+            case ID:
+                values = internalData.ids.stream().map(Value::new).collect(Collectors.toList());
+                break;
+            case TAG:
+                values = internalData.datapointSources.stream().map(Value::new).collect(Collectors.toList());
+                break;
+            case TIMESTAMP:
+                values = internalData.timestamps.stream().map(Value::new).collect(Collectors.toList());
+                break;
+            //            case GROUND_TRUTH: //todo
+            //                values = internalData.groundTruths;
+            //                break;
+            case INDEX:
+                // this is a rehash of other functions, but lets the same function perform similar logic
+                values = rowIndexStream().mapToObj(Value::new).collect(Collectors.toList());
+                break;
+        }
+
+        List<Value> finalValues = values;
+        final List<Integer> rowIndices = rowIndexStream()
+                .filter(i -> predicate.test(finalValues.get(i))).boxed()
+                .collect(Collectors.toUnmodifiableList());
+
+        return filterByRowIndex(rowIndices);
+    }
+
     public Dataframe filterRowsByInputs(Predicate<List<Value>> predicate) {
         final List<List<Value>> inputRows = getInputRows();
         return filterRowsByColumnRole(inputRows, predicate);
@@ -1239,6 +1275,14 @@ public class Dataframe {
             }
             this.nameAliases = newAliases;
         }
+    }
+
+    public enum InternalColumn {
+        TAG,
+        ID,
+        TIMESTAMP,
+        // GROUND_TRUTH, //todo
+        INDEX,
     }
 
     private class InternalData {

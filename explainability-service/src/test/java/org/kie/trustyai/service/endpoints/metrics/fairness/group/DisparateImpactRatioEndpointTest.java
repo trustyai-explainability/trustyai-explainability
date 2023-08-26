@@ -148,7 +148,7 @@ class DisparateImpactRatioEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("Invalid type for output: got 'male', expected object compatible with 'INT32'"));
+                .body(containsString("Invalid type for output=income: got 'male', expected object compatible with 'INT32'"));
     }
 
     @Test
@@ -197,8 +197,8 @@ class DisparateImpactRatioEndpointTest {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .body(allOf(
-                        containsString("No output found with name=icnome for model=example1"),
-                        containsString("No protected attribute found with name=city for model=example1")));
+                        containsString("No output found with name=icnome"),
+                        containsString("No protected attribute found with name=city")));
     }
 
     @Test
@@ -214,9 +214,9 @@ class DisparateImpactRatioEndpointTest {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
                 .body(allOf(
-                        containsString("Invalid type for output: got 'approved-doesnt-exist', expected object compatible with 'INT32'"),
-                        containsString("Received invalid type for privileged attribute: got 'lemons', expected object compatible with 'INT32'"),
-                        containsString("Received invalid type for unprivileged attribute: got '1.5', expected object compatible with 'INT32'")));
+                        containsString("Invalid type for output=income: got 'approved-doesnt-exist', expected object compatible with 'INT32'"),
+                        containsString("Received invalid type for privileged attribute=gender: got 'lemons', expected object compatible with 'INT32'"),
+                        containsString("Received invalid type for unprivileged attribute=gender: got '1.5', expected object compatible with 'INT32'")));
     }
 
     @Test
