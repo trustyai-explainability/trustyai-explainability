@@ -14,15 +14,23 @@ A row matcher has three fields:
 The row matcher can be thought of as performing an SQL-esque query:
 
 ## For `operation=EQUALS`:
-```SQL
-SELECT * FROM modelId WHERE columnName EQUALS values
+```json
+{
+  "columnName": "age",
+  "operation": "EQUALS",
+  "values": [30, 31, 52]
+}
 ```
 This will match all rows where the value of the provided column is contained anywhere within the `values` list.
 If `columnName="age'` and `values=[30, 31, 52]`, all rows where age=30, 31, **or** 52 would match.
 
 ## For `operation=BETWEEN`:
-```SQL
-SELECT rows FROM modelId WHERE columnName BETWEEN values[0], values[1]
+```json
+{
+  "columnName": "age",
+  "operation": "BETWEEN",
+  "values": [30, 35]
+}
 ```
 This will match all rows where the value of the provided column is in the range `[values[0], values[1])`
 If `columnName="age'` and `values=[30, 35]`, all rows where 30<=age<35 would match. 
