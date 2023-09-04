@@ -14,10 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
@@ -165,7 +167,7 @@ class ServiceMetadataEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
-                .when().post(metadataUrl)
+                .when().post(metadataUrl + "/names")
                 .then()
                 .statusCode(200)
                 .body(is("Feature and output name mapping successfully applied."));
@@ -203,7 +205,7 @@ class ServiceMetadataEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
-                .when().post(metadataUrl)
+                .when().post(metadataUrl + "/names")
                 .then()
                 .statusCode(200)
                 .body(is("Feature and output name mapping successfully applied."));
@@ -240,7 +242,7 @@ class ServiceMetadataEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
-                .when().post(metadataUrl)
+                .when().post(metadataUrl + "/names")
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(Matchers.containsString("Not all mapped input fields exist in model metadata"));
@@ -260,7 +262,7 @@ class ServiceMetadataEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
-                .when().post(metadataUrl)
+                .when().post(metadataUrl + "/names")
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(Matchers.containsString("Not all mapped output fields exist in model metadata"));
@@ -474,6 +476,51 @@ class ServiceMetadataEndpointTest {
         assertFalse(serviceMetadata.get(1).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(1).getData().getInputSchema().getItems().isEmpty());
 
+    }
+
+    @Test
+    void setDatapointTagging() throws JsonProcessingException {
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(50, 10);
+        datasource.get().saveDataframe(dataframe, MODEL_ID);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        List<DatapointSource> originalTags = datasource.get().getDataframe(MODEL_ID).getTags();
+
+        List<String> tags = List.of("TRAINING", "SYNTHETIC");
+        int idx = 0;
+        HashMap<String, List<Integer>> tagIDXGroundTruth = new HashMap<>();
+        HashMap<String, List<List<Integer>>> tagMapToPost = new HashMap<>();
+
+        for (String tag : tags) {
+            tagMapToPost.put(tag, List.of(List.of(idx, idx + 3), List.of(idx + 5, idx + 7), List.of(idx + 9)));
+            tagIDXGroundTruth.put(tag, List.of(idx, idx + 1, idx + 2, idx + 5, idx + 6, idx + 9));
+            idx += 10;
+        }
+        DataTagging dataTagging = new DataTagging(MODEL_ID, tagMapToPost);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(dataTagging)
+                .when().post(metadataUrl + "/tags")
+                .then()
+                .statusCode(200)
+                .body(is("Datapoints successfully tagged."));
+
+        Dataframe df = datasource.get().getDataframe(MODEL_ID);
+
+        // check that df is not appended
+        assertEquals(50, df.getRowDimension());
+
+        for (String tag : tags) {
+            Dataframe subDF = df.filterRowsByTagEquals(DatapointSource.valueOf(tag));
+
+            // make sure the correct number of points are filtered
+            assertEquals(6, subDF.getRowDimension());
+
+            // check that each datapoint we tagged has the correct tag
+            for (Integer i : tagIDXGroundTruth.get(tag)) {
+                assertTrue(subDF.getIds().contains(df.getIds().get(i)));
+            }
+        }
     }
 
 }

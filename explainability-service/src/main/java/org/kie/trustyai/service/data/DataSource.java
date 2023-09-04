@@ -108,11 +108,16 @@ public class DataSource {
     }
 
     public void saveDataframe(final Dataframe dataframe, final String modelId) throws InvalidSchemaException {
+        saveDataframe(dataframe, modelId, false);
+    }
+
+    public void saveDataframe(final Dataframe dataframe, final String modelId, boolean overwrite) throws InvalidSchemaException {
         // Add to known models
         this.knownModels.add(modelId);
 
-        if (!hasMetadata(modelId)) {
+        if (!hasMetadata(modelId) || overwrite) {
             // If metadata is not present, create it
+            // alternatively, overwrite existing metadata if requested
             final Metadata metadata = new Metadata();
             metadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
             metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
@@ -151,7 +156,7 @@ public class DataSource {
         }
 
         ByteBuffer[] byteBuffers = parser.toByteBuffers(dataframe, false);
-        if (!storage.get().dataExists(modelId)) {
+        if (!storage.get().dataExists(modelId) || overwrite) {
             storage.get().saveData(byteBuffers[0], modelId);
             storage.get().save(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
         } else {
