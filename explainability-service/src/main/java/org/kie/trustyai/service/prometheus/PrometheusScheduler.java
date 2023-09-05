@@ -62,12 +62,12 @@ public class PrometheusScheduler {
         try {
             // global service statistic
             DataSource ds = dataSource.get();
-            publisher.gauge("", "MODEL_COUNT", UUID.nameUUIDFromBytes("model_count".getBytes(StandardCharsets.UTF_8)), ds.getKnownModels().size());
+            publisher.gauge("", "MODEL_COUNT_TOTAL", UUID.nameUUIDFromBytes("model_count".getBytes(StandardCharsets.UTF_8)), ds.getKnownModels().size());
 
             Set<String> requestedModels = getModelIds();
             for (final String modelId : ds.getKnownModels()) {
                 // global model statistics
-                publisher.gauge(modelId, "MODEL_OBSERVATIONS", UUID.nameUUIDFromBytes(modelId.getBytes(StandardCharsets.UTF_8)), ds.getMetadata(modelId).getObservations());
+                publisher.gauge(modelId, "MODEL_OBSERVATIONS_TOTAL", UUID.nameUUIDFromBytes(modelId.getBytes(StandardCharsets.UTF_8)), ds.getMetadata(modelId).getObservations());
 
                 if (hasRequests() && requestedModels.contains(modelId)) {
                     final Predicate<Map.Entry<UUID, BaseMetricRequest>> filterByModelId = request -> request.getValue().getModelId().equals(modelId);

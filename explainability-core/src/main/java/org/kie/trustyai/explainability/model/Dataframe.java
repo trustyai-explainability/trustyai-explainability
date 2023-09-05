@@ -152,9 +152,10 @@ public class Dataframe {
             for (int col = 0; col < inputsSize; col++) {
                 df.data.get(col).add(currentInputs.get(col).getValue());
             }
-            df.internalData.synthetics.add(false);
+            df.internalData.datapointSources.add(DatapointSource.UNLABELED);
             df.internalData.ids.add(UUID.randomUUID().toString());
             df.internalData.timestamps.add(LocalDateTime.now());
+            df.internalData.groundTruths.add(null);
         });
 
         return df;
@@ -304,13 +305,15 @@ public class Dataframe {
 
                 if (alignedMetadata) {
                     PredictionMetadata predictionMetadata = predictionsMetadata.get(i);
-                    internalData.synthetics.add(predictionMetadata.isSynthetic());
+                    internalData.datapointSources.add(predictionMetadata.getDataPointSource());
                     internalData.ids.add(predictionMetadata.getId());
                     internalData.timestamps.add(predictionMetadata.getPredictionTime());
+                    internalData.groundTruths.add(predictionMetadata.getGroundTruth());
                 } else {
-                    internalData.synthetics.add(false);
+                    internalData.datapointSources.add(DatapointSource.UNLABELED);
                     internalData.ids.add(currentPrediction.getExecutionId().toString());
                     internalData.timestamps.add(LocalDateTime.now());
+                    internalData.groundTruths.add(null);
                 }
             });
         }
@@ -862,11 +865,20 @@ public class Dataframe {
      * @return A filtered {@link Dataframe}.
      */
     public Dataframe filterByRowIndex(List<Integer> rows) {
-        List<LocalDateTime> timestamps = rows.stream().map(internalData.timestamps::get).collect(Collectors.toList());
-        List<String> ids = rows.stream().map(internalData.ids::get).collect(Collectors.toList());
-        List<Boolean> synthetics = rows.stream().map(internalData.synthetics::get).collect(Collectors.toList());
+        int nrows = rows.size();
+        List<LocalDateTime> timestamps = new ArrayList<>(nrows);
+        List<String> ids = new ArrayList<>(nrows);
+        List<DatapointSource> datapointSources = new ArrayList<>(nrows);
+        List<Value> groundTruths = new ArrayList<>(nrows);
+        rows.forEach(row -> {
+            timestamps.add(internalData.timestamps.get(row));
+            ids.add(internalData.ids.get(row));
+            datapointSources.add(internalData.datapointSources.get(row));
+            groundTruths.add(internalData.groundTruths.get(row));
+        });
+
         Metadata metadataCopy = this.metadata.copy();
-        InternalData internalDataFiltered = new InternalData(synthetics, ids, timestamps);
+        InternalData internalDataFiltered = new InternalData(datapointSources, ids, timestamps, groundTruths);
 
         final List<List<Value>> dataCopy = columnIndexStream().mapToObj(col -> {
             final List<Value> column = data.get(col);
@@ -922,9 +934,7 @@ public class Dataframe {
     }
 
     public Dataframe filterRowsBySynthetic(boolean synthetic) {
-        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.synthetics.get(rowNumber) == synthetic)
-                .boxed().collect(Collectors.toList());
-        return filterByRowIndex(rowIndexes);
+        return synthetic ? filterRowsByTagEquals(DatapointSource.SYNTHETIC) : filterRowsByTagNotEquals(DatapointSource.SYNTHETIC);
     }
 
     public Dataframe filterRowsByTimeRange(LocalDateTime lowerBound, LocalDateTime upperBound) {
@@ -932,6 +942,49 @@ public class Dataframe {
                 .isBefore(upperBound) && internalData.timestamps.get(rowNumber).isAfter(lowerBound)).boxed()
                 .collect(Collectors.toList());
         return filterByRowIndex(rowIndexes);
+    }
+
+    public Dataframe filterRowsByTagEquals(DatapointSource dpSource) {
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.datapointSources.get(rowNumber) == dpSource).boxed().collect(Collectors.toList());
+        return filterByRowIndex(rowIndexes);
+    }
+
+    public Dataframe filterRowsByTagNotEquals(DatapointSource dpSource) {
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.datapointSources.get(rowNumber) != dpSource).boxed().collect(Collectors.toList());
+        return filterByRowIndex(rowIndexes);
+    }
+
+    /**
+     * Tag individual data points with their source, to differentiate between synthetic, training, inference data, etc
+     *
+     * @param dataTagging A map of labels and the indeces that should be assigned those labels
+     *        The keys of this map should be lists of singleton or tuple lists, detailing which indices to apply the label to.
+     *        One-item lists indicate a single index to be included, while two-item lists describe a slice of indices to include [A, B)
+     *        For example, [0], [2,5], [6] would tag the datapoints 0, 2, 3, 4, 6
+     */
+    public void tagDataPoints(Map<DatapointSource, List<List<Integer>>> dataTagging) {
+        int nrows = this.getRowDimension();
+        for (Map.Entry<DatapointSource, List<List<Integer>>> entry : dataTagging.entrySet()) {
+            for (List<Integer> idxs : entry.getValue()) {
+                if (idxs.size() > 2) {
+                    throw new IllegalArgumentException("Tag " + entry.getValue() + " keys (" + entry.getKey() + ") contain a sublist with more than two items. Please ensure sublists" +
+                            "contain either one element (to indicate a single index) or a pair of elements (to indicate a slice of indices)");
+                }
+
+                if (idxs.get(0) >= nrows || (idxs.size() > 1 && idxs.get(1) > nrows)) {
+                    throw new IndexOutOfBoundsException("Tag " + entry.getValue() + " sublists contain an out-of-range index: " + idxs + ". Dataframe only has " + nrows + " rows.");
+                }
+
+                // if a tuple, assign all points in slice to tag
+                if (idxs.size() == 2) {
+                    for (int i = idxs.get(0); i < idxs.get(1); i++) {
+                        this.internalData.datapointSources.set(i, entry.getKey());
+                    }
+                } else { //otherwise just assign the one provided point
+                    this.internalData.datapointSources.set(idxs.get(0), entry.getKey());
+                }
+            }
+        }
     }
 
     /**
@@ -1078,12 +1131,20 @@ public class Dataframe {
         return Collections.unmodifiableList(internalData.ids);
     }
 
+    public List<DatapointSource> getTags() {
+        return Collections.unmodifiableList(internalData.datapointSources);
+    }
+
     public List<LocalDateTime> getTimestamps() {
         return Collections.unmodifiableList(internalData.timestamps);
     }
 
-    public List<Boolean> getSynthetics() {
-        return Collections.unmodifiableList(internalData.synthetics);
+    public List<DatapointSource> getDataSources() {
+        return Collections.unmodifiableList(internalData.datapointSources);
+    }
+
+    public List<Value> getGroundTruths() {
+        return Collections.unmodifiableList(internalData.groundTruths);
     }
 
     @Override
@@ -1181,25 +1242,28 @@ public class Dataframe {
     }
 
     private class InternalData {
-        private final List<Boolean> synthetics;
+        private final List<DatapointSource> datapointSources;
         private final List<String> ids;
         private final List<LocalDateTime> timestamps;
+        private final List<Value> groundTruths;
 
         InternalData() {
-            this.synthetics = new ArrayList<>();
+            this.datapointSources = new ArrayList<>();
             this.ids = new ArrayList<>();
             this.timestamps = new ArrayList<>();
+            this.groundTruths = new ArrayList<>();
         }
 
-        InternalData(List<Boolean> synthetics, List<String> ids, List<LocalDateTime> timestamps) {
-            this.synthetics = synthetics;
+        InternalData(List<DatapointSource> datapointSources, List<String> ids, List<LocalDateTime> timestamps, List<Value> groundTruths) {
+            this.datapointSources = datapointSources;
             this.ids = ids;
             this.timestamps = timestamps;
+            this.groundTruths = groundTruths;
         }
 
         InternalData copy() {
-            return new InternalData(new ArrayList<>(this.synthetics), new ArrayList<>(this.ids),
-                    new ArrayList<>(this.timestamps));
+            return new InternalData(new ArrayList<>(this.datapointSources), new ArrayList<>(this.ids),
+                    new ArrayList<>(this.timestamps), new ArrayList<>(this.groundTruths));
         }
     }
 }

@@ -112,7 +112,6 @@ public class InferencePayloadReconciler {
             throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
         }
         LOG.debug("Prediction input: " + predictionInput);
-
         final ModelInferResponse output;
         try {
             output = ModelInferResponse.parseFrom(outputs);
@@ -152,11 +151,10 @@ public class InferencePayloadReconciler {
             throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
         }
         LOG.debug("Prediction input: " + predictionInput.getFeatures());
-
         final List<Feature> features = new ArrayList<>(predictionInput.getFeatures());
 
-        boolean synthetic = metadata.containsKey(ExplainerEndpoint.BIAS_IGNORE_PARAM);
-        PredictionMetadata predictionMetadata = new PredictionMetadata(id, LocalDateTime.now(), synthetic);
+        DatapointSource datapointSource = metadata.containsKey(ExplainerEndpoint.BIAS_IGNORE_PARAM) ? DatapointSource.SYNTHETIC : DatapointSource.UNLABELED;
+        PredictionMetadata predictionMetadata = new PredictionMetadata(id, LocalDateTime.now(), datapointSource);
 
         final ModelInferResponse output;
         try {

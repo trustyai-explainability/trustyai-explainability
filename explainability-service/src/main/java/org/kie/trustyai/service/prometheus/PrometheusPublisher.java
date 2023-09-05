@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -52,32 +53,35 @@ public class PrometheusPublisher {
         }
     }
 
-    private Iterable<Tag> generateTags(String modelName, UUID id, BaseMetricRequest request) {
+    private Iterable<Tag> generateTags(String modelName, UUID id, Optional<BaseMetricRequest> request) {
         List<Tag> tags;
-        if (request != null) {
-            tags = request.retrieveTags().entrySet().stream()
+        if (request.isPresent()) {
+            Map<String, String> tagMap = request.get().retrieveDefaultTags();
+            tagMap.putAll(request.get().retrieveTags());
+            tags = tagMap.entrySet().stream()
                     .map(e -> Tag.of(e.getKey(), e.getValue()))
                     .collect(Collectors.toList());
         } else {
             tags = new ArrayList<>();
+            if (!modelName.isEmpty()) {
+                // populate the model name if not coming via a request object
+                tags.add(Tag.of("model", modelName));
+            }
         }
         tags.add(Tag.of("request", id.toString()));
-        if (!modelName.isEmpty()) {
-            tags.add(Tag.of("model", modelName));
-        }
         return Tags.of(tags);
     }
 
     public void gauge(@ValidReconciledMetricRequest BaseMetricRequest request, String modelName, UUID id, double value) {
         values.put(id, new AtomicDouble(value));
-        final Iterable<Tag> tags = generateTags(modelName, id, request);
+        final Iterable<Tag> tags = generateTags(modelName, id, Optional.of(request));
         createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, id);
         LOG.debug(String.format("Scheduled request for %s id=%s, value=%f", request.getMetricName(), id, value));
     }
 
     public void gauge(String modelName, String metricName, UUID id, double value) {
         values.put(id, new AtomicDouble(value));
-        final Iterable<Tag> tags = generateTags(modelName, id, null);
+        final Iterable<Tag> tags = generateTags(modelName, id, Optional.empty());
         createOrUpdateGauge(METRIC_PREFIX + metricName.toLowerCase(), tags, id);
         LOG.debug(String.format("Scheduled request for %s id=%s, value=%f", metricName, id, value));
     }

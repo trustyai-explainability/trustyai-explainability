@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
@@ -384,7 +385,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
 
         final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
         Prediction prediction = dataframe.asPredictions().get(0);
-        PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), true);
+        PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), DatapointSource.SYNTHETIC);
         Dataframe newDataframe = Dataframe.createFrom(prediction, predictionMetadata);
 
         datasource.get().saveDataframe(newDataframe, MODEL_ID);
