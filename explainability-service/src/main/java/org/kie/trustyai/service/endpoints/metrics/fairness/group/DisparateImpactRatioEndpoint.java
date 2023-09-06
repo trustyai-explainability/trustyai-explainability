@@ -18,6 +18,7 @@ import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 import io.quarkus.cache.CacheResult;
@@ -52,11 +53,11 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
                 outcomeName,
                 favorableOutcomeAttr,
                 metricValue.doubleValue());
-    };
+    }
 
     @Override
     @CacheResult(cacheName = "metrics-calculator-dir", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public double calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
+    public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         GroupMetricRequest gmRequest = (GroupMetricRequest) request;
         try {
@@ -71,8 +72,11 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
                     value -> value.equals(unprivilegedAttr));
             final Value favorableOutcomeAttr = PayloadConverter.convertToValue(gmRequest.getFavorableOutcome().getReconciledType().get());
             final Type favorableOutcomeAttrType = PayloadConverter.convertToType(gmRequest.getFavorableOutcome().getReconciledType().get().getType());
-            return DisparateImpactRatio.calculate(privileged, unprivileged,
-                    List.of(new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+            return new MetricValueCarrier(
+                    DisparateImpactRatio.calculate(
+                            privileged,
+                            unprivileged,
+                            List.of(new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0))));
         } catch (Exception e) {
             throw new MetricCalculationException(e.getMessage(), e);
         }

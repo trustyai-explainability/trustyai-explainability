@@ -18,6 +18,7 @@ import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 import io.quarkus.cache.CacheResult;
@@ -55,7 +56,7 @@ public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
 
     @Override
     @CacheResult(cacheName = "metrics-calculator-spd", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public double calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
+    public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
         GroupMetricRequest gmRequest = (GroupMetricRequest) request;
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
@@ -70,8 +71,11 @@ public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
                     value -> value.equals(unprivilegedAttr));
             final Value favorableOutcomeAttr = PayloadConverter.convertToValue(gmRequest.getFavorableOutcome().getReconciledType().get());
             final Type favorableOutcomeAttrType = PayloadConverter.convertToType(gmRequest.getFavorableOutcome().getReconciledType().get().getType());
-            return GroupStatisticalParityDifference.calculate(privileged, unprivileged,
-                    List.of(new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+            return new MetricValueCarrier(
+                    GroupStatisticalParityDifference.calculate(
+                            privileged,
+                            unprivileged,
+                            List.of(new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0))));
         } catch (Exception e) {
             throw new MetricCalculationException(e.getMessage(), e);
         }

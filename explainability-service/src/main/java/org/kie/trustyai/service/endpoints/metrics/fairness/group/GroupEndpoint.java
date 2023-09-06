@@ -22,6 +22,7 @@ import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
@@ -69,18 +70,22 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
 
         RequestReconciler.reconcile(request, metadata);
 
-        final double metricValue;
+        final MetricValueCarrier metricValue;
         try {
             metricValue = this.calculate(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
-        final String metricDefinition = this.getSpecificDefinition(metricValue, request);
+        if (metricValue.isSingle()) {
+            final String metricDefinition = this.getSpecificDefinition(metricValue.getValue(), request);
 
-        MetricThreshold thresholds = thresholdFunction(request.getThresholdDelta(), metricValue);
-        final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue, metricDefinition, thresholds, super.getMetricName());
-        return Response.ok(dirObj).build();
+            MetricThreshold thresholds = thresholdFunction(request.getThresholdDelta(), metricValue.getValue());
+            final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue.getValue(), metricDefinition, thresholds, super.getMetricName());
+            return Response.ok(dirObj).build();
+        } else {
+            throw new UnsupportedOperationException("Group metric endpoint not yet compatible with multiple-valued metrics");
+        }
     }
 
     @GET

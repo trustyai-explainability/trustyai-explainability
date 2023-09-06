@@ -26,6 +26,7 @@ import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.identity.ValidIdentityMetricRequest;
 
 import io.quarkus.cache.CacheResult;
@@ -47,10 +48,10 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
 
     @Override
     @CacheResult(cacheName = "metrics-calculator-identity", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public double calculate(Dataframe dataframe, BaseMetricRequest request) {
+    public MetricValueCarrier calculate(Dataframe dataframe, BaseMetricRequest request) {
         List<Value> vs = dataframe.getColumn(dataframe.getColumnNames().indexOf(((IdentityMetricRequest) request).getColumnName()));
         double value = vs.stream().mapToDouble(Value::asNumber).sum() / ((double) vs.size());
-        return value;
+        return new MetricValueCarrier(value);
     }
 
     public String getGeneralDefinition() {
@@ -87,7 +88,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
 
         final double metricValue;
         try {
-            metricValue = this.calculate(dataframe, request);
+            metricValue = this.calculate(dataframe, request).getValue();
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();

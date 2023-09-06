@@ -27,6 +27,7 @@ import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
@@ -113,5 +114,5 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
         return Response.ok().entity(response).build();
     }
 
-    public abstract double calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request);
+    public abstract MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request);
 }

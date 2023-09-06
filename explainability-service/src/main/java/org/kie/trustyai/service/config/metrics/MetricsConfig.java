@@ -1,5 +1,7 @@
 package org.kie.trustyai.service.config.metrics;
 
+import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
+
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 
@@ -9,6 +11,8 @@ public interface MetricsConfig {
     Spd spd();
 
     Dir dir();
+
+    Meanshift meanshift();
 
     interface Spd {
 
@@ -25,6 +29,14 @@ public interface MetricsConfig {
         double thresholdLower();
 
         @WithDefault("1.2")
+        double thresholdUpper();
+    }
+
+    interface Meanshift {
+        @WithDefault("0")
+        double thresholdLower();
+
+        @WithDefault("1")
         double thresholdUpper();
     }
 

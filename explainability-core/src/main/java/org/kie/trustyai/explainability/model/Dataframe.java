@@ -686,7 +686,6 @@ public class Dataframe {
         return this.metadata.types;
     }
 
-
     /**
      * Return the number of outputs.
      *
