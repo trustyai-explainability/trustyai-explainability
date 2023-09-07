@@ -8,6 +8,15 @@ spec:
         repoRef:
           name: manifests
           path: config
+        parameters:
+          - name: trustyaiServiceImageName
+            value: serviceImagePlaceholder
+          - name: trustyaiServiceImageTag
+            value: serviceTagPlaceholder
+          - name: trustyaiOperatorImageName
+            value: operatorImagePlaceholder
+          - name: trustyaiOperatorImageTag
+            value: operatorTagPlaceholder
       name: trustyai-service-operator
   repos:
     - name: manifests

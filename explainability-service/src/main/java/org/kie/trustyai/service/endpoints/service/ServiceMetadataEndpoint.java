@@ -1,26 +1,25 @@
 package org.kie.trustyai.service.endpoints.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
+import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
@@ -28,6 +27,7 @@ import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+@ApplicationScoped
 @Path("/info")
 public class ServiceMetadataEndpoint {
 
@@ -54,8 +54,14 @@ public class ServiceMetadataEndpoint {
         for (String modelId : dataSource.get().getKnownModels()) {
             final ServiceMetadata serviceMetadata = new ServiceMetadata();
 
-            serviceMetadata.getMetrics().scheduledMetadata.dir = scheduler.getDirRequests().size();
-            serviceMetadata.getMetrics().scheduledMetadata.spd = scheduler.getSpdRequests().size();
+            for (Map.Entry<String, ConcurrentHashMap<UUID, BaseMetricRequest>> metricDict : scheduler.getAllRequests().entrySet()) {
+                metricDict.getValue().values().forEach(metric -> {
+                    if (metric.getModelId().equals(modelId)) {
+                        final String metricName = metricDict.getKey();
+                        serviceMetadata.getMetrics().scheduledMetadata.setCount(metricName, serviceMetadata.getMetrics().scheduledMetadata.getCount(metricName) + 1);
+                    }
+                });
+            }
 
             try {
                 final Metadata metadata = dataSource.get().getMetadata(modelId);
@@ -73,17 +79,59 @@ public class ServiceMetadataEndpoint {
     }
 
     @POST
+    @Path("/tags")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response labelSchema(DataTagging dataTagging) throws JsonProcessingException {
+
+        if (!dataSource.get().getKnownModels().contains(dataTagging.getModelId())) {
+            return Response.serverError()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Model ID " + dataTagging.getModelId() + " does not exist in TrustyAI metadata.")
+                    .build();
+        }
+
+        try {
+            EnumMap<DatapointSource, List<List<Integer>>> tagMapping = new EnumMap<>(DatapointSource.class);
+            for (String tag : dataTagging.getDataTagging().keySet()) {
+                DatapointSource dpSource;
+                try {
+                    dpSource = DatapointSource.valueOf(tag);
+                } catch (IllegalArgumentException e) {
+                    return Response.serverError()
+                            .entity("Provided datapoint tag=" + tag + " is not valid. Must be one of " + Arrays.toString(DatapointSource.values()))
+                            .status(Response.Status.BAD_REQUEST)
+                            .build();
+                }
+                tagMapping.put(dpSource, dataTagging.getDataTagging().get(tag));
+            }
+
+            Dataframe df = dataSource.get().getDataframe(dataTagging.getModelId());
+            df.tagDataPoints(tagMapping);
+            dataSource.get().saveDataframe(df, dataTagging.getModelId(), true);
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            return Response.serverError()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(e.getMessage())
+                    .build();
+        }
+
+        return Response.ok().entity("Datapoints successfully tagged.").build();
+    }
+
+    @POST
+    @Path("/names")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response labelSchema(NameMapping nameMapping) throws JsonProcessingException {
 
-        if (!dataSource.get().getKnownModels().contains(nameMapping.getModelID())) {
+        if (!dataSource.get().getKnownModels().contains(nameMapping.getModelId())) {
             return Response.serverError()
                     .status(Response.Status.BAD_REQUEST)
-                    .entity("Model ID " + nameMapping.getModelID() + " does not exist in TrustyAI metadata.")
+                    .entity("Model ID " + nameMapping.getModelId() + " does not exist in TrustyAI metadata.")
                     .build();
         }
-        final Metadata metadata = dataSource.get().getMetadata(nameMapping.getModelID());
+        final Metadata metadata = dataSource.get().getMetadata(nameMapping.getModelId());
 
         // validation
         Schema inputSchema = metadata.getInputSchema();

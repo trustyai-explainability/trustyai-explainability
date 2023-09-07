@@ -13,7 +13,8 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.LocalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.ModelConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -61,7 +62,7 @@ class ShapEndpointTest {
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
         final LocalExplanationRequest payload = new LocalExplanationRequest();
-        payload.setModelId(MODEL_ID);
+        payload.setModelConfig(new ModelConfig("", MODEL_ID, ""));
         payload.setPredictionId(id);
 
         given().contentType(ContentType.JSON).body(payload)

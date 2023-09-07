@@ -10,7 +10,8 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.GlobalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.GlobalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.ModelConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -54,9 +55,8 @@ class PartialDependencePlotEndpointTest {
     @Test
     void postWithoutKserve() throws JsonProcessingException {
         datasource.get().reset();
-        Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
         final GlobalExplanationRequest payload = new GlobalExplanationRequest();
-        payload.setModelId(MODEL_ID);
+        payload.setModelConfig(new ModelConfig("", MODEL_ID, ""));
 
         given().contentType(ContentType.JSON).body(payload)
                 .when().post()

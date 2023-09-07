@@ -22,21 +22,18 @@ import javax.ws.rs.core.Response;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
-import org.kie.trustyai.service.payloads.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.GlobalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.GlobalExplanationRequest;
 
 public abstract class GlobalExplainerEndpoint extends ExplainerEndpoint {
 
-    protected Response processRequest(GlobalExplanationRequest request, DataSource dataSource, ServiceConfig serviceConfig) {
+    protected Response processRequest(GlobalExplanationRequest request, DataSource dataSource) {
         try {
-            String modelId = request.getModelId();
-            String modelVersion = request.getModelVersion();
-            PredictionProvider model = getModel(serviceConfig, modelId, modelVersion);
+            PredictionProvider model = getModel(request.getModelConfig());
 
-            Dataframe dataframe = dataSource.getDataframe(modelId);
+            Dataframe dataframe = dataSource.getDataframe(request.getModelConfig().getName());
             List<Prediction> predictions = dataframe.asPredictions();
 
             BaseExplanationResponse entity = generateExplanation(model, predictions);

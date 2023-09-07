@@ -68,6 +68,7 @@ public class Dataframe {
         // Process inputs metadata
         for (Feature feature : prediction.getInput().getFeatures()) {
             df.metadata.names.add(feature.getName());
+            df.metadata.nameAliases.add(null);
             df.metadata.types.add(feature.getType());
             df.metadata.constrained.add(feature.isConstrained());
             df.metadata.domains.add(feature.getDomain());
@@ -77,6 +78,7 @@ public class Dataframe {
         // Process outputs metadata
         for (Output output : prediction.getOutput().getOutputs()) {
             df.metadata.names.add(output.getName());
+            df.metadata.nameAliases.add(null);
             df.metadata.types.add(output.getType());
             df.metadata.constrained.add(true);
             df.metadata.domains.add(EmptyFeatureDomain.create());
@@ -134,6 +136,7 @@ public class Dataframe {
         // Process inputs metadata
         for (Feature feature : inputs.get(0).getFeatures()) {
             df.metadata.names.add(feature.getName());
+            df.metadata.nameAliases.add(null);
             df.metadata.types.add(feature.getType());
             df.metadata.constrained.add(feature.isConstrained());
             df.metadata.domains.add(feature.getDomain());
@@ -149,9 +152,10 @@ public class Dataframe {
             for (int col = 0; col < inputsSize; col++) {
                 df.data.get(col).add(currentInputs.get(col).getValue());
             }
-            df.internalData.synthetics.add(false);
+            df.internalData.datapointSources.add(DatapointSource.UNLABELED);
             df.internalData.ids.add(UUID.randomUUID().toString());
             df.internalData.timestamps.add(LocalDateTime.now());
+            df.internalData.groundTruths.add(null);
         });
 
         return df;
@@ -188,6 +192,7 @@ public class Dataframe {
             // Process inputs metadata
             for (Feature feature : predictions.get(0).getInput().getFeatures()) {
                 df.metadata.names.add(feature.getName());
+                df.metadata.nameAliases.add(null);
                 df.metadata.types.add(feature.getType());
                 df.metadata.constrained.add(feature.isConstrained());
                 df.metadata.domains.add(feature.getDomain());
@@ -197,6 +202,7 @@ public class Dataframe {
             // Process outputs metadata
             for (Output output : predictions.get(0).getOutput().getOutputs()) {
                 df.metadata.names.add(output.getName());
+                df.metadata.nameAliases.add(null);
                 df.metadata.types.add(output.getType());
                 df.metadata.constrained.add(true);
                 df.metadata.domains.add(EmptyFeatureDomain.create());
@@ -299,13 +305,15 @@ public class Dataframe {
 
                 if (alignedMetadata) {
                     PredictionMetadata predictionMetadata = predictionsMetadata.get(i);
-                    internalData.synthetics.add(predictionMetadata.isSynthetic());
+                    internalData.datapointSources.add(predictionMetadata.getDataPointSource());
                     internalData.ids.add(predictionMetadata.getId());
                     internalData.timestamps.add(predictionMetadata.getPredictionTime());
+                    internalData.groundTruths.add(predictionMetadata.getGroundTruth());
                 } else {
-                    internalData.synthetics.add(false);
+                    internalData.datapointSources.add(DatapointSource.UNLABELED);
                     internalData.ids.add(currentPrediction.getExecutionId().toString());
                     internalData.timestamps.add(LocalDateTime.now());
+                    internalData.groundTruths.add(null);
                 }
             });
         }
@@ -653,7 +661,11 @@ public class Dataframe {
      * @return A {@link List} with the column names
      */
     public List<String> getColumnNames() {
-        return metadata.names;
+        return metadata.getNames();
+    }
+
+    public void setColumnAliases(Map<String, String> aliases) {
+        metadata.setNameAliases(aliases);
     }
 
     /**
@@ -662,7 +674,7 @@ public class Dataframe {
      * @return A {@link List} with the column names
      */
     public List<String> getColumnNames(List<Integer> indices) {
-        return indices.stream().map(metadata.names::get).collect(Collectors.toCollection(ArrayList::new));
+        return indices.stream().map(metadata::getNames).collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -690,7 +702,7 @@ public class Dataframe {
         final List<Value> rowValues = getRow(row);
         final List<Integer> outputIndices = getOutputsIndices();
         return outputIndices.stream()
-                .map(i -> new Output(metadata.names.get(i), metadata.types.get(i), rowValues.get(i), 0.0))
+                .map(i -> new Output(metadata.getNames(i), metadata.types.get(i), rowValues.get(i), 0.0))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -708,9 +720,9 @@ public class Dataframe {
         return inputIndices.stream()
                 .map(i -> {
                     if (metadata.constrained.get(i)) {
-                        return new Feature(metadata.names.get(i), metadata.types.get(i), rowValues.get(i));
+                        return new Feature(metadata.getNames(i), metadata.types.get(i), rowValues.get(i));
                     } else {
-                        return new Feature(metadata.names.get(i), metadata.types.get(i), rowValues.get(i), metadata.constrained.get(i), metadata.domains.get(i));
+                        return new Feature(metadata.getNames(i), metadata.types.get(i), rowValues.get(i), metadata.constrained.get(i), metadata.domains.get(i));
                     }
 
                 })
@@ -730,7 +742,7 @@ public class Dataframe {
         final List<Integer> outputIndices = getOutputsIndices();
         return outputIndices.stream()
                 .map(i -> {
-                    return new Output(metadata.names.get(i), metadata.types.get(i), rowValues.get(i), 0.0);
+                    return new Output(metadata.getNames(i), metadata.types.get(i), rowValues.get(i), 0.0);
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -806,7 +818,7 @@ public class Dataframe {
         validateColumnIndex(column);
         final Type type = metadata.types.get(column);
         final List<Value> values = data.get(column);
-        final String name = metadata.names.get(column);
+        final String name = metadata.getNames(column);
         final FeatureDomain domain = metadata.domains.get(column);
 
         // Map each type to its corresponding feature generator
@@ -842,7 +854,7 @@ public class Dataframe {
 
         return data.get(column)
                 .stream()
-                .map(v -> new Output(metadata.names.get(column), metadata.types.get(column), v, 0.0))
+                .map(v -> new Output(metadata.getNames(column), metadata.types.get(column), v, 0.0))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -853,11 +865,20 @@ public class Dataframe {
      * @return A filtered {@link Dataframe}.
      */
     public Dataframe filterByRowIndex(List<Integer> rows) {
-        List<LocalDateTime> timestamps = rows.stream().map(internalData.timestamps::get).collect(Collectors.toList());
-        List<String> ids = rows.stream().map(internalData.ids::get).collect(Collectors.toList());
-        List<Boolean> synthetics = rows.stream().map(internalData.synthetics::get).collect(Collectors.toList());
+        int nrows = rows.size();
+        List<LocalDateTime> timestamps = new ArrayList<>(nrows);
+        List<String> ids = new ArrayList<>(nrows);
+        List<DatapointSource> datapointSources = new ArrayList<>(nrows);
+        List<Value> groundTruths = new ArrayList<>(nrows);
+        rows.forEach(row -> {
+            timestamps.add(internalData.timestamps.get(row));
+            ids.add(internalData.ids.get(row));
+            datapointSources.add(internalData.datapointSources.get(row));
+            groundTruths.add(internalData.groundTruths.get(row));
+        });
+
         Metadata metadataCopy = this.metadata.copy();
-        InternalData internalDataFiltered = new InternalData(synthetics, ids, timestamps);
+        InternalData internalDataFiltered = new InternalData(datapointSources, ids, timestamps, groundTruths);
 
         final List<List<Value>> dataCopy = columnIndexStream().mapToObj(col -> {
             final List<Value> column = data.get(col);
@@ -913,9 +934,7 @@ public class Dataframe {
     }
 
     public Dataframe filterRowsBySynthetic(boolean synthetic) {
-        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.synthetics.get(rowNumber) == synthetic)
-                .boxed().collect(Collectors.toList());
-        return filterByRowIndex(rowIndexes);
+        return synthetic ? filterRowsByTagEquals(DatapointSource.SYNTHETIC) : filterRowsByTagNotEquals(DatapointSource.SYNTHETIC);
     }
 
     public Dataframe filterRowsByTimeRange(LocalDateTime lowerBound, LocalDateTime upperBound) {
@@ -923,6 +942,49 @@ public class Dataframe {
                 .isBefore(upperBound) && internalData.timestamps.get(rowNumber).isAfter(lowerBound)).boxed()
                 .collect(Collectors.toList());
         return filterByRowIndex(rowIndexes);
+    }
+
+    public Dataframe filterRowsByTagEquals(DatapointSource dpSource) {
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.datapointSources.get(rowNumber) == dpSource).boxed().collect(Collectors.toList());
+        return filterByRowIndex(rowIndexes);
+    }
+
+    public Dataframe filterRowsByTagNotEquals(DatapointSource dpSource) {
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.datapointSources.get(rowNumber) != dpSource).boxed().collect(Collectors.toList());
+        return filterByRowIndex(rowIndexes);
+    }
+
+    /**
+     * Tag individual data points with their source, to differentiate between synthetic, training, inference data, etc
+     *
+     * @param dataTagging A map of labels and the indeces that should be assigned those labels
+     *        The keys of this map should be lists of singleton or tuple lists, detailing which indices to apply the label to.
+     *        One-item lists indicate a single index to be included, while two-item lists describe a slice of indices to include [A, B)
+     *        For example, [0], [2,5], [6] would tag the datapoints 0, 2, 3, 4, 6
+     */
+    public void tagDataPoints(Map<DatapointSource, List<List<Integer>>> dataTagging) {
+        int nrows = this.getRowDimension();
+        for (Map.Entry<DatapointSource, List<List<Integer>>> entry : dataTagging.entrySet()) {
+            for (List<Integer> idxs : entry.getValue()) {
+                if (idxs.size() > 2) {
+                    throw new IllegalArgumentException("Tag " + entry.getValue() + " keys (" + entry.getKey() + ") contain a sublist with more than two items. Please ensure sublists" +
+                            "contain either one element (to indicate a single index) or a pair of elements (to indicate a slice of indices)");
+                }
+
+                if (idxs.get(0) >= nrows || (idxs.size() > 1 && idxs.get(1) > nrows)) {
+                    throw new IndexOutOfBoundsException("Tag " + entry.getValue() + " sublists contain an out-of-range index: " + idxs + ". Dataframe only has " + nrows + " rows.");
+                }
+
+                // if a tuple, assign all points in slice to tag
+                if (idxs.size() == 2) {
+                    for (int i = idxs.get(0); i < idxs.get(1); i++) {
+                        this.internalData.datapointSources.set(i, entry.getKey());
+                    }
+                } else { //otherwise just assign the one provided point
+                    this.internalData.datapointSources.set(idxs.get(0), entry.getKey());
+                }
+            }
+        }
     }
 
     /**
@@ -1019,6 +1081,7 @@ public class Dataframe {
         data.add(new ArrayList<>(values));
 
         metadata.names.add(name);
+        metadata.nameAliases.add(null);
         metadata.types.add(type);
         metadata.constrained.add(true);
         metadata.domains.add(EmptyFeatureDomain.create());
@@ -1068,12 +1131,20 @@ public class Dataframe {
         return Collections.unmodifiableList(internalData.ids);
     }
 
+    public List<DatapointSource> getTags() {
+        return Collections.unmodifiableList(internalData.datapointSources);
+    }
+
     public List<LocalDateTime> getTimestamps() {
         return Collections.unmodifiableList(internalData.timestamps);
     }
 
-    public List<Boolean> getSynthetics() {
-        return Collections.unmodifiableList(internalData.synthetics);
+    public List<DatapointSource> getDataSources() {
+        return Collections.unmodifiableList(internalData.datapointSources);
+    }
+
+    public List<Value> getGroundTruths() {
+        return Collections.unmodifiableList(internalData.groundTruths);
     }
 
     @Override
@@ -1081,7 +1152,7 @@ public class Dataframe {
         final StringBuilder builder = new StringBuilder();
         builder.append("Dataframe [").append(getRowDimension()).append("x").append(getColumnDimension()).append("]\n");
         for (int i = 0; i < getColumnDimension(); i++) {
-            builder.append("\tColumn ").append(i).append(" (").append(metadata.names.get(i)).append(")\n");
+            builder.append("\tColumn ").append(i).append(" (").append(metadata.names.get(i)).append("-> ").append(metadata.nameAliases.get(i)).append(")\n");
             builder.append("\t\tType: ").append(metadata.types.get(i)).append("\n");
             builder.append("\t\tDomain: ");
             final FeatureDomain domain = metadata.domains.get(i);
@@ -1098,18 +1169,20 @@ public class Dataframe {
 
     class Metadata {
         private final List<String> names;
+        private List<String> nameAliases;
         private final List<Type> types;
         private final List<Boolean> constrained;
         private final List<FeatureDomain> domains;
         private final List<Boolean> inputs;
 
         private Metadata() {
-            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+            this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         }
 
-        private Metadata(List<String> names, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains,
+        private Metadata(List<String> names, List<String> nameAliases, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains,
                 List<Boolean> inputs) {
             this.names = new ArrayList<>(names);
+            this.nameAliases = new ArrayList<>(nameAliases);
             this.types = new ArrayList<>(types);
             this.constrained = new ArrayList<>(constrained);
             this.domains = new ArrayList<>(domains);
@@ -1118,6 +1191,7 @@ public class Dataframe {
 
         public void remove(int column) {
             names.remove(column);
+            nameAliases.remove(column);
             types.remove(column);
             constrained.remove(column);
             domains.remove(column);
@@ -1127,34 +1201,69 @@ public class Dataframe {
         public Metadata copy() {
             return new Metadata(
                     new ArrayList<>(this.names),
+                    new ArrayList<>(this.nameAliases),
                     new ArrayList<>(this.types),
                     new ArrayList<>(this.constrained),
                     new ArrayList<>(this.domains),
                     new ArrayList<>(this.inputs));
         }
 
+        private List<String> getNames() {
+            List<String> out = new ArrayList<>();
+            for (int i = 0; i < this.names.size(); i++) {
+                if (this.nameAliases.get(i) != null) {
+                    out.add(this.nameAliases.get(i));
+                } else {
+                    out.add(this.names.get(i));
+                }
+            }
+            return out;
+        }
+
+        private String getNames(int i) {
+            if (this.nameAliases.get(i) != null) {
+                return this.nameAliases.get(i);
+            } else {
+                return this.names.get(i);
+            }
+        }
+
+        private void setNameAliases(Map<String, String> aliases) {
+            List<String> newAliases = new ArrayList<>();
+            for (String name : names) {
+                if (aliases.containsKey(name)) {
+                    newAliases.add(aliases.get(name));
+                } else {
+                    newAliases.add(null);
+                }
+            }
+            this.nameAliases = newAliases;
+        }
     }
 
     private class InternalData {
-        private final List<Boolean> synthetics;
+        private final List<DatapointSource> datapointSources;
         private final List<String> ids;
         private final List<LocalDateTime> timestamps;
+        private final List<Value> groundTruths;
 
         InternalData() {
-            this.synthetics = new ArrayList<>();
+            this.datapointSources = new ArrayList<>();
             this.ids = new ArrayList<>();
             this.timestamps = new ArrayList<>();
+            this.groundTruths = new ArrayList<>();
         }
 
-        InternalData(List<Boolean> synthetics, List<String> ids, List<LocalDateTime> timestamps) {
-            this.synthetics = synthetics;
+        InternalData(List<DatapointSource> datapointSources, List<String> ids, List<LocalDateTime> timestamps, List<Value> groundTruths) {
+            this.datapointSources = datapointSources;
             this.ids = ids;
             this.timestamps = timestamps;
+            this.groundTruths = groundTruths;
         }
 
         InternalData copy() {
-            return new InternalData(new ArrayList<>(this.synthetics), new ArrayList<>(this.ids),
-                    new ArrayList<>(this.timestamps));
+            return new InternalData(new ArrayList<>(this.datapointSources), new ArrayList<>(this.ids),
+                    new ArrayList<>(this.timestamps), new ArrayList<>(this.groundTruths));
         }
     }
 }

@@ -2,7 +2,9 @@ package org.kie.trustyai.service.data;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.inject.Instance;
@@ -42,6 +44,13 @@ public class DataSource {
         return knownModels;
     }
 
+    private Map<String, String> getJointNameAliases(Metadata metadata) {
+        HashMap<String, String> jointMapping = new HashMap<>();
+        jointMapping.putAll(metadata.getInputSchema().getNameMapping());
+        jointMapping.putAll(metadata.getOutputSchema().getNameMapping());
+        return jointMapping;
+    }
+
     public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
         final ByteBuffer dataByteBuffer;
         try {
@@ -65,7 +74,9 @@ public class DataSource {
             throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
         }
 
-        return parser.toDataframe(dataByteBuffer, internalDataByteBuffer, metadata);
+        Dataframe df = parser.toDataframe(dataByteBuffer, internalDataByteBuffer, metadata);
+        df.setColumnAliases(getJointNameAliases(metadata));
+        return df;
     }
 
     public Dataframe getDataframe(final String modelId, int batchSize) throws DataframeCreateException {
@@ -91,15 +102,22 @@ public class DataSource {
             throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
         }
 
-        return parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
+        Dataframe df = parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
+        df.setColumnAliases(getJointNameAliases(metadata));
+        return df;
     }
 
     public void saveDataframe(final Dataframe dataframe, final String modelId) throws InvalidSchemaException {
+        saveDataframe(dataframe, modelId, false);
+    }
+
+    public void saveDataframe(final Dataframe dataframe, final String modelId, boolean overwrite) throws InvalidSchemaException {
         // Add to known models
         this.knownModels.add(modelId);
 
-        if (!hasMetadata(modelId)) {
+        if (!hasMetadata(modelId) || overwrite) {
             // If metadata is not present, create it
+            // alternatively, overwrite existing metadata if requested
             final Metadata metadata = new Metadata();
             metadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
             metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
@@ -138,7 +156,7 @@ public class DataSource {
         }
 
         ByteBuffer[] byteBuffers = parser.toByteBuffers(dataframe, false);
-        if (!storage.get().dataExists(modelId)) {
+        if (!storage.get().dataExists(modelId) || overwrite) {
             storage.get().saveData(byteBuffers[0], modelId);
             storage.get().save(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
         } else {
@@ -163,6 +181,7 @@ public class DataSource {
         } catch (JsonProcessingException e) {
             throw new StorageWriteException("Could not save metadata: " + e.getMessage());
         }
+
         storage.get().save(byteBuffer, modelId + "-" + METADATA_FILENAME);
     }
 

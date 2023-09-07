@@ -48,10 +48,10 @@ import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.payloads.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.CounterfactualExplanationRequest;
-import org.kie.trustyai.service.payloads.CounterfactualExplanationResponse;
-import org.kie.trustyai.service.payloads.LocalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.CounterfactualExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.CounterfactualExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
 
 @Tag(name = "Counterfactual Explainer Endpoint")
 @Path("/explainers/local/cf")

@@ -3,8 +3,12 @@ package org.kie.trustyai.service.endpoints.metrics;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.kie.trustyai.service.payloads.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 
+import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
@@ -12,50 +16,86 @@ public class RequestPayloadGenerator {
 
     private static final String MODEL_ID = "example1";
 
-    public static BaseMetricRequest correct() {
-        BaseMetricRequest request = new BaseMetricRequest();
+    public static GroupMetricRequest correct() {
+        GroupMetricRequest request = new GroupMetricRequest();
         request.setProtectedAttribute("gender");
-        request.setFavorableOutcome(IntNode.valueOf(1));
+        request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(1)));
         request.setOutcomeName("income");
-        request.setPrivilegedAttribute(IntNode.valueOf(1));
-        request.setUnprivilegedAttribute(IntNode.valueOf(0));
+        request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+        request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
         request.setModelId(MODEL_ID);
 
         return request;
     }
 
-    public static BaseMetricRequest named(String name) {
-        BaseMetricRequest request = new BaseMetricRequest();
+    public static GroupMetricRequest named(String name) {
+        GroupMetricRequest request = new GroupMetricRequest();
         request.setProtectedAttribute("gender");
-        request.setFavorableOutcome(IntNode.valueOf(1));
+        request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(1)));
         request.setOutcomeName("income");
-        request.setPrivilegedAttribute(IntNode.valueOf(1));
-        request.setUnprivilegedAttribute(IntNode.valueOf(0));
+        request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+        request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
         request.setModelId(MODEL_ID);
         request.setRequestName(name);
 
         return request;
     }
 
-    public static BaseMetricRequest incorrectType() {
-        BaseMetricRequest request = new BaseMetricRequest();
+    public static GroupMetricRequest incorrectType() {
+        GroupMetricRequest request = new GroupMetricRequest();
         request.setProtectedAttribute("gender");
-        request.setFavorableOutcome(TextNode.valueOf("male"));
+        request.setFavorableOutcome(new ReconcilableOutput(TextNode.valueOf("male")));
         request.setOutcomeName("income");
-        request.setPrivilegedAttribute(IntNode.valueOf(1));
-        request.setUnprivilegedAttribute(IntNode.valueOf(0));
+        request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+        request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
         request.setModelId(MODEL_ID);
 
         return request;
     }
 
-    public static BaseMetricRequest incorrectInput() {
-        BaseMetricRequest request = new BaseMetricRequest();
+    public static GroupMetricRequest incorrectInput() {
+        GroupMetricRequest request = new GroupMetricRequest();
         request.setProtectedAttribute("city");
-        request.setFavorableOutcome(TextNode.valueOf("approved"));
+        request.setFavorableOutcome(new ReconcilableOutput(TextNode.valueOf("approved")));
         request.setOutcomeName("income");
-        request.setPrivilegedAttribute(IntNode.valueOf(1));
-        request.setUnprivilegedAttribute(IntNode.valueOf(0));
+        request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+        request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
+        request.setModelId(MODEL_ID);
+        return request;
+    }
+
+    public static IdentityMetricRequest correctIdentityInput() {
+        IdentityMetricRequest request = new IdentityMetricRequest();
+        request.setColumnName("gender");
+        request.setModelId(MODEL_ID);
+        return request;
+    }
+
+    public static IdentityMetricRequest incorrectIdentityInput() {
+        IdentityMetricRequest request = new IdentityMetricRequest();
+        request.setColumnName("THIS_FIELD_DOES_NOT_EXIST");
+        request.setModelId(MODEL_ID);
+        return request;
+    }
+
+    public static GroupMetricRequest incorrectManyWrongNames() {
+        GroupMetricRequest request = new GroupMetricRequest();
+        request.setProtectedAttribute("city");
+        request.setFavorableOutcome(new ReconcilableOutput(TextNode.valueOf("approved")));
+        request.setOutcomeName("icnome");
+        request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+        request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
+        request.setModelId(MODEL_ID);
+        return request;
+    }
+
+    public static GroupMetricRequest incorrectManyWrongTypes() {
+        GroupMetricRequest request = new GroupMetricRequest();
+        request.setProtectedAttribute("gender");
+        request.setFavorableOutcome(new ReconcilableOutput(TextNode.valueOf("approved-doesnt-exist")));
+        request.setOutcomeName("income");
+        request.setPrivilegedAttribute(new ReconcilableFeature(TextNode.valueOf("lemons")));
+        request.setUnprivilegedAttribute(new ReconcilableFeature(DoubleNode.valueOf(1.5)));
         request.setModelId(MODEL_ID);
         return request;
     }

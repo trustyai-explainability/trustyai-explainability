@@ -32,11 +32,10 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.global.lime.AggregatedLimeExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.payloads.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.GlobalExplanationRequest;
-import org.kie.trustyai.service.payloads.SaliencyExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.GlobalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
 
 @Tag(name = "Aggregated LIME Explainer Endpoint")
 @Path("/explainers/global/lime")
@@ -46,14 +45,11 @@ public class AggregatedLimeEndpoint extends GlobalExplainerEndpoint {
     @Inject
     Instance<DataSource> dataSource;
 
-    @Inject
-    ServiceConfig serviceConfig;
-
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response explain(GlobalExplanationRequest request) {
-        return processRequest(request, dataSource.get(), serviceConfig);
+        return processRequest(request, dataSource.get());
     }
 
     @Override

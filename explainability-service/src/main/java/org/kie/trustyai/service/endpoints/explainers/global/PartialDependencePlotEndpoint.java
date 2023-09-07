@@ -34,11 +34,10 @@ import org.kie.trustyai.explainability.global.pdp.PartialDependencePlotExplainer
 import org.kie.trustyai.explainability.model.PartialDependenceGraph;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.payloads.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.GlobalExplanationRequest;
-import org.kie.trustyai.service.payloads.PartialDependencePlotExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.GlobalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.PartialDependencePlotExplanationResponse;
 
 @Tag(name = "Partial Dependence Plot Explainer Endpoint")
 @Path("/explainers/global/pdp")
@@ -49,14 +48,11 @@ public class PartialDependencePlotEndpoint extends GlobalExplainerEndpoint {
     @Inject
     Instance<DataSource> dataSource;
 
-    @Inject
-    ServiceConfig serviceConfig;
-
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response explain(GlobalExplanationRequest request) {
-        return processRequest(request, dataSource.get(), serviceConfig);
+        return processRequest(request, dataSource.get());
     }
 
     @Override
