@@ -41,6 +41,8 @@ public class MeanshiftEndpoint extends DriftEndpoint {
 
     private static final Logger LOG = Logger.getLogger(MeanshiftEndpoint.class);
 
+    // === THRESHOLDS ======================================
+    // determine if the metric value(s) exceed the provided threshold(s)
     @Override
     public MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue) {
         return new MetricThreshold(
@@ -49,11 +51,14 @@ public class MeanshiftEndpoint extends DriftEndpoint {
                 metricValue.getNamedValues().values().stream().max(Comparator.naturalOrder()).orElse(0.));
     }
 
+    // === DEFINITIONS ======================================
+    // a generalized definition of this category of metric
     @Override
     public String getGeneralDefinition() {
         return "MeanShift gives the per-column probability that the data values seen in a test dataset come from the same distribution of a training dataset, under the assumption that the values are normally distributed.";
     }
 
+    // a specific definition for this value of this metric in this specific context
     @Override
     public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest DriftMetricRequest request) {
         StringBuilder out = new StringBuilder(getGeneralDefinition());
@@ -78,15 +83,15 @@ public class MeanshiftEndpoint extends DriftEndpoint {
 
     }
 
-
+    // === CALCULATION FUNCTION ======================================
     @Override
     @CacheResult(cacheName = "metrics-calculator-meanshift", keyGenerator = MetricCalculationCacheKeyGen.class)
     public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
-        @ValidDriftMetricRequest DriftMetricRequest dmRequest = (DriftMetricRequest) request;
+        DriftMetricRequest dmRequest = (DriftMetricRequest) request;
 
         MeanshiftFitting msf;
         if (dmRequest.getFitting() == null) {
-            LOG.info("Fitting a meanshift drift request");
+            LOG.debug("Fitting a meanshift drift request for model="+request.getModelId());
 
             // get the data that matches the provided reference tag: calibration data
             Dataframe fitting = super.dataSource.get()
@@ -95,7 +100,7 @@ public class MeanshiftEndpoint extends DriftEndpoint {
             msf = Meanshift.precompute(fitting);
             dmRequest.setFitting(msf.getFitStats());
         } else {
-            LOG.debug("Using previously found fitting in request");
+            LOG.debug("Using previously found meanshift fitting in request for model="+request.getModelId());
             msf = new MeanshiftFitting(dmRequest.getFitting());
         }
         Meanshift ms = new Meanshift(msf);
