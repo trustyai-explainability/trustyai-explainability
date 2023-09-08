@@ -1,12 +1,10 @@
 package org.kie.trustyai.service.payloads.metrics;
 
-import com.google.api.Metric;
-import org.kie.trustyai.service.prometheus.MetricValueCarrier;
-
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 
 public class BaseMetricResponse {
     public final Date timestamp = new Date();
@@ -32,7 +30,6 @@ public class BaseMetricResponse {
 
     protected BaseMetricResponse() {
     }
-
 
     public String getType() {
         return type;

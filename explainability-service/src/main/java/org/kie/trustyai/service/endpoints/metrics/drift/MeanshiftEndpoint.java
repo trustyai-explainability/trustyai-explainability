@@ -2,16 +2,11 @@ package org.kie.trustyai.service.endpoints.metrics.drift;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.ws.rs.Path;
-import javax.xml.crypto.Data;
 
-import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -20,7 +15,6 @@ import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
 import org.kie.trustyai.metrics.drift.meanshift.MeanshiftFitting;
 import org.kie.trustyai.metrics.drift.meanshift.MeanshiftResult;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
-import org.kie.trustyai.service.endpoints.service.ServiceMetadataEndpoint;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
@@ -91,7 +85,7 @@ public class MeanshiftEndpoint extends DriftEndpoint {
 
         MeanshiftFitting msf;
         if (dmRequest.getFitting() == null) {
-            LOG.debug("Fitting a meanshift drift request for model="+request.getModelId());
+            LOG.debug("Fitting a meanshift drift request for model=" + request.getModelId());
 
             // get the data that matches the provided reference tag: calibration data
             Dataframe fitting = super.dataSource.get()
@@ -100,7 +94,7 @@ public class MeanshiftEndpoint extends DriftEndpoint {
             msf = Meanshift.precompute(fitting);
             dmRequest.setFitting(msf.getFitStats());
         } else {
-            LOG.debug("Using previously found meanshift fitting in request for model="+request.getModelId());
+            LOG.debug("Using previously found meanshift fitting in request for model=" + request.getModelId());
             msf = new MeanshiftFitting(dmRequest.getFitting());
         }
         Meanshift ms = new Meanshift(msf);

@@ -14,7 +14,6 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 
-
 @ApplicationScoped
 public class GroupMetricRequestValidator implements ConstraintValidator<ValidGroupMetricRequest, GroupMetricRequest> {
     private static final Logger LOG = Logger.getLogger(GroupMetricRequestValidator.class);
@@ -26,7 +25,6 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
     public void initialize(ValidGroupMetricRequest constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
-
 
     @Override
     public boolean isValid(GroupMetricRequest request, ConstraintValidatorContext context) {

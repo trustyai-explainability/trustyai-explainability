@@ -12,7 +12,6 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -21,8 +20,6 @@ import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
-import org.kie.trustyai.service.payloads.consumer.upload.ModelInferJointPayload;
-import org.kie.trustyai.service.utils.KserveRestPayloads;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -30,7 +27,6 @@ import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

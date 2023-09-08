@@ -20,9 +20,9 @@ import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
+import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 import io.quarkus.cache.CacheResult;
-import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 @ApplicationScoped
 @Tag(name = "Disparate Impact Ratio Endpoint", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
@@ -60,7 +60,8 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
     @CacheResult(cacheName = "metrics-calculator-dir", keyGenerator = MetricCalculationCacheKeyGen.class)
     public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
-        @ValidGroupMetricRequest GroupMetricRequest gmRequest = (GroupMetricRequest) request;
+        @ValidGroupMetricRequest
+        GroupMetricRequest gmRequest = (GroupMetricRequest) request;
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(gmRequest.getProtectedAttribute());
 

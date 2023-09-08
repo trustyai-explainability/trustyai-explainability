@@ -1,8 +1,5 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.ws.rs.Consumes;
@@ -16,7 +13,6 @@ import javax.ws.rs.core.Response;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
-import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;

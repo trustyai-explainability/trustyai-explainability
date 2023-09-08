@@ -3,13 +3,13 @@ package org.kie.trustyai.service.payloads.metrics.drift;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.kie.trustyai.service.payloads.data.statistics.StatisticalSummaryValuesDeserializer;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -24,7 +24,7 @@ public class DriftMetricRequest extends BaseMetricRequest {
     private String referenceTag;
 
     @JsonDeserialize(using = StatisticalSummaryValuesDeserializer.class)
-    private Map<String,  StatisticalSummaryValues> fitting;
+    private Map<String, StatisticalSummaryValues> fitting;
 
     public DriftMetricRequest() {
         // Public default no-argument constructor

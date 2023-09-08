@@ -1,7 +1,5 @@
 package org.kie.trustyai.service.config.metrics;
 
-import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
-
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 

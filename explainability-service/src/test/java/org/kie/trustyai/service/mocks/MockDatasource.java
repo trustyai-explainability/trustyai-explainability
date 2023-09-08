@@ -56,7 +56,7 @@ public class MockDatasource extends DataSource {
         return Dataframe.createFrom(predictions);
     }
 
-    public Dataframe  generateRandomDataframeDrifted(int observations){
+    public Dataframe generateRandomDataframeDrifted(int observations) {
         return generateRandomDataframeDrifted(observations, 100);
     }
 
@@ -67,7 +67,7 @@ public class MockDatasource extends DataSource {
             final List<Feature> featureList = List.of(
                     // guarantee feature diversity for age is min(observations, featureDiversity)
                     FeatureFactory.newNumericalFeature("age", (i % featureDiversity) + featureDiversity),
-                    FeatureFactory.newNumericalFeature("gender",0),
+                    FeatureFactory.newNumericalFeature("gender", 0),
                     FeatureFactory.newNumericalFeature("race", random.nextBoolean() ? 1 : 0));
             final PredictionInput predictionInput = new PredictionInput(featureList);
 

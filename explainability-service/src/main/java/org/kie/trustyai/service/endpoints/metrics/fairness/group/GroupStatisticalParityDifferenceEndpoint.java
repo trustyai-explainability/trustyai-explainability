@@ -20,9 +20,9 @@ import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
+import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 import io.quarkus.cache.CacheResult;
-import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 @ApplicationScoped
 @Tag(name = "Statistical Parity Difference Endpoint", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
@@ -58,7 +58,8 @@ public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
     @Override
     @CacheResult(cacheName = "metrics-calculator-spd", keyGenerator = MetricCalculationCacheKeyGen.class)
     public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
-        @ValidGroupMetricRequest GroupMetricRequest gmRequest = (GroupMetricRequest) request;
+        @ValidGroupMetricRequest
+        GroupMetricRequest gmRequest = (GroupMetricRequest) request;
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(gmRequest.getProtectedAttribute());

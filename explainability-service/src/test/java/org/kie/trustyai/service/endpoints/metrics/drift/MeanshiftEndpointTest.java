@@ -1,10 +1,7 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -32,7 +29,6 @@ import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.request;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
@@ -69,7 +65,7 @@ class MeanshiftEndpointTest {
     }
 
     @Test
-    void meanshiftNonPreFit(){
+    void meanshiftNonPreFit() {
         DriftMetricRequest payload = new DriftMetricRequest();
         payload.setReferenceTag("TRAINING");
         payload.setModelId(MODEL_ID);
@@ -89,10 +85,9 @@ class MeanshiftEndpointTest {
     }
 
     @Test
-    void meanshiftPreFit(){
+    void meanshiftPreFit() {
         Dataframe dfTrain = datasource.get().getDataframe(MODEL_ID).filterRowsByTagEquals(DatapointSource.TRAINING);
         MeanshiftFitting msf = Meanshift.precompute(dfTrain);
-
 
         DriftMetricRequest payload = new DriftMetricRequest();
         payload.setReferenceTag("TRAINING");
