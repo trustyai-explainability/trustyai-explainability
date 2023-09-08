@@ -2,10 +2,10 @@ package org.kie.trustyai.service.utils;
 
 import java.util.stream.IntStream;
 
-import org.kie.trustyai.service.payloads.consumer.upload.ModelInferJointPayload;
-import org.kie.trustyai.service.payloads.consumer.upload.ModelInferRequestPayload;
-import org.kie.trustyai.service.payloads.consumer.upload.ModelInferResponsePayload;
-import org.kie.trustyai.service.payloads.consumer.upload.TensorPayload;
+import org.kie.trustyai.service.payloads.data.upload.ModelInferJointPayload;
+import org.kie.trustyai.service.payloads.data.upload.ModelInferRequestPayload;
+import org.kie.trustyai.service.payloads.data.upload.ModelInferResponsePayload;
+import org.kie.trustyai.service.payloads.data.upload.TensorPayload;
 
 import com.google.protobuf.ByteString;
 
