@@ -86,16 +86,16 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
 
         RequestReconciler.reconcile(request, metadata);
 
-        final double metricValue;
+        final MetricValueCarrier metricValue;
         try {
-            metricValue = this.calculate(dataframe, request).getValue();
+            metricValue = this.calculate(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
         final String metricDefinition = this.getSpecificDefinitionFunction(request);
 
-        MetricThreshold thresholds = thresholdFunction(request.getLowerThreshold(), request.getUpperThreshold(), metricValue);
+        MetricThreshold thresholds = thresholdFunction(request.getLowerThreshold(), request.getUpperThreshold(), metricValue.getValue());
         final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue, metricDefinition, thresholds, super.getMetricName());
         return Response.ok(dirObj).build();
     }

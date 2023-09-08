@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.validators.metrics.drift;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -8,10 +9,14 @@ import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
+import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
+import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 @ApplicationScoped
 public class DriftMetricRequestValidator implements ConstraintValidator<ValidDriftMetricRequest, DriftMetricRequest> {
@@ -22,6 +27,7 @@ public class DriftMetricRequestValidator implements ConstraintValidator<ValidDri
     public void initialize(ValidDriftMetricRequest constraintAnnotation) {
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
+
 
     @Override
     public boolean isValid(DriftMetricRequest request, ConstraintValidatorContext context) {
@@ -46,7 +52,27 @@ public class DriftMetricRequestValidator implements ConstraintValidator<ValidDri
                         .addConstraintViolation();
                 batchValidation = false;
             }
-            return columnValidation && batchValidation;
+
+            boolean tagValidation = true;
+            if (Objects.nonNull(request.getReferenceTag())){
+                try{
+                    DatapointSource.valueOf(request.getReferenceTag());
+                } catch (IllegalArgumentException e){
+                    context.buildConstraintViolationWithTemplate(
+                                    String.format("%s not a valid data tag, must be one of %s",
+                                            request.getReferenceTag(),
+                                            Arrays.toString(DatapointSource.values())))
+                            .addConstraintViolation();
+                    tagValidation = false;
+                }
+            } else {
+                context.buildConstraintViolationWithTemplate(
+                        "Must provide a reference tag defining the original data distribution, one of: "+ Arrays.toString(DatapointSource.values())
+                ).addConstraintViolation();
+                tagValidation = false;
+            }
+
+            return columnValidation && batchValidation && tagValidation;
         }
     }
 }

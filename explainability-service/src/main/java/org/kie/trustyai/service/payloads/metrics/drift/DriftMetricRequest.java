@@ -3,7 +3,9 @@ package org.kie.trustyai.service.payloads.metrics.drift;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.kie.trustyai.service.payloads.data.statistics.ColumnSummaryPayload;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
+import org.kie.trustyai.service.payloads.data.statistics.StatisticalSummaryValuesDeserializer;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -18,37 +20,39 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = DriftMetricRequest.class, name = "DriftMetricRequest")
 })
 public class DriftMetricRequest extends BaseMetricRequest {
-    private double lowerThreshold;
-    private double upperThreshold;
-    private Map<String, ColumnSummaryPayload> fitting;
+    private Double thresholdDelta;
+    private String referenceTag;
+
+    @JsonDeserialize(using = StatisticalSummaryValuesDeserializer.class)
+    private Map<String,  StatisticalSummaryValues> fitting;
 
     public DriftMetricRequest() {
         // Public default no-argument constructor
         super();
     }
 
-    public double getLowerThreshold() {
-        return lowerThreshold;
+    public Double getThresholdDelta() {
+        return thresholdDelta;
     }
 
-    public void setLowerThreshold(double lowerThreshold) {
-        this.lowerThreshold = lowerThreshold;
+    public void setThresholdDelta(Double thresholdDelta) {
+        this.thresholdDelta = thresholdDelta;
     }
 
-    public double getUpperThreshold() {
-        return upperThreshold;
-    }
-
-    public void setUpperThreshold(double upperThreshold) {
-        this.upperThreshold = upperThreshold;
-    }
-
-    public Map<String, ColumnSummaryPayload> getFitting() {
+    public Map<String, StatisticalSummaryValues> getFitting() {
         return fitting;
     }
 
-    public void setFitting(Map<String, ColumnSummaryPayload> fitting) {
+    public void setFitting(Map<String, StatisticalSummaryValues> fitting) {
         this.fitting = fitting;
+    }
+
+    public String getReferenceTag() {
+        return referenceTag;
+    }
+
+    public void setReferenceTag(String referenceTag) {
+        this.referenceTag = referenceTag;
     }
 
     @Override

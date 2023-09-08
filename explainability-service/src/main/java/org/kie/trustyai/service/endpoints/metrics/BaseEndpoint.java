@@ -115,4 +115,8 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     }
 
     public abstract MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request);
+
+    // this function should return a generic definition (as a response) for the corresponding metric
+    public abstract Response getDefinition();
+
 }

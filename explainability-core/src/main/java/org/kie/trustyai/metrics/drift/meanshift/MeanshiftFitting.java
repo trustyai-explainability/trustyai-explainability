@@ -11,6 +11,10 @@ public class MeanshiftFitting {
         this.fitStats = fitStats;
     }
 
+    public Map<String, StatisticalSummaryValues> getFitStats() {
+        return fitStats;
+    }
+
     @Override
     public String toString() {
         return "MeanshiftFitting{" +

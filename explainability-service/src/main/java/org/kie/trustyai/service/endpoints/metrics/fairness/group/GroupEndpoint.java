@@ -31,13 +31,14 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
         super(name);
     }
 
-    public abstract MetricThreshold thresholdFunction(Number delta, Number metricValue);
+    public abstract MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue);
 
-    public abstract String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, Number metricvalue);
+    public abstract String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged,
+            MetricValueCarrier metricvalue);
 
     public abstract String getGeneralDefinition();
 
-    public String getSpecificDefinition(Number metricValue, @ValidReconciledMetricRequest GroupMetricRequest request) {
+    public String getSpecificDefinition(MetricValueCarrier metricValue, @ValidReconciledMetricRequest GroupMetricRequest request) {
         final String outcomeName = request.getOutcomeName();
 
         PayloadConverter.convertToValue(request.getFavorableOutcome().getReconciledType().get());
@@ -78,10 +79,10 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
         if (metricValue.isSingle()) {
-            final String metricDefinition = this.getSpecificDefinition(metricValue.getValue(), request);
+            final String metricDefinition = this.getSpecificDefinition(metricValue, request);
 
-            MetricThreshold thresholds = thresholdFunction(request.getThresholdDelta(), metricValue.getValue());
-            final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue.getValue(), metricDefinition, thresholds, super.getMetricName());
+            MetricThreshold thresholds = thresholdFunction(request.getThresholdDelta(), metricValue);
+            final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue, metricDefinition, thresholds, super.getMetricName());
             return Response.ok(dirObj).build();
         } else {
             throw new UnsupportedOperationException("Group metric endpoint not yet compatible with multiple-valued metrics");
@@ -91,6 +92,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     @GET
     @Path("/definition")
     @Produces(MediaType.TEXT_PLAIN)
+    @Override
     public Response getDefinition() {
         return Response.ok(getGeneralDefinition()).build();
     }
@@ -107,7 +109,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
-        return Response.ok(this.getSpecificDefinition(request.getMetricValue(), request)).build();
+        return Response.ok(this.getSpecificDefinition(new MetricValueCarrier(request.getMetricValue()), request)).build();
     }
 
     @POST

@@ -11,8 +11,10 @@ import javax.validation.ConstraintValidatorContext;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
+import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 @ApplicationScoped
 public class GroupMetricRequestValidator implements ConstraintValidator<ValidGroupMetricRequest, GroupMetricRequest> {
@@ -26,8 +28,10 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
         ConstraintValidator.super.initialize(constraintAnnotation);
     }
 
+
     @Override
     public boolean isValid(GroupMetricRequest request, ConstraintValidatorContext context) {
+
         final String modelId = request.getModelId();
         boolean result;
 

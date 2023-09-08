@@ -22,6 +22,7 @@ import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 
 import io.quarkus.cache.CacheResult;
+import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 @ApplicationScoped
 @Tag(name = "Statistical Parity Difference Endpoint", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
@@ -29,35 +30,35 @@ import io.quarkus.cache.CacheResult;
 @Path("/metrics/group/fairness/spd")
 public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
     @Override
-    public MetricThreshold thresholdFunction(Number delta, Number metricValue) {
+    public MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue) {
         if (delta == null) {
             return new MetricThreshold(
                     metricsConfig.spd().thresholdLower(),
                     metricsConfig.spd().thresholdUpper(),
-                    metricValue.doubleValue());
+                    metricValue.getValue());
         } else {
             return new MetricThreshold(
                     0 - delta.doubleValue(),
                     delta.doubleValue(),
-                    metricValue.doubleValue());
+                    metricValue.getValue());
         }
     }
 
     @Override
-    public String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, Number metricValue) {
+    public String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, MetricValueCarrier metricValue) {
         return FairnessDefinitions.defineGroupStatisticalParityDifference(
                 protectedAttribute,
                 privileged,
                 unprivileged,
                 outcomeName,
                 favorableOutcomeAttr,
-                metricValue.doubleValue());
+                metricValue.getValue());
     };
 
     @Override
     @CacheResult(cacheName = "metrics-calculator-spd", keyGenerator = MetricCalculationCacheKeyGen.class)
     public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
-        GroupMetricRequest gmRequest = (GroupMetricRequest) request;
+        @ValidGroupMetricRequest GroupMetricRequest gmRequest = (GroupMetricRequest) request;
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(gmRequest.getProtectedAttribute());

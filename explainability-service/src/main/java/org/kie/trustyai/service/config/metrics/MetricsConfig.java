@@ -12,7 +12,7 @@ public interface MetricsConfig {
 
     Dir dir();
 
-    Meanshift meanshift();
+    Drift drift();
 
     interface Spd {
 
@@ -32,12 +32,9 @@ public interface MetricsConfig {
         double thresholdUpper();
     }
 
-    interface Meanshift {
-        @WithDefault("0")
-        double thresholdLower();
-
-        @WithDefault("1")
-        double thresholdUpper();
+    interface Drift {
+        @WithDefault(".05")
+        double thresholdDelta();
     }
 
 }
