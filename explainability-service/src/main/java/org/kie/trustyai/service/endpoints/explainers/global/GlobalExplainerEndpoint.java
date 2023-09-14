@@ -39,7 +39,7 @@ public abstract class GlobalExplainerEndpoint extends ExplainerEndpoint {
             BaseExplanationResponse entity = generateExplanation(model, predictions);
             return Response.ok(entity).build();
         } catch (Exception e) {
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 
