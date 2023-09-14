@@ -10,6 +10,8 @@ public interface MetricsConfig {
 
     Dir dir();
 
+    Drift drift();
+
     interface Spd {
 
         @WithDefault("-0.1")
@@ -26,6 +28,11 @@ public interface MetricsConfig {
 
         @WithDefault("1.2")
         double thresholdUpper();
+    }
+
+    interface Drift {
+        @WithDefault(".05")
+        double thresholdDelta();
     }
 
 }

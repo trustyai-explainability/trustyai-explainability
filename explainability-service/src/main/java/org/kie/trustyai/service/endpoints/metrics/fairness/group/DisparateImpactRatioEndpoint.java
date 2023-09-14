@@ -18,7 +18,9 @@ import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
+import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 import io.quarkus.cache.CacheResult;
 
@@ -29,35 +31,36 @@ import io.quarkus.cache.CacheResult;
 @Path("/metrics/group/fairness/dir")
 public class DisparateImpactRatioEndpoint extends GroupEndpoint {
     @Override
-    public MetricThreshold thresholdFunction(Number delta, Number metricValue) {
+    public MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue) {
         if (delta == null) {
             return new MetricThreshold(
                     metricsConfig.dir().thresholdLower(),
                     metricsConfig.dir().thresholdUpper(),
-                    metricValue.doubleValue());
+                    metricValue.getValue());
         } else {
             return new MetricThreshold(
                     1 - delta.doubleValue(),
                     1 + delta.doubleValue(),
-                    metricValue.doubleValue());
+                    metricValue.getValue());
         }
     }
 
     @Override
-    public String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, Number metricValue) {
+    public String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, MetricValueCarrier metricValue) {
         return FairnessDefinitions.defineGroupDisparateImpactRatio(
                 protectedAttribute,
                 privileged,
                 unprivileged,
                 outcomeName,
                 favorableOutcomeAttr,
-                metricValue.doubleValue());
-    };
+                metricValue.getValue());
+    }
 
     @Override
     @CacheResult(cacheName = "metrics-calculator-dir", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public double calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
+    public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
+        @ValidGroupMetricRequest
         GroupMetricRequest gmRequest = (GroupMetricRequest) request;
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(gmRequest.getProtectedAttribute());
@@ -71,8 +74,11 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
                     value -> value.equals(unprivilegedAttr));
             final Value favorableOutcomeAttr = PayloadConverter.convertToValue(gmRequest.getFavorableOutcome().getReconciledType().get());
             final Type favorableOutcomeAttrType = PayloadConverter.convertToType(gmRequest.getFavorableOutcome().getReconciledType().get().getType());
-            return DisparateImpactRatio.calculate(privileged, unprivileged,
-                    List.of(new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+            return new MetricValueCarrier(
+                    DisparateImpactRatio.calculate(
+                            privileged,
+                            unprivileged,
+                            List.of(new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0))));
         } catch (Exception e) {
             throw new MetricCalculationException(e.getMessage(), e);
         }
@@ -80,7 +86,7 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
 
     @Override
     public String getGeneralDefinition() {
-        return FairnessDefinitions.defineGroupStatisticalParityDifference();
+        return FairnessDefinitions.defineGroupDisparateImpactRatio();
     }
 
     public DisparateImpactRatioEndpoint() {

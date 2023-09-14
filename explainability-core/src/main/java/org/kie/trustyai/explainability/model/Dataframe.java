@@ -678,6 +678,15 @@ public class Dataframe {
     }
 
     /**
+     * Return type of metadata columns
+     *
+     * @return A {@link List} with the column types
+     */
+    public List<Type> getColumnTypes() {
+        return this.metadata.types;
+    }
+
+    /**
      * Return the number of outputs.
      *
      * @return The number of outputs.

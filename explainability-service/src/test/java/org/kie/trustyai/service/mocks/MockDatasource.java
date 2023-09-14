@@ -56,6 +56,29 @@ public class MockDatasource extends DataSource {
         return Dataframe.createFrom(predictions);
     }
 
+    public Dataframe generateRandomDataframeDrifted(int observations) {
+        return generateRandomDataframeDrifted(observations, 100);
+    }
+
+    public Dataframe generateRandomDataframeDrifted(int observations, int featureDiversity) {
+        final List<Prediction> predictions = new ArrayList<>();
+        final Random random = new Random(0);
+        for (int i = 0; i < observations; i++) {
+            final List<Feature> featureList = List.of(
+                    // guarantee feature diversity for age is min(observations, featureDiversity)
+                    FeatureFactory.newNumericalFeature("age", (i % featureDiversity) + featureDiversity),
+                    FeatureFactory.newNumericalFeature("gender", 0),
+                    FeatureFactory.newNumericalFeature("race", random.nextBoolean() ? 1 : 0));
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+
+            final List<Output> outputList = List.of(
+                    new Output("income", Type.NUMBER, new Value(random.nextBoolean() ? 1 : 0), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
+    }
+
     public Dataframe generateRandomTextDataframe(int observations) {
         return generateRandomTextDataframe(observations, 0);
     }

@@ -22,6 +22,7 @@ import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
@@ -30,13 +31,14 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
         super(name);
     }
 
-    public abstract MetricThreshold thresholdFunction(Number delta, Number metricValue);
+    public abstract MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue);
 
-    public abstract String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, Number metricvalue);
+    public abstract String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged,
+            MetricValueCarrier metricvalue);
 
     public abstract String getGeneralDefinition();
 
-    public String getSpecificDefinition(Number metricValue, @ValidReconciledMetricRequest GroupMetricRequest request) {
+    public String getSpecificDefinition(MetricValueCarrier metricValue, @ValidReconciledMetricRequest GroupMetricRequest request) {
         final String outcomeName = request.getOutcomeName();
 
         PayloadConverter.convertToValue(request.getFavorableOutcome().getReconciledType().get());
@@ -69,23 +71,28 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
 
         RequestReconciler.reconcile(request, metadata);
 
-        final double metricValue;
+        final MetricValueCarrier metricValue;
         try {
             metricValue = this.calculate(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
         }
-        final String metricDefinition = this.getSpecificDefinition(metricValue, request);
+        if (metricValue.isSingle()) {
+            final String metricDefinition = this.getSpecificDefinition(metricValue, request);
 
-        MetricThreshold thresholds = thresholdFunction(request.getThresholdDelta(), metricValue);
-        final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue, metricDefinition, thresholds, super.getMetricName());
-        return Response.ok(dirObj).build();
+            MetricThreshold thresholds = thresholdFunction(request.getThresholdDelta(), metricValue);
+            final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue, metricDefinition, thresholds, super.getMetricName());
+            return Response.ok(dirObj).build();
+        } else {
+            throw new UnsupportedOperationException("Group metric endpoint not yet compatible with multiple-valued metrics");
+        }
     }
 
     @GET
     @Path("/definition")
     @Produces(MediaType.TEXT_PLAIN)
+    @Override
     public Response getDefinition() {
         return Response.ok(getGeneralDefinition()).build();
     }
@@ -102,7 +109,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
             return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
         }
 
-        return Response.ok(this.getSpecificDefinition(request.getMetricValue(), request)).build();
+        return Response.ok(this.getSpecificDefinition(new MetricValueCarrier(request.getMetricValue()), request)).build();
     }
 
     @POST

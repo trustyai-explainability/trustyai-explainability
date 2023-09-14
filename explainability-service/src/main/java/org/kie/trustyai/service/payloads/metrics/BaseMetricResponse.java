@@ -1,23 +1,34 @@
 package org.kie.trustyai.service.payloads.metrics;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
+
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 
 public class BaseMetricResponse {
     public final Date timestamp = new Date();
     protected String type = "metric";
     protected Double value;
+    protected Map<String, Double> namedValues;
     protected String specificDefinition;
     protected String name;
     protected UUID id;
     protected MetricThreshold threshold;
 
-    public BaseMetricResponse(Double value, String specificDefinition, MetricThreshold threshold, String name) {
-        this.value = value;
+    public BaseMetricResponse(MetricValueCarrier mvc, String specificDefinition, MetricThreshold threshold, String name) {
+        if (mvc.isSingle()) {
+            this.value = mvc.getValue();
+        } else {
+            this.namedValues = mvc.getNamedValues();
+        }
         this.id = UUID.randomUUID();
         this.name = name;
         this.threshold = threshold;
         this.specificDefinition = specificDefinition;
+    }
+
+    protected BaseMetricResponse() {
     }
 
     public String getType() {
@@ -48,6 +59,14 @@ public class BaseMetricResponse {
         this.value = value;
     }
 
+    public Map<String, Double> getNamedValues() {
+        return namedValues;
+    }
+
+    public void setNamedValues(Map<String, Double> namedValues) {
+        this.namedValues = namedValues;
+    }
+
     public String getSpecificDefinition() {
         return specificDefinition;
     }
@@ -70,5 +89,19 @@ public class BaseMetricResponse {
 
     public void setThresholds(MetricThreshold threshold) {
         this.threshold = threshold;
+    }
+
+    @Override
+    public String toString() {
+        return "BaseMetricResponse{" +
+                "timestamp=" + timestamp +
+                ", type='" + type + '\'' +
+                ", value=" + value +
+                ", namedValues=" + namedValues +
+                ", specificDefinition='" + specificDefinition + '\'' +
+                ", name='" + name + '\'' +
+                ", id=" + id +
+                ", threshold=" + threshold +
+                '}';
     }
 }
