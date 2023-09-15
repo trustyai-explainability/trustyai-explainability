@@ -1,7 +1,7 @@
 package org.kie.trustyai.service.validators.metrics.drift;
 
-import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
@@ -51,19 +50,16 @@ public class DriftMetricRequestValidator implements ConstraintValidator<ValidDri
 
             boolean tagValidation = true;
             if (Objects.nonNull(request.getReferenceTag())) {
-                try {
-                    DatapointSource.valueOf(request.getReferenceTag());
-                } catch (IllegalArgumentException e) {
-                    context.buildConstraintViolationWithTemplate(
-                            String.format("%s not a valid data tag, must be one of %s",
-                                    request.getReferenceTag(),
-                                    Arrays.toString(DatapointSource.values())))
+                Optional<String> tagValidationErrorMessage = GenericValidationUtils.validateDataTag(request.getReferenceTag());
+                if (tagValidationErrorMessage.isPresent()) {
+                    context.buildConstraintViolationWithTemplate(tagValidationErrorMessage.get())
                             .addConstraintViolation();
                     tagValidation = false;
                 }
             } else {
                 context.buildConstraintViolationWithTemplate(
-                        "Must provide a reference tag defining the original data distribution, one of: " + Arrays.toString(DatapointSource.values())).addConstraintViolation();
+                        "Must provide a reference tag in request defining the original data distribution. This is done by passing a field \"referenceTag\": \"tagString\" in the request body.")
+                        .addConstraintViolation();
                 tagValidation = false;
             }
 

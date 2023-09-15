@@ -8,21 +8,28 @@ public class PredictionMetadata {
 
     private final String id;
 
-    private final DatapointSource datapointSource;
+    private final String datapointTag;
 
     private final Value groundTruth;
 
-    public PredictionMetadata(String id, LocalDateTime predictionTime, DatapointSource datapointSource) {
+    public PredictionMetadata(String id, LocalDateTime predictionTime) {
         this.id = id;
         this.predictionTime = predictionTime;
-        this.datapointSource = datapointSource;
+        this.datapointTag = "";
         this.groundTruth = null;
     }
 
-    public PredictionMetadata(String id, LocalDateTime predictionTime, DatapointSource datapointSource, Value groundTruth) {
+    public PredictionMetadata(String id, LocalDateTime predictionTime, String datapointTag) {
         this.id = id;
         this.predictionTime = predictionTime;
-        this.datapointSource = datapointSource;
+        this.datapointTag = datapointTag;
+        this.groundTruth = null;
+    }
+
+    public PredictionMetadata(String id, LocalDateTime predictionTime, String datapointTag, Value groundTruth) {
+        this.id = id;
+        this.predictionTime = predictionTime;
+        this.datapointTag = datapointTag;
         this.groundTruth = groundTruth;
     }
 
@@ -34,8 +41,8 @@ public class PredictionMetadata {
         return predictionTime;
     }
 
-    public DatapointSource getDataPointSource() {
-        return datapointSource;
+    public String getDataPointTag() {
+        return datapointTag;
     }
 
     public Value getGroundTruth() {

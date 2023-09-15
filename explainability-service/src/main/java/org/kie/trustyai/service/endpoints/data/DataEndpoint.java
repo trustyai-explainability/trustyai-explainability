@@ -1,8 +1,8 @@
 package org.kie.trustyai.service.endpoints.data;
 
-import java.util.Arrays;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -21,7 +21,6 @@ import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
@@ -39,6 +38,7 @@ import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferJointPayload;
 import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.validators.data.ValidDataDownloadRequest;
+import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 
 @ApplicationScoped
 @Path("/data")
@@ -188,21 +188,18 @@ public class DataEndpoint {
         final Dataframe dataframe = Dataframe.createFrom(predictions);
 
         // tag the points accordingly
-        DatapointSource dpSource;
+        String dpSource;
         if (jointPayload.getDataTag() == null) {
-            dpSource = DatapointSource.UNLABELED;
+            dpSource = "";
         } else {
-            try {
-                dpSource = DatapointSource.valueOf(jointPayload.getDataTag());
-            } catch (IllegalArgumentException e) {
-                return Response.serverError()
-                        .entity("Provided datapoint tag=" + jointPayload.getDataTag() + " is not valid. Must be one of " + Arrays.toString(DatapointSource.values()))
-                        .status(Response.Status.BAD_REQUEST)
-                        .build();
+            dpSource = jointPayload.getDataTag();
+            Optional<String> tagValidation = GenericValidationUtils.validateDataTag(dpSource);
+            if (tagValidation.isPresent()) {
+                return Response.serverError().entity(tagValidation.get()).status(Response.Status.BAD_REQUEST).build();
             }
         }
 
-        EnumMap<DatapointSource, List<List<Integer>>> taggingMap = new EnumMap<>(DatapointSource.class);
+        HashMap<String, List<List<Integer>>> taggingMap = new HashMap<>();
         taggingMap.put(dpSource, List.of(List.of(0, dataframe.getRowDimension())));
         dataframe.tagDataPoints(taggingMap);
 
