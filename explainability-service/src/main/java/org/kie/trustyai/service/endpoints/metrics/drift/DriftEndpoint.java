@@ -89,7 +89,7 @@ public abstract class DriftEndpoint extends BaseEndpoint<DriftMetricRequest> {
             dataframe = super.dataSource.get().getDataframe(request.getModelId(), request.getBatchSize()).filterRowsBySynthetic(false);
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
         }
 
         // use the calculate function to compute the metric value(s)
@@ -98,7 +98,7 @@ public abstract class DriftEndpoint extends BaseEndpoint<DriftMetricRequest> {
             metricValue = this.calculate(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error calculating metric").build();
         }
 
         // get the metric definition and the threshold exceeded state

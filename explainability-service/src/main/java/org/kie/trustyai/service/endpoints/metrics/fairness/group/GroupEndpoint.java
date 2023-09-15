@@ -66,7 +66,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
             metadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
         }
 
         RequestReconciler.reconcile(request, metadata);
@@ -76,7 +76,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
             metricValue = this.calculate(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error calculating metric: " + e.getMessage()).build();
         }
         if (metricValue.isSingle()) {
             final String metricDefinition = this.getSpecificDefinition(metricValue, request);
@@ -106,7 +106,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
             RequestReconciler.reconcile(request, dataSource);
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
         }
 
         return Response.ok(this.getSpecificDefinition(new MetricValueCarrier(request.getMetricValue()), request)).build();

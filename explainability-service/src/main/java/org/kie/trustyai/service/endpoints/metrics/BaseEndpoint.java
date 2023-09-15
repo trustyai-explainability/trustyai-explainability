@@ -104,7 +104,7 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
             RequestReconciler.reconcile(request, dataSource);
         } catch (DataframeCreateException e) {
             LOG.error("No data available: " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
         }
         scheduler.register(request.getMetricName(), id, request);
 
