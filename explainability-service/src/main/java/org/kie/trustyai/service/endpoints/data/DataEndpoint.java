@@ -194,9 +194,9 @@ public class DataEndpoint {
             dpSource = "";
         } else {
             dpSource = jointPayload.getDataTag();
-            Optional<String> tagValidation = GenericValidationUtils.validateDataTag(dpSource);
-            if (tagValidation.isPresent()) {
-                return Response.serverError().entity(tagValidation.get()).status(Response.Status.BAD_REQUEST).build();
+            Optional<String> tagValidationErrorMessage = GenericValidationUtils.validateDataTag(dpSource);
+            if (tagValidationErrorMessage.isPresent()) {
+                return Response.serverError().entity(tagValidationErrorMessage.get()).status(Response.Status.BAD_REQUEST).build();
             }
         }
 
