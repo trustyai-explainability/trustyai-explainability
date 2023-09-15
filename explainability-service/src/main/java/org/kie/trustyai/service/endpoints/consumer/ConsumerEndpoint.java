@@ -94,7 +94,7 @@ public class ConsumerEndpoint {
                 return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
             }
         } else {
-            return Response.serverError().entity("Unsupported payload kind=" + request.getKind()).status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.serverError().entity("Unsupported payload kind=" + request.getKind()).status(Response.Status.BAD_REQUEST).build();
         }
 
         return Response.ok().build();
