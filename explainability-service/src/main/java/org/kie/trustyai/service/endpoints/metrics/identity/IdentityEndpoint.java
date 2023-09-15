@@ -81,7 +81,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
             metadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
         }
 
         RequestReconciler.reconcile(request, metadata);
@@ -91,7 +91,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
             metricValue = this.calculate(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error calculating metric: " + e.getMessage()).build();
         }
         final String metricDefinition = this.getSpecificDefinitionFunction(request);
 

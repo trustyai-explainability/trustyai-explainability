@@ -68,6 +68,6 @@ class LimeEndpointTest {
         given().contentType(ContentType.JSON).body(payload)
                 .when().post()
                 .then()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+                .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 }

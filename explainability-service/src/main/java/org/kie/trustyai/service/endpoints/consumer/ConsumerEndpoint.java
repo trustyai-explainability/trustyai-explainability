@@ -99,5 +99,4 @@ public class ConsumerEndpoint {
 
         return Response.ok().build();
     }
-
 }

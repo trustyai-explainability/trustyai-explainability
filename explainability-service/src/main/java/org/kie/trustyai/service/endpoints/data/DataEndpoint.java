@@ -159,7 +159,7 @@ public class DataEndpoint {
         try {
             predictionInputs = TensorConverter.parseKserveModelInferRequest(inferRequestBuilder.build());
         } catch (IllegalArgumentException e) {
-            throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error parsing input payload: " + e.getMessage()).build();
         }
 
         List<PredictionOutput> predictionOutputs;
@@ -170,17 +170,18 @@ public class DataEndpoint {
             try {
                 UploadUtils.populateResponseBuilder(inferResponseBuilder, jointPayload.getResponse());
             } catch (IllegalArgumentException e) {
+                //thrown in case of mishapen output
                 return Response.serverError().entity(e.getMessage()).status(Response.Status.BAD_REQUEST).build();
             }
 
             try {
                 predictionOutputs = TensorConverter.parseKserveModelInferResponse(inferResponseBuilder.build(), predictionInputs.size());
             } catch (IllegalArgumentException e) {
-                throw new DataframeCreateException("Error parsing output payload: " + e.getMessage());
+                return Response.serverError().entity("Error parsing output payload: " + e.getMessage()).status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
         } else {
             //todo, grab automatically from model
-            throw new IllegalArgumentException("No output payload specified in request");
+            return Response.serverError().entity("No output payload specified in request").status(Response.Status.BAD_REQUEST).build();
         }
 
         final List<Prediction> predictions =
