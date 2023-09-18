@@ -83,9 +83,12 @@ public class PrometheusScheduler {
                         // entry value: BaseMetricRequest
                         final Dataframe batch = df.tail(Math.min(df.getRowDimension(), entry.getValue().getBatchSize()));
                         String metricName = entry.getValue().getMetricName();
-                        final double value = metricsDirectory.getCalculator(metricName).apply(batch, entry.getValue());
-
-                        publisher.gauge(entry.getValue(), modelId, entry.getKey(), value);
+                        final MetricValueCarrier value = metricsDirectory.getCalculator(metricName).apply(batch, entry.getValue());
+                        if (value.isSingle()) {
+                            publisher.gauge(entry.getValue(), modelId, entry.getKey(), value.getValue());
+                        } else {
+                            publisher.gauge(entry.getValue(), modelId, entry.getKey(), value.getNamedValues());
+                        }
                     });
                 }
             }

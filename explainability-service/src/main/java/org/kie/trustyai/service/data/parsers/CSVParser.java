@@ -79,7 +79,7 @@ public class CSVParser implements DataParser {
         return Dataframe.createWithMetadata(predictions, predictionsMetadata);
     }
 
-    private String convertToString(Dataframe dataframe, boolean includeHeader) {
+    public String convertToString(Dataframe dataframe, boolean includeHeader) {
         final StringBuilder output = new StringBuilder();
         if (includeHeader) {
             output

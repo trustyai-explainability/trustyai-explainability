@@ -18,7 +18,9 @@ import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
+import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 import io.quarkus.cache.CacheResult;
 
@@ -28,34 +30,35 @@ import io.quarkus.cache.CacheResult;
 @Path("/metrics/group/fairness/spd")
 public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
     @Override
-    public MetricThreshold thresholdFunction(Number delta, Number metricValue) {
+    public MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue) {
         if (delta == null) {
             return new MetricThreshold(
                     metricsConfig.spd().thresholdLower(),
                     metricsConfig.spd().thresholdUpper(),
-                    metricValue.doubleValue());
+                    metricValue.getValue());
         } else {
             return new MetricThreshold(
                     0 - delta.doubleValue(),
                     delta.doubleValue(),
-                    metricValue.doubleValue());
+                    metricValue.getValue());
         }
     }
 
     @Override
-    public String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, Number metricValue) {
+    public String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, MetricValueCarrier metricValue) {
         return FairnessDefinitions.defineGroupStatisticalParityDifference(
                 protectedAttribute,
                 privileged,
                 unprivileged,
                 outcomeName,
                 favorableOutcomeAttr,
-                metricValue.doubleValue());
+                metricValue.getValue());
     };
 
     @Override
     @CacheResult(cacheName = "metrics-calculator-spd", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public double calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
+    public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
+        @ValidGroupMetricRequest
         GroupMetricRequest gmRequest = (GroupMetricRequest) request;
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
         try {
@@ -70,8 +73,11 @@ public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
                     value -> value.equals(unprivilegedAttr));
             final Value favorableOutcomeAttr = PayloadConverter.convertToValue(gmRequest.getFavorableOutcome().getReconciledType().get());
             final Type favorableOutcomeAttrType = PayloadConverter.convertToType(gmRequest.getFavorableOutcome().getReconciledType().get().getType());
-            return GroupStatisticalParityDifference.calculate(privileged, unprivileged,
-                    List.of(new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0)));
+            return new MetricValueCarrier(
+                    GroupStatisticalParityDifference.calculate(
+                            privileged,
+                            unprivileged,
+                            List.of(new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0))));
         } catch (Exception e) {
             throw new MetricCalculationException(e.getMessage(), e);
         }

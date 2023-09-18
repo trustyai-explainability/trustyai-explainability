@@ -12,7 +12,6 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -21,8 +20,6 @@ import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
-import org.kie.trustyai.service.payloads.consumer.upload.ModelInferJointPayload;
-import org.kie.trustyai.service.utils.KserveRestPayloads;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -30,7 +27,6 @@ import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -284,89 +280,4 @@ class ConsumerEndpointTest {
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
     }
-
-    // data upload tests ===============================================================================================
-    @Test
-    void uploadData() {
-        int[] testInputRows = new int[] { 1, 5, 250 };
-        int[] testInputCols = new int[] { 1, 4 };
-        int[] testOutputCols = new int[] { 1, 2 };
-        String[] testDatatypes = new String[] { "INT64", "INT32", "FP32", "FP64", "BOOL" };
-
-        // sorry for the quad loop
-        for (int nInputRows : testInputRows) {
-            for (int nInputCols : testInputCols) {
-                for (int nOutputCols : testOutputCols) {
-                    for (String datatype : testDatatypes) {
-                        ModelInferJointPayload payload = KserveRestPayloads.generatePayload(nInputRows, nInputCols, nOutputCols, datatype, "TRAINING");
-                        emptyStorage();
-
-                        given()
-                                .contentType(ContentType.JSON)
-                                .body(payload)
-                                .when().post("/upload")
-                                .then()
-                                .statusCode(RestResponse.StatusCode.OK)
-                                .body(containsString(nInputRows + " datapoints"));
-
-                        // check that tagging is correctly applied
-                        Dataframe df = datasource.get().getDataframe(payload.getModelName());
-                        Dataframe trainDF = df.filterRowsByTagEquals(DatapointSource.TRAINING);
-                        Dataframe nonTrainDF = df.filterRowsByTagNotEquals(DatapointSource.TRAINING);
-
-                        assertEquals(nInputRows, df.getRowDimension());
-                        assertEquals(nInputRows, trainDF.getRowDimension());
-                        assertEquals(0, nonTrainDF.getRowDimension());
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    void uploadMultipleTagging() {
-        int nPayload1 = 50;
-        int nPayload2 = 51;
-        ModelInferJointPayload payload1 = KserveRestPayloads.generatePayload(nPayload1, 10, 1, "INT64", "TRAINING");
-        ModelInferJointPayload payload2 = KserveRestPayloads.generatePayload(nPayload2, 10, 1, "INT64", "SYNTHETIC");
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload1)
-                .when().post("/upload")
-                .then()
-                .statusCode(RestResponse.StatusCode.OK)
-                .body(containsString(nPayload1 + " datapoints"));
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload2)
-                .when().post("/upload")
-                .then()
-                .statusCode(RestResponse.StatusCode.OK)
-                .body(containsString(nPayload2 + " datapoints"));
-
-        // check that tagging is correctly applied
-        Dataframe df = datasource.get().getDataframe(payload1.getModelName());
-        Dataframe trainDF = df.filterRowsByTagEquals(DatapointSource.TRAINING);
-        Dataframe synthDF = df.filterRowsByTagEquals(DatapointSource.SYNTHETIC);
-
-        assertEquals(nPayload1 + nPayload2, df.getRowDimension());
-        assertEquals(nPayload1, trainDF.getRowDimension());
-        assertEquals(nPayload2, synthDF.getRowDimension());
-    }
-
-    @Test
-    void uploadTagThatDoesntExist() {
-        ModelInferJointPayload payload1 = KserveRestPayloads.generatePayload(5, 10, 1, "INT64", "enumthatdoesntexist");
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload1)
-                .when().post("/upload")
-                .then()
-                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Provided datapoint tag=enumthatdoesntexist is not valid. Must be one of [SYNTHETIC, TRAINING, UNLABELED]"));
-    }
-
 }

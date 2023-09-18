@@ -26,6 +26,7 @@ import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
+import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.identity.ValidIdentityMetricRequest;
 
 import io.quarkus.cache.CacheResult;
@@ -47,10 +48,10 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
 
     @Override
     @CacheResult(cacheName = "metrics-calculator-identity", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public double calculate(Dataframe dataframe, BaseMetricRequest request) {
+    public MetricValueCarrier calculate(Dataframe dataframe, BaseMetricRequest request) {
         List<Value> vs = dataframe.getColumn(dataframe.getColumnNames().indexOf(((IdentityMetricRequest) request).getColumnName()));
         double value = vs.stream().mapToDouble(Value::asNumber).sum() / ((double) vs.size());
-        return value;
+        return new MetricValueCarrier(value);
     }
 
     public String getGeneralDefinition() {
@@ -80,21 +81,21 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
             metadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
         }
 
         RequestReconciler.reconcile(request, metadata);
 
-        final double metricValue;
+        final MetricValueCarrier metricValue;
         try {
             metricValue = this.calculate(dataframe, request);
         } catch (MetricCalculationException e) {
             LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("Error calculating metric").build();
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error calculating metric: " + e.getMessage()).build();
         }
         final String metricDefinition = this.getSpecificDefinitionFunction(request);
 
-        MetricThreshold thresholds = thresholdFunction(request.getLowerThreshold(), request.getUpperThreshold(), metricValue);
+        MetricThreshold thresholds = thresholdFunction(request.getLowerThreshold(), request.getUpperThreshold(), metricValue.getValue());
         final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue, metricDefinition, thresholds, super.getMetricName());
         return Response.ok(dirObj).build();
     }
