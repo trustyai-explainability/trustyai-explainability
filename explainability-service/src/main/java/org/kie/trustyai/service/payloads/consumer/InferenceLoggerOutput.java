@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InferenceLoggerOutput {
     @JsonProperty("predictions")
-    private List<Integer> predictions;
+    private List<Double> predictions;
 
-    public List<Integer> getPredictions() {
+    public List<Double> getPredictions() {
         return predictions;
     }
 
-    public void setPredictions(List<Integer> predictions) {
+    public void setPredictions(List<Double> predictions) {
         this.predictions = predictions;
     }
 }

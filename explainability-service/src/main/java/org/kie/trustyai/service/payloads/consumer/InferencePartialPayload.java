@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class InferencePartialPayload {
+public class InferencePartialPayload implements PartialPayload {
 
     @JsonProperty("modelid")
     private String modelId;

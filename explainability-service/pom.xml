@@ -20,7 +20,6 @@
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>2.13.4.Final</quarkus.platform.version>
         <apache.commons.collections.version>4.4</apache.commons.collections.version>
-        <cloud.events.version>2.5.0</cloud.events.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
     </properties>
@@ -105,29 +104,6 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-funqy-knative-events</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.cloudevents</groupId>
-            <artifactId>cloudevents-api</artifactId>
-            <version>${cloud.events.version}</version>  <!-- choose the latest version available -->
-        </dependency>
-        <dependency>
-            <groupId>io.cloudevents</groupId>
-            <artifactId>cloudevents-core</artifactId>
-            <version>${cloud.events.version}</version>  <!-- choose the latest version available -->
-        </dependency>
-
-        <dependency>
-            <groupId>io.cloudevents</groupId>
-            <artifactId>cloudevents-http-restful-ws</artifactId>
-            <version>${cloud.events.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.cloudevents</groupId>
-            <artifactId>cloudevents-json-jackson</artifactId>
-            <version>${cloud.events.version}</version>  <!-- choose the latest version available -->
         </dependency>
 
         <dependency>

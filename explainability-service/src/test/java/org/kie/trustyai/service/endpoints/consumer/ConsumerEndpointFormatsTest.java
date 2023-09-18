@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;

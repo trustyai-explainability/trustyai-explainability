@@ -2,9 +2,6 @@ package org.kie.trustyai.service.endpoints.consumer;
 
 import java.util.Base64;
 import java.util.UUID;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -18,21 +15,14 @@ import javax.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
-import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
-import org.kie.trustyai.service.data.utils.InferencePayloadReconciler;
+import org.kie.trustyai.service.data.utils.ModelMeshInferencePayloadReconciler;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
-
-import org.kie.trustyai.service.payloads.consumer.upload.ModelInferJointPayload;
-import org.kie.trustyai.service.payloads.consumer.upload.UploadUtils;
 
 @Path("/consumer/kserve/v2")
 public class ConsumerEndpoint {
@@ -42,13 +32,7 @@ public class ConsumerEndpoint {
     Instance<DataSource> dataSource;
 
     @Inject
-    InferencePayloadReconciler reconciler;
-
-    @POST
-    @Path("/logger")
-    public void logInference(Object jsonEvent) {
-        LOG.info(jsonEvent);
-    }
+    ModelMeshInferencePayloadReconciler reconciler;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
