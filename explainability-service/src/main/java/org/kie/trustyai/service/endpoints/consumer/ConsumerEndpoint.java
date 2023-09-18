@@ -1,10 +1,6 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -22,12 +18,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
@@ -38,10 +29,6 @@ import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
 import org.kie.trustyai.service.payloads.consumer.upload.ModelInferJointPayload;
 import org.kie.trustyai.service.payloads.consumer.upload.UploadUtils;
-
-import static org.kie.trustyai.service.payloads.consumer.upload.UploadUtils.populateRequestBuilder;
-
-import io.cloudevents.CloudEvent;
 
 @Path("/consumer/kserve/v2")
 public class ConsumerEndpoint {
@@ -54,10 +41,9 @@ public class ConsumerEndpoint {
     InferencePayloadReconciler reconciler;
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/logger")
-    public void logInference(CloudEvent jsonEvent) {
-        System.out.println(jsonEvent);
+    public void logInference(Object jsonEvent) {
+        LOG.info(jsonEvent);
     }
 
     @POST
