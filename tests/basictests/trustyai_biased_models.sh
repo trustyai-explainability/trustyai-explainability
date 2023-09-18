@@ -89,7 +89,7 @@ function check_communication(){
     oc project $MM_NAMESPACE
 
     # send some data to modelmesh
-    os::cmd::try_until_text "oc logs $(oc get pods -o name | grep trustyai-service)" "Received partial input payload" $odhdefaulttimeout $odhdefaultinterval  || eval "$FAILURE_HANDLING"
+    os::cmd::try_until_text "curl -k https://$INFER_ROUTE_ALPHA/infer -d @${RESOURCEDIR}/data/loan_default/dummy_data.json; oc logs $(oc get pods -o name | grep trustyai-service)" "Received partial input payload" $odhdefaulttimeout $odhdefaultinterval  || eval "$FAILURE_HANDLING"
 }
 
 function send_data(){
