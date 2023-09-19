@@ -2,8 +2,8 @@ package org.kie.trustyai.service.endpoints.consumer;
 
 import java.nio.charset.StandardCharsets;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.utils.KServeInferencePayloadReconciler;
@@ -15,7 +15,7 @@ import io.quarkus.funqy.Funq;
 import io.quarkus.funqy.knative.events.CloudEvent;
 import io.quarkus.funqy.knative.events.CloudEventMapping;
 
-@Singleton
+@ApplicationScoped
 public class CloudEventConsumer {
 
     private static final Logger LOG = Logger.getLogger(CloudEventConsumer.class);

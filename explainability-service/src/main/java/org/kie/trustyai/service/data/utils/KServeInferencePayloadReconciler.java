@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.*;
@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Reconcile partial input and output inference payloads in the KServe v2 protobuf format.
  */
-@Singleton
+@ApplicationScoped
 public class KServeInferencePayloadReconciler extends InferencePayloadReconciler<KServeInputPayload, KServeOutputPayload> {
     private static final Logger LOG = Logger.getLogger(KServeInferencePayloadReconciler.class);
 
