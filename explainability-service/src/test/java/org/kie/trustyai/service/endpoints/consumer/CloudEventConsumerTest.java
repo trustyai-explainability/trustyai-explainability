@@ -81,8 +81,6 @@ public class CloudEventConsumerTest {
         assertEquals(5, df.getColumnDimension());
         assertEquals(4, df.getInputsCount());
         assertEquals(1, df.getOutputsCount());
-
-        System.out.println("s");
     }
 
     @Test
