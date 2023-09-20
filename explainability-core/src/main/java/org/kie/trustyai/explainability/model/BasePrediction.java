@@ -65,4 +65,12 @@ public abstract class BasePrediction implements Prediction {
     public int hashCode() {
         return Objects.hash(input, executionId, output);
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "input=" + this.getInput() +
+                ",output=" + this.getOutput() +
+                '}';
+    }
 }
