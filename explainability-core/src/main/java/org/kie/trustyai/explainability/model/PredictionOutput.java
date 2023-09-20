@@ -57,4 +57,11 @@ public class PredictionOutput {
     public int hashCode() {
         return Objects.hash(outputs);
     }
+
+    @Override
+    public String toString() {
+        return "PredictionOutput{" +
+                "outputs=" + outputs +
+                '}';
+    }
 }
