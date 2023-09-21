@@ -10,20 +10,10 @@ public class PredictionMetadata {
 
     private final DatapointSource datapointSource;
 
-    private final Value groundTruth;
-
     public PredictionMetadata(String id, LocalDateTime predictionTime, DatapointSource datapointSource) {
         this.id = id;
         this.predictionTime = predictionTime;
         this.datapointSource = datapointSource;
-        this.groundTruth = null;
-    }
-
-    public PredictionMetadata(String id, LocalDateTime predictionTime, DatapointSource datapointSource, Value groundTruth) {
-        this.id = id;
-        this.predictionTime = predictionTime;
-        this.datapointSource = datapointSource;
-        this.groundTruth = groundTruth;
     }
 
     public String getId() {
@@ -36,9 +26,5 @@ public class PredictionMetadata {
 
     public DatapointSource getDataPointSource() {
         return datapointSource;
-    }
-
-    public Value getGroundTruth() {
-        return groundTruth;
     }
 }

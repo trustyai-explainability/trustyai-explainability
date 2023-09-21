@@ -68,4 +68,14 @@ public class SchemaItem {
     public int hashCode() {
         return Objects.hash(type, name, index);
     }
+
+    @Override
+    public String toString() {
+        return "SchemaItem{" +
+                "type=" + type +
+                ", name='" + name + '\'' +
+                ", values=" + values +
+                ", index=" + index +
+                '}';
+    }
 }

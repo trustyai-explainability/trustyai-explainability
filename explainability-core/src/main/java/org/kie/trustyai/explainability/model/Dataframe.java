@@ -37,23 +37,28 @@ public class Dataframe {
     private final List<List<Value>> data;
     private final Metadata metadata;
     private final InternalData internalData;
+    private final Map<String, Integer> idToIDX;
 
-    Dataframe() {
+    public Dataframe() {
         this.data = new ArrayList<>(new ArrayList<>());
         this.metadata = new Metadata();
         this.internalData = new InternalData();
+        this.idToIDX = new HashMap<>();
     }
 
     Dataframe(List<List<Value>> data, Metadata metadata) {
         this.data = new ArrayList<>(data);
         this.metadata = metadata;
         this.internalData = new InternalData();
+        this.idToIDX = new HashMap<>();
     }
 
     Dataframe(List<List<Value>> data, Metadata metadata, InternalData internalData) {
         this.data = new ArrayList<>(data);
         this.metadata = metadata;
         this.internalData = internalData;
+        this.idToIDX = new HashMap<>();
+        calculateIndexHashes();
     }
 
     /**
@@ -113,7 +118,7 @@ public class Dataframe {
         final Dataframe df;
 
         if (predictions.isEmpty()) {
-            throw new IllegalArgumentException("Cannot create a dataframe from an empy list of predictions.");
+            throw new IllegalArgumentException("Cannot create a dataframe from an empty list of predictions.");
         }
 
         if (predictions != null && predictions.size() > 0) {
@@ -153,9 +158,10 @@ public class Dataframe {
                 df.data.get(col).add(currentInputs.get(col).getValue());
             }
             df.internalData.datapointSources.add(DatapointSource.UNLABELED);
-            df.internalData.ids.add(UUID.randomUUID().toString());
+            String id = UUID.randomUUID().toString();
+            df.internalData.ids.add(id);
             df.internalData.timestamps.add(LocalDateTime.now());
-            df.internalData.groundTruths.add(null);
+            df.idToIDX.put(id, i);
         });
 
         return df;
@@ -289,6 +295,7 @@ public class Dataframe {
                 alignedMetadata = false;
             }
             final int inputsSize = getInputsCount();
+            final int originalSize = getRowDimension();
 
             IntStream.range(0, predictions.size()).forEach(i -> {
                 Prediction currentPrediction = predictions.get(i);
@@ -305,15 +312,21 @@ public class Dataframe {
 
                 if (alignedMetadata) {
                     PredictionMetadata predictionMetadata = predictionsMetadata.get(i);
+                    if (idToIDX.containsKey(predictionMetadata.getId())) {
+                        throw new IllegalArgumentException("ID=" + predictionMetadata.getId() + " already exists in the dataframe. Prediction IDs must be unique.");
+                    }
                     internalData.datapointSources.add(predictionMetadata.getDataPointSource());
                     internalData.ids.add(predictionMetadata.getId());
                     internalData.timestamps.add(predictionMetadata.getPredictionTime());
-                    internalData.groundTruths.add(predictionMetadata.getGroundTruth());
+                    idToIDX.put(predictionMetadata.getId(), originalSize + i);
                 } else {
+                    if (idToIDX.containsKey(currentPrediction.getExecutionId().toString())) {
+                        throw new IllegalArgumentException("ID=" + currentPrediction.getExecutionId().toString() + " already exists in the dataframe. Prediction IDs must be unique.");
+                    }
                     internalData.datapointSources.add(DatapointSource.UNLABELED);
                     internalData.ids.add(currentPrediction.getExecutionId().toString());
                     internalData.timestamps.add(LocalDateTime.now());
-                    internalData.groundTruths.add(null);
+                    idToIDX.put(currentPrediction.getExecutionId().toString(), originalSize + i);
                 }
             });
         }
@@ -878,23 +891,23 @@ public class Dataframe {
         List<LocalDateTime> timestamps = new ArrayList<>(nrows);
         List<String> ids = new ArrayList<>(nrows);
         List<DatapointSource> datapointSources = new ArrayList<>(nrows);
-        List<Value> groundTruths = new ArrayList<>(nrows);
         rows.forEach(row -> {
             timestamps.add(internalData.timestamps.get(row));
             ids.add(internalData.ids.get(row));
             datapointSources.add(internalData.datapointSources.get(row));
-            groundTruths.add(internalData.groundTruths.get(row));
         });
 
         Metadata metadataCopy = this.metadata.copy();
-        InternalData internalDataFiltered = new InternalData(datapointSources, ids, timestamps, groundTruths);
+        InternalData internalDataFiltered = new InternalData(datapointSources, ids, timestamps);
 
         final List<List<Value>> dataCopy = columnIndexStream().mapToObj(col -> {
             final List<Value> column = data.get(col);
             return rows.stream().map(column::get).collect(Collectors.toCollection(ArrayList::new));
         }).collect(Collectors.toCollection(ArrayList::new));
 
-        return new Dataframe(dataCopy, metadataCopy, internalDataFiltered);
+        Dataframe filtered = new Dataframe(dataCopy, metadataCopy, internalDataFiltered);
+        filtered.calculateIndexHashes();
+        return filtered;
     }
 
     /**
@@ -935,9 +948,6 @@ public class Dataframe {
             case TIMESTAMP:
                 values = internalData.timestamps.stream().map(Value::new).collect(Collectors.toList());
                 break;
-            //            case GROUND_TRUTH: //todo
-            //                values = internalData.groundTruths;
-            //                break;
             case INDEX:
                 // this is a rehash of other functions, but lets the same function perform similar logic
                 values = rowIndexStream().mapToObj(Value::new).collect(Collectors.toList());
@@ -1188,16 +1198,18 @@ public class Dataframe {
         return Collections.unmodifiableList(internalData.datapointSources);
     }
 
-    public List<Value> getGroundTruths() {
-        return Collections.unmodifiableList(internalData.groundTruths);
-    }
-
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder.append("Dataframe [").append(getRowDimension()).append("x").append(getColumnDimension()).append("]\n");
         for (int i = 0; i < getColumnDimension(); i++) {
-            builder.append("\tColumn ").append(i).append(" (").append(metadata.names.get(i)).append("-> ").append(metadata.nameAliases.get(i)).append(")\n");
+
+            builder.append("\tColumn ").append(i);
+            if (metadata.nameAliases.get(i) != null) {
+                builder.append(" (").append(metadata.names.get(i)).append("-> ").append(metadata.nameAliases.get(i)).append(")\n");
+            } else {
+                builder.append("\n");
+            }
             builder.append("\t\tType: ").append(metadata.types.get(i)).append("\n");
             builder.append("\t\tDomain: ");
             final FeatureDomain domain = metadata.domains.get(i);
@@ -1210,6 +1222,14 @@ public class Dataframe {
             builder.append("\t\tInput: ").append(metadata.inputs.get(i) ? "yes" : "no").append("\n");
         }
         return builder.toString();
+    }
+
+    public boolean hasID(String id) {
+        return idToIDX.containsKey(id);
+    }
+
+    public Integer getRowIdxFromID(String id) {
+        return idToIDX.get(id);
     }
 
     class Metadata {
@@ -1286,11 +1306,16 @@ public class Dataframe {
         }
     }
 
+    public void calculateIndexHashes() {
+        for (int i = 0; i < internalData.ids.size(); i++) {
+            this.idToIDX.put(internalData.ids.get(i), i);
+        }
+    }
+
     public enum InternalColumn {
         TAG,
         ID,
         TIMESTAMP,
-        // GROUND_TRUTH, //todo
         INDEX,
     }
 
@@ -1298,25 +1323,22 @@ public class Dataframe {
         private final List<DatapointSource> datapointSources;
         private final List<String> ids;
         private final List<LocalDateTime> timestamps;
-        private final List<Value> groundTruths;
 
         InternalData() {
             this.datapointSources = new ArrayList<>();
             this.ids = new ArrayList<>();
             this.timestamps = new ArrayList<>();
-            this.groundTruths = new ArrayList<>();
         }
 
-        InternalData(List<DatapointSource> datapointSources, List<String> ids, List<LocalDateTime> timestamps, List<Value> groundTruths) {
+        InternalData(List<DatapointSource> datapointSources, List<String> ids, List<LocalDateTime> timestamps) {
             this.datapointSources = datapointSources;
             this.ids = ids;
             this.timestamps = timestamps;
-            this.groundTruths = groundTruths;
         }
 
         InternalData copy() {
             return new InternalData(new ArrayList<>(this.datapointSources), new ArrayList<>(this.ids),
-                    new ArrayList<>(this.timestamps), new ArrayList<>(this.groundTruths));
+                    new ArrayList<>(this.timestamps));
         }
     }
 }

@@ -9,6 +9,9 @@ public class ModelInferJointPayload {
     @JsonProperty("data_tag")
     private String dataTag;
 
+    @JsonProperty("is_ground_truth")
+    private boolean groundTruth;
+
     private ModelInferRequestPayload request;
     private ModelInferResponsePayload response;
 
@@ -44,10 +47,20 @@ public class ModelInferJointPayload {
         this.dataTag = dataTag;
     }
 
+    public boolean isGroundTruth() {
+        return groundTruth;
+    }
+
+    public void setGroundTruth(boolean groundTruth) {
+        this.groundTruth = groundTruth;
+    }
+
     @Override
     public String toString() {
-        return "ModelJointPayload{" +
+        return "ModelInferJointPayload{" +
                 "modelName='" + modelName + '\'' +
+                ", dataTag='" + dataTag + '\'' +
+                ", groundTruth=" + groundTruth +
                 ", request=" + request +
                 ", response=" + response +
                 '}';

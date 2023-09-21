@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.PayloadConverter;
@@ -21,6 +22,32 @@ public class CSVUtils {
 
     private CSVUtils() {
 
+    }
+
+    private static List<Output> getOutputs(List<String> outputNames, Metadata metadata, CSVRecord entry) {
+        return outputNames.stream().map(colName -> {
+            final SchemaItem schemaItem = metadata.getOutputSchema().retrieveNameMappedItems().get(colName);
+            final int inputIndex = schemaItem.getIndex();
+            final String name = schemaItem.getName();
+            final DataType vtypes = schemaItem.getType();
+            final String valueString = entry.get(inputIndex);
+            final Type types = PayloadConverter.convertToType(schemaItem.getType());
+            if (types.equals(Type.BOOLEAN)) {
+                return new Output(name, Type.BOOLEAN, new Value(Boolean.valueOf(valueString)), 1.0);
+            } else if (types.equals(Type.NUMBER)) {
+                if (vtypes.equals(DataType.DOUBLE)) {
+                    return new Output(name, Type.NUMBER, new Value(Double.valueOf(valueString)), 1.0);
+                } else if (vtypes.equals(DataType.FLOAT)) {
+                    return new Output(name, Type.NUMBER, new Value(Float.valueOf(valueString)), 1.0);
+                } else if (vtypes.equals(DataType.INT32)) {
+                    return new Output(name, Type.NUMBER, new Value(Integer.valueOf(valueString)), 1.0);
+                } else {
+                    return new Output(name, Type.NUMBER, new Value(Long.valueOf(valueString)), 1.0);
+                }
+            } else {
+                return new Output(name, Type.CATEGORICAL, new Value(valueString), 1.0);
+            }
+        }).collect(Collectors.toList());
     }
 
     public static List<Prediction> parse(String in, Metadata metadata) throws IOException {
@@ -53,8 +80,10 @@ public class CSVUtils {
                     final DataType types = schemaItem.getType();
                     if (types.equals(DataType.BOOL)) {
                         return FeatureFactory.newBooleanFeature(name, Boolean.valueOf(valueString));
-                    } else if (types.equals(DataType.DOUBLE) || types.equals(DataType.FLOAT)) {
+                    } else if (types.equals(DataType.DOUBLE)) {
                         return FeatureFactory.newNumericalFeature(name, Double.valueOf(valueString));
+                    } else if (types.equals(DataType.FLOAT)) {
+                        return FeatureFactory.newNumericalFeature(name, Float.valueOf(valueString));
                     } else if (types.equals(DataType.INT32)) {
                         return FeatureFactory.newNumericalFeature(name, Integer.valueOf(valueString));
                     } else if (types.equals(DataType.INT64)) {
@@ -64,27 +93,7 @@ public class CSVUtils {
                     }
                 }).collect(Collectors.toList());
 
-                final List<Output> outputs = outputNames.stream().map(colName -> {
-                    final SchemaItem schemaItem = metadata.getOutputSchema().retrieveNameMappedItems().get(colName);
-                    final int inputIndex = schemaItem.getIndex();
-                    final String name = schemaItem.getName();
-                    final DataType vtypes = schemaItem.getType();
-                    final String valueString = entry.get(inputIndex);
-                    final Type types = PayloadConverter.convertToType(schemaItem.getType());
-                    if (types.equals(Type.BOOLEAN)) {
-                        return new Output(name, Type.BOOLEAN, new Value(Boolean.valueOf(valueString)), 1.0);
-                    } else if (types.equals(Type.NUMBER)) {
-                        if (vtypes.equals(DataType.DOUBLE) || vtypes.equals(DataType.FLOAT)) {
-                            return new Output(name, Type.NUMBER, new Value(Double.valueOf(valueString)), 1.0);
-                        } else if (vtypes.equals(DataType.INT32)) {
-                            return new Output(name, Type.NUMBER, new Value(Integer.valueOf(valueString)), 1.0);
-                        } else {
-                            return new Output(name, Type.NUMBER, new Value(Long.valueOf(valueString)), 1.0);
-                        }
-                    } else {
-                        return new Output(name, Type.CATEGORICAL, new Value(valueString), 1.0);
-                    }
-                }).collect(Collectors.toList());
+                final List<Output> outputs = getOutputs(outputNames, metadata, entry);
 
                 final PredictionInput predictionInput = new PredictionInput(inputFeatures);
                 final PredictionOutput predictionOutput = new PredictionOutput(outputs);

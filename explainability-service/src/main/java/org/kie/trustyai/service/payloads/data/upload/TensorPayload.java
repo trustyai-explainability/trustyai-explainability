@@ -9,6 +9,7 @@ public class TensorPayload {
     private String datatype;
     private HashMap<String, Object> parameters;
     private Object[] data;
+    private String[] executionIDs = null;
 
     public String getName() {
         return name;
@@ -50,14 +51,23 @@ public class TensorPayload {
         this.data = data;
     }
 
+    public String[] getExecutionIDs() {
+        return executionIDs;
+    }
+
+    public void setExecutionIDs(String[] executionID) {
+        this.executionIDs = executionID;
+    }
+
     @Override
     public String toString() {
-        return "ModelInferRequestPayload{" +
+        return "TensorPayload{" +
                 "name='" + name + '\'' +
                 ", shape=" + Arrays.toString(shape) +
                 ", datatype='" + datatype + '\'' +
                 ", parameters=" + parameters +
-                ", data=" + Arrays.deepToString(data) +
+                ", data=" + Arrays.toString(data) +
+                ", executionID='" + Arrays.toString(executionIDs) + '\'' +
                 '}';
     }
 }

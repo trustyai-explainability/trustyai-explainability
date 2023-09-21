@@ -65,4 +65,12 @@ public class Schema {
     public int hashCode() {
         return Objects.hash(items, nameMapping);
     }
+
+    @Override
+    public String toString() {
+        return "Schema{" +
+                "items=" + items +
+                ", nameMapping=" + nameMapping +
+                '}';
+    }
 }
