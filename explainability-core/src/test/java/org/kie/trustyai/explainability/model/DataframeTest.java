@@ -704,7 +704,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), Dataframe.InternalTags.SYNTHETIC.get()));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now()));
             idx++;
         }
         df.addPredictions(predictions, metadata);
