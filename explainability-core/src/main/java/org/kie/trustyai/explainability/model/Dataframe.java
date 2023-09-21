@@ -152,7 +152,7 @@ public class Dataframe {
             for (int col = 0; col < inputsSize; col++) {
                 df.data.get(col).add(currentInputs.get(col).getValue());
             }
-            df.internalData.datapointTags.add("");
+            df.internalData.datapointTags.add(InternalTags.UNLABELED.get());
             df.internalData.ids.add(UUID.randomUUID().toString());
             df.internalData.timestamps.add(LocalDateTime.now());
             df.internalData.groundTruths.add(null);
@@ -310,7 +310,7 @@ public class Dataframe {
                     internalData.timestamps.add(predictionMetadata.getPredictionTime());
                     internalData.groundTruths.add(predictionMetadata.getGroundTruth());
                 } else {
-                    internalData.datapointTags.add("");
+                    internalData.datapointTags.add(InternalTags.UNLABELED.get());
                     internalData.ids.add(currentPrediction.getExecutionId().toString());
                     internalData.timestamps.add(LocalDateTime.now());
                     internalData.groundTruths.add(null);
@@ -1320,7 +1320,8 @@ public class Dataframe {
     public static final String TRUSTYAI_INTERNAL_TAG_PREFIX = "_trustyai";
 
     public enum InternalTags {
-        SYNTHETIC(TRUSTYAI_INTERNAL_TAG_PREFIX + "_synthetic");
+        SYNTHETIC(TRUSTYAI_INTERNAL_TAG_PREFIX + "_synthetic"),
+        UNLABELED(TRUSTYAI_INTERNAL_TAG_PREFIX + "_unlabeled");
 
         private final String tagValue;
 
