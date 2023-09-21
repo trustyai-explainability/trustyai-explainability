@@ -11,7 +11,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
 import org.kie.trustyai.metrics.drift.meanshift.MeanshiftFitting;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
@@ -37,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MeanshiftEndpointTest {
 
     private static final String MODEL_ID = "example1";
+    private static final String TRAINING_TAG = "TRAINING";
     private static final int N_SAMPLES = 100;
     @Inject
     Instance<MockDatasource> datasource;
@@ -51,8 +51,8 @@ class MeanshiftEndpointTest {
         storage.get().emptyStorage();
         Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
 
-        HashMap<DatapointSource, List<List<Integer>>> tagging = new HashMap<>();
-        tagging.put(DatapointSource.TRAINING, List.of(List.of(0, N_SAMPLES)));
+        HashMap<String, List<List<Integer>>> tagging = new HashMap<>();
+        tagging.put(TRAINING_TAG, List.of(List.of(0, N_SAMPLES)));
         dataframe.tagDataPoints(tagging);
         dataframe.addPredictions(datasource.get().generateRandomDataframeDrifted(N_SAMPLES).asPredictions());
         datasource.get().saveDataframe(dataframe, MODEL_ID);
@@ -67,7 +67,7 @@ class MeanshiftEndpointTest {
     @Test
     void meanshiftNonPreFit() {
         DriftMetricRequest payload = new DriftMetricRequest();
-        payload.setReferenceTag("TRAINING");
+        payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
 
         BaseMetricResponse response = given()
@@ -86,11 +86,11 @@ class MeanshiftEndpointTest {
 
     @Test
     void meanshiftPreFit() {
-        Dataframe dfTrain = datasource.get().getDataframe(MODEL_ID).filterRowsByTagEquals(DatapointSource.TRAINING);
+        Dataframe dfTrain = datasource.get().getDataframe(MODEL_ID).filterRowsByTagEquals(TRAINING_TAG);
         MeanshiftFitting msf = Meanshift.precompute(dfTrain);
 
         DriftMetricRequest payload = new DriftMetricRequest();
-        payload.setReferenceTag("TRAINING");
+        payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
         payload.setFitting(msf.getFitStats());
 
@@ -112,7 +112,7 @@ class MeanshiftEndpointTest {
     @Test
     void meanshiftNonPreFitRequest() throws InterruptedException {
         DriftMetricRequest payload = new DriftMetricRequest();
-        payload.setReferenceTag("TRAINING");
+        payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
 
         given()

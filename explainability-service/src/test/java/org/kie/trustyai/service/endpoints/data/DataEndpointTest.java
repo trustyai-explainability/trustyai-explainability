@@ -13,7 +13,6 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.utils.CSVUtils;
@@ -208,8 +207,8 @@ class DataEndpointTest {
     void downloadTextDataInternalColumn() throws IOException {
         final Dataframe dataframe = datasource.get().generateRandomTextDataframe(1000);
 
-        HashMap<DatapointSource, List<List<Integer>>> tags = new HashMap<>();
-        tags.put(DatapointSource.TRAINING, List.of(List.of(0, 500)));
+        HashMap<String, List<List<Integer>>> tags = new HashMap<>();
+        tags.put("TRAINING", List.of(List.of(0, 500)));
         dataframe.tagDataPoints(tags);
 
         datasource.get().saveDataframe(dataframe, MODEL_ID);
@@ -360,13 +359,14 @@ class DataEndpointTest {
         int[] testInputCols = new int[] { 1, 4 };
         int[] testOutputCols = new int[] { 1, 2 };
         String[] testDatatypes = new String[] { "INT64", "INT32", "FP32", "FP64", "BOOL" };
+        String dataTag = "TRAINING";
 
         // sorry for the quad loop
         for (int nInputRows : testInputRows) {
             for (int nInputCols : testInputCols) {
                 for (int nOutputCols : testOutputCols) {
                     for (String datatype : testDatatypes) {
-                        ModelInferJointPayload payload = KserveRestPayloads.generatePayload(nInputRows, nInputCols, nOutputCols, datatype, "TRAINING");
+                        ModelInferJointPayload payload = KserveRestPayloads.generatePayload(nInputRows, nInputCols, nOutputCols, datatype, dataTag);
                         emptyStorage();
 
                         given()
@@ -379,8 +379,8 @@ class DataEndpointTest {
 
                         // check that tagging is correctly applied
                         Dataframe df = datasource.get().getDataframe(payload.getModelName());
-                        Dataframe trainDF = df.filterRowsByTagEquals(DatapointSource.TRAINING);
-                        Dataframe nonTrainDF = df.filterRowsByTagNotEquals(DatapointSource.TRAINING);
+                        Dataframe trainDF = df.filterRowsByTagEquals(dataTag);
+                        Dataframe nonTrainDF = df.filterRowsByTagNotEquals(dataTag);
 
                         assertEquals(nInputRows, df.getRowDimension());
                         assertEquals(nInputRows, trainDF.getRowDimension());
@@ -396,7 +396,7 @@ class DataEndpointTest {
         int nPayload1 = 50;
         int nPayload2 = 51;
         ModelInferJointPayload payload1 = KserveRestPayloads.generatePayload(nPayload1, 10, 1, "INT64", "TRAINING");
-        ModelInferJointPayload payload2 = KserveRestPayloads.generatePayload(nPayload2, 10, 1, "INT64", "SYNTHETIC");
+        ModelInferJointPayload payload2 = KserveRestPayloads.generatePayload(nPayload2, 10, 1, "INT64", "NOT TRAINING");
 
         given()
                 .contentType(ContentType.JSON)
@@ -416,8 +416,8 @@ class DataEndpointTest {
 
         // check that tagging is correctly applied
         Dataframe df = datasource.get().getDataframe(payload1.getModelName());
-        Dataframe trainDF = df.filterRowsByTagEquals(DatapointSource.TRAINING);
-        Dataframe synthDF = df.filterRowsByTagEquals(DatapointSource.SYNTHETIC);
+        Dataframe trainDF = df.filterRowsByTagEquals("TRAINING");
+        Dataframe synthDF = df.filterRowsByTagEquals("NOT TRAINING");
 
         assertEquals(nPayload1 + nPayload2, df.getRowDimension());
         assertEquals(nPayload1, trainDF.getRowDimension());
@@ -425,8 +425,8 @@ class DataEndpointTest {
     }
 
     @Test
-    void uploadTagThatDoesntExist() {
-        ModelInferJointPayload payload1 = KserveRestPayloads.generatePayload(5, 10, 1, "INT64", "enumthatdoesntexist");
+    void uploadTagThatUsesProtectedName() {
+        ModelInferJointPayload payload1 = KserveRestPayloads.generatePayload(5, 10, 1, "INT64", Dataframe.TRUSTYAI_INTERNAL_TAG_PREFIX + "_something");
 
         given()
                 .contentType(ContentType.JSON)
@@ -434,6 +434,9 @@ class DataEndpointTest {
                 .when().post("/upload")
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Provided datapoint tag=enumthatdoesntexist is not valid. Must be one of [SYNTHETIC, TRAINING, UNLABELED]"));
+                .body(is(String.format(
+                        "The tag prefix '%s' is reserved for internal TrustyAI use only. Provided tag '%s_something' violates this restriction.",
+                        Dataframe.TRUSTYAI_INTERNAL_TAG_PREFIX,
+                        Dataframe.TRUSTYAI_INTERNAL_TAG_PREFIX)));
     }
 }

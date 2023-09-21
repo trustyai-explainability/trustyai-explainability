@@ -14,7 +14,6 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.explainability.model.Value;
@@ -67,10 +66,10 @@ public class CSVParser implements DataParser {
         }
         if (values != null) {
             for (int i = 0; i < predictions.size(); i++) {
-                DatapointSource datapointSource = DatapointSource.valueOf(values.get(i).get(0).asString());
+                String datapointTag = values.get(i).get(0).asString();
                 String id = values.get(i).get(1).asString();
                 LocalDateTime predictionTime = LocalDateTime.parse(values.get(i).get(2).asString());
-                PredictionMetadata predictionMetadata = new PredictionMetadata(id, predictionTime, datapointSource);
+                PredictionMetadata predictionMetadata = new PredictionMetadata(id, predictionTime, datapointTag);
                 predictionsMetadata.add(predictionMetadata);
             }
         }
@@ -119,11 +118,11 @@ public class CSVParser implements DataParser {
         if (includeHeader) {
             output.append(String.join(",", "synthetic", "id", "timestamp")).append("\n");
         }
-        List<DatapointSource> datapointSources = dataframe.getDataSources();
+        List<String> datapointTags = dataframe.getTags();
         List<String> ids = dataframe.getIds();
         List<LocalDateTime> timestamps = dataframe.getTimestamps();
         for (int i = 0; i < ids.size(); i++) {
-            output.append(String.join(",", String.valueOf(datapointSources.get(i)), ids.get(i),
+            output.append(String.join(",", datapointTags.get(i), ids.get(i),
                     timestamps.get(i).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))).append("\n");
         }
         String outputString = output.toString();

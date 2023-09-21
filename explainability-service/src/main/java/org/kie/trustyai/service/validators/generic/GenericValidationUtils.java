@@ -1,9 +1,12 @@
 package org.kie.trustyai.service.validators.generic;
 
+import java.util.Optional;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.validation.ConstraintValidatorContext;
 
+import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.PayloadConverter;
@@ -110,5 +113,16 @@ public class GenericValidationUtils {
 
     public static boolean validateFeatureColumnType(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, ValueNode valueNode) {
         return validateFeatureColumnType(context, metadata, modelId, columnName, valueNode, "feature");
+    }
+
+    // if tag is invalid, return error string. Else return nothing
+    public static Optional<String> validateDataTag(String dataTag) {
+        if (dataTag.startsWith(Dataframe.TRUSTYAI_INTERNAL_TAG_PREFIX)) {
+            return Optional.of(String.format(
+                    "The tag prefix '%s' is reserved for internal TrustyAI use only. Provided tag '%s' violates this restriction.",
+                    Dataframe.TRUSTYAI_INTERNAL_TAG_PREFIX,
+                    dataTag));
+        }
+        return Optional.empty();
     }
 }

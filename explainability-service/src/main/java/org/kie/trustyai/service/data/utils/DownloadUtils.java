@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.payloads.values.DataType;
@@ -122,7 +121,7 @@ public class DownloadUtils {
     }
 
     public static Dataframe equalsMatcherInternal(Dataframe df, RowMatcher rowMatcher, Dataframe.InternalColumn internalColumn, boolean invert) {
-        if (internalColumn == Dataframe.InternalColumn.ID) {
+        if (internalColumn == Dataframe.InternalColumn.ID || internalColumn == Dataframe.InternalColumn.TAG) {
             Set<String> equalsVals = rowMatcher.getValues().stream().map(JsonNode::textValue).collect(Collectors.toSet());
             return df.filterByInternalColumnValue(internalColumn, value -> invert ^ equalsVals.contains((String) value.getUnderlyingObject()));
         } else if (internalColumn == Dataframe.InternalColumn.TIMESTAMP) {
@@ -131,9 +130,6 @@ public class DownloadUtils {
         } else if (internalColumn == Dataframe.InternalColumn.INDEX) {
             Set<Integer> equalsVals = rowMatcher.getValues().stream().map(JsonNode::intValue).collect(Collectors.toSet());
             return df.filterByInternalColumnValue(internalColumn, value -> invert ^ equalsVals.contains((int) value.getUnderlyingObject()));
-        } else if (internalColumn == Dataframe.InternalColumn.TAG) {
-            Set<DatapointSource> equalsVals = rowMatcher.getValues().stream().map(v -> DatapointSource.valueOf(v.textValue())).collect(Collectors.toSet());
-            return df.filterByInternalColumnValue(internalColumn, value -> invert ^ equalsVals.contains((DatapointSource) value.getUnderlyingObject()));
         } else {
             return df.filterByInternalColumnValue(internalColumn, value -> invert);
         }

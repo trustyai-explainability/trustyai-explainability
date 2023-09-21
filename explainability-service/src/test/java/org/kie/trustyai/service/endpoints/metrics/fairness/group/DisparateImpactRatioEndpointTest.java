@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
@@ -550,7 +549,7 @@ class DisparateImpactRatioEndpointTest {
 
         final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
         Prediction prediction = dataframe.asPredictions().get(0);
-        PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), DatapointSource.SYNTHETIC);
+        PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), Dataframe.InternalTags.SYNTHETIC.get());
         Dataframe newDataframe = Dataframe.createFrom(prediction, predictionMetadata);
 
         datasource.get().saveDataframe(newDataframe, MODEL_ID);
