@@ -27,6 +27,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -1206,6 +1207,51 @@ public class Dataframe {
             builder.append("\t\tInput: ").append(metadata.inputs.get(i) ? "yes" : "no").append("\n");
         }
         return builder.toString();
+    }
+
+    public Dataframe std() {
+
+        // public Dataframe copy() {
+        // return new Dataframe(
+        // this.data.stream().map(ArrayList::new).collect(Collectors.toCollection(ArrayList::new)),
+        // metadata.copy(), internalData.copy());
+        // }
+
+        // Dataframe(List<List<Value>> data, Metadata metadata) {
+        // this.data = new ArrayList<>(data);
+        // this.metadata = metadata;
+        // this.internalData = new InternalData();
+        // }
+
+        final int numCols = metadata.names.size();
+
+        // Dataframe assumes this is list of columns each containing a list of rows
+        final List<List<Value>> stdData = new ArrayList<>(numCols);
+
+        final StandardDeviation sd = new StandardDeviation();
+
+        for (int i = 0; i < numCols; i++) {
+
+            final List<Value> columnData = this.getColumn(i);
+            final int numRows = columnData.size();
+
+            final double[] rowDoubles = new double[numRows];
+
+            for (int j = 0; j < numRows; j++) {
+                final Value rowValue = columnData.get(j);
+                rowDoubles[j] = rowValue.asNumber();
+            }
+
+            final Double stdDev = sd.evaluate(rowDoubles);
+            final Value stdValue = new Value(stdDev);
+
+            final List<Value> rows = new ArrayList<Value>(1);
+            stdData.add(rows);
+
+            rows.add(stdValue);
+        }
+
+        return new Dataframe(stdData, this.metadata);
     }
 
     class Metadata {
