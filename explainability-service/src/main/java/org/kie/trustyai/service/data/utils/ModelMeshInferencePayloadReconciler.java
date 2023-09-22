@@ -121,8 +121,8 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
         LOG.debug("Prediction input: " + predictionInput.getFeatures());
         final List<Feature> features = new ArrayList<>(predictionInput.getFeatures());
 
-        DatapointSource datapointSource = metadata.containsKey(ExplainerEndpoint.BIAS_IGNORE_PARAM) ? DatapointSource.SYNTHETIC : DatapointSource.UNLABELED;
-        PredictionMetadata predictionMetadata = new PredictionMetadata(id, LocalDateTime.now(), datapointSource);
+        String datapointTag = metadata.containsKey(ExplainerEndpoint.BIAS_IGNORE_PARAM) ? Dataframe.InternalTags.SYNTHETIC.get() : "";
+        PredictionMetadata predictionMetadata = new PredictionMetadata(id, LocalDateTime.now(), datapointTag);
 
         final ModelInferResponse output;
         try {
