@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -22,11 +23,14 @@ public class FourierMMD {
     private int randomSeed;
     private int n_mode;
     private double threshold;
+    private double gamma;
 
     private Mean mean = new Mean();
 
     private boolean isBiasCorrected = false;
     private StandardDeviation std = new StandardDeviation(isBiasCorrected);
+
+    private NormalDistribution normalDistribution = new NormalDistribution();
 
     private FourierMMDFitting fitStats = new FourierMMDFitting();
 
@@ -37,7 +41,8 @@ public class FourierMMD {
             int n_mode,
             int randomSeed,
             double sig,
-            boolean deltaStat) {
+            boolean deltaStat,
+            double gamma) {
         this.deltaStat = deltaStat;
         this.n_test = n_test;
         this.n_window = n_window;
@@ -45,18 +50,19 @@ public class FourierMMD {
         this.n_mode = n_mode;
         this.threshold = threshold;
         this.randomSeed = randomSeed;
+        this.gamma = gamma;
     }
 
     public FourierMMD(Dataframe dfTrain) {
 
-        this(1.5, 168, 100, 512, 1234, 10.0, true);
+        this(0.8, 168, 100, 512, 1234, 10.0, true, 1.5);
 
         precompute(dfTrain);
     }
 
     public FourierMMD(FourierMMDFitting fourierMMDFitting) {
 
-        this(1.5, 168, 100, 512, 1234, 10.0, true);
+        this(0.8, 168, 100, 512, 1234, 10.0, true, 1.5);
 
         fitStats = fourierMMDFitting;
     }
@@ -472,13 +478,15 @@ public class FourierMMD {
 
         retval.computedValuesScore = driftScoreGE0;
 
-        // magnitude = np.absolute(drift_score / self.threshold)
+        // magnitude = 1-st.norm.cdf(-score + self.gamma)
 
-        retval.magnitude = Math.abs(driftScoreGE0 / threshold);
+        final double cdf = normalDistribution.cumulativeProbability(this.gamma - driftScoreGE0);
 
-        // flag = True if magnitude > 1 else False
+        retval.magnitude = (1.0 - cdf);
 
-        if (retval.magnitude > 1.0) {
+        // flag = True if magnitude > self.threshold else False
+
+        if (retval.magnitude > this.threshold) {
             retval.drift = true;
         } else {
             retval.drift = false;
