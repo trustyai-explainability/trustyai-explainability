@@ -112,8 +112,17 @@ public class KServeFormatsTest {
         return new KServePayloads(request.build(), response.build());
     }
 
+    public static List<Prediction> duplicatePrediction(Prediction p, int batchSize) {
+        List<Prediction> out = new ArrayList<>();
+        out.add(p);
+        for (int i = 1; i < batchSize; i++) {
+            out.add(new SimplePrediction(p.getInput(), p.getOutput()));
+        }
+        return out;
+    }
+
     public static KServePayloads generateNPBatch(Prediction prediction, int batchSize, String inputName, String outputName) {
-        final List<Prediction> predictions = IntStream.range(0, batchSize).mapToObj(i -> prediction).collect(Collectors.toList());
+        final List<Prediction> predictions = duplicatePrediction(prediction, batchSize);
         final TensorDataframe df = TensorDataframe.createFrom(predictions);
 
         ModelInferRequest.InferInputTensor.Builder requestTensor = df.asArrayInputTensor(inputName);
@@ -150,7 +159,7 @@ public class KServeFormatsTest {
     }
 
     public static KServePayloads generatePDBatch(Prediction prediction, int batchSize) {
-        final List<Prediction> predictions = IntStream.range(0, batchSize).mapToObj(i -> prediction).collect(Collectors.toList());
+        final List<Prediction> predictions = duplicatePrediction(prediction, batchSize);
         final TensorDataframe df = TensorDataframe.createFrom(predictions);
 
         List<ModelInferRequest.InferInputTensor.Builder> requestTensor = df.asBatchDataframeInputTensor();
