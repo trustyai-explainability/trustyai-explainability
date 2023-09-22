@@ -10,7 +10,6 @@ import javax.ws.rs.Path;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
 import org.kie.trustyai.metrics.drift.meanshift.MeanshiftFitting;
 import org.kie.trustyai.metrics.drift.meanshift.MeanshiftResult;
@@ -90,7 +89,7 @@ public class MeanshiftEndpoint extends DriftEndpoint {
             // get the data that matches the provided reference tag: calibration data
             Dataframe fitting = super.dataSource.get()
                     .getDataframe(request.getModelId())
-                    .filterRowsByTagEquals(DatapointSource.valueOf(dmRequest.getReferenceTag()));
+                    .filterRowsByTagEquals(dmRequest.getReferenceTag());
             msf = Meanshift.precompute(fitting);
             dmRequest.setFitting(msf.getFitStats());
         } else {
@@ -101,7 +100,7 @@ public class MeanshiftEndpoint extends DriftEndpoint {
         LOG.debug("Cache miss. Calculating metric for " + dmRequest.getModelId());
 
         // get data that does _not_ have the provided reference tag: test data
-        Dataframe filtered = dataframe.filterRowsByTagNotEquals(DatapointSource.valueOf(((DriftMetricRequest) request).getReferenceTag()));
+        Dataframe filtered = dataframe.filterRowsByTagNotEquals(((DriftMetricRequest) request).getReferenceTag());
         Map<String, MeanshiftResult> result = ms.calculate(filtered, dmRequest.getThresholdDelta());
 
         Map<String, Double> namedValues = new HashMap<>();

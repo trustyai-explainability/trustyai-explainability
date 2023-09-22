@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -24,6 +23,7 @@ import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
+import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -92,18 +92,16 @@ public class ServiceMetadataEndpoint {
         }
 
         try {
-            EnumMap<DatapointSource, List<List<Integer>>> tagMapping = new EnumMap<>(DatapointSource.class);
+            HashMap<String, List<List<Integer>>> tagMapping = new HashMap<>();
+            List<String> tagErrors = new ArrayList<>();
             for (String tag : dataTagging.getDataTagging().keySet()) {
-                DatapointSource dpSource;
-                try {
-                    dpSource = DatapointSource.valueOf(tag);
-                } catch (IllegalArgumentException e) {
-                    return Response.serverError()
-                            .entity("Provided datapoint tag=" + tag + " is not valid. Must be one of " + Arrays.toString(DatapointSource.values()))
-                            .status(Response.Status.BAD_REQUEST)
-                            .build();
-                }
-                tagMapping.put(dpSource, dataTagging.getDataTagging().get(tag));
+                Optional<String> tagValidationErrorMessage = GenericValidationUtils.validateDataTag(tag);
+                tagValidationErrorMessage.ifPresent(tagErrors::add);
+                tagMapping.put(tag, dataTagging.getDataTagging().get(tag));
+            }
+
+            if (!tagErrors.isEmpty()) {
+                return Response.serverError().entity(String.join(", ", tagErrors)).status(Response.Status.BAD_REQUEST).build();
             }
 
             Dataframe df = dataSource.get().getDataframe(dataTagging.getModelId());

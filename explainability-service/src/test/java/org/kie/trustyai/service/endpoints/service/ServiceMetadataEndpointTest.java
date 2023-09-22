@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DatapointSource;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
@@ -483,7 +482,7 @@ class ServiceMetadataEndpointTest {
         final Dataframe dataframe = datasource.get().generateRandomDataframe(50, 10);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-        List<DatapointSource> originalTags = datasource.get().getDataframe(MODEL_ID).getTags();
+        List<String> originalTags = datasource.get().getDataframe(MODEL_ID).getTags();
 
         List<String> tags = List.of("TRAINING", "SYNTHETIC");
         int idx = 0;
@@ -511,7 +510,7 @@ class ServiceMetadataEndpointTest {
         assertEquals(50, df.getRowDimension());
 
         for (String tag : tags) {
-            Dataframe subDF = df.filterRowsByTagEquals(DatapointSource.valueOf(tag));
+            Dataframe subDF = df.filterRowsByTagEquals(tag);
 
             // make sure the correct number of points are filtered
             assertEquals(6, subDF.getRowDimension());

@@ -8,12 +8,18 @@ public class PredictionMetadata {
 
     private final String id;
 
-    private final DatapointSource datapointSource;
+    private final String datapointTag;
 
-    public PredictionMetadata(String id, LocalDateTime predictionTime, DatapointSource datapointSource) {
+    public PredictionMetadata(String id, LocalDateTime predictionTime) {
         this.id = id;
         this.predictionTime = predictionTime;
-        this.datapointSource = datapointSource;
+        this.datapointTag = "";
+    }
+
+    public PredictionMetadata(String id, LocalDateTime predictionTime, String datapointTag) {
+        this.id = id;
+        this.predictionTime = predictionTime;
+        this.datapointTag = datapointTag;
     }
 
     public String getId() {
@@ -24,7 +30,7 @@ public class PredictionMetadata {
         return predictionTime;
     }
 
-    public DatapointSource getDataPointSource() {
-        return datapointSource;
+    public String getDataPointTag() {
+        return datapointTag;
     }
 }
