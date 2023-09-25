@@ -67,41 +67,6 @@ public class FourierMMD {
         fitStats = fourierMMDFitting;
     }
 
-    // def _random_fourier_coefficients(self, x, wave_num, bias, n_mode):
-
-    private double[] randomFourierCoefficients(double[][] x, double[][] waveNum, double[][] bias, int ndata) {
-        // r_cos = np.cos(np.matmul(x, wave_num) + bias.repeat(x.shape[0], 0))
-
-        final Array2DRowRealMatrix xMatrix = new Array2DRowRealMatrix(x);
-        final Array2DRowRealMatrix waveNumMatrix = new Array2DRowRealMatrix(waveNum);
-        final Array2DRowRealMatrix product = xMatrix.multiply(waveNumMatrix);
-
-        final double[][] rCos = new double[ndata][n_mode];
-        for (int r = 0; r < ndata; r++) {
-            for (int c = 0; c < n_mode; c++) {
-                final double entry = product.getEntry(r, c);
-                final double newEntry = entry + bias[0][c];
-                rCos[r][c] = Math.cos(newEntry);
-            }
-        }
-
-        // a_ref = r_cos.mean(0) * np.sqrt(2 / self.n_mode)
-
-        final double[] aRef = new double[n_mode];
-        final double multiplier = Math.sqrt(2.0 / n_mode);
-        for (int c = 0; c < n_mode; c++) {
-            double sum = 0.0;
-            for (int r = 0; r < ndata; r++) {
-                sum += rCos[r][c];
-            }
-
-            aRef[c] = (sum / ndata) * multiplier;
-        }
-
-        return aRef;
-    }
-        
-
     // def learn(self, data: pd.DataFrame):
     public FourierMMDFitting precompute(Dataframe data) {
 
@@ -162,21 +127,9 @@ public class FourierMMD {
         // waveNum (theta) and bias (b) must be the same for precompute() and execute()
         rg.setSeed(this.randomSeed);
 
-        // wave_num = np.random.randn(x_in.shape[1], self.n_mode)
+        final double[][] waveNum = getWaveNum(numColumns, rg);
 
-        final double[][] waveNum = new double[numColumns][n_mode];
-        for (int i = 0; i < numColumns; i++) {
-            for (int j = 0; j < n_mode; j++) {
-                waveNum[i][j] = rg.nextGaussian();
-            }
-        }
-
-        // bias = np.random.rand(1, self.n_mode) * 2.0 * np.pi
-
-        final double[][] bias = new double[1][n_mode];
-        for (int i = 0; i < n_mode; i++) {
-            bias[0][i] = rg.nextDouble() * 2.0 * Math.PI;
-        }
+        final double[][] bias = getBias(rg);
 
         // # 2. sample the data set
         // ndata = self.n_window * self.n_test
@@ -238,7 +191,7 @@ public class FourierMMD {
 
         // # 3. compute random Fourier mode
 
-        double[] aRef = randomFourierCoefficients(x1Scaled,  waveNum, bias, ndata2);
+        double[] aRef = randomFourierCoefficients(x1Scaled, waveNum, bias, ndata2);
 
         // self.learned_params["A_ref"] = a_ref
 
@@ -389,21 +342,9 @@ public class FourierMMD {
         // values
         rg.setSeed(fitStats.randomSeed);
 
-        // wave_num = np.random.randn(x_in.shape[1], self.n_mode)
+        final double[][] waveNum = getWaveNum(numColumns, rg);
 
-        final double[][] waveNum = new double[numColumns][n_mode];
-        for (int i = 0; i < numColumns; i++) {
-            for (int j = 0; j < n_mode; j++) {
-                waveNum[i][j] = rg.nextGaussian();
-            }
-        }
-
-        // bias = np.random.rand(1, self.n_mode) * 2.0 * np.pi
-
-        final double[][] bias = new double[1][n_mode];
-        for (int i = 0; i < n_mode; i++) {
-            bias[0][i] = rg.nextDouble() * 2.0 * Math.PI;
-        }
+        final double[][] bias = getBias(rg);
 
         // # 2. prepare the data
         // x1 = x_in / np.array(self.learned_params["scale"]).repeat(x_in.shape[0], 0)
@@ -430,7 +371,7 @@ public class FourierMMD {
 
         // # 3. compute random Fourier mode
 
-        double[] aComp = randomFourierCoefficients(x1,  waveNum, bias, numRows);
+        double[] aComp = randomFourierCoefficients(x1, waveNum, bias, numRows);
 
         // # 4. compute mmd score
         // mmd = ((self.learned_params["A_ref"] - a_comp) ** 2).sum()
@@ -484,6 +425,62 @@ public class FourierMMD {
         // }
 
         return retval;
+    }
+
+    private double[][] getWaveNum(final int numColumns, final RandomGenerator rg) {
+        // wave_num = np.random.randn(x_in.shape[1], self.n_mode)
+
+        final double[][] waveNum = new double[numColumns][n_mode];
+        for (int i = 0; i < numColumns; i++) {
+            for (int j = 0; j < n_mode; j++) {
+                waveNum[i][j] = rg.nextGaussian();
+            }
+        }
+        return waveNum;
+    }
+
+    private double[][] getBias(final RandomGenerator rg) {
+        // bias = np.random.rand(1, self.n_mode) * 2.0 * np.pi
+
+        final double[][] bias = new double[1][n_mode];
+        for (int i = 0; i < n_mode; i++) {
+            bias[0][i] = rg.nextDouble() * 2.0 * Math.PI;
+        }
+        return bias;
+    }
+
+    // def _random_fourier_coefficients(self, x, wave_num, bias, n_mode):
+
+    private double[] randomFourierCoefficients(double[][] x, double[][] waveNum, double[][] bias, int ndata) {
+        // r_cos = np.cos(np.matmul(x, wave_num) + bias.repeat(x.shape[0], 0))
+
+        final Array2DRowRealMatrix xMatrix = new Array2DRowRealMatrix(x);
+        final Array2DRowRealMatrix waveNumMatrix = new Array2DRowRealMatrix(waveNum);
+        final Array2DRowRealMatrix product = xMatrix.multiply(waveNumMatrix);
+
+        final double[][] rCos = new double[ndata][n_mode];
+        for (int r = 0; r < ndata; r++) {
+            for (int c = 0; c < n_mode; c++) {
+                final double entry = product.getEntry(r, c);
+                final double newEntry = entry + bias[0][c];
+                rCos[r][c] = Math.cos(newEntry);
+            }
+        }
+
+        // a_ref = r_cos.mean(0) * np.sqrt(2 / self.n_mode)
+
+        final double[] aRef = new double[n_mode];
+        final double multiplier = Math.sqrt(2.0 / n_mode);
+        for (int c = 0; c < n_mode; c++) {
+            double sum = 0.0;
+            for (int r = 0; r < ndata; r++) {
+                sum += rCos[r][c];
+            }
+
+            aRef[c] = (sum / ndata) * multiplier;
+        }
+
+        return aRef;
     }
 
 }
