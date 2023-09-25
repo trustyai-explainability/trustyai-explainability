@@ -12,6 +12,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 
 public class FourierMMD {
@@ -73,7 +74,9 @@ public class FourierMMD {
         // save randomSeed in fitStats for execute() use
         fitStats.randomSeed = this.randomSeed;
 
-        final List<String> columns = data.getColumnNames();
+        final Dataframe numericData = getNumericColumns(data);
+
+        final List<String> columns = numericData.getColumnNames();
 
         final int numColumns = columns.size();
 
@@ -84,9 +87,9 @@ public class FourierMMD {
 
         final Dataframe xIn;
         if (deltaStat) {
-            xIn = delta(data, numColumns);
+            xIn = delta(numericData, numColumns);
         } else {
-            xIn = data;
+            xIn = numericData;
         }
 
         final int numRows = xIn.getRowDimension();
@@ -252,7 +255,9 @@ public class FourierMMD {
         // mmd = []
         // computed_values = {}
 
-        final List<String> colNames = data.getColumnNames();
+        final Dataframe numericData = getNumericColumns(data);
+
+        final List<String> colNames = numericData.getColumnNames();
         final int numColumns = colNames.size();
 
         // if self.delta_stat:
@@ -262,9 +267,9 @@ public class FourierMMD {
 
         final Dataframe xIn;
         if (deltaStat) {
-            xIn = delta(data, numColumns);
+            xIn = delta(numericData, numColumns);
         } else {
-            xIn = data;
+            xIn = numericData;
         }
 
         // # 1. re-generate random wavenumber and biases
@@ -343,6 +348,27 @@ public class FourierMMD {
         // "magnitude": magnitude,
         // "computed_values": computed_values,
         // }
+
+        return retval;
+    }
+
+    private static Dataframe getNumericColumns(Dataframe input) {
+        final List<Type> colTypes = input.getColumnTypes();
+
+        final List<Integer> dropColumns = new ArrayList<Integer>(colTypes.size());
+
+        for (int col = 0; col < colTypes.size(); col++) {
+
+            final Type type = colTypes.get(col);
+            if (type != Type.NUMBER) {
+                dropColumns.add(col);
+            }
+        }
+
+        final Dataframe retval = input.copy();
+        retval.dropColumns();
+
+        assert dropColumns.size() < colTypes.size();
 
         return retval;
     }
