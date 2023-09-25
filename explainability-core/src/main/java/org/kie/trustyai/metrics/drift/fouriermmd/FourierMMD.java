@@ -84,19 +84,7 @@ public class FourierMMD {
 
         final Dataframe xIn;
         if (deltaStat) {
-            xIn = data.tail(data.getRowDimension() - 1);
-            for (int r = 0; r < xIn.getRowDimension(); r++) {
-                List<Value> row1Values = xIn.getRow(r);
-
-                List<Value> row2Values = data.getRow(r);
-                for (int c = 0; c < numColumns; c++) {
-                    final double row1Data = row1Values.get(c).asNumber();
-                    final double row2Data = row2Values.get(c).asNumber();
-                    final double newData = row1Data - row2Data;
-                    xIn.setValue(r, c, new Value(newData));
-                }
-            }
-
+            xIn = delta(data, numColumns);
         } else {
             xIn = data;
         }
@@ -168,26 +156,9 @@ public class FourierMMD {
             x1.add(xIn.getRow(rand[i]));
         }
 
-        // x1 = x1 / self.learned_params["scale"].repeat(x1.shape[0], 0)
+        final double[] scaleArray = getScaleArray(numColumns);
 
-        final List<Value> scale = fitStats.scale.getRow(0);
-
-        final double[] scaleArray = new double[numColumns];
-
-        for (int i = 0; i < numColumns; i++) {
-            scaleArray[i] = scale.get(i).asNumber();
-        }
-
-        final double[][] x1Scaled = new double[ndata2][numColumns];
-        for (int row = 0; row < ndata2; row++) {
-            final List<Value> rowValues = x1.get(row);
-            for (int col = 0; col < numColumns; col++) {
-                final Value val = rowValues.get(col);
-                final double colDouble = val.asNumber();
-                final double scaledColDouble = colDouble / scaleArray[col];
-                x1Scaled[row][col] = scaledColDouble;
-            }
-        }
+        final double[][] x1Scaled = getX1Scaled(numColumns, ndata2, x1, scaleArray);
 
         // # 3. compute random Fourier mode
 
@@ -228,34 +199,7 @@ public class FourierMMD {
                 }
             }
 
-            // r_cos = np.cos(np.matmul(x1, wave_num) + bias.repeat(x1.shape[0], 0))
-
-            final Array2DRowRealMatrix waveNumMatrix = new Array2DRowRealMatrix(waveNum);
-            final Array2DRowRealMatrix xWindowedMatrix = new Array2DRowRealMatrix(xWindowed);
-            final Array2DRowRealMatrix product2 = xWindowedMatrix.multiply(waveNumMatrix);
-
-            final double[][] rCos2 = new double[n_window][n_mode];
-
-            for (int r = 0; r < n_window; r++) {
-                for (int c = 0; c < n_mode; c++) {
-                    final double entry = product2.getEntry(r, c);
-                    final double newEntry = entry + bias[0][c];
-                    rCos2[r][c] = Math.cos(newEntry);
-                }
-            }
-
-            // a_comp = r_cos.mean(0) * np.sqrt(2 / self.n_mode)
-
-            final double[] aComp = new double[n_mode];
-            final double multiplier2 = Math.sqrt(2.0 / n_mode);
-            for (int c = 0; c < n_mode; c++) {
-                double sum = 0.0;
-                for (int r = 0; r < n_window; r++) {
-                    sum += rCos2[r][c];
-                }
-
-                aComp[c] = (sum / n_window) * multiplier2;
-            }
+            final double[] aComp = randomFourierCoefficients(xWindowed, waveNum, bias, n_window);
 
             // mmd = ((a_ref - a_comp) ** 2).sum()
 
@@ -318,17 +262,7 @@ public class FourierMMD {
 
         final Dataframe xIn;
         if (deltaStat) {
-            xIn = data.tail(data.getRowDimension() - 1);
-            for (int r = 0; r < xIn.getRowDimension(); r++) {
-                List<Value> row1Values = xIn.getRow(r);
-                List<Value> row2Values = data.getRow(r);
-                for (int c = 0; c < numColumns; c++) {
-                    final double row1Data = row1Values.get(c).asNumber();
-                    final double row2Data = row2Values.get(c).asNumber();
-                    final double newData = row1Data - row2Data;
-                    xIn.setValue(r, c, new Value(newData));
-                }
-            }
+            xIn = delta(data, numColumns);
         } else {
             xIn = data;
         }
@@ -346,15 +280,7 @@ public class FourierMMD {
 
         final double[][] bias = getBias(rg);
 
-        // # 2. prepare the data
-        // x1 = x_in / np.array(self.learned_params["scale"]).repeat(x_in.shape[0], 0)
-
-        final List<Value> scale = fitStats.scale.getRow(0);
-        final double[] scaleArray = new double[numColumns];
-
-        for (int i = 0; i < numColumns; i++) {
-            scaleArray[i] = scale.get(i).asNumber();
-        }
+        final double[] scaleArray = getScaleArray(numColumns);
 
         final int numRows = xIn.getRowDimension();
 
@@ -427,6 +353,23 @@ public class FourierMMD {
         return retval;
     }
 
+    private Dataframe delta(Dataframe data, final int numColumns) {
+        final Dataframe xIn;
+        xIn = data.tail(data.getRowDimension() - 1);
+        for (int r = 0; r < xIn.getRowDimension(); r++) {
+            List<Value> row1Values = xIn.getRow(r);
+
+            List<Value> row2Values = data.getRow(r);
+            for (int c = 0; c < numColumns; c++) {
+                final double row1Data = row1Values.get(c).asNumber();
+                final double row2Data = row2Values.get(c).asNumber();
+                final double newData = row1Data - row2Data;
+                xIn.setValue(r, c, new Value(newData));
+            }
+        }
+        return xIn;
+    }
+
     private double[][] getWaveNum(final int numColumns, final RandomGenerator rg) {
         // wave_num = np.random.randn(x_in.shape[1], self.n_mode)
 
@@ -481,6 +424,34 @@ public class FourierMMD {
         }
 
         return aRef;
+    }
+
+    private double[] getScaleArray(final int numColumns) {
+        // x1 = x1 / self.learned_params["scale"].repeat(x1.shape[0], 0)
+
+        final List<Value> scale = fitStats.scale.getRow(0);
+
+        final double[] scaleArray = new double[numColumns];
+
+        for (int i = 0; i < numColumns; i++) {
+            scaleArray[i] = scale.get(i).asNumber();
+        }
+        return scaleArray;
+    }
+
+    private double[][] getX1Scaled(final int numColumns, final int ndata2, final List<List<Value>> x1,
+            final double[] scaleArray) {
+        final double[][] x1Scaled = new double[ndata2][numColumns];
+        for (int row = 0; row < ndata2; row++) {
+            final List<Value> rowValues = x1.get(row);
+            for (int col = 0; col < numColumns; col++) {
+                final Value val = rowValues.get(col);
+                final double colDouble = val.asNumber();
+                final double scaledColDouble = colDouble / scaleArray[col];
+                x1Scaled[row][col] = scaledColDouble;
+            }
+        }
+        return x1Scaled;
     }
 
 }
