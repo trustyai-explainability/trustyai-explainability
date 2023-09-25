@@ -3,12 +3,11 @@ package org.kie.trustyai.metrics.drift.fouriermmd;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -112,11 +111,9 @@ public class FourierMMD {
         // # 1. generate random wavenumber and biases
         // np.random.seed(self.seed)
 
-        final RandomGenerator rg = new JDKRandomGenerator();
-
         // Init the RNG to the same seed that will be used for the execute() method
         // waveNum (theta) and bias (b) must be the same for precompute() and execute()
-        rg.setSeed(this.randomSeed);
+        final Random rg = new Random(this.randomSeed);
 
         final double[][] waveNum = getWaveNum(numColumns, rg);
 
@@ -275,11 +272,9 @@ public class FourierMMD {
         // # 1. re-generate random wavenumber and biases
         // np.random.seed(self.seed)
 
-        final RandomGenerator rg = new JDKRandomGenerator();
-
         // Important! Must use the same random seed to regenerate the waveNum and bias
         // values
-        rg.setSeed(fitStats.randomSeed);
+        final Random rg = new Random(fitStats.randomSeed);
 
         final double[][] waveNum = getWaveNum(numColumns, rg);
 
@@ -390,7 +385,7 @@ public class FourierMMD {
         return xIn;
     }
 
-    private double[][] getWaveNum(final int numColumns, final RandomGenerator rg) {
+    private double[][] getWaveNum(final int numColumns, final Random rg) {
         // wave_num = np.random.randn(x_in.shape[1], self.n_mode)
 
         final double[][] waveNum = new double[numColumns][n_mode];
@@ -402,7 +397,7 @@ public class FourierMMD {
         return waveNum;
     }
 
-    private double[][] getBias(final RandomGenerator rg) {
+    private double[][] getBias(final Random rg) {
         // bias = np.random.rand(1, self.n_mode) * 2.0 * np.pi
 
         final double[][] bias = new double[1][n_mode];
