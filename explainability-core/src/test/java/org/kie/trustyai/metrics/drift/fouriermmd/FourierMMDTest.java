@@ -18,7 +18,7 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
-import org.kie.trustyai.metrics.drift.fouriermmd.DriftResult;
+import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMDResult;
 import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMD;
 
 // class Test_Fourier_MMD(unittest.TestCase):
@@ -183,7 +183,7 @@ public class FourierMMDTest {
 
             FourierMMD fourierMMD = new FourierMMD(trainDF);
 
-            DriftResult drift = fourierMMD.calculate(validDF);
+            FourierMMDResult drift = fourierMMD.calculate(validDF);
 
             // self.assertIsNotNone(d_res)
             // self.assertIsInstance(d_res, dict)
@@ -230,7 +230,7 @@ public class FourierMMDTest {
 
             FourierMMD fourierMMD = new FourierMMD(trainDF);
 
-            DriftResult drift = fourierMMD.calculate(testDF);
+            FourierMMDResult drift = fourierMMD.calculate(testDF);
 
             // self.assertIsNotNone(d_res)
             // self.assertIsInstance(d_res, dict)

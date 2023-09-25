@@ -4,7 +4,7 @@ package org.kie.trustyai.metrics.drift.fouriermmd;
  * Return value from FourierMMD.execute()
  */
 
-public class DriftResult {
+public class FourierMMDResult {
     // return {
     // "drift": flag,
     // "magnitude": magnitude,

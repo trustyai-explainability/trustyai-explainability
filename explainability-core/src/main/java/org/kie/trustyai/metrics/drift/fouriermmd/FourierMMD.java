@@ -349,7 +349,7 @@ public class FourierMMD {
         return fitStats;
     }
 
-    public DriftResult calculate(Dataframe data) {
+    public FourierMMDResult calculate(Dataframe data) {
 
         // def execute(self, data: pd.DataFrame):
         // mmd = []
@@ -457,7 +457,7 @@ public class FourierMMD {
             driftScoreGE0 = driftScore;
         }
 
-        final DriftResult retval = new DriftResult();
+        final FourierMMDResult retval = new FourierMMDResult();
 
         // computed_values["score"] = drift_score
 
