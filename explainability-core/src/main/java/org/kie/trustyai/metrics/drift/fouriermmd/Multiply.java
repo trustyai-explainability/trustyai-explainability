@@ -20,6 +20,8 @@ public class Multiply implements Function<Value, Value> {
 
         final double orig = value.asNumber();
 
+        assert !Double.isNaN(orig);
+
         final double newDouble = orig * multiplier;
 
         final Value newValue = new Value(newDouble);
