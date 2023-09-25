@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Feature;
@@ -91,9 +92,9 @@ public class FourierMMDTest {
 
             FourierMMDResult drift = fourierMMD.calculate(validDF);
 
-            assert !drift.drift;
+            Assertions.assertFalse(drift.drift, "drift f;ag is true");
 
-            assert drift.magnitude < 1.0;
+            Assertions.assertTrue(drift.magnitude < 1.0, "drift.magnitude >= 1.0");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,9 +110,9 @@ public class FourierMMDTest {
 
             FourierMMDResult drift = fourierMMD.calculate(testDF);
 
-            assert drift.drift;
+            Assertions.assertTrue(drift.drift, "drift flag is false");
 
-            assert drift.magnitude >= 1.0;
+            Assertions.assertTrue(drift.magnitude >= 1.0, "drift.magnitude < 1.0");
 
         } catch (Exception e) {
             e.printStackTrace();
