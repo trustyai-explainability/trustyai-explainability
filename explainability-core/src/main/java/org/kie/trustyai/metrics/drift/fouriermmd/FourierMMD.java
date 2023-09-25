@@ -67,6 +67,41 @@ public class FourierMMD {
         fitStats = fourierMMDFitting;
     }
 
+    // def _random_fourier_coefficients(self, x, wave_num, bias, n_mode):
+
+    private double[] randomFourierCoefficients(double[][] x, double[][] waveNum, double[][] bias, int ndata) {
+        // r_cos = np.cos(np.matmul(x, wave_num) + bias.repeat(x.shape[0], 0))
+
+        final Array2DRowRealMatrix xMatrix = new Array2DRowRealMatrix(x);
+        final Array2DRowRealMatrix waveNumMatrix = new Array2DRowRealMatrix(waveNum);
+        final Array2DRowRealMatrix product = xMatrix.multiply(waveNumMatrix);
+
+        final double[][] rCos = new double[ndata][n_mode];
+        for (int r = 0; r < ndata; r++) {
+            for (int c = 0; c < n_mode; c++) {
+                final double entry = product.getEntry(r, c);
+                final double newEntry = entry + bias[0][c];
+                rCos[r][c] = Math.cos(newEntry);
+            }
+        }
+
+        // a_ref = r_cos.mean(0) * np.sqrt(2 / self.n_mode)
+
+        final double[] aRef = new double[n_mode];
+        final double multiplier = Math.sqrt(2.0 / n_mode);
+        for (int c = 0; c < n_mode; c++) {
+            double sum = 0.0;
+            for (int r = 0; r < ndata; r++) {
+                sum += rCos[r][c];
+            }
+
+            aRef[c] = (sum / ndata) * multiplier;
+        }
+
+        return aRef;
+    }
+        
+
     // def learn(self, data: pd.DataFrame):
     public FourierMMDFitting precompute(Dataframe data) {
 
@@ -202,33 +237,8 @@ public class FourierMMD {
         }
 
         // # 3. compute random Fourier mode
-        // r_cos = np.cos(np.matmul(x1, wave_num) + bias.repeat(x1.shape[0], 0))
 
-        final Array2DRowRealMatrix x1ScaledMatrix = new Array2DRowRealMatrix(x1Scaled);
-        final Array2DRowRealMatrix waveNumMatrix = new Array2DRowRealMatrix(waveNum);
-        final Array2DRowRealMatrix product = x1ScaledMatrix.multiply(waveNumMatrix);
-
-        final double[][] rCos = new double[ndata2][n_mode];
-        for (int r = 0; r < ndata2; r++) {
-            for (int c = 0; c < n_mode; c++) {
-                final double entry = product.getEntry(r, c);
-                final double newEntry = entry + bias[0][c];
-                rCos[r][c] = Math.cos(newEntry);
-            }
-        }
-
-        // a_ref = r_cos.mean(0) * np.sqrt(2 / self.n_mode)
-
-        final double[] aRef = new double[n_mode];
-        final double multiplier = Math.sqrt(2.0 / n_mode);
-        for (int c = 0; c < n_mode; c++) {
-            double sum = 0.0;
-            for (int r = 0; r < ndata2; r++) {
-                sum += rCos[r][c];
-            }
-
-            aRef[c] = (sum / ndata2) * multiplier;
-        }
+        double[] aRef = randomFourierCoefficients(x1Scaled,  waveNum, bias, ndata2);
 
         // self.learned_params["A_ref"] = a_ref
 
@@ -267,6 +277,7 @@ public class FourierMMD {
 
             // r_cos = np.cos(np.matmul(x1, wave_num) + bias.repeat(x1.shape[0], 0))
 
+            final Array2DRowRealMatrix waveNumMatrix = new Array2DRowRealMatrix(waveNum);
             final Array2DRowRealMatrix xWindowedMatrix = new Array2DRowRealMatrix(xWindowed);
             final Array2DRowRealMatrix product2 = xWindowedMatrix.multiply(waveNumMatrix);
 
@@ -418,34 +429,8 @@ public class FourierMMD {
         }
 
         // # 3. compute random Fourier mode
-        // r_cos = np.cos(np.matmul(x1, wave_num) + bias.repeat(x1.shape[0], 0))
 
-        final Array2DRowRealMatrix x1ScaledMatrix = new Array2DRowRealMatrix(x1);
-        final Array2DRowRealMatrix waveNumMatrix = new Array2DRowRealMatrix(waveNum);
-        final Array2DRowRealMatrix product = x1ScaledMatrix.multiply(waveNumMatrix);
-
-        final double[][] rCos = new double[numRows][n_mode];
-
-        for (int r = 0; r < numRows; r++) {
-            for (int c = 0; c < n_mode; c++) {
-                final double entry = product.getEntry(r, c);
-                final double newEntry = entry + bias[0][c];
-                rCos[r][c] = Math.cos(newEntry);
-            }
-        }
-
-        // a_comp = r_cos.mean(0) * np.sqrt(2 / self.n_mode)
-
-        final double[] aComp = new double[n_mode];
-        final double multiplier2 = Math.sqrt(2.0 / n_mode);
-        for (int c = 0; c < n_mode; c++) {
-            double sum = 0.0;
-            for (int r = 0; r < numRows; r++) {
-                sum += rCos[r][c];
-            }
-
-            aComp[c] = (sum / numRows) * multiplier2;
-        }
+        double[] aComp = randomFourierCoefficients(x1,  waveNum, bias, numRows);
 
         // # 4. compute mmd score
         // mmd = ((self.learned_params["A_ref"] - a_comp) ** 2).sum()
