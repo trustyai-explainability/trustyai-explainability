@@ -284,16 +284,10 @@ public class FourierMMD {
 
         final int numRows = xIn.getRowDimension();
 
-        final double[][] x1 = new double[numRows][numColumns];
-        for (int row = 0; row < numRows; row++) {
-            final List<Value> rowValues = xIn.getRow(row);
-            for (int col = 0; col < numColumns; col++) {
-                final Value val = rowValues.get(col);
-                final double colDouble = val.asNumber();
-                final double scaledColDouble = colDouble / scaleArray[col];
-                x1[row][col] = scaledColDouble;
-            }
-        }
+        final List<List<Value>> xInRows = xIn.getRows();
+
+        final double[][] x1 = getX1Scaled(numColumns, numRows, xInRows,
+                scaleArray);
 
         // # 3. compute random Fourier mode
 
