@@ -92,9 +92,9 @@ public class FourierMMDTest {
 
             FourierMMDResult drift = fourierMMD.calculate(validDF);
 
-            Assertions.assertFalse(drift.drift, "drift f;ag is true");
+            Assertions.assertFalse(drift.drifted, "drifted flag is true");
 
-            Assertions.assertTrue(drift.magnitude < 1.0, "drift.magnitude >= 1.0");
+            Assertions.assertTrue(drift.pValue < 1.0, "drift.pValue >= 1.0");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -110,9 +110,9 @@ public class FourierMMDTest {
 
             FourierMMDResult drift = fourierMMD.calculate(testDF);
 
-            Assertions.assertTrue(drift.drift, "drift flag is false");
+            Assertions.assertTrue(drift.drifted, "drifted flag is false");
 
-            Assertions.assertTrue(drift.magnitude >= 1.0, "drift.magnitude < 1.0");
+            Assertions.assertTrue(drift.pValue >= 1.0, "drift.pValue < 1.0");
 
         } catch (Exception e) {
             e.printStackTrace();

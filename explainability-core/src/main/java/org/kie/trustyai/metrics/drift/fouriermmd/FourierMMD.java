@@ -324,20 +324,20 @@ public class FourierMMD {
 
         // computed_values["score"] = drift_score
 
-        retval.computedValuesScore = driftScoreGE0;
+        retval.relativeMMDScore = driftScoreGE0;
 
         // magnitude = 1-st.norm.cdf(-score + self.gamma)
 
         final double cdf = normalDistribution.cumulativeProbability(this.gamma - driftScoreGE0);
 
-        retval.magnitude = (1.0 - cdf);
+        retval.pValue = (1.0 - cdf);
 
         // flag = True if magnitude > self.threshold else False
 
-        if (retval.magnitude > this.threshold) {
-            retval.drift = true;
+        if (retval.pValue > this.threshold) {
+            retval.drifted = true;
         } else {
-            retval.drift = false;
+            retval.drifted = false;
         }
 
         // return {

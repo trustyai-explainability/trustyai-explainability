@@ -11,18 +11,18 @@ public class FourierMMDResult {
     // "computed_values": computed_values,
     // }
 
-    public boolean drift;
-    public double magnitude;
-    public double computedValuesScore;
+    public boolean drifted;
+    public double pValue;
+    public double relativeMMDScore;
 
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
 
         buf.append("DriftResult{\n");
-        buf.append("drift = " + drift + "\n");
-        buf.append("magnitude = " + magnitude + "\n");
-        buf.append("computedValuesScore = " + computedValuesScore + "\n");
+        buf.append("drifted = " + drifted + "\n");
+        buf.append("pValue = " + pValue + "\n");
+        buf.append("relativeMMDScore = " + relativeMMDScore + "\n");
         buf.append("}\n");
 
         return buf.toString();
