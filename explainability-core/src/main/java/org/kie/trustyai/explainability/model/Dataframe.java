@@ -1250,6 +1250,30 @@ public class Dataframe {
         return new Dataframe(stdData, this.metadata);
     }
 
+    public Dataframe getNumericColumns() {
+
+        final List<Type> colTypes = this.metadata.types;
+
+        final List<Integer> dropColumns = new ArrayList<Integer>(colTypes.size());
+
+        for (int col = 0; col < colTypes.size(); col++) {
+
+            final Type type = colTypes.get(col);
+            if (type != Type.NUMBER) {
+                dropColumns.add(col);
+            }
+        }
+
+        final Dataframe retval = copy();
+        retval.dropColumns();
+
+        if (dropColumns.size() == colTypes.size()) {
+            throw new IllegalArgumentException("no non-numeric columns");
+        }
+
+        return retval;
+    }
+
     class Metadata {
         private final List<String> names;
         private List<String> nameAliases;

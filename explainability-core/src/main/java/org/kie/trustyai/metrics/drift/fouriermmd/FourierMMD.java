@@ -73,7 +73,7 @@ public class FourierMMD {
         // save randomSeed in fitStats for execute() use
         fitStats.randomSeed = this.randomSeed;
 
-        final Dataframe numericData = getNumericColumns(data);
+        final Dataframe numericData = data.getNumericColumns();
 
         final List<String> columns = numericData.getColumnNames();
 
@@ -254,7 +254,7 @@ public class FourierMMD {
         // mmd = []
         // computed_values = {}
 
-        final Dataframe numericData = getNumericColumns(data);
+        final Dataframe numericData = data.getNumericColumns();
 
         final List<String> colNames = numericData.getColumnNames();
         final int numColumns = colNames.size();
@@ -345,29 +345,6 @@ public class FourierMMD {
         // "magnitude": magnitude,
         // "computed_values": computed_values,
         // }
-
-        return retval;
-    }
-
-    private static Dataframe getNumericColumns(Dataframe input) {
-        final List<Type> colTypes = input.getColumnTypes();
-
-        final List<Integer> dropColumns = new ArrayList<Integer>(colTypes.size());
-
-        for (int col = 0; col < colTypes.size(); col++) {
-
-            final Type type = colTypes.get(col);
-            if (type != Type.NUMBER) {
-                dropColumns.add(col);
-            }
-        }
-
-        final Dataframe retval = input.copy();
-        retval.dropColumns();
-
-        if (dropColumns.size() == colTypes.size()) {
-            throw new IllegalArgumentException("no non-numeric columns");
-        }
 
         return retval;
     }
