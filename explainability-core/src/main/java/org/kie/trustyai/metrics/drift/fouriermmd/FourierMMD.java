@@ -104,7 +104,8 @@ public class FourierMMD {
 
         final Dataframe sd = xIn.std();
 
-        final Function<Value, Value> multiply = new Multiply(sig);
+        final Function<Value, Value> multiply = (Value v) -> new Value(v.asNumber() * sig);
+
         final int row2 = 0;
         sd.transformRow(row2, multiply);
 
