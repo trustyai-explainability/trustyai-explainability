@@ -92,6 +92,9 @@ public class FourierMMD {
         }
 
         final int numRows = xIn.getRowDimension();
+        if (numRows == 0) {
+            throw new IllegalArgumentException("Dataframe is empty");
+        }
 
         // n_test = self.n_test
         // window_size = self.n_window
@@ -129,8 +132,6 @@ public class FourierMMD {
         final int ndata2 = Math.min(ndata, numRows);
 
         // idx = np.random.choice(x_in.shape[0], ndata, replace=False)
-
-        assert ndata2 <= numRows;
 
         final boolean[] done = new boolean[numRows];
         Arrays.fill(done, false);
@@ -363,7 +364,9 @@ public class FourierMMD {
         final Dataframe retval = input.copy();
         retval.dropColumns();
 
-        assert dropColumns.size() < colTypes.size();
+        if (dropColumns.size() == colTypes.size()) {
+            throw new IllegalArgumentException("no non-numeric columns");
+        }
 
         return retval;
     }
