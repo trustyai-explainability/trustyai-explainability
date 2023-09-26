@@ -15,6 +15,19 @@ public class FourierMMDResult {
     public double pValue;
     public double relativeMMDScore;
 
+    public double getRelativeMMDScore() {
+        return relativeMMDScore;
+    }
+
+    public double getpValue() {
+        return pValue;
+    }
+
+    public boolean isDrifted() {
+        return drifted;
+    }
+
+
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();

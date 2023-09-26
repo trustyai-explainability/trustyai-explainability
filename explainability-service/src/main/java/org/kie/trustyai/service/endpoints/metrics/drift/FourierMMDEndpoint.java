@@ -3,6 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics.drift;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.Path;
@@ -53,7 +54,7 @@ public class FourierMMDEndpoint extends DriftEndpoint {
 
     // a specific definition for this value of this metric in this specific context
     @Override
-    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest DriftMetricRequest request) {
+    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest FourierMMDMetricRequest request) {
         StringBuilder out = new StringBuilder(getGeneralDefinition());
         out.append(System.getProperty("line.separator"));
 
@@ -78,33 +79,45 @@ public class FourierMMDEndpoint extends DriftEndpoint {
 
     // === CALCULATION FUNCTION ======================================
     @Override
-    @CacheResult(cacheName = "metrics-calculator-meanshift", keyGenerator = MetricCalculationCacheKeyGen.class)
+    @CacheResult(cacheName = "metrics-calculator-fouriermmd", keyGenerator = MetricCalculationCacheKeyGen.class)
     public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
-        DriftMetricRequest dmRequest = (DriftMetricRequest) request;
+        FourierMMDMetricRequest fmmRequest = (FourierMMDMetricRequest) request;
 
-        MeanshiftFitting msf;
-        if (dmRequest.getFitting() == null) {
-            LOG.debug("Fitting a meanshift drift request for model=" + request.getModelId());
+        FourierMMDFitting fmf;
+        if (fmmRequest.getFitting() == null) {
+            LOG.debug("Fitting a fourier mmd drift request for model=" + request.getModelId());
 
             // get the data that matches the provided reference tag: calibration data
             Dataframe fitting = super.dataSource.get()
                     .getDataframe(request.getModelId())
-                    .filterRowsByTagEquals(dmRequest.getReferenceTag());
-            msf = Meanshift.precompute(fitting);
-            dmRequest.setFitting(msf.getFitStats());
+                    .filterRowsByTagEquals(fmmRequest.getReferenceTag());
+            
+            // get parameters
+            final FourierMMDParameters parameters = fmmRequest.getParameters();
+            final int randomSeed = new Random().nextInt();
+
+            fmf = FourierMMD.precompute(fitting,
+                parameters.getnWindow(),
+                parameters.getnTest(),
+                parameters.getnMode(),
+                randomSeed,
+                parameters.getSig(),
+                parameters.getDeltaStat(),
+                parameters.getGamma());
+            fmmRequest.setFitting(fmf.getFitStats());
         } else {
-            LOG.debug("Using previously found meanshift fitting in request for model=" + request.getModelId());
-            msf = new MeanshiftFitting(dmRequest.getFitting());
+            LOG.debug("Using previously found fouriermmd fitting in request for model=" + request.getModelId());
+            fmf = new FourierMMDFitting(fmmRequest.getFitting());
         }
-        Meanshift ms = new Meanshift(msf);
-        LOG.debug("Cache miss. Calculating metric for " + dmRequest.getModelId());
+        FourierMMD fmmd = new FourierMMD(fmf);
+        LOG.debug("Cache miss. Calculating metric for " + fmmRequest.getModelId());
 
         // get data that does _not_ have the provided reference tag: test data
-        Dataframe filtered = dataframe.filterRowsByTagNotEquals(((DriftMetricRequest) request).getReferenceTag());
-        Map<String, MeanshiftResult> result = ms.calculate(filtered, dmRequest.getThresholdDelta());
+        Dataframe filtered = dataframe.filterRowsByTagNotEquals(((FourierMMDMetricRequest) request).getReferenceTag());
+        Map<String, FourierMMDResult> result = fmmd.calculate(filtered, fmmRequest.getThresholdDelta());
 
         Map<String, Double> namedValues = new HashMap<>();
-        for (Map.Entry<String, MeanshiftResult> resultEntry : result.entrySet()) {
+        for (Map.Entry<String, FourierMMDResult> resultEntry : result.entrySet()) {
             namedValues.put(resultEntry.getKey(), resultEntry.getValue().getpValue());
         }
         return new MetricValueCarrier(namedValues);
