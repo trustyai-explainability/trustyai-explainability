@@ -27,7 +27,6 @@ public class FourierMMDResult {
         return drifted;
     }
 
-
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();

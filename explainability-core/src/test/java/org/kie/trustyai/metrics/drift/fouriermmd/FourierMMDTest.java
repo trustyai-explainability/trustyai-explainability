@@ -91,10 +91,17 @@ public class FourierMMDTest {
         try {
             setup();
 
-            FourierMMD fourierMMD = new FourierMMD(trainDF);
+            final boolean deltaStat = true;
+            final int n_test = 100;
+            final int n_window = 168;
+            final double sig = 10.0;
+            final int randomSeed = 1234;
+            final int n_mode = 512;
+            FourierMMD fourierMMD = new FourierMMD(trainDF, deltaStat, n_test, n_window, sig, randomSeed, n_mode);
 
             final double threshold = 0.8;
-            FourierMMDResult drift = fourierMMD.calculate(validDF, threshold);
+            final double gamma = 1.5;
+            FourierMMDResult drift = fourierMMD.calculate(validDF, threshold, gamma);
 
             Assertions.assertFalse(drift.drifted, "drifted flag is true");
 
@@ -110,10 +117,17 @@ public class FourierMMDTest {
         try {
             setup();
 
-            FourierMMD fourierMMD = new FourierMMD(trainDF);
+            final boolean deltaStat = true;
+            final int n_test = 100;
+            final int n_window = 168;
+            final double sig = 10.0;
+            final int randomSeed = 1234;
+            final int n_mode = 512;
+            FourierMMD fourierMMD = new FourierMMD(trainDF, deltaStat, n_test, n_window, sig, randomSeed, n_mode);
 
             final double threshold = 0.8;
-            FourierMMDResult drift = fourierMMD.calculate(testDF, threshold);
+            final double gamma = 1.5;
+            FourierMMDResult drift = fourierMMD.calculate(testDF, threshold, gamma);
 
             Assertions.assertTrue(drift.drifted, "drifted flag is false");
 
