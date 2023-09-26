@@ -93,7 +93,8 @@ public class FourierMMDTest {
 
             FourierMMD fourierMMD = new FourierMMD(trainDF);
 
-            FourierMMDResult drift = fourierMMD.calculate(validDF);
+            final double threshold = 0.8;
+            FourierMMDResult drift = fourierMMD.calculate(validDF, threshold);
 
             Assertions.assertFalse(drift.drifted, "drifted flag is true");
 
@@ -111,7 +112,8 @@ public class FourierMMDTest {
 
             FourierMMD fourierMMD = new FourierMMD(trainDF);
 
-            FourierMMDResult drift = fourierMMD.calculate(testDF);
+            final double threshold = 0.8;
+            FourierMMDResult drift = fourierMMD.calculate(testDF, threshold);
 
             Assertions.assertTrue(drift.drifted, "drifted flag is false");
 

@@ -20,7 +20,6 @@ public class FourierMMD {
     private double sig;
     private int randomSeed;
     private int n_mode;
-    private double threshold;
     private double gamma;
 
     private NormalDistribution normalDistribution = new NormalDistribution();
@@ -28,7 +27,6 @@ public class FourierMMD {
     private FourierMMDFitting fitStats = new FourierMMDFitting();
 
     public FourierMMD(
-            double threshold,
             int n_window,
             int n_test,
             int n_mode,
@@ -41,21 +39,20 @@ public class FourierMMD {
         this.n_window = n_window;
         this.sig = sig;
         this.n_mode = n_mode;
-        this.threshold = threshold;
         this.randomSeed = randomSeed;
         this.gamma = gamma;
     }
 
     public FourierMMD(Dataframe dfTrain) {
 
-        this(0.8, 168, 100, 512, 1234, 10.0, true, 1.5);
+        this(168, 100, 512, 1234, 10.0, true, 1.5);
 
         precompute(dfTrain);
     }
 
     public FourierMMD(FourierMMDFitting fourierMMDFitting) {
 
-        this(0.8, 168, 100, 512, 1234, 10.0, true, 1.5);
+        this(168, 100, 512, 1234, 10.0, true, 1.5);
 
         fitStats = fourierMMDFitting;
     }
@@ -241,7 +238,7 @@ public class FourierMMD {
         return fitStats;
     }
 
-    public FourierMMDResult calculate(Dataframe data) {
+    public FourierMMDResult calculate(Dataframe data, double threshold) {
 
         // def execute(self, data: pd.DataFrame):
         // mmd = []
@@ -327,7 +324,7 @@ public class FourierMMD {
 
         // flag = True if magnitude > self.threshold else False
 
-        if (retval.pValue > this.threshold) {
+        if (retval.pValue > threshold) {
             retval.drifted = true;
         } else {
             retval.drifted = false;
