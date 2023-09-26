@@ -13,7 +13,6 @@ public class FourierMMDParameters {
     private int randomSeed = 22;
     private double sig = 10.0;
     private boolean deltaStat = True;
-    private double gamma = 2.0;
 
     public int getnWindow() {
         return nWindow;

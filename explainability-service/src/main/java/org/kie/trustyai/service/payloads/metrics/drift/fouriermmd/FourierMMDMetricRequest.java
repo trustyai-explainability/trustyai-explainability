@@ -9,6 +9,8 @@ import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 public class FourierMMDMetricRequest extends DriftMetricRequest {
 
     private FourierMMDParameters parameters = new FourierMMDParameters();
+    private double gamma = 2.0;
+
 
     public FourierMMDParameters getParameters() {
         return parameters;
@@ -17,4 +19,14 @@ public class FourierMMDMetricRequest extends DriftMetricRequest {
     public void setParameters(FourierMMDParameters parameters) {
         this.parameters = parameters;
     }
+
+    public int getGamma() {
+        return gamma;
+    }
+
+    public void setGamma() {
+        this.gamma = gamma;
+    }
+
+    private Double thresholdDelta;
 }
