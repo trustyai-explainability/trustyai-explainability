@@ -8,11 +8,9 @@ import java.util.function.Function;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.utils.DataUtils;
 
 public class FourierMMD {
 
@@ -24,11 +22,6 @@ public class FourierMMD {
     private int n_mode;
     private double threshold;
     private double gamma;
-
-    private Mean mean = new Mean();
-
-    private boolean isBiasCorrected = false;
-    private StandardDeviation std = new StandardDeviation(isBiasCorrected);
 
     private NormalDistribution normalDistribution = new NormalDistribution();
 
@@ -237,12 +230,12 @@ public class FourierMMD {
             sampleMMD2NoNaN[i] = sampleMMD2.get(i);
         }
 
-        fitStats.mean_mmd = mean.evaluate(sampleMMD2NoNaN);
+        fitStats.mean_mmd = DataUtils.getMean(sampleMMD2NoNaN);
 
         // self.learned_params["std_mmd"] = np.nanstd(np.array(sample_mmd))
 
-        fitStats.std_mmd = std.evaluate(sampleMMD2NoNaN);
-
+        fitStats.std_mmd = DataUtils.getStdDev(sampleMMD2NoNaN, fitStats.mean_mmd);
+        
         // return self.learned_params
 
         return fitStats;
