@@ -21,17 +21,25 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAmount;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Currency;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
+import org.kie.trustyai.explainability.utils.DataUtils;
 
 public class Dataframe {
 
@@ -1211,24 +1219,10 @@ public class Dataframe {
 
     public Dataframe std() {
 
-        // public Dataframe copy() {
-        // return new Dataframe(
-        // this.data.stream().map(ArrayList::new).collect(Collectors.toCollection(ArrayList::new)),
-        // metadata.copy(), internalData.copy());
-        // }
-
-        // Dataframe(List<List<Value>> data, Metadata metadata) {
-        // this.data = new ArrayList<>(data);
-        // this.metadata = metadata;
-        // this.internalData = new InternalData();
-        // }
-
         final int numCols = metadata.names.size();
 
         // Dataframe assumes this is list of columns each containing a list of rows
         final List<List<Value>> stdData = new ArrayList<>(numCols);
-
-        final StandardDeviation sd = new StandardDeviation();
 
         for (int i = 0; i < numCols; i++) {
 
@@ -1242,8 +1236,10 @@ public class Dataframe {
                 rowDoubles[j] = rowValue.asNumber();
             }
 
-            final Double stdDev = sd.evaluate(rowDoubles);
-            final Value stdValue = new Value(stdDev);
+            final double dataMean = DataUtils.getMean(rowDoubles);
+            final double dataStdDev = DataUtils.getStdDev(rowDoubles, dataMean);
+
+            final Value stdValue = new Value(dataStdDev);
 
             final List<Value> rows = new ArrayList<Value>(1);
             stdData.add(rows);
