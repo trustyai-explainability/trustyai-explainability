@@ -175,6 +175,9 @@ function local_teardown_wait(){
 function teardown_trustyai_test() {
   header "Cleaning up the TrustyAI test"
   oc project $MM_NAMESPACE  || eval "$FAILURE_HANDLING"
+  echo $(oc get pods)
+  echo $(oc get events | grep trustyai-service)
+  
   TRUSTY_ROUTE=http://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
   # delete all requests
