@@ -141,6 +141,9 @@ function teardown_trustyai_test() {
   header "Cleaning up the TrustyAI test"
 
   oc project $MM_NAMESPACE || eval "$FAILURE_HANDLING"
+  echo $(oc get pods)
+  echo $(oc get events)
+  
   TRUSTY_ROUTE=http://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
   if [ $REQUESTS_CREATED = true ]; then
