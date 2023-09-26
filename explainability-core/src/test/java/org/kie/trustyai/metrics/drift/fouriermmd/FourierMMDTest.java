@@ -2,8 +2,9 @@ package org.kie.trustyai.metrics.drift.fouriermmd;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,9 +23,9 @@ import org.kie.trustyai.explainability.model.Value;
 
 public class FourierMMDTest {
 
-    final String trainDataSetFileName = "/Users/jtray/git/trustyai-explainability/explainability-core/src/test/resources/train_ts_x.csv";
-    final String validDataSetFileName = "/Users/jtray/git/trustyai-explainability/explainability-core/src/test/resources/valid_ts_x.csv";
-    final String testDataSetFileName = "/Users/jtray/git/trustyai-explainability/explainability-core/src/test/resources/test_ts_x.csv";
+    final String trainDataSetFileName = "train_ts_x.csv";
+    final String validDataSetFileName = "valid_ts_x.csv";
+    final String testDataSetFileName = "test_ts_x.csv";
 
     Dataframe trainDF;
     Dataframe validDF;
@@ -41,7 +42,9 @@ public class FourierMMDTest {
 
     private Dataframe readCSV(String fileName) throws FileNotFoundException, IOException {
 
-        BufferedReader br = new BufferedReader(new FileReader(fileName));
+        final InputStream is = getClass().getClassLoader().getResourceAsStream(fileName);
+        final InputStreamReader isr = new InputStreamReader(is);
+        final BufferedReader br = new BufferedReader(isr);
 
         br.readLine(); // skip header line
 
