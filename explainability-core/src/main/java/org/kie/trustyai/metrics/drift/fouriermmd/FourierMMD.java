@@ -2,7 +2,9 @@ package org.kie.trustyai.metrics.drift.fouriermmd;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -15,34 +17,34 @@ import org.kie.trustyai.explainability.utils.DataUtils;
 public class FourierMMD {
 
     private NormalDistribution normalDistribution = new NormalDistribution();
-    // private Map<String, StatisticalSummaryValues> fitStats;
+    private Map<String, Object> fitStats;
 
-    private FourierMMDFitting fitStats = new FourierMMDFitting();
+    // private FourierMMDFitting fitStats = new FourierMMDFitting();
 
-    public FourierMMD() {
-    }
+    // public FourierMMD() {
+    // }
 
     public FourierMMD(Dataframe dfTrain, boolean deltaStat, int n_test, int n_window, double sig, int randomSeed,
             int n_mode) {
 
-        precompute(dfTrain, deltaStat, n_test, n_window, sig, randomSeed, n_mode);
+        FourierMMDFitting fourierMMDFitting = precompute(dfTrain, deltaStat, n_test, n_window, sig, randomSeed, n_mode);
+        fitStats = fourierMMDFitting.fitStats;
     }
 
     public FourierMMD(FourierMMDFitting fourierMMDFitting) {
 
-        fitStats = fourierMMDFitting;
+        fitStats = fourierMMDFitting.fitStats;
     }
 
     // def learn(self, data: pd.DataFrame):
-    public FourierMMDFitting precompute(Dataframe data, boolean deltaStat, int n_test, int n_window, double sig,
+    public static FourierMMDFitting precompute(Dataframe data, boolean deltaStat, int n_test, int n_window, double sig,
             int randomSeed, int n_mode) {
 
+        Map<String, Object> computedStats = new HashMap<>();
         // save randomSeed in fitStats for execute() use
-        fitStats.randomSeed = randomSeed;
-
-        fitStats.deltaStat = deltaStat;
-
-        fitStats.n_mode = n_mode;
+        computedStats.put("randomSeed", randomSeed);
+        computedStats.put("deltaStat", deltaStat);
+        computedStats.put("n_mode", n_mode);
 
         final Dataframe numericData = data.getNumericColumns();
 
@@ -56,7 +58,7 @@ public class FourierMMD {
         // x_in = data
 
         final Dataframe xIn;
-        if (fitStats.deltaStat) {
+        if (deltaStat) {
             xIn = delta(numericData, numColumns);
         } else {
             xIn = numericData;
@@ -80,7 +82,7 @@ public class FourierMMD {
         final int row2 = 0;
         sd.transformRow(row2, multiply);
         final double[] scaleArray = dfToArray(sd, numColumns);
-        fitStats.scale = scaleArray;
+        computedStats.put("scale", scaleArray);
 
         // # Random Fourier mode for reference data
         // # 1. generate random wavenumber and biases
@@ -88,11 +90,11 @@ public class FourierMMD {
 
         // Init the RNG to the same seed that will be used for the execute() method
         // waveNum (theta) and bias (b) must be the same for precompute() and execute()
-        final Random rg = new Random(fitStats.randomSeed);
+        final Random rg = new Random(randomSeed);
 
-        final double[][] waveNum = getWaveNum(numColumns, rg);
+        final double[][] waveNum = getWaveNum(numColumns, rg, n_mode);
 
-        final double[][] bias = getBias(rg);
+        final double[][] bias = getBias(rg, n_mode);
 
         // # 2. sample the data set
         // ndata = self.n_window * self.n_test
@@ -133,11 +135,11 @@ public class FourierMMD {
 
         // # 3. compute random Fourier mode
 
-        double[] aRef = randomFourierCoefficients(x1Scaled, waveNum, bias, ndata2);
+        double[] aRef = randomFourierCoefficients(x1Scaled, waveNum, bias, ndata2, n_mode);
 
         // self.learned_params["A_ref"] = a_ref
 
-        fitStats.aRef = aRef;
+        computedStats.put("aRef", aRef);
 
         // # 4. compute reference mmd score
         // sample_mmd = []
@@ -170,7 +172,7 @@ public class FourierMMD {
                 }
             }
 
-            final double[] aComp = randomFourierCoefficients(xWindowed, waveNum, bias, n_window);
+            final double[] aComp = randomFourierCoefficients(xWindowed, waveNum, bias, n_window, n_mode);
 
             // mmd = ((a_ref - a_comp) ** 2).sum()
 
@@ -205,15 +207,15 @@ public class FourierMMD {
             sampleMMD2NoNaN[i] = sampleMMD2.get(i);
         }
 
-        fitStats.mean_mmd = DataUtils.getMean(sampleMMD2NoNaN);
+        computedStats.put("mean_mmd", DataUtils.getMean(sampleMMD2NoNaN));
 
         // self.learned_params["std_mmd"] = np.nanstd(np.array(sample_mmd))
 
-        fitStats.std_mmd = DataUtils.getStdDev(sampleMMD2NoNaN, fitStats.mean_mmd);
+        computedStats.put("std_mmd", DataUtils.getStdDev(sampleMMD2NoNaN, (double) computedStats.get("mean_mmd")));
 
         // return self.learned_params
 
-        return fitStats;
+        return new FourierMMDFitting(computedStats);
     }
 
     public FourierMMDResult calculate(Dataframe data, double threshold, double gamma) {
@@ -233,7 +235,7 @@ public class FourierMMD {
         // x_in = data
 
         final Dataframe xIn;
-        if (fitStats.deltaStat) {
+        if ((boolean) fitStats.get("deltaStat")) {
             xIn = delta(numericData, numColumns);
         } else {
             xIn = numericData;
@@ -244,29 +246,29 @@ public class FourierMMD {
 
         // Important! Must use the same random seed to regenerate the waveNum and bias
         // values
-        final Random rg = new Random(fitStats.randomSeed);
+        final Random rg = new Random((int) fitStats.get("randomSeed"));
 
-        final double[][] waveNum = getWaveNum(numColumns, rg);
+        final double[][] waveNum = getWaveNum(numColumns, rg, (int) fitStats.get("n_mode"));
 
-        final double[][] bias = getBias(rg);
+        final double[][] bias = getBias(rg, (int) fitStats.get("n_mode"));
 
         final int numRows = xIn.getRowDimension();
 
         final List<List<Value>> xInRows = xIn.getRows();
 
         final double[][] x1 = getXScaled(numColumns, numRows, xInRows,
-                fitStats.scale);
+                (double[]) fitStats.get("scale"));
 
         // # 3. compute random Fourier mode
 
-        double[] aComp = randomFourierCoefficients(x1, waveNum, bias, numRows);
+        double[] aComp = randomFourierCoefficients(x1, waveNum, bias, numRows, (int) fitStats.get("n_mode"));
 
         // # 4. compute mmd score
         // mmd = ((self.learned_params["A_ref"] - a_comp) ** 2).sum()
 
         double mmd = 0.0;
-        for (int c = 0; c < fitStats.n_mode; c++) {
-            final double diff = fitStats.aRef[c] - aComp[c];
+        for (int c = 0; c < (int) fitStats.get("n_mode"); c++) {
+            final double diff = ((double[]) fitStats.get("aRef"))[c] - aComp[c];
             final double term = diff * diff;
             mmd += term;
         }
@@ -275,7 +277,7 @@ public class FourierMMD {
         // "std_mmd"
         // ]
 
-        final double driftScore = (mmd - fitStats.mean_mmd) / fitStats.std_mmd;
+        final double driftScore = (mmd - (double) fitStats.get("mean_mmd")) / (double) fitStats.get("std_mmd");
 
         // drift_score = np.max([0, drift_score])
 
@@ -315,7 +317,7 @@ public class FourierMMD {
         return retval;
     }
 
-    private Dataframe delta(Dataframe data, final int numColumns) {
+    private static Dataframe delta(Dataframe data, final int numColumns) {
         final Dataframe xIn;
         xIn = data.tail(data.getRowDimension() - 1);
         for (int r = 0; r < xIn.getRowDimension(); r++) {
@@ -332,23 +334,23 @@ public class FourierMMD {
         return xIn;
     }
 
-    private double[][] getWaveNum(final int numColumns, final Random rg) {
+    private static double[][] getWaveNum(final int numColumns, final Random rg, final int n_mode) {
         // wave_num = np.random.randn(x_in.shape[1], self.n_mode)
 
-        final double[][] waveNum = new double[numColumns][fitStats.n_mode];
+        final double[][] waveNum = new double[numColumns][n_mode];
         for (int i = 0; i < numColumns; i++) {
-            for (int j = 0; j < fitStats.n_mode; j++) {
+            for (int j = 0; j < n_mode; j++) {
                 waveNum[i][j] = rg.nextGaussian();
             }
         }
         return waveNum;
     }
 
-    private double[][] getBias(final Random rg) {
+    private static double[][] getBias(final Random rg, final int n_mode) {
         // bias = np.random.rand(1, self.n_mode) * 2.0 * np.pi
 
-        final double[][] bias = new double[1][fitStats.n_mode];
-        for (int i = 0; i < fitStats.n_mode; i++) {
+        final double[][] bias = new double[1][n_mode];
+        for (int i = 0; i < n_mode; i++) {
             bias[0][i] = rg.nextDouble() * 2.0 * Math.PI;
         }
         return bias;
@@ -356,16 +358,16 @@ public class FourierMMD {
 
     // def _random_fourier_coefficients(self, x, wave_num, bias, n_mode):
 
-    private double[] randomFourierCoefficients(double[][] x, double[][] waveNum, double[][] bias, int ndata) {
+    private static double[] randomFourierCoefficients(double[][] x, double[][] waveNum, double[][] bias, int ndata, final int n_mode) {
         // r_cos = np.cos(np.matmul(x, wave_num) + bias.repeat(x.shape[0], 0))
 
         final Array2DRowRealMatrix xMatrix = new Array2DRowRealMatrix(x);
         final Array2DRowRealMatrix waveNumMatrix = new Array2DRowRealMatrix(waveNum);
         final Array2DRowRealMatrix product = xMatrix.multiply(waveNumMatrix);
 
-        final double[][] rCos = new double[ndata][fitStats.n_mode];
+        final double[][] rCos = new double[ndata][n_mode];
         for (int r = 0; r < ndata; r++) {
-            for (int c = 0; c < fitStats.n_mode; c++) {
+            for (int c = 0; c < n_mode; c++) {
                 final double entry = product.getEntry(r, c);
                 final double newEntry = entry + bias[0][c];
                 rCos[r][c] = Math.cos(newEntry);
@@ -374,9 +376,9 @@ public class FourierMMD {
 
         // a_ref = r_cos.mean(0) * np.sqrt(2 / self.n_mode)
 
-        final double[] aRef = new double[fitStats.n_mode];
-        final double multiplier = Math.sqrt(2.0 / fitStats.n_mode);
-        for (int c = 0; c < fitStats.n_mode; c++) {
+        final double[] aRef = new double[n_mode];
+        final double multiplier = Math.sqrt(2.0 / n_mode);
+        for (int c = 0; c < n_mode; c++) {
             double sum = 0.0;
             for (int r = 0; r < ndata; r++) {
                 sum += rCos[r][c];
@@ -388,7 +390,7 @@ public class FourierMMD {
         return aRef;
     }
 
-    private double[] dfToArray(Dataframe df, final int numColumns) {
+    private static double[] dfToArray(Dataframe df, final int numColumns) {
         // x1 = x1 / self.learned_params["scale"].repeat(x1.shape[0], 0)
 
         final List<Value> scale = df.getRow(0);
@@ -401,7 +403,7 @@ public class FourierMMD {
         return scaleArray;
     }
 
-    private double[][] getXScaled(final int numColumns, final int ndata2, final List<List<Value>> x1,
+    private static double[][] getXScaled(final int numColumns, final int ndata2, final List<List<Value>> x1,
             final double[] scaleArray) {
         final double[][] x1Scaled = new double[ndata2][numColumns];
         for (int row = 0; row < ndata2; row++) {
