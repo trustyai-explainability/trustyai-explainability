@@ -126,16 +126,14 @@ class FourierMMDEndpointTest {
     @BeforeEach
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
-
+        // Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
         Dataframe dataframe = readCSV(trainDataSetFileName);
 
         HashMap<String, List<List<Integer>>> tagging = new HashMap<>();
         tagging.put(TRAINING_TAG, List.of(List.of(0, N_SAMPLES)));
         dataframe.tagDataPoints(tagging);
-
         Dataframe validDF = readCSV(validDataSetFileName);
         dataframe.addPredictions(validDF.asPredictions());
-
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }
@@ -160,6 +158,7 @@ class FourierMMDEndpointTest {
                 .extract()
                 .body().as(BaseMetricResponse.class);
 
+        // System.out.println("pvalue" + response.getNamedValues().get("pValue"));
         assertEquals(0, response.getNamedValues().get("pValue"));
     }
 
