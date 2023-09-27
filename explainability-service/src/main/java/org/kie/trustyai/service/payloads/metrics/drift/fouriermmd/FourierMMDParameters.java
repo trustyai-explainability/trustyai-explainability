@@ -1,7 +1,5 @@
 package org.kie.trustyai.service.payloads.metrics.drift.fouriermmd;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Parameters for Fourier MMD Drift.
  */
@@ -12,7 +10,7 @@ public class FourierMMDParameters {
     private int nMode = 512;
     private int randomSeed = 22;
     private double sig = 10.0;
-    private boolean deltaStat = True;
+    private boolean deltaStat = true;
 
     public int getnWindow() {
         return nWindow;
@@ -46,7 +44,7 @@ public class FourierMMDParameters {
         this.randomSeed = randomSeed;
     }
 
-    public int getSig() {
+    public double getSig() {
         return sig;
     }
 
@@ -54,20 +52,12 @@ public class FourierMMDParameters {
         this.sig = sig;
     }
 
-    public int getDeltaStat() {
+    public boolean getDeltaStat() {
         return deltaStat;
     }
 
     public void setDeltaStat() {
         this.deltaStat = deltaStat;
-    }
-
-    public int getGamma() {
-        return gamma;
-    }
-
-    public void setGamma() {
-        this.gamma = gamma;
     }
 
 }

@@ -17,7 +17,9 @@ import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMDResult;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
+import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDParameters;
 import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
@@ -54,7 +56,7 @@ public class FourierMMDEndpoint extends DriftEndpoint {
 
     // a specific definition for this value of this metric in this specific context
     @Override
-    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest FourierMMDMetricRequest request) {
+    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest DriftMetricRequest request) {
         StringBuilder out = new StringBuilder(getGeneralDefinition());
         out.append(System.getProperty("line.separator"));
 
@@ -91,19 +93,19 @@ public class FourierMMDEndpoint extends DriftEndpoint {
             Dataframe fitting = super.dataSource.get()
                     .getDataframe(request.getModelId())
                     .filterRowsByTagEquals(fmmRequest.getReferenceTag());
-            
+
             // get parameters
             final FourierMMDParameters parameters = fmmRequest.getParameters();
             final int randomSeed = new Random().nextInt();
 
             fmf = FourierMMD.precompute(fitting,
-                parameters.getnWindow(),
-                parameters.getnTest(),
-                parameters.getnMode(),
-                randomSeed,
-                parameters.getSig(),
-                parameters.getDeltaStat(),);
-            fmmRequest.setFitting(fmf.getFitStats());
+                    parameters.getDeltaStat(),
+                    parameters.getnTest(),
+                    parameters.getnWindow(),
+                    parameters.getSig(),
+                    randomSeed,
+                    parameters.getnMode());
+            fmmRequest.setFitting(fmf);
         } else {
             LOG.debug("Using previously found fouriermmd fitting in request for model=" + request.getModelId());
             fmf = new FourierMMDFitting(fmmRequest.getFitting());
