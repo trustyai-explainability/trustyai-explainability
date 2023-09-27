@@ -32,12 +32,16 @@ public class ApproxKSTest {
         trainGKSketches = ksFitting.getfitSketches();
 
     }
+    public ApproxKSTest(double eps) {
+        this.eps = eps;
+    }
     // fit if GKSketch is already known
-    public ApproxKSTest(ApproxKSFitting approxKSFitting) {
+    public ApproxKSTest(ApproxKSFitting approxKSFitting, double eps) {
         trainGKSketches = approxKSFitting.getfitSketches();
+        this.eps = eps;
     }
 
-    public ApproxKSFitting  precompute(Dataframe dfTrain) { 
+    public ApproxKSFitting precompute(Dataframe dfTrain) { 
         List<Type> types = dfTrain.getColumnTypes();
         Map<String, GKSketch> sketches = new HashMap<String, GKSketch>();
 
