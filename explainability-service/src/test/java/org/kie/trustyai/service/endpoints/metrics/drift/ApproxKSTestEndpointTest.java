@@ -13,14 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.metrics.drift.ks_test.ApproxKSFitting;
 import org.kie.trustyai.metrics.drift.ks_test.ApproxKSTest;
-import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
-import org.kie.trustyai.metrics.drift.meanshift.MeanshiftFitting;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
-import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.kstest.ApproxKSTestMetricRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
