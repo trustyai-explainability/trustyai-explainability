@@ -31,7 +31,7 @@ public class FourierMMDResult {
     public String toString() {
         StringBuffer buf = new StringBuffer();
 
-        buf.append("DriftResult{\n");
+        buf.append("FourierMMDResult{\n");
         buf.append("drifted = " + drifted + "\n");
         buf.append("pValue = " + pValue + "\n");
         buf.append("relativeMMDScore = " + relativeMMDScore + "\n");

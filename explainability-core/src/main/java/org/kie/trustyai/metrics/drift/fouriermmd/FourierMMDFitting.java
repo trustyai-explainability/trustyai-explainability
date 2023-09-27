@@ -2,10 +2,25 @@ package org.kie.trustyai.metrics.drift.fouriermmd;
 
 import java.util.Arrays;
 
-import org.kie.trustyai.explainability.model.Dataframe;
-
 public class FourierMMDFitting {
-    public Dataframe scale;
+    // java.util.Map<String, StatisticalSummaryValues> fitStats;
+
+    // public FourierMMDFitting(Map<String, StatisticalSummaryValues> fitStats) {
+    //     this.fitStats = fitStats;
+    // }
+
+    // public Map<String, StatisticalSummaryValues> getFitStats() {
+    //     return fitStats;
+    // }
+
+    // @Override
+    // public String toString() {
+    //     return "MeanshiftFitting{" +
+    //             "fitStats=" + fitStats +
+    //             '}';
+    // }
+
+    public double[] scale;
     public double[] aRef;
     public double mean_mmd;
     public double std_mmd;
@@ -17,9 +32,9 @@ public class FourierMMDFitting {
 
     }
 
-    public FourierMMDFitting(Dataframe scale, double[] aRef, double mean_mmd, double std_mmd, int random_seed,
+    public FourierMMDFitting(double[] scale, double[] aRef, double mean_mmd, double std_mmd, int random_seed,
             boolean deltaStat, int n_mode) {
-        this.scale = scale.copy();
+        this.scale = Arrays.copyOf(scale, scale.length);
         this.aRef = Arrays.copyOf(aRef, aRef.length);
         this.mean_mmd = mean_mmd;
         this.std_mmd = std_mmd;

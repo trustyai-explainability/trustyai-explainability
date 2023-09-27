@@ -15,6 +15,7 @@ import org.kie.trustyai.explainability.utils.DataUtils;
 public class FourierMMD {
 
     private NormalDistribution normalDistribution = new NormalDistribution();
+    // private Map<String, StatisticalSummaryValues> fitStats;
 
     private FourierMMDFitting fitStats = new FourierMMDFitting();
 
@@ -72,12 +73,14 @@ public class FourierMMD {
         // # learn normalization scale
         // self.learned_params["scale"] = np.expand_dims(x_in.std(0) * self.sig, 0)
 
-        fitStats.scale = xIn.std();
+        final Dataframe sd = xIn.std();
 
         final Function<Value, Value> multiply = (Value v) -> new Value(v.asNumber() * sig);
 
         final int row2 = 0;
-        fitStats.scale.transformRow(row2, multiply);
+        sd.transformRow(row2, multiply);
+        final double[] scaleArray = dfToArray(sd, numColumns);
+        fitStats.scale = scaleArray;
 
         // # Random Fourier mode for reference data
         // # 1. generate random wavenumber and biases
@@ -126,7 +129,7 @@ public class FourierMMD {
             x1.add(xIn.getRow(rand[i]));
         }
 
-        final double[][] x1Scaled = getXScaled(numColumns, ndata2, x1, fitStats.scale);
+        final double[][] x1Scaled = getXScaled(numColumns, ndata2, x1, scaleArray);
 
         // # 3. compute random Fourier mode
 
@@ -161,12 +164,9 @@ public class FourierMMD {
 
             // x1 = x1 / self.learned_params["scale"].repeat(x1.shape[0], 0)
 
-            final List<Value> scaleRow = fitStats.scale.getRow(0);
             for (int r = 0; r < n_window; r++) {
                 for (int c = 0; c < numColumns; c++) {
-                    final Value scaleValue = scaleRow.get(c);
-
-                    xWindowed[r][c] /= scaleValue.asNumber();
+                    xWindowed[r][c] /= scaleArray[c];
                 }
             }
 
@@ -388,22 +388,31 @@ public class FourierMMD {
         return aRef;
     }
 
-    private double[][] getXScaled(final int numColumns, final int ndata2, final List<List<Value>> x1,
-            final Dataframe scale) {
+    private double[] dfToArray(Dataframe df, final int numColumns) {
+        // x1 = x1 / self.learned_params["scale"].repeat(x1.shape[0], 0)
 
+        final List<Value> scale = df.getRow(0);
+
+        final double[] scaleArray = new double[numColumns];
+
+        for (int i = 0; i < numColumns; i++) {
+            scaleArray[i] = scale.get(i).asNumber();
+        }
+        return scaleArray;
+    }
+
+    private double[][] getXScaled(final int numColumns, final int ndata2, final List<List<Value>> x1,
+            final double[] scaleArray) {
         final double[][] x1Scaled = new double[ndata2][numColumns];
-        final List<Value> scaleRow = scale.getRow(0);
         for (int row = 0; row < ndata2; row++) {
             final List<Value> rowValues = x1.get(row);
             for (int col = 0; col < numColumns; col++) {
                 final Value val = rowValues.get(col);
                 final double colDouble = val.asNumber();
-                final Value scaleValue = scaleRow.get(col);
-                final double scaledColDouble = colDouble / scaleValue.asNumber();
+                final double scaledColDouble = colDouble / scaleArray[col];
                 x1Scaled[row][col] = scaledColDouble;
             }
         }
-
         return x1Scaled;
     }
 
