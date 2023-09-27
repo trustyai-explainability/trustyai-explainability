@@ -47,7 +47,7 @@ function deploy_model() {
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/modelmesh/service_account.yaml -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
     oc label namespace $MM_NAMESPACE "modelmesh-enabled=true" --overwrite=true || echo "Failed to apply modelmesh-enabled label."
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/trustyai/secret.yaml -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
-    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/trustyai/odh-mlserver-0.x.yaml  -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
+    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/trustyai/odh-mlserver-1.x.yaml  -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
 #    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/trustyai/model.yaml  -n ${MM_NAMESPACE}"
 
     SECRETKEY=$(openssl rand -hex 32)
