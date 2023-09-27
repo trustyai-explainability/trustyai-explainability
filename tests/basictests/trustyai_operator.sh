@@ -54,7 +54,7 @@ function deploy_model() {
     sed -i "s/<secretkey>/$SECRETKEY/g" ${RESOURCEDIR}/trustyai/sample-minio.yaml || eval "$FAILURE_HANDLING"
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/trustyai/sample-minio.yaml -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
     #os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/trustyai/openvino-serving-runtime.yaml -n ${MM_NAMESPACE}"
-    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/models/openvino-inference-service.yaml -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
+    os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/models/minio_sklearn_mlserver_model.yaml -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/trustyai/trustyai_crd.yaml -n ${MM_NAMESPACE}" || eval "$FAILURE_HANDLING"
 }
 
@@ -72,7 +72,7 @@ function check_mm_resources() {
   header "Checking that ModelMesh resources have spun up"
   oc project $MM_NAMESPACE || eval "$FAILURE_HANDLING"
 
-  os::cmd::try_until_text "oc get pod | grep modelmesh-serving" "5/5" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc get pod | grep modelmesh-serving-mlserver" "5/5" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get route example-sklearn-isvc" "example-sklearn-isvc" $odhdefaulttimeout $odhdefaultinterval
   INFER_ROUTE=$(oc get route example-sklearn-isvc --template={{.spec.host}}{{.spec.path}}) || eval "$FAILURE_HANDLING"
   token=$(oc create token user-one -n ${MM_NAMESPACE}) || eval "$FAILURE_HANDLING"
@@ -114,7 +114,7 @@ function schedule_and_check_request(){
         \"modelId\": \"example-sklearn-isvc\",
         \"protectedAttribute\": \"predict-0\",
         \"favorableOutcome\": 0,
-        \"outcomeName\": \"predict\",
+        \"outcomeName\": \"predict-0\",
         \"privilegedAttribute\": 0.0,
         \"unprivilegedAttribute\": 1.0
     }'" "requestId" || eval "$FAILURE_HANDLING"
