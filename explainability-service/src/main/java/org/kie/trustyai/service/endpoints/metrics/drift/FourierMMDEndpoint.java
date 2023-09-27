@@ -60,21 +60,16 @@ public class FourierMMDEndpoint extends DriftEndpoint {
         StringBuilder out = new StringBuilder(getGeneralDefinition());
         out.append(System.getProperty("line.separator"));
 
-        int maxColLen = metricValues.getNamedValues().keySet().stream().mapToInt(s -> s.length()).max().orElse(0);
-        String fmt = String.format("%%%ds", maxColLen);
-
-        for (Map.Entry<String, Double> entry : metricValues.getNamedValues().entrySet()) {
-            boolean reject = entry.getValue() <= request.getThresholdDelta();
-            out.append(String.format("  - Column %s has p=%f probability of coming from the training distribution.",
-                    String.format(fmt, entry.getKey()),
-                    entry.getValue()));
-            if (reject) {
-                out.append(String.format(" p <= %f -> [SIGNIFICANT DRIFT]", request.getThresholdDelta()));
-            } else {
-                out.append(String.format(" p >  %f", request.getThresholdDelta()));
-            }
-            out.append(System.getProperty("line.separator"));
+        Map<String, Double> namedValues = metricValues.getNamedValues();
+        boolean isDrifted = namedValues.get("pValue") <= request.getThresholdDelta();
+        out.append(String.format("  - Test data has p=%f probability of being drifted from the training distribution.",
+                namedValues.get("pValue")));
+        if (isDrifted) {
+            out.append(String.format(" p > %f -> [SIGNIFICANT DRIFT]", request.getThresholdDelta()));
+        } else {
+            out.append(String.format(" p <=  %f", request.getThresholdDelta()));
         }
+
         return out.toString();
 
     }
