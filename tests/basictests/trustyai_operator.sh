@@ -166,7 +166,7 @@ function teardown_trustyai_test() {
   fi
 
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/secret.yaml" || eval "$FAILURE_HANDLING"
-  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/odh-mlserver-0.x.yaml" || eval "$FAILURE_HANDLING"
+  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/odh-mlserver-1.x.yaml" || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_crd.yaml"  || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete project $MM_NAMESPACE" || eval "$FAILURE_HANDLING"
 
