@@ -19,6 +19,7 @@ import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDParameters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -65,7 +66,7 @@ class FourierMMDEndpointTest {
     }
 
     @Test
-    void meanshiftNonPreFit() {
+    void fourierMMDNonPreFit() {
         FourierMMDMetricRequest payload = new FourierMMDMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
@@ -79,20 +80,25 @@ class FourierMMDEndpointTest {
                 .extract()
                 .body().as(BaseMetricResponse.class);
 
-        assertEquals(0, response.getNamedValues().get("age"));
-        assertEquals(.570004, response.getNamedValues().get("race"), 1e-5);
-        assertEquals(1, response.getNamedValues().get("income"));
+        assertEquals(0, response.getNamedValues().get("pValue"));
     }
 
     @Test
     void fourierMMDPreFit() {
         Dataframe dfTrain = datasource.get().getDataframe(MODEL_ID).filterRowsByTagEquals(TRAINING_TAG);
-        FourierMMDFitting msf = FourierMMD.precompute(dfTrain);
+        FourierMMDParameters parameters = new FourierMMDParameters();
+        FourierMMDFitting fmf = FourierMMD.precompute(dfTrain,
+                parameters.getDeltaStat(),
+                parameters.getnTest(),
+                parameters.getnWindow(),
+                parameters.getSig(),
+                parameters.getRandomSeed(),
+                parameters.getnMode());
 
         FourierMMDMetricRequest payload = new FourierMMDMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
-        payload.setFitting(msf.getFitStats());
+        payload.setFitting(fmf.getFitStats());
 
         BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
@@ -104,9 +110,7 @@ class FourierMMDEndpointTest {
                 .extract()
                 .body().as(BaseMetricResponse.class);
 
-        assertEquals(0, response.getNamedValues().get("age"));
-        assertEquals(.570004, response.getNamedValues().get("race"), 1e-5);
-        assertEquals(1, response.getNamedValues().get("income"));
+        assertEquals(0, response.getNamedValues().get("pValue"));
     }
 
     @Test

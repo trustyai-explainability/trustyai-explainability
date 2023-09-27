@@ -105,7 +105,7 @@ public class FourierMMDEndpoint extends DriftEndpoint {
                     parameters.getSig(),
                     randomSeed,
                     parameters.getnMode());
-            fmmRequest.setFitting(fmf);
+            fmmRequest.setFitting(fmf.getFitStats());
         } else {
             LOG.debug("Using previously found fouriermmd fitting in request for model=" + request.getModelId());
             fmf = new FourierMMDFitting(fmmRequest.getFitting());
@@ -115,12 +115,11 @@ public class FourierMMDEndpoint extends DriftEndpoint {
 
         // get data that does _not_ have the provided reference tag: test data
         Dataframe filtered = dataframe.filterRowsByTagNotEquals(((FourierMMDMetricRequest) request).getReferenceTag());
-        Map<String, FourierMMDResult> result = fmmd.calculate(filtered, fmmRequest.getThresholdDelta(), fmmRequest.getGamma());
+        FourierMMDResult result = fmmd.calculate(filtered, fmmRequest.getThresholdDelta(), fmmRequest.getGamma());
 
         Map<String, Double> namedValues = new HashMap<>();
-        for (Map.Entry<String, FourierMMDResult> resultEntry : result.entrySet()) {
-            namedValues.put(resultEntry.getKey(), resultEntry.getValue().getpValue());
-        }
+        namedValues.put("pValue", result.getpValue());
+
         return new MetricValueCarrier(namedValues);
     }
 }
