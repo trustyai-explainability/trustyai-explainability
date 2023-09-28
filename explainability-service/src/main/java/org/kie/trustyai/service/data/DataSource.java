@@ -198,6 +198,10 @@ public class DataSource {
 
     }
 
+    public void verifyKnownModels() {
+        knownModels.removeIf(modelID -> !hasMetadata(modelID));
+    }
+
     public boolean hasMetadata(String modelId) {
         return storage.get().fileExists(modelId + "-" + METADATA_FILENAME);
     }
