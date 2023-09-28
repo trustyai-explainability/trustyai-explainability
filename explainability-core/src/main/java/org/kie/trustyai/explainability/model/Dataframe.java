@@ -978,7 +978,7 @@ public class Dataframe {
 
     public Dataframe filterRowsById(String id, boolean negate, int size) {
         List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> !negate == internalData.ids.get(rowNumber)
-                        .equals(id)).distinct().limit(size).boxed().collect(Collectors.toList());
+                .equals(id)).distinct().limit(size).boxed().collect(Collectors.toList());
         return filterByRowIndex(rowIndexes);
     }
 
