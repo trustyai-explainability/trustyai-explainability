@@ -633,7 +633,7 @@ class DataframeTest {
     @Test
     void testDataFrameFromPredictionAndMetadata() {
         Prediction prediction = createTestPrediction();
-        PredictionMetadata metadata = new PredictionMetadata("123", LocalDateTime.now(), DatapointSource.UNLABELED);
+        PredictionMetadata metadata = new PredictionMetadata("123", LocalDateTime.now());
         Dataframe dataframe = Dataframe.createFrom(prediction, metadata);
         assertThat(dataframe).isNotNull();
         assertThat(dataframe.getRowDimension()).isEqualTo(1);
@@ -649,7 +649,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), DatapointSource.SYNTHETIC));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), Dataframe.InternalTags.SYNTHETIC.get()));
             idx++;
         }
         df.addPredictions(predictions, metadata);
@@ -666,7 +666,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), DatapointSource.SYNTHETIC));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), Dataframe.InternalTags.SYNTHETIC.get()));
             idx++;
         }
         df.addPredictions(predictions, metadata);
@@ -686,7 +686,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), DatapointSource.UNLABELED));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now()));
             idx++;
         }
         df.addPredictions(predictions, metadata);
@@ -704,7 +704,7 @@ class DataframeTest {
         List<PredictionMetadata> metadata = new ArrayList<>();
         int idx = 0;
         for (Prediction ignored : predictions) {
-            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now(), DatapointSource.UNLABELED));
+            metadata.add(new PredictionMetadata(String.valueOf(idx), LocalDateTime.now()));
             idx++;
         }
         df.addPredictions(predictions, metadata);

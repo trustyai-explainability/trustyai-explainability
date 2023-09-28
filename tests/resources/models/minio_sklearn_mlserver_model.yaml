@@ -22,7 +22,7 @@ spec:
     model:
       modelFormat:
         name: sklearn
-      runtime: mlserver-0.x
+      runtime: mlserver-1.x
       storage:
         key: aws-connection-minio-data-connection
         path: sklearn/model.joblib

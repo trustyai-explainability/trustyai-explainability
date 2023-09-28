@@ -19,7 +19,7 @@ import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
-import org.kie.trustyai.service.data.utils.InferencePayloadReconciler;
+import org.kie.trustyai.service.data.utils.ModelMeshInferencePayloadReconciler;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
@@ -32,7 +32,7 @@ public class ConsumerEndpoint {
     Instance<DataSource> dataSource;
 
     @Inject
-    InferencePayloadReconciler reconciler;
+    ModelMeshInferencePayloadReconciler reconciler;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
