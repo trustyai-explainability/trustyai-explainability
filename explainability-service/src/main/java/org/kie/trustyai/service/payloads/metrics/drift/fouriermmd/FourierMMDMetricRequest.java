@@ -3,10 +3,12 @@ package org.kie.trustyai.service.payloads.metrics.drift.fouriermmd;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kie.trustyai.service.payloads.data.statistics.FourierMMDValuesDeserializer;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Request for Fourier MMD Drift.
@@ -27,6 +29,8 @@ public class FourierMMDMetricRequest extends BaseMetricRequest {
 
     private FourierMMDParameters parameters = new FourierMMDParameters();
     private double gamma = 2.0;
+
+    @JsonDeserialize(using = FourierMMDValuesDeserializer.class)
     private Map<String, Object> fitting;
 
     public FourierMMDMetricRequest() {

@@ -104,6 +104,9 @@ public class FourierMMD {
         // ndata = np.min([ndata, x_in.shape[0]])
 
         final int ndata2 = Math.min(ndata, numRows);
+        if (ndata2 <= n_window) {
+            throw new IllegalArgumentException("n_window must be less than " + ndata2);
+        }
 
         // idx = np.random.choice(x_in.shape[0], ndata, replace=False)
 

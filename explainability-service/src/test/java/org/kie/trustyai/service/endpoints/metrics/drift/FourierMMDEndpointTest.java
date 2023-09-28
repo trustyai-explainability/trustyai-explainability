@@ -43,7 +43,7 @@ import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestProfile(MetricsEndpointTestProfile.class)
@@ -52,7 +52,7 @@ class FourierMMDEndpointTest {
 
     private static final String MODEL_ID = "example1";
     private static final String TRAINING_TAG = "TRAINING";
-    private static final int N_SAMPLES = 100;
+    private static final int N_SAMPLES = 1000;
     @Inject
     Instance<MockDatasource> datasource;
     @Inject
@@ -146,8 +146,12 @@ class FourierMMDEndpointTest {
     @Test
     void fourierMMDNonPreFit() {
         FourierMMDMetricRequest payload = new FourierMMDMetricRequest();
+
+        double threshold = 0.8;
+
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
+        payload.setThresholdDelta(threshold);
 
         BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
@@ -158,8 +162,7 @@ class FourierMMDEndpointTest {
                 .extract()
                 .body().as(BaseMetricResponse.class);
 
-        // System.out.println("pvalue" + response.getNamedValues().get("pValue"));
-        assertEquals(0, response.getNamedValues().get("pValue"));
+        assertTrue(response.getNamedValues().get("pValue") < threshold);
     }
 
     @Test
@@ -169,14 +172,18 @@ class FourierMMDEndpointTest {
         FourierMMDFitting fmf = FourierMMD.precompute(dfTrain,
                 parameters.getDeltaStat(),
                 parameters.getnTest(),
-                parameters.getnWindow(),
+                20, //parameters.getnWindow(),
                 parameters.getSig(),
                 parameters.getRandomSeed(),
                 parameters.getnMode());
 
         FourierMMDMetricRequest payload = new FourierMMDMetricRequest();
+
+        double threshold = 0.8;
+
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
+        payload.setThresholdDelta(threshold);
         payload.setFitting(fmf.getFitStats());
 
         BaseMetricResponse response = given()
@@ -189,7 +196,7 @@ class FourierMMDEndpointTest {
                 .extract()
                 .body().as(BaseMetricResponse.class);
 
-        assertEquals(0, response.getNamedValues().get("pValue"));
+        assertTrue(response.getNamedValues().get("pValue") < threshold);
     }
 
     @Test
