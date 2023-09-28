@@ -973,8 +973,12 @@ public class Dataframe {
     }
 
     public Dataframe filterRowsById(String id) {
-        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.ids.get(rowNumber).equals(id))
-                .boxed().collect(Collectors.toList());
+        return filterRowsById(id, false, 1);
+    }
+
+    public Dataframe filterRowsById(String id, boolean negate, int size) {
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> !negate == internalData.ids.get(rowNumber)
+                        .equals(id)).distinct().limit(size).boxed().collect(Collectors.toList());
         return filterByRowIndex(rowIndexes);
     }
 

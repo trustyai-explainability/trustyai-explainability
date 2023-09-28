@@ -711,5 +711,11 @@ class DataframeTest {
         assertThat(df.getRows().size()).isEqualTo(11);
         Dataframe filteredById = df.filterRowsById("5");
         assertThat(filteredById.getRowDimension()).isEqualTo(1);
+        Dataframe filteredById2 = df.filterRowsById("5", false, 1);
+        assertThat(filteredById2.getRowDimension()).isEqualTo(1);
+        Dataframe filteredByIdNegated = df.filterRowsById("5", true, 9);
+        assertThat(filteredByIdNegated.getRowDimension()).isEqualTo(9);
+        Dataframe filteredByIdNegated2 = df.filterRowsById("5", true, 5);
+        assertThat(filteredByIdNegated2.getRowDimension()).isEqualTo(5);
     }
 }
