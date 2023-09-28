@@ -85,7 +85,6 @@ public class MeanshiftEndpoint extends DriftEndpoint<MeanshiftMetricRequest> {
         @ValidDriftMetricRequest
         MeanshiftMetricRequest request = (MeanshiftMetricRequest) bmRequest;
 
-
         MeanshiftFitting msf;
         if (request.getFitting() == null) {
             LOG.debug("Fitting a meanshift drift request for model=" + request.getModelId());

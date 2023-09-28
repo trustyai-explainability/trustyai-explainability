@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 

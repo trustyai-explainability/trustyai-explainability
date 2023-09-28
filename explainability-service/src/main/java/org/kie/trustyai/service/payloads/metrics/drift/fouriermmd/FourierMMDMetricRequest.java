@@ -4,12 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kie.trustyai.service.payloads.data.statistics.FourierMMDValuesDeserializer;
-import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 
 /**
  * Request for Fourier MMD Drift.
@@ -39,7 +38,6 @@ public class FourierMMDMetricRequest extends DriftMetricRequest {
         return parameters;
     }
 
-
     public Map<String, Object> getFitting() {
         return fitting;
     }
@@ -60,7 +58,6 @@ public class FourierMMDMetricRequest extends DriftMetricRequest {
     public void setGamma() {
         this.gamma = gamma;
     }
-
 
     @Override
     public Map<String, String> retrieveTags() {

@@ -3,13 +3,10 @@ package org.kie.trustyai.service.endpoints.metrics.drift;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -21,20 +18,15 @@ import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMD;
 import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMDFitting;
 import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMDResult;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
-import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
-import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
-import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDParameters;
 import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
+import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
 
 import io.quarkus.cache.CacheResult;
-import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
 
 @ApplicationScoped
 @Tag(name = "FourierMMD Drift Endpoint", description = "Meanshift measures the distance between distributions as " +
@@ -81,10 +73,9 @@ public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
 
     }
 
-
     // this function should provide the functionality of actually calculating a specific metric value for a given request
     @CacheResult(cacheName = "metrics-calculator-fouriermmd", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public MetricValueCarrier calculate(Dataframe dataframe,  @ValidReconciledMetricRequest BaseMetricRequest bmRequest) {
+    public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest bmRequest) {
         @ValidDriftMetricRequest
         FourierMMDMetricRequest request = (FourierMMDMetricRequest) bmRequest;
 

@@ -4,16 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
-import org.kie.trustyai.service.payloads.data.statistics.StatisticalSummaryValuesDeserializer;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -30,7 +27,6 @@ public abstract class DriftMetricRequest extends BaseMetricRequest {
     private Double thresholdDelta;
     private String referenceTag;
     private Set<String> fitColumns;
-
 
     protected DriftMetricRequest() {
         // Public default no-argument constructor

@@ -1,13 +1,14 @@
 package org.kie.trustyai.service.payloads.metrics.drift.meanshift;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.Map;
+
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.kie.trustyai.service.payloads.data.statistics.StatisticalSummaryValuesDeserializer;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
