@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.kie.trustyai.service.payloads.data.statistics.StatisticalSummaryValuesDeserializer;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.kstest.ApproxKSTestMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -17,7 +18,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
         property = "@type",
         defaultImpl = DriftMetricRequest.class)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = DriftMetricRequest.class, name = "DriftMetricRequest")
+        @JsonSubTypes.Type(value = DriftMetricRequest.class, name = "DriftMetricRequest"),
+        @JsonSubTypes.Type(value = ApproxKSTestMetricRequest.class, name = "ApproxKSTestMetricRequest")
 })
 public class DriftMetricRequest extends BaseMetricRequest {
     private Double thresholdDelta;

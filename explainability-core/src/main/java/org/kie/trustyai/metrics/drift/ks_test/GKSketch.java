@@ -15,11 +15,18 @@ public class GKSketch {
         # delta : r_max - r_min; // covered range
     */
     private List<Triple<Double, Integer, Integer>> summary;
+
     // track max and min values of sketch
     private double xmin;
     private double xmax;
     private int numx; //number of values we have seen so far
 
+    public GKSketch(double epsilon, double xmin, double xmax, int d) {
+        this.epsilon = epsilon;
+        this.xmin = xmin;
+        this.xmax = xmax;
+        this.numx = d;
+    }
     public GKSketch(double epsilon) {
         this.epsilon = epsilon;
         this.summary = new ArrayList<Triple<Double, Integer,Integer>>();
@@ -131,10 +138,10 @@ public class GKSketch {
         for(int i=1; i<summary.size(); i++) 
         {
             j=i-1;
-            Triple tj = summary.get(j);
+            Triple<Double, Integer, Integer> tj = summary.get(j);
             double vj = (double) tj.getLeft();
             if(x >= vj) {
-                Triple ti = summary.get(i);
+                Triple<Double, Integer, Integer> ti = summary.get(i);
                 double vi = (double) ti.getLeft();
                 if(x < vi) {
                     newI = i;
@@ -230,6 +237,10 @@ public class GKSketch {
 
     public List<Triple<Double, Integer, Integer>> getSummary() {
         return summary;
+    }
+
+    public void setSummary(List<Triple<Double, Integer, Integer>> summary) {
+        this.summary = summary;
     }
 
     public List<Double> approxQuantiles(double[] probs) {

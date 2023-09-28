@@ -80,7 +80,7 @@ public class ApproxKSTestEndpoint extends DriftEndpoint {
         ApproxKSTestMetricRequest aksRequest = (ApproxKSTestMetricRequest) request;
         ApproxKSFitting aksFitting;
         ApproxKSTest approxKS;
-        if (aksRequest.getFitting() == null) {
+        if (aksRequest.getSketchFitting() == null) {
             LOG.debug("Fitting a approxKSTest drift request for model=" + request.getModelId());
             // get the data that matches the provided reference tag: calibration data
             Dataframe fitting = super.dataSource.get()

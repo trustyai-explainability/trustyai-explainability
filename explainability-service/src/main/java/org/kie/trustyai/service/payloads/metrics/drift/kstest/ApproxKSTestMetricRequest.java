@@ -2,13 +2,21 @@ package org.kie.trustyai.service.payloads.metrics.drift.kstest;
 
 import java.util.Map;
 import org.kie.trustyai.metrics.drift.ks_test.GKSketch;
+import org.kie.trustyai.service.payloads.data.statistics.GKSketchesDeserializer;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /*
  * Request for ApproxKSTest Drift
+ * 
  */
 public class ApproxKSTestMetricRequest extends DriftMetricRequest {
     private double epsilon = 0.001d; // approximation level in GKSketch
+
+    @JsonDeserialize(using = GKSketchesDeserializer.class)
     private Map<String, GKSketch> sketchFitting; // training data fitting 
 
     public ApproxKSTestMetricRequest() {
