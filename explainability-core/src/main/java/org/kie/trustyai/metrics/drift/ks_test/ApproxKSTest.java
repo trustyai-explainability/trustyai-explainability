@@ -28,7 +28,7 @@ public class ApproxKSTest {
             Dataframe dfTrain) {
         this.eps = eps;
         //precompute GKSketch of training data
-        ApproxKSFitting ksFitting =  precompute(dfTrain);
+        ApproxKSFitting ksFitting =  precompute(dfTrain, eps);
         trainGKSketches = ksFitting.getfitSketches();
 
     }
@@ -41,7 +41,7 @@ public class ApproxKSTest {
         this.eps = eps;
     }
 
-    public ApproxKSFitting precompute(Dataframe dfTrain) { 
+    public static ApproxKSFitting precompute(Dataframe dfTrain, double eps) { 
         List<Type> types = dfTrain.getColumnTypes();
         Map<String, GKSketch> sketches = new HashMap<String, GKSketch>();
 

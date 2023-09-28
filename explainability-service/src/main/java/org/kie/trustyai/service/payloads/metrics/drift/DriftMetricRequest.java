@@ -8,6 +8,7 @@ import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.kstest.ApproxKSTestMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.kstest.KSTestMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
         @JsonSubTypes.Type(value = MeanshiftMetricRequest.class, name = "MeanshiftMetricRequest"),
         @JsonSubTypes.Type(value = FourierMMDMetricRequest.class, name = "FourierMMDMetricRequest"),
         @JsonSubTypes.Type(value = ApproxKSTestMetricRequest.class, name = "ApproxKSTestMetricRequest"),
+        @JsonSubTypes.Type(value = KSTestMetricRequest.class, name = "KSTestMetricRequest"),
 })
 @JsonTypeName("DriftMetricRequest")
 public abstract class DriftMetricRequest extends BaseMetricRequest {

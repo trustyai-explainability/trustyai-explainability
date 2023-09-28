@@ -16,7 +16,7 @@ import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
-import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.kstest.KSTestMetricRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -65,7 +65,7 @@ class KSTestEndpointTest {
 
     @Test
     void KSTestDriftRequest() {
-        DriftMetricRequest payload = new DriftMetricRequest();
+        KSTestMetricRequest payload = new KSTestMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
 
@@ -83,10 +83,9 @@ class KSTestEndpointTest {
         assertTrue(response.getNamedValues().get("income") > 0.05);
 
     }
-
     @Test
     void KSTestNonPreFitRequest() throws InterruptedException {
-        DriftMetricRequest payload = new DriftMetricRequest();
+        KSTestMetricRequest payload = new KSTestMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
 

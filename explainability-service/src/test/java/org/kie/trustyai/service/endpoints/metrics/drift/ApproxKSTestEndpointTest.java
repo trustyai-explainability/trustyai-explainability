@@ -63,7 +63,6 @@ class ApproxKSTestEndpointTest {
     void clearRequests() {
         scheduler.get().getAllRequests().clear();
     }
-
     @Test
     void approxKSTestNonPreFit() {
         ApproxKSTestMetricRequest payload = new ApproxKSTestMetricRequest();
@@ -84,8 +83,7 @@ class ApproxKSTestEndpointTest {
     @Test
     void approxKSTestPreFit() {
         Dataframe dfTrain = datasource.get().getDataframe(MODEL_ID).filterRowsByTagEquals(TRAINING_TAG);
-        ApproxKSTest aks = new ApproxKSTest(0.001);
-        ApproxKSFitting aksf = aks.precompute(dfTrain);
+        ApproxKSFitting aksf = ApproxKSTest.precompute(dfTrain, 0.01);
 
         ApproxKSTestMetricRequest payload = new ApproxKSTestMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
@@ -106,9 +104,8 @@ class ApproxKSTestEndpointTest {
         //assertEquals(.570004, response.getNamedValues().get("race"), 1e-5);
         //assertEquals(1, response.getNamedValues().get("income"));
     }
-
     @Test
-    void meanshiftNonPreFitRequest() throws InterruptedException {
+    void approxKSTestNonPreFitRequest() throws InterruptedException {
         ApproxKSTestMetricRequest payload = new ApproxKSTestMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
@@ -119,4 +116,5 @@ class ApproxKSTestEndpointTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode());
     }
+
 }

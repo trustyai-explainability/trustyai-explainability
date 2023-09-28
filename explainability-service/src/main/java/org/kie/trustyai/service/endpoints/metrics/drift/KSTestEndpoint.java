@@ -15,7 +15,7 @@ import org.kie.trustyai.metrics.drift.ks_test.KSTest;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
-import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.kstest.KSTestMetricRequest;
 import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
@@ -26,7 +26,7 @@ import io.quarkus.cache.CacheResult;
 @Tag(name = "KSTest Drift Endpoint", description = "Kolmogorov-Smirnov Test measures the columns of the tested dataframe come " +
         "from the same distribution as the training dataframe.")
 @Path("/metrics/drift/kstest")
-public class KSTestEndpoint extends DriftEndpoint {
+public class KSTestEndpoint extends DriftEndpoint<KSTestMetricRequest> {
     public KSTestEndpoint() {
         super("KSTEST");
     }
@@ -50,7 +50,7 @@ public class KSTestEndpoint extends DriftEndpoint {
 
     // a specific definition for this value of this metric in this specific context
     @Override
-    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest DriftMetricRequest request) {
+    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest KSTestMetricRequest request) {
         StringBuilder out = new StringBuilder(getGeneralDefinition());
         out.append(System.getProperty("line.separator"));
 
@@ -75,7 +75,7 @@ public class KSTestEndpoint extends DriftEndpoint {
     @Override
     @CacheResult(cacheName = "metrics-calculator-kstest", keyGenerator = MetricCalculationCacheKeyGen.class)
     public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
-        DriftMetricRequest ksRequest = (DriftMetricRequest)request;
+        KSTestMetricRequest ksRequest = (KSTestMetricRequest)request;
         KSTest ks = new KSTest();
         // Get train data
         Dataframe trainData = super.dataSource.get()

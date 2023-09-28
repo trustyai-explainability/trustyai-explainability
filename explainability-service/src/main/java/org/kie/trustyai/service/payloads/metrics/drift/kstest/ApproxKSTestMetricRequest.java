@@ -13,6 +13,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  * Request for ApproxKSTest Drift
  * 
  */
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "@type",
+        defaultImpl = ApproxKSTestMetricRequest.class)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = ApproxKSTestMetricRequest.class, name = "ApproxKSTestMetricRequest")
+})
 public class ApproxKSTestMetricRequest extends DriftMetricRequest {
     private double epsilon = 0.001d; // approximation level in GKSketch
 
@@ -25,6 +33,9 @@ public class ApproxKSTestMetricRequest extends DriftMetricRequest {
     }
 
     public void setSketchFitting(Map<String, GKSketch> sketchFitting) {
+        if (sketchFitting != null) {
+            this.setFitColumns(sketchFitting.keySet());
+        }
         this.sketchFitting = sketchFitting;
     }
 

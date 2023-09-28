@@ -16,7 +16,6 @@ import org.kie.trustyai.metrics.drift.ks_test.ApproxKSTest;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
-import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.kstest.ApproxKSTestMetricRequest;
 import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
@@ -28,7 +27,7 @@ import io.quarkus.cache.CacheResult;
 @Tag(name = "ApproxKSTest Drift Endpoint", description = "Approximate Kolmogorov-Smirnov Test measures that the columns of the tested dataframe come " +
         "from the same distribution as the training dataframe.")
 @Path("/metrics/drift/approxkstest")
-public class ApproxKSTestEndpoint extends DriftEndpoint {
+public class ApproxKSTestEndpoint extends DriftEndpoint<ApproxKSTestMetricRequest> {
     public ApproxKSTestEndpoint() {
         super("APPROXKSTEST");
     }
@@ -52,7 +51,7 @@ public class ApproxKSTestEndpoint extends DriftEndpoint {
 
     // a specific definition for this value of this metric in this specific context
     @Override
-    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest DriftMetricRequest request) {
+    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest ApproxKSTestMetricRequest request) {
         StringBuilder out = new StringBuilder(getGeneralDefinition());
         out.append(System.getProperty("line.separator"));
 
@@ -79,22 +78,19 @@ public class ApproxKSTestEndpoint extends DriftEndpoint {
     public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
         ApproxKSTestMetricRequest aksRequest = (ApproxKSTestMetricRequest) request;
         ApproxKSFitting aksFitting;
-        ApproxKSTest approxKS;
         if (aksRequest.getSketchFitting() == null) {
             LOG.debug("Fitting a approxKSTest drift request for model=" + request.getModelId());
             // get the data that matches the provided reference tag: calibration data
             Dataframe fitting = super.dataSource.get()
                     .getDataframe(request.getModelId())
                     .filterRowsByTagEquals(aksRequest.getReferenceTag());
-            approxKS = new ApproxKSTest(aksRequest.getEpsilon());
-            aksFitting = approxKS.precompute(fitting);
+            aksFitting = ApproxKSTest.precompute(fitting, aksRequest.getEpsilon() );
             aksRequest.setSketchFitting(aksFitting.getfitSketches());
         } else {
             LOG.debug("Using previously found fitting data sketches in request for model=" + request.getModelId());
             aksFitting = new ApproxKSFitting(aksRequest.getSketchFitting());
-            approxKS = new ApproxKSTest(aksFitting, aksRequest.getEpsilon());
         }
-        
+        ApproxKSTest approxKS = new ApproxKSTest(aksFitting, aksRequest.getEpsilon());
         LOG.debug("Cache miss. Calculating metric for " + aksRequest.getModelId());
         // get data that does _not_ have the provided reference tag: test data
         Dataframe filtered = dataframe.filterRowsByTagNotEquals(aksRequest.getReferenceTag());

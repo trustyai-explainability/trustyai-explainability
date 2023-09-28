@@ -49,7 +49,7 @@ public class GKSketchesDeserializer extends StdDeserializer<Map<String, GKSketch
         int size = node.size();
         List<Triple<Double, Integer, Integer>> summary = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            summary.add(Triple.of(node.get(i).get(0).asDouble(), node.get(i).get(1 ).asInt(), node.get(i).get(2).asInt() ) );
+            summary.add(Triple.of(node.get(i).get("left").asDouble(), node.get(i).get("middle" ).asInt(), node.get(i).get("right").asInt() ) );
         }
         return summary;
     }
