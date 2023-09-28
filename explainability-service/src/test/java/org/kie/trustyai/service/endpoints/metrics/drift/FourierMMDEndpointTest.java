@@ -140,7 +140,7 @@ class FourierMMDEndpointTest {
 
     @AfterEach
     void clearRequests() {
-        scheduler.get().getAllRequests().clear();
+      scheduler.get().getAllRequests().clear();
     }
 
     @Test
