@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kie.trustyai.service.payloads.data.statistics.FourierMMDValuesDeserializer;
-import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -22,11 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = FourierMMDMetricRequest.class, name = "FourierMMDMetricRequest")
 })
-public class FourierMMDMetricRequest extends BaseMetricRequest {
-
-    private Double thresholdDelta;
-    private String referenceTag;
-
+public class FourierMMDMetricRequest extends DriftMetricRequest {
     private FourierMMDParameters parameters = new FourierMMDParameters();
     private double gamma = 2.0;
 
@@ -38,14 +34,6 @@ public class FourierMMDMetricRequest extends BaseMetricRequest {
         super();
     }
 
-    public Double getThresholdDelta() {
-        return thresholdDelta;
-    }
-
-    public void setThresholdDelta(Double thresholdDelta) {
-        this.thresholdDelta = thresholdDelta;
-    }
-
     public FourierMMDParameters getParameters() {
         return parameters;
     }
@@ -55,6 +43,7 @@ public class FourierMMDMetricRequest extends BaseMetricRequest {
     }
 
     public void setFitting(Map<String, Object> fitting) {
+        // fitting object * does not correspond to columns*, so do not set fitColumns
         this.fitting = fitting;
     }
 
@@ -68,14 +57,6 @@ public class FourierMMDMetricRequest extends BaseMetricRequest {
 
     public void setGamma() {
         this.gamma = gamma;
-    }
-
-    public String getReferenceTag() {
-        return referenceTag;
-    }
-
-    public void setReferenceTag(String referenceTag) {
-        this.referenceTag = referenceTag;
     }
 
     @Override

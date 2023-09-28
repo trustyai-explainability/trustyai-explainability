@@ -22,7 +22,7 @@ import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
 
-public abstract class DriftEndpoint extends BaseEndpoint<DriftMetricRequest> {
+public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEndpoint<T> {
     protected DriftEndpoint(String name) {
         super(name);
     }
@@ -35,7 +35,7 @@ public abstract class DriftEndpoint extends BaseEndpoint<DriftMetricRequest> {
     public abstract String getGeneralDefinition();
 
     // this function should provide a specific definition/interpretation of what this specific metric value means
-    public abstract String getSpecificDefinition(MetricValueCarrier metricValueCarrier, @ValidDriftMetricRequest DriftMetricRequest request);
+    public abstract String getSpecificDefinition(MetricValueCarrier metricValueCarrier, @ValidDriftMetricRequest T request);
 
     // this function should provide the functionality of actually calculating a specific metric value for a given request
     @Override
@@ -55,7 +55,7 @@ public abstract class DriftEndpoint extends BaseEndpoint<DriftMetricRequest> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
-    public Response createRequest(@ValidDriftMetricRequest DriftMetricRequest request) {
+    public Response createRequest(@ValidDriftMetricRequest T request) {
         if (Objects.isNull(request.getThresholdDelta())) {
             final double defaultUpperThresh = metricsConfig.drift().thresholdDelta();
             request.setThresholdDelta(defaultUpperThresh);
@@ -68,7 +68,7 @@ public abstract class DriftEndpoint extends BaseEndpoint<DriftMetricRequest> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response response(@ValidDriftMetricRequest DriftMetricRequest request) throws DataframeCreateException {
+    public Response response(@ValidDriftMetricRequest T request) throws DataframeCreateException {
 
         final Dataframe dataframe;
         try {

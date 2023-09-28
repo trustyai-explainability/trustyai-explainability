@@ -18,7 +18,7 @@ import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
-import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -66,7 +66,7 @@ class MeanshiftEndpointTest {
 
     @Test
     void meanshiftNonPreFit() {
-        DriftMetricRequest payload = new DriftMetricRequest();
+        MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
 
@@ -89,7 +89,7 @@ class MeanshiftEndpointTest {
         Dataframe dfTrain = datasource.get().getDataframe(MODEL_ID).filterRowsByTagEquals(TRAINING_TAG);
         MeanshiftFitting msf = Meanshift.precompute(dfTrain);
 
-        DriftMetricRequest payload = new DriftMetricRequest();
+        MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
         payload.setFitting(msf.getFitStats());
@@ -111,7 +111,7 @@ class MeanshiftEndpointTest {
 
     @Test
     void meanshiftNonPreFitRequest() throws InterruptedException {
-        DriftMetricRequest payload = new DriftMetricRequest();
+        MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
 
