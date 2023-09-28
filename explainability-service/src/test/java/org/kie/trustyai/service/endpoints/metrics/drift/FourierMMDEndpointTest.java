@@ -13,6 +13,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
+import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

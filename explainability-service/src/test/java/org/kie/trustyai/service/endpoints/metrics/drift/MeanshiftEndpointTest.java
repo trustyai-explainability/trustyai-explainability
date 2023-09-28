@@ -7,6 +7,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
+import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
+import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,9 +68,11 @@ class MeanshiftEndpointTest {
 
     @Test
     void meanshiftNonPreFit() {
-        DriftMetricRequest payload = new DriftMetricRequest();
+        MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
+
+
 
         BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
@@ -89,7 +93,7 @@ class MeanshiftEndpointTest {
         Dataframe dfTrain = datasource.get().getDataframe(MODEL_ID).filterRowsByTagEquals(TRAINING_TAG);
         MeanshiftFitting msf = Meanshift.precompute(dfTrain);
 
-        DriftMetricRequest payload = new DriftMetricRequest();
+        MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
         payload.setFitting(msf.getFitStats());
@@ -111,7 +115,7 @@ class MeanshiftEndpointTest {
 
     @Test
     void meanshiftNonPreFitRequest() throws InterruptedException {
-        DriftMetricRequest payload = new DriftMetricRequest();
+        MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
 
