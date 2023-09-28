@@ -140,7 +140,7 @@ class FourierMMDEndpointTest {
 
     @AfterEach
     void clearRequests() {
-      scheduler.get().getAllRequests().clear();
+        scheduler.get().getAllRequests().clear();
     }
 
     @Test
@@ -172,7 +172,7 @@ class FourierMMDEndpointTest {
         FourierMMDFitting fmf = FourierMMD.precompute(dfTrain,
                 parameters.getDeltaStat(),
                 parameters.getnTest(),
-                20, //parameters.getnWindow(),
+                20, // parameters.getnWindow(),
                 parameters.getSig(),
                 parameters.getRandomSeed(),
                 parameters.getnMode());
