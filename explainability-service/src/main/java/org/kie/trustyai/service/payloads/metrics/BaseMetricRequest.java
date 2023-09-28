@@ -18,8 +18,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
         @JsonSubTypes.Type(value = GroupMetricRequest.class, name = "GroupMetricRequest"),
         @JsonSubTypes.Type(value = IdentityMetricRequest.class, name = "IdentityMetricRequest"),
         @JsonSubTypes.Type(value = DriftMetricRequest.class, name = "DriftMetricRequest"),
-        @JsonSubTypes.Type(value = MeanshiftMetricRequest.class, name = "MeanshiftMetricRequest"),
-        @JsonSubTypes.Type(value = FourierMMDMetricRequest.class, name = "FourierMMDMetricRequest")
 })
 @JsonTypeName("BaseMetricRequest")
 public abstract class BaseMetricRequest {
