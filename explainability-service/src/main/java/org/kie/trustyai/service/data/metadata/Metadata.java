@@ -46,7 +46,12 @@ public class Metadata {
     public void mergeInputSchema(Schema otherSchema) {
         if (otherSchema.equals(this.inputSchema)) {
             for (String columnName : this.inputSchema.getItems().keySet()) {
-                this.inputSchema.getItems().get(columnName).getValues().addAll(otherSchema.getItems().get(columnName).getValues());
+                // propagate nulls: null values mean there too many unique values to enumerate, therefore null + x = x + null = null
+                if (this.inputSchema.getItems().get(columnName).getValues() == null || otherSchema.getItems().get(columnName).getValues() == null) {
+                    this.inputSchema.getItems().get(columnName).setValues(null);
+                } else {
+                    this.inputSchema.getItems().get(columnName).getValues().addAll(otherSchema.getItems().get(columnName).getValues());
+                }
             }
         } else {
             final String message = "Original schema and schema-to-merge are not compatible";
@@ -57,7 +62,12 @@ public class Metadata {
     public void mergeOutputSchema(Schema otherSchema) {
         if (otherSchema.equals(this.outputSchema)) {
             for (String columnName : this.outputSchema.getItems().keySet()) {
-                this.outputSchema.getItems().get(columnName).getValues().addAll(otherSchema.getItems().get(columnName).getValues());
+                // propagate nulls: null values mean there too many unique values to enumerate, therefore null + x = x + null = null
+                if (this.outputSchema.getItems().get(columnName).getValues() == null || otherSchema.getItems().get(columnName).getValues() == null) {
+                    this.outputSchema.getItems().get(columnName).setValues(null);
+                } else {
+                    this.outputSchema.getItems().get(columnName).getValues().addAll(otherSchema.getItems().get(columnName).getValues());
+                }
             }
         } else {
             final String message = "Original schema and schema-to-merge are not compatible";

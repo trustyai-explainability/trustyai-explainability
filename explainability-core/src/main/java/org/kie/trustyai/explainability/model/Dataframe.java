@@ -21,7 +21,15 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAmount;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Currency;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -31,6 +39,7 @@ import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
+import org.kie.trustyai.explainability.utils.DataUtils;
 
 public class Dataframe {
 
@@ -973,8 +982,12 @@ public class Dataframe {
     }
 
     public Dataframe filterRowsById(String id) {
-        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> internalData.ids.get(rowNumber).equals(id))
-                .boxed().collect(Collectors.toList());
+        return filterRowsById(id, false, 1);
+    }
+
+    public Dataframe filterRowsById(String id, boolean negate, int size) {
+        List<Integer> rowIndexes = rowIndexStream().filter(rowNumber -> !negate == internalData.ids.get(rowNumber)
+                .equals(id)).distinct().limit(size).boxed().collect(Collectors.toList());
         return filterByRowIndex(rowIndexes);
     }
 
@@ -1206,6 +1219,63 @@ public class Dataframe {
             builder.append("\t\tInput: ").append(metadata.inputs.get(i) ? "yes" : "no").append("\n");
         }
         return builder.toString();
+    }
+
+    public Dataframe std() {
+
+        final int numCols = metadata.names.size();
+
+        // Dataframe assumes this is list of columns each containing a list of rows
+        final List<List<Value>> stdData = new ArrayList<>(numCols);
+
+        for (int i = 0; i < numCols; i++) {
+
+            final List<Value> columnData = this.getColumn(i);
+            final int numRows = columnData.size();
+
+            final double[] rowDoubles = new double[numRows];
+
+            for (int j = 0; j < numRows; j++) {
+                final Value rowValue = columnData.get(j);
+                rowDoubles[j] = rowValue.asNumber();
+            }
+
+            final double dataMean = DataUtils.getMean(rowDoubles);
+            final double dataStdDev = DataUtils.getStdDev(rowDoubles, dataMean);
+
+            final Value stdValue = new Value(dataStdDev);
+
+            final List<Value> rows = new ArrayList<Value>(1);
+            stdData.add(rows);
+
+            rows.add(stdValue);
+        }
+
+        return new Dataframe(stdData, this.metadata);
+    }
+
+    public Dataframe getNumericColumns() {
+
+        final List<Type> colTypes = this.metadata.types;
+
+        final List<Integer> dropColumns = new ArrayList<Integer>(colTypes.size());
+
+        for (int col = 0; col < colTypes.size(); col++) {
+
+            final Type type = colTypes.get(col);
+            if (type != Type.NUMBER) {
+                dropColumns.add(col);
+            }
+        }
+
+        final Dataframe retval = copy();
+        retval.dropColumns();
+
+        if (dropColumns.size() == colTypes.size()) {
+            throw new IllegalArgumentException("no non-numeric columns");
+        }
+
+        return retval;
     }
 
     class Metadata {
