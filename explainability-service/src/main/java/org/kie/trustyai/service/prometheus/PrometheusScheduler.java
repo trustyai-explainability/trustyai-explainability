@@ -62,6 +62,7 @@ public class PrometheusScheduler {
         try {
             // global service statistic
             DataSource ds = dataSource.get();
+            ds.verifyKnownModels();
             publisher.gauge("", "MODEL_COUNT_TOTAL", UUID.nameUUIDFromBytes("model_count".getBytes(StandardCharsets.UTF_8)), ds.getKnownModels().size());
 
             Set<String> requestedModels = getModelIds();
