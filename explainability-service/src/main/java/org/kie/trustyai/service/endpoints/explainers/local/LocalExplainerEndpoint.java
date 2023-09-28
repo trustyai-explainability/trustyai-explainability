@@ -16,8 +16,6 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -41,7 +39,7 @@ public abstract class LocalExplainerEndpoint extends ExplainerEndpoint {
             Prediction predictionToExplain;
             List<Prediction> predictions = dataframe.filterRowsById(request.getPredictionId()).asPredictions();
             if (predictions.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).entity( "No prediction found with id="
+                return Response.status(Response.Status.NOT_FOUND).entity("No prediction found with id="
                         + request.getPredictionId()).build();
             } else if (predictions.size() == 1) {
                 predictionToExplain = predictions.get(0);
@@ -51,7 +49,7 @@ public abstract class LocalExplainerEndpoint extends ExplainerEndpoint {
                 BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution);
                 return Response.ok(entity).build();
             } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity( "Found " + predictions.size()
+                return Response.status(Response.Status.BAD_REQUEST).entity("Found " + predictions.size()
                         + " predictions with id=" + request.getPredictionId()).build();
             }
         } catch (Exception e) {
@@ -60,7 +58,7 @@ public abstract class LocalExplainerEndpoint extends ExplainerEndpoint {
     }
 
     protected abstract BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain,
-                                                                   List<PredictionInput> inputs);
+            List<PredictionInput> inputs);
 
     protected abstract Prediction prepare(Prediction prediction, LocalExplanationRequest request, List<PredictionInput> testData);
 
