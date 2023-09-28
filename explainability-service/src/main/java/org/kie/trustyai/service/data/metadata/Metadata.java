@@ -47,7 +47,7 @@ public class Metadata {
         if (otherSchema.equals(this.inputSchema)) {
             for (String columnName : this.inputSchema.getItems().keySet()) {
                 // propagate nulls: null values mean there too many unique values to enumerate, therefore null + x = x + null = null
-                if (this.inputSchema.getItems().get(columnName).getValues() == null || otherSchema.getItems().get(columnName).getValues() == null){
+                if (this.inputSchema.getItems().get(columnName).getValues() == null || otherSchema.getItems().get(columnName).getValues() == null) {
                     this.inputSchema.getItems().get(columnName).setValues(null);
                 } else {
                     this.inputSchema.getItems().get(columnName).getValues().addAll(otherSchema.getItems().get(columnName).getValues());
@@ -63,7 +63,7 @@ public class Metadata {
         if (otherSchema.equals(this.outputSchema)) {
             for (String columnName : this.outputSchema.getItems().keySet()) {
                 // propagate nulls: null values mean there too many unique values to enumerate, therefore null + x = x + null = null
-                if (this.outputSchema.getItems().get(columnName).getValues() == null || otherSchema.getItems().get(columnName).getValues() == null){
+                if (this.outputSchema.getItems().get(columnName).getValues() == null || otherSchema.getItems().get(columnName).getValues() == null) {
                     this.outputSchema.getItems().get(columnName).setValues(null);
                 } else {
                     this.outputSchema.getItems().get(columnName).getValues().addAll(otherSchema.getItems().get(columnName).getValues());
