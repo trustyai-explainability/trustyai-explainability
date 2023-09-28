@@ -61,12 +61,15 @@ public class Meanshift {
                                     testNames.get(i)));
                 }
 
-                StatisticalSummaryValues testStats = getColumnStats(dfTest.getColumn(i));
-                double tStat = tTest.t(fitStats.get(colName), testStats);
-
-                double pValue = (1 - tDistribution.cumulativeProbability(Math.abs(tStat))) * 2;
-                boolean reject = pValue <= alpha;
-                result.put(colName, new MeanshiftResult(tStat, pValue, reject));
+                if (dfTest.getRowDimension() < 2) {
+                    result.put(colName, new MeanshiftResult(0, 1, false));
+                } else {
+                    StatisticalSummaryValues testStats = getColumnStats(dfTest.getColumn(i));
+                    double tStat = tTest.t(fitStats.get(colName), testStats);
+                    double pValue = (1 - tDistribution.cumulativeProbability(Math.abs(tStat))) * 2;
+                    boolean reject = pValue <= alpha;
+                    result.put(colName, new MeanshiftResult(tStat, pValue, reject));
+                }
             }
         }
         return result;
