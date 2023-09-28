@@ -35,8 +35,8 @@ public class DriftMetricRequestValidator implements ConstraintValidator<ValidDri
 
             // check that the fitting is valid, if provided
             boolean columnValidation = true;
-            if (request.getFitting() != null) {
-                for (String columnName : request.getFitting().keySet()) {
+            if (request.getFitColumns() != null) {
+                for (String columnName : request.getFitColumns()) {
                     columnValidation = GenericValidationUtils.validateColumnName(context, metadata, modelId, columnName) && columnValidation;
                 }
             }
