@@ -32,11 +32,8 @@ public class ApproxKSTest {
         trainGKSketches = ksFitting.getfitSketches();
 
     }
-    public ApproxKSTest(double eps) {
-        this.eps = eps;
-    }
     // fit if GKSketch is already known
-    public ApproxKSTest(ApproxKSFitting approxKSFitting, double eps) {
+    public ApproxKSTest( double eps, ApproxKSFitting approxKSFitting) {
         trainGKSketches = approxKSFitting.getfitSketches();
         this.eps = eps;
     }

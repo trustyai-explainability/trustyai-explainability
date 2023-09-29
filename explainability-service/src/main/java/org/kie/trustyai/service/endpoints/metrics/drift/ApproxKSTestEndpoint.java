@@ -90,7 +90,7 @@ public class ApproxKSTestEndpoint extends DriftEndpoint<ApproxKSTestMetricReques
             LOG.debug("Using previously found fitting data sketches in request for model=" + request.getModelId());
             aksFitting = new ApproxKSFitting(aksRequest.getSketchFitting());
         }
-        ApproxKSTest approxKS = new ApproxKSTest(aksFitting, aksRequest.getEpsilon());
+        ApproxKSTest approxKS = new ApproxKSTest(aksRequest.getEpsilon(), aksFitting);
         LOG.debug("Cache miss. Calculating metric for " + aksRequest.getModelId());
         // get data that does _not_ have the provided reference tag: test data
         Dataframe filtered = dataframe.filterRowsByTagNotEquals(aksRequest.getReferenceTag());

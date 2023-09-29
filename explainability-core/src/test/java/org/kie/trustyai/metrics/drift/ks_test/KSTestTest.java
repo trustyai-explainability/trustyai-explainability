@@ -76,8 +76,6 @@ class KSTestTest {
         KSTest ks = new KSTest();
         List<String> names = data1.getColumnNames();
         HashMap<String, HypothesisTestResult> result = ks.calculate(data1, data2, 0.05);
-        System.out.println( "NormalDistributionsNoShift Exact KS Test= " + result.get(names.get(0)).getStatVal() );
-        System.out.println( "NormalDistributionsNoShift Exact KS pValue= " + result.get(names.get(0)).getpValue() );
         assertEquals(1, result.size());
         assertTrue(result.get(names.get(0)).getpValue() >= 0.01 );
         assertTrue(result.get(names.get(0)).getStatVal() > 0.0 );
@@ -91,8 +89,6 @@ class KSTestTest {
         KSTest ks = new KSTest();
         List<String> names = data1.getColumnNames();
         HashMap<String, HypothesisTestResult> result = ks.calculate(data1, data2, 0.05);
-        System.out.println( "NormalDistributionsMeanShift Exact KS Test= " + result.get(names.get(0)).getStatVal() );
-        System.out.println( "NormalDistributionsMeanShift Exact KS pValue= " + result.get(names.get(0)).getpValue() );
         assertEquals(1, result.size());
         assertTrue(result.get(names.get(0)).getpValue() <= 0.01 );
         assertTrue(result.get(names.get(0)).getStatVal() > 0.0 );
@@ -105,8 +101,6 @@ class KSTestTest {
         KSTest ks = new KSTest();
         List<String> names = data1.getColumnNames();
         HashMap<String, HypothesisTestResult> result = ks.calculate(data1, data2, 0.05);
-        System.out.println( "NormalDistributionsVarianceShift Exact KS Test= " + result.get(names.get(0)).getStatVal() );
-        System.out.println( "NormalDistributionsVarianceShift Exact KS pValue= " + result.get(names.get(0)).getpValue() );
         assertEquals(1, result.size());
         assertTrue(result.get(names.get(0)).getpValue() <= 0.01 );
         assertTrue(result.get(names.get(0)).getStatVal() > 0.0 );
@@ -128,10 +122,7 @@ class KSTestTest {
         KSTest ks = new KSTest();
         List<String> names = data1.getColumnNames();
         HashMap<String, HypothesisTestResult> result = ks.calculate(data1, data2, 0.05);
-        for (int i = 0; i < idx1.length; i++) {
-            System.out.println("NormalDistributionsShift Exact KS Test= " + result.get(names.get(i)).getStatVal());
-            System.out.println("NormalDistributionsShift Exact KS pValue= " + result.get(names.get(i)).getpValue());
-        }
+
         assertTrue(result.get(names.get(0)).getpValue() <= 0.05 );
         assertTrue(result.get(names.get(0)).getStatVal() > 0.0 );
         assertTrue(result.get(names.get(1)).getpValue() >= 0.05 );
