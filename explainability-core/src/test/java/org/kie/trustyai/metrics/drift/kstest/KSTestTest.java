@@ -13,6 +13,7 @@ import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class KSTestTest {

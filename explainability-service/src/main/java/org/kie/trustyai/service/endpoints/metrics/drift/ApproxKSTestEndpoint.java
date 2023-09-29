@@ -94,6 +94,9 @@ public class ApproxKSTestEndpoint extends DriftEndpoint<ApproxKSTestMetricReques
         LOG.debug("Cache miss. Calculating metric for " + aksRequest.getModelId());
         // get data that does _not_ have the provided reference tag: test data
         Dataframe filtered = dataframe.filterRowsByTagNotEquals(aksRequest.getReferenceTag());
+        if (filtered.getRowDimension() < 2) {
+            LOG.warn("Test data has less than two observations; ApproxKSTest results will not be numerically reliable.");
+        }
         Map<String, HypothesisTestResult> result = approxKS.calculate(filtered, aksRequest.getThresholdDelta());
 
         Map<String, Double> namedValues = new HashMap<>();

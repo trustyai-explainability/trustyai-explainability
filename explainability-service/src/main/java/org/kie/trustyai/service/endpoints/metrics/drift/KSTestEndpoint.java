@@ -83,6 +83,9 @@ public class KSTestEndpoint extends DriftEndpoint<KSTestMetricRequest> {
                 .filterRowsByTagEquals(ksRequest.getReferenceTag());
         // get data that does _not_ have the provided reference tag: test data
         Dataframe filtered = dataframe.filterRowsByTagNotEquals(ksRequest.getReferenceTag());
+        if (filtered.getRowDimension() < 2) {
+            LOG.warn("Test data has less than two observations; KSTest results will not be numerically reliable.");
+        }
         LOG.debug("Cache miss. Calculating metric for " + ksRequest.getModelId());
         Map<String, HypothesisTestResult> result = ks.calculate(trainData, filtered, ksRequest.getThresholdDelta());
 
