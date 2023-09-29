@@ -56,6 +56,26 @@ public class MockDatasource extends DataSource {
         return Dataframe.createFrom(predictions);
     }
 
+    public Dataframe generateDataframeFromNormalDistributions(int observations, double mean, double stdDeviation) {
+        final List<Prediction> predictions = new ArrayList<>();
+        final Random random = new Random(0);
+        for (int i = 0; i < observations; i++) {
+            double nextRand = random.nextGaussian();
+            final List<Feature> featureList = List.of(
+                    // guarantee feature diversity for age is min(observations, featureDiversity)
+                    FeatureFactory.newNumericalFeature("f1", (nextRand * stdDeviation + mean)),
+                    FeatureFactory.newNumericalFeature("f2", (nextRand * stdDeviation + 2 * mean)),
+                    FeatureFactory.newNumericalFeature("f3", (nextRand * 2 * stdDeviation + mean)));
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+
+            final List<Output> outputList = List.of(
+                    new Output("income", Type.NUMBER, new Value(random.nextBoolean() ? 1 : 0), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
+    }
+
     public Dataframe generateRandomDataframeDrifted(int observations) {
         return generateRandomDataframeDrifted(observations, 100);
     }

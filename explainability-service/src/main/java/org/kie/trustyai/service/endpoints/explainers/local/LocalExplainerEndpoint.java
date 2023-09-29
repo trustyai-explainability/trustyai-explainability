@@ -16,8 +16,6 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -38,17 +36,22 @@ public abstract class LocalExplainerEndpoint extends ExplainerEndpoint {
             PredictionProvider model = getModel(request.getModelConfig());
 
             Dataframe dataframe = dataSource.getDataframe(request.getModelConfig().getName());
-            List<Prediction> predictions = dataframe.asPredictions();
-            // TODO: check if we can fetch and use the prediction/payload id rather than an hash
-            Predicate<Prediction> idFilter = prediction -> prediction.getInput().hashCode() == Integer.parseInt(request.getPredictionId());
-            Prediction predictionToExplain = predictions.stream().filter(idFilter).findFirst().orElseThrow();
-            List<PredictionInput> testDataDistribution = predictions.stream().filter(idFilter.negate()).map(Prediction::getInput)
-                    .distinct().limit(serviceConfig.batchSize().orElse(100)).collect(Collectors.toList());
-
-            predictionToExplain = prepare(predictionToExplain, request, testDataDistribution);
-
-            BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution);
-            return Response.ok(entity).build();
+            Prediction predictionToExplain;
+            List<Prediction> predictions = dataframe.filterRowsById(request.getPredictionId()).asPredictions();
+            if (predictions.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).entity("No prediction found with id="
+                        + request.getPredictionId()).build();
+            } else if (predictions.size() == 1) {
+                predictionToExplain = predictions.get(0);
+                List<PredictionInput> testDataDistribution = dataframe.filterRowsById(request.getPredictionId(), true,
+                        serviceConfig.batchSize().orElse(100)).asPredictionInputs();
+                predictionToExplain = prepare(predictionToExplain, request, testDataDistribution);
+                BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution);
+                return Response.ok(entity).build();
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Found " + predictions.size()
+                        + " predictions with id=" + request.getPredictionId()).build();
+            }
         } catch (Exception e) {
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }

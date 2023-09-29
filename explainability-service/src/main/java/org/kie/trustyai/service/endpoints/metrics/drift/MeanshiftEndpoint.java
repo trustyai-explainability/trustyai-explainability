@@ -17,6 +17,7 @@ import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
@@ -27,7 +28,7 @@ import io.quarkus.cache.CacheResult;
 @Tag(name = "Meanshift Drift Endpoint", description = "Meanshift measures that the columns of the tested dataframe come " +
         "from the same distribution as the training dataframe.")
 @Path("/metrics/drift/meanshift")
-public class MeanshiftEndpoint extends DriftEndpoint {
+public class MeanshiftEndpoint extends DriftEndpoint<MeanshiftMetricRequest> {
     public MeanshiftEndpoint() {
         super("MEANSHIFT");
     }
@@ -53,7 +54,8 @@ public class MeanshiftEndpoint extends DriftEndpoint {
 
     // a specific definition for this value of this metric in this specific context
     @Override
-    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest DriftMetricRequest request) {
+    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest MeanshiftMetricRequest request) {
+
         StringBuilder out = new StringBuilder(getGeneralDefinition());
         out.append(System.getProperty("line.separator"));
 
@@ -79,29 +81,34 @@ public class MeanshiftEndpoint extends DriftEndpoint {
     // === CALCULATION FUNCTION ======================================
     @Override
     @CacheResult(cacheName = "metrics-calculator-meanshift", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
-        DriftMetricRequest dmRequest = (DriftMetricRequest) request;
+    public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest bmRequest) {
+        @ValidDriftMetricRequest
+        MeanshiftMetricRequest request = (MeanshiftMetricRequest) bmRequest;
 
         MeanshiftFitting msf;
-        if (dmRequest.getFitting() == null) {
+        if (request.getFitting() == null) {
             LOG.debug("Fitting a meanshift drift request for model=" + request.getModelId());
 
             // get the data that matches the provided reference tag: calibration data
             Dataframe fitting = super.dataSource.get()
                     .getDataframe(request.getModelId())
-                    .filterRowsByTagEquals(dmRequest.getReferenceTag());
+                    .filterRowsByTagEquals(request.getReferenceTag());
             msf = Meanshift.precompute(fitting);
-            dmRequest.setFitting(msf.getFitStats());
+            request.setFitting(msf.getFitStats());
         } else {
             LOG.debug("Using previously found meanshift fitting in request for model=" + request.getModelId());
-            msf = new MeanshiftFitting(dmRequest.getFitting());
+            msf = new MeanshiftFitting(request.getFitting());
         }
         Meanshift ms = new Meanshift(msf);
-        LOG.debug("Cache miss. Calculating metric for " + dmRequest.getModelId());
+        LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
 
         // get data that does _not_ have the provided reference tag: test data
         Dataframe filtered = dataframe.filterRowsByTagNotEquals(((DriftMetricRequest) request).getReferenceTag());
-        Map<String, MeanshiftResult> result = ms.calculate(filtered, dmRequest.getThresholdDelta());
+
+        if (dataframe.getRowDimension() < 2) {
+            LOG.warn("Test data has less than two observations; Meanshift results will not be numerically reliable.");
+        }
+        Map<String, MeanshiftResult> result = ms.calculate(filtered, request.getThresholdDelta());
 
         Map<String, Double> namedValues = new HashMap<>();
         for (Map.Entry<String, MeanshiftResult> resultEntry : result.entrySet()) {
