@@ -63,6 +63,7 @@ class ApproxKSTestEndpointTest {
     void clearRequests() {
         scheduler.get().getAllRequests().clear();
     }
+
     @Test
     void approxKSTestNonPreFit() {
         ApproxKSTestMetricRequest payload = new ApproxKSTestMetricRequest();
@@ -111,6 +112,7 @@ class ApproxKSTestEndpointTest {
         assertTrue(response.getNamedValues().get("f3") < 0.05);
         assertTrue(response.getNamedValues().get("income") > 0.05);
     }
+
     @Test
     void approxKSTestNonPreFitRequest() throws InterruptedException {
         ApproxKSTestMetricRequest payload = new ApproxKSTestMetricRequest();
@@ -123,6 +125,5 @@ class ApproxKSTestEndpointTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode());
     }
-
 
 }

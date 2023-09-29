@@ -5,37 +5,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
-import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.random.JDKRandomGenerator;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ApproxKSTestTest {
 
     /*
-    1. Univariate Normal mean shift
-    2. Univariate Normal no shift
-    3. Univariate Normal variance shift 
-    TODO:
-    4. Univariate Gamma vs uniform
-    5. Univariate gamma vs gamma
-    6. Multivariate tests 
-    */
+     * 1. Univariate Normal mean shift
+     * 2. Univariate Normal no shift
+     * 3. Univariate Normal variance shift
+     */
     public static final int colSize = 4;
     public static final int sampleSize = 10000;
-    int randomSeed=0;
+    int randomSeed = 0;
     double[][] dists = getNormalDistributions(randomSeed);
 
     // Produces 4 Normal distribution with various means and stds
     public double[][] getNormalDistributions(int randomSeed) {
         JDKRandomGenerator randomGen = new JDKRandomGenerator(randomSeed);
-        dists  = new double[colSize][sampleSize];
+        dists = new double[colSize][sampleSize];
         NormalDistribution nd1 = new NormalDistribution(randomGen, 0.0, 1.0);
         NormalDistribution nd2 = new NormalDistribution(randomGen, 1.0, 1.0);
         NormalDistribution nd3 = new NormalDistribution(randomGen, 1.0, 1.0);
@@ -48,6 +44,7 @@ class ApproxKSTestTest {
 
         return dists;
     }
+
     // generate single column DF from mock data
     public Dataframe generate(int col) {
         List<PredictionInput> ps = new ArrayList<>();
@@ -71,124 +68,96 @@ class ApproxKSTestTest {
     }
 
     @Test
-    void testCompareApproxKSMeanShift( ) {
-        for(int i = 0; i<10; i++) {
+    void testCompareApproxKSMeanShift() {
+        for (int i = 0; i < 10; i++) {
             dists = getNormalDistributions(i + 1);
             Dataframe data1 = generate(0); // N(0,1)
             Dataframe data2 = generate(1); // N(1,1)
             KSTest ks = new KSTest();
             List<String> names = data1.getColumnNames();
             HashMap<String, HypothesisTestResult> result = ks.calculate(data1, data2, 0.05);
-            System.out.println("NormalDistributionsMeanShift Exact KS Test= " + result.get(names.get(0)).getStatVal());
-            System.out.println("NormalDistributionsMeanShift Exact KS pValue= " + result.get(names.get(0)).getpValue());
 
             double eps = 0.01;
             ApproxKSTest approxKS = new ApproxKSTest(eps, data1);
             HashMap<String, HypothesisTestResult> approxRes = approxKS.calculate(data2, 0.05);
-            System.out.println(
-                    "NormalDistributionsMeanShift Approx KS Test= " + approxRes.get(names.get(0)).getStatVal());
-            System.out.println(
-                    "NormalDistributionsMeanShift Approx KS pValue= " + approxRes.get(names.get(0)).getpValue());
             assertEquals(1, result.size());
             double diff = Math.abs(approxRes.get(names.get(0)).getStatVal() - result.get(names.get(0)).getStatVal());
-            System.out.println("Result diff: " + diff + " eps: " + eps);
             assertTrue(diff <= (6 * eps));
 
         }
     }
 
     @Test
-    void testCompareApproxKSNoShift( ) {
-        for(int i = 0; i<10; i++) {
+    void testCompareApproxKSNoShift() {
+        for (int i = 0; i < 10; i++) {
             dists = getNormalDistributions(i + 1);
             Dataframe data1 = generate(1); // N(1,1)
             Dataframe data2 = generate(2); // N(1,1)
             KSTest ks = new KSTest();
             List<String> names = data1.getColumnNames();
             HashMap<String, HypothesisTestResult> result = ks.calculate(data1, data2, 0.05);
-            System.out.println("NormalDistributionsNoShift Exact KS Test= " + result.get(names.get(0)).getStatVal());
-            System.out.println("NormalDistributionsNoShift Exact KS pValue= " + result.get(names.get(0)).getpValue());
 
             double eps = 0.001;
             ApproxKSTest approxKS = new ApproxKSTest(eps, data1);
             HashMap<String, HypothesisTestResult> approxRes = approxKS.calculate(data2, 0.05);
-            System.out.println(
-                    "NormalDistributionsNoShift Approx KS Test= " + approxRes.get(names.get(0)).getStatVal());
-            System.out.println(
-                    "NormalDistributionsNoShift Approx KS pValue= " + approxRes.get(names.get(0)).getpValue());
             assertEquals(1, result.size());
             assertFalse(approxRes.get(names.get(0)).isReject()); // If you increase aproximation, i.e. eps, this assertion may fail on some cases
             double diff = Math.abs(approxRes.get(names.get(0)).getStatVal() - result.get(names.get(0)).getStatVal());
-            System.out.println("Result diff: " + diff + " eps: " + eps);
             assertTrue(diff <= (6 * eps));
 
         }
     }
+
     @Test
-    void testCompareApproxKSVarianceShift( ) {
-        for(int i = 0; i<10; i++) {
+    void testCompareApproxKSVarianceShift() {
+        for (int i = 0; i < 10; i++) {
             dists = getNormalDistributions(i + 1);
             Dataframe data1 = generate(0); // N(1,0)
             Dataframe data2 = generate(3); // N(1,2)
             KSTest ks = new KSTest();
             List<String> names = data1.getColumnNames();
             HashMap<String, HypothesisTestResult> result = ks.calculate(data1, data2, 0.05);
-            System.out.println("NormalDistributionsVarianceShift Exact KS Test= " + result.get(names.get(0)).getStatVal());
-            System.out.println("NormalDistributionsVarianceShift Exact KS pValue= " + result.get(names.get(0)).getpValue());
 
             double eps = 0.01;
             ApproxKSTest approxKS = new ApproxKSTest(eps, data1);
             HashMap<String, HypothesisTestResult> approxRes = approxKS.calculate(data2, 0.05);
-            System.out.println(
-                    "NormalDistributionsVarianceShift Approx KS Test= " + approxRes.get(names.get(0)).getStatVal());
-            System.out.println(
-                    "NormalDistributionsVarianceShift Approx KS pValue= " + approxRes.get(names.get(0)).getpValue());
             assertEquals(1, result.size());
             assertTrue(approxRes.get(names.get(0)).isReject()); // If you increase aproximation, i.e. eps, this assertion may fail on some cases
             double diff = Math.abs(approxRes.get(names.get(0)).getStatVal() - result.get(names.get(0)).getStatVal());
-            System.out.println("Result diff: " + diff + " eps: " + eps);
             assertTrue(diff <= (6 * eps));
 
         }
     }
 
     @Test
-    void testMultiColumnApproxKS( ) {
-            dists = getNormalDistributions(34);
-            Integer[] idx1 = new Integer[3]; //0, 1,2
-            Integer[] idx2 = new Integer[3]; //1,2,3
-            for(int i=0;i<colSize-1;i++)
-            {
-                idx1[i] = i;
-                idx2[i] = i+1;
-            }
+    void testMultiColumnApproxKS() {
+        dists = getNormalDistributions(34);
+        Integer[] idx1 = new Integer[3]; //0, 1,2
+        Integer[] idx2 = new Integer[3]; //1,2,3
+        for (int i = 0; i < colSize - 1; i++) {
+            idx1[i] = i;
+            idx2[i] = i + 1;
+        }
 
-            Dataframe data1 = generate(idx1, "normal_dist"); 
-            Dataframe data2 = generate(idx2, "normal_dist"); 
-            KSTest ks = new KSTest();
-            List<String> names = data1.getColumnNames();
-            HashMap<String, HypothesisTestResult> result = ks.calculate(data1, data2, 0.05);
-            double eps = 0.001;
-            ApproxKSTest approxKS = new ApproxKSTest(eps, data1);
-            HashMap<String, HypothesisTestResult> approxRes = approxKS.calculate(data2, 0.05);
-            for(int i=0;i<idx1.length;i++){
-                System.out.println("Approx KS Test= " + approxRes.get(names.get(i)).getStatVal());
-                System.out.println("Approx KS pValue= " + approxRes.get(names.get(i)).getpValue());
-            }
-            assertEquals(3, result.size());
-            for(int i=0;i<idx1.length;i++){ 
-                double diff = Math.abs(approxRes.get(names.get(i)).getStatVal() - result.get(names.get(i)).getStatVal());
-                System.out.println("Result diff: " + diff + " eps: " + eps);
-                assertTrue(diff <= (6 * eps));
-            }
-            assertTrue(approxRes.get(names.get(0)).getpValue() <= 0.05 );
-            assertTrue(approxRes.get(names.get(0)).getStatVal() > 0.0 );
-            assertTrue(approxRes.get(names.get(1)).getpValue() >= 0.05 );
-            assertTrue(approxRes.get(names.get(1)).getStatVal() > 0.0 );
-            assertTrue(approxRes.get(names.get(2)).getpValue() <= 0.05 );
-            assertTrue(approxRes.get(names.get(2)).getStatVal() > 0.0 );
+        Dataframe data1 = generate(idx1, "normal_dist");
+        Dataframe data2 = generate(idx2, "normal_dist");
+        KSTest ks = new KSTest();
+        List<String> names = data1.getColumnNames();
+        HashMap<String, HypothesisTestResult> result = ks.calculate(data1, data2, 0.05);
+        double eps = 0.001;
+        ApproxKSTest approxKS = new ApproxKSTest(eps, data1);
+        HashMap<String, HypothesisTestResult> approxRes = approxKS.calculate(data2, 0.05);
+        assertEquals(3, result.size());
+        for (int i = 0; i < idx1.length; i++) {
+            double diff = Math.abs(approxRes.get(names.get(i)).getStatVal() - result.get(names.get(i)).getStatVal());
+            assertTrue(diff <= (6 * eps));
+        }
+        assertTrue(approxRes.get(names.get(0)).getpValue() <= 0.05);
+        assertTrue(approxRes.get(names.get(0)).getStatVal() > 0.0);
+        assertTrue(approxRes.get(names.get(1)).getpValue() >= 0.05);
+        assertTrue(approxRes.get(names.get(1)).getStatVal() > 0.0);
+        assertTrue(approxRes.get(names.get(2)).getpValue() <= 0.05);
+        assertTrue(approxRes.get(names.get(2)).getStatVal() > 0.0);
 
-            
-     }
-    // TODO add test to check error thrown when different columns provided for train and test    
+    }
 }

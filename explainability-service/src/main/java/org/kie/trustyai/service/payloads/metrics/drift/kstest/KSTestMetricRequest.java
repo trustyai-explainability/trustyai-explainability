@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = KSTestMetricRequest.class, name = "KSTestMetricRequest")
 })
-public class KSTestMetricRequest extends DriftMetricRequest{
+public class KSTestMetricRequest extends DriftMetricRequest {
     public KSTestMetricRequest() {
         super();
     }

@@ -46,7 +46,7 @@ public class ApproxKSTestEndpoint extends DriftEndpoint<ApproxKSTestMetricReques
 
     @Override
     public String getGeneralDefinition() {
-        return "ApproxKSTest calculates kolmogorov-smirnov test from summary of two samples which are GK epsilon sketches ensures maximum error is 6*epsilon compared to exact KS Test.";
+        return "ApproxKSTest calculates an approximate Kolmogorov-Smirnov test, and ensures that the maximum error is 6*epsilon as compared to an exact KS Test.";
     }
 
     // a specific definition for this value of this metric in this specific context
@@ -84,7 +84,7 @@ public class ApproxKSTestEndpoint extends DriftEndpoint<ApproxKSTestMetricReques
             Dataframe fitting = super.dataSource.get()
                     .getDataframe(request.getModelId())
                     .filterRowsByTagEquals(aksRequest.getReferenceTag());
-            aksFitting = ApproxKSTest.precompute(fitting, aksRequest.getEpsilon() );
+            aksFitting = ApproxKSTest.precompute(fitting, aksRequest.getEpsilon());
             aksRequest.setSketchFitting(aksFitting.getfitSketches());
         } else {
             LOG.debug("Using previously found fitting data sketches in request for model=" + request.getModelId());

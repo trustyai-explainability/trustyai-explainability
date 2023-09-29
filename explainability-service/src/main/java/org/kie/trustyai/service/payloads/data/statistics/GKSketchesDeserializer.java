@@ -45,17 +45,16 @@ public class GKSketchesDeserializer extends StdDeserializer<Map<String, GKSketch
         int size = node.size();
         List<Triple<Double, Integer, Integer>> summary = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            summary.add(Triple.of(node.get(i).get("left").asDouble(), node.get(i).get("middle" ).asInt(), node.get(i).get("right").asInt() ) );
+            summary.add(Triple.of(node.get(i).get("left").asDouble(), node.get(i).get("middle").asInt(), node.get(i).get("right").asInt()));
         }
         return summary;
     }
-    
+
     private GKSketch parseJsonToGKSketch(JsonNode node) {
         return new GKSketch(
                 node.get("epsilon").asDouble(),
                 node.get("xmin").asDouble(),
                 node.get("xmax").asDouble(),
-                node.get("numx").asInt()
-                );
+                node.get("numx").asInt());
     }
 }

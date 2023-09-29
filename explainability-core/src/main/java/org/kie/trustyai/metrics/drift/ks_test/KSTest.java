@@ -2,23 +2,24 @@ package org.kie.trustyai.metrics.drift.ks_test;
 
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
-import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 
 public class KSTest {
     public KSTest() {
-        
+
     }
+
     /*
      * Returns HypothesisTestResult per column with KSTest statistic, p-value and reject
      */
-    public HashMap<String, HypothesisTestResult> calculate(Dataframe dfTrain, Dataframe dfTest, double signif)
-    {
-        if(dfTrain.getRowDimension() < 2 || (dfTest.getRowDimension() < 2) ) {
-            throw new IllegalArgumentException( String.format("Passed dataframes are too small to calculate statistical hypotesis test."));
+    public HashMap<String, HypothesisTestResult> calculate(Dataframe dfTrain, Dataframe dfTest, double signif) {
+        if (dfTrain.getRowDimension() < 2 || (dfTest.getRowDimension() < 2)) {
+            throw new IllegalArgumentException(String.format("Passed dataframes are too small to calculate statistical hypothesis test."));
         }
         double d = 0.0d;
         List<Type> types = dfTrain.getColumnTypes();
@@ -43,7 +44,7 @@ public class KSTest {
                 d = ks_test.kolmogorovSmirnovStatistic(trainArray, testArray);
                 double pValue = ks_test.kolmogorovSmirnovTest(trainArray, testArray);
                 boolean reject = pValue <= signif;
-                result.put(colName, new HypothesisTestResult(d, pValue, reject) );
+                result.put(colName, new HypothesisTestResult(d, pValue, reject));
             }
         }
         return result;

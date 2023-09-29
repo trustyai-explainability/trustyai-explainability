@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.payloads.metrics.drift.kstest;
 
 import java.util.Map;
+
 import org.kie.trustyai.metrics.drift.ks_test.GKSketch;
 import org.kie.trustyai.service.payloads.data.statistics.GKSketchesDeserializer;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
@@ -50,6 +51,5 @@ public class ApproxKSTestMetricRequest extends DriftMetricRequest {
     public void setEpsilon(double epsilon) {
         this.epsilon = epsilon;
     }
-
 
 }

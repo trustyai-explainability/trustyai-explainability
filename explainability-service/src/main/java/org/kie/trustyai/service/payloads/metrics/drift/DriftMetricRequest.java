@@ -6,9 +6,9 @@ import java.util.Set;
 
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDMetricRequest;
-import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.kstest.ApproxKSTestMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.kstest.KSTestMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

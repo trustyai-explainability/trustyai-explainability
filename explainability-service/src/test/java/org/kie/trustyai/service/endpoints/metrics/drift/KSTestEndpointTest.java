@@ -83,6 +83,7 @@ class KSTestEndpointTest {
         assertTrue(response.getNamedValues().get("income") > 0.05);
 
     }
+
     @Test
     void KSTestNonPreFitRequest() throws InterruptedException {
         KSTestMetricRequest payload = new KSTestMetricRequest();
@@ -96,5 +97,5 @@ class KSTestEndpointTest {
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode());
     }
-    
+
 }

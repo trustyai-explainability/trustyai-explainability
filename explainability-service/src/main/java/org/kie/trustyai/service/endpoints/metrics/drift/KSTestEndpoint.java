@@ -75,12 +75,12 @@ public class KSTestEndpoint extends DriftEndpoint<KSTestMetricRequest> {
     @Override
     @CacheResult(cacheName = "metrics-calculator-kstest", keyGenerator = MetricCalculationCacheKeyGen.class)
     public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest request) {
-        KSTestMetricRequest ksRequest = (KSTestMetricRequest)request;
+        KSTestMetricRequest ksRequest = (KSTestMetricRequest) request;
         KSTest ks = new KSTest();
         // Get train data
         Dataframe trainData = super.dataSource.get()
-                    .getDataframe(request.getModelId())
-                    .filterRowsByTagEquals(ksRequest.getReferenceTag());
+                .getDataframe(request.getModelId())
+                .filterRowsByTagEquals(ksRequest.getReferenceTag());
         // get data that does _not_ have the provided reference tag: test data
         Dataframe filtered = dataframe.filterRowsByTagNotEquals(ksRequest.getReferenceTag());
         LOG.debug("Cache miss. Calculating metric for " + ksRequest.getModelId());
