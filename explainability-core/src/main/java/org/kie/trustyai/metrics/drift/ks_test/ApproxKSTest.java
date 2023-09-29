@@ -42,10 +42,6 @@ public class ApproxKSTest {
         List<Type> types = dfTrain.getColumnTypes();
         Map<String, GKSketch> sketches = new HashMap<String, GKSketch>();
 
-        if (dfTrain.getRowDimension() < 2) {
-            throw new IllegalArgumentException(String.format("Passed dataframe is too small to calculate statistical hypothesis test."));
-        }
-
         for (int i = 0; i < dfTrain.getColumnDimension(); i++) {
             if (types.get(i).equals(Type.NUMBER)) {
                 // build epsilon sketch for given column
@@ -61,9 +57,6 @@ public class ApproxKSTest {
      * Returns HypothesisTestResult per column with Approximate KSTest statistic, p-value and reject
      */
     public HashMap<String, HypothesisTestResult> calculate(Dataframe dfTest, double signif) {
-        if (dfTest.getRowDimension() < 2) {
-            throw new IllegalArgumentException(String.format("Passed dataframe is too small to calculate statistical hypotesis test."));
-        }
         List<Type> types = dfTest.getColumnTypes();
         List<String> testNames = dfTest.getColumnNames();
 
@@ -77,18 +70,22 @@ public class ApproxKSTest {
                                     "Passed dataframe not compatible with the train dataframe: no such column in train dataframe with name %s.",
                                     testNames.get(i)));
                 }
-                GKSketch testSketch = new GKSketch(eps);
-                GKSketch trainSketch = trainGKSketches.get(colName);
-                dfTest.getColumn(i).stream().mapToDouble(Value::asNumber).forEach(testSketch::insert);
-                double d = 0.0;
-                try {
-                    d = computeKSDistance(trainSketch, testSketch);
-                } catch (GKException e) {
-                    throw new RuntimeException("GKSketch executed unexpectadly with " + e.getMessage());
+                if (dfTest.getRowDimension() < 2 || trainGKSketches.get(colName).size() < 2) {
+                    result.put(colName, new HypothesisTestResult(0, 1, false));
+                } else {
+                    GKSketch testSketch = new GKSketch(eps);
+                    GKSketch trainSketch = trainGKSketches.get(colName);
+                    dfTest.getColumn(i).stream().mapToDouble(Value::asNumber).forEach(testSketch::insert);
+                    double d = 0.0;
+                    try {
+                        d = computeKSDistance(trainSketch, testSketch);
+                    } catch (GKException e) {
+                        throw new RuntimeException("Unexpected execution of GKSketch:  " + e.getMessage());
+                    }
+                    double pValue = computePvalue(d, trainSketch.getNumx(), testSketch.getNumx()); //compute pvalue
+                    boolean reject = pValue <= signif;
+                    result.put(colName, new HypothesisTestResult(d, pValue, reject));
                 }
-                double pValue = computePvalue(d, trainSketch.getNumx(), testSketch.getNumx()); //compute pvalue
-                boolean reject = pValue <= signif;
-                result.put(colName, new HypothesisTestResult(d, pValue, reject));
             }
         }
 

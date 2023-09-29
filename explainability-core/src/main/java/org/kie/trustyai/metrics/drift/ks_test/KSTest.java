@@ -18,9 +18,6 @@ public class KSTest {
      * Returns HypothesisTestResult per column with KSTest statistic, p-value and reject
      */
     public HashMap<String, HypothesisTestResult> calculate(Dataframe dfTrain, Dataframe dfTest, double signif) {
-        if (dfTrain.getRowDimension() < 2 || (dfTest.getRowDimension() < 2)) {
-            throw new IllegalArgumentException(String.format("Passed dataframes are too small to calculate statistical hypothesis test."));
-        }
         double d = 0.0d;
         List<Type> types = dfTrain.getColumnTypes();
         List<String> trainNames = dfTrain.getColumnNames();
@@ -36,15 +33,18 @@ public class KSTest {
                                     "Passed dataframe not compatible with the train dataframe: no such column in train dataframe with name %s.",
                                     testNames.get(i)));
                 }
+                if (dfTrain.getRowDimension() < 2 || (dfTest.getRowDimension() < 2)) {
+                    result.put(colName, new HypothesisTestResult(0, 1, false));
+                } else {
+                    double[] trainArray = dfTrain.getColumn(i).stream().mapToDouble(Value::asNumber).toArray();
+                    double[] testArray = dfTest.getColumn(i).stream().mapToDouble(Value::asNumber).toArray();
 
-                double[] trainArray = dfTrain.getColumn(i).stream().mapToDouble(Value::asNumber).toArray();
-                double[] testArray = dfTest.getColumn(i).stream().mapToDouble(Value::asNumber).toArray();
-
-                KolmogorovSmirnovTest ks_test = new KolmogorovSmirnovTest();
-                d = ks_test.kolmogorovSmirnovStatistic(trainArray, testArray);
-                double pValue = ks_test.kolmogorovSmirnovTest(trainArray, testArray);
-                boolean reject = pValue <= signif;
-                result.put(colName, new HypothesisTestResult(d, pValue, reject));
+                    KolmogorovSmirnovTest ks_test = new KolmogorovSmirnovTest();
+                    d = ks_test.kolmogorovSmirnovStatistic(trainArray, testArray);
+                    double pValue = ks_test.kolmogorovSmirnovTest(trainArray, testArray);
+                    boolean reject = pValue <= signif;
+                    result.put(colName, new HypothesisTestResult(d, pValue, reject));
+                }
             }
         }
         return result;

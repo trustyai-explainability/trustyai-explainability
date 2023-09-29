@@ -47,7 +47,7 @@ public class GKSketch {
         try {
             update(x);
         } catch (GKException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Unexpected execution of GKSketch:  " + e.getMessage());
         }
     }
 

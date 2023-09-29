@@ -76,7 +76,6 @@ class KSTestEndpointTest {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
                 .body().as(BaseMetricResponse.class);
-        System.out.println(response);
         assertTrue(response.getNamedValues().get("f1") < 0.05);
         assertTrue(response.getNamedValues().get("f2") < 0.05);
         assertTrue(response.getNamedValues().get("f3") < 0.05);
