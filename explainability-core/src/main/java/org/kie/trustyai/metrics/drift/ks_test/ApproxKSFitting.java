@@ -1,6 +1,6 @@
 package org.kie.trustyai.metrics.drift.ks_test;
-import java.util.Map;
 
+import java.util.Map;
 
 public class ApproxKSFitting {
     Map<String, GKSketch> fitSketches;

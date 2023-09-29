@@ -1,6 +1,5 @@
 package org.kie.trustyai.metrics.drift;
 
-
 public class HypothesisTestResult {
 
     private final double statVal;
