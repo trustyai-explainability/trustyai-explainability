@@ -26,8 +26,7 @@ import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 @TestProfile(MetricsEndpointTestProfile.class)
@@ -48,12 +47,12 @@ class KSTestEndpointTest {
     @BeforeEach
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
-        Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        Dataframe dataframe = datasource.get().generateDataframeFromNormalDistributions(N_SAMPLES, 1.0, 2.0);
 
         HashMap<String, List<List<Integer>>> tagging = new HashMap<>();
         tagging.put(TRAINING_TAG, List.of(List.of(0, N_SAMPLES)));
         dataframe.tagDataPoints(tagging);
-        dataframe.addPredictions(datasource.get().generateRandomDataframeDrifted(N_SAMPLES).asPredictions());
+        dataframe.addPredictions(datasource.get().generateDataframeFromNormalDistributions(N_SAMPLES, 2.0, 1.0).asPredictions());
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }
@@ -77,9 +76,10 @@ class KSTestEndpointTest {
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()
                 .body().as(BaseMetricResponse.class);
-        // TODO: update test data
-        assertEquals(0, response.getNamedValues().get("age"));
-        assertTrue(response.getNamedValues().get("race") > 0.05);
+        System.out.println(response);
+        assertTrue(response.getNamedValues().get("f1") < 0.05);
+        assertTrue(response.getNamedValues().get("f2") < 0.05);
+        assertTrue(response.getNamedValues().get("f3") < 0.05);
         assertTrue(response.getNamedValues().get("income") > 0.05);
 
     }

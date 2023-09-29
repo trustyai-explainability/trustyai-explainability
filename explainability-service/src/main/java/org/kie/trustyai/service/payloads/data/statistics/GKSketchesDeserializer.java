@@ -41,10 +41,6 @@ public class GKSketchesDeserializer extends StdDeserializer<Map<String, GKSketch
         return result;
     };
 
-    /**
-     * @param node
-     * @return summary
-     */
     public List<Triple<Double, Integer, Integer>> jsonNodeToTripleList(JsonNode node) {
         int size = node.size();
         List<Triple<Double, Integer, Integer>> summary = new ArrayList<>(size);
@@ -53,23 +49,7 @@ public class GKSketchesDeserializer extends StdDeserializer<Map<String, GKSketch
         }
         return summary;
     }
-
-    /* 
-    private Object parseJsonToObject(Map.Entry<String, JsonNode> entry) {
-        if ("summary" == entry.getKey()) {
-            return jsonNodeToTripleList(entry.getValue());
-        } else if ("xmin" == entry.getKey()) {
-            return entry.getValue().asDouble();
-        } else if ("xmax" == entry.getKey()) {
-            return entry.getValue().asDouble();
-        } else if ("numx" == entry.getKey()) {
-            return entry.getValue().asInt();
-        } else if ("epsilon" == entry.getKey()) {
-            return entry.getValue().asDouble();
-        } else {
-            return entry.getValue();
-        }
-    } */
+    
     private GKSketch parseJsonToGKSketch(JsonNode node) {
         return new GKSketch(
                 node.get("epsilon").asDouble(),
@@ -78,28 +58,4 @@ public class GKSketchesDeserializer extends StdDeserializer<Map<String, GKSketch
                 node.get("numx").asInt()
                 );
     }
-    /* 
-    @Override
-    public Map<String, StatisticalSummaryValues> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-        JsonNode node = jp.getCodec().readTree(jp);
-
-        Map<String, StatisticalSummaryValues> result = new HashMap<>();
-
-        for (Iterator<Map.Entry<String, JsonNode>> it = node.fields(); it.hasNext();) {
-            Map.Entry<String, JsonNode> entry = it.next();
-            result.put(entry.getKey(), parseJsonToSSV(entry.getValue()));
-        }
-        return result;
-    }
-
-    private StatisticalSummaryValues parseJsonToSSV(JsonNode node) {
-        return new StatisticalSummaryValues(
-                node.get("mean").asDouble(),
-                node.get("variance").asDouble(),
-                node.get("n").asLong(),
-                node.get("max").asDouble(),
-                node.get("min").asDouble(),
-                node.get("sum").asDouble());
-    }
-    */
 }
