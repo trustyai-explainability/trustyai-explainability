@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.prometheus;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -80,11 +82,13 @@ public class PrometheusPublisher {
     }
 
     public void gauge(@ValidReconciledMetricRequest BaseMetricRequest request, String modelName, UUID id, Map<String, Double> namedValues) {
+        AtomicInteger idx = new AtomicInteger();
         for (Map.Entry<String, Double> entry : namedValues.entrySet()) {
-            values.put(id, new AtomicDouble(entry.getValue()));
-            List<Tag> tags = generateTags(modelName, id, Optional.of(request));
-            tags.add(Tag.of("columnName", entry.getKey()));
-            createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, id);
+            UUID newID = UUID.nameUUIDFromBytes((id.toString() + idx.getAndIncrement()).getBytes(StandardCharsets.UTF_8));
+            values.put(newID, new AtomicDouble(entry.getValue()));
+            List<Tag> tags = generateTags(modelName, newID, Optional.of(request));
+            tags.add(Tag.of("subcategory", entry.getKey()));
+            createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, newID);
         }
         LOG.debug(String.format("Scheduled request for %s id=%s, value=%s", request.getMetricName(), id, namedValues));
     }
