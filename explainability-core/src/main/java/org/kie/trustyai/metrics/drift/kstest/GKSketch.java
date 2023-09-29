@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Triple;
 
 // This class implements Greenwald-Khanna epsilon sketch for approximate quantiles as mentioned in Lall's.
-// Algorithm is based on M. Greenwald and S. Khanna. Space-efficient online com- putation of quantile summaries. In SIGMOD, pages 58–66, 2001
+// Algorithm is based on M. Greenwald and S. Khanna. Space-efficient online computation of quantile summaries. In SIGMOD, pages 58–66, 2001
 public class GKSketch {
     private double epsilon;
     /*

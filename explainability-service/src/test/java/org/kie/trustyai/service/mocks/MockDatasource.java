@@ -60,7 +60,7 @@ public class MockDatasource extends DataSource {
         final List<Prediction> predictions = new ArrayList<>();
         final Random random = new Random(0);
         for (int i = 0; i < observations; i++) {
-            double nextRand = random.nextGaussian() * stdDeviation + mean;
+            double nextRand = random.nextGaussian();
             final List<Feature> featureList = List.of(
                     // guarantee feature diversity for age is min(observations, featureDiversity)
                     FeatureFactory.newNumericalFeature("f1", (nextRand * stdDeviation + mean)),

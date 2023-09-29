@@ -15,7 +15,7 @@ import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 import org.kie.trustyai.metrics.drift.kstest.GKSketch.GKException;
 
 /*
- * Implements Approximate Kolmogorov-Smirnov Test using Greenwald-Khanna epsilon sketch as described in A. Lall, “Data streaming algorithms for the kolmogorov-smirnov test,”
+ * Implements Approximate Kolmogorov-Smirnov Test using Greenwald-Khanna epsilon sketch as described in A. Lall, “Data streaming algorithms for the kolmogorov-smirnov test”
 in 2015 IEEE International Conference on Big Data (Big Data), 2015, pp. 95–104
  */
 public class ApproxKSTest {
