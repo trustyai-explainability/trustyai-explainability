@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.drift.ks_test;
+package org.kie.trustyai.metrics.drift.kstest;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,7 +12,7 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
-import org.kie.trustyai.metrics.drift.ks_test.GKSketch.GKException;
+import org.kie.trustyai.metrics.drift.kstest.GKSketch.GKException;
 
 /*
  * Implements Approximate Kolmogorov-Smirnov Test using Greenwald-Khanna epsilon sketch as described in A. Lall, “Data streaming algorithms for the kolmogorov-smirnov test,”

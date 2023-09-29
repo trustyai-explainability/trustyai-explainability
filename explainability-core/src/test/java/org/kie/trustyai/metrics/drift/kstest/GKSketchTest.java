@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.drift.ks_test;
+package org.kie.trustyai.metrics.drift.kstest;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,7 +9,6 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class GKSketchTest {

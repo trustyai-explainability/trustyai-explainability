@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.drift.ks_test;
+package org.kie.trustyai.metrics.drift.kstest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +13,6 @@ import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class ApproxKSTestTest {

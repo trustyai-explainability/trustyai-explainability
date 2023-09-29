@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Triple;
-import org.kie.trustyai.metrics.drift.ks_test.GKSketch;
+import org.kie.trustyai.metrics.drift.kstest.GKSketch;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;

@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.drift.ks_test;
+package org.kie.trustyai.metrics.drift.kstest;
 
 import java.util.Map;
 

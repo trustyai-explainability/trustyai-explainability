@@ -2,7 +2,7 @@ package org.kie.trustyai.service.payloads.metrics.drift.kstest;
 
 import java.util.Map;
 
-import org.kie.trustyai.metrics.drift.ks_test.GKSketch;
+import org.kie.trustyai.metrics.drift.kstest.GKSketch;
 import org.kie.trustyai.service.payloads.data.statistics.GKSketchesDeserializer;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 
