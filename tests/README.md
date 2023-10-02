@@ -30,7 +30,7 @@ make clean # remove the artifacts of the test from the cluster (operator, ODH, p
 To change the images used in CI, use the following flags in the `make run` command:
 * `SERVICE_IMAGE_REPO`: Set the repo to pull the service image from, defaults to `quay.io/trustyai/trustyai-service`
 * `SERVICE_IMAGE_TAG`: Set the tag to pull for the service image, defaults to `latest`
-* `OPERATOR_IMAGE_REPO`: Set the repo to pull the operator image from, defaults to `quay.io/trustyai/trustyai-service-operator
+* `OPERATOR_IMAGE_REPO`: Set the repo to pull the operator image from, defaults to `quay.io/trustyai/trustyai-service-operator`
 * `OPERATOR_IMAGE_TAG`: Set the tag to pull for the operator image, defaults to `latest`
 
 
