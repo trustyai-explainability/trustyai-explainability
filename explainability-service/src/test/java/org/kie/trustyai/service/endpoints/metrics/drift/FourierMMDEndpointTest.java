@@ -148,7 +148,6 @@ class FourierMMDEndpointTest {
         FourierMMDMetricRequest payload = new FourierMMDMetricRequest();
 
         double threshold = 0.8;
-
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
         payload.setThresholdDelta(threshold);
@@ -162,7 +161,7 @@ class FourierMMDEndpointTest {
                 .extract()
                 .body().as(BaseMetricResponse.class);
 
-        assertTrue(response.getNamedValues().get("pValue") < threshold);
+        assertTrue(response.getValue() < threshold);
     }
 
     @Test
@@ -184,7 +183,7 @@ class FourierMMDEndpointTest {
         payload.setReferenceTag(TRAINING_TAG);
         payload.setModelId(MODEL_ID);
         payload.setThresholdDelta(threshold);
-        payload.setFitting(fmf.getFitStats());
+        payload.setFitting(fmf);
 
         BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
@@ -196,7 +195,7 @@ class FourierMMDEndpointTest {
                 .extract()
                 .body().as(BaseMetricResponse.class);
 
-        assertTrue(response.getNamedValues().get("pValue") < threshold);
+        assertTrue(response.getValue() < threshold);
     }
 
     @Test
