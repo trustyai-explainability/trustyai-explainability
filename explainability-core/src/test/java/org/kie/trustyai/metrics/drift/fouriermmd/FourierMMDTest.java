@@ -98,7 +98,8 @@ public class FourierMMDTest {
             final double sig = 10.0;
             final int randomSeed = 1234;
             final int n_mode = 512;
-            FourierMMD fourierMMD = new FourierMMD(trainDF, deltaStat, n_test, n_window, sig, randomSeed, n_mode);
+            final double epsilon = 1.0e-7;
+            FourierMMD fourierMMD = new FourierMMD(trainDF, deltaStat, n_test, n_window, sig, randomSeed, n_mode, epsilon);
 
             final double threshold = 0.8;
             final double gamma = 1.5;
@@ -124,7 +125,8 @@ public class FourierMMDTest {
             final double sig = 10.0;
             final int randomSeed = 1234;
             final int n_mode = 512;
-            FourierMMD fourierMMD = new FourierMMD(trainDF, deltaStat, n_test, n_window, sig, randomSeed, n_mode);
+            final double epsilon = 1.0e-7;
+            FourierMMD fourierMMD = new FourierMMD(trainDF, deltaStat, n_test, n_window, sig, randomSeed, n_mode, epsilon);
 
             final double threshold = 0.8;
             final double gamma = 1.5;

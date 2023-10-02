@@ -98,7 +98,8 @@ public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
                     parameters.getnWindow(),
                     parameters.getSig(),
                     rng.nextInt(),
-                    parameters.getnMode());
+                    parameters.getnMode(),
+                    parameters.getEpsilon());
             request.setFitting(fmf);
         } else {
             LOG.debug("Using previously found fouriermmd fitting in request for model=" + request.getModelId());

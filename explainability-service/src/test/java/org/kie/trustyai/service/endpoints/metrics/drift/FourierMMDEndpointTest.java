@@ -174,7 +174,8 @@ class FourierMMDEndpointTest {
                 20, // parameters.getnWindow(),
                 parameters.getSig(),
                 parameters.getRandomSeed(),
-                parameters.getnMode());
+                parameters.getnMode(),
+                parameters.getEpsilon());
 
         FourierMMDMetricRequest payload = new FourierMMDMetricRequest();
 

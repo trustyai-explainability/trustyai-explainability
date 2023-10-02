@@ -21,8 +21,8 @@ public class FourierMMD {
     private FourierMMDFitting fitStats;
 
     public FourierMMD(Dataframe dfTrain, boolean deltaStat, int n_test, int n_window, double sig, int randomSeed,
-            int n_mode) {
-        fitStats = precompute(dfTrain, deltaStat, n_test, n_window, sig, randomSeed, n_mode);
+            int n_mode, double epsilon) {
+        fitStats = precompute(dfTrain, deltaStat, n_test, n_window, sig, randomSeed, n_mode, epsilon);
     }
 
     public FourierMMD(FourierMMDFitting fourierMMDFitting) {
@@ -31,7 +31,7 @@ public class FourierMMD {
 
     // def learn(self, data: pd.DataFrame):
     public static FourierMMDFitting precompute(Dataframe data, boolean deltaStat, int n_test, int n_window, double sig,
-            int randomSeed, int n_mode) {
+            int randomSeed, int n_mode, double epsilon) {
 
         FourierMMDFitting computedStats = new FourierMMDFitting(randomSeed, deltaStat, n_mode);
         final Dataframe numericData = data.getNumericColumns();
@@ -45,7 +45,15 @@ public class FourierMMD {
             throw new IllegalArgumentException("Dataframe is empty");
         }
 
-        final double[] scaleArray = Arrays.stream(xIn.std()).mapToDouble(d -> d * sig).toArray();
+        final double[] scaleArray = Arrays.stream(xIn.std()).mapToDouble(d -> d).toArray();
+        for (int i = 0; i < scaleArray.length; i++) {
+            if (scaleArray[i] < epsilon) {
+                scaleArray[i] = epsilon;
+            }
+
+            scaleArray[i] *= sig;
+        }
+
         computedStats.setScale(scaleArray);
 
         // Init the RNG to the same seed that will be used for the execute() method
