@@ -19,14 +19,19 @@ make clean # remove the artifacts of the test from the cluster (operator, ODH, p
 
 
 
-## Useful Arguments
+## Useful Makefile Arguments
 * `BUILD_TOOL=docker/podman`: set the tool used to build and run the testing container
 * `SKIP_INSTALL=true/false`: skip the install of the ODH operator, if you've already installed it manually or via a previous test
 * `SKIP_KFDEF_INSTALL=true/false`: skip the install of ODH via KFdef, if you've already installed it manually or via a previous test
 * `TESTS_REGEX=${REGEX}`: only run tests whose names match the regex
 * `LOCAL=true/false`: This flag makes the test suite stop and wait for user input between the end of a test script and cluster teardown.   This prevents automatic teardown, which is useful for manual inspection of the cluster before teardown when running the tests locally.
 * `TEARDOWN=true/false`: This flag will just run the corresponding `teardown` functions within the various tests, useful for cleaning up stranded components from failed tests, without deleting the operator and ODH install. It's recommended to use this with a `make run`, as using `make test` will trigger a `make clean` that fully wipes the cluster. 
-
+### CI Image Arguments
+To change the images used in CI, use the following flags in the `make run` command:
+* `SERVICE_IMAGE_REPO`: Set the repo to pull the service image from, defaults to `quay.io/trustyai/trustyai-service`
+* `SERVICE_IMAGE_TAG`: Set the tag to pull for the service image, defaults to `latest`
+* `OPERATOR_IMAGE_REPO`: Set the repo to pull the operator image from, defaults to `quay.io/trustyai/trustyai-service-operator
+* `OPERATOR_IMAGE_TAG`: Set the tag to pull for the operator image, defaults to `latest`
 
 
 # OpenShift-CI Information
