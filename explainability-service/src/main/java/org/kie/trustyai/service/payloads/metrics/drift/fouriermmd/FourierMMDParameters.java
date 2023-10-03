@@ -16,7 +16,7 @@ public class FourierMMDParameters {
         return nWindow;
     }
 
-    public void setnWindow() {
+    public void setnWindow(int nWindow) {
         this.nWindow = nWindow;
     }
 
@@ -24,7 +24,7 @@ public class FourierMMDParameters {
         return nTest;
     }
 
-    public void setnTest() {
+    public void setnTest(int nTest) {
         this.nTest = nTest;
     }
 
@@ -32,7 +32,7 @@ public class FourierMMDParameters {
         return nMode;
     }
 
-    public void setnMode() {
+    public void setnMode(int nMode) {
         this.nMode = nMode;
     }
 
@@ -40,7 +40,7 @@ public class FourierMMDParameters {
         return randomSeed;
     }
 
-    public void setRandomSeed() {
+    public void setRandomSeed(int randomSeed) {
         this.randomSeed = randomSeed;
     }
 
@@ -48,16 +48,15 @@ public class FourierMMDParameters {
         return sig;
     }
 
-    public void setSig() {
+    public void setSig(double sig) {
         this.sig = sig;
     }
 
-    public boolean getDeltaStat() {
+    public boolean isDeltaStat() {
         return deltaStat;
     }
 
-    public void setDeltaStat() {
+    public void setDeltaStat(boolean deltaStat) {
         this.deltaStat = deltaStat;
     }
-
 }
