@@ -17,10 +17,8 @@ ODHPROJECT=${ODHPROJECT:-"opendatahub"}
 export ODHPROJECT
 export LOCAL
 export TEARDOWN
-export SERVICE_IMAGE_REPO
-export SERVICE_IMAGE_TAG
-export OPERATOR_IMAGE_REPO
-export OPERATOR_IMAGE_TAG
+export SERVICE_IMAGE
+export OPERATOR_IMAGE
 
 echo "OCP version info"
 echo `oc version`
