@@ -291,7 +291,6 @@ public class TensorConverter {
     // converting an entire batch of raw contents is faster, so prefer this function when possible
     private static List<Output> rawHandlerMultiOutput(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, List<String> names, int secondShape, boolean raw) {
         if (raw) {
-            logger.info("raw converter raw handler multi list<output>");
             return PayloadParser.rawContentToPredictionOutput(data, names).getOutputs();
         }
         return IntStream.range(0, secondShape)
