@@ -211,7 +211,6 @@ public class PayloadParser {
     public static PredictionOutput outputFromContentList(List<?> values, Type type, List<String> outputNames) {
         final int size = values.size();
         List<String> names = outputNames == null ? IntStream.range(0, size).mapToObj(i -> "outputs-" + i).collect(Collectors.toList()) : outputNames;
-
         if (names.size() != size) {
             throw new IllegalArgumentException("Output names list has an incorrect size (" + names.size() + ", when it should be " + size + ")");
         }
