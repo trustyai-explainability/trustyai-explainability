@@ -298,7 +298,6 @@ public class TensorConverter {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-
     private static List<PredictionOutput> rawHandlerMulti(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, List<String> names, int secondShape, boolean raw) {
         return rawHandlerMulti(data, tensor, names, secondShape, raw, 0);
     }
