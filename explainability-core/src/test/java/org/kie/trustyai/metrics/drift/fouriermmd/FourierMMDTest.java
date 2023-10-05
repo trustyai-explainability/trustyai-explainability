@@ -20,6 +20,7 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 
 public class FourierMMDTest {
 
@@ -101,11 +102,11 @@ public class FourierMMDTest {
 
             final double threshold = 0.8;
             final double gamma = 1.5;
-            FourierMMDResult drift = fourierMMD.calculate(validDF, threshold, gamma);
+            HypothesisTestResult drift = fourierMMD.calculate(validDF, threshold, gamma);
 
-            Assertions.assertFalse(drift.drifted, "drifted flag is true");
+            Assertions.assertFalse(drift.isReject(), "drifted flag is true");
 
-            Assertions.assertTrue(drift.pValue < 1.0, "drift.pValue >= 1.0");
+            Assertions.assertTrue(drift.getpValue() < 1.0, "drift.pValue >= 1.0");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -127,11 +128,11 @@ public class FourierMMDTest {
 
             final double threshold = 0.8;
             final double gamma = 1.5;
-            FourierMMDResult drift = fourierMMD.calculate(testDF, threshold, gamma);
+            HypothesisTestResult drift = fourierMMD.calculate(testDF, threshold, gamma);
 
-            Assertions.assertTrue(drift.drifted, "drifted flag is false");
+            Assertions.assertTrue(drift.isReject(), "drifted flag is false");
 
-            Assertions.assertTrue(drift.pValue >= 1.0, "drift.pValue < 1.0");
+            Assertions.assertTrue(drift.getpValue() >= 1.0, "drift.pValue < 1.0");
 
         } catch (Exception e) {
             e.printStackTrace();

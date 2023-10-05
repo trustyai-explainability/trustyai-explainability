@@ -3,12 +3,11 @@ package org.kie.trustyai.service.payloads.metrics.drift.fouriermmd;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.kie.trustyai.service.payloads.data.statistics.FourierMMDValuesDeserializer;
+import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMDFitting;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Request for Fourier MMD Drift.
@@ -26,8 +25,7 @@ public class FourierMMDMetricRequest extends DriftMetricRequest {
     private FourierMMDParameters parameters = new FourierMMDParameters();
     private double gamma = 2.0;
 
-    @JsonDeserialize(using = FourierMMDValuesDeserializer.class)
-    private Map<String, Object> fitting;
+    private FourierMMDFitting fitting;
 
     public FourierMMDMetricRequest() {
         // Public default no-argument constructor
@@ -38,11 +36,11 @@ public class FourierMMDMetricRequest extends DriftMetricRequest {
         return parameters;
     }
 
-    public Map<String, Object> getFitting() {
+    public FourierMMDFitting getFitting() {
         return fitting;
     }
 
-    public void setFitting(Map<String, Object> fitting) {
+    public void setFitting(FourierMMDFitting fitting) {
         // fitting object * does not correspond to columns*, so do not set fitColumns
         this.fitting = fitting;
     }
