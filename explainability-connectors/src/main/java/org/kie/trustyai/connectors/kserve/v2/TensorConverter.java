@@ -291,6 +291,7 @@ public class TensorConverter {
     // converting an entire batch of raw contents is faster, so prefer this function when possible
     private static List<Output> rawHandlerMultiOutput(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, List<String> names, int secondShape, boolean raw) {
         if (raw) {
+            logger.info("raw converter raw handler multi list<output>");
             return PayloadParser.rawContentToPredictionOutput(data, names).getOutputs();
         }
         return IntStream.range(0, secondShape)
@@ -298,10 +299,15 @@ public class TensorConverter {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    // converting an entire batch of raw contents is faster, so prefer this function when possible
+
     private static List<PredictionOutput> rawHandlerMulti(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, List<String> names, int secondShape, boolean raw) {
+        return rawHandlerMulti(data, tensor, names, secondShape, raw, 0);
+    }
+
+    // converting an entire batch of raw contents is faster, so prefer this function when possible
+    private static List<PredictionOutput> rawHandlerMulti(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, List<String> names, int secondShape, boolean raw, int idx) {
         if (raw) {
-            return new ArrayList<>(List.of(PayloadParser.rawContentToPredictionOutput(data, names)));
+            return new ArrayList<>(List.of(PayloadParser.rawContentToPredictionOutput(data, names, idx)));
         }
         final List<Output> output = IntStream.range(0, secondShape)
                 .mapToObj(i -> contentsToOutput(tensor, names.get(i), i))
@@ -409,7 +415,7 @@ public class TensorConverter {
                                     tensors.get(tensorIDX),
                                     names,
                                     perTensorSecondShape.get(tensorIDX),
-                                    raw).get(0).getOutputs();
+                                    raw, tensorIDX).get(0).getOutputs();
                         }).flatMap(Collection::stream).collect(Collectors.toList());
                 return List.of(new PredictionOutput(outputs));
 
