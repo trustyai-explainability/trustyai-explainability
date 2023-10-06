@@ -1,7 +1,5 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
-import java.util.Random;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -30,7 +28,6 @@ import io.quarkus.cache.CacheResult;
         "distance between mean embeddings of features from the test dataframe and the training dataframe.")
 @Path("/metrics/drift/fouriermmd")
 public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
-    final Random rng = new Random();
 
     public FourierMMDEndpoint() {
         super("FOURIERMMD");
