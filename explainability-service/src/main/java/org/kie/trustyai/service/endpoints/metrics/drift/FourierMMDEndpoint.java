@@ -97,7 +97,7 @@ public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
             final FourierMMDParameters parameters = request.getParameters();
 
             fmf = FourierMMD.precompute(fitting,
-                    parameters.getDeltaStat(),
+                    parameters.isDeltaStat(),
                     parameters.getnTest(),
                     parameters.getnWindow(),
                     parameters.getSig(),

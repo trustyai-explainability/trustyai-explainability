@@ -53,7 +53,7 @@ public class FourierMMDParameters {
         this.sig = sig;
     }
 
-    public boolean getDeltaStat() {
+    public boolean isDeltaStat() {
         return deltaStat;
     }
 

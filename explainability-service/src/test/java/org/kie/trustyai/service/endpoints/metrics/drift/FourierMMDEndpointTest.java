@@ -169,7 +169,7 @@ class FourierMMDEndpointTest {
         Dataframe dfTrain = datasource.get().getDataframe(MODEL_ID).filterRowsByTagEquals(TRAINING_TAG);
         FourierMMDParameters parameters = new FourierMMDParameters();
         FourierMMDFitting fmf = FourierMMD.precompute(dfTrain,
-                parameters.getDeltaStat(),
+                parameters.isDeltaStat(),
                 parameters.getnTest(),
                 20, // parameters.getnWindow(),
                 parameters.getSig(),
