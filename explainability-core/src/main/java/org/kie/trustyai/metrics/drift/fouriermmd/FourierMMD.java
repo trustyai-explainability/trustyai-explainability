@@ -223,7 +223,8 @@ public class FourierMMD {
 
     // def _random_fourier_coefficients(self, x, wave_num, bias, n_mode):
 
-    private static double[] randomFourierCoefficients(double[][] x, double[][] waveNum, double[][] bias, int ndata, final int n_mode) {
+    private static double[] randomFourierCoefficients(double[][] x, double[][] waveNum, double[][] bias, int ndata,
+            final int n_mode) {
         // r_cos = np.cos(np.matmul(x, wave_num) + bias.repeat(x.shape[0], 0))
 
         final Array2DRowRealMatrix xMatrix = new Array2DRowRealMatrix(x);

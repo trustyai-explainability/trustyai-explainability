@@ -11,13 +11,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
  * Request for Fourier MMD Drift.
- * Specific parameters for the Fourier MMD are defined in the {@link FourierMMDParameters} class.
+ * Specific parameters for the Fourier MMD are defined in the
+ * {@link FourierMMDParameters} class.
  */
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "@type",
-        defaultImpl = FourierMMDMetricRequest.class)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "@type", defaultImpl = FourierMMDMetricRequest.class)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = FourierMMDMetricRequest.class, name = "FourierMMDMetricRequest")
 })
