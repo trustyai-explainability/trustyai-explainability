@@ -1244,7 +1244,6 @@ public class Dataframe {
         return idToIDX.get(id);
     }
 
-
     /**
      * Get the standard deviation of all numeric columns
      *
