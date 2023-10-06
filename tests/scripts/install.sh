@@ -45,15 +45,12 @@ popd
 pushd ~/kfdef
 
 # put in latest values for operator image
-sed -i "s#value: operatorTagPlaceholder#value: latest#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
-sed -i "s#value: operatorImagePlaceholder#value: quay.io/trustyai/trustyai-service-operator#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
-
+sed -i "s#value: operatorImagePlaceholder#value: ${OPERATOR_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 
 if [ -z "$PULL_NUMBER" ]; then
   echo "No pull number, not modifying ${KFDEF_FILENAME}"
       # if not a pull, use latest version of service
-      sed -i "s#value: serviceTagPlaceholder#value: latest#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
-      sed -i "s#value: serviceImagePlaceholder#value: quay.io/trustyai/trustyai-service#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
+      sed -i "s#value: serviceImagePlaceholder#value: ${SERVICE_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 else
   if [ $REPO_NAME == "trustyai-explainability" ]; then
     echo "Setting manifests in kfctl_openshift to use pull number: $PULL_NUMBER"
@@ -63,8 +60,7 @@ else
 
     # if a pull, use version built from CI
     echo "Setting TrustyAI operator configmap to use PR image"
-    sed -i "s#value: serviceImagePlaceholder#value: quay.io/trustyai/trustyai-service-ci#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
-    sed -i "s#value: serviceTagPlaceholder#value: ${BRANCH_SHA}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
+    sed -i "s#value: serviceImagePlaceholder#value: quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 
     echo "TrustyAI Operator KFDEF"
     cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml

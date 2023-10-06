@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Currency;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1241,48 +1242,41 @@ public class Dataframe {
 
     public Integer getRowIdxFromID(String id) {
         return idToIDX.get(id);
-
-    public Dataframe std() {
-
-        final int numCols = metadata.names.size();
-
-        // Dataframe assumes this is list of columns each containing a list of rows
-        final List<List<Value>> stdData = new ArrayList<>(numCols);
-
-        for (int i = 0; i < numCols; i++) {
-
-            final List<Value> columnData = this.getColumn(i);
-            final int numRows = columnData.size();
-
-            final double[] rowDoubles = new double[numRows];
-
-            for (int j = 0; j < numRows; j++) {
-                final Value rowValue = columnData.get(j);
-                rowDoubles[j] = rowValue.asNumber();
-            }
-
-            final double dataMean = DataUtils.getMean(rowDoubles);
-            final double dataStdDev = DataUtils.getStdDev(rowDoubles, dataMean);
-
-            final Value stdValue = new Value(dataStdDev);
-
-            final List<Value> rows = new ArrayList<Value>(1);
-            stdData.add(rows);
-
-            rows.add(stdValue);
-        }
-
-        return new Dataframe(stdData, this.metadata);
     }
 
-    public Dataframe getNumericColumns() {
 
+    /**
+     * Get the standard deviation of all numeric columns
+     *
+     * @return Resulting {@link List} of standard deviations
+     */
+    public Double[] std() {
+        final int numCols = metadata.names.size();
         final List<Type> colTypes = this.metadata.types;
 
-        final List<Integer> dropColumns = new ArrayList<Integer>(colTypes.size());
+        // Dataframe assumes this is list of columns each containing a list of rows
+        final Double[] stdData = new Double[numCols];
+
+        for (int i = 0; i < numCols; i++) {
+            if (colTypes.get(i).equals(Type.NUMBER)) {
+                final double[] rowDoubles = this.getColumn(i).stream().mapToDouble(Value::asNumber).toArray();
+                stdData[i] = DataUtils.getStdDev(rowDoubles, DataUtils.getMean(rowDoubles));
+            } else {
+                stdData[i] = null;
+            }
+        }
+        return stdData;
+    }
+
+    /**
+     * Return a subset of the dataframe containing only numeric columns
+     *
+     */
+    public Dataframe getNumericColumns() {
+        final List<Type> colTypes = this.metadata.types;
+        final List<Integer> dropColumns = new ArrayList<>(colTypes.size());
 
         for (int col = 0; col < colTypes.size(); col++) {
-
             final Type type = colTypes.get(col);
             if (type != Type.NUMBER) {
                 dropColumns.add(col);
