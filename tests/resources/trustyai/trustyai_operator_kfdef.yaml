@@ -9,14 +9,10 @@ spec:
           name: manifests
           path: config
         parameters:
-          - name: trustyaiServiceImageName
+          - name: trustyaiServiceImage
             value: serviceImagePlaceholder
-          - name: trustyaiServiceImageTag
-            value: serviceTagPlaceholder
-          - name: trustyaiOperatorImageName
+          - name: trustyaiOperatorImage
             value: operatorImagePlaceholder
-          - name: trustyaiOperatorImageTag
-            value: operatorTagPlaceholder
       name: trustyai-service-operator
   repos:
     - name: manifests

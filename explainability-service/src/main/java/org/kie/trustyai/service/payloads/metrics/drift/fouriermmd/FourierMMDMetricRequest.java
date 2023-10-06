@@ -25,7 +25,6 @@ public class FourierMMDMetricRequest extends DriftMetricRequest {
     private FourierMMDParameters parameters = new FourierMMDParameters();
     private double gamma = 2.0;
 
-    //@JsonDeserialize(using = FourierMMDValuesDeserializer.class)
     private FourierMMDFitting fitting;
 
     public FourierMMDMetricRequest() {
