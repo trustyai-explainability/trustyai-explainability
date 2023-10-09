@@ -45,14 +45,7 @@ public class FourierMMD {
             throw new IllegalArgumentException("Dataframe is empty");
         }
 
-        final double[] scaleArray = Arrays.stream(xIn.std()).mapToDouble(d -> d).toArray();
-        for (int i = 0; i < scaleArray.length; i++) {
-            if (scaleArray[i] < epsilon) {
-                scaleArray[i] = epsilon;
-            }
-
-            scaleArray[i] *= sig;
-        }
+        final double[] scaleArray = Arrays.stream(xIn.std()).mapToDouble(d -> Math.max(d, epsilon) * sig).toArray();
 
         computedStats.setScale(scaleArray);
 
