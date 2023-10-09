@@ -2,14 +2,6 @@ package org.kie.trustyai.service.endpoints.metrics.drift;
 
 import java.util.Objects;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
@@ -21,6 +13,14 @@ import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
+
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEndpoint<T> {
     protected DriftEndpoint(String name) {

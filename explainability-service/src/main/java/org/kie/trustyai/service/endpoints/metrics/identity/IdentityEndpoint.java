@@ -3,15 +3,6 @@ package org.kie.trustyai.service.endpoints.metrics.identity;
 import java.util.List;
 import java.util.Objects;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -30,6 +21,15 @@ import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.identity.ValidIdentityMetricRequest;
 
 import io.quarkus.cache.CacheResult;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 @Tag(name = "Identity Endpoint", description = "The identity endpoint simply returns a mean of a model's last N feature or output values. This is useful" +

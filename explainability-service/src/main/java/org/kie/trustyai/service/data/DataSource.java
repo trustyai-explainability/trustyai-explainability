@@ -7,10 +7,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -27,12 +23,17 @@ import org.kie.trustyai.service.payloads.service.Schema;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+
 @Singleton
 public class DataSource {
     public static final String METADATA_FILENAME = "metadata.json";
     public static final String INTERNAL_DATA_FILENAME = "internal_data.csv";
     private static final Logger LOG = Logger.getLogger(DataSource.class);
     protected final Set<String> knownModels = new HashSet<>();
+
     @Inject
     Instance<Storage> storage;
     @Inject

@@ -1,12 +1,5 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
@@ -22,6 +15,13 @@ import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
 
 import io.quarkus.cache.CacheResult;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 @Tag(name = "FourierMMD Drift Endpoint", description = "Meanshift measures the distance between distributions as " +

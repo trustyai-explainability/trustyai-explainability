@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.storage.MinioConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
@@ -23,6 +21,8 @@ import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import io.minio.*;
 import io.minio.errors.*;
 import io.quarkus.arc.lookup.LookupIfProperty;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "MINIO")
 @ApplicationScoped

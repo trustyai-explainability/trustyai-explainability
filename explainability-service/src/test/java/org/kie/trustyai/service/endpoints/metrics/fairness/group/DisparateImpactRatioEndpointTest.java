@@ -6,10 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +31,10 @@ import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;

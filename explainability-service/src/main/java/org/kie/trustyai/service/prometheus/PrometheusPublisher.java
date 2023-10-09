@@ -11,9 +11,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
@@ -26,6 +23,9 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.search.Search;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class PrometheusPublisher {

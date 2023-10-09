@@ -4,8 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
-import javax.enterprise.inject.Instance;
-
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.values.DataType;
@@ -13,6 +11,8 @@ import org.kie.trustyai.service.payloads.values.TypedValue;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilerMatcher;
+
+import jakarta.enterprise.inject.Instance;
 
 public class RequestReconciler {
 
