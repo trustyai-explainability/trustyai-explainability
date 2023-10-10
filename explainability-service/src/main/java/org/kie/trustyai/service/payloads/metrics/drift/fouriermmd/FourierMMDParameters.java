@@ -11,6 +11,7 @@ public class FourierMMDParameters {
     private int randomSeed = 22;
     private double sig = 10.0;
     private boolean deltaStat = true;
+    private double epsilon = 1.0e-7;
 
     public int getnWindow() {
         return nWindow;
@@ -59,4 +60,13 @@ public class FourierMMDParameters {
     public void setDeltaStat(boolean deltaStat) {
         this.deltaStat = deltaStat;
     }
+
+    public double getEpsilon() {
+        return epsilon;
+    }
+
+    public void setEpsilon(double epsilon) {
+        this.epsilon = epsilon;
+    }
+
 }

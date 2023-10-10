@@ -8,11 +8,13 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
@@ -32,13 +34,51 @@ public class FourierMMDTest {
     Dataframe validDF;
     Dataframe testDF;
 
-    protected void setup() throws Exception {
+    protected void setup() throws IOException {
 
         trainDF = readCSV(trainDataSetFileName);
 
         validDF = readCSV(validDataSetFileName);
 
         testDF = readCSV(testDataSetFileName);
+    }
+
+    protected static Dataframe generateRandomDataframe(int observations, int featureDiversity) {
+        final List<Prediction> predictions = new ArrayList<>();
+        final Random random = new Random(0);
+        for (int i = 0; i < observations; i++) {
+            final List<Feature> featureList = List.of(
+                    // guarantee feature diversity for age is min(observations, featureDiversity)
+                    FeatureFactory.newNumericalFeature("age", i % featureDiversity),
+                    FeatureFactory.newNumericalFeature("gender", random.nextBoolean() ? 1 : 0),
+                    FeatureFactory.newNumericalFeature("race", random.nextBoolean() ? 1 : 0));
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+
+            final List<Output> outputList = List.of(
+                    new Output("income", Type.NUMBER, new Value(random.nextBoolean() ? 1 : 0), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
+    }
+
+    protected static Dataframe generateRandomDataframeDrifted(int observations, int featureDiversity) {
+        final List<Prediction> predictions = new ArrayList<>();
+        final Random random = new Random(0);
+        for (int i = 0; i < observations; i++) {
+            final List<Feature> featureList = List.of(
+                    // guarantee feature diversity for age is min(observations, featureDiversity)
+                    FeatureFactory.newNumericalFeature("age", (i % featureDiversity) + featureDiversity),
+                    FeatureFactory.newNumericalFeature("gender", 0),
+                    FeatureFactory.newNumericalFeature("race", random.nextBoolean() ? 1 : 0));
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+
+            final List<Output> outputList = List.of(
+                    new Output("income", Type.NUMBER, new Value(random.nextBoolean() ? 1 : 0), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
     }
 
     private Dataframe readCSV(String fileName) throws FileNotFoundException, IOException {
@@ -88,54 +128,99 @@ public class FourierMMDTest {
     }
 
     @Test
-    void testValidData() {
-        try {
-            setup();
+    void testValidData() throws IOException {
 
-            final boolean deltaStat = true;
-            final int n_test = 100;
-            final int n_window = 168;
-            final double sig = 10.0;
-            final int randomSeed = 1234;
-            final int n_mode = 512;
-            FourierMMD fourierMMD = new FourierMMD(trainDF, deltaStat, n_test, n_window, sig, randomSeed, n_mode);
+        setup();
 
-            final double threshold = 0.8;
-            final double gamma = 1.5;
-            HypothesisTestResult drift = fourierMMD.calculate(validDF, threshold, gamma);
+        final boolean deltaStat = true;
+        final int n_test = 100;
+        final int n_window = 168;
+        final double sig = 10.0;
+        final int randomSeed = 1234;
+        final int n_mode = 512;
+        final double epsilon = 1.0e-7;
+        FourierMMD fourierMMD = new FourierMMD(trainDF, deltaStat, n_test, n_window, sig, randomSeed, n_mode,
+                epsilon);
 
-            Assertions.assertFalse(drift.isReject(), "drifted flag is true");
+        final double threshold = 0.8;
+        final double gamma = 1.5;
+        HypothesisTestResult drift = fourierMMD.calculate(validDF, threshold, gamma);
 
-            Assertions.assertTrue(drift.getpValue() < 1.0, "drift.pValue >= 1.0");
+        Assertions.assertFalse(drift.isReject(), "drifted flag is true");
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Assertions.assertTrue(drift.getpValue() < 1.0, "drift.pValue >= 1.0");
+
     }
 
     @Test
-    void testProductionData() {
-        try {
-            setup();
+    void testProductionData() throws IOException {
 
-            final boolean deltaStat = true;
-            final int n_test = 100;
-            final int n_window = 168;
-            final double sig = 10.0;
-            final int randomSeed = 1234;
-            final int n_mode = 512;
-            FourierMMD fourierMMD = new FourierMMD(trainDF, deltaStat, n_test, n_window, sig, randomSeed, n_mode);
+        setup();
 
-            final double threshold = 0.8;
-            final double gamma = 1.5;
-            HypothesisTestResult drift = fourierMMD.calculate(testDF, threshold, gamma);
+        final boolean deltaStat = true;
+        final int n_test = 100;
+        final int n_window = 168;
+        final double sig = 10.0;
+        final int randomSeed = 1234;
+        final int n_mode = 512;
+        final double epsilon = 1.0e-7;
+        FourierMMD fourierMMD = new FourierMMD(trainDF, deltaStat, n_test, n_window, sig, randomSeed, n_mode,
+                epsilon);
 
-            Assertions.assertTrue(drift.isReject(), "drifted flag is false");
+        final double threshold = 0.8;
+        final double gamma = 1.5;
+        HypothesisTestResult drift = fourierMMD.calculate(testDF, threshold, gamma);
 
-            Assertions.assertTrue(drift.getpValue() >= 1.0, "drift.pValue < 1.0");
+        Assertions.assertTrue(drift.isReject(), "drifted flag is false");
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Assertions.assertTrue(drift.getpValue() >= 1.0, "drift.pValue < 1.0");
+
+    }
+
+    @Test
+    void testRandomData() {
+
+        // def test_tab_prod_data(self):
+        // window = 20
+        // ss = Fourier_MMD(time_column=None, gamma=4, n_window=window,
+        // delta_stat=False)
+
+        // self.train_tab_x = self._generateRandomDataframe(100, 100)
+
+        Dataframe trainTabX = FourierMMDTest.generateRandomDataframe(100, 100);
+
+        // _ = ss.learn(self.train_tab_x)
+
+        final boolean deltaStat = false;
+        final int n_test = 100;
+        final int n_window = 20;
+        final double sig = 10.0;
+        final int randomSeed = 1234;
+        final int n_mode = 512;
+        final double epsilon = 1.0e-7;
+        FourierMMD fourierMMD = new FourierMMD(trainTabX, deltaStat, n_test, n_window, sig, randomSeed, n_mode,
+                epsilon);
+
+        // d_res = ss.execute(self.test_tab_x)
+
+        // self.test_tab_x = self._generateRandomDataframeDrifted(100,100)
+
+        Dataframe testTabX = FourierMMDTest.generateRandomDataframeDrifted(100, 100);
+
+        final double threshold = 0.8;
+        final double gamma = 4.0;
+        HypothesisTestResult drift = fourierMMD.calculate(testTabX, threshold, gamma);
+
+        // self.assertIsNotNone(d_res)
+        // self.assertIsInstance(d_res, dict)
+        // self.assertListEqual(
+        // list(d_res.keys()), ["drift", "magnitude", "computed_values"]
+        // )
+        // self.assertTrue(d_res["drift"])
+        // self.assertGreaterEqual(d_res["magnitude"], 1)
+
+        Assertions.assertTrue(drift.isReject(), "drifted flag is false");
+
+        Assertions.assertTrue(drift.getpValue() >= 1.0, "drift.pValue < 1.0");
     }
 }

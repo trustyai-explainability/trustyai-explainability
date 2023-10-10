@@ -28,6 +28,7 @@ import io.quarkus.cache.CacheResult;
         "distance between mean embeddings of features from the test dataframe and the training dataframe.")
 @Path("/metrics/drift/fouriermmd")
 public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
+
     public FourierMMDEndpoint() {
         super("FOURIERMMD");
     }
@@ -48,9 +49,11 @@ public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
         return "FourierMMD gives probability that the data values seen in a test dataset come from the same distribution of a training dataset, under the assumption that the computed mmd values are normally distributed.";
     }
 
-    // this function should provide a specific definition/interpretation of what this specific metric value means
+    // this function should provide a specific definition/interpretation of what
+    // this specific metric value means
     @Override
-    public String getSpecificDefinition(MetricValueCarrier metricValues, @ValidDriftMetricRequest FourierMMDMetricRequest request) {
+    public String getSpecificDefinition(MetricValueCarrier metricValues,
+            @ValidDriftMetricRequest FourierMMDMetricRequest request) {
         StringBuilder out = new StringBuilder(getGeneralDefinition());
         out.append(System.getProperty("line.separator"));
 
@@ -70,9 +73,11 @@ public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
 
     }
 
-    // this function should provide the functionality of actually calculating a specific metric value for a given request
+    // this function should provide the functionality of actually calculating a
+    // specific metric value for a given request
     @CacheResult(cacheName = "metrics-calculator-fouriermmd", keyGenerator = MetricCalculationCacheKeyGen.class)
-    public MetricValueCarrier calculate(Dataframe dataframe, @ValidReconciledMetricRequest BaseMetricRequest bmRequest) {
+    public MetricValueCarrier calculate(Dataframe dataframe,
+            @ValidReconciledMetricRequest BaseMetricRequest bmRequest) {
         @ValidDriftMetricRequest
         FourierMMDMetricRequest request = (FourierMMDMetricRequest) bmRequest;
 
@@ -94,7 +99,9 @@ public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
                     parameters.getnWindow(),
                     parameters.getSig(),
                     0,
-                    parameters.getnMode());
+                    parameters.getnMode(),
+                    parameters.getEpsilon());
+
             request.setFitting(fmf);
         } else {
             LOG.debug("Using previously found fouriermmd fitting in request for model=" + request.getModelId());
