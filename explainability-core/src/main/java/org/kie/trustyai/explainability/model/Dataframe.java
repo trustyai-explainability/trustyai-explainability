@@ -68,7 +68,9 @@ public class Dataframe {
         this.metadata = metadata;
         this.internalData = internalData;
         this.idToIDX = new HashMap<>();
-        calculateIndexHashes();
+        if (internalData.size() > 0) {
+            calculateIndexHashes();
+        }
     }
 
     /**
@@ -1384,22 +1386,29 @@ public class Dataframe {
         private final List<String> datapointTags;
         private final List<String> ids;
         private final List<LocalDateTime> timestamps;
+        private final int size;
 
         InternalData() {
             this.datapointTags = new ArrayList<>();
             this.ids = new ArrayList<>();
             this.timestamps = new ArrayList<>();
+            this.size = 0;
         }
 
         InternalData(List<String> datapointTags, List<String> ids, List<LocalDateTime> timestamps) {
             this.datapointTags = datapointTags;
             this.ids = ids;
             this.timestamps = timestamps;
+            this.size = ids.size();
         }
 
         InternalData copy() {
             return new InternalData(new ArrayList<>(this.datapointTags), new ArrayList<>(this.ids),
                     new ArrayList<>(this.timestamps));
+        }
+
+        public int size(){
+            return this.size;
         }
     }
 
