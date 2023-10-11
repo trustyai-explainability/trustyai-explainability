@@ -366,7 +366,6 @@ class DataEndpointTest {
         String[] testDatatypes = new String[] { "INT64", "INT32", "FP32", "FP64", "BOOL" };
         String dataTag = "TRAINING";
 
-        // sorry for the quad loop
         for (int nInputRows : testInputRows) {
             for (int nInputCols : testInputCols) {
                 for (int nOutputCols : testOutputCols) {

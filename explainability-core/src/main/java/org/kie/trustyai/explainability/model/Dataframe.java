@@ -1407,7 +1407,7 @@ public class Dataframe {
                     new ArrayList<>(this.timestamps));
         }
 
-        public int size(){
+        public int size() {
             return this.size;
         }
     }
