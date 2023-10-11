@@ -10,27 +10,16 @@ public class PredictionMetadata {
 
     private final String datapointTag;
 
-    private final Value groundTruth;
-
     public PredictionMetadata(String id, LocalDateTime predictionTime) {
         this.id = id;
         this.predictionTime = predictionTime;
         this.datapointTag = "";
-        this.groundTruth = null;
     }
 
     public PredictionMetadata(String id, LocalDateTime predictionTime, String datapointTag) {
         this.id = id;
         this.predictionTime = predictionTime;
         this.datapointTag = datapointTag;
-        this.groundTruth = null;
-    }
-
-    public PredictionMetadata(String id, LocalDateTime predictionTime, String datapointTag, Value groundTruth) {
-        this.id = id;
-        this.predictionTime = predictionTime;
-        this.datapointTag = datapointTag;
-        this.groundTruth = groundTruth;
     }
 
     public String getId() {
@@ -43,9 +32,5 @@ public class PredictionMetadata {
 
     public String getDataPointTag() {
         return datapointTag;
-    }
-
-    public Value getGroundTruth() {
-        return groundTruth;
     }
 }

@@ -96,7 +96,7 @@ class DataframeTest {
             Dataframe.createFrom(emptyList);
         });
 
-        final String expected = "Cannot create a dataframe from an empy list of predictions.";
+        final String expected = "Cannot create a dataframe from an empty list of predictions.";
         assertEquals(expected, exception.getMessage());
     }
 

@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Singleton
 public class DataSource {
     public static final String METADATA_FILENAME = "metadata.json";
+    public static final String GROUND_TRUTH_SUFFIX = "-ground-truths";
     public static final String INTERNAL_DATA_FILENAME = "internal_data.csv";
     private static final Logger LOG = Logger.getLogger(DataSource.class);
     protected final Set<String> knownModels = new HashSet<>();
@@ -204,6 +205,23 @@ public class DataSource {
 
     public boolean hasMetadata(String modelId) {
         return storage.get().fileExists(modelId + "-" + METADATA_FILENAME);
+    }
+
+    public static String getGroundTruthName(String modelId) {
+        return modelId + GROUND_TRUTH_SUFFIX;
+    }
+
+    // ground truth access and settors
+    public boolean hasGroundTruths(String modelId) {
+        return hasMetadata(getGroundTruthName(modelId));
+    }
+
+    public void saveGroundTruths(Dataframe groundTruthsDataframe, String modelId) {
+        saveDataframe(groundTruthsDataframe, getGroundTruthName(modelId));
+    }
+
+    public Dataframe getGroundTruths(String modelId) {
+        return getDataframe(getGroundTruthName(modelId));
     }
 
 }
