@@ -34,5 +34,5 @@ spec:
     name: modelmesh-monitoring
   repos:
   - name: manifests
-    uri: https://github.com/opendatahub-io/odh-manifests/tarball/master
+    uri: https://github.com/RobGeada/odh-manifests/tarball/MMPatch
   version: master
