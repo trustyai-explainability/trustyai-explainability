@@ -45,14 +45,6 @@ public class DataSource {
         return knownModels;
     }
 
-    private static String standardizeModelId(String inboundModelId) {
-        if (inboundModelId != null && inboundModelId.contains("__isvc")) {
-            return inboundModelId.split("__isvc")[0];
-        } else {
-            return inboundModelId;
-        }
-    }
-
     private Map<String, String> getJointNameAliases(Metadata metadata) {
         HashMap<String, String> jointMapping = new HashMap<>();
         jointMapping.putAll(metadata.getInputSchema().getNameMapping());
@@ -60,8 +52,7 @@ public class DataSource {
         return jointMapping;
     }
 
-    public Dataframe getDataframe(String modelId) throws DataframeCreateException {
-        modelId = standardizeModelId(modelId);
+    public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
         final ByteBuffer dataByteBuffer;
         try {
             dataByteBuffer = storage.get().readData(modelId);
@@ -89,8 +80,7 @@ public class DataSource {
         return df;
     }
 
-    public Dataframe getDataframe(String modelId, int batchSize) throws DataframeCreateException {
-        modelId = standardizeModelId(modelId);
+    public Dataframe getDataframe(final String modelId, int batchSize) throws DataframeCreateException {
         final ByteBuffer byteBuffer;
         try {
             byteBuffer = storage.get().readData(modelId, batchSize);
@@ -122,8 +112,7 @@ public class DataSource {
         saveDataframe(dataframe, modelId, false);
     }
 
-    public void saveDataframe(final Dataframe dataframe, String modelId, boolean overwrite) throws InvalidSchemaException {
-        modelId = standardizeModelId(modelId);
+    public void saveDataframe(final Dataframe dataframe, final String modelId, boolean overwrite) throws InvalidSchemaException {
         // Add to known models
         this.knownModels.add(modelId);
 
@@ -179,14 +168,12 @@ public class DataSource {
     }
 
     public void updateMetadataObservations(int number, String modelId) {
-        modelId = standardizeModelId(modelId);
         final Metadata metadata = getMetadata(modelId);
         metadata.incrementObservations(number);
         saveMetadata(metadata, modelId);
     }
 
     public void saveMetadata(Metadata metadata, String modelId) throws StorageWriteException {
-        modelId = standardizeModelId(modelId);
         final ObjectMapper mapper = new ObjectMapper();
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer byteBuffer;
@@ -200,7 +187,6 @@ public class DataSource {
     }
 
     public Metadata getMetadata(String modelId) throws StorageReadException {
-        modelId = standardizeModelId(modelId);
         final ObjectMapper mapper = new ObjectMapper();
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer metadataBytes = storage.get().read(modelId + "-" + METADATA_FILENAME);
@@ -218,28 +204,23 @@ public class DataSource {
     }
 
     public boolean hasMetadata(String modelId) {
-        modelId = standardizeModelId(modelId);
         return storage.get().fileExists(modelId + "-" + METADATA_FILENAME);
     }
 
     public static String getGroundTruthName(String modelId) {
-        modelId = standardizeModelId(modelId);
         return modelId + GROUND_TRUTH_SUFFIX;
     }
 
     // ground truth access and settors
     public boolean hasGroundTruths(String modelId) {
-        modelId = standardizeModelId(modelId);
         return hasMetadata(getGroundTruthName(modelId));
     }
 
     public void saveGroundTruths(Dataframe groundTruthsDataframe, String modelId) {
-        modelId = standardizeModelId(modelId);
         saveDataframe(groundTruthsDataframe, getGroundTruthName(modelId));
     }
 
     public Dataframe getGroundTruths(String modelId) {
-        modelId = standardizeModelId(modelId);
         return getDataframe(getGroundTruthName(modelId));
     }
 

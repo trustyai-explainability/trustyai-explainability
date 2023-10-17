@@ -36,6 +36,14 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
     @Inject
     Instance<DataSource> datasource;
 
+    private String standardizeModelId(String inboundModelId) {
+        if (inboundModelId != null && inboundModelId.contains("__isvc")) {
+            return inboundModelId.split("__isvc")[0];
+        } else {
+            return inboundModelId;
+        }
+    }
+
     protected synchronized void save(String id, String modelId) throws InvalidSchemaException, DataframeCreateException {
         final InferencePartialPayload output = unreconciledOutputs.get(id);
         final InferencePartialPayload input = unreconciledInputs.get(id);
@@ -46,7 +54,7 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
         final List<Prediction> prediction = payloadToPrediction(input, output, id, input.getMetadata());
         final Dataframe dataframe = Dataframe.createFrom(prediction);
 
-        datasource.get().saveDataframe(dataframe, modelId);
+        datasource.get().saveDataframe(dataframe, standardizeModelId(modelId));
 
         unreconciledInputs.remove(id);
         unreconciledOutputs.remove(id);
