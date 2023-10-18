@@ -38,8 +38,8 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
 
     protected static final String MM_MODEL_SUFFIX = "__isvc";
 
-    protected static String standardizeModelId(String inboundModelId){
-        if (inboundModelId != null && inboundModelId.contains(MM_MODEL_SUFFIX)){
+    protected static String standardizeModelId(String inboundModelId) {
+        if (inboundModelId != null && inboundModelId.contains(MM_MODEL_SUFFIX)) {
             int index = inboundModelId.lastIndexOf(MM_MODEL_SUFFIX);
             return inboundModelId.substring(0, index);
         } else {
