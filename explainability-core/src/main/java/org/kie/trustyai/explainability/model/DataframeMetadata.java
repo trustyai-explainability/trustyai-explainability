@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 
 public class DataframeMetadata {
@@ -15,6 +16,7 @@ public class DataframeMetadata {
     private List<FeatureDomain> domains;
     private final List<Boolean> inputs;
 
+    // constructors ====================================================================================================
     public DataframeMetadata() {
         this(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
     }
@@ -30,26 +32,6 @@ public class DataframeMetadata {
         updateCachedColumnNames();
     }
 
-    public void remove(int column) {
-        names.remove(column);
-        nameAliases.remove(column);
-        types.remove(column);
-        constrained.remove(column);
-        domains.remove(column);
-        inputs.remove(column);
-        cachedColumnNames.remove(column);
-    }
-
-    public void add(String name, String nameAlias, Type type, Boolean constraint, FeatureDomain domain, Boolean input) {
-        this.names.add(name);
-        this.nameAliases.add(nameAlias);
-        this.types.add(type);
-        this.constrained.add(constraint);
-        this.domains.add(domain);
-        this.inputs.add(input);
-        this.cachedColumnNames.add(nameAlias == null ? name : nameAlias);
-    }
-
     public DataframeMetadata copy() {
         return new DataframeMetadata(
                 new ArrayList<>(this.names),
@@ -60,6 +42,48 @@ public class DataframeMetadata {
                 new ArrayList<>(this.inputs));
     }
 
+    public void remove(int column) {
+        names.remove(column);
+        nameAliases.remove(column);
+        types.remove(column);
+        constrained.remove(column);
+        domains.remove(column);
+        inputs.remove(column);
+        cachedColumnNames.remove(column);
+    }
+
+    // row adders ======================================================================================================
+    public void add(String name, String nameAlias, Type type, Boolean constraint, FeatureDomain domain, Boolean input) {
+        this.names.add(name);
+        this.nameAliases.add(nameAlias);
+        this.types.add(type);
+        this.constrained.add(constraint);
+        this.domains.add(domain);
+        this.inputs.add(input);
+        this.cachedColumnNames.add(nameAlias == null ? name : nameAlias);
+    }
+
+    public void add(Feature feature) {
+        add(
+                feature.getName(),
+                null,
+                feature.getType(),
+                feature.isConstrained(),
+                feature.getDomain(),
+                true);
+    }
+
+    public void add(Output output) {
+        add(
+                output.getName(),
+                null,
+                output.getType(),
+                true,
+                EmptyFeatureDomain.create(),
+                false);
+    }
+
+    // column name accessors ===========================================================================================
     private void updateCachedColumnNames() {
         List<String> newNames = new ArrayList<>();
         for (int i = 0; i < this.names.size(); i++) {

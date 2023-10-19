@@ -84,24 +84,12 @@ public class Dataframe {
 
         // Process inputs metadata
         for (Feature feature : prediction.getInput().getFeatures()) {
-            df.metadata.add(
-                    feature.getName(),
-                    null,
-                    feature.getType(),
-                    feature.isConstrained(),
-                    feature.getDomain(),
-                    true);
+            df.metadata.add(feature);
             df.data.add(new ArrayList<>());
         }
         // Process outputs metadata
         for (Output output : prediction.getOutput().getOutputs()) {
-            df.metadata.add(
-                    output.getName(),
-                    null,
-                    output.getType(),
-                    true,
-                    EmptyFeatureDomain.create(),
-                    false);
+            df.metadata.add(output);
             df.data.add(new ArrayList<>());
         }
 
@@ -154,13 +142,7 @@ public class Dataframe {
 
         // Process inputs metadata
         for (Feature feature : inputs.get(0).getFeatures()) {
-            df.metadata.add(
-                    feature.getName(),
-                    null,
-                    feature.getType(),
-                    feature.isConstrained(),
-                    feature.getDomain(),
-                    true);
+            df.metadata.add(feature);
             df.data.add(new ArrayList<>());
         }
 
@@ -213,24 +195,12 @@ public class Dataframe {
         } else {
             // Process inputs metadata
             for (Feature feature : predictions.get(0).getInput().getFeatures()) {
-                df.metadata.add(
-                        feature.getName(),
-                        null,
-                        feature.getType(),
-                        feature.isConstrained(),
-                        feature.getDomain(),
-                        true);
+                df.metadata.add(feature);
                 df.data.add(new ArrayList<>());
             }
             // Process outputs metadata
             for (Output output : predictions.get(0).getOutput().getOutputs()) {
-                df.metadata.add(
-                        output.getName(),
-                        null,
-                        output.getType(),
-                        true,
-                        EmptyFeatureDomain.create(),
-                        false);
+                df.metadata.add(output);
                 df.data.add(new ArrayList<>());
             }
 
