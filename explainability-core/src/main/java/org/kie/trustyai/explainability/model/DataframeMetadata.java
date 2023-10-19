@@ -1,6 +1,7 @@
 package org.kie.trustyai.explainability.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,9 @@ public class DataframeMetadata {
 
     public DataframeMetadata(List<String> names, List<String> nameAliases, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains,
             List<Boolean> inputs) {
+        if (names == null || nameAliases == null || types == null || constrained == null || domains == null || inputs == null) {
+            throw new IllegalArgumentException("DataframeMetadata cannot be constructed from null arguments");
+        }
         this.names = new ArrayList<>(names);
         this.nameAliases = new ArrayList<>(nameAliases);
         this.types = new ArrayList<>(types);
@@ -42,7 +46,7 @@ public class DataframeMetadata {
                 new ArrayList<>(this.inputs));
     }
 
-    public void remove(int column) {
+    public synchronized void remove(int column) {
         names.remove(column);
         nameAliases.remove(column);
         types.remove(column);
@@ -53,7 +57,7 @@ public class DataframeMetadata {
     }
 
     // row adders ======================================================================================================
-    public void add(String name, String nameAlias, Type type, Boolean constraint, FeatureDomain domain, Boolean input) {
+    public synchronized void add(String name, String nameAlias, Type type, Boolean constraint, FeatureDomain domain, Boolean input) {
         this.names.add(name);
         this.nameAliases.add(nameAlias);
         this.types.add(type);
@@ -63,7 +67,7 @@ public class DataframeMetadata {
         this.cachedColumnNames.add(nameAlias == null ? name : nameAlias);
     }
 
-    public void add(Feature feature) {
+    public synchronized void add(Feature feature) {
         add(
                 feature.getName(),
                 null,
@@ -73,7 +77,7 @@ public class DataframeMetadata {
                 true);
     }
 
-    public void add(Output output) {
+    public synchronized void add(Output output) {
         add(
                 output.getName(),
                 null,
@@ -97,7 +101,7 @@ public class DataframeMetadata {
     }
 
     protected List<String> getNames() {
-        return cachedColumnNames;
+        return Collections.unmodifiableList(cachedColumnNames);
     }
 
     protected String getNames(int i) {
@@ -147,10 +151,6 @@ public class DataframeMetadata {
         return nameAliases;
     }
 
-    public List<String> getCachedColumnNames() {
-        return cachedColumnNames;
-    }
-
     public List<Type> getTypes() {
         return types;
     }
@@ -168,23 +168,23 @@ public class DataframeMetadata {
     }
 
     //setters ==========================================================================================================
-    public void setNameAlias(int i, String nameAlias) {
+    public synchronized void setNameAlias(int i, String nameAlias) {
         this.nameAliases.set(i, nameAlias);
     }
 
-    public void setType(int i, Type type) {
+    public synchronized void setType(int i, Type type) {
         this.types.set(i, type);
     }
 
-    public void setConstrained(int i, Boolean constraint) {
+    public synchronized void setConstrained(int i, Boolean constraint) {
         this.constrained.set(i, constraint);
     }
 
-    public void setDomain(int i, FeatureDomain domain) {
+    public synchronized void setDomain(int i, FeatureDomain domain) {
         this.domains.set(i, domain);
     }
 
-    public void setInput(int i, Boolean input) {
+    public synchronized void setInput(int i, Boolean input) {
         this.inputs.set(i, input);
     }
 }
