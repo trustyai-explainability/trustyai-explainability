@@ -1,11 +1,11 @@
 package org.kie.trustyai.explainability.model;
 
-import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
-import org.kie.trustyai.explainability.model.domain.FeatureDomain;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
+import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 
 public class DataframeMetadata {
     private final List<String> names;
@@ -22,7 +22,7 @@ public class DataframeMetadata {
     }
 
     public DataframeMetadata(List<String> names, List<String> nameAliases, List<Type> types, List<Boolean> constrained, List<FeatureDomain> domains,
-                             List<Boolean> inputs) {
+            List<Boolean> inputs) {
         this.names = new ArrayList<>(names);
         this.nameAliases = new ArrayList<>(nameAliases);
         this.types = new ArrayList<>(types);
@@ -60,7 +60,7 @@ public class DataframeMetadata {
         this.constrained.add(constraint);
         this.domains.add(domain);
         this.inputs.add(input);
-        this.cachedColumnNames.add(nameAlias == null ? name :  nameAlias);
+        this.cachedColumnNames.add(nameAlias == null ? name : nameAlias);
     }
 
     public void add(Feature feature) {
@@ -70,8 +70,7 @@ public class DataframeMetadata {
                 feature.getType(),
                 feature.isConstrained(),
                 feature.getDomain(),
-                true
-        );
+                true);
     }
 
     public void add(Output output) {
@@ -81,8 +80,7 @@ public class DataframeMetadata {
                 output.getType(),
                 true,
                 EmptyFeatureDomain.create(),
-                false
-        );
+                false);
     }
 
     // column name accessors ===========================================================================================
@@ -173,7 +171,6 @@ public class DataframeMetadata {
     public void setNameAlias(int i, String nameAlias) {
         this.nameAliases.set(i, nameAlias);
     }
-
 
     public void setType(int i, Type type) {
         this.types.set(i, type);
