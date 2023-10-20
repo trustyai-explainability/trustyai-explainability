@@ -64,4 +64,25 @@ public class PayloadConverter {
         }
     }
 
+    public static DataType payloadTypeToDataType(String s) {
+        switch (s) {
+            case "BOOL":
+                return DataType.BOOL;
+            case "UNT8":
+            case "UINT16":
+            case "UINT32":
+            case "INT8":
+            case "INT16":
+            case "INT32":
+                return DataType.INT32;
+            case "INT64":
+                return DataType.INT64;
+            case "FP32":
+                return DataType.FLOAT;
+            case "FP64":
+                return DataType.DOUBLE;
+        }
+        return DataType.UNKNOWN;
+    }
+
 }

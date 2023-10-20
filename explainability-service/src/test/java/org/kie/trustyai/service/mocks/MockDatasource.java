@@ -56,6 +56,23 @@ public class MockDatasource extends DataSource {
         return Dataframe.createFrom(predictions);
     }
 
+    public Dataframe generateRandomNColumnDataframe(int observations, int columns) {
+        final List<Prediction> predictions = new ArrayList<>();
+        final Random random = new Random(0);
+        for (int i = 0; i < observations; i++) {
+            List<Feature> featureList = new ArrayList<>();
+            for (int j = 0; j < columns; j++) {
+                featureList.add(FeatureFactory.newNumericalFeature(String.valueOf(j), i * j));
+            }
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+            final List<Output> outputList = List.of(
+                    new Output("output", Type.NUMBER, new Value(random.nextBoolean() ? 1 : 0), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
+    }
+
     public Dataframe generateDataframeFromNormalDistributions(int observations, double mean, double stdDeviation) {
         final List<Prediction> predictions = new ArrayList<>();
         final Random random = new Random(0);

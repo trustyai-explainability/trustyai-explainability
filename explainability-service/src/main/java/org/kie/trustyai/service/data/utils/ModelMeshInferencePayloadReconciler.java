@@ -3,6 +3,8 @@ package org.kie.trustyai.service.data.utils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,7 +24,9 @@ import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
+import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
+import org.kie.trustyai.service.payloads.values.DataType;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -53,11 +57,10 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
         LOG.debug("Reconciling partial input and output, id=" + id);
 
         // save
+        final OptionallyTypedPredictionList optionallyTypedPredictionList = payloadToPrediction(input, output, id, input.getMetadata());
+        final Dataframe dataframe = Dataframe.createFrom(optionallyTypedPredictionList.predictions);
 
-        final List<Prediction> prediction = payloadToPrediction(input, output, id, input.getMetadata());
-        final Dataframe dataframe = Dataframe.createFrom(prediction);
-
-        datasource.get().saveDataframe(dataframe, standardizeModelId(modelId));
+        datasource.get().saveDataframe(dataframe, standardizeModelId(modelId), optionallyTypedPredictionList.types);
 
         unreconciledInputs.remove(id);
         unreconciledOutputs.remove(id);
@@ -72,7 +75,8 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
      * @return A {@link Prediction}
      * @throws DataframeCreateException
      */
-    public List<Prediction> payloadToPrediction(InferencePartialPayload inputPayload, InferencePartialPayload outputPayload, String id, Map<String, String> metadata) throws DataframeCreateException {
+    public OptionallyTypedPredictionList payloadToPrediction(InferencePartialPayload inputPayload, InferencePartialPayload outputPayload, String id, Map<String, String> metadata)
+            throws DataframeCreateException {
         final byte[] inputBytes = Base64.getDecoder().decode(inputPayload.getData().getBytes());
         final byte[] outputBytes = Base64.getDecoder().decode(outputPayload.getData().getBytes());
 
@@ -83,10 +87,23 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
             throw new DataframeCreateException(e.getMessage());
         }
         final List<PredictionInput> predictionInput;
+        List<DataType> types = null;
         final int enforcedFirstDimension;
         try {
             predictionInput = TensorConverter.parseKserveModelInferRequest(input);
             enforcedFirstDimension = predictionInput.size();
+            if (predictionInput.size() == 1) {
+                List<DataType> candidateInputTypes = input.getInputsList().stream().map(iit -> {
+                    DataType dt = PayloadConverter.payloadTypeToDataType(iit.getDatatype());
+                    int listSizeProduct = iit.getShapeList().stream().reduce(1L, (x, y) -> x * y).intValue();
+                    return Collections.nCopies(listSizeProduct, dt);
+                })
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+                if (candidateInputTypes.size() == predictionInput.get(0).getFeatures().size()) {
+                    types = candidateInputTypes;
+                }
+            }
         } catch (IllegalArgumentException e) {
             throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
         }
@@ -100,18 +117,31 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
         final List<PredictionOutput> predictionOutput;
         try {
             predictionOutput = TensorConverter.parseKserveModelInferResponse(output, enforcedFirstDimension);
+            if (predictionOutput.size() == 1) {
+                List<DataType> candidateOutputTypes = output.getOutputsList().stream().map(iot -> {
+                    DataType dt = PayloadConverter.payloadTypeToDataType(iot.getDatatype());
+                    int listSizeProduct = iot.getShapeList().stream().reduce(1L, (x, y) -> x * y).intValue();
+                    return Collections.nCopies(listSizeProduct, dt);
+                })
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+                if (candidateOutputTypes.size() == predictionOutput.get(0).getOutputs().size() && types != null) {
+                    types.addAll(candidateOutputTypes);
+                }
+            }
         } catch (IllegalArgumentException e) {
             throw new DataframeCreateException("Error parsing output payload: " + e.getMessage());
         }
+
         LOG.debug("Prediction output: " + predictionOutput);
 
         // Aggregate features and outputs
         final int size = predictionInput.size();
-        return IntStream.range(0, size).mapToObj(i -> {
+        return new OptionallyTypedPredictionList(types, IntStream.range(0, size).mapToObj(i -> {
             final PredictionInput pi = predictionInput.get(i);
             final PredictionOutput po = predictionOutput.get(i);
             return new SimplePrediction(pi, po);
-        }).collect(Collectors.toCollection(ArrayList::new));
+        }).collect(Collectors.toCollection(ArrayList::new)));
     }
 
     public Dataframe payloadToDataFrame(byte[] inputs, byte[] outputs, String id, Map<String, String> metadata,
