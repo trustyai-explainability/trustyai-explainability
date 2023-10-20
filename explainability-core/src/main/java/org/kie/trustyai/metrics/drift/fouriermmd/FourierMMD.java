@@ -55,9 +55,9 @@ public class FourierMMD {
      *                   each time "n_window" data is used to compute a MMD score
      * @param n_window   number of the samples to compute a MMD score. "n_window"
      *                   consecutive data.
-     * @param sig        sigma
+     * @param sig        sigma, a scale parameter of the kernel
      * @param randomSeed the seed for the random number generator
-     * @param n_mode
+     * @param n_mode     number of Fourier modes to approximate the original kernel.
      * @param epsilon    minimum value for standard deviation
      * 
      * @return FourierMMDFitting the Fourier MMD fitting data.
