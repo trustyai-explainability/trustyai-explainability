@@ -178,6 +178,8 @@ function teardown_trustyai_test() {
   oc get pods >> ${ARTIFACT_DIR}/${MM_NAMESPACE}.pods.txt
   oc get events >>  ${ARTIFACT_DIR}/${MM_NAMESPACE}.events.txt
   oc logs -n opendatahub $(oc get pods -o name -n opendatahub | grep trustyai) >> ${ARTIFACT_DIR}/${ODHPROJECT}.trustyoperatorlogs.txt
+  oc logs $(oc get pods -o name | grep trustyai) >> ${ARTIFACT_DIR}/trusty_service_pod_logs.txt || true
+  oc exec $(oc get pods -o name | grep trustyai) -c trustyai-service -- bash -c "ls /inputs/" >> ${ARTIFACT_DIR}/trusty_service_inputs_ls.txt || true
   
   TRUSTY_ROUTE=http://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
