@@ -28,6 +28,8 @@ spec:
       parameters:
         - name: deployment-namespace
           value: opendatahub
+        - name: odh-model-controller
+          value: 'quay.io/opendatahub/odh-model-controller:v0.11.0-alpha'
       repoRef:
         name: manifests
         path: modelmesh-monitoring
