@@ -9,8 +9,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
@@ -19,6 +17,8 @@ import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "PVC")
 @ApplicationScoped

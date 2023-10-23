@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
@@ -17,8 +12,13 @@ import org.kie.trustyai.service.data.utils.MetadataUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.quarkus.arc.Priority;
 import io.quarkus.test.Mock;
+
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 @Mock
 @Alternative

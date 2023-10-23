@@ -3,13 +3,13 @@ package org.kie.trustyai.service.data.cache;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.payloads.service.Schema;
 
 import io.quarkus.cache.CacheKeyGenerator;
 import io.quarkus.cache.CompositeCacheKey;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class SchemaNameMappingCacheKeyGen implements CacheKeyGenerator {

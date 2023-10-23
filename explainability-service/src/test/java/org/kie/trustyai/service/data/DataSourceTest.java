@@ -1,8 +1,5 @@
 package org.kie.trustyai.service.data;
 
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
@@ -12,6 +9,9 @@ import org.kie.trustyai.service.mocks.MockDatasource;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
