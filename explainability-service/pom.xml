@@ -133,11 +133,6 @@
             <artifactId>jakarta.enterprise.cdi-api</artifactId>
             <version>4.0.1</version>
         </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
-            <version>4.4.5</version>
-        </dependency>
     </dependencies>
 
 
