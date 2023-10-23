@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
@@ -22,6 +20,8 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.data.utils.CSVUtils;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @LookupIfProperty(name = "service.data.format", stringValue = "CSV")
 @ApplicationScoped

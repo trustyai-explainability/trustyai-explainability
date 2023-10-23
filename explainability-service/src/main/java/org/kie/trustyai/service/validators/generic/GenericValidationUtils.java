@@ -2,10 +2,6 @@ package org.kie.trustyai.service.validators.generic;
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.validation.ConstraintValidatorContext;
-
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
@@ -13,6 +9,10 @@ import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 
 import com.fasterxml.jackson.databind.node.ValueNode;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.validation.ConstraintValidatorContext;
 
 @ApplicationScoped
 public class GenericValidationUtils {

@@ -2,12 +2,12 @@ package org.kie.trustyai.service.mocks;
 
 import java.io.File;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Alternative;
-
 import org.kie.trustyai.service.data.storage.PVCStorage;
 
 import io.quarkus.test.Mock;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
 
 @Mock
 @Alternative
