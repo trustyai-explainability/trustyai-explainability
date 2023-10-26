@@ -133,7 +133,8 @@ class DataEndpointTest {
                 .when().post("/download")
                 .then().extract().body().as(DataResponsePayload.class);
 
-        Dataframe df = Dataframe.createFrom(CSVUtils.parse(response.getDataCSV(), datasource.get().getMetadata(MODEL_ID), true));
+        List<Prediction> predictions = CSVUtils.parse(response.getDataCSV(), datasource.get().getMetadata(MODEL_ID), true);
+        Dataframe df = Dataframe.createFrom(predictions);
 
         int yearIndex = df.getColumnNames().indexOf("year");
         int makeIndex = df.getColumnNames().indexOf("make");

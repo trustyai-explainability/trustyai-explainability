@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -78,31 +79,40 @@ public class CSVParser implements DataParser {
         return Dataframe.createWithMetadata(predictions, predictionsMetadata);
     }
 
-    public String convertToString(Dataframe dataframe, boolean includeHeader) {
+    public String convertToString(Dataframe dataframe, boolean includeHeader, boolean includeInternalData) {
         final StringBuilder output = new StringBuilder();
         if (includeHeader) {
-            output
-                    .append(
-                            String.join(",",
-                                    dataframe.getColumnNames().stream().map(name -> "\"" + name + "\"").collect(Collectors.toList())))
-                    .append("\n");
+            output.append(String.join(",", dataframe.getColumnNames().stream().map(name -> "\"" + name + "\"")
+                    .collect(Collectors.toList())));
+            if (includeInternalData) {
+                output.append(",\"_internal_id\",\"_internal_tag\"");
+            }
+            output.append("\n");
+
         }
+        AtomicInteger i = new AtomicInteger();
         dataframe.getRows().forEach(values -> {
-            final String rowStr = String.join(",", values.stream().map(value -> {
+            final String rowStr = values.stream().map(value -> {
                 final Object obj = value.getUnderlyingObject();
                 if (obj instanceof String) {
                     return "\"" + obj + "\"";
                 } else {
                     return obj.toString();
                 }
-            }).collect(Collectors.toList()));
-            output.append(rowStr).append("\n");
+            }).collect(Collectors.joining(","));
+            output.append(rowStr);
+            if (includeInternalData) {
+                output.append(",\"").append(dataframe.getIds().get(i.get())).append("\",\"")
+                        .append(dataframe.getTags().get(i.get())).append("\"");
+            }
+            output.append("\n");
+            i.getAndIncrement();
         });
         return output.toString();
     }
 
     private ByteBuffer convertToByteBuffer(Dataframe dataframe, boolean includeHeader) {
-        final String inputsStr = convertToString(dataframe, includeHeader);
+        final String inputsStr = convertToString(dataframe, includeHeader, false);
         return ByteBuffer.wrap(inputsStr.getBytes(UTF8));
     }
 

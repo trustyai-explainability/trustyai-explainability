@@ -51,10 +51,14 @@ public class CSVUtils {
     }
 
     public static List<Prediction> parse(String in, Metadata metadata) throws IOException {
-        return parse(in, metadata, false);
+        return parse(in, metadata, false, false);
     }
 
     public static List<Prediction> parse(String in, Metadata metadata, boolean header) throws IOException {
+        return parse(in, metadata, header, false);
+    }
+
+    public static List<Prediction> parse(String in, Metadata metadata, boolean header, boolean internal) throws IOException {
         CSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(in));
 
         final List<String> inputNames = metadata.getInputSchema().retrieveNameMappedItems().entrySet()
