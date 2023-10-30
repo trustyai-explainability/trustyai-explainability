@@ -2,9 +2,9 @@ package org.kie.trustyai.service.payloads.values;
 
 import java.util.function.BiFunction;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.validation.valueextraction.ExtractedValue;
-import javax.validation.valueextraction.ValueExtractor;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.validation.valueextraction.ExtractedValue;
+import jakarta.validation.valueextraction.ValueExtractor;
 
 // needed to exempt the BiFunctions in the Metric Directory from Javax container validation
 @ApplicationScoped

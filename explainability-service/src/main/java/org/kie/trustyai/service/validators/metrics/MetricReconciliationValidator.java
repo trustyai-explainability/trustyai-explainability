@@ -2,14 +2,14 @@ package org.kie.trustyai.service.validators.metrics;
 
 import java.lang.reflect.Field;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilerMatcher;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 @ApplicationScoped
 public class MetricReconciliationValidator implements ConstraintValidator<ValidReconciledMetricRequest, BaseMetricRequest> {

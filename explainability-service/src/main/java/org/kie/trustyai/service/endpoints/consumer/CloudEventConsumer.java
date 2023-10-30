@@ -2,9 +2,6 @@ package org.kie.trustyai.service.endpoints.consumer;
 
 import java.nio.charset.StandardCharsets;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.utils.KServeInferencePayloadReconciler;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
@@ -14,6 +11,9 @@ import org.kie.trustyai.service.payloads.consumer.KServeOutputPayload;
 import io.quarkus.funqy.Funq;
 import io.quarkus.funqy.knative.events.CloudEvent;
 import io.quarkus.funqy.knative.events.CloudEventMapping;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class CloudEventConsumer {
