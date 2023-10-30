@@ -223,7 +223,10 @@ public class TensorConverter {
                         predictionInputs.add(new PredictionInput(features));
                     }
                 } else {
-                    final int secondShape = shape.get(1).intValue();
+                    int secondShape = 1;
+                    for (Long subShape : shape.subList(1, shape.size())) {
+                        secondShape *= subShape.intValue();
+                    }
 
                     for (int batch = 0; batch < firstShape; batch++) {
                         final List<Feature> features = new ArrayList<>();
@@ -280,9 +283,9 @@ public class TensorConverter {
     }
 
     // if only a single item from raw contents is needed, use this
-    private static Output rawHandlerSingle(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, String name, int idx, boolean raw) {
+    private static Output rawHandlerSingle(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, String name, int tensorIdx, int idx, boolean raw) {
         if (raw) {
-            return PayloadParser.rawContentToOutput(data, name, 0, idx);
+            return PayloadParser.rawContentToOutput(data, name, tensorIdx, idx);
         } else {
             return contentsToOutput(tensor, name, idx);
         }
@@ -354,7 +357,7 @@ public class TensorConverter {
 
                 } else if (shape.size() == 1) {
                     // A single element feature, no batch. PD or NP irrelevant
-                    return List.of(new PredictionOutput(List.of(rawHandlerSingle(data, tensor, tensor.getName(), 0, raw))));
+                    return List.of(new PredictionOutput(List.of(rawHandlerSingle(data, tensor, tensor.getName(), 0, 0, raw))));
                 } else {
                     throw new IllegalArgumentException("Shape size not supported for tabular data");
                 }
@@ -366,7 +369,7 @@ public class TensorConverter {
                     for (int batch = 0; batch < firstShape; batch++) {
                         final List<Output> outputs = new ArrayList<>();
                         String name = featureNames.isPresent() ? featureNames.get().get(0) : tensor.getName();
-                        outputs.add(rawHandlerSingle(data, tensor, name, batch, raw));
+                        outputs.add(rawHandlerSingle(data, tensor, name, 0, batch, raw));
                         predictionOutputs.add(new PredictionOutput(outputs));
                     }
                 } else {
@@ -377,7 +380,7 @@ public class TensorConverter {
                         final List<Output> outputs = new ArrayList<>();
                         for (int featureIndex = 0; featureIndex < secondShape; featureIndex++) {
                             String name = featureNames.isPresent() ? featureNames.get().get(featureIndex) : tensor.getName() + "-" + featureIndex;
-                            outputs.add(rawHandlerSingle(data, tensor, name, secondShape * batch + featureIndex, raw));
+                            outputs.add(rawHandlerSingle(data, tensor, name, 0, secondShape * batch + featureIndex, raw));
                         }
                         predictionOutputs.add(new PredictionOutput(outputs));
                     }
@@ -420,7 +423,7 @@ public class TensorConverter {
             } else if (perTensorSecondShape.stream().allMatch(i -> i == enforcedFirstDimension)) {
                 List<List<Output>> outputs = tensors.stream()
                         .map(tensor -> IntStream.range(0, perTensorSecondShape.get(0))
-                                .mapToObj(i -> rawHandlerSingle(data, tensor, tensor.getName(), i, raw))
+                                .mapToObj(i -> rawHandlerSingle(data, tensor, tensor.getName(), 0, i, raw))
                                 .collect(Collectors.toCollection(ArrayList::new)))
                         .collect(Collectors.toCollection(ArrayList::new));
 
@@ -434,8 +437,23 @@ public class TensorConverter {
                     predictionOutputs.add(new PredictionOutput(batchOutputs));
                 }
                 return predictionOutputs;
+            } else if (perTensorShapes.stream().allMatch(i -> i.get(0) == enforcedFirstDimension)) {
+                // list of tensors of shape [efd, n], [efd, m], ...
+                List<PredictionOutput> outputs = new ArrayList<>();
+                for (int outputIdx = 0; outputIdx < enforcedFirstDimension; outputIdx++) {
+                    List<Output> os = new ArrayList<>();
+                    for (int tIdx = 0; tIdx < tensors.size(); tIdx++) {
+                        List<String> names = labelTensors(tensors.get(tIdx).getName(), perTensorSecondShape.get(tIdx));
+                        for (int i = 0; i < perTensorSecondShape.get(tIdx); i++) {
+                            os.add(rawHandlerSingle(data, tensors.get(tIdx), names.get(i), tIdx, outputIdx * perTensorSecondShape.get(tIdx) + i, raw));
+                        }
+                    }
+                    outputs.add(new PredictionOutput(os));
+                }
+                return outputs;
+
             } else {
-                throw new IllegalArgumentException("Tensor shapes: " + perTensorSecondShape + " do not match number of inputs " + enforcedFirstDimension);
+                throw new IllegalArgumentException("Tensor shapes: " + perTensorShapes + " are not compatible with number of inputs " + enforcedFirstDimension);
             }
 
         } else {
