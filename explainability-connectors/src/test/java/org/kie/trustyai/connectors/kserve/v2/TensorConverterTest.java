@@ -96,6 +96,34 @@ class TensorConverterTest {
     }
 
     @Test
+    void modelInferResponseToPredictionOutputAmbiguous() {
+        final Random random = new Random(0);
+        final List<Double> values = IntStream.range(0, 25).mapToObj(i -> i * 1.).collect(Collectors.toList());
+        InferTensorContents.Builder contents1 = InferTensorContents.newBuilder();
+        for (int i = 0; i < 25; i++) {
+            contents1 = contents1.addFp64Contents(values.get(i));
+        }
+        ModelInferResponse.InferOutputTensor outputTensor1 = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("output1")
+                .addShape(5).addShape(5).setContents(contents1).build();
+
+        ModelInferResponse.InferOutputTensor outputTensor2 = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("output2")
+                .addShape(5).addShape(5).setContents(contents1).build();
+
+        final ModelInferResponse response = ModelInferResponse.newBuilder().addOutputs(outputTensor1).addOutputs(outputTensor2).build();
+        final List<PredictionOutput> predictionOutputs = TensorConverter.parseKserveModelInferResponse(response, 5);
+        assertEquals(5, predictionOutputs.size());
+
+        for (int i = 0; i < 5; i++) {
+            PredictionOutput po = predictionOutputs.get(i);
+            assertEquals(10, po.getOutputs().size());
+        }
+    }
+
+    @Test
     void modelInferResponseToPredictionInputImageBatch() {
 
         int[] shape = { 5, 3, 224, 224 };
