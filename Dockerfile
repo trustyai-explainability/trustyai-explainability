@@ -38,7 +38,7 @@ COPY ${SOURCE_CODE}/explainability-integrationtests ./explainability-integration
 COPY ${SOURCE_CODE}/pom.xml ./pom.xml
 
 # build and clean up everything we don't need
-RUN mvn -B clean package --file pom.xml -P service-minimal -DskipTests; rm -Rf explainability-core explainability-connectors explainability-arrow explainability-integrationtests
+RUN mvn -B clean package --file pom.xml -P service-minimal -DskipTests && rm -Rf explainability-core explainability-connectors explainability-arrow explainability-integrationtests
 
 ## Livebuilder CODE END ##
 
