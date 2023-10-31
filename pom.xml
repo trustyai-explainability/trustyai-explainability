@@ -295,6 +295,11 @@
         <profile>
             <!-- Use for CPaaS builds. -->
             <id>service-minimal</id>
+            <activation>
+                <property>
+                    <name>downstream</name>
+                </property>
+            </activation>
             <modules>
                 <module>explainability-core</module>
                 <module>explainability-connectors</module>
@@ -336,18 +341,6 @@
         </profile>
     </profiles>
 
-    <repositories>
-        <repository>
-            <id>red-hat-ga</id>
-            <url>https://maven.repository.redhat.com/ga/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>red-hat-ga</id>
-            <url>https://maven.repository.redhat.com/ga/</url>
-        </pluginRepository>
-    </pluginRepositories>
     <distributionManagement>
         <repository>
             <id>jboss.staging</id>

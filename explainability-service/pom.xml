@@ -18,7 +18,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-        <quarkus.platform.version>3.2.6.Final-redhat-00002</quarkus.platform.version>
+        <quarkus.platform.version>3.2.6.Final</quarkus.platform.version>
         <apache.commons.collections.version>4.4</apache.commons.collections.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
@@ -205,6 +205,18 @@
             <properties>
                 <skipITs>false</skipITs>
                 <quarkus.package.type>native</quarkus.package.type>
+            </properties>
+        </profile>
+        <profile>
+            <id>downstream</id>
+            <activation>
+                <property>
+                    <name>downstream</name>
+                </property>
+            </activation>
+            <properties>
+                <quarkus.platform.version>3.2.6.Final-redhat-00002</quarkus.platform.version>
+                <quarkus.platform.group-id>com.redhat.quarkus</quarkus.platform.group-id>
             </properties>
         </profile>
     </profiles>
