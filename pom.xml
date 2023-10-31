@@ -295,11 +295,6 @@
         <profile>
             <!-- Use for CPaaS builds. -->
             <id>service-minimal</id>
-            <activation>
-                <property>
-                    <name>downstream</name>
-                </property>
-            </activation>
             <modules>
                 <module>explainability-core</module>
                 <module>explainability-connectors</module>

@@ -207,17 +207,5 @@
                 <quarkus.package.type>native</quarkus.package.type>
             </properties>
         </profile>
-        <profile>
-            <id>downstream</id>
-            <activation>
-                <property>
-                    <name>downstream</name>
-                </property>
-            </activation>
-            <properties>
-                <quarkus.platform.version>3.2.6.Final-redhat-00002</quarkus.platform.version>
-                <quarkus.platform.group-id>com.redhat.quarkus</quarkus.platform.group-id>
-            </properties>
-        </profile>
     </profiles>
 </project>
