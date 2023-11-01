@@ -8,18 +8,22 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Schema {
     private final Map<String, SchemaItem> items;
     private Map<String, String> nameMapping = new HashMap<>();
+    private Map<String, SchemaItem> mappedItems = new HashMap<>();
 
     public Schema() {
         this.items = new ConcurrentHashMap<>();
+        calculateNameMappedItems();
     }
 
     public Schema(Map<String, SchemaItem> items) {
         this.items = items;
+        calculateNameMappedItems();
     }
 
     public Schema(Map<String, SchemaItem> items, Map<String, String> nameMapping) {
         this.items = items;
         this.nameMapping = nameMapping;
+        calculateNameMappedItems();
     }
 
     public static Schema from(Map<String, SchemaItem> items) {
@@ -31,16 +35,15 @@ public class Schema {
     }
 
     //@CacheResult(cacheName = "schema-name-mapped-items", keyGenerator = SchemaNameMappingCacheKeyGen.class)
-    public Map<String, SchemaItem> retrieveNameMappedItems() {
-        Map<String, SchemaItem> returnMap = new HashMap<>();
-        for (Map.Entry<String, SchemaItem> entry : items.entrySet()) {
-            if (nameMapping.containsKey(entry.getKey())) {
-                returnMap.put(nameMapping.get(entry.getKey()), entry.getValue());
-            } else {
-                returnMap.put(entry.getKey(), entry.getValue());
+    private void calculateNameMappedItems() {
+        this.mappedItems = new HashMap<>(items);
+        if (!nameMapping.isEmpty()) {
+            for (Map.Entry<String, String> mapping : nameMapping.entrySet()) {
+                if (items.containsKey(mapping.getKey())) {
+                    this.mappedItems.put(mapping.getKey(), items.get(mapping.getKey()));
+                }
             }
         }
-        return returnMap;
     }
 
     public Map<String, String> getNameMapping() {
@@ -49,6 +52,11 @@ public class Schema {
 
     public void setNameMapping(Map<String, String> nameMapping) {
         this.nameMapping = nameMapping;
+        calculateNameMappedItems();
+    }
+
+    public Map<String, SchemaItem> getNameMappedItems() {
+        return mappedItems;
     }
 
     @Override

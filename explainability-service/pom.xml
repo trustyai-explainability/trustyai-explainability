@@ -36,11 +36,11 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-arc</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-resteasy-reactive</artifactId>
         </dependency>
         <dependency>
@@ -59,11 +59,11 @@
             <version>3.3.1</version>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-smallrye-health</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-junit5</artifactId>
             <scope>test</scope>
         </dependency>
@@ -73,39 +73,39 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-junit5-mockito</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-container-image-docker</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-kubernetes</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-scheduler</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-funqy-knative-events</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-hibernate-validator</artifactId>
         </dependency>
         <dependency>
@@ -114,7 +114,7 @@
             <version>${apache.commons.collections.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>${quarkus.platform.group-id}</groupId>
             <artifactId>quarkus-cache</artifactId>
         </dependency>
         <dependency>

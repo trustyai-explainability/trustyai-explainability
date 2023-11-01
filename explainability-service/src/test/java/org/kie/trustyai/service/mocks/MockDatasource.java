@@ -3,6 +3,8 @@ package org.kie.trustyai.service.mocks;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
@@ -78,6 +80,23 @@ public class MockDatasource extends DataSource {
 
     public Dataframe generateRandomDataframeDrifted(int observations) {
         return generateRandomDataframeDrifted(observations, 100);
+    }
+
+    public Dataframe generateRandomNColumnDataframe(int observations, int columns) {
+        final List<Prediction> predictions = new ArrayList<>();
+        final Random random = new Random(0);
+        for (int i = 0; i < observations; i++) {
+            final List<Feature> featureList = IntStream.range(0, columns)
+                    .mapToObj(idx -> FeatureFactory.newNumericalFeature("f" + idx, idx))
+                    .collect(Collectors.toList());
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+
+            final List<Output> outputList = List.of(
+                    new Output("income", Type.NUMBER, new Value(random.nextBoolean() ? 1 : 0), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
     }
 
     public Dataframe generateRandomDataframeDrifted(int observations, int featureDiversity) {

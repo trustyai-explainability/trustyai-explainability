@@ -27,7 +27,7 @@ public class GenericValidationUtils {
     }
 
     public static boolean validateFeatureColumnName(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, String objectName) {
-        if (!metadata.getInputSchema().retrieveNameMappedItems().containsKey(columnName)) {
+        if (!metadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
             context.buildConstraintViolationWithTemplate("No " + objectName + " found with name=" + columnName)
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
@@ -42,7 +42,7 @@ public class GenericValidationUtils {
     }
 
     public static boolean validateOutputColumnName(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, String objectName) {
-        if (!metadata.getOutputSchema().retrieveNameMappedItems().containsKey(columnName)) {
+        if (!metadata.getOutputSchema().getNameMappedItems().containsKey(columnName)) {
             context.buildConstraintViolationWithTemplate("No " + objectName + " found with name=" + columnName)
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
@@ -57,7 +57,7 @@ public class GenericValidationUtils {
     }
 
     public static boolean validateColumnName(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName) {
-        if (!metadata.getOutputSchema().retrieveNameMappedItems().containsKey(columnName) && !metadata.getInputSchema().retrieveNameMappedItems().containsKey(columnName)) {
+        if (!metadata.getOutputSchema().getNameMappedItems().containsKey(columnName) && !metadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
             context.buildConstraintViolationWithTemplate("No feature or output found with name=" + columnName)
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
@@ -70,7 +70,7 @@ public class GenericValidationUtils {
     // check to see if the provided output value has a compatible type
     public static boolean validateOutputColumnType(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, ValueNode valueNode, String objectName) {
         // Output name guaranteed to exist
-        final SchemaItem outcomeSchema = metadata.getOutputSchema().retrieveNameMappedItems().get(columnName);
+        final SchemaItem outcomeSchema = metadata.getOutputSchema().getNameMappedItems().get(columnName);
         if (!PayloadConverter.checkValueType(outcomeSchema.getType(), valueNode)) {
             context.buildConstraintViolationWithTemplate(
                     String.format(
@@ -94,7 +94,7 @@ public class GenericValidationUtils {
     // check to see if the provided attribute values have a compatible type
     public static boolean validateFeatureColumnType(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, ValueNode valueNode, String objectName) {
         // Protected attribute guaranteed to exist
-        final SchemaItem protectedAttrSchema = metadata.getInputSchema().retrieveNameMappedItems().get(columnName);
+        final SchemaItem protectedAttrSchema = metadata.getInputSchema().getNameMappedItems().get(columnName);
         boolean result = true;
         if (!PayloadConverter.checkValueType(protectedAttrSchema.getType(), valueNode)) {
             context.buildConstraintViolationWithTemplate(

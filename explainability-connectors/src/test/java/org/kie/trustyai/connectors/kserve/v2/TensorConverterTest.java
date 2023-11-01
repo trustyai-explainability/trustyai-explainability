@@ -3,6 +3,7 @@ package org.kie.trustyai.connectors.kserve.v2;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
@@ -57,6 +58,94 @@ class TensorConverterTest {
         for (int i = 0; i < 3; i++) {
             assertEquals(values.get(i), predictionOutput.get(i).getValue().asNumber());
         }
+    }
+
+    @Test
+    void modelInferResponseToPredictionOutputMultipleVectorBatch() {
+        final Random random = new Random(0);
+        final List<Double> values = IntStream.range(0, 15).mapToObj(i -> i * 1.).collect(Collectors.toList());
+        InferTensorContents.Builder contents1 = InferTensorContents.newBuilder();
+        for (int i = 0; i < 10; i++) {
+            contents1 = contents1.addFp64Contents(values.get(i));
+        }
+        ModelInferResponse.InferOutputTensor outputTensor1 = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("logits")
+                .addShape(5).addShape(2).setContents(contents1).build();
+
+        InferTensorContents.Builder contents2 = InferTensorContents.newBuilder();
+        for (int i = 10; i < 15; i++) {
+            contents2 = contents2.addFp64Contents(values.get(i));
+        }
+        ModelInferResponse.InferOutputTensor outputTensor2 = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("ood_scores")
+                .addShape(5).addShape(1).setContents(contents2).build();
+
+        final ModelInferResponse response = ModelInferResponse.newBuilder().addOutputs(outputTensor1).addOutputs(outputTensor2).build();
+        final List<PredictionOutput> predictionOutputs = TensorConverter.parseKserveModelInferResponse(response, 5);
+        assertEquals(5, predictionOutputs.size());
+
+        for (int i = 0; i < 5; i++) {
+            PredictionOutput po = predictionOutputs.get(i);
+            assertEquals(3, po.getOutputs().size());
+            assertEquals(values.get(i * 2), po.getOutputs().get(0).getValue().asNumber());
+            assertEquals(values.get(i * 2 + 1), po.getOutputs().get(1).getValue().asNumber());
+            assertEquals(values.get(i + 10), po.getOutputs().get(2).getValue().asNumber());
+        }
+    }
+
+    @Test
+    void modelInferResponseToPredictionOutputAmbiguous() {
+        final Random random = new Random(0);
+        final List<Double> values = IntStream.range(0, 25).mapToObj(i -> i * 1.).collect(Collectors.toList());
+        InferTensorContents.Builder contents1 = InferTensorContents.newBuilder();
+        for (int i = 0; i < 25; i++) {
+            contents1 = contents1.addFp64Contents(values.get(i));
+        }
+        ModelInferResponse.InferOutputTensor outputTensor1 = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("output1")
+                .addShape(5).addShape(5).setContents(contents1).build();
+
+        ModelInferResponse.InferOutputTensor outputTensor2 = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("output2")
+                .addShape(5).addShape(5).setContents(contents1).build();
+
+        final ModelInferResponse response = ModelInferResponse.newBuilder().addOutputs(outputTensor1).addOutputs(outputTensor2).build();
+        final List<PredictionOutput> predictionOutputs = TensorConverter.parseKserveModelInferResponse(response, 5);
+        assertEquals(5, predictionOutputs.size());
+
+        for (int i = 0; i < 5; i++) {
+            PredictionOutput po = predictionOutputs.get(i);
+            assertEquals(10, po.getOutputs().size());
+        }
+    }
+
+    @Test
+    void modelInferResponseToPredictionInputImageBatch() {
+
+        int[] shape = { 5, 3, 224, 224 };
+        final Random random = new Random(0);
+        InferTensorContents.Builder contents = InferTensorContents.newBuilder();
+        for (int i = 0; i < shape[0] * shape[1] * shape[2] * shape[3]; i++) {
+            contents = contents.addFp64Contents(i * 1.);
+        }
+        ModelInferRequest.InferInputTensor tensor = ModelInferRequest.InferInputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("input")
+                .addShape(shape[0])
+                .addShape(shape[1])
+                .addShape(shape[2])
+                .addShape(shape[3])
+                .setContents(contents).build();
+
+        final ModelInferRequest request = ModelInferRequest.newBuilder().addInputs(tensor).build();
+        final List<PredictionInput> predictionInputs = TensorConverter.parseKserveModelInferRequest(request);
+
+        assertEquals(5, predictionInputs.size());
+        assertEquals(shape[1] * shape[2] * shape[3], predictionInputs.get(0).getFeatures().size());
     }
 
     @Test
