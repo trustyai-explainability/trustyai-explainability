@@ -1,5 +1,8 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -319,5 +322,24 @@ class TensorConverterTest {
         final ModelInferRequest request = ModelInferRequest.newBuilder().addAllInputs(tensors).build();
         final List<Feature> features = TensorConverter.parseKserveModelInferRequest(request).get(0).getFeatures();
         assertEquals(prediction.getInput().getFeatures().size(), features.size());
+    }
+
+    @Test
+    void littleEndianFloatTest() throws IOException {
+        File file = new File(getClass().getClassLoader().getResource("fp32_output_payload").getFile());
+        FileInputStream fl = new FileInputStream(file);
+        byte[] arr = new byte[(int) file.length()];
+        fl.read(arr);
+        fl.close();
+
+        ModelInferResponse output = ModelInferResponse.parseFrom(arr);
+        List<PredictionOutput> predictionOutput = TensorConverter.parseKserveModelInferResponse(output, 5);
+
+        for (PredictionOutput po : predictionOutput) {
+            for (Output o : po.getOutputs()) {
+                // for big-endian fp32, this will fail
+                assertTrue(Math.abs(o.getValue().asNumber()) < 3);
+            }
+        }
     }
 }
