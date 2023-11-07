@@ -35,11 +35,7 @@ public class KserveRestPayloads {
     public static TensorPayload generateTensor(int nRows, int nCols, String name, String datatype, int offset) {
         TensorPayload tensorPayload = new TensorPayload();
         tensorPayload.setName(name);
-        if (nCols == 1) {
-            tensorPayload.setShape(new Number[] { nRows });
-        } else {
-            tensorPayload.setShape(new Number[] { nRows, nCols });
-        }
+        tensorPayload.setShape(new Number[] { nRows, nCols });
         tensorPayload.setDatatype(datatype);
 
         if (nRows == 1) {
