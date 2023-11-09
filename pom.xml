@@ -149,13 +149,6 @@
                 <scope>test</scope>
             </dependency>
 
-            <dependency>
-                <groupId>org.apache.opennlp</groupId>
-                <artifactId>opennlp-tools</artifactId>
-                <version>${version.org.apache.opennlp}</version>
-                <scope>test</scope>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 
