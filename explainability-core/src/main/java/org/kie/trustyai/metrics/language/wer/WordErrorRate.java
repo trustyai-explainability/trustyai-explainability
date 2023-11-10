@@ -3,9 +3,9 @@ package org.kie.trustyai.metrics.language.wer;
 import java.util.Arrays;
 import java.util.List;
 
-import org.kie.trustyai.metrics.language.utils.AlignedTokenSequences;
-import org.kie.trustyai.metrics.language.utils.TokenSequenceAligner;
-import org.kie.trustyai.metrics.language.utils.TokenSequenceAlignmentCounters;
+import org.kie.trustyai.metrics.language.utils.alignment.AlignedTokenSequences;
+import org.kie.trustyai.metrics.language.utils.alignment.TokenSequenceAligner;
+import org.kie.trustyai.metrics.language.utils.alignment.TokenSequenceAlignmentCounters;
 
 import opennlp.tools.tokenize.SimpleTokenizer;
 import opennlp.tools.tokenize.Tokenizer;

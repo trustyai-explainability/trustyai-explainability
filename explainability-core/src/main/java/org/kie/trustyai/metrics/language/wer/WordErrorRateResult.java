@@ -1,6 +1,6 @@
 package org.kie.trustyai.metrics.language.wer;
 
-import org.kie.trustyai.metrics.language.utils.TokenSequenceAlignmentCounters;
+import org.kie.trustyai.metrics.language.utils.alignment.TokenSequenceAlignmentCounters;
 
 public class WordErrorRateResult {
     private final double wordErrorRate;

@@ -2,6 +2,8 @@ package org.kie.trustyai.metrics.language.utils;
 
 import org.apache.commons.text.StringTokenizer;
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.metrics.language.utils.alignment.AlignedTokenSequences;
+import org.kie.trustyai.metrics.language.utils.alignment.TokenSequenceAligner;
 
 import static org.junit.jupiter.api.Assertions.*;
 

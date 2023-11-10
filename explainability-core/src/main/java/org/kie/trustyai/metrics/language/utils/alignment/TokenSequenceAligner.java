@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.language.utils;
+package org.kie.trustyai.metrics.language.utils.alignment;
 
 import java.util.ArrayList;
 import java.util.List;
