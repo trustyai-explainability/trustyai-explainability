@@ -14,7 +14,7 @@ public class NLPUtils {
      * In case of a tie (e.g. 4(r) < 5(h) < 6(r)), the smallest will be returned.
      * This is to reduce the brevity penalty for terser hypotheses.
      *
-     * @param references       A list of lists of references.
+     * @param references A list of lists of references.
      * @param hypothesisLength The length of the hypothesis.
      * @return The length of the reference that's closest to the hypothesis length.
      */

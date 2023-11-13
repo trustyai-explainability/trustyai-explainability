@@ -1,17 +1,17 @@
 package org.kie.trustyai.metrics.language.bleu;
 
-import org.kie.trustyai.metrics.language.AbstractNLPPerformanceMetric;
-import org.kie.trustyai.metrics.language.bleu.smoothing.SmoothingFunction;
-import org.kie.trustyai.metrics.language.bleu.smoothing.SmoothingOriginal;
-import org.kie.trustyai.metrics.language.utils.NGramUtils;
-import org.kie.trustyai.metrics.language.utils.NLPUtils;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import org.kie.trustyai.metrics.language.AbstractNLPPerformanceMetric;
+import org.kie.trustyai.metrics.language.bleu.smoothing.SmoothingFunction;
+import org.kie.trustyai.metrics.language.bleu.smoothing.SmoothingOriginal;
+import org.kie.trustyai.metrics.language.utils.NGramUtils;
+import org.kie.trustyai.metrics.language.utils.NLPUtils;
 
 public class BLEU extends AbstractNLPPerformanceMetric {
 
@@ -39,7 +39,7 @@ public class BLEU extends AbstractNLPPerformanceMetric {
      * Calculate brevity penalty.
      *
      * @param closestReferenceLength The length of the closest reference.
-     * @param hypothesisLength       The length of the hypothesis.
+     * @param hypothesisLength The length of the hypothesis.
      * @return BLEU's brevity penalty.
      */
     public static double brevityPenalty(int closestReferenceLength, int hypothesisLength) {
@@ -69,7 +69,7 @@ public class BLEU extends AbstractNLPPerformanceMetric {
      *
      * @param references A list of reference strings.
      * @param hypothesis The hypothesis string.
-     * @param maxNgram   The maximum n-gram order.
+     * @param maxNgram The maximum n-gram order.
      * @return The BLEU score.
      */
     public double calculateSentence(List<String> references, String hypothesis, int maxNgram) {
@@ -81,8 +81,8 @@ public class BLEU extends AbstractNLPPerformanceMetric {
      *
      * @param references A list of reference strings.
      * @param hypothesis The hypothesis string.
-     * @param maxNgram   The maximum n-gram order.
-     * @param weights    The weights for each n-gram order.
+     * @param maxNgram The maximum n-gram order.
+     * @param weights The weights for each n-gram order.
      * @return The BLEU score.
      */
     public double calculateSentence(List<String> references, String hypothesis, int maxNgram, double[] weights) {
@@ -154,8 +154,7 @@ public class BLEU extends AbstractNLPPerformanceMetric {
                 .collect(Collectors.toMap(
                         ngram -> ngram,
                         ngram -> 1,
-                        Integer::max
-                ));
+                        Integer::max));
 
         // Clip the hypothesis n-gram counts using the max counts from references
         int clippedCount = 0;
@@ -175,6 +174,7 @@ public class BLEU extends AbstractNLPPerformanceMetric {
 
     /**
      * Calculate n-gram precision given a list of reference sentences and a hypothesis
+     * 
      * @param refTokenLists
      * @param hypTokens
      * @param n
@@ -204,7 +204,7 @@ public class BLEU extends AbstractNLPPerformanceMetric {
             clippedCount += Math.min(hypCount, refCount);
         }
 
-        return new int[]{clippedCount, totalNgrams};
+        return new int[] { clippedCount, totalNgrams };
     }
 
     /**
@@ -212,7 +212,7 @@ public class BLEU extends AbstractNLPPerformanceMetric {
      *
      * @param references Corpus of reference sentences
      * @param hypotheses Hypoteses sentences
-     * @param weights    weights for n-grams
+     * @param weights weights for n-grams
      * @return Corpus BLEU score
      */
     public double calculateCorpus(List<List<String>> references, List<String> hypotheses, double[] weights) {

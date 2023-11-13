@@ -1,9 +1,12 @@
 package org.kie.trustyai.metrics.language.utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import opennlp.tools.ngram.NGramModel;
 import opennlp.tools.util.StringList;
-
-import java.util.*;
 
 public class NGramUtils {
 
@@ -38,6 +41,7 @@ public class NGramUtils {
 
     /**
      * Generate n-gram counts for a list of words
+     * 
      * @param words
      * @param n
      * @return
@@ -47,7 +51,8 @@ public class NGramUtils {
         for (int i = 0; i <= words.size() - n; i++) {
             final StringBuilder sb = new StringBuilder();
             for (int j = 0; j < n; j++) {
-                if (j > 0) sb.append(" ");
+                if (j > 0)
+                    sb.append(" ");
                 sb.append(words.get(i + j));
             }
             final String ngram = sb.toString();

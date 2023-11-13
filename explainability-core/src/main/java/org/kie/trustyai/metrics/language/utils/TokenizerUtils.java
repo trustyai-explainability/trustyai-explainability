@@ -1,9 +1,12 @@
 package org.kie.trustyai.metrics.language.utils;
 
-import opennlp.tools.tokenize.*;
-
 import java.io.IOException;
 import java.io.InputStream;
+
+import opennlp.tools.tokenize.Tokenizer;
+import opennlp.tools.tokenize.TokenizerME;
+import opennlp.tools.tokenize.TokenizerModel;
+import opennlp.tools.tokenize.WhitespaceTokenizer;
 
 public class TokenizerUtils {
 

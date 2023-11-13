@@ -1,5 +1,10 @@
 package org.kie.trustyai.metrics.language.nlp;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,11 +12,6 @@ import org.kie.trustyai.metrics.language.bleu.BLEU;
 import org.kie.trustyai.metrics.language.bleu.smoothing.SmoothingFunction;
 import org.kie.trustyai.metrics.language.bleu.smoothing.SmoothingFunctionEpsilon;
 import org.kie.trustyai.metrics.language.utils.NLPUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -33,40 +33,40 @@ class BLEUTest {
     private static final List<String> corpusHypotheses = List.of("It is a guide to action which ensures that the military always obeys the commands of the party",
             "he read the book because he was interested in world history");
 
-    private static final List<String> corpusReferences = List.of("It is a guide to action that ensures that the military will forever heed Party commands"
-            , "It is the guiding principle which guarantees the military forces always being under the command of the Party"
-            , "It is the practical guide for the army always to heed the directions of the party",
+    private static final List<String> corpusReferences = List.of("It is a guide to action that ensures that the military will forever heed Party commands",
+            "It is the guiding principle which guarantees the military forces always being under the command of the Party",
+            "It is the practical guide for the army always to heed the directions of the party",
             "he was interested in world history because he read the book");
 
-    private static final String hyp1 = String.join(" ", new String[]{
+    private static final String hyp1 = String.join(" ", new String[] {
             "It", "is", "a", "guide", "to", "action", "which",
             "ensures", "that", "the", "military", "always",
             "obeys", "the", "commands", "of", "the", "party"
     });
-    private static final String hyp2 = String.join(" ", new String[]{
+    private static final String hyp2 = String.join(" ", new String[] {
             "he", "read", "the", "book", "because", "he", "was",
             "interested", "in", "world", "history"
     });
 
     // References for hyp1
-    private static final String ref1a = String.join(" ", new String[]{
+    private static final String ref1a = String.join(" ", new String[] {
             "It", "is", "a", "guide", "to", "action", "that",
             "ensures", "that", "the", "military", "will", "forever",
             "heed", "Party", "commands"
     });
-    private static final String ref1b = String.join(" ", new String[]{
+    private static final String ref1b = String.join(" ", new String[] {
             "It", "is", "the", "guiding", "principle", "which",
             "guarantees", "the", "military", "forces", "always",
             "being", "under", "the", "command", "of", "the", "Party"
     });
-    private static final String ref1c = String.join(" ", new String[]{
+    private static final String ref1c = String.join(" ", new String[] {
             "It", "is", "the", "practical", "guide", "for", "the",
             "army", "always", "to", "heed", "the", "directions",
             "of", "the", "party"
     });
 
     // References for hyp2
-    private static final String ref2a = String.join(" ", new String[]{
+    private static final String ref2a = String.join(" ", new String[] {
             "he", "was", "interested", "in", "world", "history",
             "because", "he", "read", "the", "book"
     });
@@ -77,7 +77,7 @@ class BLEUTest {
         final SmoothingFunction epsilon = new SmoothingFunctionEpsilon();
         final BLEU blue = new BLEU(epsilon);
 
-        double[] weights = {0.3, 0.7}; // Uniform weights for unigram and bigram
+        double[] weights = { 0.3, 0.7 }; // Uniform weights for unigram and bigram
         final double score = blue.calculateSentence(commonReferences, commonHypothesis, 2, weights);
 
         assertEquals(0.3, score, 0.05);
@@ -88,7 +88,7 @@ class BLEUTest {
     void calculateSentenceNoSmoothingWeights() {
         final BLEU blue = new BLEU();
 
-        double[] weights = {0.3, 0.7}; // Uniform weights for unigram and bigram
+        double[] weights = { 0.3, 0.7 }; // Uniform weights for unigram and bigram
         final double score = blue.calculateSentence(commonReferences, commonHypothesis, 2, weights);
 
         assertEquals(0.3, score, 0.05);
@@ -210,8 +210,7 @@ class BLEUTest {
         final List<String> references = List.of(
                 "It is a guide to action that ensures that the military will forever heed Party commands",
                 "It is the guiding principle which guarantees the military forces always being under the command of the Party",
-                "It is the practical guide for the army always to heed the directions of the party"
-        );
+                "It is the practical guide for the army always to heed the directions of the party");
         final String hypothesis = "of the";
         final BLEU bleu = new BLEU();
         assertEquals(1.0, bleu.modifiedPrecision(references, hypothesis, 1), 0.0001);
@@ -225,8 +224,7 @@ class BLEUTest {
         final List<String> references = List.of(
                 "It is a guide to action that ensures that the military will forever heed Party commands",
                 "It is the guiding principle which guarantees the military forces always being under the command of the Party",
-                "It is the practical guide for the army always to heed the directions of the party"
-        );
+                "It is the practical guide for the army always to heed the directions of the party");
 
         final String hypothesis1 = "It is a guide to action which ensures that the military always obeys the commands of the party";
         final BLEU bleu = new BLEU();
@@ -262,7 +260,7 @@ class BLEUTest {
         final BLEU bleu = new BLEU();
 
         // Custom weights for testing
-        final double[] weights = {0.1, 0.3, 0.5, 0.1};
+        final double[] weights = { 0.1, 0.3, 0.5, 0.1 };
 
         final List<List<String>> list_of_references = List.of(List.of(ref1a, ref1b, ref1c), List.of(ref2a));
         final List<String> hypotheses = List.of(hyp1, hyp2);
@@ -278,14 +276,14 @@ class BLEUTest {
 
         // Multiple sets of weights
         final double[][] weightSets = {
-                {0.5, 0.5},
-                {0.333, 0.333, 0.334},
-                {0.25, 0.25, 0.25, 0.25},
-                {0.2, 0.2, 0.2, 0.2, 0.2}
+                { 0.5, 0.5 },
+                { 0.333, 0.333, 0.334 },
+                { 0.25, 0.25, 0.25, 0.25 },
+                { 0.2, 0.2, 0.2, 0.2, 0.2 }
         };
 
         // Expected BLEU scores for the different weight sets
-        final double[] expectedBLEUScores = {0.8242, 0.7067, 0.5920, 0.4719};
+        final double[] expectedBLEUScores = { 0.8242, 0.7067, 0.5920, 0.4719 };
 
         final List<List<String>> references = List.of(List.of(ref1a, ref1b, ref1c), List.of(ref2a));
         final List<String> hypotheses = List.of(hyp1, hyp2);

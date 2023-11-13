@@ -1,7 +1,8 @@
 package org.kie.trustyai.metrics.language;
 
-import opennlp.tools.tokenize.Tokenizer;
 import org.kie.trustyai.metrics.language.utils.TokenizerUtils;
+
+import opennlp.tools.tokenize.Tokenizer;
 
 public class AbstractNLPPerformanceMetric {
     private final Tokenizer tokenizer;

@@ -2,8 +2,8 @@ package org.kie.trustyai.metrics.language.bleu.smoothing;
 
 public class SmoothingFunctionEpsilon implements SmoothingFunction {
 
-    private final double epsilon;
     private static final double DEFAULT_EPSILON = 0.1;
+    private final double epsilon;
 
     public SmoothingFunctionEpsilon(double epsilon) {
         this.epsilon = epsilon;
