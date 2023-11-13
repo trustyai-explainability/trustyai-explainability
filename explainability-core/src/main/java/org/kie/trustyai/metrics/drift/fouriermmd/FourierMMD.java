@@ -15,6 +15,20 @@ import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 
+/**
+ * FourierMMD is a class to identify drift in input data using a random Fourier
+ * approximation to a Radial-Basis-Function Kernel Maximum Mean Discrepancy.
+ *
+ * References:
+ * .. [#0] `Ji Zhao, Deyu Meng, 'FastMMD: Ensemble of Circular Discrepancy for
+ * Efficient Two-Sample Test'
+ * <https://arxiv.org/abs/1405.2664>`_
+ * .. [#1] `Olivier Goudet, et al. 'Learning Functional Causal Models with
+ * Generative Neural Networks'
+ * <https://arxiv.org/abs/1709.05321>`_
+ * 
+ */
+
 public class FourierMMD {
 
     private NormalDistribution normalDistribution = new NormalDistribution();
@@ -28,6 +42,26 @@ public class FourierMMD {
     public FourierMMD(FourierMMDFitting fourierMMDFitting) {
         fitStats = fourierMMDFitting;
     }
+
+    /**
+     * precompute() is used to train the FourierMMD drift model.
+     * 
+     * @param data the training data
+     * @param deltaStat if 'true' , compute MMD score for Dx = x[t+1]-x[t],
+     *        if 'false', compute MMD score for the input data, x
+     * @param n_test number of MMD scores to compute the stastistics for MMD
+     *        scores
+     *        => MMD computation is repeated "n_test" times,
+     *        each time "n_window" data is used to compute a MMD score
+     * @param n_window number of the samples to compute a MMD score. "n_window"
+     *        consecutive data.
+     * @param sig sigma, a scale parameter of the kernel
+     * @param randomSeed the seed for the random number generator
+     * @param n_mode number of Fourier modes to approximate the original kernel.
+     * @param epsilon minimum value for standard deviation
+     * 
+     * @return FourierMMDFitting the Fourier MMD fitting data.
+     */
 
     // def learn(self, data: pd.DataFrame):
     public static FourierMMDFitting precompute(Dataframe data, boolean deltaStat, int n_test, int n_window, double sig,
@@ -131,6 +165,19 @@ public class FourierMMD {
         computedStats.setStdMMD(DataUtils.getStdDev(sampleMMD2NoNaN, computedStats.getMeanMMD()));
         return computedStats;
     }
+
+    /**
+     * Calculate the drift relative to the precompute() data.
+     * 
+     * @param data Test data
+     * @param threshold if the probability of "data MMD score >
+     *        (mean_mmd+std_mmd*gamma)" is larger than "threshold", we
+     *        flag a drift.
+     * @param gamma set the threshold to flag drift. If data MMD score >
+     *        (mean_mmd+std_mmd*gamma), we assume a drift happened
+     * 
+     * @return HypothesisTestResult the hypothesis test result
+     */
 
     public HypothesisTestResult calculate(Dataframe data, double threshold, double gamma) {
         final Dataframe numericData = data.getNumericColumns();

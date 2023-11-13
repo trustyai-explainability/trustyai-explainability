@@ -42,6 +42,7 @@ public class RawConverter {
     public static List<Float> toFloat(ByteString raw) {
         List<Float> floatList = new ArrayList<>();
         ByteBuffer byteBuffer = ByteBuffer.wrap(raw.toByteArray());
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         while (byteBuffer.hasRemaining()) {
             floatList.add(byteBuffer.getFloat());
         }
@@ -86,6 +87,7 @@ public class RawConverter {
 
     public static ByteString fromFloat(List<Float> floatList) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(floatList.size() * 4);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         for (float value : floatList) {
             byteBuffer.putFloat(value);
         }

@@ -26,7 +26,7 @@ public class CSVUtils {
 
     private static List<Output> getOutputs(List<String> outputNames, Metadata metadata, CSVRecord entry) {
         return outputNames.stream().map(colName -> {
-            final SchemaItem schemaItem = metadata.getOutputSchema().retrieveNameMappedItems().get(colName);
+            final SchemaItem schemaItem = metadata.getOutputSchema().getNameMappedItems().get(colName);
             final int inputIndex = schemaItem.getIndex();
             final String name = schemaItem.getName();
             final DataType vtypes = schemaItem.getType();
@@ -61,12 +61,12 @@ public class CSVUtils {
     public static List<Prediction> parse(String in, Metadata metadata, boolean header, boolean internal) throws IOException {
         CSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(in));
 
-        final List<String> inputNames = metadata.getInputSchema().retrieveNameMappedItems().entrySet()
+        final List<String> inputNames = metadata.getInputSchema().getNameMappedItems().entrySet()
                 .stream()
                 .sorted(Comparator.comparingInt(e -> e.getValue().getIndex()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-        final List<String> outputNames = metadata.getOutputSchema().retrieveNameMappedItems().entrySet()
+        final List<String> outputNames = metadata.getOutputSchema().getNameMappedItems().entrySet()
                 .stream()
                 .sorted(Comparator.comparingInt(e -> e.getValue().getIndex()))
                 .map(Map.Entry::getKey)
@@ -77,7 +77,7 @@ public class CSVUtils {
         parser.stream().forEach(entry -> {
             if (!header || idx.get() > 0) {
                 final List<Feature> inputFeatures = inputNames.stream().map(colName -> {
-                    final SchemaItem schemaItem = metadata.getInputSchema().retrieveNameMappedItems().get(colName);
+                    final SchemaItem schemaItem = metadata.getInputSchema().getNameMappedItems().get(colName);
                     final int inputIndex = schemaItem.getIndex();
                     final String name = schemaItem.getName();
                     final String valueString = entry.get(inputIndex);
