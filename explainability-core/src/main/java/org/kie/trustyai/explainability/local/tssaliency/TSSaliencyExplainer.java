@@ -5,25 +5,29 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
-import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.SaliencyResults.SourceExplainer;
+import org.kie.trustyai.explainability.utils.MatrixUtilsExtensions;
 
 public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults> {
 
-    final public int nalpha; // Number of steps in convex path
+    public final int nalpha; // Number of steps in convex path
     final double sigma; // standard deviation
     final double mu; // Step size for gradient estimation
-    final private int ng; // Number of samples for gradient estimation
-    final private RandomGenerator randomGenerator; // random number generatr
+    private final int ng; // Number of samples for gradient estimation
+    private final RandomGenerator randomGenerator; // random number generatr
     private RealVector baseValue; // Feature’s base values
 
-    public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed, double sigma, double mu) {
-        this.baseValue = new ArrayRealVector(baseValue);
+    public TSSaliencyExplainer(Optional<double[]> baseValue, int ng, int nalpha, int randomSeed, double sigma, double mu) {
+        if (baseValue.isEmpty()) {
+            this.baseValue = new ArrayRealVector(0);
+        } else {
+            this.baseValue = new ArrayRealVector(baseValue.get());
+        }
         this.ng = ng;
         this.nalpha = nalpha;
         this.randomGenerator = new Well19937c(randomSeed);
@@ -34,7 +38,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
     @Override
     public CompletableFuture<SaliencyResults> explainAsync(Prediction prediction, PredictionProvider model,
             Consumer<SaliencyResults> intermediateResultsConsumer) {
-        final List<Prediction> predictionList = new ArrayList<Prediction>(1);
+        final List<Prediction> predictionList = new ArrayList<>(1);
 
         predictionList.add(prediction);
 
@@ -117,7 +121,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 }
 
                 // Elements are initialised with zero
-                final RealMatrix score = MatrixUtils.createRealMatrix(T, F);
+                final RealMatrix score = MatrixUtilsExtensions.zeros(T, F);
 
                 for (int t = 0; t < numberCores; t++) {
 
@@ -147,14 +151,14 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 final FeatureImportance featureImportance = new FeatureImportance(predictionInputs.getFeatures().get(0),
                         scoreResult.getData(), 0.0);
 
-                final List<FeatureImportance> featureImportances = new ArrayList<FeatureImportance>(1);
+                final List<FeatureImportance> featureImportances = new ArrayList<>(1);
                 featureImportances.add(featureImportance);
 
                 final Saliency saliency = new Saliency(output, featureImportances);
                 saliencies.put(output.getName(), saliency);
             }
 
-            final CompletableFuture<SaliencyResults> retval = new CompletableFuture<SaliencyResults>();
+            final CompletableFuture<SaliencyResults> retval = new CompletableFuture<>();
 
             retval.complete(saliencyResults);
 
@@ -192,22 +196,23 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
         final int T = x.getRowDimension();
         final int F = x.getColumnDimension();
-
-        final NormalDistribution N = new NormalDistribution(randomGenerator, 0.0, sigma);
-
-        final RealMatrix[] U = new RealMatrix[ng];
-        for (int i = 0; i < ng; i++) {
-            U[i] = MatrixUtils.createRealMatrix(T, F); // Creates a matrix with T rows and F columns
-        }
+        final Random r = new Random();
+        double U[][][] = new double[ng][T][F];
 
         for (int n = 0; n < ng; n++) {
 
             double sum = 0.0;
             for (int t = 0; t < T; t++) {
                 for (int f = 0; f < F; f++) {
-                    U[n].setEntry(t, f, N.sample());
-                    final double v = U[n].getEntry(t, f);
-                    sum += v * v;
+                    // long normalStart = System.nanoTime();
+                    // U[n][t][f] = N.sample();
+                    U[n][t][f] = r.nextGaussian() * this.sigma;
+                    // long normalEnd = System.nanoTime();
+                    // totalNormalCount++;
+                    // totalNormalTime += (normalEnd - normalStart);
+
+                    sum += (U[n][t][f]) * (U[n][t][f]);
+
                 }
             }
 
@@ -215,28 +220,27 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
             for (int t = 0; t < T; t++) {
                 for (int f = 0; f < F; f++) {
-                    // U[n][t][f] = (U[n][t][f]) / L2norm;
-                    U[n].setEntry(t, f, U[n].getEntry(t, f) / L2norm);
+                    U[n][t][f] = (U[n][t][f]) / L2norm;
                 }
             }
         }
 
         final double[] diff = new double[ng];
 
-        final List<PredictionInput> inputs = new LinkedList<PredictionInput>();
+        final List<PredictionInput> inputs = new LinkedList<>();
 
         for (int n = 0; n < ng; n++) {
 
             // dfs = f(x + u * sample) - f(x)
 
-            final List<Feature> features2delta = new LinkedList<Feature>();
+            final List<Feature> features2delta = new LinkedList<>();
 
             for (int t = 0; t < T; t++) {
 
                 final double[] feature3Array = new double[F];
 
                 for (int f = 0; f < F; f++) {
-                    feature3Array[f] = x.getEntry(t, f) + mu * U[n].getEntry(t, f);
+                    feature3Array[f] = x.getEntry(t, f) + mu * U[n][t][f];
                 }
 
                 final Feature feature3 = new Feature("xdelta" + t, Type.VECTOR, new Value(feature3Array));
@@ -248,7 +252,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
         }
 
-        final List<Feature> features2 = new LinkedList<Feature>();
+        final List<Feature> features2 = new LinkedList<>();
 
         for (int t = 0; t < T; t++) {
 
@@ -272,7 +276,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
         final PredictionOutput fxPredictionOutput = results.get(results.size() - 1);
         final List<Output> fxs = fxPredictionOutput.getOutputs();
         final Output[] fx = fxs.toArray(new Output[0]);
-        final double fxScore = fx[0].getScore();
+        final double fxScore = fx[0].getValue().asNumber();
 
         for (int i = 0; i < results.size() - 1; i++) {
             final PredictionOutput fxDeltaPredictionOutput = results.get(i);
@@ -281,14 +285,14 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
             final Output[] fxDelta = fxDeltas.toArray(new Output[0]);
 
-            final double fxDeltaScore = fxDelta[0].getScore();
+            final double fxDeltaScore = fxDelta[0].getValue().asNumber();
 
             diff[i] = fxDeltaScore - fxScore;
         }
 
         // g(t,j) = (T * F) / ng * sum(ng) (diff * U) / MU)
 
-        final RealMatrix retval = MatrixUtils.createRealMatrix(T, F);
+        final RealMatrix retval = MatrixUtilsExtensions.zeros(T, F);
 
         final double mult = (double) (T * F) / ng;
 
@@ -298,7 +302,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 double gsum = 0.0;
 
                 for (int n = 0; n < ng; n++) {
-                    final double term = diff[n] * U[n].getEntry(t, f);
+                    final double term = diff[n] * U[n][t][f];
                     final double term2 = term / mu;
                     gsum += term2;
                 }

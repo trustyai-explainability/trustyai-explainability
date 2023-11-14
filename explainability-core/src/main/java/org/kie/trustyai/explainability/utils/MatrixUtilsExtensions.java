@@ -21,31 +21,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.linear.SingularMatrixException;
-import org.apache.commons.math3.linear.SingularValueDecomposition;
+import org.apache.commons.math3.linear.*;
 import org.apache.commons.math3.util.Pair;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 
 public class MatrixUtilsExtensions {
-    public enum Axis {
-        ROW,
-        COLUMN
-    }
-
     private static final String SHAPE_STRING = "Matrix %s shape: %d x %d";
 
     private MatrixUtilsExtensions() {
         throw new IllegalStateException("Utility class");
     }
 
-    // === Creation ops ================================================================================================
     /**
      * Convert a prediction input to a row vector array compatible with matrix ops
-     * 
+     *
      * @param p: the prediction inputs to convert into a double[][] row vector
      * @return double[][] array, the converted matrix
      */
@@ -55,9 +45,11 @@ public class MatrixUtilsExtensions {
                 .toArray());
     }
 
+    // === Creation ops ================================================================================================
+
     /**
      * Convert a list of prediction inputs to an array compatible with matrix ops
-     * 
+     *
      * @param ps: the list of prediction inputs to convert into a double[][] array
      * @return double[][] array, the converted matrix
      */
@@ -72,7 +64,7 @@ public class MatrixUtilsExtensions {
 
     /**
      * Convert a prediction input to a row vector array compatible with matrix ops
-     * 
+     *
      * @param p: the prediction inputs to convert into a double[][] row vector
      * @return double[][] array, the converted matrix
      */
@@ -84,7 +76,7 @@ public class MatrixUtilsExtensions {
 
     /**
      * Convert a list of prediction outputs to an array compatible with matrix ops
-     * 
+     *
      * @param ps: the list of prediction outputs to convert into a double[][] array
      * @return double[][] array, the converted matrix
      */
@@ -97,7 +89,6 @@ public class MatrixUtilsExtensions {
                         .toArray(double[][]::new));
     }
 
-    // === RealMAtrix Operations =======================================================================================
     /**
      * Compute the Moore-Pensor Psuedoinverse of a matrix via SVD
      *
@@ -122,6 +113,8 @@ public class MatrixUtilsExtensions {
         sigma = sigma.transpose();
         return v.multiply((sigma.multiply(u.transpose())));
     }
+
+    // === RealMAtrix Operations =======================================================================================
 
     /**
      * Attempt to invert the matrix. If it's numerically non-invertible, use Moore-Penrose Psuedoinverse via
@@ -324,11 +317,10 @@ public class MatrixUtilsExtensions {
         return result;
     }
 
-    // specific optimizations to minimize unneccesary allocation =======================================================
     /**
      * For some matrix A, diagonal matrix B, and vector C, compute (A^T B A)^T and A^T B C. These can be combined
      * to avoid iterating across A twice
-     * 
+     *
      * @param A: Matrix
      * @param B: Diagonal matrix, represented as a vector of its diagonal
      * @param C: Vector
@@ -358,7 +350,8 @@ public class MatrixUtilsExtensions {
 
     }
 
-    // === REAL VECTOR STATISTICS =====================================
+    // specific optimizations to minimize unneccesary allocation =======================================================
+
     /**
      * Find the minimum positive value of a vector. Returns the max double if no values are positive.
      * this mirrors behavior of https://github.com/scikit-learn/scikit-learn/blob/0d378913be6d7e485b792ea36e9268be31ed52d0/sklearn/utils/arrayfuncs.pyx#L21
@@ -378,6 +371,8 @@ public class MatrixUtilsExtensions {
         }
         return minPos;
     }
+
+    // === REAL VECTOR STATISTICS =====================================
 
     /**
      * Find nonzero indexs of a vector.
@@ -419,7 +414,6 @@ public class MatrixUtilsExtensions {
         return Arrays.stream(v.toArray()).sum();
     }
 
-    // === SWAP FUNCTIONS ==============================================================================================
     /**
      * Functions to swap the ith and jth element of x in-place
      *
@@ -435,6 +429,8 @@ public class MatrixUtilsExtensions {
         x.setRow(j, tmp);
     }
 
+    // === SWAP FUNCTIONS ==============================================================================================
+
     public static void swap(RealVector x, int i, int j) {
         double tmp = x.getEntry(i);
         x.setEntry(i, x.getEntry(j));
@@ -447,7 +443,6 @@ public class MatrixUtilsExtensions {
         x[j] = tmp;
     }
 
-    // == 2D ARRAY FUNCTIONS============================================================================================
     /**
      * Get the idx-th column of some 2D array m
      *
@@ -462,6 +457,30 @@ public class MatrixUtilsExtensions {
             out.add(m[i][idx]);
         }
         return out;
+    }
+
+    // == 2D ARRAY FUNCTIONS============================================================================================
+
+    /**
+     * Create a zero-initialized {@link RealMatrix} of the given size.
+     *
+     * @param rows Number of rows
+     * @param cols Number of columns
+     * @return A zero-initialized {@link RealMatrix}
+     */
+    public static RealMatrix zeros(int rows, int cols) {
+        final RealMatrix matrix = MatrixUtils.createRealMatrix(rows, cols);
+        for (int i = 0; i < matrix.getRowDimension(); i++) {
+            for (int j = 0; j < matrix.getColumnDimension(); j++) {
+                matrix.setEntry(i, j, 0);
+            }
+        }
+        return matrix;
+    }
+
+    public enum Axis {
+        ROW,
+        COLUMN
     }
 
 }
