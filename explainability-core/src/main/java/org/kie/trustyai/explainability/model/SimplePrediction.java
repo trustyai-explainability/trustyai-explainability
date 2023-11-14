@@ -27,6 +27,14 @@ public class SimplePrediction extends BasePrediction {
         super(input, output, uuid);
     }
 
+    public SimplePrediction(PredictionInput input, PredictionOutput output, PredictionMetadata metadata) {
+        super(input, output, metadata);
+    }
+
+    public SimplePrediction(PredictionInput input, PredictionOutput output, UUID uuid, PredictionMetadata metadata) {
+        super(input, output, uuid, metadata);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

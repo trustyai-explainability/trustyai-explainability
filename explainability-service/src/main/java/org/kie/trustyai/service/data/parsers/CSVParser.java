@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionMetadata;
+import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.metadata.Metadata;
@@ -49,14 +51,17 @@ public class CSVParser implements DataParser {
     @Override
     public Dataframe toDataframe(ByteBuffer dataByteBuffer, ByteBuffer internalDataByteBuffer, Metadata metadata)
             throws DataframeCreateException {
-        final String data = UTF8.decode(dataByteBuffer).toString();
 
+        // read predictions
+        final String data = UTF8.decode(dataByteBuffer).toString();
         final List<Prediction> predictions;
         try {
             predictions = CSVUtils.parse(data, metadata);
         } catch (IOException e) {
             throw new DataframeCreateException(e.getMessage());
         }
+
+        // read metadata
         List<PredictionMetadata> predictionsMetadata = new ArrayList<>();
         final String internalData = UTF8.decode(internalDataByteBuffer).toString();
         final List<List<Value>> values;
@@ -75,8 +80,17 @@ public class CSVParser implements DataParser {
             }
         }
 
+        // create predictions with metadata
+        List<Prediction> predictionsFinal = new ArrayList<>();
+        int i = 0;
+        for (Prediction prediction : predictions) {
+            predictionsFinal.add(new SimplePrediction(prediction.getInput(), prediction.getOutput(),
+                    prediction.getExecutionId(), predictionsMetadata.get(i)));
+            i++;
+        }
+
         LOG.info("Creating dataframe from CSV data");
-        return Dataframe.createWithMetadata(predictions, predictionsMetadata);
+        return Dataframe.createFrom(predictionsFinal);
     }
 
     public String convertToString(Dataframe dataframe, boolean includeHeader, boolean includeInternalData) {
@@ -85,10 +99,9 @@ public class CSVParser implements DataParser {
             output.append(String.join(",", dataframe.getColumnNames().stream().map(name -> "\"" + name + "\"")
                     .collect(Collectors.toList())));
             if (includeInternalData) {
-                output.append(",\"_internal_id\",\"_internal_tag\"");
+                output.append(",\"_trustyai_id\",\"_trustyai_tag\",\"_trustyai_timestamp\"");
             }
             output.append("\n");
-
         }
         AtomicInteger i = new AtomicInteger();
         dataframe.getRows().forEach(values -> {
@@ -103,7 +116,8 @@ public class CSVParser implements DataParser {
             output.append(rowStr);
             if (includeInternalData) {
                 output.append(",\"").append(dataframe.getIds().get(i.get())).append("\",\"")
-                        .append(dataframe.getTags().get(i.get())).append("\"");
+                        .append(dataframe.getTags().get(i.get())).append("\",\"")
+                        .append(dataframe.getTimestamps().get(i.get()).toInstant(ZoneOffset.UTC).toEpochMilli()).append("\"");
             }
             output.append("\n");
             i.getAndIncrement();

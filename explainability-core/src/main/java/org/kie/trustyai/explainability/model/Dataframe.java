@@ -74,32 +74,6 @@ public class Dataframe {
     }
 
     /**
-     * Create a dataframe from a single @link{Prediction}
-     *
-     * @param prediction The original @link{Prediction}
-     * @return A @link{Dataframe}
-     */
-    public static Dataframe createFrom(Prediction prediction) {
-        final Dataframe df = new Dataframe();
-
-        // Process inputs metadata
-        for (Feature feature : prediction.getInput().getFeatures()) {
-            df.metadata.add(feature);
-            df.data.add(new ArrayList<>());
-        }
-        // Process outputs metadata
-        for (Output output : prediction.getOutput().getOutputs()) {
-            df.metadata.add(output);
-            df.data.add(new ArrayList<>());
-        }
-
-        // Copy data
-        df.addPrediction(prediction);
-
-        return df;
-    }
-
-    /**
      * Create a dataframe from a @link{Dataset}
      *
      * @param dataset The original @link{Dataset}
@@ -184,11 +158,11 @@ public class Dataframe {
         return df;
     }
 
-    public static Dataframe createFrom(Prediction prediction, PredictionMetadata predictionMetadata) {
-        return createWithMetadata(List.of(prediction), List.of(predictionMetadata));
+    public static Dataframe createFrom(Prediction prediction) {
+        return createWithMetadata(List.of(prediction));
     }
 
-    public static Dataframe createWithMetadata(List<Prediction> predictions, List<PredictionMetadata> predictionsMetadata) {
+    public static Dataframe createWithMetadata(List<Prediction> predictions) {
         final Dataframe df = new Dataframe();
         if (predictions.isEmpty()) {
             return df;
@@ -205,7 +179,7 @@ public class Dataframe {
             }
 
             // Copy data
-            df.addPredictions(predictions, predictionsMetadata);
+            df.addPredictions(predictions);
 
             return df;
         }
@@ -248,16 +222,6 @@ public class Dataframe {
      * @param predictions The {@link List} of {@link Prediction} to add.
      */
     public void addPredictions(List<Prediction> predictions) {
-        addPredictions(predictions, null);
-    }
-
-    /**
-     * Add a {@link List} of predictions to the {@link Dataframe}
-     *
-     * @param predictions The {@link List} of {@link Prediction} to add.
-     * @param predictionsMetadata The {@link List} of {@link PredictionMetadata} or {@code null}.
-     */
-    public void addPredictions(List<Prediction> predictions, List<PredictionMetadata> predictionsMetadata) {
         if (predictions != null && predictions.size() > 0) {
             final Prediction prediction = predictions.get(0);
             final List<Feature> inputs = prediction.getInput().getFeatures();
@@ -271,17 +235,6 @@ public class Dataframe {
                 throw new IllegalArgumentException("Prediction outputs do not match dataframe outputs");
             }
 
-            boolean alignedMetadata;
-            if (predictionsMetadata != null) {
-                if (predictionsMetadata.size() != predictions.size()) {
-                    throw new IllegalArgumentException("Different number of predictions " + predictions.size() +
-                            " and metadata " + predictionsMetadata.size());
-                } else {
-                    alignedMetadata = true;
-                }
-            } else {
-                alignedMetadata = false;
-            }
             final int inputsSize = getInputsCount();
             final int originalSize = getRowDimension();
 
@@ -297,24 +250,26 @@ public class Dataframe {
                 for (int col = inputsSize; col < nFeatures; col++) {
                     data.get(col).add(currentOutputs.get(col - inputsSize).getValue());
                 }
-
-                if (alignedMetadata) {
-                    PredictionMetadata predictionMetadata = predictionsMetadata.get(i);
-                    if (idToIDX.containsKey(predictionMetadata.getId())) {
-                        throw new IllegalArgumentException("ID=" + predictionMetadata.getId() + " already exists in the dataframe. Prediction IDs must be unique.");
+                String id;
+                if (currentPrediction.hasMetadata()) {
+                    PredictionMetadata predictionMetadata = currentPrediction.getPredictionMetadata();
+                    id = predictionMetadata.getId();
+                    if (idToIDX.containsKey(id)) {
+                        throw new IllegalArgumentException("ID=" + id + " already exists in the dataframe. Prediction IDs must be unique.");
                     }
                     internalData.datapointTags.add(predictionMetadata.getDataPointTag());
-                    internalData.ids.add(predictionMetadata.getId());
+                    internalData.ids.add(id);
                     internalData.timestamps.add(predictionMetadata.getPredictionTime());
-                    idToIDX.put(predictionMetadata.getId(), originalSize + i);
+                    idToIDX.put(id, originalSize + i);
                 } else {
-                    if (idToIDX.containsKey(currentPrediction.getExecutionId().toString())) {
-                        throw new IllegalArgumentException("ID=" + currentPrediction.getExecutionId().toString() + " already exists in the dataframe. Prediction IDs must be unique.");
+                    id = currentPrediction.getExecutionId().toString();
+                    if (idToIDX.containsKey(id)) {
+                        throw new IllegalArgumentException("ID=" + id + " already exists in the dataframe. Prediction IDs must be unique.");
                     }
                     internalData.datapointTags.add(InternalTags.UNLABELED.get());
-                    internalData.ids.add(currentPrediction.getExecutionId().toString());
+                    internalData.ids.add(id);
                     internalData.timestamps.add(LocalDateTime.now());
-                    idToIDX.put(currentPrediction.getExecutionId().toString(), originalSize + i);
+                    idToIDX.put(id, originalSize + i);
                 }
             });
         }
@@ -1154,7 +1109,19 @@ public class Dataframe {
             }
             final PredictionInput input = new PredictionInput(features);
             final PredictionOutput output = new PredictionOutput(outputs);
-            predictions.add(new SimplePrediction(input, output));
+
+            Prediction prediction;
+            try {
+                String id = internalData.ids.get(row);
+                LocalDateTime predictionTime = internalData.timestamps.get(row);
+                String datapointTag = internalData.datapointTags.get(row);
+                PredictionMetadata predictionMetadata = new PredictionMetadata(id, predictionTime, datapointTag);
+                prediction = new SimplePrediction(input, output, predictionMetadata);
+            } catch (Exception e) {
+                prediction = new SimplePrediction(input, output);
+            }
+
+            predictions.add(prediction);
         }
         return predictions;
     }

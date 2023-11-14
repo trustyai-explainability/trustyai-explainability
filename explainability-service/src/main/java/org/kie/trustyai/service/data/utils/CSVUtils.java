@@ -2,7 +2,11 @@ package org.kie.trustyai.service.data.utils;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -102,7 +106,20 @@ public class CSVUtils {
                 final PredictionInput predictionInput = new PredictionInput(inputFeatures);
                 final PredictionOutput predictionOutput = new PredictionOutput(outputs);
 
-                result.add(new SimplePrediction(predictionInput, predictionOutput));
+                Prediction prediction;
+                if (internal) {
+                    int initialOffset = inputNames.size() + outputNames.size();
+                    String id = entry.get(initialOffset);
+                    String tag = entry.get(initialOffset + 1);
+                    String timestamp = entry.get(initialOffset + 2);
+                    LocalDateTime predictionTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(timestamp)),
+                            ZoneOffset.UTC);
+                    PredictionMetadata predictionMetadata = new PredictionMetadata(id, predictionTime, tag);
+                    prediction = new SimplePrediction(predictionInput, predictionOutput, predictionMetadata);
+                } else {
+                    prediction = new SimplePrediction(predictionInput, predictionOutput);
+                }
+                result.add(prediction);
             }
             idx.incrementAndGet();
         });
