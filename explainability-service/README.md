@@ -3,12 +3,11 @@
 <!-- TOC -->
 
 * [trustyai-service](#trustyai-service)
+* [Introduction](#Introduction)
 * [Running](#running)
     * [Locally](#locally)
         * [Using data in storage only](#using-data-in-storage-only)
-            * [Own data in MinIO](#own-data-in-minio)
         * [Consuming KServe v2 data](#consuming-kserve-v2-data)
-    * [S3 (MinIO)](#s3-minio)
 * [Endpoints](#endpoints)
     * [Metrics](#metrics)
         * [Statistical Parity Difference](#statistical-parity-difference)
@@ -25,6 +24,22 @@
     * [OpenShift](#openshift)
 
 <!-- TOC -->
+
+# Introduction
+
+The TrustyAI service is a REST service that provides the integration between XAI and metrics algorithms
+provided by the [TrustyAI core](https://github.com/trustyai-explainability/trustyai-explainability/tree/main/explainability-core)
+and external models.
+
+Although it can be used as a standalone service, it is designed to be used as part of
+[Open Data Hub](https://github.com/opendatahub-io), deployed in OpenShift/Kubernetes and managed by the [TrustyAI operator](https://github.com/trustyai-explainability/trustyai-service-operator).
+
+The main functionality of the service is to provide a REST API to calculate metrics and explainability.
+The service can consume model data (inputs and outputs) for metrics calculation either via a consumer endpoint,
+or cloud events.
+
+To provide explanations, the service performs inferences to a ModelMesh/KServe-deployed model
+using gRPC.
 
 # Running
 
@@ -77,29 +92,6 @@ curl -X POST --location "http://localhost:8080/metrics/spd/request" \
 
 And observe the `trustyai_spd` metric in Prometheus: http://localhost:9090
 
-#### Own data in MinIO
-
-To use your own provided data, configure the MinIO container (by pre-populating it with data, according to
-the [steps below](#s3-minio))
-and run the container using (either `docker`, `podman`):
-
-```shell
-docker run -p 8080:8080 \
-    --env SERVICE_DATA_FORMAT=CSV \
-    --env SERVICE_STORAGE_FORMAT="MINIO" \
-    --env MINIO_BUCKET_NAME="inputs" \
-    --env MINIO_ENDPOINT="http://localhost:9000" \
-    --env STORAGE_DATA_FILENAME="income-biased-inputs.csv" \
-    --env STORAGE_DATA_FOLDER="/inputs" \
-    --env MINIO_SECRET_KEY="minioadmin" \
-    --env MINIO_ACCESS_KEY="minioadmin" \
-    --env SERVICE_METRICS_SCHEDULE="5s" \
-    trustyai/trustyai-service:999-SNAPSHOT -d 
-```
-
-When using the metrics HTTP request, remember to adjust the feature names and values to what makes sense for your own
-data.
-
 ### Consuming KServe v2 data
 
 Another demo includes a process with simulates sending gRPC encoded KServe v2 data to a `consumer` endpoint in the
@@ -142,52 +134,6 @@ trustyai-service  | 2023-02-18 12:22:18,001 INFO  [org.kie.tru.ser.dat.DataSourc
 ```
 
 You can also inspect the data `~/volumes/pvc/inputs` in order to see what data is being serialised.
-
-## S3 (MinIO)
-
-In order to set up MinIO for local development, first install the [MinIO client](https://github.com/minio/mc) `mc`.
-Run the MinIO server with
-
-```shell
-docker run \
-   -p 9000:9000 \
-   -p 9090:9090 \
-   --name minio \
-   -v ~/minio/trustyai-service/data:/data \
-   -e "MINIO_ROOT_USER=minioadmin" \
-   -e "MINIO_ROOT_PASSWORD=minioadmin" \
-   quay.io/minio/minio server /data --console-address ":9090"
-```
-
-Connect to MinIO using:
-
-```shell
-mc alias set local http://127.0.0.1:9000 minioadmin minioadmin
-```
-
-Now create a bucket, for instance, `inputs`:
-
-```shell
-mc mb local/inputs
-```
-
-Copy a file into the bucket:
-
-```shell
-mc cp data/income-biased-inputs.csv local/inputs
-```
-
-Optionally, check the file was successfully copies:
-
-```shell
-mc ls local/inputs
-```
-
-Which should produce:
-
-```text
-[2023-02-09 23:01:49 GMT]  68KiB income-biased-inputs.csv
-```
 
 # Endpoints
 
@@ -731,7 +677,7 @@ curl -X POST --location "http://localhost:8080/q/info" \
 ## Metrics
 
 Storage backend adapters implement the `Storage` interface which has the responsibility
-of reading the data from a specific storage type (flat file on PVC, S3, database, _etc_)
+of reading the data from a specific storage type (flat file on PVC at the moment)
 and return the inputs and outputs as `ByteBuffer`.
 From there, the service converts the `ByteBuffer` into a TrustyAI `Dataframe` to be used
 in the metrics calculations.
@@ -742,7 +688,6 @@ The supported data sources are:
 
 | Type                                      | Storage property |
 |-------------------------------------------|------------------|
-| MinIO                                     | `MINIO`          |
 | Kubernetes Persistent Volume Claims (PVC) | `PVC`            |
 | Memory                                    | `MEMORY`         |
 
