@@ -32,6 +32,14 @@ spec:
           value: THESECRETKEY
       image: quay.io/opendatahub/modelmesh-minio-examples:v0.8.0
       name: minio
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
 ---
 apiVersion: v1
 kind: Secret
