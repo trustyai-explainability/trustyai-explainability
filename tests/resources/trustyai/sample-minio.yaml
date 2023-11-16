@@ -32,6 +32,14 @@ spec:
           value: THESECRETKEY
       image: quay.io/trustyai/modelmesh-minio-examples:latest
       name: minio
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
 ---
 apiVersion: v1
 kind: Secret
