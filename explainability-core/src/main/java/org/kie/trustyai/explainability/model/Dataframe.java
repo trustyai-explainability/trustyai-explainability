@@ -251,7 +251,7 @@ public class Dataframe {
                     data.get(col).add(currentOutputs.get(col - inputsSize).getValue());
                 }
                 String id;
-                if (currentPrediction.hasMetadata()) {
+                if (currentPrediction.hasPredictionMetadata()) {
                     PredictionMetadata predictionMetadata = currentPrediction.getPredictionMetadata();
                     id = predictionMetadata.getId();
                     if (idToIDX.containsKey(id)) {

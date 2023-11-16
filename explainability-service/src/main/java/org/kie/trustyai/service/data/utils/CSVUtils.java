@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +19,8 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
+
+import static org.kie.trustyai.service.data.parsers.CSVParser.ZONE_OFFSET;
 
 public class CSVUtils {
 
@@ -112,8 +112,8 @@ public class CSVUtils {
                     String id = entry.get(initialOffset);
                     String tag = entry.get(initialOffset + 1);
                     String timestamp = entry.get(initialOffset + 2);
-                    LocalDateTime predictionTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(timestamp)),
-                            ZoneOffset.UTC);
+                    LocalDateTime predictionTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(
+                            Long.parseLong(timestamp)), ZONE_OFFSET);
                     PredictionMetadata predictionMetadata = new PredictionMetadata(id, predictionTime, tag);
                     prediction = new SimplePrediction(predictionInput, predictionOutput, predictionMetadata);
                 } else {

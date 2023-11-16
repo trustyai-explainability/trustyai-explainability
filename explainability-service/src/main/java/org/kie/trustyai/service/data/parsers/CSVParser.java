@@ -32,6 +32,7 @@ public class CSVParser implements DataParser {
 
     private static final Logger LOG = Logger.getLogger(CSVParser.class);
     private static final Charset UTF8 = StandardCharsets.UTF_8;
+    public static final ZoneOffset ZONE_OFFSET = ZoneOffset.UTC;
 
     @Override
     public Dataframe toDataframe(ByteBuffer byteBuffer, Metadata metadata) throws DataframeCreateException {
@@ -99,7 +100,13 @@ public class CSVParser implements DataParser {
             output.append(String.join(",", dataframe.getColumnNames().stream().map(name -> "\"" + name + "\"")
                     .collect(Collectors.toList())));
             if (includeInternalData) {
-                output.append(",\"_trustyai_id\",\"_trustyai_tag\",\"_trustyai_timestamp\"");
+                output.append(",\"")
+                        .append("_trustyai_id")
+                        .append("\",\"")
+                        .append("_trustyai_tag")
+                        .append("\",\"")
+                        .append("_trustyai_timestamp")
+                        .append("\"");
             }
             output.append("\n");
         }
@@ -115,9 +122,13 @@ public class CSVParser implements DataParser {
             }).collect(Collectors.joining(","));
             output.append(rowStr);
             if (includeInternalData) {
-                output.append(",\"").append(dataframe.getIds().get(i.get())).append("\",\"")
-                        .append(dataframe.getTags().get(i.get())).append("\",\"")
-                        .append(dataframe.getTimestamps().get(i.get()).toInstant(ZoneOffset.UTC).toEpochMilli()).append("\"");
+                output.append(",\"")
+                        .append(dataframe.getIds().get(i.get()))
+                        .append("\",\"")
+                        .append(dataframe.getTags().get(i.get()))
+                        .append("\",\"")
+                        .append(dataframe.getTimestamps().get(i.get()).toInstant(ZONE_OFFSET).toEpochMilli())
+                        .append("\"");
             }
             output.append("\n");
             i.getAndIncrement();

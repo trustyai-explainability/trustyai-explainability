@@ -28,7 +28,7 @@ public interface Prediction {
 
     UUID getExecutionId();
 
-    boolean hasMetadata();
+    boolean hasPredictionMetadata();
 
     PredictionMetadata getPredictionMetadata();
 }

@@ -72,7 +72,7 @@ public abstract class BasePrediction implements Prediction {
     }
 
     @Override
-    public boolean hasMetadata() {
+    public boolean hasPredictionMetadata() {
         return predictionMetadata != null;
     }
 
