@@ -101,9 +101,9 @@ public class CSVParser implements DataParser {
                     .collect(Collectors.toList())));
             if (includeInternalData) {
                 output.append(",\"")
-                        .append("_trustyai_id")
-                        .append("\",\"")
                         .append("_trustyai_tag")
+                        .append("\",\"")
+                        .append("_trustyai_id")
                         .append("\",\"")
                         .append("_trustyai_timestamp")
                         .append("\"");
@@ -123,9 +123,9 @@ public class CSVParser implements DataParser {
             output.append(rowStr);
             if (includeInternalData) {
                 output.append(",\"")
-                        .append(dataframe.getIds().get(i.get()))
-                        .append("\",\"")
                         .append(dataframe.getTags().get(i.get()))
+                        .append("\",\"")
+                        .append(dataframe.getIds().get(i.get()))
                         .append("\",\"")
                         .append(dataframe.getTimestamps().get(i.get()).toInstant(ZONE_OFFSET).toEpochMilli())
                         .append("\"");
