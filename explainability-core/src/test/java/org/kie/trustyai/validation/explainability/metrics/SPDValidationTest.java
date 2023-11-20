@@ -3,6 +3,7 @@ package org.kie.trustyai.validation.explainability.metrics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
 import org.kie.trustyai.metrics.fairness.group.GroupStatisticalParityDifference;
 
 import java.io.BufferedReader;
@@ -70,8 +71,20 @@ public class SPDValidationTest {
         final Dataframe privileged = dataframe.filterByColumnValue(9, privilegedPredicate);
         final Dataframe unprivileged = dataframe.filterByColumnValue(9, unprivilegedPredicate);
 
-        final Output favourableOutcome = new Output("income", Type.NUMBER, new Value(1), 1d);
+        final Output favourableOutcome = new Output("income", Type.NUMBER, new Value(0), 1d);
         final double spd = GroupStatisticalParityDifference.calculate(privileged, unprivileged, List.of(favourableOutcome));
-        assertEquals(-0.19643287553870947, spd, 1e-5);
+        assertEquals(0.19643287553870947, spd, 1e-5);
+    }
+
+    @Test
+    public void testSPDValidationDIR() {
+        final Predicate<Value> privilegedPredicate = value -> value.getUnderlyingObject().equals(1);
+        final Predicate<Value> unprivilegedPredicate = value -> value.getUnderlyingObject().equals(0);
+        final Dataframe privileged = dataframe.filterByColumnValue(9, privilegedPredicate);
+        final Dataframe unprivileged = dataframe.filterByColumnValue(9, unprivilegedPredicate);
+
+        final Output favourableOutcome = new Output("income", Type.NUMBER, new Value(0), 1d);
+        final double spd = DisparateImpactRatio.calculate(privileged, unprivileged, List.of(favourableOutcome));
+        assertEquals(1.28, spd, 1e-2);
     }
 }
