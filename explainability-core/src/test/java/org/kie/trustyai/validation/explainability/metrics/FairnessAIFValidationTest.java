@@ -1,6 +1,7 @@
 package org.kie.trustyai.validation.explainability.metrics;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SPDValidationTest {
+public class FairnessAIFValidationTest {
 
     private Dataframe dataframe;
 
@@ -65,6 +66,7 @@ public class SPDValidationTest {
     }
 
     @Test
+    @DisplayName("SPD validation with AIF data")
     public void testSPDValidationAIF() {
         final Predicate<Value> privilegedPredicate = value -> value.getUnderlyingObject().equals(1);
         final Predicate<Value> unprivilegedPredicate = value -> value.getUnderlyingObject().equals(0);
@@ -77,6 +79,7 @@ public class SPDValidationTest {
     }
 
     @Test
+    @DisplayName("DIR validation with AIF data")
     public void testSPDValidationDIR() {
         final Predicate<Value> privilegedPredicate = value -> value.getUnderlyingObject().equals(1);
         final Predicate<Value> unprivilegedPredicate = value -> value.getUnderlyingObject().equals(0);
