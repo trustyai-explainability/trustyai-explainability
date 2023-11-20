@@ -109,8 +109,8 @@ public class CSVUtils {
                 Prediction prediction;
                 if (internal) {
                     int initialOffset = inputNames.size() + outputNames.size();
-                    String id = entry.get(initialOffset);
-                    String tag = entry.get(initialOffset + 1);
+                    String tag = entry.get(initialOffset);
+                    String id = entry.get(initialOffset + 1);
                     String timestamp = entry.get(initialOffset + 2);
                     LocalDateTime predictionTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(
                             Long.parseLong(timestamp)), ZONE_OFFSET);
