@@ -4,12 +4,11 @@ import org.kie.trustyai.metrics.language.utils.TokenizerUtils;
 
 import opennlp.tools.tokenize.Tokenizer;
 
-public class AbstractNLPPerformanceMetric {
+public abstract class AbstractNLPPerformanceMetric<T, R> implements NLPPerformanceMetric<T, R> {
     private final Tokenizer tokenizer;
 
     public AbstractNLPPerformanceMetric() {
         tokenizer = TokenizerUtils.getDefaultTokenizer();
-
     }
 
     public AbstractNLPPerformanceMetric(Tokenizer tokenizer) {

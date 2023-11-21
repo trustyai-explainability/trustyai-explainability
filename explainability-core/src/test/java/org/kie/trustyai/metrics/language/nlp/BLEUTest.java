@@ -78,7 +78,7 @@ class BLEUTest {
         final BLEU blue = new BLEU(epsilon);
 
         double[] weights = { 0.3, 0.7 }; // Uniform weights for unigram and bigram
-        final double score = blue.calculateSentence(commonReferences, commonHypothesis, 2, weights);
+        final double score = blue.calculate(commonReferences, commonHypothesis, 2, weights);
 
         assertEquals(0.3, score, 0.05);
     }
@@ -89,7 +89,7 @@ class BLEUTest {
         final BLEU blue = new BLEU();
 
         double[] weights = { 0.3, 0.7 }; // Uniform weights for unigram and bigram
-        final double score = blue.calculateSentence(commonReferences, commonHypothesis, 2, weights);
+        final double score = blue.calculate(commonReferences, commonHypothesis, 2, weights);
 
         assertEquals(0.3, score, 0.05);
     }
@@ -99,7 +99,7 @@ class BLEUTest {
     void calculateSentenceNoSmoothingNoWeights() {
         final BLEU blue = new BLEU();
 
-        final double score = blue.calculateSentence(commonReferences, commonHypothesis, 2);
+        final double score = blue.calculate(commonReferences, commonHypothesis, 2);
 
         assertEquals(0.35, score, 0.05);
     }
@@ -148,7 +148,7 @@ class BLEUTest {
         final BLEU bleuCalculator = new BLEU();
 
         for (int n = 1; n <= hypothesis.length(); n++) {
-            double score = bleuCalculator.calculateSentence(references, hypothesis, n);
+            double score = bleuCalculator.calculate(references, hypothesis, n);
             assertEquals(0.0, score, 0.00001, "The score should be zero for no matches");
         }
     }
@@ -161,7 +161,7 @@ class BLEUTest {
         final BLEU bleuCalculator = new BLEU();
 
         for (int n = 1; n <= 10; n++) {
-            double score = bleuCalculator.calculateSentence(references, uncommon, n);
+            double score = bleuCalculator.calculate(references, uncommon, n);
             assertEquals(1.0, score, 0.00001, "The score should be one for full matches");
         }
     }
@@ -170,28 +170,28 @@ class BLEUTest {
     @DisplayName("BLEU validation A (BLEU-2)")
     void validationBLEU2() {
         final BLEU bleuCalculator = new BLEU();
-        assertEquals(0.7453, bleuCalculator.calculateSentence(validationReference, validationHypothesisA, 2), 0.05);
+        assertEquals(0.7453, bleuCalculator.calculate(validationReference, validationHypothesisA, 2), 0.05);
     }
 
     @Test
     @DisplayName("BLEU validation A (BLEU-3)")
     void validationBLEU3() {
         final BLEU bleuCalculator = new BLEU();
-        assertEquals(0.6240, bleuCalculator.calculateSentence(validationReference, validationHypothesisA, 3), 0.05);
+        assertEquals(0.6240, bleuCalculator.calculate(validationReference, validationHypothesisA, 3), 0.05);
     }
 
     @Test
     @DisplayName("BLEU validation A (BLEU-4)")
     void validationBLEU4() {
         final BLEU bleuCalculator = new BLEU();
-        assertEquals(0.5045, bleuCalculator.calculateSentence(validationReference, validationHypothesisA, 4), 0.02);
+        assertEquals(0.5045, bleuCalculator.calculate(validationReference, validationHypothesisA, 4), 0.02);
     }
 
     @Test
     @DisplayName("BLEU validation A (BLEU-5)")
     void validationBLEU5() {
         final BLEU bleuCalculator = new BLEU();
-        assertEquals(0.3920, bleuCalculator.calculateSentence(validationReference, validationHypothesisA, 5), 0.02);
+        assertEquals(0.3920, bleuCalculator.calculate(validationReference, validationHypothesisA, 5), 0.02);
     }
 
     @Test
@@ -249,8 +249,8 @@ class BLEUTest {
         assertEquals(0.5920, bleu.calculateCorpus(list_of_references, hypotheses, weights), 0.01);
 
         // individual scores
-        double score1 = bleu.calculateSentence(List.of(ref1a, ref1b, ref1c), hyp1);
-        double score2 = bleu.calculateSentence(List.of(ref2a), hyp2);
+        double score1 = bleu.calculate(List.of(ref1a, ref1b, ref1c), hyp1);
+        double score2 = bleu.calculate(List.of(ref2a), hyp2);
         assertEquals(0.6223, (score1 + score2) / 2.0, 0.05);
     }
 

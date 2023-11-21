@@ -6,6 +6,8 @@ import org.apache.commons.text.StringTokenizer;
 import org.junit.jupiter.api.Test;
 
 import opennlp.tools.tokenize.SimpleTokenizer;
+import org.kie.trustyai.metrics.language.AbstractNLPPerformanceMetric;
+import org.kie.trustyai.metrics.language.utils.AlignedTokenSequences;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,36 +33,46 @@ class WordErrorRateTest {
             3 / 78.,
             1.0);
 
+    // nlp whitespace tokenizer creates a different number of tokens and thus produces different answers
+    List<Double> groundTruthsWhitespaceTokenizer = List.of(
+            9 / 15.,
+            3 / 79.,
+            10/11.);
+
     @Test
     public void testCommonsTokenizer() {
         for (int i = 0; i < references.size(); i++) {
-            double wer = WordErrorRate.calculate(
+            WordErrorRate wer = new WordErrorRate();
+            double werValue = wer.calculate(
                     new StringTokenizer(references.get(i)).getTokenList(),
                     new StringTokenizer(inputs.get(i)).getTokenList()).getWordErrorRate();
 
-            assertEquals(groundTruthWERsCommonsTokenizer.get(i), wer, 1e-5);
+            assertEquals(groundTruthWERsCommonsTokenizer.get(i), werValue, 1e-5);
         }
     }
 
     @Test
-    public void testDefaultOpenNLPTokenizer() {
+    public void testDefaultWhitespaceTokenizer() {
         for (int i = 0; i < references.size(); i++) {
-            double wer = WordErrorRate.calculate(references.get(i), inputs.get(i)).getWordErrorRate();
-            assertEquals(groundTruthWERsNLPTokenizer.get(i), wer, 1e-5);
+            double wer = new WordErrorRate().calculate(references.get(i), inputs.get(i)).getWordErrorRate();
+            assertEquals(groundTruthsWhitespaceTokenizer.get(i), wer, 1e-5);
         }
     }
 
     @Test
     public void testProvidedOpenNLPTokenizer() {
         for (int i = 0; i < references.size(); i++) {
-            double wer = WordErrorRate.calculate(references.get(i), inputs.get(i), SimpleTokenizer.INSTANCE).getWordErrorRate();
-            assertEquals(groundTruthWERsNLPTokenizer.get(i), wer, 1e-5);
+            WordErrorRateResult werr =  new WordErrorRate(SimpleTokenizer.INSTANCE).calculate(references.get(i), inputs.get(i));
+            System.out.println(werr.getAlignmentCounters());
+            System.out.println(werr.getAlignedInputString());
+            System.out.println(werr.getAlignedReferenceString());
+            assertEquals(groundTruthWERsNLPTokenizer.get(i), werr.getWordErrorRate(), 1e-5);
         }
     }
 
     @Test
     public void testResultObject() {
-        WordErrorRateResult werr = WordErrorRate.calculate(references.get(0), inputs.get(0), SimpleTokenizer.INSTANCE);
+        WordErrorRateResult werr = new WordErrorRate( SimpleTokenizer.INSTANCE).calculate(references.get(0), inputs.get(0));
         assertEquals(8, werr.getAlignmentCounters().correct);
         assertEquals(1, werr.getAlignmentCounters().deletions);
         assertEquals(2, werr.getAlignmentCounters().insertions);
