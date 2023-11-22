@@ -49,10 +49,10 @@ pushd ~/kfdef
 # put in latest values for operator image
 sed -i "s#value: operatorImagePlaceholder#value: ${OPERATOR_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 
-if [ -z "$PULL_NUMBER" ] || [ $REPO_OWNER != "trustyai-explainability" ]; then
-  echo "No pull number and/or workflow is not originating from a TrustyAI repo: using default ${KFDEF_FILENAME}"
-      # if not a pull, use latest version of service
-      sed -i "s#value: serviceImagePlaceholder#value: ${SERVICE_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
+if [ -z "$PULL_NUMBER" ] || [ $REPO_OWNER != "trustyai-explainability" ] || [ $REPO_NAME != "trustyai-explainability" ]; then
+  echo "No pull number and/or workflow is not originating from the original repo: using default ${KFDEF_FILENAME}"
+  # if not a pull, use latest version of service
+  sed -i "s#value: serviceImagePlaceholder#value: ${SERVICE_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 else
   if [ $REPO_NAME == "trustyai-explainability" ]; then
     echo "Setting manifests in kfctl_openshift to use pull number: $PULL_NUMBER"
