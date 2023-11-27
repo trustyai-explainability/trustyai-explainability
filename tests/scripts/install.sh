@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Installing kfDef from test directory"
+echo "Installing KFDef from test directory"
 KFDEF_FILENAME=odh-core.yaml
 
 set -x
@@ -34,10 +34,12 @@ pushd ~/src/${REPO_NAME}
 if [ -z "$PULL_NUMBER" ]; then
   echo "No pull number, assuming nightly run"
 else
-  curl -O -L https://github.com/${REPO_OWNER}/${REPO_NAME}/pull/${PULL_NUMBER}.patch
-  echo "Applying followng patch:"
-  cat ${PULL_NUMBER}.patch > ${ARTIFACT_DIR}/github-pr-${PULL_NUMBER}.patch
-  git apply ${PULL_NUMBER}.patch
+  if [ $REPO_OWNER == "trustyai-explainability" ]; then
+    curl -O -L https://github.com/${REPO_OWNER}/${REPO_NAME}/pull/${PULL_NUMBER}.patch
+    echo "Applying following patch (ignore any failures here):"
+    cat ${PULL_NUMBER}.patch > ${ARTIFACT_DIR}/github-pr-${PULL_NUMBER}.patch
+    git apply ${PULL_NUMBER}.patch
+  fi
 fi
 
 popd
@@ -47,10 +49,10 @@ pushd ~/kfdef
 # put in latest values for operator image
 sed -i "s#value: operatorImagePlaceholder#value: ${OPERATOR_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 
-if [ -z "$PULL_NUMBER" ]; then
-  echo "No pull number, not modifying ${KFDEF_FILENAME}"
-      # if not a pull, use latest version of service
-      sed -i "s#value: serviceImagePlaceholder#value: ${SERVICE_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
+if [ -z "$PULL_NUMBER" ] || [ $REPO_OWNER != "trustyai-explainability" ] || [ $REPO_NAME != "trustyai-explainability" ]; then
+  echo "No pull number and/or workflow is not originating from the original repo: using default ${KFDEF_FILENAME}"
+  # if not a pull, use latest version of service
+  sed -i "s#value: serviceImagePlaceholder#value: ${SERVICE_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
 else
   if [ $REPO_NAME == "trustyai-explainability" ]; then
     echo "Setting manifests in kfctl_openshift to use pull number: $PULL_NUMBER"

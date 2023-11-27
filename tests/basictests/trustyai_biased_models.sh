@@ -69,6 +69,18 @@ function check_trustyai_resources() {
 
 }
 
+function check_trustyai_conditions() {
+  header "Checking the TrustyAIService conditions are correct"
+  oc project $MM_NAMESPACE  || eval "$FAILURE_HANDLING"
+
+  os::cmd::try_until_text "oc get TrustyAIService trustyai-service -o json | jq -r '.status.conditions[] | select(.type==\"InferenceServicesPresent\") | \"\(.type),\(.status),\(.reason),\(.message)\"'" "InferenceServicesPresent,True,InferenceServicesFound,InferenceServices found" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc get TrustyAIService trustyai-service -o json | jq -r '.status.conditions[] | select(.type==\"PVCAvailable\") | \"\(.type),\(.status),\(.reason),\(.message)\"'" "PVCAvailable,True,PVCFound,PersistentVolumeClaim found" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc get TrustyAIService trustyai-service -o json | jq -r '.status.conditions[] | select(.type==\"RouteAvailable\") | \"\(.type),\(.status),\(.reason),\(.message)\"'" "RouteAvailable,True,RouteFound,Route found" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc get TrustyAIService trustyai-service -o json | jq -r '.status.conditions[] | select(.type==\"Available\") | \"\(.type),\(.status),\(.reason),\(.message)\"'" "Available,True,AllComponentsReady,AllComponentsReady" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+
+}
+
+
 function check_mm_resources() {
   header "Checking that ModelMesh resources have spun up"
   oc project $MM_NAMESPACE
@@ -217,6 +229,7 @@ if [ $TEARDOWN = false ]; then
   [ $FAILURE = false ] && install_trustyai_operator              || echo -e "\033[0;31mSkipping TrustyAI-Operator install due to previous failure\033[0m"
   [ $FAILURE = false ] && deploy_model                  || echo -e "\033[0;31mSkipping model deployment due to previous failure\033[0m"
   [ $FAILURE = false ] && check_trustyai_resources      || echo -e "\033[0;31mSkipping TrustyAI resource check due to previous failure\033[0m"
+  [ $FAILURE = false ] && check_trustyai_conditions     || echo -e "\033[0;31mSkipping TrustyAI conditions check due to previous failure\033[0m"
   [ $FAILURE = false ] && check_mm_resources            || echo -e "\033[0;31mSkipping ModelMesh resource check due to previous failure\033[0m"
   [ $FAILURE = false ] && check_communication           || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check due to previous failure\033[0m"
   [ $FAILURE = false ] && send_data                     || echo -e "\033[0;31mSkipping data generation due to previous failure\033[0m"
