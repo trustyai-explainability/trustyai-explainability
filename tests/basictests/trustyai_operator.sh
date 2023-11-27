@@ -19,9 +19,15 @@ REQUESTS_CREATED=false
 FAILURE=false
 FAILURE_HANDLING='FAILURE=true && echo -e "\033[0;31mERROR\033[0m"'
 
-
+# Authentication token
+TOKEN=$(oc whoami -t)
 
 os::test::junit::declare_suite_start "$MY_SCRIPT"
+
+# Function to add the Authorization token to curl commands
+function curl_token() {
+    curl -H "Authorization: Bearer ${TOKEN}" "$@"
+}
 
 function setup_monitoring() {
     header "Enabling User Workload Monitoring on the cluster"
@@ -64,7 +70,7 @@ function check_trustyai_resources() {
 
   os::cmd::try_until_text "oc get deployment trustyai-service" "trustyai-service" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get route trustyai-service-route" "trustyai-service-route" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "oc get pod | grep trustyai-service" "1/1" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc get pod | grep trustyai-service" "2/2" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 
 }
 
@@ -108,7 +114,7 @@ function schedule_and_check_request(){
 
   TRUSTY_ROUTE=https://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
-  os::cmd::expect_success_and_text "curl -k --location $TRUSTY_ROUTE/metrics/spd/request \
+  os::cmd::expect_success_and_text "curl_token -k --location $TRUSTY_ROUTE/metrics/spd/request \
     --header 'Content-Type: application/json' \
     --data '{
         \"modelId\": \"example-sklearn-isvc\",
@@ -118,7 +124,7 @@ function schedule_and_check_request(){
         \"privilegedAttribute\": 0.0,
         \"unprivilegedAttribute\": 1.0
     }'" "requestId" || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "curl -k $TRUSTY_ROUTE/q/metrics" "trustyai_spd" || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "curl_token -k $TRUSTY_ROUTE/q/metrics" "trustyai_spd" || eval "$FAILURE_HANDLING"
   REQUESTS_CREATED=true;
 }
 
@@ -154,11 +160,11 @@ function teardown_trustyai_test() {
   if [ $REQUESTS_CREATED = true ]; then
     for METRIC_NAME in "spd" "dir"
     do
-      curl -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests
-      for REQUEST in $(curl -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
+      curl_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests
+      for REQUEST in $(curl -sk -H "Authorization: Bearer ${TOKEN}" $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
       do
         echo -n $REQUEST": "
-        curl -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+        curl_token -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
             -H 'Content-Type: application/json' \
             -d "{
                   \"requestId\": \"$REQUEST\"
