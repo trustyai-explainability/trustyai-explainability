@@ -3,12 +3,14 @@ package org.kie.trustyai.metrics.language.utils;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 public class AlignedTokenSequences {
     private final List<String> alignedReference;
     private final List<String> alignedInput;
     private final String alignedReferenceVisualization;
     private final String alignedInputVisualization;
+    private final String alignedLabelVisualization;
     private final TokenSequenceAlignmentCounters alignmentCounters;
 
     public AlignedTokenSequences(Pair<List<String>, List<String>> alignedSequencePair, TokenSequenceAlignmentCounters alignmentCounters) {
@@ -16,9 +18,10 @@ public class AlignedTokenSequences {
         this.alignedInput = alignedSequencePair.getRight();
         this.alignmentCounters = alignmentCounters;
 
-        Pair<String, String> processedPair = TokenSequenceAligner.toStrings(alignedReference, alignedInput);
-        alignedReferenceVisualization = processedPair.getLeft();
-        alignedInputVisualization = processedPair.getRight();
+        Triple<String, String, String> processedTriple = TokenSequenceAligner.toStrings(alignedReference, alignedInput);
+        alignedReferenceVisualization = processedTriple.getLeft();
+        alignedInputVisualization = processedTriple.getMiddle();
+        alignedLabelVisualization = processedTriple.getRight();
     }
 
     public AlignedTokenSequences(List<String> alignedReference, List<String> alignedInput, TokenSequenceAlignmentCounters alignmentCounters) {
@@ -26,9 +29,10 @@ public class AlignedTokenSequences {
         this.alignedInput = alignedInput;
         this.alignmentCounters = alignmentCounters;
 
-        Pair<String, String> processedPair = TokenSequenceAligner.toStrings(alignedReference, alignedInput);
-        alignedReferenceVisualization = processedPair.getLeft();
-        alignedInputVisualization = processedPair.getRight();
+        Triple<String, String, String> processedTriple = TokenSequenceAligner.toStrings(alignedReference, alignedInput);
+        alignedReferenceVisualization = processedTriple.getLeft();
+        alignedInputVisualization = processedTriple.getMiddle();
+        alignedLabelVisualization = processedTriple.getRight();
     }
 
     public List<String> getAlignedReference() {
@@ -45,6 +49,10 @@ public class AlignedTokenSequences {
 
     public String getAlignedInputVisualization() {
         return alignedInputVisualization;
+    }
+
+    public String getAlignedLabelVisualization() {
+        return alignedLabelVisualization;
     }
 
     public TokenSequenceAlignmentCounters getAlignmentCounters() {

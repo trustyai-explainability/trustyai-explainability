@@ -71,6 +71,7 @@ Joe Woelfel, MERL (developer and speech advisor)
 Peter Wolf, MERL (developer and speech advisor)
  */
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 public class TokenSequenceAligner {
     // struct to hold the various alignment operations
@@ -90,6 +91,7 @@ public class TokenSequenceAligner {
     // constants for alignment visualization functions
     private static final String MISSING_TOKEN_FILLER = "*";
     private static final String TOKEN_PADDER = " ";
+    private static final String TOKEN_SEPARATOR = " |";
 
     /**
      * Align two token sequences for use in comparison metrics
@@ -119,6 +121,7 @@ public class TokenSequenceAligner {
         TokenSequenceAlignmentCounters counters = new TokenSequenceAlignmentCounters();
         Alignment[][] backtraceGraph = createBacktraceGraph(reference, input, comparator);
         List<Alignment> alignmentOperations = traverseBacktrace(backtraceGraph, counters);
+        counters.correct = reference.size() - counters.deletions - counters.substitutions;
         return new AlignedTokenSequences(produceAlignment(alignmentOperations, reference, input), counters);
     }
 
@@ -200,7 +203,6 @@ public class TokenSequenceAligner {
                 case OK: //sequences remain aligned, move to previous word in both seqs
                     i--;
                     j--;
-                    counters.correct++;
                     break;
                 case SUBSTITUTION: //sequences remain aligned, move to previous word in both seqs
                     i--;
@@ -259,7 +261,7 @@ public class TokenSequenceAligner {
      * @param alignedInput the alignedInput sequence
      * @return an aligned Pair of ReferenceString, InputString
      */
-    protected static Pair<String, String> toStrings(List<String> alignedReference, List<String> alignedInput) {
+    protected static Triple<String, String, String> toStrings(List<String> alignedReference, List<String> alignedInput) {
         if (alignedReference.size() != alignedInput.size()) {
             throw new IllegalArgumentException(String.format(
                     "Aligned Sequence Visualizer is designed to receive the outputs of TokenSequenceAligner.align, therefore" +
@@ -270,6 +272,7 @@ public class TokenSequenceAligner {
 
         StringJoiner processedReferenceSequence = new StringJoiner(TOKEN_PADDER);
         StringJoiner processedInputSequence = new StringJoiner(TOKEN_PADDER);
+        StringJoiner processedLabelSequence = new StringJoiner(TOKEN_PADDER);
 
         for (int i = 0; i < alignedReference.size(); i++) {
             String referenceWord = alignedReference.get(i);
@@ -289,11 +292,28 @@ public class TokenSequenceAligner {
             } else {
                 ;
             }
-            processedReferenceSequence.add(processedReferenceWord);
-            processedInputSequence.add(processedInputWord);
+
+            String processedLabelWord;
+            int wordLen = processedInputWord.length();
+            if (processedReferenceWord.equals(processedInputWord)) {
+                processedLabelWord = "C" + TOKEN_PADDER.repeat(wordLen - 1);
+            } else if (processedReferenceWord.contains(MISSING_TOKEN_FILLER)) {
+                processedLabelWord = "I" + TOKEN_PADDER.repeat(wordLen - 1);
+            } else if (processedInputWord.contains(MISSING_TOKEN_FILLER)) {
+                processedLabelWord = "D" + TOKEN_PADDER.repeat(wordLen - 1);
+            } else {
+                processedLabelWord = "S" + TOKEN_PADDER.repeat(wordLen - 1);
+            }
+
+            processedReferenceSequence.add(processedReferenceWord).add(TOKEN_SEPARATOR);
+            processedInputSequence.add(processedInputWord).add(TOKEN_SEPARATOR);
+            processedLabelSequence.add(processedLabelWord).add(TOKEN_SEPARATOR);
         }
 
-        return Pair.of(processedReferenceSequence.toString(), processedInputSequence.toString());
+        return Triple.of(
+                processedReferenceSequence.toString(),
+                processedInputSequence.toString(),
+                processedLabelSequence.toString());
     }
 
 }
