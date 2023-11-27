@@ -32,6 +32,10 @@ function setup_monitoring() {
     oc apply -f ${RESOURCEDIR}/modelmesh/enable-uwm.yaml || eval "$FAILURE_HANDLING"
 }
 
+# Function to add the Authorization token to curl commands
+function curl_token() {
+    curl -H "Authorization: Bearer ${TOKEN}" "$@"
+}
 
 function install_trustyai_operator(){
   header "Installing TrustyAI Operator"
@@ -88,7 +92,7 @@ function check_trustyai_authentication() {
   TRUSTY_ROUTE=https://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
   os::cmd::try_until_text "curl -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/info" "403" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "curl -k -s -o /dev/null -w \"%{http_code}\" -H \"Authorization: Bearer ${TOKEN}\" ${TRUSTY_ROUTE}/info" "200" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "curl_token -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/info" "200" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function check_mm_resources() {
@@ -131,7 +135,7 @@ function schedule_and_check_request(){
     METRIC_UPPERCASE=$(echo ${METRIC_NAME} | tr '[:lower:]' '[:upper:]')
     for MODEL in $MODEL_ALPHA $MODEL_BETA
     do
-      curl -sk -H "Authorization: Bearer ${TOKEN}" --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+      curl_token -sk --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
         --header 'Content-Type: application/json' \
         --data "{
                   \"modelId\": \"$MODEL\",
@@ -209,10 +213,10 @@ function teardown_trustyai_test() {
   if [ $REQUESTS_CREATED = true ]; then
     for METRIC_NAME in "spd" "dir"
     do
-      for REQUEST in $(curl -sk -H "Authorization: Bearer ${TOKEN}" $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
+      for REQUEST in $(curl_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
       do
         echo -n $REQUEST": "
-        curl -k  -H "Authorization: Bearer ${TOKEN}" -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+        curl_token -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
             -H 'Content-Type: application/json' \
             -d "{
                   \"requestId\": \"$REQUEST\"
