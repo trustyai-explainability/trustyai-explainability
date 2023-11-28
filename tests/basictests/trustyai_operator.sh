@@ -24,7 +24,7 @@ os::test::junit::declare_suite_start "$MY_SCRIPT"
 
 # Function to add the Authorization token to curl commands
 function curl_token() {
-    TOKEN=$(oc create token user-one -n ${MM_NAMESPACE})
+    TOKEN=$(oc create token user-one -n ${MM_NAMESPACE}) || eval "$FAILURE_HANDLING"
     curl -H "Authorization: Bearer ${TOKEN}" "$@"
 }
 

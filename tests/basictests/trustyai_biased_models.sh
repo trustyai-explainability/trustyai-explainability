@@ -32,7 +32,8 @@ function setup_monitoring() {
 
 # Function to add the Authorization token to curl commands
 function curl_token() {
-    TOKEN=$(oc create token user-one -n ${MM_NAMESPACE})
+    oc apply -f ${RESOURCEDIR}/modelmesh/service_account.yaml -n ${MM_NAMESPACE}
+    TOKEN=$(oc create token user-one -n ${MM_NAMESPACE}) || eval "$FAILURE_HANDLING"
     curl -H "Authorization: Bearer ${TOKEN}" "$@"
 }
 
