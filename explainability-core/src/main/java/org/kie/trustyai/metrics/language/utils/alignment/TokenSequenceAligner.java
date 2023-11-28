@@ -71,6 +71,7 @@ Joe Woelfel, MERL (developer and speech advisor)
 Peter Wolf, MERL (developer and speech advisor)
  */
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 public class TokenSequenceAligner {
     // struct to hold the various alignment operations
@@ -90,19 +91,20 @@ public class TokenSequenceAligner {
     // constants for alignment visualization functions
     private static final String MISSING_TOKEN_FILLER = "*";
     private static final String TOKEN_PADDER = " ";
+    private static final String TOKEN_SEPARATOR = " |";
 
     /**
      * Align two token sequences for use in comparison metrics
      * Based on the NISTAlign method https://github.com/cmusphinx/sphinx4/blob/master/sphinx4-core/src/main/java/edu/cmu/sphinx/util/NISTAlign.java
      *
      * @param reference: First list of tokens, by which top base the alignment on
-     * @param input Second list of tokens, to align to the reference
+     * @param hypothesis Second list of tokens, to align to the reference
      *
      * @return an AlignedTokenSequences object that contains the alignments and string representations
      */
 
-    public static AlignedTokenSequences align(List<String> reference, List<String> input) {
-        return align(reference, input, String::equals);
+    public static AlignedTokenSequences align(List<String> reference, List<String> hypothesis) {
+        return align(reference, hypothesis, String::equals);
     }
 
     /**
@@ -110,16 +112,17 @@ public class TokenSequenceAligner {
      * Based on the NISTAlign method https://github.com/cmusphinx/sphinx4/blob/master/sphinx4-core/src/main/java/edu/cmu/sphinx/util/NISTAlign.java
      *
      * @param reference: First list of tokens, by which top base the alignment on
-     * @param input Second list of tokens, to align to the reference
+     * @param hypothesis Second list of tokens, to align to the reference
      * @param comparator a function of two string that returns true when they match, false otherwise
      *
      * @return an AlignedTokenSequences object that contains the alignments and string representations
      */
-    public static AlignedTokenSequences align(List<String> reference, List<String> input, BiPredicate<String, String> comparator) {
+    public static AlignedTokenSequences align(List<String> reference, List<String> hypothesis, BiPredicate<String, String> comparator) {
         TokenSequenceAlignmentCounters counters = new TokenSequenceAlignmentCounters();
-        Alignment[][] backtraceGraph = createBacktraceGraph(reference, input, comparator);
+        Alignment[][] backtraceGraph = createBacktraceGraph(reference, hypothesis, comparator);
         List<Alignment> alignmentOperations = traverseBacktrace(backtraceGraph, counters);
-        return new AlignedTokenSequences(produceAlignment(alignmentOperations, reference, input), counters);
+        counters.correct = reference.size() - counters.deletions - counters.substitutions;
+        return new AlignedTokenSequences(produceAlignment(alignmentOperations, reference, hypothesis), counters);
     }
 
     // set values of the penalty and backtrace table depending on penalty and alignment code
@@ -133,16 +136,16 @@ public class TokenSequenceAligner {
         };
     }
 
-    // create weighted graph describing the various alignment operation (DEL, INS, SUB, etc) paths that could transmute the input sequence
+    // create weighted graph describing the various alignment operation (DEL, INS, SUB, etc) paths that could transmute the hypothesis sequence
     // into the reference string
-    private static Alignment[][] createBacktraceGraph(List<String> reference, List<String> input, BiPredicate<String, String> comparator) {
+    private static Alignment[][] createBacktraceGraph(List<String> reference, List<String> hypothesis, BiPredicate<String, String> comparator) {
         // set up graphs
         // rows are words in reference
         // columns are words in seq-to-align
-        // position i,j is the edge between reference token i and input token j
+        // position i,j is the edge between reference token i and hypothesis token j
 
-        int[][] penaltyGraph = new int[reference.size() + 1][input.size() + 1];
-        Alignment[][] backtraceGraph = new Alignment[reference.size() + 1][input.size() + 1];
+        int[][] penaltyGraph = new int[reference.size() + 1][hypothesis.size() + 1];
+        Alignment[][] backtraceGraph = new Alignment[reference.size() + 1][hypothesis.size() + 1];
         backtraceGraph[0][0] = Alignment.OK;
 
         // set up counters
@@ -153,7 +156,7 @@ public class TokenSequenceAligner {
             penaltyGraph[i][0] = DELETION_PENALTY * i;
             backtraceGraph[i][0] = Alignment.DELETION;
 
-            for (int j = 1; j <= input.size(); j++) {
+            for (int j = 1; j <= hypothesis.size(); j++) {
                 penaltyGraph[0][j] = INSERTION_PENALTY * j;
                 backtraceGraph[0][j] = Alignment.INSERTION;
                 minPenalty.set(MAX_PENALTY);
@@ -166,7 +169,7 @@ public class TokenSequenceAligner {
                 penaltySetter.accept(penalty, Alignment.DELETION);
 
                 // do the words match?
-                if (comparator.test(reference.get(i - 1), input.get(j - 1))) {
+                if (comparator.test(reference.get(i - 1), hypothesis.get(j - 1))) {
                     penalty = penaltyGraph[i - 1][j - 1];
                     penaltySetter.accept(penalty, Alignment.OK);
                 } else {
@@ -200,7 +203,6 @@ public class TokenSequenceAligner {
                 case OK: //sequences remain aligned, move to previous word in both seqs
                     i--;
                     j--;
-                    counters.correct++;
                     break;
                 case SUBSTITUTION: //sequences remain aligned, move to previous word in both seqs
                     i--;
@@ -221,79 +223,97 @@ public class TokenSequenceAligner {
     }
 
     // follow the backtrace traversal path to align the two sequences
-    private static Pair<List<String>, List<String>> produceAlignment(List<Alignment> alignmentOperations, List<String> reference, List<String> input) {
+    private static Pair<List<String>, List<String>> produceAlignment(List<Alignment> alignmentOperations, List<String> reference, List<String> hypothesis) {
         ListIterator<String> referenceIterator = reference.listIterator();
-        ListIterator<String> inputIterator = input.listIterator();
+        ListIterator<String> hypothesisIterator = hypothesis.listIterator();
         String referenceWord;
-        String inputWord;
+        String hypothesisWord;
 
         List<String> alignedReference = new ArrayList<>();
-        List<String> alignedInput = new ArrayList<>();
+        List<String> alignedHypothesis = new ArrayList<>();
 
         // walk through operations in reverse
         for (int i = alignmentOperations.size() - 2; i >= 0; i--) {
             Alignment alignmentOperation = alignmentOperations.get(i);
 
-            inputWord = null;
+            hypothesisWord = null;
             referenceWord = null;
             if (alignmentOperation == Alignment.INSERTION) {
-                inputWord = inputIterator.next();
+                hypothesisWord = hypothesisIterator.next();
             } else if (alignmentOperation == Alignment.DELETION) {
                 referenceWord = referenceIterator.next();
             } else {
                 referenceWord = referenceIterator.next();
-                inputWord = inputIterator.next();
+                hypothesisWord = hypothesisIterator.next();
             }
 
             alignedReference.add(referenceWord);
-            alignedInput.add(inputWord);
+            alignedHypothesis.add(hypothesisWord);
         }
 
-        return Pair.of(alignedReference, alignedInput);
+        return Pair.of(alignedReference, alignedHypothesis);
     }
 
     /**
      * Given the outputs of TokenSequenceAligner.align, generate aligned string representations of the two inputted sequences
      *
      * @param alignedReference the alignedReference sequence
-     * @param alignedInput the alignedInput sequence
+     * @param alignedHypothesis the alignedHypothesis sequence
      * @return an aligned Pair of ReferenceString, InputString
      */
-    protected static Pair<String, String> toStrings(List<String> alignedReference, List<String> alignedInput) {
-        if (alignedReference.size() != alignedInput.size()) {
+    protected static Triple<String, String, String> toStrings(List<String> alignedReference, List<String> alignedHypothesis) {
+        if (alignedReference.size() != alignedHypothesis.size()) {
             throw new IllegalArgumentException(String.format(
                     "Aligned Sequence Visualizer is designed to receive the outputs of TokenSequenceAligner.align, therefore" +
-                            "alignedReference.size() must equals alignedInput.size(), but got %d versus %d.",
+                            "alignedReference.size() must equals alignedHypothesis.size(), but got %d versus %d.",
                     alignedReference.size(),
-                    alignedInput.size()));
+                    alignedHypothesis.size()));
         }
 
         StringJoiner processedReferenceSequence = new StringJoiner(TOKEN_PADDER);
-        StringJoiner processedInputSequence = new StringJoiner(TOKEN_PADDER);
+        StringJoiner processedHypothesisSequence = new StringJoiner(TOKEN_PADDER);
+        StringJoiner processedLabelSequence = new StringJoiner(TOKEN_PADDER);
 
         for (int i = 0; i < alignedReference.size(); i++) {
             String referenceWord = alignedReference.get(i);
-            String inputWord = alignedInput.get(i);
+            String hypothesisWord = alignedHypothesis.get(i);
 
             String processedReferenceWord = referenceWord;
-            String processedInputWord = inputWord;
+            String processedHypothesisWord = hypothesisWord;
 
             if (referenceWord == null) {
-                processedReferenceWord = MISSING_TOKEN_FILLER.repeat(inputWord.length());
-            } else if (inputWord == null) {
-                processedInputWord = MISSING_TOKEN_FILLER.repeat(referenceWord.length());
-            } else if (referenceWord.length() > inputWord.length()) {
-                processedInputWord += TOKEN_PADDER.repeat(referenceWord.length() - inputWord.length());
-            } else if (inputWord.length() > referenceWord.length()) {
-                processedReferenceWord += TOKEN_PADDER.repeat(inputWord.length() - processedReferenceWord.length());
+                processedReferenceWord = MISSING_TOKEN_FILLER.repeat(hypothesisWord.length());
+            } else if (hypothesisWord == null) {
+                processedHypothesisWord = MISSING_TOKEN_FILLER.repeat(referenceWord.length());
+            } else if (referenceWord.length() > hypothesisWord.length()) {
+                processedHypothesisWord += TOKEN_PADDER.repeat(referenceWord.length() - hypothesisWord.length());
+            } else if (hypothesisWord.length() > referenceWord.length()) {
+                processedReferenceWord += TOKEN_PADDER.repeat(hypothesisWord.length() - processedReferenceWord.length());
             } else {
                 ;
             }
-            processedReferenceSequence.add(processedReferenceWord);
-            processedInputSequence.add(processedInputWord);
+
+            String processedLabelWord;
+            int wordLen = processedHypothesisWord.length();
+            if (processedReferenceWord.equals(processedHypothesisWord)) {
+                processedLabelWord = "C" + TOKEN_PADDER.repeat(wordLen - 1);
+            } else if (processedReferenceWord.contains(MISSING_TOKEN_FILLER)) {
+                processedLabelWord = "I" + TOKEN_PADDER.repeat(wordLen - 1);
+            } else if (processedHypothesisWord.contains(MISSING_TOKEN_FILLER)) {
+                processedLabelWord = "D" + TOKEN_PADDER.repeat(wordLen - 1);
+            } else {
+                processedLabelWord = "S" + TOKEN_PADDER.repeat(wordLen - 1);
+            }
+
+            processedReferenceSequence.add(processedReferenceWord).add(TOKEN_SEPARATOR);
+            processedHypothesisSequence.add(processedHypothesisWord).add(TOKEN_SEPARATOR);
+            processedLabelSequence.add(processedLabelWord).add(TOKEN_SEPARATOR);
         }
 
-        return Pair.of(processedReferenceSequence.toString(), processedInputSequence.toString());
+        return Triple.of(
+                processedReferenceSequence.toString(),
+                processedHypothesisSequence.toString(),
+                processedLabelSequence.toString());
     }
 
 }

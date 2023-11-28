@@ -1,7 +1,6 @@
-package org.kie.trustyai.metrics.language.utils;
+package org.kie.trustyai.metrics.language.utils.tokenizers;
 
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.metrics.language.utils.tokenizers.CommonsTokenizer;
 
 import opennlp.tools.tokenize.SimpleTokenizer;
 

@@ -149,6 +149,7 @@
                 <scope>test</scope>
             </dependency>
 
+
             <dependency>
                 <groupId>org.apache.opennlp</groupId>
                 <artifactId>opennlp-tools</artifactId>
@@ -335,27 +336,7 @@
             </properties>
         </profile>
     </profiles>
-
-    <repositories>
-        <repository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>red-hat-ga</id>
-            <url>https://maven.repository.redhat.com/ga/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>red-hat-ga</id>
-            <url>https://maven.repository.redhat.com/ga/</url>
-        </pluginRepository>
-    </pluginRepositories>
+    
     <distributionManagement>
         <repository>
             <id>jboss.staging</id>

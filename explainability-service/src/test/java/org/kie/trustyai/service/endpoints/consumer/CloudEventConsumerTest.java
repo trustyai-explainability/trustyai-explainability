@@ -97,7 +97,8 @@ public class CloudEventConsumerTest {
             consumer.get().consumeKubeflowResponse(mockOutput);
         });
 
-        assertEquals("Could not parse input data", exception.getMessage());
+        assertEquals("Could not parse input data: Unrecognized token 'foo': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n" +
+                " at [Source: (String)\"foo\"; line: 1, column: 4]", exception.getMessage());
     }
 
     @Test
