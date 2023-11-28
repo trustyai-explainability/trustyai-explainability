@@ -9,6 +9,7 @@ RESOURCEDIR="${MY_DIR}/../resources"
 
 TEST_USER=${OPENSHIFT_TESTUSER_NAME:-"admin"} #Username used to login
 TEST_PASS=${OPENSHIFT_TESTUSER_PASS:-"admin"} #Password used to login
+echo $(oc get route -n openshift-authentication oauth-openshift -o json)
 OPENSHIFT_OAUTH_ENDPOINT="https://$(oc get route -n openshift-authentication   oauth-openshift -o json | jq -r '.spec.host')"
 
 LOCAL=${LOCAL:-false}
