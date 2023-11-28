@@ -7,8 +7,10 @@ MY_DIR=$(readlink -f `dirname "${BASH_SOURCE[0]}"`)
 source ${MY_DIR}/../util
 RESOURCEDIR="${MY_DIR}/../resources"
 
-TEST_USER=${OPENSHIFT_TESTUSER_NAME:-"admin"} #Username used to login to the ODH Dashboard
-TEST_PASS=${OPENSHIFT_TESTUSER_PASS:-"admin"} #Password used to login to the ODH Dashboard
+TEST_USER=${OPENSHIFT_TESTUSER_NAME:-"admin"} #Username used to login
+TEST_PASS=${OPENSHIFT_TESTUSER_PASS:-"admin"} #Password used to login
+OPENSHIFT_OAUTH_ENDPOINT="https://$(oc get route -n openshift-authentication   oauth-openshift -o json | jq -r '.spec.host')"
+
 LOCAL=${LOCAL:-false}
 TEARDOWN=${TEARDOWN:-false}
 
@@ -20,7 +22,7 @@ FAILURE=false
 FAILURE_HANDLING='FAILURE=true && echo -e "\033[0;31mERROR\033[0m"'
 
 # Authentication token
-TOKEN=$(oc whoami -t)
+TOKEN="$(curl -skiL -u $TEST_USER:$TEST_PASS -H 'X-CSRF-Token: xxx' '$OPENSHIFT_OAUTH_ENDPOINT/oauth/authorize?response_type=token&client_id=openshift-challenging-client' | grep -oP 'access_token=\K[^&]*')"
 
 os::test::junit::declare_suite_start "$MY_SCRIPT"
 
