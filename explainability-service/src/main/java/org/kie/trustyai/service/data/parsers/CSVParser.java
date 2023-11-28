@@ -5,15 +5,18 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionMetadata;
+import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.metadata.Metadata;
@@ -29,6 +32,7 @@ public class CSVParser implements DataParser {
 
     private static final Logger LOG = Logger.getLogger(CSVParser.class);
     private static final Charset UTF8 = StandardCharsets.UTF_8;
+    public static final ZoneOffset ZONE_OFFSET = ZoneOffset.UTC;
 
     @Override
     public Dataframe toDataframe(ByteBuffer byteBuffer, Metadata metadata) throws DataframeCreateException {
@@ -48,14 +52,17 @@ public class CSVParser implements DataParser {
     @Override
     public Dataframe toDataframe(ByteBuffer dataByteBuffer, ByteBuffer internalDataByteBuffer, Metadata metadata)
             throws DataframeCreateException {
-        final String data = UTF8.decode(dataByteBuffer).toString();
 
+        // read predictions
+        final String data = UTF8.decode(dataByteBuffer).toString();
         final List<Prediction> predictions;
         try {
             predictions = CSVUtils.parse(data, metadata);
         } catch (IOException e) {
             throw new DataframeCreateException(e.getMessage());
         }
+
+        // read metadata
         List<PredictionMetadata> predictionsMetadata = new ArrayList<>();
         final String internalData = UTF8.decode(internalDataByteBuffer).toString();
         final List<List<Value>> values;
@@ -74,35 +81,63 @@ public class CSVParser implements DataParser {
             }
         }
 
+        // create predictions with metadata
+        List<Prediction> predictionsFinal = new ArrayList<>();
+        int i = 0;
+        for (Prediction prediction : predictions) {
+            predictionsFinal.add(new SimplePrediction(prediction.getInput(), prediction.getOutput(),
+                    prediction.getExecutionId(), predictionsMetadata.get(i)));
+            i++;
+        }
+
         LOG.info("Creating dataframe from CSV data");
-        return Dataframe.createWithMetadata(predictions, predictionsMetadata);
+        return Dataframe.createFrom(predictionsFinal);
     }
 
-    public String convertToString(Dataframe dataframe, boolean includeHeader) {
+    public String convertToString(Dataframe dataframe, boolean includeHeader, boolean includeInternalData) {
         final StringBuilder output = new StringBuilder();
         if (includeHeader) {
-            output
-                    .append(
-                            String.join(",",
-                                    dataframe.getColumnNames().stream().map(name -> "\"" + name + "\"").collect(Collectors.toList())))
-                    .append("\n");
+            output.append(String.join(",", dataframe.getColumnNames().stream().map(name -> "\"" + name + "\"")
+                    .collect(Collectors.toList())));
+            if (includeInternalData) {
+                output.append(",\"")
+                        .append("_trustyai_tag")
+                        .append("\",\"")
+                        .append("_trustyai_id")
+                        .append("\",\"")
+                        .append("_trustyai_timestamp")
+                        .append("\"");
+            }
+            output.append("\n");
         }
+        AtomicInteger i = new AtomicInteger();
         dataframe.getRows().forEach(values -> {
-            final String rowStr = String.join(",", values.stream().map(value -> {
+            final String rowStr = values.stream().map(value -> {
                 final Object obj = value.getUnderlyingObject();
                 if (obj instanceof String) {
                     return "\"" + obj + "\"";
                 } else {
                     return obj.toString();
                 }
-            }).collect(Collectors.toList()));
-            output.append(rowStr).append("\n");
+            }).collect(Collectors.joining(","));
+            output.append(rowStr);
+            if (includeInternalData) {
+                output.append(",\"")
+                        .append(dataframe.getTags().get(i.get()))
+                        .append("\",\"")
+                        .append(dataframe.getIds().get(i.get()))
+                        .append("\",\"")
+                        .append(dataframe.getTimestamps().get(i.get()).toInstant(ZONE_OFFSET).toEpochMilli())
+                        .append("\"");
+            }
+            output.append("\n");
+            i.getAndIncrement();
         });
         return output.toString();
     }
 
     private ByteBuffer convertToByteBuffer(Dataframe dataframe, boolean includeHeader) {
-        final String inputsStr = convertToString(dataframe, includeHeader);
+        final String inputsStr = convertToString(dataframe, includeHeader, false);
         return ByteBuffer.wrap(inputsStr.getBytes(UTF8));
     }
 

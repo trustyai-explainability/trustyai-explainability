@@ -150,7 +150,7 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
         }
         LOG.debug("Prediction output: " + predictionOutput.getOutputs());
 
-        Prediction prediction = new SimplePrediction(new PredictionInput(features), predictionOutput);
-        return Dataframe.createFrom(prediction, predictionMetadata);
+        Prediction prediction = new SimplePrediction(new PredictionInput(features), predictionOutput, predictionMetadata);
+        return Dataframe.createFrom(prediction);
     }
 }

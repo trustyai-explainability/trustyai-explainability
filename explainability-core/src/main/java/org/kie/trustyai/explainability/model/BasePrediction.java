@@ -22,15 +22,25 @@ public abstract class BasePrediction implements Prediction {
     private final PredictionInput input;
     private final UUID executionId;
     private final PredictionOutput output;
+    private final PredictionMetadata predictionMetadata;
 
     public BasePrediction(PredictionInput input, PredictionOutput output) {
-        this(input, output, UUID.randomUUID());
+        this(input, output, UUID.randomUUID(), null);
     }
 
     public BasePrediction(PredictionInput input, PredictionOutput output, UUID executionId) {
+        this(input, output, executionId, null);
+    }
+
+    public BasePrediction(PredictionInput input, PredictionOutput output, PredictionMetadata predictionMetadata) {
+        this(input, output, null, predictionMetadata);
+    }
+
+    public BasePrediction(PredictionInput input, PredictionOutput output, UUID executionId, PredictionMetadata predictionMetadata) {
         this.input = input;
         this.output = output;
         this.executionId = executionId;
+        this.predictionMetadata = predictionMetadata;
     }
 
     @Override
@@ -59,6 +69,16 @@ public abstract class BasePrediction implements Prediction {
         BasePrediction that = (BasePrediction) o;
         return Objects.equals(input, that.input) && Objects.equals(executionId, that.executionId)
                 && Objects.equals(output, that.output);
+    }
+
+    @Override
+    public boolean hasPredictionMetadata() {
+        return predictionMetadata != null;
+    }
+
+    @Override
+    public PredictionMetadata getPredictionMetadata() {
+        return predictionMetadata;
     }
 
     @Override

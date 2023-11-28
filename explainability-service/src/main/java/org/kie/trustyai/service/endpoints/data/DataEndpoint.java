@@ -138,7 +138,7 @@ public class DataEndpoint {
         }
 
         DataResponsePayload dataResponsePayload = new DataResponsePayload();
-        dataResponsePayload.setDataCSV(csvParser.convertToString(returnDF, true));
+        dataResponsePayload.setDataCSV(csvParser.convertToString(returnDF, true, true));
 
         return Response.ok().entity(dataResponsePayload).build();
 

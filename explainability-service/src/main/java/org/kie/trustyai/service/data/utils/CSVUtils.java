@@ -2,6 +2,8 @@ package org.kie.trustyai.service.data.utils;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -17,6 +19,8 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
+
+import static org.kie.trustyai.service.data.parsers.CSVParser.ZONE_OFFSET;
 
 public class CSVUtils {
 
@@ -51,10 +55,14 @@ public class CSVUtils {
     }
 
     public static List<Prediction> parse(String in, Metadata metadata) throws IOException {
-        return parse(in, metadata, false);
+        return parse(in, metadata, false, false);
     }
 
     public static List<Prediction> parse(String in, Metadata metadata, boolean header) throws IOException {
+        return parse(in, metadata, header, false);
+    }
+
+    public static List<Prediction> parse(String in, Metadata metadata, boolean header, boolean internal) throws IOException {
         CSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(in));
 
         final List<String> inputNames = metadata.getInputSchema().getNameMappedItems().entrySet()
@@ -98,7 +106,20 @@ public class CSVUtils {
                 final PredictionInput predictionInput = new PredictionInput(inputFeatures);
                 final PredictionOutput predictionOutput = new PredictionOutput(outputs);
 
-                result.add(new SimplePrediction(predictionInput, predictionOutput));
+                Prediction prediction;
+                if (internal) {
+                    int initialOffset = inputNames.size() + outputNames.size();
+                    String tag = entry.get(initialOffset);
+                    String id = entry.get(initialOffset + 1);
+                    String timestamp = entry.get(initialOffset + 2);
+                    LocalDateTime predictionTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(
+                            Long.parseLong(timestamp)), ZONE_OFFSET);
+                    PredictionMetadata predictionMetadata = new PredictionMetadata(id, predictionTime, tag);
+                    prediction = new SimplePrediction(predictionInput, predictionOutput, predictionMetadata);
+                } else {
+                    prediction = new SimplePrediction(predictionInput, predictionOutput);
+                }
+                result.add(prediction);
             }
             idx.incrementAndGet();
         });
