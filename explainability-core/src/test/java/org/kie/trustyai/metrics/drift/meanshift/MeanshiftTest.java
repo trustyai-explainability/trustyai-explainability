@@ -1,19 +1,11 @@
 package org.kie.trustyai.metrics.drift.meanshift;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.metrics.utils.PerColumnStatistics;
 import org.kie.trustyai.metrics.utils.PregeneratedNormalData;
 

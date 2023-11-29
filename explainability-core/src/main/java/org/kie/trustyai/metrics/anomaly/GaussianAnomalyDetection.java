@@ -1,5 +1,11 @@
 package org.kie.trustyai.metrics.anomaly;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -10,12 +16,6 @@ import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.metrics.utils.PerColumnStatisticalAnalysis;
 import org.kie.trustyai.metrics.utils.PerColumnStatistics;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
 
 public class GaussianAnomalyDetection extends PerColumnStatisticalAnalysis {
     /**
@@ -32,10 +32,9 @@ public class GaussianAnomalyDetection extends PerColumnStatisticalAnalysis {
      *
      * @param perColumnStatistics: Precomputed per-column means and standard deviations
      */
-    public GaussianAnomalyDetection(PerColumnStatistics perColumnStatistics){
+    public GaussianAnomalyDetection(PerColumnStatistics perColumnStatistics) {
         super(perColumnStatistics);
     }
-
 
     /**
      * Compute a bounded probability (see below) with a window size of 1 standard deviation.
@@ -43,7 +42,7 @@ public class GaussianAnomalyDetection extends PerColumnStatisticalAnalysis {
      * @param testPrediction: the data point over which to compute the per-column probabilities
      * @return a map of column name : probabilities
      */
-    public Map<String, Double> calculateBoundedProbability(Prediction testPrediction){
+    public Map<String, Double> calculateBoundedProbability(Prediction testPrediction) {
         return calculateBoundedProbability(testPrediction, 1.);
     }
 
@@ -92,7 +91,7 @@ public class GaussianAnomalyDetection extends PerColumnStatisticalAnalysis {
             NormalDistribution normalDistribution = new NormalDistribution(ssv.getMean(), ssv.getStandardDeviation());
 
             double window = windowSize * ssv.getStandardDeviation();
-            return normalDistribution.probability(featureValue - window, featureValue + window)/
+            return normalDistribution.probability(featureValue - window, featureValue + window) /
                     normalDistribution.probability(ssv.getMean() - window, ssv.getMean() + window);
         };
         return perColumnCalculation(testPrediction, calculation);
@@ -106,9 +105,9 @@ public class GaussianAnomalyDetection extends PerColumnStatisticalAnalysis {
      * @param testPrediction: the data point over which to compute the per-column normalized deviation
      * @return a map of column name : normalized deviation
      */
-    public Map<String, Double> calculateNormalizedDeviation(Prediction testPrediction){
+    public Map<String, Double> calculateNormalizedDeviation(Prediction testPrediction) {
         BiFunction<StatisticalSummaryValues, Double, Double> calculation =
-                (ssv, featureValue) -> (featureValue - ssv.getMean())/ssv.getStandardDeviation();
+                (ssv, featureValue) -> (featureValue - ssv.getMean()) / ssv.getStandardDeviation();
         return perColumnCalculation(testPrediction, calculation);
     }
 
@@ -123,12 +122,12 @@ public class GaussianAnomalyDetection extends PerColumnStatisticalAnalysis {
         List<String> testNames = new ArrayList<>();
         List<Type> types = new ArrayList<>();
         List<Value> values = new ArrayList<>();
-        for (Feature f : testPrediction.getInput().getFeatures()){
+        for (Feature f : testPrediction.getInput().getFeatures()) {
             testNames.add(f.getName());
             types.add(f.getType());
             values.add(f.getValue());
         }
-        for (Output o : testPrediction.getOutput().getOutputs()){
+        for (Output o : testPrediction.getOutput().getOutputs()) {
             testNames.add(o.getName());
             types.add(o.getType());
             values.add(o.getValue());
@@ -151,7 +150,7 @@ public class GaussianAnomalyDetection extends PerColumnStatisticalAnalysis {
 
                 StatisticalSummaryValues ssv = getFitStats().get(colName);
                 double featureValue = values.get(i).asNumber();
-                result.put(colName,calculation.apply(ssv, featureValue));
+                result.put(colName, calculation.apply(ssv, featureValue));
             }
         }
         return result;

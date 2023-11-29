@@ -21,10 +21,9 @@ public class Meanshift extends PerColumnStatisticalAnalysis {
     }
 
     // use pre-computed fitting
-    public Meanshift(PerColumnStatistics perColumnStatistics){
+    public Meanshift(PerColumnStatistics perColumnStatistics) {
         super(perColumnStatistics);
     }
-
 
     public Map<String, MeanshiftResult> calculate(Dataframe dfTest, double alpha) {
         List<Type> types = dfTest.getColumnTypes();

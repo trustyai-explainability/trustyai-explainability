@@ -1,15 +1,15 @@
 package org.kie.trustyai.metrics.utils;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 // defines logic for calculating statistical summaries values for each column in a dataframe, to be used to analyze distributions, etc
 public class PerColumnStatisticalAnalysis {
@@ -19,7 +19,7 @@ public class PerColumnStatisticalAnalysis {
         fitStats = precompute(dfTrain).fitStats;
     }
 
-    public PerColumnStatisticalAnalysis(PerColumnStatistics perColumnStatistics){
+    public PerColumnStatisticalAnalysis(PerColumnStatistics perColumnStatistics) {
         fitStats = perColumnStatistics.fitStats;
     }
 
@@ -36,7 +36,7 @@ public class PerColumnStatisticalAnalysis {
         return new PerColumnStatistics(computedStats);
     }
 
-    public Map<String, StatisticalSummaryValues> getFitStats(){
+    public Map<String, StatisticalSummaryValues> getFitStats() {
         return Collections.unmodifiableMap(fitStats);
     }
 
@@ -46,6 +46,5 @@ public class PerColumnStatisticalAnalysis {
         double std = DataUtils.getStdDev(colArray, mean);
         return new StatisticalSummaryValues(mean, Math.pow(std, 2), colArray.length, 0, 0, 0);
     }
-
 
 }

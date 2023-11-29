@@ -1,13 +1,13 @@
 package org.kie.trustyai.metrics.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class PregeneratedNormalData {
     private final static double[][] data = {
@@ -315,11 +315,15 @@ public class PregeneratedNormalData {
     };
 
     private final static double[] expectedColMeans = {
-            1.764280078254214, 0.835406431353438, 3.6778271182180715, 3.1955962681589942, 0.5868176897672245, -1.8844096384495421, 0.8709898438574264, 1.9122709871568528, -2.1355621511978953, 3.6305530293935733, -1.3973993596173875, 3.9131172562095786, 1.184197127117156, 4.01376602375299, 1.8890409910022747, 2.697836268634615, -1.6105720014620848, 1.6343433382639132, 4.176149753564121, 1.2448483794565874, 4.749533763260601, -0.01841271003602843, 0.45506384360112945, 0.6844375209870563, 3.4989720174122847
+            1.764280078254214, 0.835406431353438, 3.6778271182180715, 3.1955962681589942, 0.5868176897672245, -1.8844096384495421, 0.8709898438574264, 1.9122709871568528, -2.1355621511978953,
+            3.6305530293935733, -1.3973993596173875, 3.9131172562095786, 1.184197127117156, 4.01376602375299, 1.8890409910022747, 2.697836268634615, -1.6105720014620848, 1.6343433382639132,
+            4.176149753564121, 1.2448483794565874, 4.749533763260601, -0.01841271003602843, 0.45506384360112945, 0.6844375209870563, 3.4989720174122847
     };
 
     private final static double[] expectedColStds = {
-            6.236634010774237, 6.0704509238388304, 4.773789842086536, 4.343656372896566, 9.31136931933505, 3.964232342780544, 8.667420029271176, 6.172492536036271, 3.48513837470132, 9.016458486351448, 3.9345532290018834, 4.341183266970682, 9.424581575324119, 3.8793302635341442, 7.564114792823143, 8.347755448874702, 3.941602808407785, 10.08541952999284, 4.601422950844002, 9.344055988563827, 4.615837382855054, 6.447806548269106, 8.259548275273037, 6.058733593097952, 4.704158986087033
+            6.236634010774237, 6.0704509238388304, 4.773789842086536, 4.343656372896566, 9.31136931933505, 3.964232342780544, 8.667420029271176, 6.172492536036271, 3.48513837470132, 9.016458486351448,
+            3.9345532290018834, 4.341183266970682, 9.424581575324119, 3.8793302635341442, 7.564114792823143, 8.347755448874702, 3.941602808407785, 10.08541952999284, 4.601422950844002,
+            9.344055988563827, 4.615837382855054, 6.447806548269106, 8.259548275273037, 6.058733593097952, 4.704158986087033
     };
 
     public static double[][] getData() {
@@ -336,6 +340,7 @@ public class PregeneratedNormalData {
 
     /**
      * Generate a single-column dataframe from the precomputed matrix
+     * 
      * @param col: the column of data to select
      * @return A single-column dataframe
      */
@@ -349,6 +354,7 @@ public class PregeneratedNormalData {
 
     /**
      * Generate an n-column dataframe from the precomputed matrix
+     * 
      * @param colIdxs: the indices of data columns to select
      * @return An n-column dataframe
      */
@@ -358,6 +364,7 @@ public class PregeneratedNormalData {
 
     /**
      * Generate an n-column numeric dataframe from the precomputed matrix, with an optional text column added as the last column
+     * 
      * @param colIdxs: the indices of data columns to select
      * @param addString: whether or not to add the text column
      * @return An n-column dataframe, with an optional text column
@@ -368,6 +375,7 @@ public class PregeneratedNormalData {
 
     /**
      * Generate an n-column numeric dataframe from the precomputed matrix, with an optional text column added as the last column
+     * 
      * @param colIdxs: the indices of data columns to select
      * @param addString: whether or not to add the text column
      * @param colPrefix: the desired prefix name for the text column, will be colPrefix+"text"
