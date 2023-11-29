@@ -12,24 +12,114 @@ import org.kie.trustyai.metrics.utils.PerColumnStatisticalAnalysis;
 import org.kie.trustyai.metrics.utils.PerColumnStatistics;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 public class GaussianAnomalyDetection extends PerColumnStatisticalAnalysis {
-    // fit from a specific dataframe
+    /**
+     * Fit the Gaussian Anomaly Detector to a training dataset, computing the mean and standard deviation for each numeric feature and output.
+     *
+     * @param dfTrain: the Dataframe over which to calculate per-column means and standard deviations
+     */
     public GaussianAnomalyDetection(Dataframe dfTrain) {
         super(dfTrain);
     }
 
-    // use pre-computed fitting
+    /**
+     * Fit the Gaussian Anomaly Detector to a training dataset, from precomputed means and standard deviations for each feature and output.
+     *
+     * @param perColumnStatistics: Precomputed per-column means and standard deviations
+     */
     public GaussianAnomalyDetection(PerColumnStatistics perColumnStatistics){
         super(perColumnStatistics);
     }
 
 
-    public Map<String, Double> calculate(Prediction testPrediction) {
+    /**
+     * Compute a bounded probability (see below) with a window size of 1 standard deviation.
+     *
+     * @param testPrediction: the data point over which to compute the per-column probabilities
+     * @return a map of column name : probabilities
+     */
+    public Map<String, Double> calculateBoundedProbability(Prediction testPrediction){
+        return calculateBoundedProbability(testPrediction, 1.);
+    }
+
+    /**
+     * Find the probability of drawing each feature/output value plus/minus a configurable window from the Gaussian column distributions.
+     * That is, for a feature/output value f, window size w, and computed standard deviation of the corresponding column s, this finds the probability of drawing a point
+     * f - sw < x <= f + sw from the column distribution. This describes how likely values within $w$ standard deviations of f are to come from the fit distribution.
+     * Values close to 1 indicate that f is well within the column's calculated Gaussian distribution, while numbers close to 0 indicate that f is far from the distribution.
+     *
+     * @param testPrediction: the data point over which to compute the per-column probabilities
+     * @param windowSize: the number of standard deviations on each side of the feature/output value to use
+     * @return a map of column name : probabilities
+     */
+    public Map<String, Double> calculateBoundedProbability(Prediction testPrediction, double windowSize) {
+        BiFunction<StatisticalSummaryValues, Double, Double> calculation = (ssv, featureValue) -> {
+            NormalDistribution normalDistribution = new NormalDistribution(ssv.getMean(), ssv.getStandardDeviation());
+            double window = windowSize * ssv.getStandardDeviation();
+            return normalDistribution.probability(featureValue - window, featureValue + window);
+        };
+        return perColumnCalculation(testPrediction, calculation);
+    }
+
+    /**
+     * Compute a normalized bounded probability (see below) with a window size of 1 standard deviation.
+     *
+     * @param testPrediction: the data point over which to compute the per-column probabilities
+     * @return a map of column name : probabilities
+     */
+    public Map<String, Double> calculateNormalizedBoundedProbability(Prediction testPrediction) {
+        return calculateNormalizedBoundedProbability(testPrediction, 1.);
+    }
+
+    /**
+     * Find the normalized probability of drawing each feature/output value plus/minus a configurable window from the Gaussian column distributions.
+     * That is, for a feature/output value f, window size w, column mean u, and column standard deviations, this computes
+     * (f - sw < x <= f + sw)/(u - sw < x <= u + sw)
+     * This describes how likely values within $w$ standard deviations of f are to come from the fit distribution. Values close to 1 indicate that f is close to the mean of the
+     * distribution, while numbers close to 0 indicate that f is far from the distribution.
+     *
+     * @param testPrediction: the data point over which to compute the per-column probabilities
+     * @param windowSize: the number of standard deviations on each side of the feature/output value to use
+     * @return a map of column name : probabilities
+     */
+    public Map<String, Double> calculateNormalizedBoundedProbability(Prediction testPrediction, double windowSize) {
+        BiFunction<StatisticalSummaryValues, Double, Double> calculation = (ssv, featureValue) -> {
+            NormalDistribution normalDistribution = new NormalDistribution(ssv.getMean(), ssv.getStandardDeviation());
+
+            double window = windowSize * ssv.getStandardDeviation();
+            return normalDistribution.probability(featureValue - window, featureValue + window)/
+                    normalDistribution.probability(ssv.getMean() - window, ssv.getMean() + window);
+        };
+        return perColumnCalculation(testPrediction, calculation);
+    }
+
+    /**
+     * Compute the normal deviation of each feature/output value in the test prediction:
+     * (x-u)/s, where u is the column mean and s is the column standard deviation. This gives the number of standard
+     * deviations each feature/output value is from their respective column means.
+     *
+     * @param testPrediction: the data point over which to compute the per-column normalized deviation
+     * @return a map of column name : normalized deviation
+     */
+    public Map<String, Double> calculateNormalizedDeviation(Prediction testPrediction){
+        BiFunction<StatisticalSummaryValues, Double, Double> calculation =
+                (ssv, featureValue) -> (featureValue - ssv.getMean())/ssv.getStandardDeviation();
+        return perColumnCalculation(testPrediction, calculation);
+    }
+
+    /**
+     * Helper function to compute some column-analysis function over each column in the testPrediction
+     *
+     * @param testPrediction: The prediction over which to compute per-column analysis
+     * @param calculation: Some function f(columnStats, columnValue) -> double
+     * @return map column name : function output
+     */
+    private Map<String, Double> perColumnCalculation(Prediction testPrediction, BiFunction<StatisticalSummaryValues, Double, Double> calculation) {
         List<String> testNames = new ArrayList<>();
         List<Type> types = new ArrayList<>();
         List<Value> values = new ArrayList<>();
@@ -55,13 +145,13 @@ public class GaussianAnomalyDetection extends PerColumnStatisticalAnalysis {
                 if (!this.getFitStats().containsKey(colName)) {
                     throw new IllegalArgumentException(
                             String.format(
-                                    "Passed dataframe not compatible with the mean-shift fitting: no such column in fitting with name %s.",
+                                    "Passed dataframe not compatible with the Gaussian fitting: no such column in fitting with name %s.",
                                     testNames.get(i)));
                 }
 
                 StatisticalSummaryValues ssv = getFitStats().get(colName);
-                NormalDistribution normalDistribution = new NormalDistribution(ssv.getMean(), ssv.getStandardDeviation());
-                result.put(colName, normalDistribution.density(values.get(i).asNumber()));
+                double featureValue = values.get(i).asNumber();
+                result.put(colName,calculation.apply(ssv, featureValue));
             }
         }
         return result;
