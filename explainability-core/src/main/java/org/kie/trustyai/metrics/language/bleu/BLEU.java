@@ -13,7 +13,7 @@ import org.kie.trustyai.metrics.language.bleu.smoothing.SmoothingOriginal;
 import org.kie.trustyai.metrics.language.utils.NGramUtils;
 import org.kie.trustyai.metrics.language.utils.NLPUtils;
 
-public class BLEU extends AbstractNLPPerformanceMetric {
+public class BLEU extends AbstractNLPPerformanceMetric<Double, List<String>> {
 
     private static final int DEFAULT_MAX_NGRAMS = 4; // BLEU-4
 
@@ -60,8 +60,9 @@ public class BLEU extends AbstractNLPPerformanceMetric {
      * @param hypothesis The hypothesis string.
      * @return The BLEU score.
      */
-    public double calculateSentence(List<String> references, String hypothesis) {
-        return calculateSentence(references, hypothesis, DEFAULT_MAX_NGRAMS);
+    @Override
+    public Double calculate(List<String> references, String hypothesis) {
+        return calculate(references, hypothesis, DEFAULT_MAX_NGRAMS);
     }
 
     /**
@@ -72,8 +73,8 @@ public class BLEU extends AbstractNLPPerformanceMetric {
      * @param maxNgram The maximum n-gram order.
      * @return The BLEU score.
      */
-    public double calculateSentence(List<String> references, String hypothesis, int maxNgram) {
-        return calculateSentence(references, hypothesis, maxNgram, createUniformWeights(maxNgram));
+    public Double calculate(List<String> references, String hypothesis, int maxNgram) {
+        return calculate(references, hypothesis, maxNgram, createUniformWeights(maxNgram));
     }
 
     /**
@@ -85,7 +86,7 @@ public class BLEU extends AbstractNLPPerformanceMetric {
      * @param weights The weights for each n-gram order.
      * @return The BLEU score.
      */
-    public double calculateSentence(List<String> references, String hypothesis, int maxNgram, double[] weights) {
+    public Double calculate(List<String> references, String hypothesis, int maxNgram, double[] weights) {
         if (weights.length != maxNgram) {
             throw new IllegalArgumentException("Weights array must be the same length as maxNgram");
         }
@@ -129,7 +130,7 @@ public class BLEU extends AbstractNLPPerformanceMetric {
                 score *= Math.pow(smoothedPrecisionScores[i], weights[i]);
             } else if (weights[i] > 0) {
                 // If the precision score is 0 and the weight is not zero, then the BLEU score should be 0.
-                return 0;
+                return 0.;
             }
         }
 
@@ -141,7 +142,7 @@ public class BLEU extends AbstractNLPPerformanceMetric {
         return score;
     }
 
-    public double modifiedPrecision(List<String> references, String hypothesis, int n) {
+    public Double modifiedPrecision(List<String> references, String hypothesis, int n) {
         // Tokenize the hypothesis
         final String[] hypothesisTokens = this.getTokenizer().tokenize(hypothesis);
         final List<String> hypothesisNgrams = NGramUtils.generateNgrams(hypothesisTokens, n);
@@ -215,7 +216,7 @@ public class BLEU extends AbstractNLPPerformanceMetric {
      * @param weights weights for n-grams
      * @return Corpus BLEU score
      */
-    public double calculateCorpus(List<List<String>> references, List<String> hypotheses, double[] weights) {
+    public Double calculateCorpus(List<List<String>> references, List<String> hypotheses, double[] weights) {
         if (references.size() != hypotheses.size()) {
             throw new IllegalArgumentException("The number of hypotheses and their reference sets should be the same");
         }
@@ -275,5 +276,4 @@ public class BLEU extends AbstractNLPPerformanceMetric {
         return bp * Math.exp(bleuScore);
 
     }
-
 }

@@ -7,8 +7,9 @@ MY_DIR=$(readlink -f `dirname "${BASH_SOURCE[0]}"`)
 source ${MY_DIR}/../util
 RESOURCEDIR="${MY_DIR}/../resources"
 
-TEST_USER=${OPENSHIFT_TESTUSER_NAME:-"admin"} #Username used to login to the ODH Dashboard
-TEST_PASS=${OPENSHIFT_TESTUSER_PASS:-"admin"} #Password used to login to the ODH Dashboard
+TEST_USER=${OPENSHIFT_TESTUSER_NAME:-"admin"} #Username used to login
+TEST_PASS=${OPENSHIFT_TESTUSER_PASS:-"admin"} #Password used to login
+
 LOCAL=${LOCAL:-false}
 TEARDOWN=${TEARDOWN:-false}
 MM_NAMESPACE="${ODHPROJECT}-model"
@@ -22,7 +23,6 @@ REQUESTS_CREATED=false
 FAILURE=false
 FAILURE_HANDLING='FAILURE=true && echo -e "\033[0;31mERROR\033[0m"'
 
-
 os::test::junit::declare_suite_start "$MY_SCRIPT"
 
 function setup_monitoring() {
@@ -30,6 +30,12 @@ function setup_monitoring() {
     oc apply -f ${RESOURCEDIR}/modelmesh/enable-uwm.yaml || eval "$FAILURE_HANDLING"
 }
 
+# Function to add the Authorization token to curl commands
+function curl_token() {
+    oc apply -f ${RESOURCEDIR}/modelmesh/service_account.yaml -n ${MM_NAMESPACE}
+    TOKEN=$(oc create token user-one -n ${MM_NAMESPACE}) || eval "$FAILURE_HANDLING"
+    curl -H "Authorization: Bearer ${TOKEN}" "$@"
+}
 
 function install_trustyai_operator(){
   header "Installing TrustyAI Operator"
@@ -65,7 +71,7 @@ function check_trustyai_resources() {
 
   os::cmd::try_until_text "oc get deployment trustyai-service" "trustyai-service" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get route trustyai-service-route" "trustyai-service-route" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "oc get pod | grep trustyai-service" "1/1" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc get pod | grep trustyai-service" "2/2" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 
 }
 
@@ -80,6 +86,14 @@ function check_trustyai_conditions() {
 
 }
 
+function check_trustyai_authentication() {
+  header "Checking the TrustyAIService authentication"
+  oc project $MM_NAMESPACE  || eval "$FAILURE_HANDLING"
+  TRUSTY_ROUTE=https://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
+
+  os::cmd::try_until_text "curl -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/info" "403" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "curl_token -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/info" "200" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+}
 
 function check_mm_resources() {
   header "Checking that ModelMesh resources have spun up"
@@ -121,7 +135,7 @@ function schedule_and_check_request(){
     METRIC_UPPERCASE=$(echo ${METRIC_NAME} | tr '[:lower:]' '[:upper:]')
     for MODEL in $MODEL_ALPHA $MODEL_BETA
     do
-      curl -sk --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+      curl_token -sk --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
         --header 'Content-Type: application/json' \
         --data "{
                   \"modelId\": \"$MODEL\",
@@ -199,10 +213,10 @@ function teardown_trustyai_test() {
   if [ $REQUESTS_CREATED = true ]; then
     for METRIC_NAME in "spd" "dir"
     do
-      for REQUEST in $(curl -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
+      for REQUEST in $(curl_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
       do
         echo -n $REQUEST": "
-        curl -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+        curl_token -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
             -H 'Content-Type: application/json' \
             -d "{
                   \"requestId\": \"$REQUEST\"
@@ -230,6 +244,7 @@ if [ $TEARDOWN = false ]; then
   [ $FAILURE = false ] && deploy_model                  || echo -e "\033[0;31mSkipping model deployment due to previous failure\033[0m"
   [ $FAILURE = false ] && check_trustyai_resources      || echo -e "\033[0;31mSkipping TrustyAI resource check due to previous failure\033[0m"
   [ $FAILURE = false ] && check_trustyai_conditions     || echo -e "\033[0;31mSkipping TrustyAI conditions check due to previous failure\033[0m"
+  [ $FAILURE = false ] && check_trustyai_authentication || echo -e "\033[0;31mSkipping TrustyAI authentication check due to previous failure\033[0m"
   [ $FAILURE = false ] && check_mm_resources            || echo -e "\033[0;31mSkipping ModelMesh resource check due to previous failure\033[0m"
   [ $FAILURE = false ] && check_communication           || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check due to previous failure\033[0m"
   [ $FAILURE = false ] && send_data                     || echo -e "\033[0;31mSkipping data generation due to previous failure\033[0m"
