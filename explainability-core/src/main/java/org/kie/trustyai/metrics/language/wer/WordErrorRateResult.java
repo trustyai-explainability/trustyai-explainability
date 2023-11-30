@@ -1,6 +1,6 @@
 package org.kie.trustyai.metrics.language.wer;
 
-import org.kie.trustyai.metrics.language.utils.TokenSequenceAlignmentCounters;
+import org.kie.trustyai.metrics.language.utils.alignment.TokenSequenceAlignmentCounters;
 
 public class WordErrorRateResult {
     private final double wordErrorRate;
@@ -37,9 +37,9 @@ public class WordErrorRateResult {
     public String toString() {
         return new StringBuilder().append("Word Error Rate: ")
                 .append(wordErrorRate).append(System.getProperty("line.separator"))
-                .append("Reference: ").append(alignedReferenceString).append(System.getProperty("line.separator"))
-                .append("    Input: ").append(alignedInputString).append(System.getProperty("line.separator"))
-                .append("   Labels: ").append(alignedLabelString)
+                .append(" Reference: ").append(alignedReferenceString).append(System.getProperty("line.separator"))
+                .append("Hypothesis: ").append(alignedInputString).append(System.getProperty("line.separator"))
+                .append("    Labels: ").append(alignedLabelString)
                 .append(System.getProperty("line.separator"))
                 .append(alignmentCounters).toString();
     }

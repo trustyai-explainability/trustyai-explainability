@@ -13,6 +13,8 @@ import org.kie.trustyai.metrics.language.bleu.smoothing.SmoothingOriginal;
 import org.kie.trustyai.metrics.language.utils.NGramUtils;
 import org.kie.trustyai.metrics.language.utils.NLPUtils;
 
+import opennlp.tools.tokenize.Tokenizer;
+
 public class BLEU extends AbstractNLPPerformanceMetric<Double, List<String>> {
 
     private static final int DEFAULT_MAX_NGRAMS = 4; // BLEU-4
@@ -23,7 +25,18 @@ public class BLEU extends AbstractNLPPerformanceMetric<Double, List<String>> {
         this(new SmoothingOriginal());
     }
 
+    public BLEU(Tokenizer tokenizer) {
+        this(new SmoothingOriginal(), tokenizer);
+
+    }
+
     public BLEU(SmoothingFunction smoothingFunction) {
+        super();
+        this.smoothingFunction = smoothingFunction;
+    }
+
+    public BLEU(SmoothingFunction smoothingFunction, Tokenizer tokenizer) {
+        super(tokenizer);
         this.smoothingFunction = smoothingFunction;
     }
 

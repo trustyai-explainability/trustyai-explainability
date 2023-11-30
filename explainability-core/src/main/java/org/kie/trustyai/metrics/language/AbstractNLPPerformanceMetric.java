@@ -1,6 +1,6 @@
 package org.kie.trustyai.metrics.language;
 
-import org.kie.trustyai.metrics.language.utils.TokenizerUtils;
+import org.kie.trustyai.metrics.language.utils.tokenizers.TokenizerUtils;
 
 import opennlp.tools.tokenize.Tokenizer;
 
