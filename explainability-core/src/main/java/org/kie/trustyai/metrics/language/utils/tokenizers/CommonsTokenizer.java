@@ -17,7 +17,7 @@ public class CommonsTokenizer implements Tokenizer {
 
     @Override
     /**
-     * Produce an array of spans, marking the original string indeces of the first and last character of each token
+     * Produce an array of spans, marking the original string indices of the first and last character of each token
      */
     public Span[] tokenizePos(String s) {
         String[] tokens = this.tokenize(s);
