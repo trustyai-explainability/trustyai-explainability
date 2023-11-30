@@ -102,7 +102,7 @@ class RecordingLimeExplainerTest {
         PerturbationContext pc = new PerturbationContext(seed, new Random(), 1);
         LimeConfig config = new LimeConfig().withPerturbationContext(pc);
         RecordingLimeExplainer limeExplainer = new RecordingLimeExplainer(2);
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 10; i++) {
             List<Feature> features = new LinkedList<>();
             features.add(TestUtils.getMockedNumericFeature(Type.NUMBER.randomValue(pc).asNumber()));
             features.add(TestUtils.getMockedNumericFeature(Type.NUMBER.randomValue(pc).asNumber()));

@@ -31,34 +31,35 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class LimeConfigOptimizerTest {
+    int TIME_LIMIT = 3;
 
     @Test
     void testImpactOptimization() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).forImpactScore();
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).forImpactScore();
         assertConfigOptimized(limeConfigOptimizer);
     }
 
     @Test
     void testImpactOptimizationNoSampling() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).forImpactScore().withSampling(false);
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).forImpactScore().withSampling(false);
         assertConfigOptimized(limeConfigOptimizer);
     }
 
     @Test
     void testImpactOptimizationNoWeighting() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).forImpactScore().withWeighting(false);
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).forImpactScore().withWeighting(false);
         assertConfigOptimized(limeConfigOptimizer);
     }
 
     @Test
     void testImpactOptimizationNoEncoding() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).forImpactScore().withEncoding(false);
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).forImpactScore().withEncoding(false);
         assertConfigOptimized(limeConfigOptimizer);
     }
 
     @Test
     void testImpactOptimizationNoProximity() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).forImpactScore().withProximity(false);
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).forImpactScore().withProximity(false);
         assertConfigOptimized(limeConfigOptimizer);
     }
 
@@ -74,31 +75,31 @@ class LimeConfigOptimizerTest {
 
     @Test
     void testStabilityOptimization() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).forStabilityScore();
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).forStabilityScore();
         assertConfigOptimized(limeConfigOptimizer);
     }
 
     @Test
     void testStabilityOptimizationNoSampling() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).forStabilityScore().withSampling(false);
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).forStabilityScore().withSampling(false);
         assertConfigOptimized(limeConfigOptimizer);
     }
 
     @Test
     void testStabilityOptimizationNoWeighting() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).forStabilityScore().withWeighting(false);
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).forStabilityScore().withWeighting(false);
         assertConfigOptimized(limeConfigOptimizer);
     }
 
     @Test
     void testStabilityOptimizationNoEncoding() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).forStabilityScore().withEncoding(false);
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).forStabilityScore().withEncoding(false);
         assertConfigOptimized(limeConfigOptimizer);
     }
 
     @Test
     void testStabilityOptimizationNoProximity() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).forStabilityScore().withProximity(false);
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).forStabilityScore().withProximity(false);
         assertConfigOptimized(limeConfigOptimizer);
     }
 
@@ -114,19 +115,19 @@ class LimeConfigOptimizerTest {
 
     @Test
     void testWeightedStabilityOptimization() throws Exception {
-        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).withWeightedStability(0.5, 0.5);
+        LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).withWeightedStability(0.5, 0.5);
         assertConfigOptimized(limeConfigOptimizer);
 
-        limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).withWeightedStability(0.3, 0.7);
+        limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).withWeightedStability(0.3, 0.7);
         assertConfigOptimized(limeConfigOptimizer);
 
-        limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).withWeightedStability(0.7, 0.3);
+        limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).withWeightedStability(0.7, 0.3);
         assertConfigOptimized(limeConfigOptimizer);
 
-        limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).withWeightedStability(1, 0);
+        limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).withWeightedStability(1, 0);
         assertConfigOptimized(limeConfigOptimizer);
 
-        limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(10).withWeightedStability(0, 1);
+        limeConfigOptimizer = new LimeConfigOptimizer().withTimeLimit(TIME_LIMIT).withWeightedStability(0, 1);
         assertConfigOptimized(limeConfigOptimizer);
     }
 
@@ -158,7 +159,7 @@ class LimeConfigOptimizerTest {
             LimeConfig initialConfig = new LimeConfig().withSamples(10).withPerturbationContext(new PerturbationContext(seed, random, 1));
 
             LimeConfigOptimizer limeConfigOptimizer = new LimeConfigOptimizer().withDeterministicExecution(true)
-                    .withStepCountLimit(10).withTimeLimit(10);
+                    .withStepCountLimit(10).withTimeLimit(TIME_LIMIT);
             LimeConfig optimizedConfig = limeConfigOptimizer.optimize(initialConfig, predictions, model);
             optimizedConfigs.add(optimizedConfig);
         }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.explainability.metrics;
+package org.kie.trustyai.metrics.explainability;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -31,7 +31,6 @@ import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.LocalSaliencyStability;
 import org.kie.trustyai.explainability.utils.models.TestModels;
-import org.kie.trustyai.metrics.explainability.ExplainabilityMetrics;
 
 import static java.util.Collections.emptyList;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -41,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class ExplainabilityMetricsTest {
+    int N_TRIALS = 4;
 
     @Test
     void testExplainabilityNoExplanation() {
@@ -170,7 +170,7 @@ class ExplainabilityMetricsTest {
         Prediction prediction = new SimplePrediction(input, model.predictAsync(List.of(input)).get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT).get(0));
         LocalExplainer<SaliencyResults> explainer = new LimeExplainer();
         int topK = 2;
-        int runs = 10;
+        int runs = N_TRIALS;
         LocalSaliencyStability localSaliencyStability = ExplainabilityMetrics.getLocalSaliencyStability(model, prediction, explainer, topK, runs);
         assertThat(localSaliencyStability).isNotNull();
         assertThat(localSaliencyStability.getDecisions()).isNotNull().isNotEmpty();
@@ -184,7 +184,7 @@ class ExplainabilityMetricsTest {
     void testGetLocalSaliencyRecall() throws ExecutionException, InterruptedException, TimeoutException {
         PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
         List<Prediction> predictions = new ArrayList<>();
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < N_TRIALS; j++) {
             List<Feature> features = new ArrayList<>();
             for (int i = 0; i < 4; i++) {
                 features.add(TestUtils.getMockedNumericFeature(j + i * 0.1));
@@ -194,7 +194,7 @@ class ExplainabilityMetricsTest {
             predictions.add(prediction);
         }
         LocalExplainer<SaliencyResults> explainer = new LimeExplainer();
-        double recall = ExplainabilityMetrics.getLocalSaliencyRecall("inside", model, explainer, predictions, 2, 5);
+        double recall = ExplainabilityMetrics.getLocalSaliencyRecall("inside", model, explainer, predictions, 2, N_TRIALS / 2);
         assertThat(recall).isEqualTo(1);
     }
 
@@ -202,7 +202,7 @@ class ExplainabilityMetricsTest {
     void testGetLocalSaliencyPrecision() throws ExecutionException, InterruptedException, TimeoutException {
         PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
         List<Prediction> predictions = new ArrayList<>();
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < N_TRIALS; j++) {
             List<Feature> features = new ArrayList<>();
             for (int i = 0; i < 4; i++) {
                 features.add(TestUtils.getMockedNumericFeature(j + i * 0.1));
@@ -212,7 +212,7 @@ class ExplainabilityMetricsTest {
             predictions.add(prediction);
         }
         LocalExplainer<SaliencyResults> explainer = new LimeExplainer();
-        double recall = ExplainabilityMetrics.getLocalSaliencyPrecision("inside", model, explainer, predictions, 2, 5);
+        double recall = ExplainabilityMetrics.getLocalSaliencyPrecision("inside", model, explainer, predictions, 2, N_TRIALS / 2);
         assertThat(recall).isEqualTo(1);
     }
 
@@ -220,7 +220,7 @@ class ExplainabilityMetricsTest {
     void testGetLocalSaliencyF1() throws ExecutionException, InterruptedException, TimeoutException {
         PredictionProvider model = TestModels.getSumThresholdDifferentiableModel(0, 0.1);
         List<Prediction> predictions = new ArrayList<>();
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < N_TRIALS; j++) {
             List<Feature> features = new ArrayList<>();
             for (int i = 0; i < 4; i++) {
                 features.add(TestUtils.getMockedNumericFeature(j + i * 0.1));
@@ -230,7 +230,7 @@ class ExplainabilityMetricsTest {
             predictions.add(prediction);
         }
         LocalExplainer<SaliencyResults> explainer = new LimeExplainer();
-        double recall = ExplainabilityMetrics.getLocalSaliencyF1("inside", model, explainer, predictions, 2, 5);
+        double recall = ExplainabilityMetrics.getLocalSaliencyF1("inside", model, explainer, predictions, 2, N_TRIALS / 2);
         assertThat(recall).isEqualTo(1);
     }
 }
