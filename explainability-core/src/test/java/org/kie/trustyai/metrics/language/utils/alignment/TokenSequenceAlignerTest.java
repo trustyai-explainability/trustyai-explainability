@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.language.utils;
+package org.kie.trustyai.metrics.language.utils.alignment;
 
 import org.apache.commons.text.StringTokenizer;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ class TokenSequenceAlignerTest {
                 new StringTokenizer(testRef).getTokenList(),
                 new StringTokenizer(testHyp).getTokenList());
 
-        assertEquals(alignedSequences.getAlignedInput().size(), alignedSequences.getAlignedReference().size());
+        assertEquals(alignedSequences.getAlignedHypothesis().size(), alignedSequences.getAlignedReference().size());
     }
 
 }

@@ -74,9 +74,9 @@ class WordErrorRateTest {
         assertEquals(6, werr.getAlignmentCounters().substitutions);
         assertEquals(
                 "Word Error Rate: 0.6428571343421936\n" +
-                        "Reference: *  | This  | is  | the  | test        | reference  | ,  | to    | which  | ***  | I        | will  | compare  | alignment  | against  | .  |\n" +
-                        "    Input: I  | '     | m   | a    | hypothesis  | reference  | ,  | from  | which  | the  | aligner  | will  | compare  | *********  | against  | .  |\n" +
-                        "   Labels: I  | S     | S   | S    | S           | C          | C  | S     | C      | I    | S        | C     | C        | D          | C        | C  |\n" +
+                        " Reference: *  | This  | is  | the  | test        | reference  | ,  | to    | which  | ***  | I        | will  | compare  | alignment  | against  | .  |\n" +
+                        "Hypothesis: I  | '     | m   | a    | hypothesis  | reference  | ,  | from  | which  | the  | aligner  | will  | compare  | *********  | against  | .  |\n" +
+                        "    Labels: I  | S     | S   | S    | S           | C          | C  | S     | C      | I    | S        | C     | C        | D          | C        | C  |\n" +
                         "TokenSequenceAlignmentCounters{substitutions=6, insertions=2, deletions=1, correct=7}",
                 werr.toString());
     }

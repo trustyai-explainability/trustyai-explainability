@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.language.utils;
+package org.kie.trustyai.metrics.language.utils.alignment;
 
 public class TokenSequenceAlignmentCounters {
     public int substitutions;

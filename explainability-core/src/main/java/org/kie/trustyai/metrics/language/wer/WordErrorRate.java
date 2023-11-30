@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.kie.trustyai.metrics.language.AbstractNLPPerformanceMetric;
-import org.kie.trustyai.metrics.language.utils.AlignedTokenSequences;
-import org.kie.trustyai.metrics.language.utils.TokenSequenceAligner;
-import org.kie.trustyai.metrics.language.utils.TokenSequenceAlignmentCounters;
+import org.kie.trustyai.metrics.language.utils.alignment.AlignedTokenSequences;
+import org.kie.trustyai.metrics.language.utils.alignment.TokenSequenceAligner;
+import org.kie.trustyai.metrics.language.utils.alignment.TokenSequenceAlignmentCounters;
 
 import opennlp.tools.tokenize.Tokenizer;
 
@@ -27,17 +27,16 @@ public class WordErrorRate extends AbstractNLPPerformanceMetric<WordErrorRateRes
                 Arrays.asList(this.getTokenizer().tokenize(hypothesis)));
     }
 
-    public WordErrorRateResult calculate(List<String> tokenizedReference, List<String> tokenizedInput) {
+    public WordErrorRateResult calculate(List<String> tokenizedReference, List<String> tokenizedHypothesis) {
 
-        AlignedTokenSequences alignedTokenSequences = TokenSequenceAligner.align(tokenizedReference, tokenizedInput);
+        AlignedTokenSequences alignedTokenSequences = TokenSequenceAligner.align(tokenizedReference, tokenizedHypothesis);
         TokenSequenceAlignmentCounters alignmentCounters = alignedTokenSequences.getAlignmentCounters();
         double wer = (alignmentCounters.substitutions + alignmentCounters.deletions + alignmentCounters.insertions) / (float) tokenizedReference.size();
         return new WordErrorRateResult(
                 wer,
                 alignedTokenSequences.getAlignedReferenceVisualization(),
-                alignedTokenSequences.getAlignedInputVisualization(),
+                alignedTokenSequences.getAlignedHypothesisVisualization(),
                 alignedTokenSequences.getAlignedLabelVisualization(),
                 alignmentCounters);
     }
-
 }

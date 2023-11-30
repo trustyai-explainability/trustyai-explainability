@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.language.nlp;
+package org.kie.trustyai.metrics.language.utils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.metrics.language.utils.NLPUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

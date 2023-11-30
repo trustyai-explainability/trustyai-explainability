@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.language.utils;
+package org.kie.trustyai.metrics.language.utils.tokenizers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,5 +24,9 @@ public class TokenizerUtils {
         } catch (IOException e) {
             return WhitespaceTokenizer.INSTANCE;
         }
+    }
+
+    public static Tokenizer getCommonsTokenizer() {
+        return new CommonsTokenizer();
     }
 }

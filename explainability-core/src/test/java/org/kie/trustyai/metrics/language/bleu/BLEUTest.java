@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.language.nlp;
+package org.kie.trustyai.metrics.language.bleu;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,7 +8,6 @@ import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.metrics.language.bleu.BLEU;
 import org.kie.trustyai.metrics.language.bleu.smoothing.SmoothingFunction;
 import org.kie.trustyai.metrics.language.bleu.smoothing.SmoothingFunctionEpsilon;
 import org.kie.trustyai.metrics.language.utils.NLPUtils;
