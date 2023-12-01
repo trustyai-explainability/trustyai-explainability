@@ -4,18 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataRequestPayload {
-    String modelId;
     List<RowMatcher> matchAny = new ArrayList<>();
     List<RowMatcher> matchAll = new ArrayList<>();
     List<RowMatcher> matchNone = new ArrayList<>();
-
-    public String getModelId() {
-        return modelId;
-    }
-
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
-    }
 
     public List<RowMatcher> getMatchAny() {
         return matchAny;
@@ -41,13 +32,18 @@ public class DataRequestPayload {
         this.matchNone = matchNone;
     }
 
-    @Override
-    public String toString() {
-        return "DataRequestPayload{" +
-                "modelId='" + modelId + '\'' +
-                ", matchAny=" + matchAny +
-                ", matchAll=" + matchAll +
-                ", matchNone=" + matchNone +
-                '}';
+    public String prettyPrint() {
+        List<String> builder = new ArrayList<>();
+
+        if (!matchAll.isEmpty()){
+            builder.add("ALL of: " +matchAll);
+        }
+        if (!matchAny.isEmpty()){
+            builder.add("ANY of: "+matchAny);
+        }
+        if (!matchNone.isEmpty()){
+            builder.add("NONE of: "+matchNone);
+        }
+        return String.join(", ", builder);
     }
 }

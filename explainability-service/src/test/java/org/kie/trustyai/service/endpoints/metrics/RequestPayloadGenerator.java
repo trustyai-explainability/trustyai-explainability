@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
+import org.kie.trustyai.service.payloads.data.download.RowMatcher;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.AdvancedGroupMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
@@ -73,6 +76,49 @@ public class RequestPayloadGenerator {
 
         return request;
     }
+
+    public static AdvancedGroupMetricRequest advancedCorrect(){
+        DataRequestPayload privileged = new DataRequestPayload();
+        List<RowMatcher> matchAllList = new ArrayList<>();
+        matchAllList.add(new RowMatcher("gender", "EQUALS", List.of(new IntNode(0))));
+        matchAllList.add(new RowMatcher("race", "EQUALS", List.of(new IntNode(0))));
+        privileged.setMatchAll(matchAllList);
+
+        List<RowMatcher> matchAnyList = new ArrayList<>();
+        matchAnyList.add(new RowMatcher("age", "BETWEEN", List.of(new IntNode(5), new IntNode(10))));
+        matchAnyList.add(new RowMatcher("age", "BETWEEN", List.of(new IntNode(50), new IntNode(70))));
+        privileged.setMatchAny(matchAnyList);
+
+        List<RowMatcher> matchNoneList = new ArrayList<>();
+        matchNoneList.add(new RowMatcher("age", "BETWEEN", List.of(new IntNode(55), new IntNode(65))));
+        privileged.setMatchNone(matchNoneList);
+
+        DataRequestPayload unprivileged = new DataRequestPayload();
+        matchAllList = new ArrayList<>();
+        matchAllList.add(new RowMatcher("gender", "EQUALS", List.of(new IntNode(1))));
+        matchAllList.add(new RowMatcher("race", "EQUALS", List.of(new IntNode(1))));
+        unprivileged.setMatchAll(matchAllList);
+
+        matchAnyList = new ArrayList<>();
+        matchAnyList.add(new RowMatcher("age", "BETWEEN", List.of(new IntNode(10), new IntNode(50))));
+        matchAnyList.add(new RowMatcher("age", "BETWEEN", List.of(new IntNode(70), new IntNode(100))));
+        unprivileged.setMatchAny(matchAnyList);
+
+
+        DataRequestPayload favorable = new DataRequestPayload();
+        matchAllList = new ArrayList<>();
+        matchAllList.add(new RowMatcher("income", "EQUALS", List.of(new IntNode(1))));
+        favorable.setMatchAll(matchAllList);
+
+        AdvancedGroupMetricRequest request = new AdvancedGroupMetricRequest();
+        request.setModelId(MODEL_ID);
+        request.setPrivilegedAttribute(privileged);
+        request.setUnprivilegedAttribute(unprivileged);
+        request.setFavorableOutcome(favorable);
+        return request;
+
+    }
+
 
     public static GroupMetricRequest named(String name) {
         GroupMetricRequest request = new GroupMetricRequest();

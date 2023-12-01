@@ -16,7 +16,7 @@ import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.utils.CSVUtils;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
+import org.kie.trustyai.service.payloads.data.download.ModelDataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.DataResponsePayload;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferJointPayload;
@@ -71,27 +71,27 @@ class DataEndpointTest {
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
-        DataRequestPayload dataRequestPayload = new DataRequestPayload();
-        dataRequestPayload.setModelId(MODEL_ID);
+        ModelDataRequestPayload modelDataRequestPayload = new ModelDataRequestPayload();
+        modelDataRequestPayload.setModelId(MODEL_ID);
 
         List<RowMatcher> matchAllList = new ArrayList<>();
         matchAllList.add(new RowMatcher("gender", "EQUALS", List.of(new IntNode(0))));
         matchAllList.add(new RowMatcher("race", "EQUALS", List.of(new IntNode(0))));
         matchAllList.add(new RowMatcher("income", "EQUALS", List.of(new IntNode(0))));
-        dataRequestPayload.setMatchAll(matchAllList);
+        modelDataRequestPayload.setMatchAll(matchAllList);
 
         List<RowMatcher> matchAnyList = new ArrayList<>();
         matchAnyList.add(new RowMatcher("age", "BETWEEN", List.of(new IntNode(5), new IntNode(10))));
         matchAnyList.add(new RowMatcher("age", "BETWEEN", List.of(new IntNode(50), new IntNode(70))));
-        dataRequestPayload.setMatchAny(matchAnyList);
+        modelDataRequestPayload.setMatchAny(matchAnyList);
 
         List<RowMatcher> matchNoneList = new ArrayList<>();
         matchNoneList.add(new RowMatcher("age", "BETWEEN", List.of(new IntNode(55), new IntNode(65))));
-        dataRequestPayload.setMatchNone(matchNoneList);
+        modelDataRequestPayload.setMatchNone(matchNoneList);
 
         DataResponsePayload response = given()
                 .contentType(ContentType.JSON)
-                .body(dataRequestPayload)
+                .body(modelDataRequestPayload)
                 .when().post("/download")
                 .then().extract().body().as(DataResponsePayload.class);
 
@@ -119,17 +119,17 @@ class DataEndpointTest {
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
-        DataRequestPayload dataRequestPayload = new DataRequestPayload();
-        dataRequestPayload.setModelId(MODEL_ID);
+        ModelDataRequestPayload modelDataRequestPayload = new ModelDataRequestPayload();
+        modelDataRequestPayload.setModelId(MODEL_ID);
 
         List<RowMatcher> matchAllList = new ArrayList<>();
         matchAllList.add(new RowMatcher("make", "EQUALS", List.of(new TextNode("Chevy"), new TextNode("Ford"), new TextNode("Dodge"))));
         matchAllList.add(new RowMatcher("year", "BETWEEN", List.of(new IntNode(1990), new IntNode(2050))));
-        dataRequestPayload.setMatchAll(matchAllList);
+        modelDataRequestPayload.setMatchAll(matchAllList);
 
         DataResponsePayload response = given()
                 .contentType(ContentType.JSON)
-                .body(dataRequestPayload)
+                .body(modelDataRequestPayload)
                 .when().post("/download")
                 .then().extract().body().as(DataResponsePayload.class);
 
@@ -151,16 +151,16 @@ class DataEndpointTest {
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
-        DataRequestPayload dataRequestPayload = new DataRequestPayload();
-        dataRequestPayload.setModelId(MODEL_ID);
+        ModelDataRequestPayload modelDataRequestPayload = new ModelDataRequestPayload();
+        modelDataRequestPayload.setModelId(MODEL_ID);
 
         List<RowMatcher> matchAllList = new ArrayList<>();
         matchAllList.add(new RowMatcher("make", "BETWEEN", List.of(new TextNode("Chevy"), new TextNode("Ford"), new TextNode("Dodge"))));
-        dataRequestPayload.setMatchAll(matchAllList);
+        modelDataRequestPayload.setMatchAll(matchAllList);
 
         given()
                 .contentType(ContentType.JSON)
-                .body(dataRequestPayload)
+                .body(modelDataRequestPayload)
                 .when().post("/download")
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(containsString("BETWEEN operation must contain exactly two values, describing the lower and upper bounds of the desired range. Received 3 values"),
@@ -173,16 +173,16 @@ class DataEndpointTest {
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
-        DataRequestPayload dataRequestPayload = new DataRequestPayload();
-        dataRequestPayload.setModelId(MODEL_ID);
+        ModelDataRequestPayload modelDataRequestPayload = new ModelDataRequestPayload();
+        modelDataRequestPayload.setModelId(MODEL_ID);
 
         List<RowMatcher> matchAllList = new ArrayList<>();
         matchAllList.add(new RowMatcher("mak123e", "EQUALS", List.of(new TextNode("Chevy"), new TextNode("Ford"))));
-        dataRequestPayload.setMatchAll(matchAllList);
+        modelDataRequestPayload.setMatchAll(matchAllList);
 
         given()
                 .contentType(ContentType.JSON)
-                .body(dataRequestPayload)
+                .body(modelDataRequestPayload)
                 .when().post("/download")
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(containsString("No feature or output found with name="));
@@ -194,16 +194,16 @@ class DataEndpointTest {
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
-        DataRequestPayload dataRequestPayload = new DataRequestPayload();
-        dataRequestPayload.setModelId(MODEL_ID);
+        ModelDataRequestPayload modelDataRequestPayload = new ModelDataRequestPayload();
+        modelDataRequestPayload.setModelId(MODEL_ID);
 
         List<RowMatcher> matchAllList = new ArrayList<>();
         matchAllList.add(new RowMatcher("mak123e", "DOESNOTEXIST", List.of(new TextNode("Chevy"), new TextNode("Ford"))));
-        dataRequestPayload.setMatchAll(matchAllList);
+        modelDataRequestPayload.setMatchAll(matchAllList);
 
         given()
                 .contentType(ContentType.JSON)
-                .body(dataRequestPayload)
+                .body(modelDataRequestPayload)
                 .when().post("/download")
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(containsString("RowMatch operation must be one of [BETWEEN, EQUALS]"));
@@ -220,16 +220,16 @@ class DataEndpointTest {
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
-        DataRequestPayload dataRequestPayload = new DataRequestPayload();
-        dataRequestPayload.setModelId(MODEL_ID);
+        ModelDataRequestPayload modelDataRequestPayload = new ModelDataRequestPayload();
+        modelDataRequestPayload.setModelId(MODEL_ID);
 
         List<RowMatcher> matchAllList = new ArrayList<>();
         matchAllList.add(new RowMatcher("trustyai.TAG", "EQUALS", List.of(new TextNode("TRAINING"))));
-        dataRequestPayload.setMatchAll(matchAllList);
+        modelDataRequestPayload.setMatchAll(matchAllList);
 
         DataResponsePayload response = given()
                 .contentType(ContentType.JSON)
-                .body(dataRequestPayload)
+                .body(modelDataRequestPayload)
                 .when().post("/download")
                 .then().extract().body().as(DataResponsePayload.class);
         Dataframe df = Dataframe.createFrom(CSVUtils.parse(response.getDataCSV(), datasource.get().getMetadata(MODEL_ID), true));
@@ -244,16 +244,16 @@ class DataEndpointTest {
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
         List<Prediction> predsToExtract = datasource.get().getDataframe(MODEL_ID).asPredictions().subList(0, 10);
 
-        DataRequestPayload dataRequestPayload = new DataRequestPayload();
-        dataRequestPayload.setModelId(MODEL_ID);
+        ModelDataRequestPayload modelDataRequestPayload = new ModelDataRequestPayload();
+        modelDataRequestPayload.setModelId(MODEL_ID);
 
         List<RowMatcher> matchAllList = new ArrayList<>();
         matchAllList.add(new RowMatcher("trustyai.INDEX", "BETWEEN", List.of(new IntNode(0), new IntNode(10))));
-        dataRequestPayload.setMatchAll(matchAllList);
+        modelDataRequestPayload.setMatchAll(matchAllList);
 
         DataResponsePayload response = given()
                 .contentType(ContentType.JSON)
-                .body(dataRequestPayload)
+                .body(modelDataRequestPayload)
                 .when().post("/download")
                 .then().extract().body().as(DataResponsePayload.class);
         Dataframe df = Dataframe.createFrom(CSVUtils.parse(response.getDataCSV(), datasource.get().getMetadata(MODEL_ID), true));
@@ -285,19 +285,19 @@ class DataEndpointTest {
         List<Prediction> predsToExtract = datasource.get().getDataframe(MODEL_ID).asPredictions().subList(extractIdx, extractIdx + nToGet);
         List<LocalDateTime> timesToExtract = dataframe.getTimestamps().subList(extractIdx, extractIdx + nToGet + 1);
 
-        DataRequestPayload dataRequestPayload = new DataRequestPayload();
-        dataRequestPayload.setModelId(MODEL_ID);
+        ModelDataRequestPayload modelDataRequestPayload = new ModelDataRequestPayload();
+        modelDataRequestPayload.setModelId(MODEL_ID);
 
         List<RowMatcher> matchAnyList = new ArrayList<>();
         matchAnyList.add(new RowMatcher("trustyai.TIMESTAMP", "BETWEEN",
                 List.of(
                         new TextNode(timesToExtract.get(0).toString()),
                         new TextNode(timesToExtract.get(nToGet).toString()))));
-        dataRequestPayload.setMatchAny(matchAnyList);
+        modelDataRequestPayload.setMatchAny(matchAnyList);
 
         DataResponsePayload response = given()
                 .contentType(ContentType.JSON)
-                .body(dataRequestPayload)
+                .body(modelDataRequestPayload)
                 .when().post("/download")
                 .then().statusCode(RestResponse.StatusCode.OK)
                 .extract().body().as(DataResponsePayload.class);
@@ -321,19 +321,19 @@ class DataEndpointTest {
         List<Prediction> predsToExtract = datasource.get().getDataframe(MODEL_ID).asPredictions().subList(extractIdx, extractIdx + nToGet);
         List<LocalDateTime> timesToExtract = dataframe.getTimestamps().subList(extractIdx, extractIdx + nToGet + 1);
 
-        DataRequestPayload dataRequestPayload = new DataRequestPayload();
-        dataRequestPayload.setModelId(MODEL_ID);
+        ModelDataRequestPayload modelDataRequestPayload = new ModelDataRequestPayload();
+        modelDataRequestPayload.setModelId(MODEL_ID);
 
         List<RowMatcher> matchAnyList = new ArrayList<>();
         matchAnyList.add(new RowMatcher("trustyai.TIMESTAMP", "BETWEEN",
                 List.of(
                         new TextNode("not a timestamp"),
                         new TextNode("also not a timestamp"))));
-        dataRequestPayload.setMatchAny(matchAnyList);
+        modelDataRequestPayload.setMatchAny(matchAnyList);
 
         given()
                 .contentType(ContentType.JSON)
-                .body(dataRequestPayload)
+                .body(modelDataRequestPayload)
                 .when().post("/download")
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(containsString("is unparseable as an ISO_LOCAL_DATE_TIME"));
@@ -345,12 +345,12 @@ class DataEndpointTest {
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
-        DataRequestPayload dataRequestPayload = new DataRequestPayload();
-        dataRequestPayload.setModelId(MODEL_ID);
+        ModelDataRequestPayload modelDataRequestPayload = new ModelDataRequestPayload();
+        modelDataRequestPayload.setModelId(MODEL_ID);
 
         DataResponsePayload response = given()
                 .contentType(ContentType.JSON)
-                .body(dataRequestPayload)
+                .body(modelDataRequestPayload)
                 .when().post("/download")
                 .then().extract().body().as(DataResponsePayload.class);
         Dataframe df = Dataframe.createFrom(CSVUtils.parse(response.getDataCSV(), datasource.get().getMetadata(MODEL_ID), true));

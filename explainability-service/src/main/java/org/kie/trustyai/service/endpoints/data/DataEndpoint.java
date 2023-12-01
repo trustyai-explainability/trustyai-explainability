@@ -28,7 +28,7 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.utils.DownloadUtils;
 import org.kie.trustyai.service.data.utils.UploadUtils;
-import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
+import org.kie.trustyai.service.payloads.data.download.ModelDataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.DataResponsePayload;
 import org.kie.trustyai.service.payloads.data.download.MatchOperation;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
@@ -56,86 +56,17 @@ public class DataEndpoint {
     Instance<DataSource> dataSource;
 
     CSVParser csvParser = new CSVParser();
-
     public final static String TRUSTY_PREFIX = "trustyai.";
-
+    
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/download")
-    public Response download(@ValidDataDownloadRequest DataRequestPayload dataRequestPayload) {
-        String modelId = dataRequestPayload.getModelId();
-        Dataframe df = dataSource.get().getDataframe(modelId).copy();
+    public Response download(@ValidDataDownloadRequest ModelDataRequestPayload modelDataRequestPayload) {
+        String modelId = modelDataRequestPayload.getModelId();
+        Dataframe df = dataSource.get().getDataframe(modelId);
         Metadata metadata = dataSource.get().getMetadata(modelId);
-
-        for (RowMatcher rowMatcher : dataRequestPayload.getMatchAll()) {
-            if (rowMatcher.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
-                Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(TRUSTY_PREFIX, ""));
-                if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
-                    df = DownloadUtils.betweenMatcherInternal(df, rowMatcher, internalColumn, false);
-                } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
-                    df = DownloadUtils.equalsMatcherInternal(df, rowMatcher, internalColumn, false);
-                }
-            } else {
-                int columnIndex = df.getColumnNames().indexOf(rowMatcher.getColumnName());
-                DataType columnType = DownloadUtils.getDataType(metadata, rowMatcher);
-
-                // row match
-                if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
-                    df = DownloadUtils.betweenMatcher(df, rowMatcher, columnIndex, columnType, false);
-                } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
-                    df = DownloadUtils.equalsMatcher(df, rowMatcher, columnIndex, columnType, false);
-                }
-            }
-        }
-
-        for (RowMatcher rowMatcher : dataRequestPayload.getMatchNone()) {
-            if (rowMatcher.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
-                Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(TRUSTY_PREFIX, ""));
-                if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
-                    df = DownloadUtils.betweenMatcherInternal(df, rowMatcher, internalColumn, true);
-                } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
-                    df = DownloadUtils.equalsMatcherInternal(df, rowMatcher, internalColumn, true);
-                }
-            } else {
-                int columnIndex = df.getColumnNames().indexOf(rowMatcher.getColumnName());
-                DataType columnType = DownloadUtils.getDataType(metadata, rowMatcher);
-
-                // row match
-                if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
-                    df = DownloadUtils.betweenMatcher(df, rowMatcher, columnIndex, columnType, true);
-                } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
-                    df = DownloadUtils.equalsMatcher(df, rowMatcher, columnIndex, columnType, true);
-                }
-            }
-        }
-
-        Dataframe returnDF;
-        if (!dataRequestPayload.getMatchAny().isEmpty()) {
-            returnDF = df.filterByColumnValue(0, v -> false); //get null df
-            for (RowMatcher rowMatcher : dataRequestPayload.getMatchAny()) {
-                if (rowMatcher.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
-                    Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(TRUSTY_PREFIX, ""));
-                    if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
-                        returnDF.addPredictions(DownloadUtils.betweenMatcherInternal(df, rowMatcher, internalColumn, false).asPredictions());
-                    } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
-                        returnDF.addPredictions(DownloadUtils.equalsMatcherInternal(df, rowMatcher, internalColumn, false).asPredictions());
-                    }
-                } else {
-                    int columnIndex = df.getColumnNames().indexOf(rowMatcher.getColumnName());
-                    DataType columnType = DownloadUtils.getDataType(metadata, rowMatcher);
-
-                    // row match
-                    if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
-                        returnDF.addPredictions(DownloadUtils.betweenMatcher(df, rowMatcher, columnIndex, columnType, false).asPredictions());
-                    } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
-                        returnDF.addPredictions(DownloadUtils.equalsMatcher(df, rowMatcher, columnIndex, columnType, false).asPredictions());
-                    }
-                }
-            }
-        } else {
-            returnDF = df;
-        }
+        Dataframe returnDF = DownloadUtils.applyMatches(df, metadata, modelDataRequestPayload);
 
         DataResponsePayload dataResponsePayload = new DataResponsePayload();
         dataResponsePayload.setDataCSV(csvParser.convertToString(returnDF, true, true));
@@ -155,7 +86,6 @@ public class DataEndpoint {
 
         int nOutputs = inferenceDataframe.getOutputsCount();
         List<String> rowMismatchErrors = new ArrayList<>();
-        ;
 
         // check that uploaded inputs match recorded inputs and correlate ground truths if they do
         List<Prediction> groundTruthsToSave = new ArrayList<>();

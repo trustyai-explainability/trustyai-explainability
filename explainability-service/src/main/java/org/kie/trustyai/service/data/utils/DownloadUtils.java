@@ -1,11 +1,16 @@
 package org.kie.trustyai.service.data.utils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.endpoints.data.DataEndpoint;
+import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
+import org.kie.trustyai.service.payloads.data.download.MatchOperation;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.payloads.values.DataType;
 
@@ -133,5 +138,80 @@ public class DownloadUtils {
         } else {
             return df.filterByInternalColumnValue(internalColumn, value -> invert);
         }
+    }
+
+    public static Dataframe applyMatches(Dataframe sourceDf, Metadata metadata, DataRequestPayload requestPayload){
+        Dataframe df = sourceDf.copy();
+
+        for (RowMatcher rowMatcher : requestPayload.getMatchAll()) {
+            if (rowMatcher.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
+                Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(DataEndpoint.TRUSTY_PREFIX, ""));
+                if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
+                    df = DownloadUtils.betweenMatcherInternal(df, rowMatcher, internalColumn, false);
+                } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
+                    df = DownloadUtils.equalsMatcherInternal(df, rowMatcher, internalColumn, false);
+                }
+            } else {
+                int columnIndex = df.getColumnNames().indexOf(rowMatcher.getColumnName());
+                DataType columnType = DownloadUtils.getDataType(metadata, rowMatcher);
+
+                // row match
+                if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
+                    df = DownloadUtils.betweenMatcher(df, rowMatcher, columnIndex, columnType, false);
+                } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
+                    df = DownloadUtils.equalsMatcher(df, rowMatcher, columnIndex, columnType, false);
+                }
+            }
+        }
+
+        for (RowMatcher rowMatcher : requestPayload.getMatchNone()) {
+            if (rowMatcher.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
+                Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(DataEndpoint.TRUSTY_PREFIX, ""));
+                if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
+                    df = DownloadUtils.betweenMatcherInternal(df, rowMatcher, internalColumn, true);
+                } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
+                    df = DownloadUtils.equalsMatcherInternal(df, rowMatcher, internalColumn, true);
+                }
+            } else {
+                int columnIndex = df.getColumnNames().indexOf(rowMatcher.getColumnName());
+                DataType columnType = DownloadUtils.getDataType(metadata, rowMatcher);
+
+                // row match
+                if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
+                    df = DownloadUtils.betweenMatcher(df, rowMatcher, columnIndex, columnType, true);
+                } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
+                    df = DownloadUtils.equalsMatcher(df, rowMatcher, columnIndex, columnType, true);
+                }
+            }
+        }
+
+        Dataframe returnDF;
+        if (!requestPayload.getMatchAny().isEmpty()) {
+            returnDF = df.filterByColumnValue(0, v -> false); //get null df
+            for (RowMatcher rowMatcher : requestPayload.getMatchAny()) {
+                if (rowMatcher.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
+                    Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(DataEndpoint.TRUSTY_PREFIX, ""));
+                    if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
+                        returnDF.addPredictions(DownloadUtils.betweenMatcherInternal(df, rowMatcher, internalColumn, false).asPredictions());
+                    } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
+                        returnDF.addPredictions(DownloadUtils.equalsMatcherInternal(df, rowMatcher, internalColumn, false).asPredictions());
+                    }
+                } else {
+                    int columnIndex = df.getColumnNames().indexOf(rowMatcher.getColumnName());
+                    DataType columnType = DownloadUtils.getDataType(metadata, rowMatcher);
+
+                    // row match
+                    if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
+                        returnDF.addPredictions(DownloadUtils.betweenMatcher(df, rowMatcher, columnIndex, columnType, false).asPredictions());
+                    } else if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.EQUALS) {
+                        returnDF.addPredictions(DownloadUtils.equalsMatcher(df, rowMatcher, columnIndex, columnType, false).asPredictions());
+                    }
+                }
+            }
+        } else {
+            returnDF = df;
+        }
+
+        return returnDF;
     }
 }
