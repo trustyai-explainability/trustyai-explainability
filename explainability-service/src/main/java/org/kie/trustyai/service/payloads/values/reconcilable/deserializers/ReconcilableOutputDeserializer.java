@@ -1,6 +1,8 @@
 package org.kie.trustyai.service.payloads.values.reconcilable.deserializers;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.jboss.logging.Logger;
@@ -33,20 +35,35 @@ public class ReconcilableOutputDeserializer extends StdDeserializer<Reconcilable
         ReconcilableOutput rf;
         if (node.has("type")) {
             JsonNode value = node.get("value");
-            rf = new ReconcilableOutput((ValueNode) value);
+
+            if (value.isValueNode()) {
+                rf = new ReconcilableOutput((ValueNode) value);
+            } else {
+                List<ValueNode> valueNodes = new ArrayList<>();
+                for (JsonNode subNode : value) {
+                    valueNodes.add((ValueNode) subNode);
+                }
+                rf = new ReconcilableOutput(valueNodes);
+            }
 
             if (!node.get("type").asText().equals("null")) {
-                String type = node.get("type").asText();
-                TypedValue tv = new TypedValue();
-                tv.setValue(value);
-                tv.setType(Enum.valueOf(DataType.class, type));
-                rf.setReconciledType(Optional.of(tv));
+                List<TypedValue> tvs = new ArrayList<>();
+
+                // parse as list
+                for (ValueNode subNode : rf.getRawValueNodes()) {
+                    TypedValue tv = new TypedValue();
+                    tv.setValue(subNode);
+                    String type = node.get("type").asText();
+                    tv.setType(Enum.valueOf(DataType.class, type));
+                    tvs.add(tv);
+                }
+                rf.setReconciledType(Optional.of(tvs));
             } else {
                 rf.setReconciledType(Optional.empty());
             }
+            return rf;
         } else {
-            rf = new ReconcilableOutput((ValueNode) node);
+            throw new IllegalArgumentException("Passed JSON Node was not a ReconcilableFeature: no field found with name='type'");
         }
-        return rf;
     }
 }

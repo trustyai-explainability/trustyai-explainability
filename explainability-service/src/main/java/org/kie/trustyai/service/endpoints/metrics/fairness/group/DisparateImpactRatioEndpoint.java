@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -46,7 +47,8 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
     }
 
     @Override
-    public String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged, MetricValueCarrier metricValue) {
+    public String specificDefinitionFunction(String outcomeName, List<Value> favorableOutcomeAttr, String protectedAttribute, List<String> privileged, List<String> unprivileged,
+            MetricValueCarrier metricValue) {
         return FairnessDefinitions.defineGroupDisparateImpactRatio(
                 protectedAttribute,
                 privileged,
@@ -65,20 +67,20 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
         try {
             final int protectedIndex = dataframe.getColumnNames().indexOf(gmRequest.getProtectedAttribute());
 
-            final Value privilegedAttr = PayloadConverter.convertToValue(gmRequest.getPrivilegedAttribute().getReconciledType().get());
+            final List<Value> privilegedAttrs = PayloadConverter.convertToValues(gmRequest.getPrivilegedAttribute().getReconciledType().get());
 
             final Dataframe privileged = dataframe.filterByColumnValue(protectedIndex,
-                    value -> value.equals(privilegedAttr));
-            final Value unprivilegedAttr = PayloadConverter.convertToValue(gmRequest.getUnprivilegedAttribute().getReconciledType().get());
+                    value -> privilegedAttrs.stream().anyMatch(value::equals));
+            final List<Value> unprivilegedAttrs = PayloadConverter.convertToValues(gmRequest.getUnprivilegedAttribute().getReconciledType().get());
             final Dataframe unprivileged = dataframe.filterByColumnValue(protectedIndex,
-                    value -> value.equals(unprivilegedAttr));
-            final Value favorableOutcomeAttr = PayloadConverter.convertToValue(gmRequest.getFavorableOutcome().getReconciledType().get());
-            final Type favorableOutcomeAttrType = PayloadConverter.convertToType(gmRequest.getFavorableOutcome().getReconciledType().get().getType());
+                    value -> unprivilegedAttrs.stream().anyMatch(value::equals));
+            final List<Value> favorableOutcomeAttrs = PayloadConverter.convertToValues(gmRequest.getFavorableOutcome().getReconciledType().get());
+            final Type favorableOutcomeAttrType = PayloadConverter.convertToType(gmRequest.getFavorableOutcome().getReconciledType().get().get(0).getType());
             return new MetricValueCarrier(
                     DisparateImpactRatio.calculate(
                             privileged,
                             unprivileged,
-                            List.of(new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, favorableOutcomeAttr, 1.0))));
+                            favorableOutcomeAttrs.stream().map(v -> new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, v, 1.0)).collect(Collectors.toList())));
         } catch (Exception e) {
             throw new MetricCalculationException(e.getMessage(), e);
         }

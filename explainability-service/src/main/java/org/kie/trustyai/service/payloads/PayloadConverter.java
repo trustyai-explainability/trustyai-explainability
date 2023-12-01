@@ -1,5 +1,8 @@
 package org.kie.trustyai.service.payloads;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.payloads.values.DataType;
@@ -28,6 +31,10 @@ public class PayloadConverter {
         } else {
             return new Value(null);
         }
+    }
+
+    public static List<Value> convertToValues(List<TypedValue> nodes) {
+        return nodes.stream().map(PayloadConverter::convertToValue).collect(Collectors.toList());
     }
 
     public static boolean checkValueType(DataType type, ValueNode v) {

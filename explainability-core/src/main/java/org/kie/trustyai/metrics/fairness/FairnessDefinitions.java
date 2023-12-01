@@ -1,5 +1,8 @@
 package org.kie.trustyai.metrics.fairness;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Value;
 
@@ -24,8 +27,8 @@ public class FairnessDefinitions {
      * computed metric value
      */
     public static String defineGroupStatisticalParityDifference(
-            String protectedAttribute, String privileged, String unprivileged,
-            String outputName, Value favourableOutputValue, double metricValue) {
+            String protectedAttribute, List<String> privileged, List<String> unprivileged,
+            String outputName, List<Value> favourableOutputValue, double metricValue) {
         String specificExample = "The SPD of %f indicates that the likelihood of " +
                 "Group:%s=%s receiving Outcome:%s=%s ";
         if (metricValue > 0) {
@@ -39,7 +42,7 @@ public class FairnessDefinitions {
         return String.format(specificExample,
                 metricValue,
                 protectedAttribute, privileged.toString(),
-                outputName, favourableOutputValue.toString(),
+                outputName, favourableOutputValue.stream().map(Value::toString).collect(Collectors.toList()),
                 metricValue * 100,
                 protectedAttribute, unprivileged.toString());
     }
@@ -77,7 +80,8 @@ public class FairnessDefinitions {
                 "equal to 1 indicates a perfectly fair model for the groups and outcomes in question.";
     }
 
-    public static String defineGroupDisparateImpactRatio(String protectedAttribute, String privileged, String unprivileged, String outputName, Value favourableOutputValue, double metricValue) {
+    public static String defineGroupDisparateImpactRatio(String protectedAttribute, List<String> privileged, List<String> unprivileged, String outputName, List<Value> favourableOutputValue,
+            double metricValue) {
         String specificExample = "The DIR of %f indicates that the likelihood of Group:%s=%s receiving Outcome:%s=%s ";
         if (metricValue != 0) {
             specificExample += "is %f times that of Group:%s=%s.";
@@ -88,7 +92,7 @@ public class FairnessDefinitions {
         return String.format(specificExample,
                 metricValue,
                 protectedAttribute, privileged,
-                outputName, favourableOutputValue.toString(),
+                outputName, favourableOutputValue.stream().map(Value::toString).collect(Collectors.toList()),
                 metricValue,
                 protectedAttribute, unprivileged);
     }

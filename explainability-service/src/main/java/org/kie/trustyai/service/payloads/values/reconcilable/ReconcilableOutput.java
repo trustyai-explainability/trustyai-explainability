@@ -1,5 +1,7 @@
 package org.kie.trustyai.service.payloads.values.reconcilable;
 
+import java.util.List;
+
 import org.kie.trustyai.service.payloads.values.reconcilable.deserializers.ReconcilableOutputDeserializer;
 import org.kie.trustyai.service.payloads.values.reconcilable.serializers.ReconcilableFieldSerializer;
 
@@ -11,6 +13,10 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 @JsonSerialize(using = ReconcilableFieldSerializer.class)
 public class ReconcilableOutput extends ReconcilableField {
     public ReconcilableOutput(ValueNode rawValueNode) {
+        super(rawValueNode);
+    }
+
+    public ReconcilableOutput(List<ValueNode> rawValueNode) {
         super(rawValueNode);
     }
 }

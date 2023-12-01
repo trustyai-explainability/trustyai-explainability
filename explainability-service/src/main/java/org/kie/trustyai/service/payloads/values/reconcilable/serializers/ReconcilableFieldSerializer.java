@@ -25,12 +25,12 @@ public class ReconcilableFieldSerializer extends StdSerializer<ReconcilableField
     public void serialize(ReconcilableField value, JsonGenerator jgen, SerializerProvider serializerProvider) throws IOException {
         jgen.writeStartObject();
         if (value.getReconciledType().isPresent()) {
-            DataType dt = value.getReconciledType().get().getType();
+            DataType dt = value.getReconciledType().get().get(0).getType();
             jgen.writeStringField("type", dt.toString());
         } else {
             jgen.writeStringField("type", "null");
         }
-        jgen.writeObjectField("value", value.getRawValueNode());
+        jgen.writeObjectField("value", value.getRawValueNodes());
         jgen.writeEndObject();
 
     }

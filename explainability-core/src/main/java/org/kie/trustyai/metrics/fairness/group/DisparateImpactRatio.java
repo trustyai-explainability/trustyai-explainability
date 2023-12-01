@@ -15,17 +15,17 @@ public class DisparateImpactRatio {
      * @param groupSelector a predicate used to select the privileged group
      * @param samples a list of inputs to be used for testing fairness
      * @param model the model to be tested for fairness
-     * @param favorableOutput an output that is considered favorable / desirable
+     * @param favorableOutputs the outputs that are considered favorable / desirable
      * @return SPD, between 0 and 1
      * @throws ExecutionException if any error occurs during model prediction
      * @throws InterruptedException if timeout or other interruption issues occur during model prediction
      */
     public static double calculate(Predicate<PredictionInput> groupSelector, List<PredictionInput> samples,
-            PredictionProvider model, Output favorableOutput)
+            PredictionProvider model, List<Output> favorableOutputs)
             throws ExecutionException, InterruptedException {
 
-        double probabilityUnprivileged = FairnessMetricsUtils.getFavorableLabelProbability(groupSelector.negate(), samples, model, favorableOutput);
-        double probabilityPrivileged = FairnessMetricsUtils.getFavorableLabelProbability(groupSelector, samples, model, favorableOutput);
+        double probabilityUnprivileged = FairnessMetricsUtils.getFavorableLabelProbability(groupSelector.negate(), samples, model, favorableOutputs);
+        double probabilityPrivileged = FairnessMetricsUtils.getFavorableLabelProbability(groupSelector, samples, model, favorableOutputs);
 
         return probabilityUnprivileged / probabilityPrivileged;
     }
