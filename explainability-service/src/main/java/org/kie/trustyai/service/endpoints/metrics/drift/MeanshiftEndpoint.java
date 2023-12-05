@@ -8,8 +8,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
-import org.kie.trustyai.metrics.drift.meanshift.MeanshiftFitting;
 import org.kie.trustyai.metrics.drift.meanshift.MeanshiftResult;
+import org.kie.trustyai.metrics.utils.PerColumnStatistics;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
@@ -85,7 +85,7 @@ public class MeanshiftEndpoint extends DriftEndpoint<MeanshiftMetricRequest> {
         @ValidDriftMetricRequest
         MeanshiftMetricRequest request = (MeanshiftMetricRequest) bmRequest;
 
-        MeanshiftFitting msf;
+        PerColumnStatistics msf;
         if (request.getFitting() == null) {
             LOG.debug("Fitting a meanshift drift request for model=" + request.getModelId());
 
@@ -97,7 +97,7 @@ public class MeanshiftEndpoint extends DriftEndpoint<MeanshiftMetricRequest> {
             request.setFitting(msf.getFitStats());
         } else {
             LOG.debug("Using previously found meanshift fitting in request for model=" + request.getModelId());
-            msf = new MeanshiftFitting(request.getFitting());
+            msf = new PerColumnStatistics(request.getFitting());
         }
         Meanshift ms = new Meanshift(msf);
         LOG.debug("Cache miss. Calculating metric for " + request.getModelId());
