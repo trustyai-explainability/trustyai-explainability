@@ -8,7 +8,6 @@ import java.util.Optional;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.payloads.values.TypedValue;
-import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -29,7 +28,7 @@ public class ReconcilableOutputDeserializer extends StdDeserializer<Reconcilable
         super(vc);
     }
 
-    private ReconcilableOutput processNode(JsonNode value){
+    private ReconcilableOutput processNode(JsonNode value) {
         if (value.isValueNode()) {
             return new ReconcilableOutput((ValueNode) value);
         } else {

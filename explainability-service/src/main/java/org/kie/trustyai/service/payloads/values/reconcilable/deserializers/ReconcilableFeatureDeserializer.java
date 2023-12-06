@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ValueNode;
-import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 
 // deserializers ReconcilableFields; is the inverse of the ReconcilableFieldSerializer
 public class ReconcilableFeatureDeserializer extends StdDeserializer<ReconcilableFeature> {
@@ -29,7 +28,7 @@ public class ReconcilableFeatureDeserializer extends StdDeserializer<Reconcilabl
         super(vc);
     }
 
-    private ReconcilableFeature processNode(JsonNode value){
+    private ReconcilableFeature processNode(JsonNode value) {
         if (value.isValueNode()) {
             return new ReconcilableFeature((ValueNode) value);
         } else {
