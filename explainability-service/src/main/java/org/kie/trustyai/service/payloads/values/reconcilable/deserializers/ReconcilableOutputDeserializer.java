@@ -28,6 +28,21 @@ public class ReconcilableOutputDeserializer extends StdDeserializer<Reconcilable
         super(vc);
     }
 
+    private ReconcilableOutput processNode(JsonNode value) {
+        if (value.isValueNode()) {
+            return new ReconcilableOutput((ValueNode) value);
+        } else {
+            List<ValueNode> valueNodes = new ArrayList<>();
+            for (JsonNode subNode : value) {
+                valueNodes.add((ValueNode) subNode);
+            }
+            if (valueNodes.isEmpty()) {
+                throw new IllegalArgumentException("Passed list of output values cannot be empty.");
+            }
+            return new ReconcilableOutput(valueNodes);
+        }
+    }
+
     @Override
     public ReconcilableOutput deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode node = jp.getCodec().readTree(jp);
@@ -36,15 +51,7 @@ public class ReconcilableOutputDeserializer extends StdDeserializer<Reconcilable
         if (node.has("type")) {
             JsonNode value = node.get("value");
 
-            if (value.isValueNode()) {
-                rf = new ReconcilableOutput((ValueNode) value);
-            } else {
-                List<ValueNode> valueNodes = new ArrayList<>();
-                for (JsonNode subNode : value) {
-                    valueNodes.add((ValueNode) subNode);
-                }
-                rf = new ReconcilableOutput(valueNodes);
-            }
+            rf = processNode(value);
 
             if (!node.get("type").asText().equals("null")) {
                 List<TypedValue> tvs = new ArrayList<>();
@@ -63,7 +70,8 @@ public class ReconcilableOutputDeserializer extends StdDeserializer<Reconcilable
             }
             return rf;
         } else {
-            throw new IllegalArgumentException("Passed JSON Node was not a ReconcilableFeature: no field found with name='type'");
+            rf = processNode(node);
         }
+        return rf;
     }
 }

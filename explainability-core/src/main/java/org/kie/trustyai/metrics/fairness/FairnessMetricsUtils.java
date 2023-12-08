@@ -35,9 +35,12 @@ public class FairnessMetricsUtils {
 
     public static double getFavorableLabelProbability(Predicate<PredictionInput> groupSelector, List<PredictionInput> samples,
             PredictionProvider model, List<Output> favorableOutputs) throws ExecutionException, InterruptedException {
+        if (favorableOutputs.size() < 1) {
+            throw new IllegalArgumentException("At least one favorable output needs to be specified during fairness metric computation.");
+        }
+
         String outputName = favorableOutputs.get(0).getName();
         List<Value> outputValues = favorableOutputs.stream().map(Output::getValue).collect(Collectors.toList());
-
         List<PredictionOutput> selectedOutputs = getSelectedPredictionOutputs(groupSelector, samples, model);
 
         double numSelected = selectedOutputs.size();

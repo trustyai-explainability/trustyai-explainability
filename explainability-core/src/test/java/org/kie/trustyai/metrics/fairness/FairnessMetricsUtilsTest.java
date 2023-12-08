@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.explainability.metrics;
+package org.kie.trustyai.metrics.fairness;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -29,7 +29,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.models.TestModels;
-import org.kie.trustyai.metrics.fairness.FairnessDefinitions;
 import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
 import org.kie.trustyai.metrics.fairness.group.GroupAverageOddsDifference;
 import org.kie.trustyai.metrics.fairness.group.GroupAveragePredictiveValueDifference;

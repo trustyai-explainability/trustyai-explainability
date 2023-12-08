@@ -28,6 +28,21 @@ public class ReconcilableFeatureDeserializer extends StdDeserializer<Reconcilabl
         super(vc);
     }
 
+    private ReconcilableFeature processNode(JsonNode value) {
+        if (value.isValueNode()) {
+            return new ReconcilableFeature((ValueNode) value);
+        } else {
+            List<ValueNode> valueNodes = new ArrayList<>();
+            for (JsonNode subNode : value) {
+                valueNodes.add((ValueNode) subNode);
+            }
+            if (valueNodes.isEmpty()) {
+                throw new IllegalArgumentException("Passed list of feature values cannot be empty.");
+            }
+            return new ReconcilableFeature(valueNodes);
+        }
+    }
+
     @Override
     public ReconcilableFeature deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         JsonNode node = jp.getCodec().readTree(jp);
@@ -36,15 +51,7 @@ public class ReconcilableFeatureDeserializer extends StdDeserializer<Reconcilabl
         if (node.has("type")) {
             JsonNode value = node.get("value");
 
-            if (value.isValueNode()) {
-                rf = new ReconcilableFeature((ValueNode) value);
-            } else {
-                List<ValueNode> valueNodes = new ArrayList<>();
-                for (JsonNode subNode : value) {
-                    valueNodes.add((ValueNode) subNode);
-                }
-                rf = new ReconcilableFeature(valueNodes);
-            }
+            rf = processNode(value);
 
             if (!node.get("type").asText().equals("null")) {
                 List<TypedValue> tvs = new ArrayList<>();
@@ -61,10 +68,9 @@ public class ReconcilableFeatureDeserializer extends StdDeserializer<Reconcilabl
             } else {
                 rf.setReconciledType(Optional.empty());
             }
-            return rf;
         } else {
-            throw new IllegalArgumentException("Passed JSON Node was not a ReconcilableFeature: no field found with name='type'");
+            rf = processNode(node);
         }
-
+        return rf;
     }
 }
