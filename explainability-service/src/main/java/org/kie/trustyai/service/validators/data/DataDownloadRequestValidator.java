@@ -138,9 +138,9 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
         boolean outcome = true;
         for (ValueNode vn : rowMatch.getValues()) {
             if (feature) {
-                outcome = GenericValidationUtils.validateFeatureColumnType(context, metadata, modelId, rowMatch.getColumnName(), vn) && outcome;
+                outcome = GenericValidationUtils.validateFeatureColumnType(context, metadata, modelId, rowMatch.getColumnName(), List.of(vn)) && outcome;
             } else {
-                outcome = GenericValidationUtils.validateOutputColumnType(context, metadata, modelId, rowMatch.getColumnName(), vn) && outcome;
+                outcome = GenericValidationUtils.validateOutputColumnType(context, metadata, modelId, rowMatch.getColumnName(), List.of(vn)) && outcome;
             }
         }
         return outcome;

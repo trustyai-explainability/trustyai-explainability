@@ -1,6 +1,8 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
@@ -33,7 +35,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
 
     public abstract MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue);
 
-    public abstract String specificDefinitionFunction(String outcomeName, Value favorableOutcomeAttr, String protectedAttribute, String privileged, String unprivileged,
+    public abstract String specificDefinitionFunction(String outcomeName, List<Value> favorableOutcomeAttr, String protectedAttribute, List<String> privileged, List<String> unprivileged,
             MetricValueCarrier metricvalue);
 
     public abstract String getGeneralDefinition();
@@ -41,12 +43,18 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     public String getSpecificDefinition(MetricValueCarrier metricValue, @ValidReconciledMetricRequest GroupMetricRequest request) {
         final String outcomeName = request.getOutcomeName();
 
-        PayloadConverter.convertToValue(request.getFavorableOutcome().getReconciledType().get());
-        final Value favorableOutcomeAttr = PayloadConverter.convertToValue(request.getFavorableOutcome().getReconciledType().get());
+        final List<Value> favorableOutcomeAttrs = PayloadConverter.convertToValues(request.getFavorableOutcome().getReconciledType().get());
         final String protectedAttribute = request.getProtectedAttribute();
-        final String privileged = PayloadConverter.convertToValue(request.getPrivilegedAttribute().getReconciledType().get()).toString();
-        final String unprivileged = PayloadConverter.convertToValue(request.getUnprivilegedAttribute().getReconciledType().get()).toString();
-        return specificDefinitionFunction(outcomeName, favorableOutcomeAttr, protectedAttribute, privileged, unprivileged, metricValue);
+
+        final List<String> privilegeds = request.getPrivilegedAttribute().getReconciledType().get().stream()
+                .map(PayloadConverter::convertToValue)
+                .map(Value::toString)
+                .collect(Collectors.toList());
+        final List<String> unprivilegeds = request.getUnprivilegedAttribute().getReconciledType().get().stream()
+                .map(PayloadConverter::convertToValue)
+                .map(Value::toString)
+                .collect(Collectors.toList());
+        return specificDefinitionFunction(outcomeName, favorableOutcomeAttrs, protectedAttribute, privilegeds, unprivilegeds, metricValue);
     };
 
     @POST

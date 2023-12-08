@@ -21,11 +21,11 @@ public class GroupStatisticalParityDifference {
      * @throws InterruptedException if timeout or other interruption issues occur during model prediction
      */
     public static double calculate(Predicate<PredictionInput> groupSelector, List<PredictionInput> samples,
-            PredictionProvider model, Output favorableOutput)
+            PredictionProvider model, List<Output> favorableOutputs)
             throws ExecutionException, InterruptedException {
 
-        double probabilityUnprivileged = FairnessMetricsUtils.getFavorableLabelProbability(groupSelector.negate(), samples, model, favorableOutput);
-        double probabilityPrivileged = FairnessMetricsUtils.getFavorableLabelProbability(groupSelector, samples, model, favorableOutput);
+        double probabilityUnprivileged = FairnessMetricsUtils.getFavorableLabelProbability(groupSelector.negate(), samples, model, favorableOutputs);
+        double probabilityPrivileged = FairnessMetricsUtils.getFavorableLabelProbability(groupSelector, samples, model, favorableOutputs);
 
         return probabilityUnprivileged - probabilityPrivileged;
     }

@@ -46,13 +46,13 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
             result = validOutputName && validAttributeName;
 
             if (validOutputName) {
-                result = GenericValidationUtils.validateOutputColumnType(context, metadata, modelId, outcomeName, request.getFavorableOutcome().getRawValueNode()) && result;
+                result = GenericValidationUtils.validateOutputColumnType(context, metadata, modelId, outcomeName, request.getFavorableOutcome().getRawValueNodes()) && result;
             }
 
             if (validAttributeName) {
-                result = GenericValidationUtils.validateFeatureColumnType(context, metadata, modelId, protectedAttribute, request.getPrivilegedAttribute().getRawValueNode(), "privileged attribute")
+                result = GenericValidationUtils.validateFeatureColumnType(context, metadata, modelId, protectedAttribute, request.getPrivilegedAttribute().getRawValueNodes(), "privileged attribute")
                         && result;
-                result = GenericValidationUtils.validateFeatureColumnType(context, metadata, modelId, protectedAttribute, request.getUnprivilegedAttribute().getRawValueNode(),
+                result = GenericValidationUtils.validateFeatureColumnType(context, metadata, modelId, protectedAttribute, request.getUnprivilegedAttribute().getRawValueNodes(),
                         "unprivileged attribute") && result;
             }
             if (Objects.nonNull(request.getBatchSize()) && request.getBatchSize() <= 0) {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.metrics.explainability;
+package org.kie.trustyai.metrics.fairness;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -29,7 +29,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.models.TestModels;
-import org.kie.trustyai.metrics.fairness.FairnessDefinitions;
 import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
 import org.kie.trustyai.metrics.fairness.group.GroupAverageOddsDifference;
 import org.kie.trustyai.metrics.fairness.group.GroupAveragePredictiveValueDifference;
@@ -107,7 +106,7 @@ class FairnessMetricsUtilsTest {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double spd = GroupStatisticalParityDifference.calculate(selector, testInputs, model, output);
+        double spd = GroupStatisticalParityDifference.calculate(selector, testInputs, model, List.of(output));
         assertThat(spd).isBetween(0.1, 0.2);
     }
 
@@ -117,7 +116,7 @@ class FairnessMetricsUtilsTest {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double spd = GroupStatisticalParityDifference.calculate(selector, testInputs, model, output);
+        double spd = GroupStatisticalParityDifference.calculate(selector, testInputs, model, List.of(output));
         String generalDefinition = FairnessDefinitions.defineGroupStatisticalParityDifference();
         String specificDefinition = FairnessDefinitions.defineGroupStatisticalParityDifference(output, spd);
 
@@ -125,8 +124,8 @@ class FairnessMetricsUtilsTest {
         assertTrue(specificDefinition.contains("higher than that of the unselected group"));
 
         String specificNamedDefinition = FairnessDefinitions.defineGroupStatisticalParityDifference("text-contains",
-                "please", "not-please", "spam", new Value(false), spd);
-        assertTrue(specificNamedDefinition.contains("higher than that of Group:text-contains=not-please"));
+                List.of("please"), List.of("not-please"), "spam", List.of(new Value(false)), spd);
+        assertTrue(specificNamedDefinition.contains("higher than that of Group:text-contains=[not-please]"));
     }
 
     @Test
@@ -152,7 +151,7 @@ class FairnessMetricsUtilsTest {
         PredictionProvider model = TestModels.getDummyTextClassifier();
         Predicate<PredictionInput> selector = predictionInput -> DataUtils.textify(predictionInput).contains("please");
         Output output = new Output("spam", Type.BOOLEAN, new Value(false), 1.0);
-        double dir = DisparateImpactRatio.calculate(selector, testInputs, model, output);
+        double dir = DisparateImpactRatio.calculate(selector, testInputs, model, List.of(output));
         assertThat(dir).isPositive();
     }
 
@@ -194,8 +193,8 @@ class FairnessMetricsUtilsTest {
         assertTrue(specificDefinition.contains("times that of the unselected group"));
 
         String specificNamedDefinition = FairnessDefinitions.defineGroupDisparateImpactRatio("text-contains",
-                "please", "not-please", "spam", new Value(false), dir);
-        assertTrue(specificNamedDefinition.contains("times that of Group:text-contains=not-please"));
+                List.of("please"), List.of("not-please"), "spam", List.of(new Value(false)), dir);
+        assertTrue(specificNamedDefinition.contains("times that of Group:text-contains=[not-please]"));
     }
 
     @Test
