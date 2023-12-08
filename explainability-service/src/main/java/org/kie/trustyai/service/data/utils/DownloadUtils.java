@@ -1,9 +1,7 @@
 package org.kie.trustyai.service.data.utils;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -140,7 +138,7 @@ public class DownloadUtils {
         }
     }
 
-    public static Dataframe applyMatches(Dataframe sourceDf, Metadata metadata, DataRequestPayload requestPayload){
+    public static Dataframe applyMatches(Dataframe sourceDf, Metadata metadata, DataRequestPayload requestPayload) {
         Dataframe df = sourceDf.copy();
 
         for (RowMatcher rowMatcher : requestPayload.getMatchAll()) {

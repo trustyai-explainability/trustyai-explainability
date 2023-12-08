@@ -28,12 +28,9 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.utils.DownloadUtils;
 import org.kie.trustyai.service.data.utils.UploadUtils;
-import org.kie.trustyai.service.payloads.data.download.ModelDataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.DataResponsePayload;
-import org.kie.trustyai.service.payloads.data.download.MatchOperation;
-import org.kie.trustyai.service.payloads.data.download.RowMatcher;
+import org.kie.trustyai.service.payloads.data.download.ModelDataRequestPayload;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferJointPayload;
-import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.validators.data.ValidDataDownloadRequest;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 
@@ -57,7 +54,7 @@ public class DataEndpoint {
 
     CSVParser csvParser = new CSVParser();
     public final static String TRUSTY_PREFIX = "trustyai.";
-    
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

@@ -12,8 +12,8 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.endpoints.data.DataEndpoint;
-import org.kie.trustyai.service.payloads.data.download.ModelDataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.MatchOperation;
+import org.kie.trustyai.service.payloads.data.download.ModelDataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 
@@ -146,7 +146,7 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
         return outcome;
     }
 
-    public static boolean manualValidation(ModelDataRequestPayload modelDataRequestPayload, ConstraintValidatorContext context, Instance<DataSource> dataSource){
+    public static boolean manualValidation(ModelDataRequestPayload modelDataRequestPayload, ConstraintValidatorContext context, Instance<DataSource> dataSource) {
         context.disableDefaultConstraintViolation();
         final String modelId = modelDataRequestPayload.getModelId();
 

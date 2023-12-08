@@ -45,13 +45,13 @@ public class RowMatcher {
     @Override
     public String toString() {
         if (operation.equals("EQUALS")) {
-            if (values.size()==1) {
+            if (values.size() == 1) {
                 return "{" + columnName + " " + operation + " " + values.get(0) + "}";
             } else {
                 return "{" + columnName + " " + operation + " one of " + values + "}";
             }
         } else {
-            return "{"+columnName + " " + operation + " " + values.get(0) + " and " + values.get(1)+"}";
+            return "{" + columnName + " " + operation + " " + values.get(0) + " and " + values.get(1) + "}";
         }
     }
 }

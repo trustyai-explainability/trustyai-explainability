@@ -35,14 +35,14 @@ public class DataRequestPayload {
     public String prettyPrint() {
         List<String> builder = new ArrayList<>();
 
-        if (!matchAll.isEmpty()){
-            builder.add("ALL of: " +matchAll);
+        if (!matchAll.isEmpty()) {
+            builder.add("ALL of: " + matchAll);
         }
-        if (!matchAny.isEmpty()){
-            builder.add("ANY of: "+matchAny);
+        if (!matchAny.isEmpty()) {
+            builder.add("ANY of: " + matchAny);
         }
-        if (!matchNone.isEmpty()){
-            builder.add("NONE of: "+matchNone);
+        if (!matchNone.isEmpty()) {
+            builder.add("NONE of: " + matchNone);
         }
         return String.join(", ", builder);
     }

@@ -77,7 +77,7 @@ public class RequestPayloadGenerator {
         return request;
     }
 
-    public static AdvancedGroupMetricRequest advancedCorrect(){
+    public static AdvancedGroupMetricRequest advancedCorrect() {
         DataRequestPayload privileged = new DataRequestPayload();
         List<RowMatcher> matchAllList = new ArrayList<>();
         matchAllList.add(new RowMatcher("gender", "EQUALS", List.of(new IntNode(0))));
@@ -104,7 +104,6 @@ public class RequestPayloadGenerator {
         matchAnyList.add(new RowMatcher("age", "BETWEEN", List.of(new IntNode(70), new IntNode(100))));
         unprivileged.setMatchAny(matchAnyList);
 
-
         DataRequestPayload favorable = new DataRequestPayload();
         matchAllList = new ArrayList<>();
         matchAllList.add(new RowMatcher("income", "EQUALS", List.of(new IntNode(1))));
@@ -118,7 +117,6 @@ public class RequestPayloadGenerator {
         return request;
 
     }
-
 
     public static GroupMetricRequest named(String name) {
         GroupMetricRequest request = new GroupMetricRequest();

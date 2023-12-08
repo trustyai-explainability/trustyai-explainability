@@ -123,7 +123,7 @@ public class FairnessDefinitions {
     }
 
     public static String defineGroupDisparateImpactRatio(String privilegedSelector, String unprivilegedSelector, String favorableSelector,
-                                                          double metricValue) {
+            double metricValue) {
         String specificExample = "The DIR of %f indicates that the likelihood of the group matching %s receiving an outcome matching %s ";
         if (metricValue != 0) {
             specificExample += "is %f times that of the group matching %s.";

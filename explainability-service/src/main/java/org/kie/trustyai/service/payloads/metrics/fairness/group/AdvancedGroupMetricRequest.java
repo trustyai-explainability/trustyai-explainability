@@ -1,17 +1,15 @@
 package org.kie.trustyai.service.payloads.metrics.fairness.group;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
-import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
-import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
-import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilerMatcher;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 @JsonTypeInfo(
