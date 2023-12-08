@@ -14,7 +14,7 @@ modified, such other license.
 
 ## Issues
 
-TrustyAI-explainability uses [JIRA to manage and report issues](https://issues.redhat.com/projects/FAI/).
+TrustyAI-explainability uses [GitHub to manage and report issues](https://github.com/trustyai-explainability/trustyai-explainability/issues).
 
 If you believe you found a bug, please indicate a way to reproduce it, what you are seeing and what you would expect to see. 
 Don't forget to indicate your TrustyAI-explainability, Java, Maven, Quarkus/Spring, GraalVM version.
@@ -30,15 +30,16 @@ To contribute, use GitHub Pull Requests, from your **own** fork.
 
 - PRs should be always related to an open JIRA issue. If there is none, you should create one.
 - Try to fix only one issue per PR.
-- Make sure to create a new branch. Usually branches are named after the JIRA ticket they are addressing. E.g. for ticket "FAI-XYZ An example issue" your branch should be at least prefixed with `FAI-XYZ`. E.g.:
+- Make sure to create a new branch. Usually branches are named after the ticket they are addressing. 
+  _e.g._ for ticket #XYZ your branch should be at least prefixed with `issue-XYZ`. E.g.:
 
-        git checkout -b FAI-XYZ
+        git checkout -b issue-XYZ
         # or
-        git checkout -b FAI-XYZ-my-fix
+        git checkout -b issue-XYZ-my-fix
 
-- When you submit your PR, make sure to include the ticket ID, and its title; e.g., "FAI-XYZ An example issue".
+- When you submit your PR, make sure to include the ticket ID in the body (e.g. "Addressed #XYZ") or by linking it directly.
 - The description of your PR should describe the code you wrote. The issue that is solved should be at least described properly in the corresponding JIRA ticket.
-- If your contribution spans across multiple repositories, use the same branch name (e.g. `FAI-XYZ`).
+- If your contribution spans across multiple repositories, use the same branch name (e.g. `issue-XYZ`).
 - If your contribution spans across multiple repositories, make sure to list all the related PRs.
 
 ### Java Coding Guidelines
@@ -50,7 +51,8 @@ Copyright headers format is enforced during build time. In order to automaticall
 mvn com.mycila:license-maven-plugin:format
 ```
 
-We follow [Kogito project's codestyle](https://github.com/kiegroup/kogito-runtimes/tree/main/kogito-build/kogito-ide-config), so please make sure you have configured your IDE accordingly.
+The [project's codestyle IDE setup is available here](/config).
+Please make sure you have configured your IDE accordingly.
 
 ### Requirements for Dependencies
 

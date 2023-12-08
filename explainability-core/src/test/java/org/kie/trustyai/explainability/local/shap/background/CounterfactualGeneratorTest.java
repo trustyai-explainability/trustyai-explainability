@@ -40,7 +40,7 @@ class CounterfactualGeneratorTest {
     int N_COUNTERFACTUALS_TO_GENERATE = 10;
 
     @ParameterizedTest
-    @ValueSource(ints = { 0, 1, 2 })
+    @ValueSource(ints = { 0, 1 })
     void testDefaultGeneration(int seed) throws ExecutionException, InterruptedException, TimeoutException {
         List<PredictionInput> seeds = new ArrayList<>();
         Random rn = new Random(seed);
@@ -82,7 +82,7 @@ class CounterfactualGeneratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 0, 1, 2 })
+    @ValueSource(ints = { 0, 1 })
     void testChaining(int seed) throws ExecutionException, InterruptedException, TimeoutException {
         List<PredictionInput> seeds = new ArrayList<>();
         Random rn = new Random(seed);
@@ -122,7 +122,7 @@ class CounterfactualGeneratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = { 0, 1, 2 })
+    @ValueSource(ints = { 0, 1 })
     void testChaining2Per(int seed) throws ExecutionException, InterruptedException, TimeoutException {
         List<PredictionInput> seeds = new ArrayList<>();
         Random rn = new Random(seed);

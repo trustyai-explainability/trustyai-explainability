@@ -1,13 +1,13 @@
-package org.kie.trustyai.metrics.drift.meanshift;
+package org.kie.trustyai.metrics.utils;
 
 import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 
-public class MeanshiftFitting {
+public class PerColumnStatistics {
     java.util.Map<String, StatisticalSummaryValues> fitStats;
 
-    public MeanshiftFitting(Map<String, StatisticalSummaryValues> fitStats) {
+    public PerColumnStatistics(Map<String, StatisticalSummaryValues> fitStats) {
         this.fitStats = fitStats;
     }
 
@@ -17,7 +17,7 @@ public class MeanshiftFitting {
 
     @Override
     public String toString() {
-        return "MeanshiftFitting{" +
+        return "PerColumnStatistics{" +
                 "fitStats=" + fitStats +
                 '}';
     }

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
-import org.kie.trustyai.metrics.drift.meanshift.MeanshiftFitting;
+import org.kie.trustyai.metrics.utils.PerColumnStatistics;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
@@ -87,7 +87,7 @@ class MeanshiftEndpointTest {
     @Test
     void meanshiftPreFit() {
         Dataframe dfTrain = datasource.get().getDataframe(MODEL_ID).filterRowsByTagEquals(TRAINING_TAG);
-        MeanshiftFitting msf = Meanshift.precompute(dfTrain);
+        PerColumnStatistics msf = Meanshift.precompute(dfTrain);
 
         MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
         payload.setReferenceTag(TRAINING_TAG);
