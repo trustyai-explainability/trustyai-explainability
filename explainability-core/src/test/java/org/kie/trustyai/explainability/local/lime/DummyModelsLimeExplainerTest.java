@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class DummyModelsLimeExplainerTest {
+    int METRIC_CHUNK_SIZE = 3;
 
     @ParameterizedTest
     @ValueSource(longs = { 0 })
@@ -74,7 +75,7 @@ class DummyModelsLimeExplainerTest {
         }
         DataDistribution distribution = new PredictionInputsDataDistribution(inputs);
         int k = 2;
-        int chunkSize = 10;
+        int chunkSize = METRIC_CHUNK_SIZE;
         String decision = "feature-" + idx;
         double precision =
                 ExplainabilityMetrics.getLocalSaliencyPrecision(decision, model, limeExplainer, distribution, k, chunkSize);
@@ -126,7 +127,7 @@ class DummyModelsLimeExplainerTest {
         }
         DataDistribution distribution = new PredictionInputsDataDistribution(inputs);
         int k = 2;
-        int chunkSize = 10;
+        int chunkSize = METRIC_CHUNK_SIZE;
         String decision = "sum-but" + idx;
         double precision =
                 ExplainabilityMetrics.getLocalSaliencyPrecision(decision, model, limeExplainer, distribution, k, chunkSize);
@@ -178,7 +179,7 @@ class DummyModelsLimeExplainerTest {
         }
         DataDistribution distribution = new PredictionInputsDataDistribution(inputs);
         int k = 2;
-        int chunkSize = 10;
+        int chunkSize = METRIC_CHUNK_SIZE;
         String decision = "linear-sum-above-thresh";
         double precision =
                 ExplainabilityMetrics.getLocalSaliencyPrecision(decision, model, limeExplainer, distribution, k, chunkSize);
@@ -232,7 +233,7 @@ class DummyModelsLimeExplainerTest {
         }
         DataDistribution distribution = new PredictionInputsDataDistribution(inputs);
         int k = 2;
-        int chunkSize = 10;
+        int chunkSize = 1;
         String decision = "spam";
         double precision =
                 ExplainabilityMetrics.getLocalSaliencyPrecision(decision, model, limeExplainer, distribution, k, chunkSize);
@@ -284,7 +285,7 @@ class DummyModelsLimeExplainerTest {
         }
         DataDistribution distribution = new PredictionInputsDataDistribution(inputs);
         int k = 2;
-        int chunkSize = 10;
+        int chunkSize = 1;
         String decision = "linear-sum-above-thresh";
         try {
             double precision =
@@ -339,7 +340,7 @@ class DummyModelsLimeExplainerTest {
         }
         DataDistribution distribution = new PredictionInputsDataDistribution(inputs);
         int k = 2;
-        int chunkSize = 10;
+        int chunkSize = METRIC_CHUNK_SIZE;
         String decision = "class";
         double precision =
                 ExplainabilityMetrics.getLocalSaliencyPrecision(decision, model, limeExplainer, distribution, k, chunkSize);
