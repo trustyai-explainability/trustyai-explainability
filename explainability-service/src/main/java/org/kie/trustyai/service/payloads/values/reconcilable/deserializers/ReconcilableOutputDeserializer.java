@@ -36,6 +36,9 @@ public class ReconcilableOutputDeserializer extends StdDeserializer<Reconcilable
             for (JsonNode subNode : value) {
                 valueNodes.add((ValueNode) subNode);
             }
+            if (valueNodes.isEmpty()) {
+                throw new IllegalArgumentException("Passed list of output values cannot be empty.");
+            }
             return new ReconcilableOutput(valueNodes);
         }
     }

@@ -36,6 +36,9 @@ public class ReconcilableFeatureDeserializer extends StdDeserializer<Reconcilabl
             for (JsonNode subNode : value) {
                 valueNodes.add((ValueNode) subNode);
             }
+            if (valueNodes.isEmpty()) {
+                throw new IllegalArgumentException("Passed list of feature values cannot be empty.");
+            }
             return new ReconcilableFeature(valueNodes);
         }
     }
