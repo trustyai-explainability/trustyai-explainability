@@ -16,7 +16,7 @@
 package org.kie.trustyai.explainability.local.counterfactual;
 
 import java.util.UUID;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Function;
 
@@ -27,11 +27,12 @@ import org.optaplanner.core.config.solver.SolverManagerConfig;
 /**
  * Counterfactual explainer configuration parameters.
  */
+
 public class CounterfactualConfig {
 
     private static final double DEFAULT_GOAL_THRESHOLD = 0.01;
 
-    private Executor executor = ForkJoinPool.commonPool();
+    private ExecutorService executor = ForkJoinPool.commonPool();;
     private SolverConfig solverConfig = SolverConfigBuilder.builder().build();
     private double goalThreshold = DEFAULT_GOAL_THRESHOLD;
     private Function<SolverConfig, SolverManager<CounterfactualSolution, UUID>> solverManagerFactory =
@@ -47,11 +48,11 @@ public class CounterfactualConfig {
         return this;
     }
 
-    public Executor getExecutor() {
+    public ExecutorService getExecutor() {
         return executor;
     }
 
-    public CounterfactualConfig withExecutor(Executor executor) {
+    public CounterfactualConfig withExecutor(ExecutorService executor) {
         this.executor = executor;
         return this;
     }
