@@ -16,14 +16,12 @@
 
 package org.kie.trustyai.explainability.local.shap.background;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.ThreadDumpOnTimeoutExtension;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionInput;
@@ -34,14 +32,26 @@ import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(ThreadDumpOnTimeoutExtension.class)
 class CounterfactualGeneratorTest {
     int N_COUNTERFACTUALS_TO_GENERATE = 10;
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 1 })
+    @Timeout(value = 2, unit = TimeUnit.MINUTES, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     void testDefaultGeneration(int seed) throws ExecutionException, InterruptedException, TimeoutException {
+
+        System.out.println("Print something BEFORE seeding #####");
+
         List<PredictionInput> seeds = new ArrayList<>();
         Random rn = new Random(seed);
 
@@ -57,6 +67,8 @@ class CounterfactualGeneratorTest {
             }
             seeds.add(new PredictionInput(features));
         }
+
+        System.out.println("Print something AFTER seeding #####");
 
         // given some arbitrary linear model
         PredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
@@ -74,11 +86,17 @@ class CounterfactualGeneratorTest {
                 .generate(seeds, goal, N_COUNTERFACTUALS_TO_GENERATE);
         assertEquals(N_COUNTERFACTUALS_TO_GENERATE, background.size());
 
-        List<PredictionOutput> fnull = model.predictAsync(background).get();
+        System.out.println("Print something AFTER background #####");
+
+        List<PredictionOutput> fnull = model.predictAsync(background).get(Config.DEFAULT_ASYNC_TIMEOUT + 5, Config.DEFAULT_ASYNC_TIMEUNIT);
+
+        System.out.println("Print something AFTER predict #####");
+
         // make sure the fnull is within the default goal of .01
         for (PredictionOutput output : fnull) {
             assertEquals(0., output.getOutputs().get(0).getValue().asNumber(), .05);
         }
+
     }
 
     @ParameterizedTest
@@ -149,7 +167,7 @@ class CounterfactualGeneratorTest {
         }
         List<PredictionInput> background = CounterfactualGenerator.builder()
                 .withModel(model)
-                .withTimeoutSeconds(5)
+                .withTimeoutSeconds(10)
                 .withStepCount(30_000L)
                 .withGoalThreshold(0.01)
                 .withRandom(rn)

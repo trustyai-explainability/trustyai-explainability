@@ -23,6 +23,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -33,9 +34,12 @@ import java.util.stream.Stream;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.ThreadDumpOnTimeoutExtension;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CategoricalNumericalEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
@@ -87,6 +91,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(ThreadDumpOnTimeoutExtension.class)
 class CounterfactualExplainerTest {
 
     private static final Logger logger =
@@ -146,9 +151,15 @@ class CounterfactualExplainerTest {
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2 })
+    @Timeout(value = 2, unit = TimeUnit.MINUTES, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
     void testCounterfactualMatch(int seed) throws ExecutionException, InterruptedException, TimeoutException {
+
+        System.out.println("Print something BEFORE seeding #####");
+
         Random random = new Random();
         random.setSeed(seed);
+
+        System.out.println("Print something AFTER seeding #####");
 
         final List<Output> goal = List.of(new Output("inside", Type.BOOLEAN, new Value(true), 0.0d));
         List<Feature> features = new LinkedList<>();
