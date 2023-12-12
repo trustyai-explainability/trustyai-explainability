@@ -15,19 +15,30 @@
  */
 package org.kie.trustyai.explainability.utils;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.ThreadDumpOnTimeoutExtension;
+import org.kie.trustyai.explainability.local.lime.LimeConfig;
+import org.kie.trustyai.explainability.local.lime.LimeExplainer;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureFactory;
+import org.kie.trustyai.explainability.model.PerturbationContext;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.utils.models.TestModels;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.Config;
-import org.kie.trustyai.explainability.local.lime.LimeConfig;
-import org.kie.trustyai.explainability.local.lime.LimeExplainer;
-import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.explainability.utils.models.TestModels;
-
+@ExtendWith(ThreadDumpOnTimeoutExtension.class)
 class ValidationUtilsTest {
 
     @Test
@@ -43,7 +54,8 @@ class ValidationUtilsTest {
                 features.add(FeatureFactory.newNumericalFeature("f-" + i, Type.NUMBER.randomValue(perturbationContext).asNumber()));
             }
             PredictionInput input = new PredictionInput(features);
-            List<PredictionOutput> outputs = model.predictAsync(List.of(input)).get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT);
+            // increase a little bit since GHA might need a few more seconds
+            List<PredictionOutput> outputs = model.predictAsync(List.of(input)).get(Config.DEFAULT_ASYNC_TIMEOUT + 5, Config.DEFAULT_ASYNC_TIMEUNIT);
             Prediction prediction = new SimplePrediction(input, outputs.get(0));
             int topK = 1;
             double posScore = 0.6;
