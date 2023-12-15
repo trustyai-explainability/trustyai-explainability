@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.kie.trustyai.metrics.language.AbstractNLPPerformanceMetric;
 import org.kie.trustyai.metrics.language.bleu.BLEU;
-import org.kie.trustyai.metrics.language.wer.WordErrorRate;
+import org.kie.trustyai.metrics.language.levenshtein.WordErrorRate;
 
 import opennlp.tools.tokenize.Tokenizer;
 
@@ -39,7 +39,7 @@ public class FuzzyMatch extends AbstractNLPPerformanceMetric<Boolean, String> {
      * @return WordErrorRate(reference, input) < threshold
      */
     public boolean calculateWER(String reference, String input, double threshold) {
-        return new WordErrorRate(this.getTokenizer()).calculate(reference, input).getWordErrorRate() < threshold;
+        return new WordErrorRate(this.getTokenizer()).calculate(reference, input).getValue() < threshold;
     }
 
     /**
