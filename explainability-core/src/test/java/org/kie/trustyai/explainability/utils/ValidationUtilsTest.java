@@ -24,17 +24,13 @@ import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.TestConfig;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 
 class ValidationUtilsTest {
-
-    @BeforeEach
-    void setUp() {
-        Config.INSTANCE.setAsyncTimeout(10);
-    }
 
     @Test
     void testStableEval() throws ExecutionException, InterruptedException, TimeoutException, ValidationUtils.ValidationException {
@@ -49,7 +45,7 @@ class ValidationUtilsTest {
                 features.add(FeatureFactory.newNumericalFeature("f-" + i, Type.NUMBER.randomValue(perturbationContext).asNumber()));
             }
             PredictionInput input = new PredictionInput(features);
-            List<PredictionOutput> outputs = model.predictAsync(List.of(input)).get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT);
+            List<PredictionOutput> outputs = model.predictAsync(List.of(input)).get(TestConfig.DEFAULT_ASYNC_TIMEOUT, TestConfig.DEFAULT_ASYNC_TIMEUNIT);
             Prediction prediction = new SimplePrediction(input, outputs.get(0));
             int topK = 1;
             double posScore = 0.6;
