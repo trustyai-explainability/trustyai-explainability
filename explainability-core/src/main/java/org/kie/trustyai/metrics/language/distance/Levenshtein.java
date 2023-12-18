@@ -43,38 +43,55 @@ public class Levenshtein {
             }
         }
 
+
+
+        int distance = (int) matrix.getEntry(refSize, hypSize);
+        final LevenshteinCounters counters = getCounters(tokensA, tokensB, matrix);
+        return new LevenshteinResult(distance, counters);
+    }
+
+    /**
+     * Backtracks the Levenshtein distance matrix, as populated by the Wagner-Fischer algorithm,
+     * to determine the specific edit operations. This method is based on "Algorithm Y" from
+     * Wagner, Robert A.; Fischer, Michael J. (1974). "The String-to-String Correction Problem". Journal of the ACM. 21 (1): 168–173. doi:10.1145/321796.321811. S2CID 13381535.
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm">https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm</a>
+     * @param tokensA The first list of tokens.
+     * @param tokensB The second list of tokens.
+     * @param D The populated Levenshtein distance matrix based on the Wagner-Fischer algorithm.
+     * @return A {@link LevenshteinResult} object containing the edit operations and their counts.
+     */
+    public static LevenshteinCounters getCounters(List<String> tokensA, List<String> tokensB, RealMatrix D) {
+        int i = tokensA.size();
+        int j = tokensB.size();
+
         int correct = 0;
         int substitutions = 0;
         int insertions = 0;
         int deletions = 0;
 
-        // Count operations
-        int refIndex = refSize;
-        int hypIndex = hypSize;
-        while (refIndex > 0 || hypIndex > 0) {
-            if (refIndex > 0 && hypIndex > 0 && tokensA.get(refIndex - 1).equals(tokensB.get(hypIndex - 1))) {
-                // It's a match
-                refIndex--;
-                hypIndex--;
+        while (i > 0 || j > 0) {
+            if (i > 0 && j > 0 && tokensA.get(i - 1).equals(tokensB.get(j - 1))) {
+                // No operation needed, it's a match
+                i--;
+                j--;
                 correct++;
-            } else if (refIndex > 0 && hypIndex > 0 && matrix.getEntry(refIndex, hypIndex) == matrix.getEntry(refIndex - 1, hypIndex - 1) + 1) {
+            } else if (i > 0 && j > 0 && D.getEntry(i, j) == D.getEntry(i - 1, j - 1) + 1) {
                 // It's a substitution
-                refIndex--;
-                hypIndex--;
+                i--;
+                j--;
                 substitutions++;
-            } else if (hypIndex > 0 && matrix.getEntry(refIndex, hypIndex) == matrix.getEntry(refIndex, hypIndex - 1) + 1) {
+            } else if (j > 0 && D.getEntry(i, j) == D.getEntry(i, j - 1) + 1) {
                 // It's an insertion
-                hypIndex--;
+                j--;
                 insertions++;
-            } else if (refIndex > 0 && matrix.getEntry(refIndex, hypIndex) == matrix.getEntry(refIndex - 1, hypIndex) + 1) {
+            } else if (i > 0 && D.getEntry(i, j) == D.getEntry(i - 1, j) + 1) {
                 // It's a deletion
-                refIndex--;
+                i--;
                 deletions++;
             }
         }
 
-        int distance = (int) matrix.getEntry(refSize, hypSize);
-        final LevenshteinCounters counters = new LevenshteinCounters(substitutions, insertions, deletions, correct);
-        return new LevenshteinResult(distance, counters);
-    }
+        return new LevenshteinCounters(substitutions, insertions, deletions, correct);
+}
 }
