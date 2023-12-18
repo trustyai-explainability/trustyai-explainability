@@ -1,11 +1,15 @@
 package org.kie.trustyai.metrics.language.distance;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.kie.trustyai.metrics.language.utils.tokenizers.TokenizerUtils;
+
+import opennlp.tools.tokenize.Tokenizer;
 
 public class Levenshtein {
 
@@ -26,6 +30,33 @@ public class Levenshtein {
         final List<String> charsB = stringB.chars().mapToObj(String::valueOf).collect(Collectors.toUnmodifiableList());
 
         return calculateToken(charsA, charsB);
+    }
+
+    /**
+     * Calculate Levenshtein distances between two sentences, at the token level, using the default tokenizer
+     *
+     * @param stringA First string
+     * @param stringB Second string
+     * @return A {@link LevenshteinResult} containing the distance and counters
+     */
+    public static LevenshteinResult calculateToken(String stringA, String stringB) {
+        final List<String> tokensA = Arrays.asList(TokenizerUtils.getDefaultTokenizer().tokenize(stringA));
+        final List<String> tokensB = Arrays.asList(TokenizerUtils.getDefaultTokenizer().tokenize(stringB));
+        return calculateToken(tokensA, tokensB);
+    }
+
+    /**
+     * Calculate Levenshtein distances between two sentences, at the token level.
+     *
+     * @param stringA First string
+     * @param stringB Second string
+     * @param tokenizer The {@link Tokenizer} to use
+     * @return A {@link LevenshteinResult} containing the distance and counters
+     */
+    public static LevenshteinResult calculateToken(String stringA, String stringB, Tokenizer tokenizer) {
+        final List<String> tokensA = Arrays.asList(tokenizer.tokenize(stringA));
+        final List<String> tokensB = Arrays.asList(tokenizer.tokenize(stringB));
+        return calculateToken(tokensA, tokensB);
     }
 
     /**
@@ -62,7 +93,7 @@ public class Levenshtein {
 
         int distance = (int) matrix.getEntry(refSize, hypSize);
         final LevenshteinCounters counters = getCounters(tokensA, tokensB, matrix);
-        return new LevenshteinResult(distance, counters);
+        return new LevenshteinResult(distance, counters, matrix, tokensA, tokensB);
     }
 
     /**
