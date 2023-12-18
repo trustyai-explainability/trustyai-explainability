@@ -1,10 +1,11 @@
 package org.kie.trustyai.metrics.language.distance;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
-
-import java.util.List;
-import java.util.stream.IntStream;
 
 public class Levenshtein {
 
@@ -13,7 +14,23 @@ public class Levenshtein {
     }
 
     /**
+     * Calculate Levenshtein distances between two sentences, at the character level
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/Levenshtein_distance">https://en.wikipedia.org/wiki/Levenshtein_distance</a>
+     * @param stringA First string
+     * @param stringB Second string
+     * @return A {@link LevenshteinResult} containing the distance and counters
+     */
+    public static LevenshteinResult calculateCharacter(String stringA, String stringB) {
+        final List<String> charsA = stringA.chars().mapToObj(String::valueOf).collect(Collectors.toUnmodifiableList());
+        final List<String> charsB = stringB.chars().mapToObj(String::valueOf).collect(Collectors.toUnmodifiableList());
+
+        return calculateToken(charsA, charsB);
+    }
+
+    /**
      * Calculate Levenshtein distances between two sentences, at the token level
+     * 
      * @see <a href="https://en.wikipedia.org/wiki/Levenshtein_distance">https://en.wikipedia.org/wiki/Levenshtein_distance</a>
      * @param tokensA First list of tokens
      * @param tokensB Second list of tokens
@@ -42,8 +59,6 @@ public class Levenshtein {
                 }
             }
         }
-
-
 
         int distance = (int) matrix.getEntry(refSize, hypSize);
         final LevenshteinCounters counters = getCounters(tokensA, tokensB, matrix);
@@ -93,5 +108,5 @@ public class Levenshtein {
         }
 
         return new LevenshteinCounters(substitutions, insertions, deletions, correct);
-}
+    }
 }
