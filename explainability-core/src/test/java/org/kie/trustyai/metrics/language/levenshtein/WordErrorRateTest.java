@@ -5,9 +5,9 @@ import java.util.List;
 import org.apache.commons.text.StringTokenizer;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import opennlp.tools.tokenize.SimpleTokenizer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class WordErrorRateTest {
 
