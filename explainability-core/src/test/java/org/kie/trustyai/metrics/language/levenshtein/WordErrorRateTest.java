@@ -5,9 +5,9 @@ import java.util.List;
 import org.apache.commons.text.StringTokenizer;
 import org.junit.jupiter.api.Test;
 
-import opennlp.tools.tokenize.SimpleTokenizer;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static org.junit.jupiter.api.Assertions.*;
+import opennlp.tools.tokenize.SimpleTokenizer;
 
 class WordErrorRateTest {
 
@@ -53,8 +53,7 @@ class WordErrorRateTest {
 
     @Test
     public void testProvidedOpenNLPTokenizer() {
-        for (int i = 0; i <
-                LevenshteinCommonTest.references.size(); i++) {
+        for (int i = 0; i < LevenshteinCommonTest.references.size(); i++) {
             ErrorRateResult werr = new WordErrorRate(SimpleTokenizer.INSTANCE).calculate(LevenshteinCommonTest.references.get(i), LevenshteinCommonTest.inputs.get(i));
             assertEquals(groundTruthWERsNLPTokenizer.get(i), werr.getValue(), 1e-5);
         }

@@ -1,9 +1,9 @@
 package org.kie.trustyai.metrics.language.levenshtein;
 
+import java.util.List;
+
 import org.apache.commons.text.StringTokenizer;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -45,13 +45,13 @@ class LevenshteinCommonTest {
         assertEquals(expectedWER, werResult.getValue(), "Expected WER of " + expectedWER + ", got " + werResult.getValue());
         // MER test
         final ErrorRateResult merResult = new MatchErrorRate().calculate(tokenizedReference, tokenizedHypotesis);
-        assertEquals(expectedMER, merResult.getValue(), tolerance,"Expected MER of " + expectedMER + ", got " + merResult.getValue());
+        assertEquals(expectedMER, merResult.getValue(), tolerance, "Expected MER of " + expectedMER + ", got " + merResult.getValue());
         // WIL test
         final ErrorRateResult wilResult = new WordInformationLost().calculate(tokenizedReference, tokenizedHypotesis);
         assertEquals(expectedWIL, wilResult.getValue(), tolerance, "Expected WIL of " + expectedWIL + ", got " + wilResult.getValue());
         // WIP test
         final ErrorRateResult wipResult = new WordInformationPreserved().calculate(tokenizedReference, tokenizedHypotesis);
-        assertEquals(expectedWIP, wipResult.getValue(), tolerance,"Expected WIP of " + expectedWIP + ", got " + wipResult.getValue());
+        assertEquals(expectedWIP, wipResult.getValue(), tolerance, "Expected WIP of " + expectedWIP + ", got " + wipResult.getValue());
     }
 
     @Test
@@ -72,6 +72,6 @@ class LevenshteinCommonTest {
     void testOverlap() {
         final List<String> tokenizedReference = new StringTokenizer("X Y Z").getTokenList();
         final List<String> tokenizedHypotesis = new StringTokenizer("X Z").getTokenList();
-        testAll(tokenizedReference, tokenizedHypotesis, 1 / 3., 1/3., 1/3., 1.0 - 1/3., TOLERANCE);
+        testAll(tokenizedReference, tokenizedHypotesis, 1 / 3., 1 / 3., 1 / 3., 1.0 - 1 / 3., TOLERANCE);
     }
 }

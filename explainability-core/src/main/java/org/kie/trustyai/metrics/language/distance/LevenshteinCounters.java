@@ -23,9 +23,9 @@ public class LevenshteinCounters {
     private final int correct;
 
     public LevenshteinCounters(int substitutions,
-                               int insertions,
-                               int deletions,
-                               int correct) {
+            int insertions,
+            int deletions,
+            int correct) {
         this.substitutions = substitutions;
         this.insertions = insertions;
         this.deletions = deletions;

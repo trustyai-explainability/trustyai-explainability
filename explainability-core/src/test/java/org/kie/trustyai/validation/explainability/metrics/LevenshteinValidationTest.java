@@ -1,5 +1,13 @@
 package org.kie.trustyai.validation.explainability.metrics;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -12,14 +20,6 @@ import org.kie.trustyai.metrics.language.levenshtein.MatchErrorRate;
 import org.kie.trustyai.metrics.language.levenshtein.WordErrorRate;
 import org.kie.trustyai.metrics.language.levenshtein.WordInformationLost;
 import org.kie.trustyai.metrics.language.levenshtein.WordInformationPreserved;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -39,7 +39,7 @@ class LevenshteinValidationTest {
     public void setUp() {
         final ClassLoader classLoader = getClass().getClassLoader();
         try (InputStream inputStream = classLoader.getResourceAsStream("validation/metrics/language/glue.csv");
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             CSVParser parser = CSVFormat.DEFAULT
                     .withFirstRecordAsHeader()
@@ -115,14 +115,29 @@ class LevenshteinValidationTest {
 
     @Test
     @DisplayName("Levenshtein-Word validation with GLUE data")
-    void testLevenshteinValidationGLUE() {
+    void testLevenshteinWordValidationGLUE() {
         final int N = references.size();
 
         IntStream.range(0, N).forEach(i -> {
             final List<String> referenceTokens = new StringTokenizer(references.get(i)).getTokenList();
             final List<String> hypothesisTokens = new StringTokenizer(hypotheses.get(i)).getTokenList();
             final int wil = Levenshtein.calculateToken(referenceTokens, hypothesisTokens).getDistance();
-            assertEquals(expectedLevenshteinWord.get(i), wil, "Expect Levenshtein-Word distance of " + expectedLevenshteinWord.get(i) + " got " + wil + ", for " + references.get(i) + "/" + hypotheses.get(i));
+            assertEquals(expectedLevenshteinWord.get(i), wil,
+                    "Expect Levenshtein-Word distance of " + expectedLevenshteinWord.get(i) + " got " + wil + ", for " + references.get(i) + "/" + hypotheses.get(i));
+        });
+    }
+
+    @Test
+    @DisplayName("Levenshtein-Character validation with GLUE data")
+    void testLevenshteinCharacterValidationGLUE() {
+        final int N = references.size();
+
+        IntStream.range(0, N).forEach(i -> {
+            final String reference = references.get(i);
+            final String hypothesis = hypotheses.get(i);
+            final int levenshteinChar = Levenshtein.calculateCharacter(reference, hypothesis).getDistance();
+            assertEquals(expectedLevenshteinChar.get(i), levenshteinChar,
+                    "Expect Levenshtein-Character distance of " + expectedLevenshteinChar.get(i) + " got " + levenshteinChar + ", for " + references.get(i) + "/" + hypotheses.get(i));
         });
     }
 
