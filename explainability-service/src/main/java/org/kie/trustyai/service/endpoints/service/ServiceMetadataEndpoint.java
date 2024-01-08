@@ -17,6 +17,7 @@ import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
+import org.kie.trustyai.service.validators.serviceRequests.ValidNameMappingRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -121,7 +122,7 @@ public class ServiceMetadataEndpoint {
     @Path("/names")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response labelSchema(NameMapping nameMapping) throws JsonProcessingException {
+    public Response labelSchema(@ValidNameMappingRequest NameMapping nameMapping) {
 
         if (!dataSource.get().getKnownModels().contains(nameMapping.getModelId())) {
             return Response.serverError()
@@ -131,36 +132,12 @@ public class ServiceMetadataEndpoint {
         }
         final Metadata metadata = dataSource.get().getMetadata(nameMapping.getModelId());
 
-        // validation
         Schema inputSchema = metadata.getInputSchema();
-        Set<String> inputKeySet = inputSchema.getItems().keySet();
-        Set<String> nameMappingInputKeySet = nameMapping.getInputMapping().keySet();
-
         Schema outputSchema = metadata.getOutputSchema();
-        Set<String> outputKeySet = outputSchema.getItems().keySet();
-        Set<String> nameMappingOutputKeySet = nameMapping.getOutputMapping().keySet();
-
-        if (!inputKeySet.containsAll(nameMappingInputKeySet)) {
-            Set<String> copyNameMapping = new HashSet<>(nameMappingInputKeySet);
-            copyNameMapping.removeAll(inputKeySet);
-            return Response.serverError()
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("Not all mapped input fields exist in model metadata, input features " + copyNameMapping + " do not exist")
-                    .build();
-        }
-
-        if (!outputKeySet.containsAll(nameMappingOutputKeySet)) {
-            Set<String> copyNameMapping = new HashSet<>(nameMappingOutputKeySet);
-            copyNameMapping.removeAll(outputKeySet);
-            return Response.serverError()
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity("Not all mapped output fields exist in model metadata, output fields " + copyNameMapping + " do not exist")
-                    .build();
-        }
 
         inputSchema.setNameMapping(nameMapping.getInputMapping());
         outputSchema.setNameMapping(nameMapping.getOutputMapping());
-        dataSource.get().saveMetadata(metadata, metadata.getModelId());
+        dataSource.get().saveMetadata(metadata, nameMapping.getModelId());
 
         return Response.ok().entity("Feature and output name mapping successfully applied.").build();
     }

@@ -3,6 +3,7 @@ package org.kie.trustyai.service.endpoints.service;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.hamcrest.Matchers;
@@ -204,7 +205,7 @@ class ServiceMetadataEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
-                .when().post(metadataUrl + "/names")
+                .when().post(metadataUrl + "/names").peek()
                 .then()
                 .statusCode(200)
                 .body(is("Feature and output name mapping successfully applied."));
@@ -217,13 +218,26 @@ class ServiceMetadataEndpointTest {
                 .body().as(new TypeRef<List<ServiceMetadata>>() {
                 });
 
+        // check that mappings are applied
         for (String value : serviceMetadata.get(0).getData().getInputSchema().getNameMapping().values()) {
             assertTrue(value.contains("Mapped"));
         }
+
+        // make sure non-mapped names don't appear
         for (String value : serviceMetadata.get(0).getData().getInputSchema().getNameMapping().keySet()) {
             assertFalse(value.contains("race"));
         }
 
+        // make sure that overwritten field names don't appear
+        Set<String> allInputColNames = serviceMetadata.get(0).getData().getInputSchema().getNameMappedItems().keySet();
+        System.out.println(allInputColNames);
+        assertFalse(allInputColNames.contains("age"));
+        assertTrue(allInputColNames.contains("Age Mapped"));
+        assertFalse(allInputColNames.contains("gender"));
+        assertTrue(allInputColNames.contains("Gender Mapped"));
+        assertTrue(allInputColNames.contains("race"));
+
+        // make sure no output mappings exist
         assertEquals(0, serviceMetadata.get(0).getData().getOutputSchema().getNameMapping().size());
     }
 
@@ -244,7 +258,7 @@ class ServiceMetadataEndpointTest {
                 .when().post(metadataUrl + "/names")
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(Matchers.containsString("Not all mapped input fields exist in model metadata"));
+                .body(Matchers.containsString("No feature found with name=age123"));
     }
 
     @Test
@@ -264,7 +278,7 @@ class ServiceMetadataEndpointTest {
                 .when().post(metadataUrl + "/names")
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(Matchers.containsString("Not all mapped output fields exist in model metadata"));
+                .body(Matchers.containsString("No output found with name=age123"));
     }
 
     @Test

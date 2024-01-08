@@ -1,9 +1,11 @@
 package org.kie.trustyai.service.data.metadata;
 
+import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.payloads.service.Schema;
 
 public class Metadata {
+    private static final Logger LOG = Logger.getLogger(Metadata.class);
 
     private Schema inputSchema = new Schema();
     private Schema outputSchema = new Schema();
