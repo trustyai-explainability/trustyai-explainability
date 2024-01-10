@@ -5,8 +5,22 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jboss.logging.Logger;
+
 public class Schema {
+    private static final Logger LOG = Logger.getLogger(Schema.class);
+
     private final Map<String, SchemaItem> items;
+
+    public int getRemapCount() {
+        return remapCount;
+    }
+
+    public void setRemapCount(int remapCount) {
+        this.remapCount = remapCount;
+    }
+
+    private int remapCount = 0;
     private Map<String, String> nameMapping = new HashMap<>();
     private Map<String, SchemaItem> mappedItems = new HashMap<>();
 
@@ -38,9 +52,15 @@ public class Schema {
     private void calculateNameMappedItems() {
         this.mappedItems = new HashMap<>(items);
         if (!nameMapping.isEmpty()) {
+            this.remapCount++;
+            // for key, value pair in the name mapping
             for (Map.Entry<String, String> mapping : nameMapping.entrySet()) {
+
+                // if there is a corresponding key in the raw field names
                 if (items.containsKey(mapping.getKey())) {
-                    this.mappedItems.put(mapping.getKey(), items.get(mapping.getKey()));
+                    // swap the raw field name for the mapped field name
+                    this.mappedItems.remove(mapping.getKey());
+                    this.mappedItems.put(mapping.getValue(), items.get(mapping.getKey()));
                 }
             }
         }
@@ -56,7 +76,7 @@ public class Schema {
     }
 
     public Map<String, SchemaItem> getNameMappedItems() {
-        return mappedItems;
+        return this.mappedItems;
     }
 
     @Override
