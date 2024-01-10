@@ -13,8 +13,7 @@ jobs:
       matrix:
         # configure with [ 'ubuntu-latest', 'windows-latest' ] to enable Windows builds
         include:
-          - { os: ubuntu-latest, shell: bash }
-        #  - {os: windows-latest, shell: cmd }
+          - { os: ubuntu-22.04, shell: bash } # Pinned to Ubuntu 22.04 LTS. Change if necessary.
         java-version: [ 11, 17 ]
         # Maven maintained core versions, https://maven.apache.org/docs/history.html
         maven-version: [ '3.6.3', '3.8.8', '3.9.2' ]
@@ -49,7 +48,7 @@ jobs:
         run: git config --system core.longpaths true
       - name: Set up JDK + Maven version
         # include actions/checkout, actions/setup-java, actions/cache, see https://github.com/s4u/setup-maven-action/blob/main/action.yml
-        uses: s4u/setup-maven-action@v1.7.0
+        uses: s4u/setup-maven-action@v1.11.0
         with:
           java-version: ${{ matrix.java-version }}
           maven-version: ${{ matrix.maven-version }}

@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.TestConfig;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.model.*;
@@ -43,7 +43,7 @@ class ValidationUtilsTest {
                 features.add(FeatureFactory.newNumericalFeature("f-" + i, Type.NUMBER.randomValue(perturbationContext).asNumber()));
             }
             PredictionInput input = new PredictionInput(features);
-            List<PredictionOutput> outputs = model.predictAsync(List.of(input)).get(Config.DEFAULT_ASYNC_TIMEOUT, Config.DEFAULT_ASYNC_TIMEUNIT);
+            List<PredictionOutput> outputs = model.predictAsync(List.of(input)).get(TestConfig.DEFAULT_ASYNC_TIMEOUT, TestConfig.DEFAULT_ASYNC_TIMEUNIT);
             Prediction prediction = new SimplePrediction(input, outputs.get(0));
             int topK = 1;
             double posScore = 0.6;
