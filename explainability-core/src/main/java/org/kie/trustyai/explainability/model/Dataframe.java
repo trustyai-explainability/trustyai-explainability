@@ -36,6 +36,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -46,13 +48,15 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 
-@Entity
+@Table
 public class Dataframe {
-    @ElementCollection
+    @OneToMany
     private final List<Column> data;
 
+    @OneToOne
     private final DataframeMetadata metadata;
     private final InternalData internalData;
 
@@ -1253,7 +1257,6 @@ public class Dataframe {
 
     /**
      * Return a subset of the dataframe containing only numeric columns
-     *
      */
     @Transient
     public Dataframe getNumericColumns() {

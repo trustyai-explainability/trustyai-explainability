@@ -33,7 +33,6 @@ public class BinaryFeatureDomain extends AbstractCategoricalFeatureDomain<ByteBu
     public BinaryFeatureDomain() {
         super(new HashSet<>());
     }
-    
 
     /**
      * Create a {@link FeatureDomain} for a categorical feature

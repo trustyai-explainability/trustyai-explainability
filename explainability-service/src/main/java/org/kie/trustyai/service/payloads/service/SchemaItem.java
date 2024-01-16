@@ -2,13 +2,17 @@ package org.kie.trustyai.service.payloads.service;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import org.kie.trustyai.service.payloads.values.DataType;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
 import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
-@Embeddable
+@Entity
 public class SchemaItem {
     private DataType type;
     private String name;
@@ -16,9 +20,11 @@ public class SchemaItem {
     @ElementCollection
     private Set<Object> values;
     private int index;
+    @Id
+    private UUID id;
 
     public SchemaItem() {
-
+        this.id = UUID.randomUUID();
     }
 
     public SchemaItem(DataType type, String name, Set<Object> values, int index) {
@@ -26,6 +32,7 @@ public class SchemaItem {
         this.name = name;
         this.values = values;
         this.index = index;
+        this.id = UUID.randomUUID();
     }
 
     public DataType getType() {
@@ -83,5 +90,10 @@ public class SchemaItem {
                 ", values=" + values +
                 ", index=" + index +
                 '}';
+    }
+
+    @Access(AccessType.FIELD)
+    public UUID getId() {
+        return id;
     }
 }

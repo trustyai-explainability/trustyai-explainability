@@ -142,6 +142,12 @@
       <artifactId>jakarta.enterprise.cdi-api</artifactId>
       <version>4.0.1</version>
     </dependency>
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>3.1.0</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

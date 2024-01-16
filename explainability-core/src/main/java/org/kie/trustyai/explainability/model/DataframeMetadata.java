@@ -9,9 +9,11 @@ import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 
 import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
-@Embeddable
+@Entity
 public class DataframeMetadata {
 
     @ElementCollection
@@ -29,11 +31,14 @@ public class DataframeMetadata {
     @ElementCollection
     private final List<Boolean> constrained;
 
-    @ElementCollection
+    @OneToMany
     private List<FeatureDomain> domains;
 
     @ElementCollection
     private final List<Boolean> inputs;
+
+    @Id
+    private String id;
 
     // constructors ====================================================================================================
     public DataframeMetadata() {
@@ -204,5 +209,13 @@ public class DataframeMetadata {
 
     public synchronized void setInput(int i, Boolean input) {
         this.inputs.set(i, input);
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
     }
 }

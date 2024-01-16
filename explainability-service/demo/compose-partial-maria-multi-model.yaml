@@ -12,8 +12,14 @@ services:
       STORAGE_DATA_FILENAME: "data.csv"
       STORAGE_DATA_FOLDER: "/inputs"
       LOG_LEVEL: "INFO"
+      QUARKUS_DATASOURCE_URL: "jdbc:mariadb://maria:3306/"
     volumes:
       - ~/volumes/pvc/inputs:/inputs
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/info" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -26,6 +32,9 @@ services:
       - ./prometheus:/etc/prometheus
       - prom_data:/prometheus
   generator-1:
+    depends_on:
+      trustyai:
+        condition: service_healthy
     container_name: generator-1
     image: trustyai/trustyai-service-partial
     build:
@@ -36,6 +45,9 @@ services:
       SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
       PYTHONUNBUFFERED: "1"
   generator-2:
+    depends_on:
+      trustyai:
+        condition: service_healthy
     container_name: generator-2
     image: trustyai/trustyai-service-partial
     build:
@@ -50,7 +62,7 @@ services:
     ports:
       - 3306:3306
     environment:
-      MARIADB_ROOT_PASSWORD: "test"
+      MYSQL_ROOT_PASSWORD: "test"
     image: mariadb
 volumes:
   prom_data:

@@ -9,28 +9,19 @@ import org.jboss.logging.Logger;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.OneToMany;
 
 @Embeddable
 public class Schema {
     private static final Logger LOG = Logger.getLogger(Schema.class);
 
-    @ElementCollection
+    @OneToMany
     private final Map<String, SchemaItem> items;
-
-    public int getRemapCount() {
-        return remapCount;
-    }
-
-    public void setRemapCount(int remapCount) {
-        this.remapCount = remapCount;
-    }
-
-    private int remapCount = 0;
 
     @ElementCollection
     private Map<String, String> nameMapping = new HashMap<>();
 
-    @ElementCollection
+    @OneToMany
     private Map<String, SchemaItem> mappedItems = new HashMap<>();
 
     public Schema() {
@@ -61,7 +52,6 @@ public class Schema {
     private void calculateNameMappedItems() {
         this.mappedItems = new HashMap<>(items);
         if (!nameMapping.isEmpty()) {
-            this.remapCount++;
             // for key, value pair in the name mapping
             for (Map.Entry<String, String> mapping : nameMapping.entrySet()) {
 

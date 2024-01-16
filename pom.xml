@@ -155,7 +155,6 @@
                 <artifactId>opennlp-tools</artifactId>
                 <version>${version.org.apache.opennlp}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

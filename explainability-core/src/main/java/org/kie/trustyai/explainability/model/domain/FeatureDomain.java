@@ -16,18 +16,27 @@
 package org.kie.trustyai.explainability.model.domain;
 
 import java.util.Set;
+import java.util.UUID;
 
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 /**
  * Information about the search space domain for the model's features.
  */
 
-@Embeddable
+@Entity
 public interface FeatureDomain<T> {
+    String id = String.valueOf(UUID.randomUUID());
+
+    @Id
+    @Access(AccessType.FIELD)
+    default String getId() {
+        return id;
+    }
 
     /**
      * Return whether this is an empty domain
