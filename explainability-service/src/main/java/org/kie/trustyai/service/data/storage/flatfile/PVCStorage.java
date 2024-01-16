@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.data.storage;
+package org.kie.trustyai.service.data.storage.flatfile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +15,8 @@ import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
+import org.kie.trustyai.service.data.storage.BatchReader;
+import org.kie.trustyai.service.data.storage.DataFormat;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
@@ -22,7 +24,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "PVC")
 @ApplicationScoped
-public class PVCStorage extends Storage {
+public class PVCStorage extends FlatFileStorage {
 
     private static final Logger LOG = Logger.getLogger(PVCStorage.class);
 
@@ -35,6 +37,8 @@ public class PVCStorage extends Storage {
     private final Path dataFolder;
 
     public PVCStorage(ServiceConfig serviceConfig, StorageConfig storageConfig) {
+        super();
+
         LOG.info("Starting PVC storage consumer");
         if (serviceConfig.batchSize().isPresent()) {
             this.batchSize = serviceConfig.batchSize().getAsInt();
@@ -171,5 +175,10 @@ public class PVCStorage extends Storage {
     @Override
     public Path buildDataPath(String modelId) {
         return Path.of(this.dataFolder.toString(), getDataFilename(modelId));
+    }
+
+    @Override
+    public DataFormat getDataFormat() {
+        return DataFormat.CSV;
     }
 }

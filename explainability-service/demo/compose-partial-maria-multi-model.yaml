@@ -5,8 +5,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SERVICE_STORAGE_FORMAT: "MEMORY"
-      SERVICE_DATA_FORMAT: "CSV"
+      SERVICE_STORAGE_FORMAT: "HIBERNATE"
+      SERVICE_DATA_FORMAT: "BEAN"
       SERVICE_METRICS_SCHEDULE: "5s"
       SERVICE_BATCH_SIZE: 5000
       STORAGE_DATA_FILENAME: "data.csv"
@@ -45,6 +45,12 @@ services:
       MODEL_NAME: "example-model-2"
       SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
       PYTHONUNBUFFERED: "1"
-
+  maria:
+    container_name: mariadb
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: "test"
+    image: mariadb
 volumes:
   prom_data:

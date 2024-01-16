@@ -28,16 +28,25 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Embeddable;
+
 /**
  * Wrapper class for any kind of value part of a prediction input or output.
  *
  */
+@Embeddable
 public class Value {
 
     private final Object underlyingObject;
 
     public Value(Object underlyingObject) {
         this.underlyingObject = underlyingObject;
+    }
+
+    public Value() {
+        this.underlyingObject = null;
     }
 
     public String asString() {
@@ -77,6 +86,7 @@ public class Value {
         }
     }
 
+    @Access(AccessType.FIELD)
     public Object getUnderlyingObject() {
         return underlyingObject;
     }

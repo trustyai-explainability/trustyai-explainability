@@ -17,10 +17,16 @@ package org.kie.trustyai.explainability.model.domain;
 
 import java.util.Set;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+
 /**
  * Information about the search space domain for the model's features.
  */
 
+@Embeddable
 public interface FeatureDomain<T> {
 
     /**
@@ -28,6 +34,7 @@ public interface FeatureDomain<T> {
      *
      * @return True if empty
      */
+    @Access(AccessType.FIELD)
     boolean isEmpty();
 
     /**
@@ -35,6 +42,7 @@ public interface FeatureDomain<T> {
      *
      * @return the start value
      */
+    @Access(AccessType.FIELD)
     Double getLowerBound();
 
     /**
@@ -42,6 +50,7 @@ public interface FeatureDomain<T> {
      *
      * @return the end value
      */
+    @Access(AccessType.FIELD)
     Double getUpperBound();
 
     /**
@@ -49,6 +58,8 @@ public interface FeatureDomain<T> {
      *
      * @return the end value
      */
+    @Access(AccessType.FIELD)
+    @ElementCollection
     Set<T> getCategories();
 
     /**

@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.data.storage;
+package org.kie.trustyai.service.data.storage.flatfile;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +21,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "MEMORY")
 @ApplicationScoped
-public class MemoryStorage extends Storage {
+public class MemoryStorage extends FlatFileStorage {
 
     private static final Logger LOG = Logger.getLogger(MemoryStorage.class);
 
@@ -30,6 +30,7 @@ public class MemoryStorage extends Storage {
     private final int batchSize;
 
     public MemoryStorage(ServiceConfig serviceConfig, StorageConfig config) {
+        super();
         this.dataFilename = config.dataFilename();
         this.batchSize = serviceConfig.batchSize().getAsInt();
     }

@@ -20,10 +20,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<Object> {
 
     private ObjectFeatureDomain(Set<Object> categories) {
         super(categories);
+    }
+
+    public ObjectFeatureDomain() {
+        super(new HashSet<>());
     }
 
     /**

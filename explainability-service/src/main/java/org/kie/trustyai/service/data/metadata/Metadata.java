@@ -4,6 +4,10 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.payloads.service.Schema;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
+@Entity
 public class Metadata {
     private static final Logger LOG = Logger.getLogger(Metadata.class);
 
@@ -12,6 +16,7 @@ public class Metadata {
 
     private int observations = 0;
 
+    @Id
     private String modelId;
 
     public Metadata() {

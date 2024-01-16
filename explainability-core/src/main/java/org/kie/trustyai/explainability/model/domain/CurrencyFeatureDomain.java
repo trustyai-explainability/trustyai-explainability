@@ -21,10 +21,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class CurrencyFeatureDomain extends AbstractCategoricalFeatureDomain<Currency> {
 
     private CurrencyFeatureDomain(Set<Currency> categories) {
         super(categories);
+    }
+
+    public CurrencyFeatureDomain() {
+        super(new HashSet<>());
     }
 
     /**

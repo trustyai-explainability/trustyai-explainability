@@ -17,6 +17,10 @@ package org.kie.trustyai.explainability.model.domain;
 
 import java.util.Set;
 
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
+
+@Embeddable
 public class EmptyFeatureDomain implements FeatureDomain<Object> {
 
     public static FeatureDomain<Object> create() {
@@ -24,21 +28,25 @@ public class EmptyFeatureDomain implements FeatureDomain<Object> {
     }
 
     @Override
+    @Transient
     public boolean isEmpty() {
         return true;
     }
 
     @Override
+    @Transient
     public Double getLowerBound() {
         return null;
     }
 
     @Override
+    @Transient
     public Double getUpperBound() {
         return null;
     }
 
     @Override
+    @Transient
     public Set<Object> getCategories() {
         return null;
     }

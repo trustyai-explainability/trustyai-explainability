@@ -1,6 +1,6 @@
 package org.kie.trustyai.service.mocks;
 
-import org.kie.trustyai.service.data.storage.MemoryStorage;
+import org.kie.trustyai.service.data.storage.flatfile.MemoryStorage;
 
 import io.quarkus.test.Mock;
 

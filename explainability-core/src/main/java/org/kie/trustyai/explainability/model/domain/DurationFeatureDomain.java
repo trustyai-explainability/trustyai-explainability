@@ -16,16 +16,27 @@
 package org.kie.trustyai.explainability.model.domain;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Set;
 
-public class DurationFeatureDomain extends NumericalFeatureDomain {
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 
+@Embeddable
+public class DurationFeatureDomain extends NumericalFeatureDomain {
     private final TemporalUnit unit;
 
     private DurationFeatureDomain(double lowerBound, double upperBound, TemporalUnit unit) {
         super(lowerBound, upperBound);
         this.unit = unit;
+    }
+
+    public DurationFeatureDomain() {
+        super(Double.MIN_VALUE, Double.MAX_VALUE);
+        this.unit = ChronoUnit.SECONDS;
     }
 
     /**
@@ -40,25 +51,29 @@ public class DurationFeatureDomain extends NumericalFeatureDomain {
     }
 
     @Override
+    @Transient
     public boolean isEmpty() {
         return false;
     }
 
     @Override
+    @Access(AccessType.FIELD)
     public Double getLowerBound() {
         return this.lowerBound;
     }
 
-    @Override
+    @Access(AccessType.FIELD)
     public Double getUpperBound() {
         return this.upperBound;
     }
 
     @Override
+    @Transient
     public Set<Duration> getCategories() {
         return null;
     }
 
+    @Transient
     public TemporalUnit getUnit() {
         return unit;
     }

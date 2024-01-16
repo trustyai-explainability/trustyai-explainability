@@ -16,7 +16,10 @@ import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.data.parsers.DataParser;
+import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
+import org.kie.trustyai.service.data.storage.flatfile.FlatFileStorage;
+import org.kie.trustyai.service.data.storage.hibernate.HibernateStorage;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.payloads.service.Schema;
 
@@ -37,6 +40,7 @@ public class DataSource {
 
     @Inject
     Instance<Storage> storage;
+
     @Inject
     DataParser parser;
     @Inject
@@ -54,58 +58,76 @@ public class DataSource {
     }
 
     public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
-        final ByteBuffer dataByteBuffer;
-        try {
-            dataByteBuffer = storage.get().readData(modelId);
-        } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
-        }
+        Dataframe df;
+        Storage st = storage.get();
+        if (st.getDataFormat() == DataFormat.BEAN) {
+            FlatFileStorage ffst = (FlatFileStorage) st;
 
-        final ByteBuffer internalDataByteBuffer;
-        try {
-            internalDataByteBuffer = storage.get().read(modelId + "-" + INTERNAL_DATA_FILENAME);
-        } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
-        }
+            final ByteBuffer dataByteBuffer;
+            try {
+                dataByteBuffer = ffst.readData(modelId);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException(e.getMessage());
+            }
 
-        // Fetch metadata, if not yet read
-        final Metadata metadata;
-        try {
-            metadata = getMetadata(modelId);
-        } catch (StorageReadException e) {
-            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
-        }
+            final ByteBuffer internalDataByteBuffer;
+            try {
+                internalDataByteBuffer = ffst.read(modelId + "-" + INTERNAL_DATA_FILENAME);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException(e.getMessage());
+            }
 
-        Dataframe df = parser.toDataframe(dataByteBuffer, internalDataByteBuffer, metadata);
-        df.setColumnAliases(getJointNameAliases(metadata));
+            // Fetch metadata, if not yet read
+            final Metadata metadata;
+            try {
+                metadata = getMetadata(modelId);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+            }
+
+            df = parser.toDataframe(dataByteBuffer, internalDataByteBuffer, metadata);
+            df.setColumnAliases(getJointNameAliases(metadata));
+        } else {
+            HibernateStorage hst = (HibernateStorage) storage.get();
+            df = hst.readData(modelId);
+        }
         return df;
     }
 
     public Dataframe getDataframe(final String modelId, int batchSize) throws DataframeCreateException {
-        final ByteBuffer byteBuffer;
-        try {
-            byteBuffer = storage.get().readData(modelId, batchSize);
-        } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
+        Dataframe df;
+        if (storage.get().getDataFormat() == DataFormat.BEAN) {
+            FlatFileStorage ffst = (FlatFileStorage) storage.get();
+
+            final ByteBuffer byteBuffer;
+            try {
+                byteBuffer = ffst.readData(modelId, batchSize);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException(e.getMessage());
+            }
+
+            final ByteBuffer internalDataByteBuffer;
+            try {
+                internalDataByteBuffer = ffst.read(modelId + "-" + INTERNAL_DATA_FILENAME);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException(e.getMessage());
+            }
+
+            // Fetch metadata, if not yet read
+            final Metadata metadata;
+            try {
+                metadata = getMetadata(modelId);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+            }
+
+            df = parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
+            df.setColumnAliases(getJointNameAliases(metadata));
+        } else {
+            HibernateStorage hst = (HibernateStorage) storage.get();
+            df = hst.readData(modelId, batchSize);
         }
 
-        final ByteBuffer internalDataByteBuffer;
-        try {
-            internalDataByteBuffer = storage.get().read(modelId + "-" + INTERNAL_DATA_FILENAME);
-        } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
-        }
-
-        // Fetch metadata, if not yet read
-        final Metadata metadata;
-        try {
-            metadata = getMetadata(modelId);
-        } catch (StorageReadException e) {
-            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
-        }
-
-        Dataframe df = parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
-        df.setColumnAliases(getJointNameAliases(metadata));
         return df;
     }
 
@@ -157,13 +179,23 @@ public class DataSource {
             }
         }
 
-        ByteBuffer[] byteBuffers = parser.toByteBuffers(dataframe, false);
-        if (!storage.get().dataExists(modelId) || overwrite) {
-            storage.get().saveData(byteBuffers[0], modelId);
-            storage.get().save(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
+        if (storage.get().getDataFormat() == DataFormat.CSV) {
+            FlatFileStorage ffst = (FlatFileStorage) storage.get();
+            ByteBuffer[] byteBuffers = parser.toByteBuffers(dataframe, false);
+            if (!ffst.dataExists(modelId) || overwrite) {
+                ffst.saveData(byteBuffers[0], modelId);
+                ffst.save(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
+            } else {
+                ffst.appendData(byteBuffers[0], modelId);
+                ffst.append(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
+            }
         } else {
-            storage.get().appendData(byteBuffers[0], modelId);
-            storage.get().append(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
+            HibernateStorage hst = (HibernateStorage) storage.get();
+            if (!hst.dataframeExists(modelId) || overwrite) {
+                hst.save(dataframe, modelId);
+            } else {
+                hst.append(dataframe, modelId);
+            }
         }
 
     }
@@ -175,27 +207,35 @@ public class DataSource {
     }
 
     public void saveMetadata(Metadata metadata, String modelId) throws StorageWriteException {
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
-        final ByteBuffer byteBuffer;
-        try {
-            byteBuffer = ByteBuffer.wrap(mapper.writeValueAsString(metadata).getBytes());
-        } catch (JsonProcessingException e) {
-            throw new StorageWriteException("Could not save metadata: " + e.getMessage());
-        }
+        if (storage.get().getDataFormat() == DataFormat.CSV) {
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
+            final ByteBuffer byteBuffer;
+            try {
+                byteBuffer = ByteBuffer.wrap(mapper.writeValueAsString(metadata).getBytes());
+            } catch (JsonProcessingException e) {
+                throw new StorageWriteException("Could not save metadata: " + e.getMessage());
+            }
 
-        storage.get().save(byteBuffer, modelId + "-" + METADATA_FILENAME);
+            ((FlatFileStorage) storage.get()).save(byteBuffer, modelId + "-" + METADATA_FILENAME);
+        } else {
+            ((HibernateStorage) storage.get()).saveMetadata(metadata, modelId);
+        }
     }
 
     public Metadata getMetadata(String modelId) throws StorageReadException {
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
-        final ByteBuffer metadataBytes = storage.get().read(modelId + "-" + METADATA_FILENAME);
-        try {
-            return mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), Metadata.class);
-        } catch (JsonProcessingException e) {
-            LOG.error("Could not parse metadata: " + e.getMessage());
-            throw new StorageReadException(e.getMessage());
+        if (storage.get().getDataFormat() == DataFormat.CSV) {
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
+            final ByteBuffer metadataBytes = ((FlatFileStorage) storage.get()).read(modelId + "-" + METADATA_FILENAME);
+            try {
+                return mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), Metadata.class);
+            } catch (JsonProcessingException e) {
+                LOG.error("Could not parse metadata: " + e.getMessage());
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            return ((HibernateStorage) storage.get()).readMetadata(modelId);
         }
 
     }
@@ -205,7 +245,11 @@ public class DataSource {
     }
 
     public boolean hasMetadata(String modelId) {
-        return storage.get().fileExists(modelId + "-" + METADATA_FILENAME);
+        if (storage.get().getDataFormat() == DataFormat.CSV) {
+            return ((FlatFileStorage) storage.get()).fileExists(modelId + "-" + METADATA_FILENAME);
+        } else {
+            return ((HibernateStorage) storage.get()).dataframeExists(modelId);
+        }
     }
 
     public static String getGroundTruthName(String modelId) {

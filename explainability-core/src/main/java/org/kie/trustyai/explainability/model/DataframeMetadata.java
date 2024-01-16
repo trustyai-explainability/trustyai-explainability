@@ -8,13 +8,31 @@ import java.util.Map;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class DataframeMetadata {
+
+    @ElementCollection
     private final List<String> names;
+
+    @ElementCollection
     private List<String> nameAliases;
+
+    @ElementCollection
     private List<String> cachedColumnNames;
+
+    @ElementCollection
     private List<Type> types;
+
+    @ElementCollection
     private final List<Boolean> constrained;
+
+    @ElementCollection
     private List<FeatureDomain> domains;
+
+    @ElementCollection
     private final List<Boolean> inputs;
 
     // constructors ====================================================================================================

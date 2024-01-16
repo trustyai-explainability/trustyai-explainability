@@ -17,6 +17,12 @@ package org.kie.trustyai.explainability.model.domain;
 
 import java.util.Set;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
+
+@Embeddable
 public class NumericalFeatureDomain implements FeatureDomain {
 
     protected final double lowerBound;
@@ -25,6 +31,11 @@ public class NumericalFeatureDomain implements FeatureDomain {
     protected NumericalFeatureDomain(double lowerBound, double upperBound) {
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
+    }
+
+    public NumericalFeatureDomain() {
+        this.lowerBound = Double.MIN_VALUE;
+        this.upperBound = Double.MAX_VALUE;
     }
 
     /**
@@ -39,21 +50,25 @@ public class NumericalFeatureDomain implements FeatureDomain {
     }
 
     @Override
+    @Transient
     public boolean isEmpty() {
         return false;
     }
 
     @Override
+    @Access(AccessType.FIELD)
     public Double getLowerBound() {
         return this.lowerBound;
     }
 
     @Override
+    @Access(AccessType.FIELD)
     public Double getUpperBound() {
         return this.upperBound;
     }
 
     @Override
+    @Transient
     public Set<?> getCategories() {
         return null;
     }

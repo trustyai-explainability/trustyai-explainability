@@ -5,9 +5,15 @@ import java.util.Set;
 
 import org.kie.trustyai.service.payloads.values.DataType;
 
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class SchemaItem {
     private DataType type;
     private String name;
+
+    @ElementCollection
     private Set<Object> values;
     private int index;
 

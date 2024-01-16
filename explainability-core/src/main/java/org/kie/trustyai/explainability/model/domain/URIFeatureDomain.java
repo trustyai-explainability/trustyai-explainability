@@ -21,10 +21,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class URIFeatureDomain extends AbstractCategoricalFeatureDomain<URI> {
 
     private URIFeatureDomain(Set<URI> categories) {
         super(categories);
+    }
+
+    public URIFeatureDomain() {
+        super(new HashSet<>());
     }
 
     /**

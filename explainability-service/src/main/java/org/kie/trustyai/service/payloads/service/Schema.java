@@ -7,9 +7,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
 
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class Schema {
     private static final Logger LOG = Logger.getLogger(Schema.class);
 
+    @ElementCollection
     private final Map<String, SchemaItem> items;
 
     public int getRemapCount() {
@@ -21,7 +26,11 @@ public class Schema {
     }
 
     private int remapCount = 0;
+
+    @ElementCollection
     private Map<String, String> nameMapping = new HashMap<>();
+
+    @ElementCollection
     private Map<String, SchemaItem> mappedItems = new HashMap<>();
 
     public Schema() {

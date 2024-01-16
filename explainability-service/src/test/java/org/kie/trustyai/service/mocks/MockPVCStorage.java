@@ -2,7 +2,7 @@ package org.kie.trustyai.service.mocks;
 
 import java.io.File;
 
-import org.kie.trustyai.service.data.storage.PVCStorage;
+import org.kie.trustyai.service.data.storage.flatfile.PVCStorage;
 
 import io.quarkus.test.Mock;
 

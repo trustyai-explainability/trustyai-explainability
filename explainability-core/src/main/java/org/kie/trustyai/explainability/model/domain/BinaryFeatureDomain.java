@@ -21,11 +21,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class BinaryFeatureDomain extends AbstractCategoricalFeatureDomain<ByteBuffer> {
 
     private BinaryFeatureDomain(Set<ByteBuffer> categories) {
         super(categories);
     }
+
+    public BinaryFeatureDomain() {
+        super(new HashSet<>());
+    }
+    
 
     /**
      * Create a {@link FeatureDomain} for a categorical feature

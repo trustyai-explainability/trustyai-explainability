@@ -42,34 +42,56 @@ import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
 import org.kie.trustyai.explainability.utils.DataUtils;
 
-public class Dataframe {
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 
-    private final List<List<Value>> data;
+@Entity
+public class Dataframe {
+    @ElementCollection
+    private final List<Column> data;
+
     private final DataframeMetadata metadata;
     private final InternalData internalData;
+
+    @ElementCollection
     private final Map<String, Integer> idToIDX;
+    private String id;
 
     public Dataframe() {
-        this.data = new ArrayList<>(new ArrayList<>());
+        this.data = new ArrayList<>();
         this.metadata = new DataframeMetadata();
         this.internalData = new InternalData();
         this.idToIDX = new HashMap<>();
     }
 
     Dataframe(List<List<Value>> data, DataframeMetadata metadata) {
-        this.data = new ArrayList<>(data);
+        this.data = data.stream().map(Column::new).collect(Collectors.toList());
         this.metadata = metadata;
         this.internalData = new InternalData();
         this.idToIDX = new HashMap<>();
     }
 
     Dataframe(List<List<Value>> data, DataframeMetadata metadata, InternalData internalData) {
-        this.data = new ArrayList<>(data);
+        this.data = data.stream().map(Column::new).collect(Collectors.toList());
         this.metadata = metadata;
         this.internalData = internalData;
         this.idToIDX = new HashMap<>();
         if (internalData.size() > 0) {
             calculateIndexHashes();
+        }
+    }
+
+    // hibernate wrapper for an arraylist
+    @Embeddable
+    public static class Column extends ArrayList<Value> {
+        protected Column(List<Value> values) {
+            super(values);
+        }
+
+        public Column() {
         }
     }
 
@@ -117,7 +139,7 @@ public class Dataframe {
         // Process inputs metadata
         for (Feature feature : inputs.get(0).getFeatures()) {
             df.metadata.add(feature);
-            df.data.add(new ArrayList<>());
+            df.data.add(new Column());
         }
 
         final int inputsSize = df.getInputsCount();
@@ -170,12 +192,12 @@ public class Dataframe {
             // Process inputs metadata
             for (Feature feature : predictions.get(0).getInput().getFeatures()) {
                 df.metadata.add(feature);
-                df.data.add(new ArrayList<>());
+                df.data.add(new Column());
             }
             // Process outputs metadata
             for (Output output : predictions.get(0).getOutput().getOutputs()) {
                 df.metadata.add(output);
-                df.data.add(new ArrayList<>());
+                df.data.add(new Column());
             }
 
             // Copy data
@@ -190,6 +212,7 @@ public class Dataframe {
      *
      * @return A @link{Dataframe}
      */
+    @Transient
     public Dataframe getInputDataframe() {
         final Dataframe df = this.copy();
         df.dropColumns(getOutputsIndices());
@@ -201,6 +224,7 @@ public class Dataframe {
      *
      * @return A @link{Dataframe}
      */
+    @Transient
     public Dataframe getOutputDataframe() {
         final Dataframe df = this.copy();
         df.dropColumns(getInputsIndices());
@@ -280,6 +304,7 @@ public class Dataframe {
      *
      * @return A {@link List} of input column names.
      */
+    @Transient
     public List<String> getInputNames() {
         return getColumnNames(getInputsIndices());
     }
@@ -289,6 +314,7 @@ public class Dataframe {
      *
      * @return A {@link List} of output column names.
      */
+    @Transient
     public List<String> getOutputNames() {
         return getColumnNames(getOutputsIndices());
     }
@@ -406,6 +432,7 @@ public class Dataframe {
      *
      * @return A {@link List} of indices.
      */
+    @Transient
     public List<Integer> getConstrained() {
         return columnIndexStream()
                 .filter(this.metadata::getConstrained)
@@ -443,12 +470,12 @@ public class Dataframe {
                         .collect(Collectors.toCollection(ArrayList::new));
                 List<Value> values = data.get(c);
                 values.addAll(pad);
-                data.set(c, values);
+                data.set(c, new Column(values));
             });
         } else if (i < rows) {
             columnIndexStream().forEach(c -> {
                 final List<Value> values = data.get(c);
-                data.set(c, values.subList(0, i));
+                data.set(c, new Column(values.subList(0, i)));
             });
         }
     }
@@ -458,10 +485,12 @@ public class Dataframe {
      *
      * @return Number of columns.
      */
+    @Transient
     public int getColumnDimension() {
         return this.data.size();
     }
 
+    @Transient
     public int getInputsCount() {
         return getInputsIndices().size();
     }
@@ -495,8 +524,9 @@ public class Dataframe {
      *
      * @return A {@link List} of {@link List<Value>} rows.
      */
-    public List<List<Value>> getRows() {
 
+    @Transient
+    public List<List<Value>> getRows() {
         return rowIndexStream()
                 .mapToObj(row -> columnIndexStream()
                         .mapToObj(column -> safeGetValue(row, column))
@@ -504,6 +534,7 @@ public class Dataframe {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    @Transient
     public List<Integer> getInputsIndices() {
         return columnIndexStream()
                 .filter(metadata::getInput)
@@ -529,6 +560,7 @@ public class Dataframe {
         return IntStream.range(0, getRowDimension());
     }
 
+    @Transient
     public List<Integer> getOutputsIndices() {
         return columnIndexStream()
                 .filter(i -> !metadata.getInput(i))
@@ -548,7 +580,7 @@ public class Dataframe {
         if (this.getRowDimension() != values.size()) {
             throw new IllegalArgumentException("Invalid data size. Got " + values.size() + " elements for " + this.getRowDimension() + " rows.");
         }
-        this.data.set(column, values);
+        this.data.set(column, new Column(values));
     }
 
     /**
@@ -616,6 +648,7 @@ public class Dataframe {
      *
      * @return A {@link List} with the column names
      */
+    @Transient
     public List<String> getColumnNames() {
         return metadata.getNames();
     }
@@ -638,6 +671,7 @@ public class Dataframe {
      *
      * @return A {@link List} with the column types
      */
+    @Transient
     public List<Type> getColumnTypes() {
         return this.metadata.getTypes();
     }
@@ -647,6 +681,7 @@ public class Dataframe {
      *
      * @return The number of outputs.
      */
+    @Transient
     public int getOutputsCount() {
         if (data.isEmpty()) {
             return 0;
@@ -733,6 +768,7 @@ public class Dataframe {
      *
      * @return A {@link List} of {@link List<Value>}
      */
+    @Transient
     public List<List<Value>> getInputRows() {
 
         final List<Integer> inputColumns = getInputsIndices();
@@ -750,6 +786,7 @@ public class Dataframe {
      *
      * @return A {@link List} of {@link List<Value>}
      */
+    @Transient
     public List<List<Value>> getOutputRows() {
 
         final List<Integer> outputColumns = getOutputsIndices();
@@ -1001,7 +1038,7 @@ public class Dataframe {
         final List<Value> transformedColumn = data.get(column).stream()
                 .map(fn)
                 .collect(Collectors.toCollection(ArrayList::new));
-        data.set(column, transformedColumn);
+        data.set(column, new Column(transformedColumn));
     }
 
     /**
@@ -1036,7 +1073,7 @@ public class Dataframe {
             final List<Value> columnValuesSorted = Arrays.stream(sortedIndices)
                     .mapToObj(columnValuesUnsorted::get)
                     .collect(Collectors.toCollection(ArrayList::new));
-            data.set(c, columnValuesSorted);
+            data.set(c, new Column(columnValuesSorted));
         });
     }
 
@@ -1081,7 +1118,7 @@ public class Dataframe {
     }
 
     public void addColumn(String name, Type type, List<Value> values) {
-        data.add(new ArrayList<>(values));
+        data.add(new Column(values));
         metadata.add(
                 name,
                 null,
@@ -1142,14 +1179,17 @@ public class Dataframe {
         return predictions;
     }
 
+    @Transient
     public List<String> getIds() {
         return Collections.unmodifiableList(internalData.ids);
     }
 
+    @Transient
     public List<String> getTags() {
         return Collections.unmodifiableList(internalData.datapointTags);
     }
 
+    @Transient
     public List<LocalDateTime> getTimestamps() {
         return Collections.unmodifiableList(internalData.timestamps);
     }
@@ -1215,6 +1255,7 @@ public class Dataframe {
      * Return a subset of the dataframe containing only numeric columns
      *
      */
+    @Transient
     public Dataframe getNumericColumns() {
         final List<Type> colTypes = this.metadata.getTypes();
         final List<Integer> dropColumns = new ArrayList<>(colTypes.size());
@@ -1243,6 +1284,15 @@ public class Dataframe {
         }
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Id
+    public String getId() {
+        return id;
+    }
+
     public enum InternalColumn {
         TAG,
         ID,
@@ -1250,13 +1300,20 @@ public class Dataframe {
         INDEX,
     }
 
-    private class InternalData {
+    @Embeddable
+    private static class InternalData {
+        @ElementCollection
         private final List<String> datapointTags;
+
+        @ElementCollection
         private final List<String> ids;
+
+        @ElementCollection
         private final List<LocalDateTime> timestamps;
+
         private final int size;
 
-        InternalData() {
+        public InternalData() {
             this.datapointTags = new ArrayList<>();
             this.ids = new ArrayList<>();
             this.timestamps = new ArrayList<>();

@@ -15,32 +15,48 @@
  */
 package org.kie.trustyai.explainability.model.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
+
+@Embeddable
 public class AbstractCategoricalFeatureDomain<T> implements FeatureDomain<T> {
 
+    @Access(AccessType.FIELD)
     protected final Set<T> categories;
 
     protected AbstractCategoricalFeatureDomain(Set<T> categories) {
         this.categories = categories;
     }
 
+    public AbstractCategoricalFeatureDomain() {
+        categories = new HashSet<>();
+    }
+
     @Override
+    @Transient
     public boolean isEmpty() {
         return false;
     }
 
     @Override
+    @Transient
     public Double getLowerBound() {
         return null;
     }
 
     @Override
+    @Transient
     public Double getUpperBound() {
         return null;
     }
 
     @Override
+    @Transient
     public Set<T> getCategories() {
         return this.categories;
     }

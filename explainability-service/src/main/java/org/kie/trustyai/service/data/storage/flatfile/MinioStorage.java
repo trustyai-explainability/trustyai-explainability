@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.data.storage;
+package org.kie.trustyai.service.data.storage.flatfile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -17,6 +17,7 @@ import org.kie.trustyai.service.config.storage.MinioConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
+import org.kie.trustyai.service.data.storage.DataFormat;
 
 import io.minio.*;
 import io.minio.errors.*;
@@ -26,7 +27,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "MINIO")
 @ApplicationScoped
-public class MinioStorage extends Storage {
+public class MinioStorage extends FlatFileStorage {
 
     private static final Logger LOG = Logger.getLogger(MinioStorage.class);
 
@@ -40,6 +41,8 @@ public class MinioStorage extends Storage {
     private final String secretKey;
 
     public MinioStorage(MinioConfig config, StorageConfig storageConfig) {
+        super();
+
         LOG.info("Starting MinIO storage consumer");
         if (config.bucketName().isEmpty()) {
             throw new IllegalArgumentException("Missing MinIO bucket");
@@ -226,5 +229,10 @@ public class MinioStorage extends Storage {
         } catch (StorageReadException e) {
             return new Random().nextLong();
         }
+    }
+
+    @Override
+    public DataFormat getDataFormat() {
+        return DataFormat.CSV;
     }
 }
