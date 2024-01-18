@@ -25,8 +25,6 @@ import jakarta.persistence.Transient;
 
 @Embeddable
 public class AbstractCategoricalFeatureDomain<T> implements FeatureDomain<T> {
-
-    @Access(AccessType.FIELD)
     protected final Set<T> categories;
 
     protected AbstractCategoricalFeatureDomain(Set<T> categories) {

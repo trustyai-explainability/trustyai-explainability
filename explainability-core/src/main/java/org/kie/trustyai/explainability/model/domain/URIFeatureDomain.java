@@ -21,6 +21,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
@@ -50,5 +53,12 @@ public class URIFeatureDomain extends AbstractCategoricalFeatureDomain<URI> {
 
     public static FeatureDomain<URI> create(URI... categories) {
         return new URIFeatureDomain(new HashSet<>(Arrays.asList(categories)));
+    }
+
+    @ElementCollection
+    @Access(AccessType.FIELD)
+    @Override
+    public Set<URI> getCategories(){
+        return this.categories;
     }
 }

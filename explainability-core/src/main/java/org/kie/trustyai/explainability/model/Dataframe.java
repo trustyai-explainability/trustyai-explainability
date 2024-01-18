@@ -36,8 +36,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -51,9 +49,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 
-@Table
+@Entity
 public class Dataframe {
-    @OneToMany
+    @ElementCollection
     private final List<Column> data;
 
     @OneToOne

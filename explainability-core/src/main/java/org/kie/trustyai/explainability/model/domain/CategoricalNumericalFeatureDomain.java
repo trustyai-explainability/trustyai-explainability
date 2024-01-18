@@ -20,7 +20,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
+import org.hibernate.annotations.Polymorphism;
 
 @Embeddable
 public class CategoricalNumericalFeatureDomain extends AbstractCategoricalFeatureDomain<Integer> {
@@ -49,5 +53,12 @@ public class CategoricalNumericalFeatureDomain extends AbstractCategoricalFeatur
 
     public static FeatureDomain<Integer> create(Integer... categories) {
         return new CategoricalNumericalFeatureDomain(new HashSet<>(Arrays.asList(categories)));
+    }
+
+    @ElementCollection
+    @Access(AccessType.FIELD)
+    @Override
+    public Set<Integer> getCategories(){
+        return this.categories;
     }
 }

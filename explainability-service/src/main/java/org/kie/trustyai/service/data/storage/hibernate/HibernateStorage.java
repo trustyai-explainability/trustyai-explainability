@@ -33,6 +33,7 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
 
     public HibernateStorage(ServiceConfig serviceConfig, StorageConfig storageConfig) {
         LOG.info("Starting Hibernate storage consumer");
+
         if (serviceConfig.batchSize().isPresent()) {
             this.batchSize = serviceConfig.batchSize().getAsInt();
         } else {
@@ -88,7 +89,7 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
     @Override
     public boolean dataframeExists(String modelId) throws StorageReadException {
         try {
-            return em.getReference(Dataframe.class, modelId) != null;
+            return em.find(Dataframe.class, modelId) != null;
         } catch (EntityNotFoundException e) {
             return false;
         }

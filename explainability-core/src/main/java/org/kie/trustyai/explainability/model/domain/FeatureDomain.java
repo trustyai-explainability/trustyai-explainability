@@ -23,6 +23,8 @@ import jakarta.persistence.AccessType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
 
 /**
  * Information about the search space domain for the model's features.
@@ -67,8 +69,7 @@ public interface FeatureDomain<T> {
      *
      * @return the end value
      */
-    @Access(AccessType.FIELD)
-    @ElementCollection
+    @Transient
     Set<T> getCategories();
 
     /**
