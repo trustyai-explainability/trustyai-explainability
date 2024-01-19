@@ -22,6 +22,7 @@ import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.AdvancedGroupMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
@@ -108,6 +109,25 @@ class DisparateImpactRatioEndpointTest {
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
+                .then().statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("DIR", response.getName());
+        assertFalse(Double.isNaN(response.getValue()));
+    }
+
+    @Test
+    void postAdvancedCorrect() throws JsonProcessingException {
+        datasource.get().reset();
+
+        final AdvancedGroupMetricRequest payload = RequestPayloadGenerator.advancedCorrect();
+
+        final BaseMetricResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/advanced").peek()
                 .then().statusCode(Response.Status.OK.getStatusCode())
                 .extract()
                 .body().as(BaseMetricResponse.class);
