@@ -137,7 +137,7 @@ public class ServiceMetadataEndpoint {
 
         inputSchema.setNameMapping(nameMapping.getInputMapping());
         outputSchema.setNameMapping(nameMapping.getOutputMapping());
-        dataSource.get().saveMetadata(metadata, nameMapping.getModelId());
+        dataSource.get().saveMetadata(metadata, nameMapping.getModelId(), true);
 
         return Response.ok().entity("Feature and output name mapping successfully applied.").build();
     }

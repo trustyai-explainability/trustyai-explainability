@@ -24,7 +24,6 @@ import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
-import org.hibernate.annotations.Polymorphism;
 
 @Embeddable
 public class CategoricalNumericalFeatureDomain extends AbstractCategoricalFeatureDomain<Integer> {
@@ -58,7 +57,7 @@ public class CategoricalNumericalFeatureDomain extends AbstractCategoricalFeatur
     @ElementCollection
     @Access(AccessType.FIELD)
     @Override
-    public Set<Integer> getCategories(){
+    public Set<Integer> getCategories() {
         return this.categories;
     }
 }

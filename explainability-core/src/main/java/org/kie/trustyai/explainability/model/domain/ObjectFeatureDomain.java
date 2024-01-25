@@ -42,22 +42,22 @@ public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<Object
      * @param categories A set with all the allowed category values
      * @return A {@link FeatureDomain}
      */
-    public static FeatureDomain<Object> create(Set<Object> categories) {
+    public static ObjectFeatureDomain create(Set<Object> categories) {
         return new ObjectFeatureDomain(categories);
     }
 
-    public static FeatureDomain<Object> create(List<Object> categories) {
+    public static ObjectFeatureDomain create(List<Object> categories) {
         return new ObjectFeatureDomain(new HashSet<>(categories));
     }
 
-    public static FeatureDomain<Object> create(Object... categories) {
+    public static ObjectFeatureDomain create(Object... categories) {
         return new ObjectFeatureDomain(new HashSet<>(Arrays.asList(categories)));
     }
 
     @ElementCollection
     @Access(AccessType.FIELD)
     @Override
-    public Set<Object> getCategories(){
+    public Set<Object> getCategories() {
         return this.categories;
     }
 }

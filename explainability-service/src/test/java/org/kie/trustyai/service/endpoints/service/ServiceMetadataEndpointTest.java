@@ -73,7 +73,7 @@ class ServiceMetadataEndpointTest {
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
         assertEquals(2, serviceMetadata.get(0).getData().getObservations());
-        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
         assertEquals(new HashSet<>(dataframe.getInputNames()),
@@ -103,8 +103,8 @@ class ServiceMetadataEndpointTest {
         assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
 
         // check column values
-        assertEquals(50, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
-        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("race").getValues().size());
+        assertEquals(50, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues().size());
+        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("race").getColumnValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
     }
@@ -129,8 +129,8 @@ class ServiceMetadataEndpointTest {
         assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
 
         // check column values
-        assertEquals(null, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues());
-        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("race").getValues().size());
+        assertEquals(null, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues());
+        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("race").getColumnValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
     }
@@ -349,14 +349,14 @@ class ServiceMetadataEndpointTest {
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
         assertEquals(nRequestsModelA, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
         assertEquals(modelANobs, serviceMetadata.get(0).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
         // Model B
         assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("DIR"));
         assertEquals(nRequestsModelB, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("SPD"));
         assertEquals(modelBNobs, serviceMetadata.get(1).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getColumnValues().size());
         assertFalse(serviceMetadata.get(1).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(1).getData().getInputSchema().getItems().isEmpty());
 
@@ -430,14 +430,14 @@ class ServiceMetadataEndpointTest {
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
         assertEquals(nRequestsModelA, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
         assertEquals(modelANobs, serviceMetadata.get(0).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
         // Model B
         assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("DIR"));
         assertEquals(nRequestsModelB, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("SPD"));
         assertEquals(modelBNobs, serviceMetadata.get(1).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getColumnValues().size());
         assertFalse(serviceMetadata.get(1).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(1).getData().getInputSchema().getItems().isEmpty());
 
@@ -478,14 +478,14 @@ class ServiceMetadataEndpointTest {
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
         assertEquals(modelANobs, serviceMetadata.get(0).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
         // Model B
         assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("DIR"));
         assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("SPD"));
         assertEquals(modelBNobs, serviceMetadata.get(1).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getValues().size());
+        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getColumnValues().size());
         assertFalse(serviceMetadata.get(1).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(1).getData().getInputSchema().getItems().isEmpty());
 

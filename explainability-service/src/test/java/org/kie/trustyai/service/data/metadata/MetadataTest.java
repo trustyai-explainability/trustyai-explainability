@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.UnderlyingObject;
 import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
@@ -16,12 +17,12 @@ class MetadataTest {
     private Map<String, SchemaItem> generateSchema(int n, double valueOffset, boolean makeNulls) {
         Map<String, SchemaItem> out = new HashMap<>();
         for (int i = 0; i < n; i++) {
-            Set<Object> values;
+            Set<UnderlyingObject> values;
             if (i % 2 == 0 && makeNulls) {
                 values = null;
             } else {
                 values = new HashSet<>();
-                values.add(i + valueOffset);
+                values.add(new UnderlyingObject(i + valueOffset));
             }
             SchemaItem row = new SchemaItem(DataType.DOUBLE, Integer.toString(i), values, i);
             out.put(Integer.toString(i), row);
@@ -45,10 +46,10 @@ class MetadataTest {
             int idx = Integer.parseInt(entry.getKey());
             //if null
             if (idx % 2 == 0) {
-                assertNull(entry.getValue().getValues());
+                assertNull(entry.getValue().getColumnValues());
             } else {
-                assertTrue(entry.getValue().getValues().contains(idx + .1));
-                assertTrue(entry.getValue().getValues().contains(idx + .2));
+                assertTrue(entry.getValue().getColumnValues().contains(new UnderlyingObject(idx + .1)));
+                assertTrue(entry.getValue().getColumnValues().contains(new UnderlyingObject(idx + .2)));
             }
         }
 
@@ -57,10 +58,10 @@ class MetadataTest {
             int idx = Integer.parseInt(entry.getKey());
 
             if (idx % 2 == 0) {
-                assertNull(entry.getValue().getValues());
+                assertNull(entry.getValue().getColumnValues());
             } else {
-                assertTrue(entry.getValue().getValues().contains(idx + .1));
-                assertTrue(entry.getValue().getValues().contains(idx + .2));
+                assertTrue(entry.getValue().getColumnValues().contains(new UnderlyingObject(idx + .1)));
+                assertTrue(entry.getValue().getColumnValues().contains(new UnderlyingObject(idx + .2)));
             }
         }
 

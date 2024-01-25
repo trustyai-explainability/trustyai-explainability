@@ -31,7 +31,7 @@ public class CSVUtils {
     private static List<Output> getOutputs(List<String> outputNames, Metadata metadata, CSVRecord entry) {
         return outputNames.stream().map(colName -> {
             final SchemaItem schemaItem = metadata.getOutputSchema().getNameMappedItems().get(colName);
-            final int inputIndex = schemaItem.getIndex();
+            final int inputIndex = schemaItem.getColumnIndex();
             final String name = schemaItem.getName();
             final DataType vtypes = schemaItem.getType();
             final String valueString = entry.get(inputIndex);
@@ -67,12 +67,12 @@ public class CSVUtils {
 
         final List<String> inputNames = metadata.getInputSchema().getNameMappedItems().entrySet()
                 .stream()
-                .sorted(Comparator.comparingInt(e -> e.getValue().getIndex()))
+                .sorted(Comparator.comparingInt(e -> e.getValue().getColumnIndex()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
         final List<String> outputNames = metadata.getOutputSchema().getNameMappedItems().entrySet()
                 .stream()
-                .sorted(Comparator.comparingInt(e -> e.getValue().getIndex()))
+                .sorted(Comparator.comparingInt(e -> e.getValue().getColumnIndex()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
@@ -82,7 +82,7 @@ public class CSVUtils {
             if (!header || idx.get() > 0) {
                 final List<Feature> inputFeatures = inputNames.stream().map(colName -> {
                     final SchemaItem schemaItem = metadata.getInputSchema().getNameMappedItems().get(colName);
-                    final int inputIndex = schemaItem.getIndex();
+                    final int inputIndex = schemaItem.getColumnIndex();
                     final String name = schemaItem.getName();
                     final String valueString = entry.get(inputIndex);
                     final DataType types = schemaItem.getType();

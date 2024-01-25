@@ -5,6 +5,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Transient;
 import org.jboss.logging.Logger;
 
 import jakarta.persistence.ElementCollection;
@@ -15,13 +20,14 @@ import jakarta.persistence.OneToMany;
 public class Schema {
     private static final Logger LOG = Logger.getLogger(Schema.class);
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private final Map<String, SchemaItem> items;
 
     @ElementCollection
     private Map<String, String> nameMapping = new HashMap<>();
 
-    @OneToMany
+    @Transient
     private Map<String, SchemaItem> mappedItems = new HashMap<>();
 
     public Schema() {

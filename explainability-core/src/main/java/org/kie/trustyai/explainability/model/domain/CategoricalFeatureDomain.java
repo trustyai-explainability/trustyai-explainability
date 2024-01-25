@@ -57,7 +57,7 @@ public class CategoricalFeatureDomain extends AbstractCategoricalFeatureDomain<S
     @ElementCollection
     @Access(AccessType.FIELD)
     @Override
-    public Set<String> getCategories(){
+    public Set<String> getCategories() {
         return this.categories;
     }
 }

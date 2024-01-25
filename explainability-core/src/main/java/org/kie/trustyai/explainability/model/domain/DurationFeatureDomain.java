@@ -15,7 +15,6 @@
  */
 package org.kie.trustyai.explainability.model.domain;
 
-import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Set;
@@ -46,7 +45,7 @@ public class DurationFeatureDomain extends NumericalFeatureDomain {
      * @param upperBound The end point of the search space
      * @return A {@link FeatureDomain}
      */
-    public static FeatureDomain<Duration> create(double lowerBound, double upperBound, TemporalUnit unit) {
+    public static DurationFeatureDomain create(double lowerBound, double upperBound, TemporalUnit unit) {
         return new DurationFeatureDomain(lowerBound, upperBound, unit);
     }
 
@@ -69,7 +68,7 @@ public class DurationFeatureDomain extends NumericalFeatureDomain {
 
     @Override
     @Transient
-    public Set<Duration> getCategories() {
+    public Set<Double> getCategories() {
         return null;
     }
 

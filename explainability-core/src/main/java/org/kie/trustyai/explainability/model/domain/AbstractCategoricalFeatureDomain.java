@@ -18,13 +18,11 @@ package org.kie.trustyai.explainability.model.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.persistence.Access;
-import jakarta.persistence.AccessType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
 
 @Embeddable
-public class AbstractCategoricalFeatureDomain<T> implements FeatureDomain<T> {
+public class AbstractCategoricalFeatureDomain<T> extends FeatureDomain<T> {
     protected final Set<T> categories;
 
     protected AbstractCategoricalFeatureDomain(Set<T> categories) {

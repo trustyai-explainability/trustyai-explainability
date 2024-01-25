@@ -60,6 +60,7 @@ public class Dataframe {
 
     @ElementCollection
     private final Map<String, Integer> idToIDX;
+
     private String id;
 
     public Dataframe() {

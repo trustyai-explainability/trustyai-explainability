@@ -60,7 +60,7 @@ public class DataSource {
     public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
         Dataframe df;
         Storage st = storage.get();
-        if (st.getDataFormat() == DataFormat.BEAN) {
+        if (st.getDataFormat() == DataFormat.CSV) {
             FlatFileStorage ffst = (FlatFileStorage) st;
 
             final ByteBuffer dataByteBuffer;
@@ -96,7 +96,7 @@ public class DataSource {
 
     public Dataframe getDataframe(final String modelId, int batchSize) throws DataframeCreateException {
         Dataframe df;
-        if (storage.get().getDataFormat() == DataFormat.BEAN) {
+        if (storage.get().getDataFormat() == DataFormat.CSV) {
             FlatFileStorage ffst = (FlatFileStorage) storage.get();
 
             final ByteBuffer byteBuffer;
@@ -145,10 +145,12 @@ public class DataSource {
             final Metadata metadata = new Metadata();
             metadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
             metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
+            LOG.info("input schema:"+metadata.getInputSchema().getItems());
+            LOG.info("output schema:"+metadata.getOutputSchema().getItems());
             metadata.setModelId(modelId);
             metadata.setObservations(dataframe.getRowDimension());
             try {
-                saveMetadata(metadata, modelId);
+                saveMetadata(metadata, modelId, false);
             } catch (StorageWriteException e) {
                 throw new DataframeCreateException(e.getMessage());
             }
@@ -168,7 +170,7 @@ public class DataSource {
                 metadata.mergeOutputSchema(newOutputSchema);
 
                 try {
-                    saveMetadata(metadata, modelId);
+                    saveMetadata(metadata, modelId, true);
                 } catch (StorageWriteException e) {
                     throw new DataframeCreateException(e.getMessage());
                 }
@@ -203,10 +205,14 @@ public class DataSource {
     public void updateMetadataObservations(int number, String modelId) {
         final Metadata metadata = getMetadata(modelId);
         metadata.incrementObservations(number);
-        saveMetadata(metadata, modelId);
+        saveMetadata(metadata, modelId, true);
     }
 
     public void saveMetadata(Metadata metadata, String modelId) throws StorageWriteException {
+        saveMetadata(metadata, modelId, false);
+    }
+
+    public void saveMetadata(Metadata metadata, String modelId, boolean isUpdate) throws StorageWriteException {
         if (storage.get().getDataFormat() == DataFormat.CSV) {
             final ObjectMapper mapper = new ObjectMapper();
             mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
@@ -219,7 +225,17 @@ public class DataSource {
 
             ((FlatFileStorage) storage.get()).save(byteBuffer, modelId + "-" + METADATA_FILENAME);
         } else {
-            ((HibernateStorage) storage.get()).saveMetadata(metadata, modelId);
+            if (isUpdate){
+                if (!metadata.getModelId().equals(modelId)){
+                    throw new IllegalArgumentException(String.format(
+                            "When updating metadata record in database, the metadata's modelId must match the modelId passed to saveMetadata(). " +
+                            "metadata.getModelId()=%s, modelId passed to saveMetadata()=%s",
+                            metadata.getModelId(), modelId));
+                }
+                ((HibernateStorage) storage.get()).updateMetadata(metadata);
+            } else {
+                ((HibernateStorage) storage.get()).saveMetadata(metadata, modelId);
+            }
         }
     }
 
@@ -237,7 +253,6 @@ public class DataSource {
         } else {
             return ((HibernateStorage) storage.get()).readMetadata(modelId);
         }
-
     }
 
     public void verifyKnownModels() {

@@ -58,7 +58,7 @@ public class CurrencyFeatureDomain extends AbstractCategoricalFeatureDomain<Curr
     @ElementCollection
     @Access(AccessType.FIELD)
     @Override
-    public Set<Currency> getCategories(){
+    public Set<Currency> getCategories() {
         return this.categories;
     }
 }

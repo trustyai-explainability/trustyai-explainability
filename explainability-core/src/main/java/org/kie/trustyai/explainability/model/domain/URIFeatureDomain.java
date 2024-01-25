@@ -58,7 +58,7 @@ public class URIFeatureDomain extends AbstractCategoricalFeatureDomain<URI> {
     @ElementCollection
     @Access(AccessType.FIELD)
     @Override
-    public Set<URI> getCategories(){
+    public Set<URI> getCategories() {
         return this.categories;
     }
 }

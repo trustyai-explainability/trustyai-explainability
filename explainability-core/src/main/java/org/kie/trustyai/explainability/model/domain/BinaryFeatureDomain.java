@@ -21,9 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.persistence.Access;
-import jakarta.persistence.AccessType;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
 
@@ -58,7 +55,7 @@ public class BinaryFeatureDomain extends AbstractCategoricalFeatureDomain<ByteBu
 
     @Transient
     @Override
-    public Set<ByteBuffer> getCategories(){
+    public Set<ByteBuffer> getCategories() {
         return this.categories;
     }
 }

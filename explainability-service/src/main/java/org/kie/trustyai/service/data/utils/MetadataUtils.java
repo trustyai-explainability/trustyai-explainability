@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.UnderlyingObject;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
@@ -40,12 +41,12 @@ public class MetadataUtils {
         schemaItem.setName(dataframe.getColumnNames().get(i));
 
         // grab unique values
-        Set<Object> uniqueValues = dataframe.getColumn(i).stream()
-                .map(Value::getUnderlyingObject)
+        Set<UnderlyingObject> uniqueValues = dataframe.getColumn(i).stream()
+                .map(Value::getUnderlyingObjectContainer)
                 .collect(Collectors.toSet());
-        schemaItem.setValues(uniqueValues.size() < 200 ? uniqueValues : null);
+        schemaItem.setColumnValues(uniqueValues.size() < 200 ? uniqueValues : null);
 
-        schemaItem.setIndex(i);
+        schemaItem.setColumnIndex(i);
         return schemaItem;
     }
 

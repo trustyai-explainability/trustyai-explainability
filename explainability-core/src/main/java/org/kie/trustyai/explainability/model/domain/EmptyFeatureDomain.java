@@ -21,7 +21,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
 
 @Embeddable
-public class EmptyFeatureDomain implements FeatureDomain<Object> {
+public class EmptyFeatureDomain extends FeatureDomain<Object> {
 
     public static FeatureDomain<Object> create() {
         return new EmptyFeatureDomain();

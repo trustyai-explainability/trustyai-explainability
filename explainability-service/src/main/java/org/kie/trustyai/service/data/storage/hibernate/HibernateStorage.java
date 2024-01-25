@@ -1,9 +1,11 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import jakarta.persistence.PersistenceContext;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -17,15 +19,15 @@ import org.kie.trustyai.service.data.storage.Storage;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
+
 @LookupIfProperty(name = "service.storage.format", stringValue = "HIBERNATE")
 @ApplicationScoped
 public class HibernateStorage extends Storage implements HibernateStorageInterface {
-    @Inject
+    @PersistenceContext
     EntityManager em;
 
     private static final Logger LOG = Logger.getLogger(HibernateStorage.class);
@@ -42,6 +44,7 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
             throw new IllegalArgumentException(message);
         }
     }
+
 
     @Override
     public DataFormat getDataFormat() {
@@ -74,12 +77,19 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
     }
 
     @Override
+    @Transactional
     public void saveMetadata(Metadata metadata, String modelId) throws StorageWriteException {
         metadata.setModelId(modelId);
         em.persist(metadata);
     }
 
+    @Transactional
+    public void updateMetadata(Metadata metadata) throws StorageWriteException {
+        em.merge(metadata);
+    }
+
     @Override
+    @Transactional
     public void append(Dataframe dataframe, String modelId) throws StorageWriteException {
         Dataframe original = readData(modelId);
         original.addPredictions(dataframe.asPredictions());

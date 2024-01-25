@@ -23,7 +23,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
 
 @Embeddable
-public class NumericalFeatureDomain implements FeatureDomain {
+public class NumericalFeatureDomain extends FeatureDomain<Double> {
 
     protected final double lowerBound;
     protected final double upperBound;
@@ -69,7 +69,7 @@ public class NumericalFeatureDomain implements FeatureDomain {
 
     @Override
     @Transient
-    public Set<?> getCategories() {
+    public Set<Double> getCategories() {
         return null;
     }
 }
