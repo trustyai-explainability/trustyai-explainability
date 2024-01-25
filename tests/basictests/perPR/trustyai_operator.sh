@@ -4,8 +4,8 @@ source $TEST_DIR/common
 
 MY_DIR=$(readlink -f `dirname "${BASH_SOURCE[0]}"`)
 
-source ${MY_DIR}/../util
-RESOURCEDIR="${MY_DIR}/../resources"
+source ${MY_DIR}/../../util
+RESOURCEDIR="${MY_DIR}/../../resources"
 
 TEST_USER=${OPENSHIFT_TESTUSER_NAME:-"admin"} #Username used to login
 TEST_PASS=${OPENSHIFT_TESTUSER_PASS:-"admin"} #Password used to login
@@ -148,7 +148,11 @@ function teardown_trustyai_test() {
   oc project $MM_NAMESPACE || eval "$FAILURE_HANDLING"
   oc get pods >> ${ARTIFACT_DIR}/${MM_NAMESPACE}.pods.txt
   oc get events >>  ${ARTIFACT_DIR}/${MM_NAMESPACE}.events.txt
-  oc logs -n opendatahub $(oc get pods -o name -n opendatahub | grep trustyai) >> ${ARTIFACT_DIR}/${ODHPROJECT}.trustyoperatorlogs.txt
+
+  oc project $ODHPROJECT
+  oc logs $(oc get pods -o name -n opendatahub | grep trustyai) >> ${ARTIFACT_DIR}/${ODHPROJECT}.trustyoperatorlogs.txt
+
+  oc project $MM_NAMESPACE || eval "$FAILURE_HANDLING"
   oc logs $(oc get pods -o name | grep trustyai) >> ${ARTIFACT_DIR}/trusty_service_pod_logs.txt || true
   oc exec $(oc get pods -o name | grep trustyai) -c trustyai-service -- bash -c "ls /inputs/" >> ${ARTIFACT_DIR}/trusty_service_inputs_ls.txt || true
 
@@ -159,8 +163,8 @@ function teardown_trustyai_test() {
   if [ $REQUESTS_CREATED = true ]; then
     for METRIC_NAME in "spd" "dir"
     do
-      curl_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests
-      for REQUEST in $(curl -sk -H "Authorization: Bearer ${TOKEN}" $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
+
+      for REQUEST in $(curl_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
       do
         echo -n $REQUEST": "
         curl_token -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
