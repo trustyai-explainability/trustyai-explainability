@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -145,14 +145,14 @@ public class MockDatasource extends DataSource {
         return Dataframe.createFrom(predictions);
     }
 
-    public Metadata createMetadata(Dataframe dataframe) {
-        final Metadata metadata = new Metadata();
+    public StorageMetadata createMetadata(Dataframe dataframe) {
+        final StorageMetadata storageMetadata = new StorageMetadata();
 
-        metadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
-        metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
-        metadata.setObservations(dataframe.getRowDimension());
+        storageMetadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
+        storageMetadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
+        storageMetadata.setObservations(dataframe.getRowDimension());
 
-        return metadata;
+        return storageMetadata;
     }
 
     public void reset() throws JsonProcessingException {

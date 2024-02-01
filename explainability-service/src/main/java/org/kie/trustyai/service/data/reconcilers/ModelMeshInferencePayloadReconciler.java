@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.data.utils;
+package org.kie.trustyai.service.data.reconcilers;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
 
     protected static final String MM_MODEL_SUFFIX = "__isvc";
 
-    protected static String standardizeModelId(String inboundModelId) {
+    public static String standardizeModelId(String inboundModelId) {
         if (inboundModelId != null && inboundModelId.contains(MM_MODEL_SUFFIX)) {
             int index = inboundModelId.lastIndexOf(MM_MODEL_SUFFIX);
             return inboundModelId.substring(0, index);

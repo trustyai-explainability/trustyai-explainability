@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.endpoints.data.DataEndpoint;
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.MatchOperation;
@@ -133,14 +133,14 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
         return outcome;
     }
 
-    private boolean checkColumnTypeCompatibility(RowMatcher rowMatch, String modelId, Metadata metadata, ConstraintValidatorContext context) {
-        boolean feature = metadata.getInputSchema().getItems().containsKey(rowMatch.getColumnName());
+    private boolean checkColumnTypeCompatibility(RowMatcher rowMatch, String modelId, StorageMetadata storageMetadata, ConstraintValidatorContext context) {
+        boolean feature = storageMetadata.getInputSchema().getItems().containsKey(rowMatch.getColumnName());
         boolean outcome = true;
         for (ValueNode vn : rowMatch.getValues()) {
             if (feature) {
-                outcome = GenericValidationUtils.validateFeatureColumnType(context, metadata, modelId, rowMatch.getColumnName(), List.of(vn)) && outcome;
+                outcome = GenericValidationUtils.validateFeatureColumnType(context, storageMetadata, modelId, rowMatch.getColumnName(), List.of(vn)) && outcome;
             } else {
-                outcome = GenericValidationUtils.validateOutputColumnType(context, metadata, modelId, rowMatch.getColumnName(), List.of(vn)) && outcome;
+                outcome = GenericValidationUtils.validateOutputColumnType(context, storageMetadata, modelId, rowMatch.getColumnName(), List.of(vn)) && outcome;
             }
         }
         return outcome;
@@ -155,7 +155,7 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
             return false;
         } else {
             boolean result = true;
-            final Metadata metadata = dataSource.get().getMetadata(modelId);
+            final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId);
             for (RowMatcher rowMatch : Stream.of(dataRequestPayload.getMatchAll(), dataRequestPayload.getMatchAny(), dataRequestPayload.getMatchNone()).flatMap(Collection::stream)
                     .collect(Collectors.toList())) {
                 boolean validOp = checkOperationExists(rowMatch, modelId, context);
@@ -176,11 +176,11 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
                     }
                 } else {
                     // make sure the column exists as a feature/output in the data
-                    result = GenericValidationUtils.validateColumnName(context, metadata, modelId, rowMatch.getColumnName()) && result;
+                    result = GenericValidationUtils.validateColumnName(context, storageMetadata, modelId, rowMatch.getColumnName()) && result;
 
                     // make sure passed values are compatible with the chosen row
                     // ** SHORT-CUT IF COLUMN DOES NOT EXIST **
-                    result = result && checkColumnTypeCompatibility(rowMatch, modelId, metadata, context);
+                    result = result && checkColumnTypeCompatibility(rowMatch, modelId, storageMetadata, context);
                 }
 
                 // for the between operation, check that values passed have the right count and type

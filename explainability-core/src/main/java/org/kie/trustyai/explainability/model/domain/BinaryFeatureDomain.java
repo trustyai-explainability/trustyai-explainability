@@ -22,9 +22,10 @@ import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
-@Embeddable
+@Entity
 public class BinaryFeatureDomain extends AbstractCategoricalFeatureDomain<ByteBuffer> {
 
     private BinaryFeatureDomain(Set<ByteBuffer> categories) {

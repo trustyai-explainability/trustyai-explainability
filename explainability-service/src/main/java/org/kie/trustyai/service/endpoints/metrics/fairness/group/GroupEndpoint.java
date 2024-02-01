@@ -8,7 +8,7 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.definitions.GroupDefinitionRequest;
@@ -63,7 +63,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     public Response response(@ValidGroupMetricRequest GroupMetricRequest request) throws DataframeCreateException {
 
         final Dataframe dataframe;
-        final Metadata metadata;
+        final StorageMetadata storageMetadata;
         try {
             if (Objects.isNull(request.getBatchSize())) {
                 final int defaultBatchSize = serviceConfig.batchSize().getAsInt();
@@ -71,13 +71,13 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
                 request.setBatchSize(defaultBatchSize);
             }
             dataframe = super.dataSource.get().getDataframe(request.getModelId(), request.getBatchSize()).filterRowsBySynthetic(false);
-            metadata = dataSource.get().getMetadata(request.getModelId());
+            storageMetadata = dataSource.get().getMetadata(request.getModelId());
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
         }
 
-        RequestReconciler.reconcile(request, metadata);
+        RequestReconciler.reconcile(request, storageMetadata);
 
         final MetricValueCarrier metricValue;
         try {

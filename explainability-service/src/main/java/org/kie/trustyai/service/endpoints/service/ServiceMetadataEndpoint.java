@@ -9,7 +9,7 @@ import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
@@ -65,8 +65,8 @@ public class ServiceMetadataEndpoint {
             }
 
             try {
-                final Metadata metadata = dataSource.get().getMetadata(modelId);
-                serviceMetadata.setData(metadata);
+                final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId);
+                serviceMetadata.setData(storageMetadata);
             } catch (DataframeCreateException | StorageReadException | NullPointerException e) {
                 LOG.warn("Problem creating dataframe: " + e.getMessage(), e);
             }
@@ -130,14 +130,14 @@ public class ServiceMetadataEndpoint {
                     .entity("Model ID " + nameMapping.getModelId() + " does not exist in TrustyAI metadata.")
                     .build();
         }
-        final Metadata metadata = dataSource.get().getMetadata(nameMapping.getModelId());
+        final StorageMetadata storageMetadata = dataSource.get().getMetadata(nameMapping.getModelId());
 
-        Schema inputSchema = metadata.getInputSchema();
-        Schema outputSchema = metadata.getOutputSchema();
+        Schema inputSchema = storageMetadata.getInputSchema();
+        Schema outputSchema = storageMetadata.getOutputSchema();
 
         inputSchema.setNameMapping(nameMapping.getInputMapping());
         outputSchema.setNameMapping(nameMapping.getOutputMapping());
-        dataSource.get().saveMetadata(metadata, nameMapping.getModelId(), true);
+        dataSource.get().saveMetadata(storageMetadata, nameMapping.getModelId(), true);
 
         return Response.ok().entity("Feature and output name mapping successfully applied.").build();
     }

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import jakarta.persistence.CascadeType;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 
@@ -31,7 +33,7 @@ public class DataframeMetadata {
     @ElementCollection
     private final List<Boolean> constrained;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<FeatureDomain> domains;
 
     @ElementCollection
@@ -87,13 +89,13 @@ public class DataframeMetadata {
         this.constrained.add(constraint);
         this.domains.add(domain);
         this.inputs.add(input);
-        this.cachedColumnNames.add(nameAlias == null ? name : nameAlias);
+        this.cachedColumnNames.add(nameAlias.equals("") ? name : nameAlias);
     }
 
     public synchronized void add(Feature feature) {
         add(
                 feature.getName(),
-                null,
+                "", // empty string == no alias for this column
                 feature.getType(),
                 feature.isConstrained(),
                 feature.getDomain(),
@@ -103,7 +105,7 @@ public class DataframeMetadata {
     public synchronized void add(Output output) {
         add(
                 output.getName(),
-                null,
+                "", // empty string == no alias for this column
                 output.getType(),
                 true,
                 EmptyFeatureDomain.create(),
@@ -114,7 +116,7 @@ public class DataframeMetadata {
     private void updateCachedColumnNames() {
         List<String> newNames = new ArrayList<>();
         for (int i = 0; i < this.names.size(); i++) {
-            if (this.nameAliases.get(i) != null) {
+            if (!this.nameAliases.get(i).equals("")) {
                 newNames.add(this.nameAliases.get(i));
             } else {
                 newNames.add(this.names.get(i));
@@ -134,11 +136,7 @@ public class DataframeMetadata {
     protected void setNameAliases(Map<String, String> aliases) {
         List<String> newAliases = new ArrayList<>();
         for (String name : names) {
-            if (aliases.containsKey(name)) {
-                newAliases.add(aliases.get(name));
-            } else {
-                newAliases.add(null);
-            }
+            newAliases.add(aliases.getOrDefault(name, ""));
         }
         this.nameAliases = newAliases;
         updateCachedColumnNames();

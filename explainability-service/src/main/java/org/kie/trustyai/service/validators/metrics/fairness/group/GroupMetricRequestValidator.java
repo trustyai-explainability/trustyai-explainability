@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 
@@ -34,25 +34,25 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
         if (!GenericValidationUtils.validateModelId(context, dataSource, modelId)) {
             result = false;
         } else {
-            final Metadata metadata = dataSource.get().getMetadata(modelId);
+            final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId);
             final String outcomeName = request.getOutcomeName();
             final String protectedAttribute = request.getProtectedAttribute();
 
             // Outcome name or attribute name not present
-            boolean validOutputName = GenericValidationUtils.validateOutputColumnName(context, metadata, modelId, outcomeName);
-            boolean validAttributeName = GenericValidationUtils.validateFeatureColumnName(context, metadata, modelId, protectedAttribute, "protected attribute");
+            boolean validOutputName = GenericValidationUtils.validateOutputColumnName(context, storageMetadata, modelId, outcomeName);
+            boolean validAttributeName = GenericValidationUtils.validateFeatureColumnName(context, storageMetadata, modelId, protectedAttribute, "protected attribute");
 
             // set result to failure if either above are false
             result = validOutputName && validAttributeName;
 
             if (validOutputName) {
-                result = GenericValidationUtils.validateOutputColumnType(context, metadata, modelId, outcomeName, request.getFavorableOutcome().getRawValueNodes()) && result;
+                result = GenericValidationUtils.validateOutputColumnType(context, storageMetadata, modelId, outcomeName, request.getFavorableOutcome().getRawValueNodes()) && result;
             }
 
             if (validAttributeName) {
-                result = GenericValidationUtils.validateFeatureColumnType(context, metadata, modelId, protectedAttribute, request.getPrivilegedAttribute().getRawValueNodes(), "privileged attribute")
+                result = GenericValidationUtils.validateFeatureColumnType(context, storageMetadata, modelId, protectedAttribute, request.getPrivilegedAttribute().getRawValueNodes(), "privileged attribute")
                         && result;
-                result = GenericValidationUtils.validateFeatureColumnType(context, metadata, modelId, protectedAttribute, request.getUnprivilegedAttribute().getRawValueNodes(),
+                result = GenericValidationUtils.validateFeatureColumnType(context, storageMetadata, modelId, protectedAttribute, request.getUnprivilegedAttribute().getRawValueNodes(),
                         "unprivileged attribute") && result;
             }
             if (Objects.nonNull(request.getBatchSize()) && request.getBatchSize() <= 0) {

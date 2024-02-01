@@ -6,29 +6,38 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Transient;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.MapKey;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import org.jboss.logging.Logger;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
 
-@Embeddable
+@Entity
+@Table(name="StorageSchema")
 public class Schema {
     private static final Logger LOG = Logger.getLogger(Schema.class);
 
     @OneToMany(cascade = CascadeType.ALL)
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private final Map<String, SchemaItem> items;
+    @MapKey(name = "name")
+    private Map<String, SchemaItem> items;
 
     @ElementCollection
     private Map<String, String> nameMapping = new HashMap<>();
 
     @Transient
     private Map<String, SchemaItem> mappedItems = new HashMap<>();
+
+    @Id
+    @GeneratedValue
+    private Long id;
 
     public Schema() {
         this.items = new ConcurrentHashMap<>();
@@ -105,5 +114,13 @@ public class Schema {
                 "items=" + items +
                 ", nameMapping=" + nameMapping +
                 '}';
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

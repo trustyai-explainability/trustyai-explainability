@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 
@@ -27,8 +27,8 @@ public class GenericValidationUtils {
         return true;
     }
 
-    public static boolean validateFeatureColumnName(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, String objectName) {
-        if (!metadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
+    public static boolean validateFeatureColumnName(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, String objectName) {
+        if (!storageMetadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
             context.buildConstraintViolationWithTemplate("No " + objectName + " found with name=" + columnName)
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
@@ -38,12 +38,12 @@ public class GenericValidationUtils {
         return true;
     }
 
-    public static boolean validateFeatureColumnName(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName) {
-        return validateFeatureColumnName(context, metadata, modelId, columnName, "feature");
+    public static boolean validateFeatureColumnName(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName) {
+        return validateFeatureColumnName(context, storageMetadata, modelId, columnName, "feature");
     }
 
-    public static boolean validateOutputColumnName(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, String objectName) {
-        if (!metadata.getOutputSchema().getNameMappedItems().containsKey(columnName)) {
+    public static boolean validateOutputColumnName(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, String objectName) {
+        if (!storageMetadata.getOutputSchema().getNameMappedItems().containsKey(columnName)) {
             context.buildConstraintViolationWithTemplate("No " + objectName + " found with name=" + columnName)
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
@@ -53,12 +53,12 @@ public class GenericValidationUtils {
         return true;
     }
 
-    public static boolean validateOutputColumnName(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName) {
-        return validateOutputColumnName(context, metadata, modelId, columnName, "output");
+    public static boolean validateOutputColumnName(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName) {
+        return validateOutputColumnName(context, storageMetadata, modelId, columnName, "output");
     }
 
-    public static boolean validateColumnName(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName) {
-        if (!metadata.getOutputSchema().getNameMappedItems().containsKey(columnName) && !metadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
+    public static boolean validateColumnName(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName) {
+        if (!storageMetadata.getOutputSchema().getNameMappedItems().containsKey(columnName) && !storageMetadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
             context.buildConstraintViolationWithTemplate("No feature or output found with name=" + columnName)
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
@@ -69,9 +69,9 @@ public class GenericValidationUtils {
     }
 
     // check to see if the provided output value has a compatible type
-    public static boolean validateOutputColumnType(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, List<ValueNode> valueNodes, String objectName) {
+    public static boolean validateOutputColumnType(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, List<ValueNode> valueNodes, String objectName) {
         // Output name guaranteed to exist
-        final SchemaItem outcomeSchema = metadata.getOutputSchema().getNameMappedItems().get(columnName);
+        final SchemaItem outcomeSchema = storageMetadata.getOutputSchema().getNameMappedItems().get(columnName);
         boolean result = true;
 
         for (ValueNode subNode : valueNodes) {
@@ -92,14 +92,14 @@ public class GenericValidationUtils {
         return result;
     }
 
-    public static boolean validateOutputColumnType(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, List<ValueNode> valueNodes) {
-        return validateOutputColumnType(context, metadata, modelId, columnName, valueNodes, "output");
+    public static boolean validateOutputColumnType(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, List<ValueNode> valueNodes) {
+        return validateOutputColumnType(context, storageMetadata, modelId, columnName, valueNodes, "output");
     }
 
     // check to see if the provided attribute values have a compatible type
-    public static boolean validateFeatureColumnType(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, List<ValueNode> valueNodes, String objectName) {
+    public static boolean validateFeatureColumnType(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, List<ValueNode> valueNodes, String objectName) {
         // Protected attribute guaranteed to exist
-        final SchemaItem protectedAttrSchema = metadata.getInputSchema().getNameMappedItems().get(columnName);
+        final SchemaItem protectedAttrSchema = storageMetadata.getInputSchema().getNameMappedItems().get(columnName);
         boolean result = true;
 
         for (ValueNode subNode : valueNodes) {
@@ -120,8 +120,8 @@ public class GenericValidationUtils {
         return result;
     }
 
-    public static boolean validateFeatureColumnType(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName, List<ValueNode> valueNodes) {
-        return validateFeatureColumnType(context, metadata, modelId, columnName, valueNodes, "feature");
+    public static boolean validateFeatureColumnType(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, List<ValueNode> valueNodes) {
+        return validateFeatureColumnType(context, storageMetadata, modelId, columnName, valueNodes, "feature");
     }
 
     // if tag is invalid, return error string. Else return nothing

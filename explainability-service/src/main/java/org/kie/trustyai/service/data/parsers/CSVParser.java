@@ -19,7 +19,7 @@ import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.CSVUtils;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -35,12 +35,12 @@ public class CSVParser implements DataParser {
     public static final ZoneOffset ZONE_OFFSET = ZoneOffset.UTC;
 
     @Override
-    public Dataframe toDataframe(ByteBuffer byteBuffer, Metadata metadata) throws DataframeCreateException {
+    public Dataframe toDataframe(ByteBuffer byteBuffer, StorageMetadata storageMetadata) throws DataframeCreateException {
         final String data = UTF8.decode(byteBuffer).toString();
 
         final List<Prediction> predictions;
         try {
-            predictions = CSVUtils.parse(data, metadata);
+            predictions = CSVUtils.parse(data, storageMetadata);
         } catch (IOException e) {
             throw new DataframeCreateException(e.getMessage());
         }
@@ -50,14 +50,14 @@ public class CSVParser implements DataParser {
     }
 
     @Override
-    public Dataframe toDataframe(ByteBuffer dataByteBuffer, ByteBuffer internalDataByteBuffer, Metadata metadata)
+    public Dataframe toDataframe(ByteBuffer dataByteBuffer, ByteBuffer internalDataByteBuffer, StorageMetadata storageMetadata)
             throws DataframeCreateException {
 
         // read predictions
         final String data = UTF8.decode(dataByteBuffer).toString();
         final List<Prediction> predictions;
         try {
-            predictions = CSVUtils.parse(data, metadata);
+            predictions = CSVUtils.parse(data, storageMetadata);
         } catch (IOException e) {
             throw new DataframeCreateException(e.getMessage());
         }

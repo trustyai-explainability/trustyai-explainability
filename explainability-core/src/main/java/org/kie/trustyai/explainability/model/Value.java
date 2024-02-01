@@ -20,8 +20,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -41,6 +45,7 @@ import jakarta.persistence.Transient;
 public class Value {
 
     private final UnderlyingObject wrappedUnderlyingObject;
+
 
     public Value(Object underlyingObject) {
         this.wrappedUnderlyingObject = new UnderlyingObject(underlyingObject);

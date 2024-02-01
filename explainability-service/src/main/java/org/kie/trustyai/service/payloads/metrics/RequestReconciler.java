@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.payloads.values.TypedValue;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
@@ -24,11 +24,11 @@ public class RequestReconciler {
 
     // For feature/output names passed as strings, reconcile the field name with the known data type of the feature/output
     public static void reconcile(BaseMetricRequest request, Instance<DataSource> dataSource) {
-        final Metadata metadata = dataSource.get().getMetadata(request.getModelId());
-        reconcile(request, metadata);
+        final StorageMetadata storageMetadata = dataSource.get().getMetadata(request.getModelId());
+        reconcile(request, storageMetadata);
     }
 
-    public static void reconcile(BaseMetricRequest request, Metadata metadata) {
+    public static void reconcile(BaseMetricRequest request, StorageMetadata storageMetadata) {
         for (Field f : request.getClass().getDeclaredFields()) {
             if (f.getType().isAssignableFrom(ReconcilableFeature.class) && f.isAnnotationPresent(ReconcilerMatcher.class)) {
                 ReconcilableFeature fieldValue;
@@ -53,7 +53,7 @@ public class RequestReconciler {
                     throw new IllegalArgumentException("Method " + f.getName() + "was declared as the name source of the reconciled feature, but returns exception:" + e);
                 }
 
-                DataType fieldDataType = metadata.getInputSchema().getNameMappedItems().get(name).getType();
+                DataType fieldDataType = storageMetadata.getInputSchema().getNameMappedItems().get(name).getType();
                 List<TypedValue> tvs = new ArrayList<>();
 
                 for (ValueNode subNode : fieldValue.getRawValueNodes()) {
@@ -92,7 +92,7 @@ public class RequestReconciler {
                     throw new IllegalArgumentException("Method " + f.getName() + "was declared as the name source of the reconciled output, but returns exception:" + e);
                 }
 
-                DataType fieldDataType = metadata.getOutputSchema().getNameMappedItems().get(name).getType();
+                DataType fieldDataType = storageMetadata.getOutputSchema().getNameMappedItems().get(name).getType();
                 List<TypedValue> tvs = new ArrayList<>();
 
                 for (ValueNode subNode : fieldValue.getRawValueNodes()) {

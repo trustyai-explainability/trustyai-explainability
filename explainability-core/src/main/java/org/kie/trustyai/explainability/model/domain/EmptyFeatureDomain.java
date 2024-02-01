@@ -18,9 +18,10 @@ package org.kie.trustyai.explainability.model.domain;
 import java.util.Set;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
-@Embeddable
+@Entity
 public class EmptyFeatureDomain extends FeatureDomain<Object> {
 
     public static FeatureDomain<Object> create() {

@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.payloads.values.DataType;
 
@@ -14,11 +14,11 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 
 public class DownloadUtils {
 
-    public static DataType getDataType(Metadata metadata, RowMatcher rowMatcher) {
-        if (metadata.getInputSchema().getItems().containsKey(rowMatcher.getColumnName())) {
-            return metadata.getInputSchema().getItems().get(rowMatcher.getColumnName()).getType();
+    public static DataType getDataType(StorageMetadata storageMetadata, RowMatcher rowMatcher) {
+        if (storageMetadata.getInputSchema().getItems().containsKey(rowMatcher.getColumnName())) {
+            return storageMetadata.getInputSchema().getItems().get(rowMatcher.getColumnName()).getType();
         } else {
-            return metadata.getOutputSchema().getItems().get(rowMatcher.getColumnName()).getType();
+            return storageMetadata.getOutputSchema().getItems().get(rowMatcher.getColumnName()).getType();
         }
     }
 

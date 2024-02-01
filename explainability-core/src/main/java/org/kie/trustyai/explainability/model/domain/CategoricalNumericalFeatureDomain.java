@@ -24,8 +24,9 @@ import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
 
-@Embeddable
+@Entity
 public class CategoricalNumericalFeatureDomain extends AbstractCategoricalFeatureDomain<Integer> {
 
     private CategoricalNumericalFeatureDomain(Set<Integer> categories) {

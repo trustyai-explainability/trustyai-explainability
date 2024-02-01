@@ -19,9 +19,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
-@Embeddable
+@Entity
 public class AbstractCategoricalFeatureDomain<T> extends FeatureDomain<T> {
     protected final Set<T> categories;
 

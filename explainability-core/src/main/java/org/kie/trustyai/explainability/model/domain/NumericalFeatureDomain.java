@@ -20,9 +20,10 @@ import java.util.Set;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
-@Embeddable
+@Entity
 public class NumericalFeatureDomain extends FeatureDomain<Double> {
 
     protected final double lowerBound;

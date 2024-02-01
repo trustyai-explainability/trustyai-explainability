@@ -36,6 +36,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.OneToMany;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -51,16 +53,17 @@ import jakarta.persistence.Transient;
 
 @Entity
 public class Dataframe {
-    @ElementCollection
-    private final List<Column> data;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<DataframeColumn> data;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private final DataframeMetadata metadata;
     private final InternalData internalData;
 
     @ElementCollection
     private final Map<String, Integer> idToIDX;
 
+    @Id
     private String id;
 
     public Dataframe() {
@@ -71,14 +74,14 @@ public class Dataframe {
     }
 
     Dataframe(List<List<Value>> data, DataframeMetadata metadata) {
-        this.data = data.stream().map(Column::new).collect(Collectors.toList());
+        this.data = data.stream().map(DataframeColumn::new).collect(Collectors.toList());
         this.metadata = metadata;
         this.internalData = new InternalData();
         this.idToIDX = new HashMap<>();
     }
 
     Dataframe(List<List<Value>> data, DataframeMetadata metadata, InternalData internalData) {
-        this.data = data.stream().map(Column::new).collect(Collectors.toList());
+        this.data = data.stream().map(DataframeColumn::new).collect(Collectors.toList());
         this.metadata = metadata;
         this.internalData = internalData;
         this.idToIDX = new HashMap<>();
@@ -87,15 +90,14 @@ public class Dataframe {
         }
     }
 
-    // hibernate wrapper for an arraylist
-    @Embeddable
-    public static class Column extends ArrayList<Value> {
-        protected Column(List<Value> values) {
-            super(values);
-        }
+    // Column getters and setters for hibernate
+    public List<DataframeColumn> getData(){
+        return this.data;
+    }
 
-        public Column() {
-        }
+
+    public void setData(List<DataframeColumn> data){
+        this.data = data;
     }
 
     /**
@@ -142,7 +144,7 @@ public class Dataframe {
         // Process inputs metadata
         for (Feature feature : inputs.get(0).getFeatures()) {
             df.metadata.add(feature);
-            df.data.add(new Column());
+            df.data.add(new DataframeColumn());
         }
 
         final int inputsSize = df.getInputsCount();
@@ -195,12 +197,12 @@ public class Dataframe {
             // Process inputs metadata
             for (Feature feature : predictions.get(0).getInput().getFeatures()) {
                 df.metadata.add(feature);
-                df.data.add(new Column());
+                df.data.add(new DataframeColumn());
             }
             // Process outputs metadata
             for (Output output : predictions.get(0).getOutput().getOutputs()) {
                 df.metadata.add(output);
-                df.data.add(new Column());
+                df.data.add(new DataframeColumn());
             }
 
             // Copy data
@@ -471,14 +473,14 @@ public class Dataframe {
                 List<Value> pad = IntStream.range(0, i - rows)
                         .mapToObj(n -> new Value(null))
                         .collect(Collectors.toCollection(ArrayList::new));
-                List<Value> values = data.get(c);
+                List<Value> values = data.get(c).getValues();
                 values.addAll(pad);
-                data.set(c, new Column(values));
+                data.set(c, new DataframeColumn(values));
             });
         } else if (i < rows) {
             columnIndexStream().forEach(c -> {
-                final List<Value> values = data.get(c);
-                data.set(c, new Column(values.subList(0, i)));
+                final List<Value> values = data.get(c).getValues();
+                data.set(c, new DataframeColumn(values.subList(0, i)));
             });
         }
     }
@@ -506,7 +508,7 @@ public class Dataframe {
      */
     public List<Value> getColumn(int column) {
         validateColumnIndex(column);
-        return data.get(column);
+        return data.get(column).getValues();
     }
 
     /**
@@ -583,7 +585,7 @@ public class Dataframe {
         if (this.getRowDimension() != values.size()) {
             throw new IllegalArgumentException("Invalid data size. Got " + values.size() + " elements for " + this.getRowDimension() + " rows.");
         }
-        this.data.set(column, new Column(values));
+        this.data.set(column, new DataframeColumn(values));
     }
 
     /**
@@ -809,7 +811,7 @@ public class Dataframe {
      */
     public Dataframe copy() {
         return new Dataframe(
-                this.data.stream().map(ArrayList::new).collect(Collectors.toCollection(ArrayList::new)),
+                this.data.stream().map(DataframeColumn::copyValues).collect(Collectors.toCollection(ArrayList::new)),
                 metadata.copy(), internalData.copy());
     }
 
@@ -822,7 +824,7 @@ public class Dataframe {
     public List<Feature> columnAsFeatures(int column) {
         validateColumnIndex(column);
         final Type type = metadata.getType(column);
-        final List<Value> values = data.get(column);
+        final List<Value> values = data.get(column).getValues();
         final String name = metadata.getNames(column);
         final FeatureDomain domain = metadata.getDomain(column);
 
@@ -885,7 +887,7 @@ public class Dataframe {
         InternalData internalDataFiltered = new InternalData(datapointTags, ids, timestamps);
 
         final List<List<Value>> dataCopy = columnIndexStream().mapToObj(col -> {
-            final List<Value> column = data.get(col);
+            final List<Value> column = data.get(col).getValues();
             return rows.stream().map(column::get).collect(Collectors.toCollection(ArrayList::new));
         }).collect(Collectors.toCollection(ArrayList::new));
 
@@ -904,7 +906,7 @@ public class Dataframe {
     public Dataframe filterByColumnValue(int column, Predicate<Value> predicate) {
         validateColumnIndex(column);
 
-        final List<Value> values = data.get(column);
+        final List<Value> values = data.get(column).getValues();
 
         final List<Integer> rowIndices = rowIndexStream()
                 .filter(i -> predicate.test(values.get(i))).boxed()
@@ -1041,7 +1043,7 @@ public class Dataframe {
         final List<Value> transformedColumn = data.get(column).stream()
                 .map(fn)
                 .collect(Collectors.toCollection(ArrayList::new));
-        data.set(column, new Column(transformedColumn));
+        data.set(column, new DataframeColumn(transformedColumn));
     }
 
     /**
@@ -1067,16 +1069,16 @@ public class Dataframe {
      */
     public void sortRowsByColumn(int column, Comparator<Value> comparator) {
         validateColumnIndex(column);
-        final List<Value> columnValues = data.get(column);
+        final List<Value> columnValues = data.get(column).getValues();
         // Calculate sort indices
         final int[] sortedIndices = rowIndexStream().boxed().sorted((i, j) -> comparator.compare(columnValues.get(i), columnValues.get(j))).mapToInt(n -> n).toArray();
         // Apply new indices to all columns
         columnIndexStream().forEach(c -> {
-            final List<Value> columnValuesUnsorted = data.get(c);
+            final List<Value> columnValuesUnsorted = data.get(c).getValues();
             final List<Value> columnValuesSorted = Arrays.stream(sortedIndices)
                     .mapToObj(columnValuesUnsorted::get)
                     .collect(Collectors.toCollection(ArrayList::new));
-            data.set(c, new Column(columnValuesSorted));
+            data.set(c, new DataframeColumn(columnValuesSorted));
         });
     }
 
@@ -1121,7 +1123,7 @@ public class Dataframe {
     }
 
     public void addColumn(String name, Type type, List<Value> values) {
-        data.add(new Column(values));
+        data.add(new DataframeColumn(values));
         metadata.add(
                 name,
                 null,
@@ -1197,6 +1199,11 @@ public class Dataframe {
         return Collections.unmodifiableList(internalData.timestamps);
     }
 
+
+    public List<String> getNameAliases(){
+        return this.metadata.getNameAliases();
+    }
+
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
@@ -1204,7 +1211,7 @@ public class Dataframe {
         for (int i = 0; i < getColumnDimension(); i++) {
 
             builder.append("\tColumn ").append(i);
-            if (metadata.getNameAlias(i) != null) {
+            if (!metadata.getNameAlias(i).equals("")) {
                 builder.append(" (").append(metadata.getRawName(i)).append("-> ").append(metadata.getNameAlias(i)).append(")\n");
             } else {
                 builder.append("\n");
@@ -1288,9 +1295,9 @@ public class Dataframe {
 
     public void setId(String id) {
         this.id = id;
+        this.metadata.setId(id);
     }
 
-    @Id
     public String getId() {
         return id;
     }

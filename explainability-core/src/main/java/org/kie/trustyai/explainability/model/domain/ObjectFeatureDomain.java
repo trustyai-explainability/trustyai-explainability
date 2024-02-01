@@ -19,16 +19,20 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
+import org.kie.trustyai.explainability.model.UnderlyingObject;
 
-@Embeddable
-public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<Object> {
+@Entity
+public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<UnderlyingObject> {
 
-    private ObjectFeatureDomain(Set<Object> categories) {
+    private ObjectFeatureDomain(Set<UnderlyingObject> categories) {
         super(categories);
     }
 
@@ -43,21 +47,26 @@ public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<Object
      * @return A {@link FeatureDomain}
      */
     public static ObjectFeatureDomain create(Set<Object> categories) {
-        return new ObjectFeatureDomain(categories);
+        return new ObjectFeatureDomain(categories.stream().map(UnderlyingObject::new).collect(Collectors.toSet()));
     }
 
     public static ObjectFeatureDomain create(List<Object> categories) {
-        return new ObjectFeatureDomain(new HashSet<>(categories));
+        return new ObjectFeatureDomain(categories.stream().map(UnderlyingObject::new).collect(Collectors.toSet()));
     }
 
     public static ObjectFeatureDomain create(Object... categories) {
-        return new ObjectFeatureDomain(new HashSet<>(Arrays.asList(categories)));
+        return new ObjectFeatureDomain(Arrays.stream(categories).map(UnderlyingObject::new).collect(Collectors.toSet()));
     }
 
     @ElementCollection
     @Access(AccessType.FIELD)
     @Override
-    public Set<Object> getCategories() {
+    public Set<UnderlyingObject> getCategories() {
         return this.categories;
+    }
+
+    @Transient
+    public Set<Object> getRawCategories() {
+        return this.categories.stream().map(UnderlyingObject::getObject).collect(Collectors.toSet());
     }
 }

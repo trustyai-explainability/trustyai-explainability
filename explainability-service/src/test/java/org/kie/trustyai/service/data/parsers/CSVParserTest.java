@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.mocks.MockDatasource;
 
@@ -20,11 +20,11 @@ class CSVParserTest {
         ByteBuffer[] byteBuffers = csvParser.toByteBuffers(dataframe, false);
         assertNotNull(byteBuffers);
         assertEquals(2, byteBuffers.length);
-        Metadata metadata = new Metadata();
-        metadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
-        metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
-        metadata.setObservations(dataframe.getRowDimension());
-        Dataframe restoredDataframe = csvParser.toDataframe(byteBuffers[0], byteBuffers[1], metadata);
+        StorageMetadata storageMetadata = new StorageMetadata();
+        storageMetadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
+        storageMetadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
+        storageMetadata.setObservations(dataframe.getRowDimension());
+        Dataframe restoredDataframe = csvParser.toDataframe(byteBuffers[0], byteBuffers[1], storageMetadata);
         assertNotNull(restoredDataframe);
         assertEquals(10, dataframe.getRowDimension());
         for (int i = 0; i < dataframe.getRowDimension(); i++) {
@@ -41,11 +41,11 @@ class CSVParserTest {
         ByteBuffer[] byteBuffers = csvParser.toByteBuffers(dataframe, false);
         assertNotNull(byteBuffers);
         assertEquals(2, byteBuffers.length);
-        Metadata metadata = new Metadata();
-        metadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
-        metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
-        metadata.setObservations(dataframe.getRowDimension());
-        Dataframe restoredDataframe = csvParser.toDataframe(byteBuffers[0], byteBuffers[1], metadata);
+        StorageMetadata storageMetadata = new StorageMetadata();
+        storageMetadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
+        storageMetadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
+        storageMetadata.setObservations(dataframe.getRowDimension());
+        Dataframe restoredDataframe = csvParser.toDataframe(byteBuffers[0], byteBuffers[1], storageMetadata);
         assertNotNull(restoredDataframe);
         assertEquals(10, dataframe.getRowDimension());
         for (int i = 0; i < dataframe.getRowDimension(); i++) {

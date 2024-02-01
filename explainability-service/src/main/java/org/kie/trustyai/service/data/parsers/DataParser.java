@@ -4,13 +4,13 @@ import java.nio.ByteBuffer;
 
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 
 public interface DataParser {
 
-    Dataframe toDataframe(ByteBuffer inputs, Metadata metadata) throws DataframeCreateException;
+    Dataframe toDataframe(ByteBuffer inputs, StorageMetadata storageMetadata) throws DataframeCreateException;
 
-    Dataframe toDataframe(ByteBuffer inputs, ByteBuffer internalData, Metadata metadata) throws DataframeCreateException;
+    Dataframe toDataframe(ByteBuffer inputs, ByteBuffer internalData, StorageMetadata storageMetadata) throws DataframeCreateException;
 
     ByteBuffer toByteBuffer(Dataframe dataframe, boolean includeHeader);
 

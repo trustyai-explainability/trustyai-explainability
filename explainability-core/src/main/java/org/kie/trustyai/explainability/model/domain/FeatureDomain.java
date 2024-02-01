@@ -1,6 +1,7 @@
 package org.kie.trustyai.explainability.model.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -15,6 +16,7 @@ public abstract class FeatureDomain<T> implements FeatureDomainInterface<T> {
     }
 
     @Id
+    @GeneratedValue
     public Long getId() {
         return id;
     }

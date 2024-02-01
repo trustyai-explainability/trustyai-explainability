@@ -4,7 +4,7 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.cache.DataCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.storage.StorageInterface;
 
 import io.quarkus.cache.CacheResult;
@@ -19,9 +19,9 @@ public interface HibernateStorageInterface extends StorageInterface {
     void save(Dataframe dataframe, String modelId) throws StorageWriteException;
 
     // metadata
-    Metadata readMetadata(String modelId) throws StorageReadException;
+    StorageMetadata readMetadata(String modelId) throws StorageReadException;
 
-    void saveMetadata(Metadata metadata, String modelId) throws StorageWriteException;
+    void saveMetadata(StorageMetadata storageMetadata, String modelId) throws StorageWriteException;
 
     // appenders
     void append(Dataframe dataframe, String location) throws StorageWriteException;

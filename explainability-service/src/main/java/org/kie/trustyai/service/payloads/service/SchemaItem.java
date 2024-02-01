@@ -2,16 +2,16 @@ package org.kie.trustyai.service.payloads.service;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
-import io.quarkus.logging.Log;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 import org.kie.trustyai.explainability.model.UnderlyingObject;
 import org.kie.trustyai.service.payloads.values.DataType;
 
+import io.quarkus.logging.Log;
+
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 @Entity
@@ -28,14 +28,15 @@ public class SchemaItem {
     @GeneratedValue
     long id;
 
-    public SchemaItem() {}
+    public SchemaItem() {
+    }
 
     public SchemaItem(DataType type, String name, Set<UnderlyingObject> columnValues, int columnIndex) {
         this.type = type;
         this.name = name;
         this.columnValues = columnValues;
         this.columnIndex = columnIndex;
-        Log.info("created schema "+id);
+        Log.info("created schema " + id);
     }
 
     public DataType getType() {

@@ -23,9 +23,10 @@ import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
-@Embeddable
+@Entity
 public class TimeFeatureDomain extends NumericalFeatureDomain {
 
     private TimeFeatureDomain(double lowerBound, double upperBound) {
@@ -68,8 +69,7 @@ public class TimeFeatureDomain extends NumericalFeatureDomain {
     }
 
     @Override
-    @Access(AccessType.FIELD)
-    @ElementCollection
+    @Transient
     public Set<Double> getCategories() {
         return null;
     }

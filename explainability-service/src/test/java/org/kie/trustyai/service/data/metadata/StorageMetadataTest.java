@@ -13,7 +13,7 @@ import org.kie.trustyai.service.payloads.values.DataType;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MetadataTest {
+class StorageMetadataTest {
     private Map<String, SchemaItem> generateSchema(int n, double valueOffset, boolean makeNulls) {
         Map<String, SchemaItem> out = new HashMap<>();
         for (int i = 0; i < n; i++) {
@@ -34,7 +34,7 @@ class MetadataTest {
     void validateNullValueMerge() {
         Schema s1 = Schema.from(generateSchema(10, .1, true));
         Schema s2 = Schema.from(generateSchema(10, .2, false));
-        Metadata m1 = new Metadata();
+        StorageMetadata m1 = new StorageMetadata();
         m1.setInputSchema(s1);
         m1.setOutputSchema(s2);
 
