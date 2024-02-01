@@ -50,19 +50,17 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
 
     @Override
     public Dataframe readData(String modelId) throws StorageReadException {
+        LOG.debug("Reading dataframe " + modelId + " from Hibernate");
         return readData(modelId, batchSize);
     }
 
     @Override
     public Dataframe readData(String modelId, int batchSize) throws StorageReadException {
+        LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
         Dataframe df = em.find(Dataframe.class, modelId);
         int length = df.getRowDimension();
         int startIdx = Math.max(0, length - batchSize);
         int endIdx = Math.min(length, batchSize);
-        LOG.info("dataframe cols: " + df.getColumnDimension());
-        LOG.info("name aliases: "  + df.getNameAliases());
-        LOG.info(df);
-        LOG.info("start: "+startIdx + " end: "+endIdx);
         List<Integer> filter = IntStream.range(startIdx, endIdx).boxed().collect(Collectors.toList());
         return df.filterByRowIndex(filter);
     }
@@ -70,36 +68,35 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
     @Override
     @Transactional
     public void save(Dataframe dataframe, String modelId) throws StorageWriteException {
-        LOG.info("saving dataframe with "+dataframe.getRowDimension() + " rows");
+        LOG.debug("Writing dataframe=" + modelId + ", rows=" + dataframe.getRowDimension() + " to Hibernate");
         dataframe.setId(modelId);
-        LOG.info("saving metadata aliases: " + dataframe.getNameAliases());
         em.persist(dataframe);
     }
 
     @Override
     public StorageMetadata readMetadata(String modelId) throws StorageReadException {
+        LOG.debug("Reading metadata for " + modelId + " from Hibernate");
         return em.find(StorageMetadata.class, modelId);
     }
 
     @Override
     @Transactional
     public void saveMetadata(StorageMetadata storageMetadata, String modelId) throws StorageWriteException {
-        LOG.info("saving metadata");
+        LOG.debug("Saving metadata for " + modelId + " into Hibernate");
         storageMetadata.setModelId(modelId);
         em.persist(storageMetadata);
-        LOG.info("metadata persisted");
     }
 
     @Transactional
     public void updateMetadata(StorageMetadata storageMetadata) throws StorageWriteException {
-        LOG.info("updating metadata");
+        LOG.debug("Updating existing metadata for " + storageMetadata.getModelId() + " in Hibernate");
         em.merge(storageMetadata);
     }
 
     @Override
     @Transactional
     public void append(Dataframe dataframe, String modelId) throws StorageWriteException {
-        LOG.info("appending dataframe");
+        LOG.debug("Appending " + dataframe.getRowDimension() + " new rows to dataframe=" + modelId + " within Hibernate");
         Dataframe original = readData(modelId);
         original.setId(modelId);
         original.addPredictions(dataframe.asPredictions());

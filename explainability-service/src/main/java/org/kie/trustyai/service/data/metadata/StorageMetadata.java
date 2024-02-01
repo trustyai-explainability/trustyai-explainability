@@ -1,22 +1,20 @@
 package org.kie.trustyai.service.data.metadata;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.OneToMany;
+import java.util.Arrays;
+import java.util.List;
+
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.payloads.service.Schema;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class StorageMetadata {
     private static final Logger LOG = Logger.getLogger(StorageMetadata.class);
-
 
     @OneToMany(cascade = CascadeType.ALL)
     // List of InputSchema, OutputSchema

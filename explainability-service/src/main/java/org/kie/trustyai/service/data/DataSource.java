@@ -145,13 +145,10 @@ public class DataSource {
             final StorageMetadata storageMetadata = new StorageMetadata();
             storageMetadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
             storageMetadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
-            LOG.info("input schema:" + storageMetadata.getInputSchema().getItems());
-            LOG.info("output schema:" + storageMetadata.getOutputSchema().getItems());
             storageMetadata.setModelId(modelId);
             storageMetadata.setObservations(dataframe.getRowDimension());
             try {
                 saveMetadata(storageMetadata, modelId, false);
-                LOG.info("exited metadata save");
             } catch (StorageWriteException e) {
                 throw new DataframeCreateException(e.getMessage());
             }
@@ -172,7 +169,6 @@ public class DataSource {
 
                 try {
                     saveMetadata(storageMetadata, modelId, true);
-                    LOG.info("exited metadata save");
                 } catch (StorageWriteException e) {
                     throw new DataframeCreateException(e.getMessage());
                 }

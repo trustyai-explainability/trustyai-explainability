@@ -18,7 +18,6 @@ package org.kie.trustyai.explainability.model.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 

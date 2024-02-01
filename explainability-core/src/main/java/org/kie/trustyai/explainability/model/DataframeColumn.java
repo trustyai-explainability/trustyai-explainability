@@ -1,13 +1,13 @@
 package org.kie.trustyai.explainability.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 // hibernate wrapper for an arraylist
 @Entity
@@ -27,27 +27,27 @@ public class DataframeColumn {
         this.values = new ArrayList<>();
     }
 
-    public Value get(int idx){
+    public Value get(int idx) {
         return this.values.get(idx);
     }
 
-    public void add(Value v){
+    public void add(Value v) {
         this.values.add(v);
     }
 
-    public int size(){
+    public int size() {
         return this.values.size();
     }
 
-    public void set(int idx, Value v){
+    public void set(int idx, Value v) {
         this.values.set(idx, v);
     }
 
-    public List<Value> getValues(){
+    public List<Value> getValues() {
         return this.values;
     }
 
-    public List<Value> copyValues(){
+    public List<Value> copyValues() {
         return new ArrayList<>(values);
     }
 

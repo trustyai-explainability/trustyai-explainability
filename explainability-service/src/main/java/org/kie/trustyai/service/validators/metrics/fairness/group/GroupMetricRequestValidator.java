@@ -50,7 +50,8 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
             }
 
             if (validAttributeName) {
-                result = GenericValidationUtils.validateFeatureColumnType(context, storageMetadata, modelId, protectedAttribute, request.getPrivilegedAttribute().getRawValueNodes(), "privileged attribute")
+                result = GenericValidationUtils.validateFeatureColumnType(context, storageMetadata, modelId, protectedAttribute, request.getPrivilegedAttribute().getRawValueNodes(),
+                        "privileged attribute")
                         && result;
                 result = GenericValidationUtils.validateFeatureColumnType(context, storageMetadata, modelId, protectedAttribute, request.getUnprivilegedAttribute().getRawValueNodes(),
                         "unprivileged attribute") && result;

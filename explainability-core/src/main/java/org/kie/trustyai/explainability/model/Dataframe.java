@@ -36,18 +36,18 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.OneToMany;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
 import org.kie.trustyai.explainability.utils.DataUtils;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 
@@ -91,12 +91,11 @@ public class Dataframe {
     }
 
     // Column getters and setters for hibernate
-    public List<DataframeColumn> getData(){
+    public List<DataframeColumn> getData() {
         return this.data;
     }
 
-
-    public void setData(List<DataframeColumn> data){
+    public void setData(List<DataframeColumn> data) {
         this.data = data;
     }
 
@@ -1199,8 +1198,7 @@ public class Dataframe {
         return Collections.unmodifiableList(internalData.timestamps);
     }
 
-
-    public List<String> getNameAliases(){
+    public List<String> getNameAliases() {
         return this.metadata.getNameAliases();
     }
 

@@ -69,7 +69,8 @@ public class GenericValidationUtils {
     }
 
     // check to see if the provided output value has a compatible type
-    public static boolean validateOutputColumnType(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, List<ValueNode> valueNodes, String objectName) {
+    public static boolean validateOutputColumnType(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, List<ValueNode> valueNodes,
+            String objectName) {
         // Output name guaranteed to exist
         final SchemaItem outcomeSchema = storageMetadata.getOutputSchema().getNameMappedItems().get(columnName);
         boolean result = true;
@@ -97,7 +98,8 @@ public class GenericValidationUtils {
     }
 
     // check to see if the provided attribute values have a compatible type
-    public static boolean validateFeatureColumnType(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, List<ValueNode> valueNodes, String objectName) {
+    public static boolean validateFeatureColumnType(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, List<ValueNode> valueNodes,
+            String objectName) {
         // Protected attribute guaranteed to exist
         final SchemaItem protectedAttrSchema = storageMetadata.getInputSchema().getNameMappedItems().get(columnName);
         boolean result = true;

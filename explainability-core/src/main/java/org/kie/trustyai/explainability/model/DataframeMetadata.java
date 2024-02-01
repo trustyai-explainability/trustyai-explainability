@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import jakarta.persistence.CascadeType;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -89,7 +88,7 @@ public class DataframeMetadata {
         this.constrained.add(constraint);
         this.domains.add(domain);
         this.inputs.add(input);
-        this.cachedColumnNames.add(nameAlias.equals("") ? name : nameAlias);
+        this.cachedColumnNames.add(nameAlias == null || nameAlias.equals("") ? name : nameAlias);
     }
 
     public synchronized void add(Feature feature) {

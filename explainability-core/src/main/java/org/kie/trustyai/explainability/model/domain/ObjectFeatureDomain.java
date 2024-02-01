@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.kie.trustyai.explainability.model.UnderlyingObject;
+
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
-import org.kie.trustyai.explainability.model.UnderlyingObject;
 
 @Entity
 public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<UnderlyingObject> {
