@@ -93,6 +93,13 @@ function check_trustyai_authentication() {
 
   os::cmd::try_until_text "curl -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/info" "403" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "curl_token -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/info" "200" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+
+  # Test endpoints under the /metrics path
+  os::cmd::try_until_text "curl -k -s -o /dev/null -w \"%{http_code}\" -X DELETE --location ${TRUSTY_ROUTE}/metrics/spd/request -H \"Content-Type: application/json\" -d '{\"requestId\": \"3281c891-e2a5-4eb3-b05d-7f3831acbb56\"}'" "403" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "curl_token -k -s -o /dev/null -w \"%{http_code}\" -X DELETE --location ${TRUSTY_ROUTE}/metrics/spd/request -H \"Content-Type: application/json\" -d '{\"requestId\": \"3281c891-e2a5-4eb3-b05d-7f3831acbb56\"}'" "200" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+
+  os::cmd::try_until_text "curl -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/metrics/all/requests" "403" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "curl_token -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/metrics/all/requests" "200" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function check_mm_resources() {
