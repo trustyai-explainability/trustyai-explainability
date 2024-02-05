@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.mocks;
+package org.kie.trustyai.service.mocks.pvc;
 
 import java.util.OptionalInt;
 
@@ -6,7 +6,8 @@ import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.StorageFormat;
 
-public class MockMemoryServiceConfig implements ServiceConfig {
+public class MockPVCServiceConfig implements ServiceConfig {
+
     @Override
     public OptionalInt batchSize() {
         return OptionalInt.of(5000);
@@ -14,7 +15,7 @@ public class MockMemoryServiceConfig implements ServiceConfig {
 
     @Override
     public StorageFormat storageFormat() {
-        return StorageFormat.MEMORY;
+        return StorageFormat.PVC;
     }
 
     @Override

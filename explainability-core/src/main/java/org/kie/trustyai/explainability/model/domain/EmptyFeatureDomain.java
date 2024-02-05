@@ -50,4 +50,5 @@ public class EmptyFeatureDomain extends FeatureDomain<Object> {
     public Set<Object> getCategories() {
         return null;
     }
+
 }

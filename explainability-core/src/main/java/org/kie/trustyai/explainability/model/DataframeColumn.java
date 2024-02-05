@@ -8,11 +8,13 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OrderColumn;
 
 // hibernate wrapper for an arraylist
 @Entity
 public class DataframeColumn {
     @ElementCollection
+    @OrderColumn(name = "order_column")
     private List<Value> values;
 
     @Id

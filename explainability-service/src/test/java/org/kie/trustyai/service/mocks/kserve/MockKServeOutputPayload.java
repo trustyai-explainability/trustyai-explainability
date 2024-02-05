@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.mocks;
+package org.kie.trustyai.service.mocks.kserve;
 
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
 

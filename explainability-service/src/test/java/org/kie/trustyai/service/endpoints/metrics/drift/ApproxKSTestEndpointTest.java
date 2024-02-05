@@ -11,10 +11,11 @@ import org.kie.trustyai.metrics.drift.kstest.ApproxKSFitting;
 import org.kie.trustyai.metrics.drift.kstest.ApproxKSTest;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
+import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.drift.kstest.ApproxKSTestMetricRequest;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -49,12 +50,12 @@ class ApproxKSTestEndpointTest {
     @BeforeEach
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
-        Dataframe dataframe = datasource.get().generateDataframeFromNormalDistributions(N_SAMPLES, 1.0, 2.0);
+        Dataframe dataframe = DataframeGenerators.generateDataframeFromNormalDistributions(N_SAMPLES, 1.0, 2.0);
 
         HashMap<String, List<List<Integer>>> tagging = new HashMap<>();
         tagging.put(TRAINING_TAG, List.of(List.of(0, N_SAMPLES)));
         dataframe.tagDataPoints(tagging);
-        dataframe.addPredictions(datasource.get().generateDataframeFromNormalDistributions(N_SAMPLES, 2.0, 1.0).asPredictions());
+        dataframe.addPredictions(DataframeGenerators.generateDataframeFromNormalDistributions(N_SAMPLES, 2.0, 1.0).asPredictions());
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }

@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.mocks;
+package org.kie.trustyai.service.mocks.hibernate;
 
 import java.util.OptionalInt;
 
@@ -6,7 +6,7 @@ import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.StorageFormat;
 
-public class MockPVCServiceConfig implements ServiceConfig {
+public class MockHibernateServiceConfig implements ServiceConfig {
 
     @Override
     public OptionalInt batchSize() {
@@ -15,12 +15,12 @@ public class MockPVCServiceConfig implements ServiceConfig {
 
     @Override
     public StorageFormat storageFormat() {
-        return StorageFormat.PVC;
+        return StorageFormat.HIBERNATE;
     }
 
     @Override
     public DataFormat dataFormat() {
-        return DataFormat.CSV;
+        return DataFormat.BEAN;
     }
 
     @Override

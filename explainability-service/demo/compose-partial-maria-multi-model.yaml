@@ -26,8 +26,8 @@ services:
       SERVICE_BATCH_SIZE: 5000
       STORAGE_DATA_FILENAME: "data.csv"
       STORAGE_DATA_FOLDER: "/inputs"
-      LOG_LEVEL: "INFO"
-      HIBERNATE: true
+      LOG_LEVEL: "DEBUG"
+      HIBERNATE: 'true'
       QUARKUS_DATASOURCE_URL: "jdbc:mariadb://trustyai-db-container:3306/trustyai-database?autoReconnect=true"
     volumes:
       - ~/volumes/pvc/inputs:/inputs

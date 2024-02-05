@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.mocks;
+package org.kie.trustyai.service.mocks.kserve;
 
 import io.quarkus.funqy.knative.events.CloudEvent;
 

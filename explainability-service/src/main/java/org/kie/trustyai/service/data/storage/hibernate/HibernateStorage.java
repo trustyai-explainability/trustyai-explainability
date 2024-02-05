@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import jakarta.persistence.TypedQuery;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.DataframeColumn;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
@@ -20,7 +22,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.transaction.Transactional;
+
+import javax.xml.crypto.Data;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "HIBERNATE")
 @ApplicationScoped
@@ -54,14 +60,41 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
         return readData(modelId, batchSize);
     }
 
+    // get the row count of a persisted dataframe
+    public int rowCount(String modelId){
+        return em.
+                createQuery("select df.internalData.size from Dataframe df where df.id = ?1", int.class)
+                .setParameter(1, modelId)
+                .getSingleResult();
+    }
+
     @Override
     public Dataframe readData(String modelId, int batchSize) throws StorageReadException {
         LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
-        Dataframe df = em.find(Dataframe.class, modelId);
-        int length = df.getRowDimension();
+
+        int length= rowCount(modelId);
         int startIdx = Math.max(0, length - batchSize);
-        int endIdx = Math.min(length, batchSize);
+        int endIdx = Math.min(length, startIdx + batchSize);
+
+
+        Dataframe result = em.createQuery(
+                "select df from Dataframe df " +
+                        "JOIN df.data d JOIN d.values v " +
+                        "WHERE df.id = ?1 " +
+                        "AND INDEX(v) >= ?2 AND INDEX(v) < ?3",
+                        Dataframe.class
+                )
+                .setParameter(1, modelId)
+                .setParameter(2, startIdx)
+                .setParameter(3, endIdx)
+                .getSingleResult();
+         System.out.println("nrows recovered: " + result.getData().get(0).size());
+
+
+        Dataframe df = em.find(Dataframe.class, modelId);
+        System.out.println(startIdx + " : " + endIdx);
         List<Integer> filter = IntStream.range(startIdx, endIdx).boxed().collect(Collectors.toList());
+
         return df.filterByRowIndex(filter);
     }
 

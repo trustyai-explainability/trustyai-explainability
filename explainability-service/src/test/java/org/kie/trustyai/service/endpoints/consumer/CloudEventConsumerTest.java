@@ -15,9 +15,9 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockKServeInputPayload;
-import org.kie.trustyai.service.mocks.MockKServeOutputPayload;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.kserve.MockKServeInputPayload;
+import org.kie.trustyai.service.mocks.kserve.MockKServeOutputPayload;
+import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
 
 import io.quarkus.funqy.knative.events.CloudEvent;

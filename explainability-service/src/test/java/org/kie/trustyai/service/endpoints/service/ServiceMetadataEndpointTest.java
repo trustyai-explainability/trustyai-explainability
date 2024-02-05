@@ -21,6 +21,7 @@ import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.IntNode;
@@ -57,7 +58,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void getTwoObservations() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(2);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(2);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -85,7 +86,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void getThousandObservations() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 50);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 50);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -111,7 +112,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void getThousandDiverseObservations() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -151,7 +152,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void setNameMapping() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 10);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -191,7 +192,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void setNameMappingPartial() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 10);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -243,7 +244,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void setNameMappingWrongInputs() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 10);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -263,7 +264,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void setNameMappingWrongOutputs() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 10);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -285,13 +286,13 @@ class ServiceMetadataEndpointTest {
     @DisplayName("Test individual metric request with different counts")
     void testIndividualMetricRequestCountsDifferent() {
         final int modelANobs = 2000;
-        final Dataframe dataframeA = datasource.get().generateRandomDataframe(modelANobs);
+        final Dataframe dataframeA = DataframeGenerators.generateRandomDataframe(modelANobs);
         final String MODEL_A = "example-model-a";
         datasource.get().saveDataframe(dataframeA, MODEL_A);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframeA), MODEL_A);
 
         final int modelBNobs = 3000;
-        final Dataframe dataframeB = datasource.get().generateRandomDataframe(modelBNobs);
+        final Dataframe dataframeB = DataframeGenerators.generateRandomDataframe(modelBNobs);
         final String MODEL_B = "example-model-b";
         datasource.get().saveDataframe(dataframeB, MODEL_B);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframeB), MODEL_B);
@@ -366,13 +367,13 @@ class ServiceMetadataEndpointTest {
     @DisplayName("Test individual metric request with same counts")
     void testIndividualMetricRequestCountsSame() {
         final int modelANobs = 2000;
-        final Dataframe dataframeA = datasource.get().generateRandomDataframe(modelANobs);
+        final Dataframe dataframeA = DataframeGenerators.generateRandomDataframe(modelANobs);
         final String MODEL_A = "example-model-a";
         datasource.get().saveDataframe(dataframeA, MODEL_A);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframeA), MODEL_A);
 
         final int modelBNobs = 3000;
-        final Dataframe dataframeB = datasource.get().generateRandomDataframe(modelBNobs);
+        final Dataframe dataframeB = DataframeGenerators.generateRandomDataframe(modelBNobs);
         final String MODEL_B = "example-model-b";
         datasource.get().saveDataframe(dataframeB, MODEL_B);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframeB), MODEL_B);
@@ -447,13 +448,13 @@ class ServiceMetadataEndpointTest {
     @DisplayName("Test individual metric request with no requests")
     void testIndividualMetricRequestCountsNone() {
         final int modelANobs = 2000;
-        final Dataframe dataframeA = datasource.get().generateRandomDataframe(modelANobs);
+        final Dataframe dataframeA = DataframeGenerators.generateRandomDataframe(modelANobs);
         final String MODEL_A = "example-model-a";
         datasource.get().saveDataframe(dataframeA, MODEL_A);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframeA), MODEL_A);
 
         final int modelBNobs = 3000;
-        final Dataframe dataframeB = datasource.get().generateRandomDataframe(modelBNobs);
+        final Dataframe dataframeB = DataframeGenerators.generateRandomDataframe(modelBNobs);
         final String MODEL_B = "example-model-b";
         datasource.get().saveDataframe(dataframeB, MODEL_B);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframeB), MODEL_B);
@@ -493,7 +494,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void setDatapointTagging() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(50, 10);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(50, 10);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
         List<String> originalTags = datasource.get().getDataframe(MODEL_ID).getTags();

@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.mocks;
+package org.kie.trustyai.service.mocks.kserve;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;

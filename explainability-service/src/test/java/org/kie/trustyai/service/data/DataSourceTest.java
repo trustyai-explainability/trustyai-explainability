@@ -5,7 +5,7 @@ import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.storage.Storage;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -28,7 +28,7 @@ class DataSourceTest {
         DataSource dataSource = new DataSource();
         dataSource.storage = storage;
         dataSource.parser = new CSVParser();
-        Dataframe dataframe = new MockDatasource().generateRandomDataframe(10);
+        Dataframe dataframe = DataframeGenerators.generateRandomDataframe(10);
         dataSource.saveDataframe(dataframe, "fake-model");
         Dataframe readDataframe = dataSource.getDataframe("fake-model");
         assertNotNull(readDataframe);

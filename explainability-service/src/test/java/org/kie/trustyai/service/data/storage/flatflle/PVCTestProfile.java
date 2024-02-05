@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.data.storage;
+package org.kie.trustyai.service.data.storage.flatflle;
 
 import java.util.Map;
 

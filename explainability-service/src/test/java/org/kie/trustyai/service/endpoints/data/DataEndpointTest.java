@@ -15,11 +15,12 @@ import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.utils.CSVUtils;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.DataResponsePayload;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferJointPayload;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 import org.kie.trustyai.service.utils.KserveRestPayloads;
 
 import com.fasterxml.jackson.databind.node.IntNode;
@@ -67,7 +68,7 @@ class DataEndpointTest {
 
     @Test
     void downloadData() throws IOException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -115,7 +116,7 @@ class DataEndpointTest {
 
     @Test
     void downloadTextData() throws IOException {
-        final Dataframe dataframe = datasource.get().generateRandomTextDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomTextDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -147,7 +148,7 @@ class DataEndpointTest {
 
     @Test
     void downloadTextDataBetweenError() throws IOException {
-        final Dataframe dataframe = datasource.get().generateRandomTextDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomTextDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -169,7 +170,7 @@ class DataEndpointTest {
 
     @Test
     void downloadTextDataInvalidColumnError() throws IOException {
-        final Dataframe dataframe = datasource.get().generateRandomTextDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomTextDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -190,7 +191,7 @@ class DataEndpointTest {
 
     @Test
     void downloadTextDataInvalidOperationError() throws IOException {
-        final Dataframe dataframe = datasource.get().generateRandomTextDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomTextDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -211,7 +212,7 @@ class DataEndpointTest {
 
     @Test
     void downloadTextDataInternalColumn() throws IOException {
-        final Dataframe dataframe = datasource.get().generateRandomTextDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomTextDataframe(1000);
 
         HashMap<String, List<List<Integer>>> tags = new HashMap<>();
         tags.put("TRAINING", List.of(List.of(0, 500)));
@@ -239,7 +240,7 @@ class DataEndpointTest {
 
     @Test
     void downloadTextDataInternalColumnIndex() throws IOException {
-        final Dataframe dataframe = datasource.get().generateRandomTextDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomTextDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
         List<Prediction> predsToExtract = datasource.get().getDataframe(MODEL_ID).asPredictions().subList(0, 10);
@@ -268,12 +269,12 @@ class DataEndpointTest {
 
     @Test
     void downloadTextDataInternalColumnTimestamp() throws IOException, InterruptedException {
-        Dataframe dataframe = datasource.get().generateRandomTextDataframe(1, -1);
+        Dataframe dataframe = DataframeGenerators.generateRandomTextDataframe(1, -1);
 
         // enforce different timestamps per prediction
         for (int i = 0; i < 100; i++) {
             Thread.sleep(1);
-            dataframe.addPredictions(datasource.get().generateRandomTextDataframe(1, i).asPredictions());
+            dataframe.addPredictions(DataframeGenerators.generateRandomTextDataframe(1, i).asPredictions());
         }
 
         datasource.get().saveDataframe(dataframe, MODEL_ID);
@@ -312,7 +313,7 @@ class DataEndpointTest {
 
     @Test
     void downloadTextDataInternalColumnTimestampUnparseable() throws IOException {
-        final Dataframe dataframe = datasource.get().generateRandomTextDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomTextDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -341,7 +342,7 @@ class DataEndpointTest {
 
     @Test
     void downloadTextDataNullRequest() throws IOException {
-        final Dataframe dataframe = datasource.get().generateRandomTextDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomTextDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 

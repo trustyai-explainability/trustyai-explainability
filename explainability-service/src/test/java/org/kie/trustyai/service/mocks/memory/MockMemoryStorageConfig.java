@@ -1,8 +1,8 @@
-package org.kie.trustyai.service.mocks;
+package org.kie.trustyai.service.mocks.memory;
 
 import org.kie.trustyai.service.config.storage.StorageConfig;
 
-public class MockPVCStorageConfig implements StorageConfig {
+public class MockMemoryStorageConfig implements StorageConfig {
     @Override
     public String dataFilename() {
         return "data.csv";

@@ -31,11 +31,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Column;
+import org.hibernate.annotations.Formula;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
@@ -58,7 +63,7 @@ public class Dataframe {
 
     @OneToOne(cascade = CascadeType.ALL)
     private final DataframeMetadata metadata;
-    private final InternalData internalData;
+    protected final InternalData internalData;
 
     @ElementCollection
     private final Map<String, Integer> idToIDX;
@@ -82,6 +87,16 @@ public class Dataframe {
 
     Dataframe(List<List<Value>> data, DataframeMetadata metadata, InternalData internalData) {
         this.data = data.stream().map(DataframeColumn::new).collect(Collectors.toList());
+        this.metadata = metadata;
+        this.internalData = internalData;
+        this.idToIDX = new HashMap<>();
+        if (internalData.size() > 0) {
+            calculateIndexHashes();
+        }
+    }
+
+    public Dataframe(List<DataframeColumn> data, DataframeMetadata metadata, InternalData internalData, int erasurePatch) {
+        this.data = data;
         this.metadata = metadata;
         this.internalData = internalData;
         this.idToIDX = new HashMap<>();
@@ -159,6 +174,7 @@ public class Dataframe {
             String id = UUID.randomUUID().toString();
             df.internalData.ids.add(id);
             df.internalData.timestamps.add(LocalDateTime.now());
+            df.internalData.size += 1;
             df.idToIDX.put(id, i);
         });
 
@@ -287,6 +303,7 @@ public class Dataframe {
                     }
                     internalData.datapointTags.add(predictionMetadata.getDataPointTag());
                     internalData.ids.add(id);
+                    internalData.size += 1;
                     internalData.timestamps.add(predictionMetadata.getPredictionTime());
                     idToIDX.put(id, originalSize + i);
                 } else {
@@ -296,6 +313,7 @@ public class Dataframe {
                     }
                     internalData.datapointTags.add(InternalTags.UNLABELED.get());
                     internalData.ids.add(id);
+                    internalData.size += 1;
                     internalData.timestamps.add(LocalDateTime.now());
                     idToIDX.put(id, originalSize + i);
                 }
@@ -455,7 +473,6 @@ public class Dataframe {
         } else {
             return this.data.get(0).size();
         }
-
     }
 
     /**
@@ -1308,7 +1325,7 @@ public class Dataframe {
     }
 
     @Embeddable
-    private static class InternalData {
+    protected static class InternalData {
         @ElementCollection
         private final List<String> datapointTags;
 
@@ -1318,7 +1335,7 @@ public class Dataframe {
         @ElementCollection
         private final List<LocalDateTime> timestamps;
 
-        private final int size;
+        private Integer size;
 
         public InternalData() {
             this.datapointTags = new ArrayList<>();

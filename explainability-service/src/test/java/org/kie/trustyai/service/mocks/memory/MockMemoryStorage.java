@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.mocks;
+package org.kie.trustyai.service.mocks.memory;
 
 import org.kie.trustyai.service.data.storage.flatfile.MemoryStorage;
 
