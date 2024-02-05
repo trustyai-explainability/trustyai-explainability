@@ -21,11 +21,12 @@ public abstract class ReconcilableField {
         this.reconciledType = Optional.empty();
     }
 
-    protected ReconcilableField(List<ValueNode> rawValueNode) {
-        this.rawValueNodes = rawValueNode;
-        this.rawValueNode = null;
-        this.reconciledType = Optional.empty();
-    }
+    // disable until better integrated with ODH UI
+    //    protected ReconcilableField(List<ValueNode> rawValueNode) {
+    //        this.rawValueNodes = rawValueNode;
+    //        this.rawValueNode = null;
+    //        this.reconciledType = Optional.empty();
+    //    }
 
     public List<ValueNode> getRawValueNodes() {
         if (isMultipleValued()) {
