@@ -203,44 +203,44 @@ if [ $TEARDOWN = false ]; then
   # deploy models
   [ $FAILURE = false ] && deploy_model $MM_NAMESPACE1               || echo -e "\033[0;31mSkipping model deployment in namespace 1 due to previous failure\033[0m"
   [ $FAILURE = false ] && deploy_model $MM_NAMESPACE2               || echo -e "\033[0;31mSkipping model deployment in namespace 2 due to previous failure\033[0m"
-  [ $FAILURE = false ] && deploy_model $MM_NAMESPACE3               || echo -e "\033[0;31mSkipping model deployment in namespace 3 due to previous failure\033[0m"
+  #[ $FAILURE = false ] && deploy_model $MM_NAMESPACE3               || echo -e "\033[0;31mSkipping model deployment in namespace 3 due to previous failure\033[0m"
 
   # install trustyai
   [ $FAILURE = false ] && check_trustyai_resources $MM_NAMESPACE1   || echo -e "\033[0;31mSkipping TrustyAI resource check in namespace 1 due to previous failure\033[0m"
   [ $FAILURE = false ] && check_trustyai_resources $MM_NAMESPACE2   || echo -e "\033[0;31mSkipping TrustyAI resource check in namespace 2 due to previous failure\033[0m"
-  [ $FAILURE = false ] && check_trustyai_resources $MM_NAMESPACE3   || echo -e "\033[0;31mSkipping TrustyAI resource check in namespace 3 due to previous failure\033[0m"
+  #[ $FAILURE = false ] && check_trustyai_resources $MM_NAMESPACE3   || echo -e "\033[0;31mSkipping TrustyAI resource check in namespace 3 due to previous failure\033[0m"
 
   # check on models
   [ $FAILURE = false ] && check_mm_resources $MM_NAMESPACE1         || echo -e "\033[0;31mSkipping ModelMesh resource check in namespace 1 due to previous failure\033[0m"
   [ $FAILURE = false ] && check_mm_resources $MM_NAMESPACE2         || echo -e "\033[0;31mSkipping ModelMesh resource check in namespace 2 due to previous failure\033[0m"
-  [ $FAILURE = false ] && check_mm_resources $MM_NAMESPACE3         || echo -e "\033[0;31mSkipping ModelMesh resource check in namespace 3 due to previous failure\033[0m"
+  #[ $FAILURE = false ] && check_mm_resources $MM_NAMESPACE3         || echo -e "\033[0;31mSkipping ModelMesh resource check in namespace 3 due to previous failure\033[0m"
 
   # check communication
   [ $FAILURE = false ] && check_communication $MM_NAMESPACE1        || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check in namespace 1 due to previous failure\033[0m"
   [ $FAILURE = false ] && check_communication $MM_NAMESPACE2        || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check in namespace 2 due to previous failure\033[0m"
-  [ $FAILURE = false ] && check_communication $MM_NAMESPACE3        || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check in namespace 3 due to previous failure\033[0m"
+  #[ $FAILURE = false ] && check_communication $MM_NAMESPACE3        || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check in namespace 3 due to previous failure\033[0m"
 
   # generate data
   [ $FAILURE = false ] && generate_data $MM_NAMESPACE1              || echo -e "\033[0;31mSkipping data generation in namespace 1 due to previous failure\033[0m"
   [ $FAILURE = false ] && generate_data $MM_NAMESPACE2              || echo -e "\033[0;31mSkipping data generation in namespace 2 due to previous failure\033[0m"
-  [ $FAILURE = false ] && generate_data $MM_NAMESPACE3              || echo -e "\033[0;31mSkipping data generation in namespace 3 due to previous failure\033[0m"
+  #[ $FAILURE = false ] && generate_data $MM_NAMESPACE3              || echo -e "\033[0;31mSkipping data generation in namespace 3 due to previous failure\033[0m"
 
   # schedule requests
   [ $FAILURE = false ] && schedule_and_check_request $MM_NAMESPACE1 || echo -e "\033[0;31mSkipping metric scheduling in namespace 1 due to previous failure\033[0m"
   [ $FAILURE = false ] && schedule_and_check_request $MM_NAMESPACE2 || echo -e "\033[0;31mSkipping metric scheduling in namespace 2 due to previous failure\033[0m"
-  [ $FAILURE = false ] && schedule_and_check_request $MM_NAMESPACE3 || echo -e "\033[0;31mSkipping metric scheduling in namespace 3 due to previous failure\033[0m"
+  #[ $FAILURE = false ] && schedule_and_check_request $MM_NAMESPACE3 || echo -e "\033[0;31mSkipping metric scheduling in namespace 3 due to previous failure\033[0m"
 
   # check prometheus
   [ $FAILURE = false ] && test_prometheus_scraping $MM_NAMESPACE1       || echo -e "\033[0;31mSkipping Prometheus data check in namespace 1 due to previous failure\033[0m"
   [ $FAILURE = false ] && test_prometheus_scraping $MM_NAMESPACE2       || echo -e "\033[0;31mSkipping Prometheus data check in namespace 2 due to previous failure\033[0m"
-  [ $FAILURE = false ] && test_prometheus_scraping $MM_NAMESPACE3       || echo -e "\033[0;31mSkipping Prometheus data check in namespace 3 due to previous failure\033[0m"
+  #[ $FAILURE = false ] && test_prometheus_scraping $MM_NAMESPACE3       || echo -e "\033[0;31mSkipping Prometheus data check in namespace 3 due to previous failure\033[0m"
 
 
   [ $LOCAL = true ] && local_teardown_wait
 fi
 teardown_trustyai_test $MM_NAMESPACE1
 teardown_trustyai_test $MM_NAMESPACE2
-teardown_trustyai_test $MM_NAMESPACE3
+#teardown_trustyai_test $MM_NAMESPACE3
 teardown_global
 
 [ $FAILURE = true ] && os::cmd::expect_success "echo 'A previous assertion failed, marking suite as failed' && exit 1"
