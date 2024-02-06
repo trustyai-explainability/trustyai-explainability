@@ -3,8 +3,10 @@ package org.kie.trustyai.service.data.storage.hibernate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.utils.DataframeGenerators;
@@ -53,7 +55,6 @@ class HibernateStorageTest {
         int ncols = 10;
 
         Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
-        System.out.println(original.getRowDimension());
         storage.get().save(original, MODEL_ID);
         Dataframe recovered = storage.get().readData(MODEL_ID, nrows);
         DataframeGenerators.roughEqualityCheck(original, recovered);
@@ -66,11 +67,13 @@ class HibernateStorageTest {
         int batch = 10;
 
         Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
-        Dataframe batched = original.filterByRowIndex(IntStream.range(nrows - batch, nrows).boxed().collect(Collectors.toList()));
-
+        Dataframe batched = original.filterByRowIndex(IntStream.range(nrows-batch, nrows).boxed().collect(Collectors.toList()));
         storage.get().save(original, MODEL_ID);
         Dataframe recovered = storage.get().readData(MODEL_ID, batch);
         DataframeGenerators.roughEqualityCheck(batched, recovered);
     }
+
+
+
 
 }

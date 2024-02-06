@@ -21,7 +21,7 @@ public class DataframeColumn {
     @GeneratedValue
     private Long id;
 
-    protected DataframeColumn(List<Value> values) {
+    public DataframeColumn(List<Value> values) {
         this.values = values;
     }
 

@@ -86,6 +86,23 @@ public class DataframeGenerators {
         return Dataframe.createFrom(predictions);
     }
 
+    public static Dataframe generatePositionalHintedDataframe(int rows, int columns) {
+        final List<Prediction> predictions = new ArrayList<>();
+        for (int i = 0; i < rows; i++) {
+            int finalI = i;
+            final List<Feature> featureList = IntStream.range(0, columns)
+                    .mapToObj(idx -> FeatureFactory.newTextFeature("f" + idx, String.format("%d,%d", finalI, idx)))
+                    .collect(Collectors.toList());
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+
+            final List<Output> outputList = List.of(
+                    new Output("o0", Type.NUMBER, new Value(i), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
+    }
+
     public static Dataframe generateRandomDataframeDrifted(int observations, int featureDiversity) {
         final List<Prediction> predictions = new ArrayList<>();
         final Random random = new Random(0);
@@ -156,6 +173,17 @@ public class DataframeGenerators {
             assertArrayEquals(df1.getConstrained().toArray(), df2.getConstrained().toArray());
             assertArrayEquals(df1.getOutputsIndices().toArray(), df2.getOutputsIndices().toArray());
             assertArrayEquals(df1.getColumnTypes().toArray(), df2.getColumnTypes().toArray());
+        }
+    }
+
+    public static void roughValueEqualityCheck(Dataframe df1, Dataframe df2) {
+        assertEquals(df1.getRowDimension(), df2.getRowDimension());
+        assertEquals(df1.getColumnDimension(), df2.getColumnDimension());
+
+        for (int col = 0; col < df1.getColumnDimension(); col++) {
+            for (int row = 0; row < df1.getRowDimension(); row++) {
+                assertEquals(df1.getValue(row, col), df2.getValue(row, col));
+            }
         }
     }
 }

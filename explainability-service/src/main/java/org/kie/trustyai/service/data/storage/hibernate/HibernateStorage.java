@@ -1,6 +1,9 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -8,6 +11,9 @@ import jakarta.persistence.TypedQuery;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.DataframeColumn;
+import org.kie.trustyai.explainability.model.DataframeInternalData;
+import org.kie.trustyai.explainability.model.DataframeMetadata;
+import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
@@ -60,6 +66,11 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
         return readData(modelId, batchSize);
     }
 
+    public Dataframe readAllData(String modelId) throws StorageReadException {
+        LOG.debug("Reading dataframe " + modelId + " from Hibernate");
+        return em.find(Dataframe.class, modelId);
+    }
+
     // get the row count of a persisted dataframe
     public int rowCount(String modelId){
         return em.
@@ -68,34 +79,76 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
                 .getSingleResult();
     }
 
+    public int colCount(String modelId){
+        return (int) em.createQuery("select size(df.data) from Dataframe df WHERE df.id = ?1")
+                .setParameter(1, modelId)
+                .getSingleResult();
+    }
+
     @Override
     public Dataframe readData(String modelId, int batchSize) throws StorageReadException {
         LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
 
-        int length= rowCount(modelId);
-        int startIdx = Math.max(0, length - batchSize);
-        int endIdx = Math.min(length, startIdx + batchSize);
+        int rowCount = rowCount(modelId);
+        int colCount = colCount(modelId);
+        int startIdx = Math.max(0, rowCount- batchSize);
+        int endIdx = Math.min(rowCount, startIdx + batchSize);
 
 
-        Dataframe result = em.createQuery(
-                "select df from Dataframe df " +
-                        "JOIN df.data d JOIN d.values v " +
-                        "WHERE df.id = ?1 " +
-                        "AND INDEX(v) >= ?2 AND INDEX(v) < ?3",
-                        Dataframe.class
+        List<List<Value>> batchColumns = new ArrayList<>();
+        for (int colIdx=0; colIdx<colCount; colIdx++){
+            List<Value> colValues = em.createQuery(
+                            "" +
+                                    "select v from Dataframe df " +
+                                    "JOIN df.data d JOIN d.values v " +
+                                    "WHERE df.id = ?1 " +
+                                    "AND index(d) = ?2 " +
+                                    "AND index(v) >= ?3 AND index(v) < ?4 ",
+                            Value.class
+                    )
+                    .setParameter(1, modelId)
+                    .setParameter(2, colIdx)
+                    .setParameter(3, startIdx)
+                    .setParameter(4, endIdx)
+                    .getResultList();
+            batchColumns.add(colValues);
+        }
+
+        List<LocalDateTime> timestamps = em.createQuery("select ts from Dataframe df " +
+                                "JOIN df.internalData internal JOIN internal.timestamps ts " +
+                                "WHERE df.id = ?1 " +
+                                "AND index(ts) >= ?2 and INDEX(ts) < ?3",
+                        LocalDateTime.class
                 )
                 .setParameter(1, modelId)
                 .setParameter(2, startIdx)
                 .setParameter(3, endIdx)
-                .getSingleResult();
-         System.out.println("nrows recovered: " + result.getData().get(0).size());
+                .getResultList();
+        List<String> ids = em.createQuery("select ids from Dataframe df " +
+                                "JOIN df.internalData internal JOIN internal.ids ids " +
+                                "WHERE df.id = ?1 " +
+                                "AND index(ids) >= ?2 and INDEX(ids) < ?3",
+                        String.class
+                )
+                .setParameter(1, modelId)
+                .setParameter(2, startIdx)
+                .setParameter(3, endIdx)
+                .getResultList();
+        List<String> datapointTags = em.createQuery("select tags from Dataframe df " +
+                                "JOIN df.internalData internal JOIN internal.datapointTags tags " +
+                                "WHERE df.id = ?1 " +
+                                "AND index(tags) >= ?2 and INDEX(tags) < ?3",
+                        String.class
+                )
+                .setParameter(1, modelId)
+                .setParameter(2, startIdx)
+                .setParameter(3, endIdx)
+                .getResultList();
+        DataframeInternalData dfInternalData = new DataframeInternalData(datapointTags, ids, timestamps);
+        DataframeMetadata dfMetadata = em.createQuery("select df.metadata from Dataframe df WHERE df.id = ?1", DataframeMetadata.class)
+                .setParameter(1, modelId).getSingleResult();
 
-
-        Dataframe df = em.find(Dataframe.class, modelId);
-        System.out.println(startIdx + " : " + endIdx);
-        List<Integer> filter = IntStream.range(startIdx, endIdx).boxed().collect(Collectors.toList());
-
-        return df.filterByRowIndex(filter);
+        return new Dataframe(batchColumns, dfMetadata, dfInternalData);
     }
 
     @Override
