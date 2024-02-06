@@ -86,7 +86,7 @@ function check_mm_resources() {
   INFER_ROUTE=$(oc get route example-sklearn-isvc --template={{.spec.host}}{{.spec.path}}) || eval "$FAILURE_HANDLING"
   token=$(oc create token user-one -n ${1}) || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "curl -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/trustyai/data.json -H 'Authorization: Bearer $token' -i" "model_name" || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "oc set env $(oc get pod -o name | grep modelmesh-serving -m 1) --list | grep MM_PAYLOAD_PROCESSORS" "trustyai-service" || eval "$FAILURE_HANDLING"
+  #os::cmd::try_until_text "oc set env $(oc get pod -o name | grep modelmesh-serving -m 1) --list | grep MM_PAYLOAD_PROCESSORS" "trustyai-service" || eval "$FAILURE_HANDLING"
 }
 
 function check_communication(){
