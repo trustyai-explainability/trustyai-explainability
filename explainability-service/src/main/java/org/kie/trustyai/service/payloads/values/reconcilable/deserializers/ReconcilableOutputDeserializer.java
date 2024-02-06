@@ -32,14 +32,16 @@ public class ReconcilableOutputDeserializer extends StdDeserializer<Reconcilable
         if (value.isValueNode()) {
             return new ReconcilableOutput((ValueNode) value);
         } else {
-            List<ValueNode> valueNodes = new ArrayList<>();
-            for (JsonNode subNode : value) {
-                valueNodes.add((ValueNode) subNode);
-            }
-            if (valueNodes.isEmpty()) {
-                throw new IllegalArgumentException("Passed list of output values cannot be empty.");
-            }
-            return new ReconcilableOutput(valueNodes);
+            throw new IllegalArgumentException("Only single valued outputs are allowed currently.");
+            //
+            //            List<ValueNode> valueNodes = new ArrayList<>();
+            //            for (JsonNode subNode : value) {
+            //                valueNodes.add((ValueNode) subNode);
+            //            }
+            //            if (valueNodes.isEmpty()) {
+            //                throw new IllegalArgumentException("Passed list of output values cannot be empty.");
+            //            }
+            //            return new ReconcilableOutput(valueNodes);
         }
     }
 

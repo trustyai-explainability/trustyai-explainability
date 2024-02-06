@@ -85,11 +85,13 @@ class UniversalListingEndpointTest {
 
         ScheduleList scheduleList = given()
                 .when()
-                .get("/metrics/all/requests")
+                .get("/metrics/all/requests").peek()
                 .then().statusCode(200).extract().body().as(ScheduleList.class);
         for (ScheduleRequest sr : scheduleList.requests) {
             if (sr.id.equals(first)) {
                 assertEquals("DIR", sr.request.getMetricName());
+                GroupMetricRequest gmr = (GroupMetricRequest) sr.request;
+                assertFalse(gmr.privilegedAttribute.isMultipleValued());
             } else if (sr.id.equals(second)) {
                 assertEquals("SPD", sr.request.getMetricName());
             } else {

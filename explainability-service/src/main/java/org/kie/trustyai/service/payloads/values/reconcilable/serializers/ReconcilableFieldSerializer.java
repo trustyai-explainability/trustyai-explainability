@@ -30,7 +30,11 @@ public class ReconcilableFieldSerializer extends StdSerializer<ReconcilableField
         } else {
             jgen.writeStringField("type", "null");
         }
-        jgen.writeObjectField("value", value.getRawValueNodes());
+        if (value.isMultipleValued()) {
+            jgen.writeObjectField("value", value.getRawValueNodes());
+        } else {
+            jgen.writeObjectField("value", value.getRawValueNode());
+        }
         jgen.writeEndObject();
 
     }
