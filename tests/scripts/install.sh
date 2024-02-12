@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Installing KFDef from test directory"
-KFDEF_FILENAME=odh-core.yaml
+echo "Installing DSC from test directory"
+DSC_FILENAME=odh-core-dsc.yaml
 
 set -x
 ## Install the opendatahub-operator
@@ -47,25 +47,26 @@ popd
 pushd ~/kfdef
 
 # put in latest values for operator image
-sed -i "s#value: operatorImagePlaceholder#value: ${OPERATOR_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
+sed -i "s#trustyaiOperatorImage: operatorImagePlaceholder#trustyaiOperatorImage: ${OPERATOR_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
 
 if [ -z "$PULL_NUMBER" ] || [ $REPO_OWNER != "trustyai-explainability" ] || [ $REPO_NAME != "trustyai-explainability" ]; then
-  echo "No pull number and/or workflow is not originating from the original repo: using default ${KFDEF_FILENAME}"
+  echo "No pull number and/or workflow is not originating from the original repo: using default ${DSC_FILENAME}"
   # if not a pull, use latest version of service
-  sed -i "s#value: serviceImagePlaceholder#value: ${SERVICE_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
+  sed -i "s#trustyaiServiceImage: serviceImagePlaceholder#trustyaiServiceImage: ${SERVICE_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
 else
   if [ $REPO_NAME == "trustyai-explainability" ]; then
-    echo "Setting manifests in kfctl_openshift to use pull number: $PULL_NUMBER"
-    sed -i "s#uri: https://github.com/trustyai-explainability/trustyai-explainability/tarball/main#uri: https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/tarball/pull/${PULL_NUMBER}/head#" ./${KFDEF_FILENAME}
-
-    BRANCH_SHA=$(curl  https://api.github.com/repos/trustyai-explainability/trustyai-explainability/pulls/${PULL_NUMBER} | jq ".head.sha"  | tr -d '"')
+#    echo "Setting manifests in kfctl_openshift to use pull number: $PULL_NUMBER"
+#    sed -i "s#uri: https://github.com/trustyai-explainability/trustyai-explainability/tarball/main#uri: https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/tarball/pull/${PULL_NUMBER}/head#" ./${DSC_FILENAME}
+#
+#    BRANCH_SHA=$(curl  https://api.github.com/repos/trustyai-explainability/trustyai-explainability/pulls/${PULL_NUMBER} | jq ".head.sha"  | tr -d '"')
 
     # if a pull, use version built from CI
     echo "Setting TrustyAI operator configmap to use PR image"
-    sed -i "s#value: serviceImagePlaceholder#value: quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
+    sed -i "s#trustyaiServiceImage: serviceImagePlaceholder#trustyaiServiceImage: quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
 
-    echo "TrustyAI Operator KFDEF"
-    cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml
+    echo "TrustyAI Configmap:"
+    cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
+    cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml > ${ARTIFACT_DIR}/operator_kfdef.yaml
   fi
 fi
 
@@ -88,23 +89,24 @@ if [ -z "${OPENSHIFT_TESTUSER_NAME}" ] || [ -z "${OPENSHIFT_TESTUSER_PASS}" ]; t
   export OPENSHIFT_TESTUSER_PASS=admin
 fi
 
-
-if ! [ -z "${SKIP_KFDEF_INSTALL}" ]; then
-  ## SKIP_KFDEF_INSTALL is useful in an instance where the 
+if ! [ -z "${SKIP_DSC_INSTALL}" ]; then
+  ## SKIP_DSC_INSTALL is useful in an instance where the
   ## operator install comes with an init container to handle
-  ## the KfDef creation
-  echo "Relying on existing KfDef because SKIP_KFDEF_INSTALL was set"
+  ## the DSC creation
+  echo "Relying on existing DSC because SKIP_DSC_INSTALL was set"
 else
 
 
-  echo "Creating the following KfDef"
-  cat ./${KFDEF_FILENAME} > ${ARTIFACT_DIR}/${KFDEF_FILENAME}
-  cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml > ${ARTIFACT_DIR}/operator_kfdef.yaml
+  echo "Creating the following DSC"
+  cat ./${DSC_FILENAME} > ${ARTIFACT_DIR}/${DSC_FILENAME}
+  cat cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml > ${ARTIFACT_DIR}/trustyai_operator_configmap.yaml
 
-  oc apply -f ./${KFDEF_FILENAME}
+  oc apply -f $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
+  oc apply -f ./odh-core-dsci.yaml
+  oc apply -f ./${DSC_FILENAME}
   kfctl_result=$?
   if [ "$kfctl_result" -ne 0 ]; then
-    echo "The installation failed"
+    echo "The installation failed"a
     exit $kfctl_result
   fi
 fi

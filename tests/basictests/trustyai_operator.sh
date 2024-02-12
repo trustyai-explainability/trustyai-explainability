@@ -160,7 +160,7 @@ function teardown_trustyai_test() {
     for METRIC_NAME in "spd" "dir"
     do
       curl_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests
-      for REQUEST in $(curl -sk -H "Authorization: Bearer ${TOKEN}" $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
+      for REQUEST in $(curl_token -sk -H "Authorization: Bearer ${TOKEN}" $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
       do
         echo -n $REQUEST": "
         curl_token -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \

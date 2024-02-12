@@ -39,7 +39,7 @@ run:
 	mkdir -p ${LOCAL_ARTIFACT_DIR}/screenshots
 	oc config view --flatten --minify > /tmp/tests-kubeconfig
 	${BUILD_TOOL} run -e SKIP_INSTALL=$(SKIP_INSTALL) -e TESTS_REGEX=$(TESTS_REGEX) -e SKIP_OPERATOR_INSTALL=$(SKIP_OPERATOR_INSTALL) \
-	    -e SKIP_KFDEF_INSTALL=$(SKIP_KFDEF_INSTALL) -e ODHPROJECT=$(ODHPROJECT) \
+	    -e SKIP_DSC_INSTALL=$(SKIP_DSC_INSTALL) -e ODHPROJECT=$(ODHPROJECT) \
 		-e OPENSHIFT_TESTUSER_NAME="$(OPENSHIFT_TESTUSER_NAME)" -e OPENSHIFT_TESTUSER_PASS="$(OPENSHIFT_TESTUSER_PASS)" -e OPENSHIFT_TESTUSER_LOGIN_PROVIDER=$(OPENSHIFT_TESTUSER_LOGIN_PROVIDER) -e ARTIFACT_DIR=$(ARTIFACT_DIR) \
 		-e LOCAL=$(LOCAL) -e TEARDOWN=$(TEARDOWN) \
 		-e SERVICE_IMAGE=$(SERVICE_IMAGE) -e OPERATOR_IMAGE=$(OPERATOR_IMAGE)  \
@@ -56,4 +56,6 @@ clean:
 	oc get validatingwebhookconfiguration -o name | grep katib | grep $(ODHPROJECT) | xargs oc delete || true
 	oc delete project $(ODHPROJECT)-model || true
 	oc delete identity htpasswd-provider:admin || true
-	oc patch $(oc get kfdef -o name) --type=merge -p '{"metadata": {"finalizers":null}}'
+	oc patch $(oc get kfdef -o name) --type=merge -p '{"metadata": {"finalizers":null}}' || true
+	oc delete $(oc get projects -o name || grep basictests-) || true
+	oc delete $(oc get projects -o name || grep nightly-) || true
