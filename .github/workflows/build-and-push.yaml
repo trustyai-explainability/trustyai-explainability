@@ -57,7 +57,6 @@ jobs:
           echo "SHA: ${{ github.event.pull_request.head.sha }}"
           echo "MAIN IMAGE AT: ${{ vars.QUAY_RELEASE_REPO }}:latest"
           echo "CI IMAGE AT: quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}"
-          echo "CI MANIFESTS AT: https://github.com/trustyai-explainability/trustyai-service-operator-ci/tree/service-ca3f17695b1e2d4361536c5b811f55a7665601ad?service-${{ env.TAG }}
 
       # Set environments depending on context
       - name: Set CI environment
@@ -118,7 +117,7 @@ jobs:
 
       # Leave comment
       - uses: peter-evans/create-or-update-comment@v4
-        name: Generated success message comment
+        name: Generate success message comment
         with:
           body: |
             PR image build and manifest generation completed successfully.
