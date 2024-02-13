@@ -100,7 +100,7 @@ jobs:
           rm -Rf $(ls . | grep -v config)
           rm -Rf .gitignore .dockerignore .github .git .yamllint.yaml
           echo "Generated Manifests for Service PR" > README.md
-          echo "[${{ github.pull_request.title }}](https://github.com/trustyai-explainability/trustyai-explainability/pull/${{ github.event.number }})" >> README.md
+          echo "https://github.com/trustyai-explainability/trustyai-explainability/pull/${{ github.event.number }}" >> README.md
 
       # push to ci-manifest repo
       - uses: cpina/github-action-push-to-another-repository@main
