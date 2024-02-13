@@ -115,11 +115,12 @@ jobs:
           destination-repository-name: 'trustyai-service-operator-ci'
           target-branch: service-${{ env.TAG }}
           create-target-branch-if-needed: 'true'
-      - name: Generated success message comment
-          uses: peter-evans/create-or-update-comment@v4
-          with:
-            body: |
-              PR image build and manifest generation completed successfully.
-              PR image: quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}"
-              CI manifests: https://github.com/trustyai-explainability/trustyai-service-operator-ci/tree/service-ca3f17695b1e2d4361536c5b811f55a7665601ad?service-${{ env.TAG }}
-            
+
+      # Leave comment
+      - uses: peter-evans/create-or-update-comment@v4
+        name: Generated success message comment
+        with:
+          body: |
+            PR image build and manifest generation completed successfully.
+            PR image: quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}"
+            CI manifests: https://github.com/trustyai-explainability/trustyai-service-operator-ci/tree/service-ca3f17695b1e2d4361536c5b811f55a7665601ad?service-${{ env.TAG }}
