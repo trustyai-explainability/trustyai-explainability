@@ -131,6 +131,6 @@ jobs:
           body: |
             PR image build and manifest generation completed successfully!
             
-            📦 [PR image:](https://quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}): `quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}`
+            📦 [PR image](https://quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}): `quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}`
             
             🗂️ [CI manifests](https://github.com/trustyai-explainability/trustyai-service-operator-ci/tree/service-${{ env.TAG }})
