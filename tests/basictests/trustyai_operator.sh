@@ -34,15 +34,6 @@ function setup_monitoring() {
 }
 
 
-function install_trustyai_operator(){
-  header "Installing TrustyAI Operator"
-  oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
-
-  oc apply -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "oc get deployment trustyai-operator" "trustyai-operator" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "oc get pods | grep trustyai-service-operator" "Running" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-}
-
 
 function deploy_model() {
     header "Deploying model into ModelMesh"
@@ -159,8 +150,7 @@ function teardown_trustyai_test() {
   if [ $REQUESTS_CREATED = true ]; then
     for METRIC_NAME in "spd" "dir"
     do
-      curl_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests
-      for REQUEST in $(curl_token -sk -H "Authorization: Bearer ${TOKEN}" $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
+      for REQUEST in $(curl_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
       do
         echo -n $REQUEST": "
         curl_token -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
@@ -177,15 +167,10 @@ function teardown_trustyai_test() {
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/odh-mlserver-1.x.yaml" || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_crd.yaml"  || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete project $MM_NAMESPACE" || eval "$FAILURE_HANDLING"
-
-  oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
-  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml"  || eval "$FAILURE_HANDLING"
-  oc delete deployment trustyai-service-operator-controller-manager  || echo "No trustyai operator deployment found"
 }
 
 if [ $TEARDOWN = false ]; then
   setup_monitoring
-  [ $FAILURE = false ] && install_trustyai_operator   || echo -e "\033[0;31mSkipping TrustyAI-Operator deployment due to previous failure\033[0m"
   [ $FAILURE = false ] && deploy_model                || echo -e "\033[0;31mSkipping model deployment due to previous failure\033[0m"
   [ $FAILURE = false ] && check_trustyai_resources    || echo -e "\033[0;31mSkipping TrustyAI resource check due to previous failure\033[0m"
   [ $FAILURE = false ] && check_mm_resources          || echo -e "\033[0;31mSkipping ModelMesh resource check due to previous failure\033[0m"

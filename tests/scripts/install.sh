@@ -49,12 +49,12 @@ pushd ~/kfdef
 if [ -z "$PULL_NUMBER" ] || [ $REPO_OWNER != "trustyai-explainability" ] || [ $REPO_NAME != "trustyai-explainability" ]; then
   echo "No pull number and/or workflow is not originating from the original repo: using default ${DSC_FILENAME}"
   # if not a pull, use latest version of service
-  sed -i "s#trustyaiRepoPlaceholder#https://github.com/trustyai-explainability/trustyai-explainability/tarball/main#" ./${DSC_FILENAME}
+  sed -i "s#trustyaiRepoPlaceholder#https://github.com/trustyai-explainability/trustyai-service-operator/tarball/main#" ./${DSC_FILENAME}
 else
   if [ $REPO_NAME == "trustyai-explainability" ]; then
     # if a pull, use version built from CI
     echo "Setting TrustyAI devflags to use PR image"
-    sed -i "s#trustyaiRepoPlaceholder#https://github.com/trustyai-explainability/trustyai-explainability/tarball/service-${BRANCH_SHA}#" ./${DSC_FILENAME}
+    sed -i "s#trustyaiRepoPlaceholder#https://github.com/trustyai-explainability/trustyai-serivce-operator-ci/tarball/service-${BRANCH_SHA}#" ./${DSC_FILENAME}
   fi
 fi
 
