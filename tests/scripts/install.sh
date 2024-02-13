@@ -46,27 +46,15 @@ popd
 ## Point manifests repo uri in the KFDEF to the manifests in the PR
 pushd ~/kfdef
 
-# put in latest values for operator image
-sed -i "s#trustyaiOperatorImage: operatorImagePlaceholder#trustyaiOperatorImage: ${OPERATOR_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
-
 if [ -z "$PULL_NUMBER" ] || [ $REPO_OWNER != "trustyai-explainability" ] || [ $REPO_NAME != "trustyai-explainability" ]; then
   echo "No pull number and/or workflow is not originating from the original repo: using default ${DSC_FILENAME}"
   # if not a pull, use latest version of service
-  sed -i "s#trustyaiServiceImage: serviceImagePlaceholder#trustyaiServiceImage: ${SERVICE_IMAGE}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
+  sed -i "s#trustyaiRepoPlaceholder#https://github.com/trustyai-explainability/trustyai-explainability/tarball/main#" ./${DSC_FILENAME}
 else
   if [ $REPO_NAME == "trustyai-explainability" ]; then
-#    echo "Setting manifests in kfctl_openshift to use pull number: $PULL_NUMBER"
-#    sed -i "s#uri: https://github.com/trustyai-explainability/trustyai-explainability/tarball/main#uri: https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/tarball/pull/${PULL_NUMBER}/head#" ./${DSC_FILENAME}
-#
-#    BRANCH_SHA=$(curl  https://api.github.com/repos/trustyai-explainability/trustyai-explainability/pulls/${PULL_NUMBER} | jq ".head.sha"  | tr -d '"')
-
     # if a pull, use version built from CI
-    echo "Setting TrustyAI operator configmap to use PR image"
-    sed -i "s#trustyaiServiceImage: serviceImagePlaceholder#trustyaiServiceImage: quay.io/trustyai/trustyai-service-ci:${BRANCH_SHA}#" $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
-
-    echo "TrustyAI Configmap:"
-    cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
-    cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_kfdef.yaml > ${ARTIFACT_DIR}/operator_kfdef.yaml
+    echo "Setting TrustyAI devflags to use PR image"
+    sed -i "s#trustyaiRepoPlaceholder#https://github.com/trustyai-explainability/trustyai-explainability/tarball/service-${BRANCH_SHA}#" ./${DSC_FILENAME}
   fi
 fi
 
@@ -99,9 +87,6 @@ else
 
   echo "Creating the following DSC"
   cat ./${DSC_FILENAME} > ${ARTIFACT_DIR}/${DSC_FILENAME}
-  cat cat $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml > ${ARTIFACT_DIR}/trustyai_operator_configmap.yaml
-
-  oc apply -f $HOME/peak/operator-tests/trustyai-explainability/resources/trustyai/trustyai_operator_configmap.yaml
   oc apply -f ./odh-core-dsci.yaml
   oc apply -f ./${DSC_FILENAME}
   kfctl_result=$?

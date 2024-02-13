@@ -37,7 +37,7 @@ spec:
         manifests:
           - contextDir: config
             sourcePath: ''
-            uri: 'https://github.com/trustyai-explainability/trustyai-service-operator/tarball/main'
+            uri: trustyaiRepoPlaceholder
       managementState: Managed
     workbenches:
       managementState: Managed
