@@ -51,7 +51,7 @@ RUN cd $HOME/src/ods-ci && poetry install
 COPY setup/operatorsetup setup/pipelines-op-setup scripts/install.sh scripts/installandtest.sh $HOME/peak/
 COPY resources $HOME/peak/operator-tests/trustyai-explainability/resources
 COPY util $HOME/peak/operator-tests/trustyai-explainability
-COPY setup/odh-core.yaml $HOME/kfdef/
+COPY setup/odh-core-dsc.yaml setup/odh-core-dsci.yaml $HOME/kfdef/
 COPY basictests $HOME/peak/operator-tests/trustyai-explainability/basictests
 
 RUN chmod -R 777 $HOME/kfdef && \
