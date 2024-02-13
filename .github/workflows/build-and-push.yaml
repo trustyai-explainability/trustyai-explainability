@@ -122,13 +122,15 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes:  PR image build and manifest generation completed successfully.
+          body-includes:  PR image build and manifest generation completed successfully
       - uses: peter-evans/create-or-update-comment@v4
         name: Generate/update success message comment
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            PR image build and manifest generation completed successfully.
-            PR image: quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}"
-            CI manifests: https://github.com/trustyai-explainability/trustyai-service-operator-ci/tree/service-ca3f17695b1e2d4361536c5b811f55a7665601ad?service-${{ env.TAG }}
+            PR image build and manifest generation completed successfully!
+            
+            📦 [PR image:](https://quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}): `quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}`
+            
+            🗂️ [CI manifests](https://github.com/trustyai-explainability/trustyai-service-operator-ci/tree/service-${{ env.TAG }})
