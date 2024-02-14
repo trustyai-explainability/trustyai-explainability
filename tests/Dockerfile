@@ -12,7 +12,7 @@ ENV HOME /root
 WORKDIR /root
 
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&\
-    dnf install -y jq bc git go-toolset python38 unzip chromium chromedriver && \
+    dnf install -y jq bc git go-toolset python3.11 python3.11-devel python3.11-pip unzip chromium chromedriver && \
     dnf clean all && \
     git clone https://github.com/opendatahub-io/peak $HOME/peak && \
     cd $HOME/peak && \
