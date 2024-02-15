@@ -98,38 +98,39 @@ class DisparateImpactRatioEndpointTest {
         assertFalse(Double.isNaN(response.getValue()));
     }
 
-    @Test
-    void postMultiValueCorrect() throws JsonProcessingException {
-        datasource.get().reset();
-
-        final GroupMetricRequest payload = RequestPayloadGenerator.multiValueCorrect();
-
-        final BaseMetricResponse response = given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post()
-                .then().statusCode(Response.Status.OK.getStatusCode())
-                .extract()
-                .body().as(BaseMetricResponse.class);
-
-        assertEquals("metric", response.getType());
-        assertEquals("DIR", response.getName());
-        assertFalse(Double.isNaN(response.getValue()));
-    }
-
-    @Test
-    void postMultiValueMismatchingType() throws JsonProcessingException {
-        datasource.get().reset();
-
-        final GroupMetricRequest payload = RequestPayloadGenerator.multiValueMismatchingType();
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post()
-                .then().statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .body(containsString("Received invalid type for privileged attribute=age: got 'wrong', expected object compatible with 'INT32'"));
-    }
+    // disabled until better integrated with ODH UI
+    //    @Test
+    //    void postMultiValueCorrect() throws JsonProcessingException {
+    //        datasource.get().reset();
+    //
+    //        final GroupMetricRequest payload = RequestPayloadGenerator.multiValueCorrect();
+    //
+    //        final BaseMetricResponse response = given()
+    //                .contentType(ContentType.JSON)
+    //                .body(payload)
+    //                .when().post()
+    //                .then().statusCode(Response.Status.OK.getStatusCode())
+    //                .extract()
+    //                .body().as(BaseMetricResponse.class);
+    //
+    //        assertEquals("metric", response.getType());
+    //        assertEquals("DIR", response.getName());
+    //        assertFalse(Double.isNaN(response.getValue()));
+    //    }
+    //
+    //    @Test
+    //    void postMultiValueMismatchingType() throws JsonProcessingException {
+    //        datasource.get().reset();
+    //
+    //        final GroupMetricRequest payload = RequestPayloadGenerator.multiValueMismatchingType();
+    //
+    //        given()
+    //                .contentType(ContentType.JSON)
+    //                .body(payload)
+    //                .when().post()
+    //                .then().statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+    //                .body(containsString("Received invalid type for privileged attribute=age: got 'wrong', expected object compatible with 'INT32'"));
+    //    }
 
     @Test
     void postThresh() throws JsonProcessingException {

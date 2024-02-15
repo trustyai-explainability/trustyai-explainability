@@ -37,15 +37,6 @@ function curl_token() {
     curl -H "Authorization: Bearer ${TOKEN}" "$@"
 }
 
-function install_trustyai_operator(){
-  header "Installing TrustyAI Operator"
-  oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
-
-  oc apply -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "oc get deployment trustyai-operator" "trustyai-operator" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "oc get pods | grep trustyai-service-operator" "Running" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-}
-
 function deploy_model() {
     header "Deploying models into ModelMesh"
     oc new-project $MM_NAMESPACE || true
@@ -236,15 +227,10 @@ function teardown_trustyai_test() {
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/ovms-1.x.yaml"  || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_crd.yaml"   || eval "$FAILURE_HANDLING"
   os::cmd::expect_success "oc delete project $MM_NAMESPACE" || true
-
-  oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
-  os::cmd::expect_success "oc delete -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml"  || eval "$FAILURE_HANDLING"
-  oc delete deployment trustyai-service-operator-controller-manager  || echo "No trustyai operator deployment found"
 }
 
 if [ $TEARDOWN = false ]; then
   setup_monitoring
-  [ $FAILURE = false ] && install_trustyai_operator              || echo -e "\033[0;31mSkipping TrustyAI-Operator install due to previous failure\033[0m"
   [ $FAILURE = false ] && deploy_model                  || echo -e "\033[0;31mSkipping model deployment due to previous failure\033[0m"
   [ $FAILURE = false ] && check_trustyai_resources      || echo -e "\033[0;31mSkipping TrustyAI resource check due to previous failure\033[0m"
   [ $FAILURE = false ] && check_trustyai_conditions     || echo -e "\033[0;31mSkipping TrustyAI conditions check due to previous failure\033[0m"

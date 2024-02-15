@@ -1,8 +1,6 @@
 package org.kie.trustyai.service.endpoints.metrics;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
@@ -13,7 +11,6 @@ import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.databind.node.ValueNode;
 
 public class RequestPayloadGenerator {
 
@@ -31,48 +28,49 @@ public class RequestPayloadGenerator {
         return request;
     }
 
-    public static GroupMetricRequest multiValueCorrect() {
-        GroupMetricRequest request = new GroupMetricRequest();
-        request.setProtectedAttribute("age");
-
-        List<ValueNode> privAge = new ArrayList<>();
-        List<ValueNode> unprivAge = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
-            privAge.add(IntNode.valueOf(i));
-            unprivAge.add(IntNode.valueOf(i + 50));
-        }
-        request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(0)));
-        request.setOutcomeName("income");
-        request.setPrivilegedAttribute(new ReconcilableFeature(privAge));
-        request.setUnprivilegedAttribute(new ReconcilableFeature(unprivAge));
-        request.setModelId(MODEL_ID);
-
-        return request;
-    }
-
-    public static GroupMetricRequest multiValueMismatchingType() {
-        GroupMetricRequest request = new GroupMetricRequest();
-        request.setProtectedAttribute("age");
-
-        List<ValueNode> privAge = new ArrayList<>();
-        List<ValueNode> unprivAge = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
-            if (i < 25) {
-                privAge.add(IntNode.valueOf(i));
-                unprivAge.add(IntNode.valueOf(i + 50));
-            } else {
-                privAge.add(TextNode.valueOf("wrong"));
-                unprivAge.add(TextNode.valueOf("wrong"));
-            }
-        }
-        request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(0)));
-        request.setOutcomeName("income");
-        request.setPrivilegedAttribute(new ReconcilableFeature(privAge));
-        request.setUnprivilegedAttribute(new ReconcilableFeature(unprivAge));
-        request.setModelId(MODEL_ID);
-
-        return request;
-    }
+    // multi valued requests disabled until better integrated with ODH UI
+    //    public static GroupMetricRequest multiValueCorrect() {
+    //        GroupMetricRequest request = new GroupMetricRequest();
+    //        request.setProtectedAttribute("age");
+    //
+    //        List<ValueNode> privAge = new ArrayList<>();
+    //        List<ValueNode> unprivAge = new ArrayList<>();
+    //        for (int i = 0; i < 50; i++) {
+    //            privAge.add(IntNode.valueOf(i));
+    //            unprivAge.add(IntNode.valueOf(i + 50));
+    //        }
+    //        request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(0)));
+    //        request.setOutcomeName("income");
+    //        request.setPrivilegedAttribute(new ReconcilableFeature(privAge));
+    //        request.setUnprivilegedAttribute(new ReconcilableFeature(unprivAge));
+    //        request.setModelId(MODEL_ID);
+    //
+    //        return request;
+    //    }
+    //
+    //    public static GroupMetricRequest multiValueMismatchingType() {
+    //        GroupMetricRequest request = new GroupMetricRequest();
+    //        request.setProtectedAttribute("age");
+    //
+    //        List<ValueNode> privAge = new ArrayList<>();
+    //        List<ValueNode> unprivAge = new ArrayList<>();
+    //        for (int i = 0; i < 50; i++) {
+    //            if (i < 25) {
+    //                privAge.add(IntNode.valueOf(i));
+    //                unprivAge.add(IntNode.valueOf(i + 50));
+    //            } else {
+    //                privAge.add(TextNode.valueOf("wrong"));
+    //                unprivAge.add(TextNode.valueOf("wrong"));
+    //            }
+    //        }
+    //        request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(0)));
+    //        request.setOutcomeName("income");
+    //        request.setPrivilegedAttribute(new ReconcilableFeature(privAge));
+    //        request.setUnprivilegedAttribute(new ReconcilableFeature(unprivAge));
+    //        request.setModelId(MODEL_ID);
+    //
+    //        return request;
+    //    }
 
     public static GroupMetricRequest named(String name) {
         GroupMetricRequest request = new GroupMetricRequest();

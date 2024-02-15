@@ -1,7 +1,5 @@
 package org.kie.trustyai.service.payloads.values.reconcilable;
 
-import java.util.List;
-
 import org.kie.trustyai.service.payloads.values.reconcilable.deserializers.ReconcilableOutputDeserializer;
 import org.kie.trustyai.service.payloads.values.reconcilable.serializers.ReconcilableFieldSerializer;
 
@@ -16,7 +14,7 @@ public class ReconcilableOutput extends ReconcilableField {
         super(rawValueNode);
     }
 
-    public ReconcilableOutput(List<ValueNode> rawValueNode) {
-        super(rawValueNode);
-    }
+    //    public ReconcilableOutput(List<ValueNode> rawValueNode) {
+    //        super(rawValueNode);
+    //    }
 }
