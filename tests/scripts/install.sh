@@ -55,7 +55,7 @@ else
     # if a pull, use version built from CI
     echo "Setting TrustyAI devflags to use PR image"
     BRANCH_SHA=$(curl https://api.github.com/repos/trustyai-explainability/trustyai-explainability/pulls/${PULL_NUMBER} | jq ".head.sha" | tr -d '"')
-    sed -i "s#trustyaiRepoPlaceholder#https://github.com/trustyai-explainability/trustyai-serivce-operator-ci/tarball/service-${BRANCH_SHA}#" ./${DSC_FILENAME}
+    sed -i "s#trustyaiRepoPlaceholder#https://api.github.com/repos/trustyai-explainability/trustyai-service-operator-ci/tarball/service-${BRANCH_SHA}#" ./${DSC_FILENAME}
   fi
 fi
 
