@@ -38,16 +38,6 @@ function setup_monitoring() {
 }
 
 
-function install_trustyai_operator(){
-  header "Installing TrustyAI Operator"
-  oc project $ODHPROJECT || eval "$FAILURE_HANDLING"
-
-  oc apply -f ${RESOURCEDIR}/trustyai/trustyai_operator_kfdef.yaml || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "oc get deployment trustyai-operator" "trustyai-operator" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "oc get pods | grep trustyai-service-operator" "Running" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-}
-
-
 function deploy_model() {
     header "Deploying model into ModelMesh, namespace=$1"
     oc new-project $1 || true
@@ -197,9 +187,6 @@ function teardown_global() {
 
 if [ $TEARDOWN = false ]; then
   setup_monitoring
-
-  [ $FAILURE = false ] && install_trustyai_operator                 || echo -e "\033[0;31mSkipping TrustyAI-Operator deployment due to previous failure\033[0m"
-
   # deploy models
   [ $FAILURE = false ] && deploy_model $MM_NAMESPACE1               || echo -e "\033[0;31mSkipping model deployment in namespace 1 due to previous failure\033[0m"
   [ $FAILURE = false ] && deploy_model $MM_NAMESPACE2               || echo -e "\033[0;31mSkipping model deployment in namespace 2 due to previous failure\033[0m"
