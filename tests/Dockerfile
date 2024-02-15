@@ -5,14 +5,14 @@ ARG BRANCH=main
 ARG ODS_CI_REPO=https://github.com/red-hat-data-services/ods-ci
 # This git reference should always reference a stable commit from ods-ci that supports ODH
 # This hash corresponds to a March 24th, 2023 commit
-ARG ODS_CI_GITREF=a0d8e0a8cf58629f895a1660c5d766c3aa4ce82e
+ARG ODS_CI_GITREF=867a617bc224726cf98fa3354293f8e50b4f5eb5
 ARG OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/latest/openshift-client-linux.tar.gz
 
 ENV HOME /root
 WORKDIR /root
 
 RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&\
-    dnf install -y jq bc git go-toolset python38 unzip chromium chromedriver && \
+    dnf install -y jq bc git go-toolset python3.11 python3.11-devel python3.11-pip unzip chromium chromedriver && \
     dnf clean all && \
     git clone https://github.com/opendatahub-io/peak $HOME/peak && \
     cd $HOME/peak && \
