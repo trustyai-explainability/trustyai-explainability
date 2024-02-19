@@ -22,18 +22,11 @@ FAILURE_HANDLING='FAILURE=true && echo -e "\033[0;31mERROR\033[0m"'
 
 os::test::junit::declare_suite_start "$MY_SCRIPT"
 
-# Function to add the Authorization token to curl commands
-function curl_token() {
-    TOKEN=$(oc create token user-one -n ${MM_NAMESPACE}) || eval "$FAILURE_HANDLING"
-    curl -H "Authorization: Bearer ${TOKEN}" "$@"
-}
 
 function setup_monitoring() {
     header "Enabling User Workload Monitoring on the cluster"
     oc apply -f ${RESOURCEDIR}/modelmesh/enable-uwm.yaml || eval "$FAILURE_HANDLING"
 }
-
-
 
 function deploy_model() {
     header "Deploying model into ModelMesh"
@@ -71,8 +64,7 @@ function check_mm_resources() {
   os::cmd::try_until_text "oc get pod | grep modelmesh-serving-mlserver" "5/5" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "oc get route example-sklearn-isvc" "example-sklearn-isvc" $odhdefaulttimeout $odhdefaultinterval
   INFER_ROUTE=$(oc get route example-sklearn-isvc --template={{.spec.host}}{{.spec.path}}) || eval "$FAILURE_HANDLING"
-  token=$(oc create token user-one -n ${MM_NAMESPACE}) || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "curl -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/trustyai/data.json -H 'Authorization: Bearer $token' -i" "model_name" || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "curl_model_token -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/trustyai/data.json  -i" "model_name" || eval "$FAILURE_HANDLING"
 }
 
 function check_communication(){
@@ -80,8 +72,8 @@ function check_communication(){
     oc project $MM_NAMESPACE || eval "$FAILURE_HANDLING"
 
     # send some data to modelmesh
-    os::cmd::expect_success_and_text "curl -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/trustyai/data.json -H 'Authorization: Bearer $token' -i" "model_name" || eval "$FAILURE_HANDLING"
-    os::cmd::try_until_text "curl -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/trustyai/data.json -H 'Authorization: Bearer $token' -i; oc logs $(oc get pods -o name | grep trustyai-service)" "Received partial input payload" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+    os::cmd::expect_success_and_text "curl_model_token -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/trustyai/data.json -i" "model_name" || eval "$FAILURE_HANDLING"
+    os::cmd::try_until_text "curl_model_token -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/trustyai/data.json -i; oc logs $(oc get pods -o name | grep trustyai-service)" "Received partial input payload" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function generate_data(){
@@ -93,7 +85,7 @@ function generate_data(){
     for i in {1..500};
     do
       DATA=$(sed "s/\[40.83, 3.5, 0.5, 0\]/\[$(($RANDOM % 2)),$(($RANDOM / 128)),$(($RANDOM / 128)), $(($RANDOM / 128)) \]/" ${RESOURCEDIR}/trustyai/data.json) || eval "$FAILURE_HANDLING"
-      curl -k https://$INFER_ROUTE/infer -d "$DATA"  -H 'Authorization: Bearer $token' -i > /dev/null 2>&1 &
+      curl_model_token -k https://$INFER_ROUTE/infer -d "$DATA"  -i > /dev/null 2>&1 &
       sleep .01
     done
 }
@@ -104,7 +96,7 @@ function schedule_and_check_request(){
 
   TRUSTY_ROUTE=https://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
-  os::cmd::expect_success_and_text "curl_token -k --location $TRUSTY_ROUTE/metrics/spd/request \
+  os::cmd::expect_success_and_text "curl_trustyai_token -k --location $TRUSTY_ROUTE/metrics/spd/request \
     --header 'Content-Type: application/json' \
     --data '{
         \"modelId\": \"example-sklearn-isvc\",
@@ -114,7 +106,7 @@ function schedule_and_check_request(){
         \"privilegedAttribute\": 0.0,
         \"unprivilegedAttribute\": 1.0
     }'" "requestId" || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "curl_token -k $TRUSTY_ROUTE/q/metrics" "trustyai_spd" || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "curl_trustyai_token -k $TRUSTY_ROUTE/q/metrics" "trustyai_spd" || eval "$FAILURE_HANDLING"
   REQUESTS_CREATED=true;
 }
 
@@ -122,10 +114,7 @@ function schedule_and_check_request(){
 function test_prometheus_scraping(){
     header "Ensure metrics are in Prometheus"
 
-    SECRET=`oc get secret -n openshift-user-workload-monitoring | grep  prometheus-user-workload-token | head -n 1 | awk '{print $1 }'` || eval "$FAILURE_HANDLING"
-    TOKEN=`echo $(oc get secret $SECRET -n openshift-user-workload-monitoring -o json | jq -r '.data.token') | base64 -d` || eval "$FAILURE_HANDLING"
-    THANOS_QUERIER_HOST=`oc get route thanos-querier -n openshift-monitoring -o json | jq -r '.spec.host'` || eval "$FAILURE_HANDLING"
-    os::cmd::try_until_text "curl -X GET -kG \"https://$THANOS_QUERIER_HOST/api/v1/query?\" --data-urlencode \"query=trustyai_spd{namespace='opendatahub-model'}\" -H 'Authorization: Bearer $TOKEN' | jq '.data.result[0].metric.protected'" "predict-0" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+    os::cmd::try_until_text "curl_prom_token \"query=trustyai_spd{namespace='opendatahub-model'}\" | jq '.data.result[0].metric.protected'" "predict-0" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function local_teardown_wait(){
@@ -147,17 +136,18 @@ function teardown_trustyai_test() {
   oc logs $(oc get pods -o name | grep trustyai) >> ${ARTIFACT_DIR}/trusty_service_pod_logs.txt || true
   oc exec $(oc get pods -o name | grep trustyai) -c trustyai-service -- bash -c "ls /inputs/" >> ${ARTIFACT_DIR}/trusty_service_inputs_ls.txt || true
 
-  
-  
-  TRUSTY_ROUTE=http://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
+
+  TRUSTY_ROUTE=https://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
   if [ $REQUESTS_CREATED = true ]; then
     for METRIC_NAME in "spd" "dir"
     do
-      for REQUEST in $(curl_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
+      for REQUEST in $( curl_trustyai_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
       do
         echo -n $REQUEST": "
-        curl_token -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+
+
+        curl_trustyai_token -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
             -H 'Content-Type: application/json' \
             -d "{
                   \"requestId\": \"$REQUEST\"
