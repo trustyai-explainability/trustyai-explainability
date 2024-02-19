@@ -120,7 +120,7 @@ function schedule_and_check_request(){
 
 function test_prometheus_scraping(){
     header "Ensure metrics are in Prometheus, namespace=$1"
-    os::cmd::try_until_text "curl_prom_token \"query=trustyai_spd{namespace='$1'}\ | jq '.data.result[0].metric.protected'" "predict-0" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+    os::cmd::try_until_text "curl_prom_token \"query=trustyai_spd{namespace='$1'}\" | jq '.data.result[0].metric.protected'" "predict-0" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function local_teardown_wait(){
