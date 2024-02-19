@@ -87,7 +87,7 @@ else
 
 
   echo "Creating the following DSC"
-  cat ./${DSC_FILENAME} > ${ARTIFACT_DIR}/${DSC_FILENAME}
+  echo $(cat ./${DSC_FILENAME} > ${ARTIFACT_DIR}/${DSC_FILENAME})
   oc apply -f ./odh-core-dsci.yaml
   oc apply -f ./${DSC_FILENAME}
   kfctl_result=$?

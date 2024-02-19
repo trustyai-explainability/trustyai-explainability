@@ -67,7 +67,7 @@ function check_mm_resources() {
   os::cmd::try_until_text "oc get route example-sklearn-isvc" "example-sklearn-isvc" $odhdefaulttimeout $odhdefaultinterval
   INFER_ROUTE=$(oc get route example-sklearn-isvc --template={{.spec.host}}{{.spec.path}}) || eval "$FAILURE_HANDLING"
   os::cmd::try_until_text "curl_model_token_with_ns $1 -k https://$INFER_ROUTE/infer -d @${RESOURCEDIR}/trustyai/data.json -i" "model_name" || eval "$FAILURE_HANDLING"
-  #os::cmd::try_until_text "oc set env $(oc get pod -o name | grep modelmesh-serving -m 1) --list | grep MM_PAYLOAD_PROCESSORS" "trustyai-service" || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "oc set env $(oc get pod -o name | grep modelmesh-serving -m 1) --list | grep MM_PAYLOAD_PROCESSORS" "trustyai-service" || eval "$FAILURE_HANDLING"
 }
 
 function check_communication(){
@@ -165,25 +165,18 @@ function teardown_trustyai_test() {
 
 if [ $TEARDOWN = false ]; then
   setup_monitoring
-  # deploy models
+  # install and reconcile models in ns1
   [ $FAILURE = false ] && deploy_model $MM_NAMESPACE1               || echo -e "\033[0;31mSkipping model deployment in namespace 1 due to previous failure\033[0m"
-  [ $FAILURE = false ] && deploy_model $MM_NAMESPACE2               || echo -e "\033[0;31mSkipping model deployment in namespace 2 due to previous failure\033[0m"
-  #[ $FAILURE = false ] && deploy_model $MM_NAMESPACE3               || echo -e "\033[0;31mSkipping model deployment in namespace 3 due to previous failure\033[0m"
-
-  # install trustyai
   [ $FAILURE = false ] && check_trustyai_resources $MM_NAMESPACE1   || echo -e "\033[0;31mSkipping TrustyAI resource check in namespace 1 due to previous failure\033[0m"
-  [ $FAILURE = false ] && check_trustyai_resources $MM_NAMESPACE2   || echo -e "\033[0;31mSkipping TrustyAI resource check in namespace 2 due to previous failure\033[0m"
-  #[ $FAILURE = false ] && check_trustyai_resources $MM_NAMESPACE3   || echo -e "\033[0;31mSkipping TrustyAI resource check in namespace 3 due to previous failure\033[0m"
-
-  # check on models
   [ $FAILURE = false ] && check_mm_resources $MM_NAMESPACE1         || echo -e "\033[0;31mSkipping ModelMesh resource check in namespace 1 due to previous failure\033[0m"
-  [ $FAILURE = false ] && check_mm_resources $MM_NAMESPACE2         || echo -e "\033[0;31mSkipping ModelMesh resource check in namespace 2 due to previous failure\033[0m"
-  #[ $FAILURE = false ] && check_mm_resources $MM_NAMESPACE3         || echo -e "\033[0;31mSkipping ModelMesh resource check in namespace 3 due to previous failure\033[0m"
-
-  # check communication
   [ $FAILURE = false ] && check_communication $MM_NAMESPACE1        || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check in namespace 1 due to previous failure\033[0m"
+
+  # install and reconcile models in ns2
+  [ $FAILURE = false ] && deploy_model $MM_NAMESPACE2               || echo -e "\033[0;31mSkipping model deployment in namespace 2 due to previous failure\033[0m"
+  [ $FAILURE = false ] && check_trustyai_resources $MM_NAMESPACE2   || echo -e "\033[0;31mSkipping TrustyAI resource check in namespace 2 due to previous failure\033[0m"
+  [ $FAILURE = false ] && check_mm_resources $MM_NAMESPACE2         || echo -e "\033[0;31mSkipping ModelMesh resource check in namespace 2 due to previous failure\033[0m"
   [ $FAILURE = false ] && check_communication $MM_NAMESPACE2        || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check in namespace 2 due to previous failure\033[0m"
-  #[ $FAILURE = false ] && check_communication $MM_NAMESPACE3        || echo -e "\033[0;31mSkipping ModelMesh-TrustyAI communication check in namespace 3 due to previous failure\033[0m"
+
 
   # generate data
   [ $FAILURE = false ] && generate_data $MM_NAMESPACE1              || echo -e "\033[0;31mSkipping data generation in namespace 1 due to previous failure\033[0m"
