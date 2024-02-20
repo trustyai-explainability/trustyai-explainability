@@ -32,8 +32,11 @@ function setup_monitoring() {
 
 function deploy_model() {
     header "Deploying model into ModelMesh, namespace=$1"
-    oc new-project $1 || true
+    oc $ODHPROJECT
+    oc apply -f ${RESOURCEDIR}/modelmesh/model-serving-config.yaml
 
+
+    oc new-project $1 || true
     os::cmd::expect_success "oc project ${1}" || eval "$FAILURE_HANDLING"
     os::cmd::expect_success "oc apply -f ${RESOURCEDIR}/modelmesh/service_account.yaml -n ${1}" || eval "$FAILURE_HANDLING"
     oc label namespace $1 "modelmesh-enabled=true" --overwrite=true || echo "Failed to apply modelmesh-enabled label."
