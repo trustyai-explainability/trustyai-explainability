@@ -32,7 +32,7 @@ function setup_monitoring() {
 
 function deploy_model() {
     header "Deploying model into ModelMesh, namespace=$1"
-    oc $ODHPROJECT
+    oc project $ODHPROJECT
     oc apply -f ${RESOURCEDIR}/modelmesh/model-serving-config.yaml
 
 
