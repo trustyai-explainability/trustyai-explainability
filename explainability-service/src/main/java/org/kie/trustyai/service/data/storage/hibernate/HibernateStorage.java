@@ -141,7 +141,7 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
     @Override
     public boolean dataframeExists(String modelId) throws StorageReadException {
         try {
-            return em.find(Dataframe.class, modelId) != null;
+            return em.find(DataframeMetadata.class, modelId) != null;
         } catch (EntityNotFoundException e) {
             return false;
         }
@@ -150,5 +150,22 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
     @Override
     public long getLastModified(String modelId) {
         return 0;
+    }
+
+    @Transactional
+    public void clearData(String modelId) {
+        if (dataframeExists(modelId)) {
+            LOG.debug("Deleting all data from " + modelId + " within Hibernate");
+            em.createQuery("" +
+                    "DELETE from DataframeRow dr " +
+                    "where dr.modelId = ?1")
+                    .setParameter(1, modelId)
+                    .executeUpdate();
+            em.createQuery("" +
+                    "DELETE from DataframeMetadata dm " +
+                    "where dm.id = ?1")
+                    .setParameter(1, modelId)
+                    .executeUpdate();
+        }
     }
 }

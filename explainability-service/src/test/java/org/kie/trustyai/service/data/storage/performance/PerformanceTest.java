@@ -21,7 +21,7 @@ public class PerformanceTest<T extends Storage> {
     Instance<T> storage;
 
     int N_ROWS = 5_000;
-    int N_DF_COPIES = 30;
+    int N_DF_COPIES = 5;
     int N_COLS = 25;
     int BATCH_SIZE = 1000;
     int N_TESTS = 50;

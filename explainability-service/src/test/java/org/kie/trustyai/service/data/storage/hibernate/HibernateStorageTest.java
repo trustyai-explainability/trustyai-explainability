@@ -9,6 +9,8 @@ import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
@@ -23,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestProfile(HibernateTestProfile.class)
-//@QuarkusTestResource(H2DatabaseTestResource.class)
+@QuarkusTestResource(H2DatabaseTestResource.class)
 class HibernateStorageTest {
     @Inject
     Instance<MockHibernateStorage> storage;
@@ -36,7 +38,9 @@ class HibernateStorageTest {
     @Transactional
     @BeforeEach
     void emptyStorage() {
+        storage.get().clearData(MODEL_ID);
         em.clear();
+
     }
 
     @Test
@@ -58,6 +62,17 @@ class HibernateStorageTest {
     }
 
     @Test
+    void testCounts() {
+        int nrows = 100;
+        int ncols = 10;
+
+        Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
+        storage.get().save(original, MODEL_ID);
+        assertEquals(nrows, storage.get().rowCount(MODEL_ID));
+        assertEquals(original.getColumnDimension(), storage.get().colCount(MODEL_ID));
+    }
+
+    @Test
     void testBatchedRead() {
         int nrows = 100;
         int ncols = 10;
@@ -66,9 +81,7 @@ class HibernateStorageTest {
         Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
         Dataframe batched = original.filterByRowIndex(IntStream.range(nrows - batch, nrows).boxed().collect(Collectors.toList()));
 
-        long start = System.currentTimeMillis();
         storage.get().save(original, MODEL_ID);
-        System.out.println(System.currentTimeMillis() - start);
         Dataframe recovered = storage.get().readData(MODEL_ID, batch);
         DataframeGenerators.roughEqualityCheck(batched, recovered);
     }
