@@ -42,6 +42,8 @@ pushd ~/src/${REPO_NAME}
 #  fi
 #fi
 
+
+
 popd
 ## Point manifests repo uri in the KFDEF to the manifests in the PR
 pushd ~/kfdef
@@ -87,7 +89,7 @@ else
 
 
   echo "Creating the following DSC"
-  cat ./${DSC_FILENAME} > ${ARTIFACT_DIR}/${DSC_FILENAME}
+  echo $(cat ./${DSC_FILENAME} > ${ARTIFACT_DIR}/${DSC_FILENAME})
   oc apply -f ./odh-core-dsci.yaml
   oc apply -f ./${DSC_FILENAME}
   kfctl_result=$?

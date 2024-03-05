@@ -4,8 +4,8 @@ source $TEST_DIR/common
 
 MY_DIR=$(readlink -f `dirname "${BASH_SOURCE[0]}"`)
 
-source ${MY_DIR}/../util
-RESOURCEDIR="${MY_DIR}/../resources"
+source ${MY_DIR}/../../util
+RESOURCEDIR="${MY_DIR}/../../resources"
 
 TEST_USER=${OPENSHIFT_TESTUSER_NAME:-"admin"} #Username used to login
 TEST_PASS=${OPENSHIFT_TESTUSER_PASS:-"admin"} #Password used to login
@@ -30,12 +30,7 @@ function setup_monitoring() {
     oc apply -f ${RESOURCEDIR}/modelmesh/enable-uwm.yaml || eval "$FAILURE_HANDLING"
 }
 
-# Function to add the Authorization token to curl commands
-function curl_token() {
-    oc apply -f ${RESOURCEDIR}/modelmesh/service_account.yaml -n ${MM_NAMESPACE}
-    TOKEN=$(oc create token user-one -n ${MM_NAMESPACE}) || eval "$FAILURE_HANDLING"
-    curl -H "Authorization: Bearer ${TOKEN}" "$@"
-}
+
 
 function deploy_model() {
     header "Deploying models into ModelMesh"
@@ -83,7 +78,7 @@ function check_trustyai_authentication() {
   TRUSTY_ROUTE=https://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
   os::cmd::try_until_text "curl -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/info" "403" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-  os::cmd::try_until_text "curl_token -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/info" "200" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+  os::cmd::try_until_text "curl_trustyai_token -k -s -o /dev/null -w \"%{http_code}\" ${TRUSTY_ROUTE}/info" "200" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function check_mm_resources() {
@@ -126,7 +121,7 @@ function schedule_and_check_request(){
     METRIC_UPPERCASE=$(echo ${METRIC_NAME} | tr '[:lower:]' '[:upper:]')
     for MODEL in $MODEL_ALPHA $MODEL_BETA
     do
-      curl_token -sk --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+      curl_trustyai_token -sk --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
         --header 'Content-Type: application/json' \
         --data "{
                   \"modelId\": \"$MODEL\",
@@ -177,11 +172,9 @@ function schedule_and_check_request(){
 function test_prometheus_scraping(){
     header "Ensure metrics are in Prometheus"
 
-    SECRET=`oc get secret -n openshift-user-workload-monitoring | grep  prometheus-user-workload-token | head -n 1 | awk '{print $1 }'` || eval "$FAILURE_HANDLING"
-    TOKEN=`echo $(oc get secret $SECRET -n openshift-user-workload-monitoring -o json | jq -r '.data.token') | base64 -d` || eval "$FAILURE_HANDLING"
-    THANOS_QUERIER_HOST=`oc get route thanos-querier -n openshift-monitoring -o json | jq -r '.spec.host'` || eval "$FAILURE_HANDLING"
-    os::cmd::try_until_text "curl -X GET -kG \"https://$THANOS_QUERIER_HOST/api/v1/query?\" --data-urlencode \"query=trustyai_spd{namespace='opendatahub-model'}\" -H 'Authorization: Bearer $TOKEN' | jq '.data.result[0].metric.protected'" "customer_data_input-3" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
-    os::cmd::try_until_text "curl -X GET -kG \"https://$THANOS_QUERIER_HOST/api/v1/query?\" --data-urlencode \"query=trustyai_dir{namespace='opendatahub-model'}\" -H 'Authorization: Bearer $TOKEN' | jq '.data.result[0].metric.protected'" "customer_data_input-3" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+    curl_prom_token "query=trustyai_spd{namespace='opendatahub-model'}"
+    os::cmd::try_until_text "curl_prom_token \"query=trustyai_spd{namespace='opendatahub-model'}\" | jq '.data.result[0].metric.protected'" "customer_data_input-3" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
+    os::cmd::try_until_text "curl_prom_token \"query=trustyai_dir{namespace='opendatahub-model'}\" | jq '.data.result[0].metric.protected'" "customer_data_input-3" $odhdefaulttimeout $odhdefaultinterval || eval "$FAILURE_HANDLING"
 }
 
 function local_teardown_wait(){
@@ -194,20 +187,24 @@ function teardown_trustyai_test() {
   oc project $MM_NAMESPACE  || eval "$FAILURE_HANDLING"
   oc get pods >> ${ARTIFACT_DIR}/${MM_NAMESPACE}.pods.txt
   oc get events >>  ${ARTIFACT_DIR}/${MM_NAMESPACE}.events.txt
-  oc logs -n opendatahub $(oc get pods -o name -n opendatahub | grep trustyai) >> ${ARTIFACT_DIR}/${ODHPROJECT}.trustyoperatorlogs.txt
+
+  oc project $ODHPROJECT
+  oc logs $(oc get pods -o name -n opendatahub | grep trustyai) >> ${ARTIFACT_DIR}/${ODHPROJECT}.trustyoperatorlogs.txt
+
+  oc project $MM_NAMESPACE  || eval "$FAILURE_HANDLING"
   oc logs $(oc get pods -o name | grep trustyai) >> ${ARTIFACT_DIR}/trusty_service_pod_logs.txt || true
   oc exec $(oc get pods -o name | grep trustyai) -c trustyai-service -- bash -c "ls /inputs/" >> ${ARTIFACT_DIR}/trusty_service_inputs_ls.txt || true
   
-  TRUSTY_ROUTE=http://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
+  TRUSTY_ROUTE=https://$(oc get route/trustyai-service --template={{.spec.host}}) || eval "$FAILURE_HANDLING"
 
   # delete all requests
   if [ $REQUESTS_CREATED = true ]; then
     for METRIC_NAME in "spd" "dir"
     do
-      for REQUEST in $(curl_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests | jq -r '.requests [].id')
+      for REQUEST in $( (curl_trustyai_token -sk $TRUSTY_ROUTE/metrics/$METRIC_NAME/requests) | jq -r '.requests [].id')
       do
         echo -n $REQUEST": "
-        curl_token -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
+        curl_trustyai_token -k -X DELETE --location $TRUSTY_ROUTE/metrics/$METRIC_NAME/request \
             -H 'Content-Type: application/json' \
             -d "{
                   \"requestId\": \"$REQUEST\"
