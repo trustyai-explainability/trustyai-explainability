@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
 import org.kie.trustyai.metrics.utils.PerColumnStatistics;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;

@@ -4,271 +4,360 @@
 package org.kie.trustyai.connectors.kserve.v2.grpc;
 
 public final class GrpcPredictV2 {
-    private GrpcPredictV2() {
-    }
+  private GrpcPredictV2() {}
+  public static void registerAllExtensions(
+      com.google.protobuf.ExtensionRegistryLite registry) {
+  }
 
-    public static void registerAllExtensions(
-            com.google.protobuf.ExtensionRegistryLite registry) {
-    }
+  public static void registerAllExtensions(
+      com.google.protobuf.ExtensionRegistry registry) {
+    registerAllExtensions(
+        (com.google.protobuf.ExtensionRegistryLite) registry);
+  }
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ServerLiveRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ServerLiveRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ServerLiveResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ServerLiveResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ServerReadyRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ServerReadyRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ServerReadyResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ServerReadyResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelReadyRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelReadyRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelReadyResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelReadyResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ServerMetadataRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ServerMetadataRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ServerMetadataResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ServerMetadataResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelMetadataRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelMetadataRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelMetadataResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelMetadataResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelMetadataResponse_TensorMetadata_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelInferRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelInferRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelInferRequest_InferInputTensor_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelInferRequest_InferInputTensor_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelInferRequest_ParametersEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelInferRequest_ParametersEntry_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelInferResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelInferResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelInferResponse_InferOutputTensor_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelInferResponse_InferOutputTensor_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelInferResponse_InferOutputTensor_ParametersEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelInferResponse_InferOutputTensor_ParametersEntry_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_ModelInferResponse_ParametersEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_ModelInferResponse_ParametersEntry_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_InferParameter_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_InferParameter_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_inference_InferTensorContents_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_inference_InferTensorContents_fieldAccessorTable;
 
-    public static void registerAllExtensions(
-            com.google.protobuf.ExtensionRegistry registry) {
-        registerAllExtensions(
-                (com.google.protobuf.ExtensionRegistryLite) registry);
-    }
+  public static com.google.protobuf.Descriptors.FileDescriptor
+      getDescriptor() {
+    return descriptor;
+  }
+  private static  com.google.protobuf.Descriptors.FileDescriptor
+      descriptor;
+  static {
+    java.lang.String[] descriptorData = {
+      "\n\025grpc_predict_v2.proto\022\tinference\"\023\n\021Se" +
+      "rverLiveRequest\"\"\n\022ServerLiveResponse\022\014\n" +
+      "\004live\030\001 \001(\010\"\024\n\022ServerReadyRequest\"$\n\023Ser" +
+      "verReadyResponse\022\r\n\005ready\030\001 \001(\010\"2\n\021Model" +
+      "ReadyRequest\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 " +
+      "\001(\t\"#\n\022ModelReadyResponse\022\r\n\005ready\030\001 \001(\010" +
+      "\"\027\n\025ServerMetadataRequest\"K\n\026ServerMetad" +
+      "ataResponse\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001" +
+      "(\t\022\022\n\nextensions\030\003 \003(\t\"5\n\024ModelMetadataR" +
+      "equest\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\"\215\002" +
+      "\n\025ModelMetadataResponse\022\014\n\004name\030\001 \001(\t\022\020\n" +
+      "\010versions\030\002 \003(\t\022\020\n\010platform\030\003 \001(\t\022?\n\006inp" +
+      "uts\030\004 \003(\0132/.inference.ModelMetadataRespo" +
+      "nse.TensorMetadata\022@\n\007outputs\030\005 \003(\0132/.in" +
+      "ference.ModelMetadataResponse.TensorMeta" +
+      "data\032?\n\016TensorMetadata\022\014\n\004name\030\001 \001(\t\022\020\n\010" +
+      "datatype\030\002 \001(\t\022\r\n\005shape\030\003 \003(\003\"\356\006\n\021ModelI" +
+      "nferRequest\022\022\n\nmodel_name\030\001 \001(\t\022\025\n\rmodel" +
+      "_version\030\002 \001(\t\022\n\n\002id\030\003 \001(\t\022@\n\nparameters" +
+      "\030\004 \003(\0132,.inference.ModelInferRequest.Par" +
+      "ametersEntry\022=\n\006inputs\030\005 \003(\0132-.inference" +
+      ".ModelInferRequest.InferInputTensor\022H\n\007o" +
+      "utputs\030\006 \003(\01327.inference.ModelInferReque" +
+      "st.InferRequestedOutputTensor\022\032\n\022raw_inp" +
+      "ut_contents\030\007 \003(\014\032\224\002\n\020InferInputTensor\022\014" +
+      "\n\004name\030\001 \001(\t\022\020\n\010datatype\030\002 \001(\t\022\r\n\005shape\030" +
+      "\003 \003(\003\022Q\n\nparameters\030\004 \003(\0132=.inference.Mo" +
+      "delInferRequest.InferInputTensor.Paramet" +
+      "ersEntry\0220\n\010contents\030\005 \001(\0132\036.inference.I" +
+      "nferTensorContents\032L\n\017ParametersEntry\022\013\n" +
+      "\003key\030\001 \001(\t\022(\n\005value\030\002 \001(\0132\031.inference.In" +
+      "ferParameter:\0028\001\032\325\001\n\032InferRequestedOutpu" +
+      "tTensor\022\014\n\004name\030\001 \001(\t\022[\n\nparameters\030\002 \003(" +
+      "\0132G.inference.ModelInferRequest.InferReq" +
+      "uestedOutputTensor.ParametersEntry\032L\n\017Pa" +
+      "rametersEntry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 \001(" +
+      "\0132\031.inference.InferParameter:\0028\001\032L\n\017Para" +
+      "metersEntry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 \001(\0132" +
+      "\031.inference.InferParameter:\0028\001\"\325\004\n\022Model" +
+      "InferResponse\022\022\n\nmodel_name\030\001 \001(\t\022\025\n\rmod" +
+      "el_version\030\002 \001(\t\022\n\n\002id\030\003 \001(\t\022A\n\nparamete" +
+      "rs\030\004 \003(\0132-.inference.ModelInferResponse." +
+      "ParametersEntry\022@\n\007outputs\030\005 \003(\0132/.infer" +
+      "ence.ModelInferResponse.InferOutputTenso" +
+      "r\022\033\n\023raw_output_contents\030\006 \003(\014\032\227\002\n\021Infer" +
+      "OutputTensor\022\014\n\004name\030\001 \001(\t\022\020\n\010datatype\030\002" +
+      " \001(\t\022\r\n\005shape\030\003 \003(\003\022S\n\nparameters\030\004 \003(\0132" +
+      "?.inference.ModelInferResponse.InferOutp" +
+      "utTensor.ParametersEntry\0220\n\010contents\030\005 \001" +
+      "(\0132\036.inference.InferTensorContents\032L\n\017Pa" +
+      "rametersEntry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 \001(" +
+      "\0132\031.inference.InferParameter:\0028\001\032L\n\017Para" +
+      "metersEntry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 \001(\0132" +
+      "\031.inference.InferParameter:\0028\001\"i\n\016InferP" +
+      "arameter\022\024\n\nbool_param\030\001 \001(\010H\000\022\025\n\013int64_" +
+      "param\030\002 \001(\003H\000\022\026\n\014string_param\030\003 \001(\tH\000B\022\n" +
+      "\020parameter_choice\"\320\001\n\023InferTensorContent" +
+      "s\022\025\n\rbool_contents\030\001 \003(\010\022\024\n\014int_contents" +
+      "\030\002 \003(\005\022\026\n\016int64_contents\030\003 \003(\003\022\025\n\ruint_c" +
+      "ontents\030\004 \003(\r\022\027\n\017uint64_contents\030\005 \003(\004\022\025" +
+      "\n\rfp32_contents\030\006 \003(\002\022\025\n\rfp64_contents\030\007" +
+      " \003(\001\022\026\n\016bytes_contents\030\010 \003(\0142\374\003\n\024GRPCInf" +
+      "erenceService\022K\n\nServerLive\022\034.inference." +
+      "ServerLiveRequest\032\035.inference.ServerLive" +
+      "Response\"\000\022N\n\013ServerReady\022\035.inference.Se" +
+      "rverReadyRequest\032\036.inference.ServerReady" +
+      "Response\"\000\022K\n\nModelReady\022\034.inference.Mod" +
+      "elReadyRequest\032\035.inference.ModelReadyRes" +
+      "ponse\"\000\022W\n\016ServerMetadata\022 .inference.Se" +
+      "rverMetadataRequest\032!.inference.ServerMe" +
+      "tadataResponse\"\000\022T\n\rModelMetadata\022\037.infe" +
+      "rence.ModelMetadataRequest\032 .inference.M" +
+      "odelMetadataResponse\"\000\022K\n\nModelInfer\022\034.i" +
+      "nference.ModelInferRequest\032\035.inference.M" +
+      "odelInferResponse\"\000B.\n*org.kie.trustyai." +
+      "connectors.kserve.v2.grpcP\001b\006proto3"
+    };
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
+      .internalBuildGeneratedFileFrom(descriptorData,
+        new com.google.protobuf.Descriptors.FileDescriptor[] {
+        });
+    internal_static_inference_ServerLiveRequest_descriptor =
+      getDescriptor().getMessageTypes().get(0);
+    internal_static_inference_ServerLiveRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ServerLiveRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_inference_ServerLiveResponse_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_inference_ServerLiveResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ServerLiveResponse_descriptor,
+        new java.lang.String[] { "Live", });
+    internal_static_inference_ServerReadyRequest_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_inference_ServerReadyRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ServerReadyRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_inference_ServerReadyResponse_descriptor =
+      getDescriptor().getMessageTypes().get(3);
+    internal_static_inference_ServerReadyResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ServerReadyResponse_descriptor,
+        new java.lang.String[] { "Ready", });
+    internal_static_inference_ModelReadyRequest_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_inference_ModelReadyRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelReadyRequest_descriptor,
+        new java.lang.String[] { "Name", "Version", });
+    internal_static_inference_ModelReadyResponse_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_inference_ModelReadyResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelReadyResponse_descriptor,
+        new java.lang.String[] { "Ready", });
+    internal_static_inference_ServerMetadataRequest_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_inference_ServerMetadataRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ServerMetadataRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_inference_ServerMetadataResponse_descriptor =
+      getDescriptor().getMessageTypes().get(7);
+    internal_static_inference_ServerMetadataResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ServerMetadataResponse_descriptor,
+        new java.lang.String[] { "Name", "Version", "Extensions", });
+    internal_static_inference_ModelMetadataRequest_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_inference_ModelMetadataRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelMetadataRequest_descriptor,
+        new java.lang.String[] { "Name", "Version", });
+    internal_static_inference_ModelMetadataResponse_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_inference_ModelMetadataResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelMetadataResponse_descriptor,
+        new java.lang.String[] { "Name", "Versions", "Platform", "Inputs", "Outputs", });
+    internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor =
+      internal_static_inference_ModelMetadataResponse_descriptor.getNestedTypes().get(0);
+    internal_static_inference_ModelMetadataResponse_TensorMetadata_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor,
+        new java.lang.String[] { "Name", "Datatype", "Shape", });
+    internal_static_inference_ModelInferRequest_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_inference_ModelInferRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelInferRequest_descriptor,
+        new java.lang.String[] { "ModelName", "ModelVersion", "Id", "Parameters", "Inputs", "Outputs", "RawInputContents", });
+    internal_static_inference_ModelInferRequest_InferInputTensor_descriptor =
+      internal_static_inference_ModelInferRequest_descriptor.getNestedTypes().get(0);
+    internal_static_inference_ModelInferRequest_InferInputTensor_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelInferRequest_InferInputTensor_descriptor,
+        new java.lang.String[] { "Name", "Datatype", "Shape", "Parameters", "Contents", });
+    internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_descriptor =
+      internal_static_inference_ModelInferRequest_InferInputTensor_descriptor.getNestedTypes().get(0);
+    internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor =
+      internal_static_inference_ModelInferRequest_descriptor.getNestedTypes().get(1);
+    internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor,
+        new java.lang.String[] { "Name", "Parameters", });
+    internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_descriptor =
+      internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor.getNestedTypes().get(0);
+    internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_inference_ModelInferRequest_ParametersEntry_descriptor =
+      internal_static_inference_ModelInferRequest_descriptor.getNestedTypes().get(2);
+    internal_static_inference_ModelInferRequest_ParametersEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelInferRequest_ParametersEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_inference_ModelInferResponse_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_inference_ModelInferResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelInferResponse_descriptor,
+        new java.lang.String[] { "ModelName", "ModelVersion", "Id", "Parameters", "Outputs", "RawOutputContents", });
+    internal_static_inference_ModelInferResponse_InferOutputTensor_descriptor =
+      internal_static_inference_ModelInferResponse_descriptor.getNestedTypes().get(0);
+    internal_static_inference_ModelInferResponse_InferOutputTensor_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelInferResponse_InferOutputTensor_descriptor,
+        new java.lang.String[] { "Name", "Datatype", "Shape", "Parameters", "Contents", });
+    internal_static_inference_ModelInferResponse_InferOutputTensor_ParametersEntry_descriptor =
+      internal_static_inference_ModelInferResponse_InferOutputTensor_descriptor.getNestedTypes().get(0);
+    internal_static_inference_ModelInferResponse_InferOutputTensor_ParametersEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelInferResponse_InferOutputTensor_ParametersEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_inference_ModelInferResponse_ParametersEntry_descriptor =
+      internal_static_inference_ModelInferResponse_descriptor.getNestedTypes().get(1);
+    internal_static_inference_ModelInferResponse_ParametersEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_ModelInferResponse_ParametersEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
+    internal_static_inference_InferParameter_descriptor =
+      getDescriptor().getMessageTypes().get(12);
+    internal_static_inference_InferParameter_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_InferParameter_descriptor,
+        new java.lang.String[] { "BoolParam", "Int64Param", "StringParam", "ParameterChoice", });
+    internal_static_inference_InferTensorContents_descriptor =
+      getDescriptor().getMessageTypes().get(13);
+    internal_static_inference_InferTensorContents_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_inference_InferTensorContents_descriptor,
+        new java.lang.String[] { "BoolContents", "IntContents", "Int64Contents", "UintContents", "Uint64Contents", "Fp32Contents", "Fp64Contents", "BytesContents", });
+  }
 
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ServerLiveRequest_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ServerLiveRequest_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ServerLiveResponse_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ServerLiveResponse_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ServerReadyRequest_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ServerReadyRequest_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ServerReadyResponse_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ServerReadyResponse_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelReadyRequest_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelReadyRequest_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelReadyResponse_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelReadyResponse_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ServerMetadataRequest_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ServerMetadataRequest_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ServerMetadataResponse_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ServerMetadataResponse_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelMetadataRequest_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelMetadataRequest_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelMetadataResponse_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelMetadataResponse_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelMetadataResponse_TensorMetadata_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelInferRequest_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelInferRequest_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelInferRequest_InferInputTensor_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelInferRequest_InferInputTensor_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelInferRequest_ParametersEntry_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelInferRequest_ParametersEntry_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelInferResponse_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelInferResponse_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelInferResponse_InferOutputTensor_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelInferResponse_InferOutputTensor_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelInferResponse_InferOutputTensor_ParametersEntry_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelInferResponse_InferOutputTensor_ParametersEntry_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_ModelInferResponse_ParametersEntry_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_ModelInferResponse_ParametersEntry_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_InferParameter_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_InferParameter_fieldAccessorTable;
-    static final com.google.protobuf.Descriptors.Descriptor internal_static_inference_InferTensorContents_descriptor;
-    static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable internal_static_inference_InferTensorContents_fieldAccessorTable;
-
-    public static com.google.protobuf.Descriptors.FileDescriptor
-            getDescriptor() {
-        return descriptor;
-    }
-
-    private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
-    static {
-        java.lang.String[] descriptorData = {
-                "\n\025grpc_predict_v2.proto\022\tinference\"\023\n\021Se" +
-                        "rverLiveRequest\"\"\n\022ServerLiveResponse\022\014\n" +
-                        "\004live\030\001 \001(\010\"\024\n\022ServerReadyRequest\"$\n\023Ser" +
-                        "verReadyResponse\022\r\n\005ready\030\001 \001(\010\"2\n\021Model" +
-                        "ReadyRequest\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 " +
-                        "\001(\t\"#\n\022ModelReadyResponse\022\r\n\005ready\030\001 \001(\010" +
-                        "\"\027\n\025ServerMetadataRequest\"K\n\026ServerMetad" +
-                        "ataResponse\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001" +
-                        "(\t\022\022\n\nextensions\030\003 \003(\t\"5\n\024ModelMetadataR" +
-                        "equest\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\"\215\002" +
-                        "\n\025ModelMetadataResponse\022\014\n\004name\030\001 \001(\t\022\020\n" +
-                        "\010versions\030\002 \003(\t\022\020\n\010platform\030\003 \001(\t\022?\n\006inp" +
-                        "uts\030\004 \003(\0132/.inference.ModelMetadataRespo" +
-                        "nse.TensorMetadata\022@\n\007outputs\030\005 \003(\0132/.in" +
-                        "ference.ModelMetadataResponse.TensorMeta" +
-                        "data\032?\n\016TensorMetadata\022\014\n\004name\030\001 \001(\t\022\020\n\010" +
-                        "datatype\030\002 \001(\t\022\r\n\005shape\030\003 \003(\003\"\356\006\n\021ModelI" +
-                        "nferRequest\022\022\n\nmodel_name\030\001 \001(\t\022\025\n\rmodel" +
-                        "_version\030\002 \001(\t\022\n\n\002id\030\003 \001(\t\022@\n\nparameters" +
-                        "\030\004 \003(\0132,.inference.ModelInferRequest.Par" +
-                        "ametersEntry\022=\n\006inputs\030\005 \003(\0132-.inference" +
-                        ".ModelInferRequest.InferInputTensor\022H\n\007o" +
-                        "utputs\030\006 \003(\01327.inference.ModelInferReque" +
-                        "st.InferRequestedOutputTensor\022\032\n\022raw_inp" +
-                        "ut_contents\030\007 \003(\014\032\224\002\n\020InferInputTensor\022\014" +
-                        "\n\004name\030\001 \001(\t\022\020\n\010datatype\030\002 \001(\t\022\r\n\005shape\030" +
-                        "\003 \003(\003\022Q\n\nparameters\030\004 \003(\0132=.inference.Mo" +
-                        "delInferRequest.InferInputTensor.Paramet" +
-                        "ersEntry\0220\n\010contents\030\005 \001(\0132\036.inference.I" +
-                        "nferTensorContents\032L\n\017ParametersEntry\022\013\n" +
-                        "\003key\030\001 \001(\t\022(\n\005value\030\002 \001(\0132\031.inference.In" +
-                        "ferParameter:\0028\001\032\325\001\n\032InferRequestedOutpu" +
-                        "tTensor\022\014\n\004name\030\001 \001(\t\022[\n\nparameters\030\002 \003(" +
-                        "\0132G.inference.ModelInferRequest.InferReq" +
-                        "uestedOutputTensor.ParametersEntry\032L\n\017Pa" +
-                        "rametersEntry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 \001(" +
-                        "\0132\031.inference.InferParameter:\0028\001\032L\n\017Para" +
-                        "metersEntry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 \001(\0132" +
-                        "\031.inference.InferParameter:\0028\001\"\325\004\n\022Model" +
-                        "InferResponse\022\022\n\nmodel_name\030\001 \001(\t\022\025\n\rmod" +
-                        "el_version\030\002 \001(\t\022\n\n\002id\030\003 \001(\t\022A\n\nparamete" +
-                        "rs\030\004 \003(\0132-.inference.ModelInferResponse." +
-                        "ParametersEntry\022@\n\007outputs\030\005 \003(\0132/.infer" +
-                        "ence.ModelInferResponse.InferOutputTenso" +
-                        "r\022\033\n\023raw_output_contents\030\006 \003(\014\032\227\002\n\021Infer" +
-                        "OutputTensor\022\014\n\004name\030\001 \001(\t\022\020\n\010datatype\030\002" +
-                        " \001(\t\022\r\n\005shape\030\003 \003(\003\022S\n\nparameters\030\004 \003(\0132" +
-                        "?.inference.ModelInferResponse.InferOutp" +
-                        "utTensor.ParametersEntry\0220\n\010contents\030\005 \001" +
-                        "(\0132\036.inference.InferTensorContents\032L\n\017Pa" +
-                        "rametersEntry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 \001(" +
-                        "\0132\031.inference.InferParameter:\0028\001\032L\n\017Para" +
-                        "metersEntry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 \001(\0132" +
-                        "\031.inference.InferParameter:\0028\001\"i\n\016InferP" +
-                        "arameter\022\024\n\nbool_param\030\001 \001(\010H\000\022\025\n\013int64_" +
-                        "param\030\002 \001(\003H\000\022\026\n\014string_param\030\003 \001(\tH\000B\022\n" +
-                        "\020parameter_choice\"\320\001\n\023InferTensorContent" +
-                        "s\022\025\n\rbool_contents\030\001 \003(\010\022\024\n\014int_contents" +
-                        "\030\002 \003(\005\022\026\n\016int64_contents\030\003 \003(\003\022\025\n\ruint_c" +
-                        "ontents\030\004 \003(\r\022\027\n\017uint64_contents\030\005 \003(\004\022\025" +
-                        "\n\rfp32_contents\030\006 \003(\002\022\025\n\rfp64_contents\030\007" +
-                        " \003(\001\022\026\n\016bytes_contents\030\010 \003(\0142\374\003\n\024GRPCInf" +
-                        "erenceService\022K\n\nServerLive\022\034.inference." +
-                        "ServerLiveRequest\032\035.inference.ServerLive" +
-                        "Response\"\000\022N\n\013ServerReady\022\035.inference.Se" +
-                        "rverReadyRequest\032\036.inference.ServerReady" +
-                        "Response\"\000\022K\n\nModelReady\022\034.inference.Mod" +
-                        "elReadyRequest\032\035.inference.ModelReadyRes" +
-                        "ponse\"\000\022W\n\016ServerMetadata\022 .inference.Se" +
-                        "rverMetadataRequest\032!.inference.ServerMe" +
-                        "tadataResponse\"\000\022T\n\rModelMetadata\022\037.infe" +
-                        "rence.ModelMetadataRequest\032 .inference.M" +
-                        "odelMetadataResponse\"\000\022K\n\nModelInfer\022\034.i" +
-                        "nference.ModelInferRequest\032\035.inference.M" +
-                        "odelInferResponse\"\000B.\n*org.kie.trustyai." +
-                        "connectors.kserve.v2.grpcP\001b\006proto3"
-        };
-        descriptor = com.google.protobuf.Descriptors.FileDescriptor
-                .internalBuildGeneratedFileFrom(descriptorData,
-                        new com.google.protobuf.Descriptors.FileDescriptor[] {
-                        });
-        internal_static_inference_ServerLiveRequest_descriptor =
-                getDescriptor().getMessageTypes().get(0);
-        internal_static_inference_ServerLiveRequest_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ServerLiveRequest_descriptor,
-                new java.lang.String[] {});
-        internal_static_inference_ServerLiveResponse_descriptor =
-                getDescriptor().getMessageTypes().get(1);
-        internal_static_inference_ServerLiveResponse_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ServerLiveResponse_descriptor,
-                new java.lang.String[] { "Live", });
-        internal_static_inference_ServerReadyRequest_descriptor =
-                getDescriptor().getMessageTypes().get(2);
-        internal_static_inference_ServerReadyRequest_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ServerReadyRequest_descriptor,
-                new java.lang.String[] {});
-        internal_static_inference_ServerReadyResponse_descriptor =
-                getDescriptor().getMessageTypes().get(3);
-        internal_static_inference_ServerReadyResponse_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ServerReadyResponse_descriptor,
-                new java.lang.String[] { "Ready", });
-        internal_static_inference_ModelReadyRequest_descriptor =
-                getDescriptor().getMessageTypes().get(4);
-        internal_static_inference_ModelReadyRequest_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelReadyRequest_descriptor,
-                new java.lang.String[] { "Name", "Version", });
-        internal_static_inference_ModelReadyResponse_descriptor =
-                getDescriptor().getMessageTypes().get(5);
-        internal_static_inference_ModelReadyResponse_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelReadyResponse_descriptor,
-                new java.lang.String[] { "Ready", });
-        internal_static_inference_ServerMetadataRequest_descriptor =
-                getDescriptor().getMessageTypes().get(6);
-        internal_static_inference_ServerMetadataRequest_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ServerMetadataRequest_descriptor,
-                new java.lang.String[] {});
-        internal_static_inference_ServerMetadataResponse_descriptor =
-                getDescriptor().getMessageTypes().get(7);
-        internal_static_inference_ServerMetadataResponse_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ServerMetadataResponse_descriptor,
-                new java.lang.String[] { "Name", "Version", "Extensions", });
-        internal_static_inference_ModelMetadataRequest_descriptor =
-                getDescriptor().getMessageTypes().get(8);
-        internal_static_inference_ModelMetadataRequest_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelMetadataRequest_descriptor,
-                new java.lang.String[] { "Name", "Version", });
-        internal_static_inference_ModelMetadataResponse_descriptor =
-                getDescriptor().getMessageTypes().get(9);
-        internal_static_inference_ModelMetadataResponse_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelMetadataResponse_descriptor,
-                new java.lang.String[] { "Name", "Versions", "Platform", "Inputs", "Outputs", });
-        internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor =
-                internal_static_inference_ModelMetadataResponse_descriptor.getNestedTypes().get(0);
-        internal_static_inference_ModelMetadataResponse_TensorMetadata_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelMetadataResponse_TensorMetadata_descriptor,
-                new java.lang.String[] { "Name", "Datatype", "Shape", });
-        internal_static_inference_ModelInferRequest_descriptor =
-                getDescriptor().getMessageTypes().get(10);
-        internal_static_inference_ModelInferRequest_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelInferRequest_descriptor,
-                new java.lang.String[] { "ModelName", "ModelVersion", "Id", "Parameters", "Inputs", "Outputs", "RawInputContents", });
-        internal_static_inference_ModelInferRequest_InferInputTensor_descriptor =
-                internal_static_inference_ModelInferRequest_descriptor.getNestedTypes().get(0);
-        internal_static_inference_ModelInferRequest_InferInputTensor_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelInferRequest_InferInputTensor_descriptor,
-                new java.lang.String[] { "Name", "Datatype", "Shape", "Parameters", "Contents", });
-        internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_descriptor =
-                internal_static_inference_ModelInferRequest_InferInputTensor_descriptor.getNestedTypes().get(0);
-        internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_descriptor,
-                new java.lang.String[] { "Key", "Value", });
-        internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor =
-                internal_static_inference_ModelInferRequest_descriptor.getNestedTypes().get(1);
-        internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor,
-                new java.lang.String[] { "Name", "Parameters", });
-        internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_descriptor =
-                internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor.getNestedTypes().get(0);
-        internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_descriptor,
-                new java.lang.String[] { "Key", "Value", });
-        internal_static_inference_ModelInferRequest_ParametersEntry_descriptor =
-                internal_static_inference_ModelInferRequest_descriptor.getNestedTypes().get(2);
-        internal_static_inference_ModelInferRequest_ParametersEntry_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelInferRequest_ParametersEntry_descriptor,
-                new java.lang.String[] { "Key", "Value", });
-        internal_static_inference_ModelInferResponse_descriptor =
-                getDescriptor().getMessageTypes().get(11);
-        internal_static_inference_ModelInferResponse_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelInferResponse_descriptor,
-                new java.lang.String[] { "ModelName", "ModelVersion", "Id", "Parameters", "Outputs", "RawOutputContents", });
-        internal_static_inference_ModelInferResponse_InferOutputTensor_descriptor =
-                internal_static_inference_ModelInferResponse_descriptor.getNestedTypes().get(0);
-        internal_static_inference_ModelInferResponse_InferOutputTensor_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelInferResponse_InferOutputTensor_descriptor,
-                new java.lang.String[] { "Name", "Datatype", "Shape", "Parameters", "Contents", });
-        internal_static_inference_ModelInferResponse_InferOutputTensor_ParametersEntry_descriptor =
-                internal_static_inference_ModelInferResponse_InferOutputTensor_descriptor.getNestedTypes().get(0);
-        internal_static_inference_ModelInferResponse_InferOutputTensor_ParametersEntry_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelInferResponse_InferOutputTensor_ParametersEntry_descriptor,
-                new java.lang.String[] { "Key", "Value", });
-        internal_static_inference_ModelInferResponse_ParametersEntry_descriptor =
-                internal_static_inference_ModelInferResponse_descriptor.getNestedTypes().get(1);
-        internal_static_inference_ModelInferResponse_ParametersEntry_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_ModelInferResponse_ParametersEntry_descriptor,
-                new java.lang.String[] { "Key", "Value", });
-        internal_static_inference_InferParameter_descriptor =
-                getDescriptor().getMessageTypes().get(12);
-        internal_static_inference_InferParameter_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_InferParameter_descriptor,
-                new java.lang.String[] { "BoolParam", "Int64Param", "StringParam", "ParameterChoice", });
-        internal_static_inference_InferTensorContents_descriptor =
-                getDescriptor().getMessageTypes().get(13);
-        internal_static_inference_InferTensorContents_fieldAccessorTable = new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-                internal_static_inference_InferTensorContents_descriptor,
-                new java.lang.String[] { "BoolContents", "IntContents", "Int64Contents", "UintContents", "Uint64Contents", "Fp32Contents", "Fp64Contents", "BytesContents", });
-    }
-
-    // @@protoc_insertion_point(outer_class_scope)
+  // @@protoc_insertion_point(outer_class_scope)
 }

@@ -7,349 +7,986 @@ package org.kie.trustyai.connectors.kserve.v2.grpc;
  * Protobuf type {@code inference.ModelInferRequest}
  */
 public final class ModelInferRequest extends
-        com.google.protobuf.GeneratedMessageV3 implements
-        // @@protoc_insertion_point(message_implements:inference.ModelInferRequest)
-        ModelInferRequestOrBuilder {
-    private static final long serialVersionUID = 0L;
+    com.google.protobuf.GeneratedMessageV3 implements
+    // @@protoc_insertion_point(message_implements:inference.ModelInferRequest)
+    ModelInferRequestOrBuilder {
+private static final long serialVersionUID = 0L;
+  // Use ModelInferRequest.newBuilder() to construct.
+  private ModelInferRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+    super(builder);
+  }
+  private ModelInferRequest() {
+    modelName_ = "";
+    modelVersion_ = "";
+    id_ = "";
+    inputs_ = java.util.Collections.emptyList();
+    outputs_ = java.util.Collections.emptyList();
+    rawInputContents_ = java.util.Collections.emptyList();
+  }
 
-    // Use ModelInferRequest.newBuilder() to construct.
-    private ModelInferRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-        super(builder);
+  @java.lang.Override
+  @SuppressWarnings({"unused"})
+  protected java.lang.Object newInstance(
+      UnusedPrivateParameter unused) {
+    return new ModelInferRequest();
+  }
+
+  @java.lang.Override
+  public final com.google.protobuf.UnknownFieldSet
+  getUnknownFields() {
+    return this.unknownFields;
+  }
+  private ModelInferRequest(
+      com.google.protobuf.CodedInputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    this();
+    if (extensionRegistry == null) {
+      throw new java.lang.NullPointerException();
     }
+    int mutable_bitField0_ = 0;
+    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+        com.google.protobuf.UnknownFieldSet.newBuilder();
+    try {
+      boolean done = false;
+      while (!done) {
+        int tag = input.readTag();
+        switch (tag) {
+          case 0:
+            done = true;
+            break;
+          case 10: {
+            java.lang.String s = input.readStringRequireUtf8();
 
-    private ModelInferRequest() {
-        modelName_ = "";
-        modelVersion_ = "";
-        id_ = "";
-        inputs_ = java.util.Collections.emptyList();
-        outputs_ = java.util.Collections.emptyList();
-        rawInputContents_ = java.util.Collections.emptyList();
+            modelName_ = s;
+            break;
+          }
+          case 18: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            modelVersion_ = s;
+            break;
+          }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            id_ = s;
+            break;
+          }
+          case 34: {
+            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              parameters_ = com.google.protobuf.MapField.newMapField(
+                  ParametersDefaultEntryHolder.defaultEntry);
+              mutable_bitField0_ |= 0x00000001;
+            }
+            com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+            parameters__ = input.readMessage(
+                ParametersDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+            parameters_.getMutableMap().put(
+                parameters__.getKey(), parameters__.getValue());
+            break;
+          }
+          case 42: {
+            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+              inputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor>();
+              mutable_bitField0_ |= 0x00000002;
+            }
+            inputs_.add(
+                input.readMessage(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.parser(), extensionRegistry));
+            break;
+          }
+          case 50: {
+            if (!((mutable_bitField0_ & 0x00000004) != 0)) {
+              outputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor>();
+              mutable_bitField0_ |= 0x00000004;
+            }
+            outputs_.add(
+                input.readMessage(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.parser(), extensionRegistry));
+            break;
+          }
+          case 58: {
+            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+              rawInputContents_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+              mutable_bitField0_ |= 0x00000008;
+            }
+            rawInputContents_.add(input.readBytes());
+            break;
+          }
+          default: {
+            if (!parseUnknownField(
+                input, unknownFields, extensionRegistry, tag)) {
+              done = true;
+            }
+            break;
+          }
+        }
+      }
+    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+      throw e.setUnfinishedMessage(this);
+    } catch (java.io.IOException e) {
+      throw new com.google.protobuf.InvalidProtocolBufferException(
+          e).setUnfinishedMessage(this);
+    } finally {
+      if (((mutable_bitField0_ & 0x00000002) != 0)) {
+        inputs_ = java.util.Collections.unmodifiableList(inputs_);
+      }
+      if (((mutable_bitField0_ & 0x00000004) != 0)) {
+        outputs_ = java.util.Collections.unmodifiableList(outputs_);
+      }
+      if (((mutable_bitField0_ & 0x00000008) != 0)) {
+        rawInputContents_ = java.util.Collections.unmodifiableList(rawInputContents_); // C
+      }
+      this.unknownFields = unknownFields.build();
+      makeExtensionsImmutable();
+    }
+  }
+  public static final com.google.protobuf.Descriptors.Descriptor
+      getDescriptor() {
+    return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_descriptor;
+  }
+
+  @SuppressWarnings({"rawtypes"})
+  @java.lang.Override
+  protected com.google.protobuf.MapField internalGetMapField(
+      int number) {
+    switch (number) {
+      case 4:
+        return internalGetParameters();
+      default:
+        throw new RuntimeException(
+            "Invalid map field number: " + number);
+    }
+  }
+  @java.lang.Override
+  protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internalGetFieldAccessorTable() {
+    return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_fieldAccessorTable
+        .ensureFieldAccessorsInitialized(
+            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.Builder.class);
+  }
+
+  public interface InferInputTensorOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:inference.ModelInferRequest.InferInputTensor)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * The tensor data type.
+     * </pre>
+     *
+     * <code>string datatype = 2;</code>
+     * @return The datatype.
+     */
+    java.lang.String getDatatype();
+    /**
+     * <pre>
+     * The tensor data type.
+     * </pre>
+     *
+     * <code>string datatype = 2;</code>
+     * @return The bytes for datatype.
+     */
+    com.google.protobuf.ByteString
+        getDatatypeBytes();
+
+    /**
+     * <pre>
+     * The tensor shape.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @return A list containing the shape.
+     */
+    java.util.List<java.lang.Long> getShapeList();
+    /**
+     * <pre>
+     * The tensor shape.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @return The count of shape.
+     */
+    int getShapeCount();
+    /**
+     * <pre>
+     * The tensor shape.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @param index The index of the element to return.
+     * @return The shape at the given index.
+     */
+    long getShape(int index);
+
+    /**
+     * <pre>
+     * Optional inference input tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+    int getParametersCount();
+    /**
+     * <pre>
+     * Optional inference input tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+    boolean containsParameters(
+        java.lang.String key);
+    /**
+     * Use {@link #getParametersMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+    getParameters();
+    /**
+     * <pre>
+     * Optional inference input tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+    java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+    getParametersMap();
+    /**
+     * <pre>
+     * Optional inference input tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+
+    org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
+        java.lang.String key,
+        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue);
+    /**
+     * <pre>
+     * Optional inference input tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+
+    org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
+        java.lang.String key);
+
+    /**
+     * <pre>
+     * The tensor contents using a data-type format. This field must
+     * not be specified if "raw" tensor contents are being used for
+     * the inference request.
+     * </pre>
+     *
+     * <code>.inference.InferTensorContents contents = 5;</code>
+     * @return Whether the contents field is set.
+     */
+    boolean hasContents();
+    /**
+     * <pre>
+     * The tensor contents using a data-type format. This field must
+     * not be specified if "raw" tensor contents are being used for
+     * the inference request.
+     * </pre>
+     *
+     * <code>.inference.InferTensorContents contents = 5;</code>
+     * @return The contents.
+     */
+    org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getContents();
+    /**
+     * <pre>
+     * The tensor contents using a data-type format. This field must
+     * not be specified if "raw" tensor contents are being used for
+     * the inference request.
+     * </pre>
+     *
+     * <code>.inference.InferTensorContents contents = 5;</code>
+     */
+    org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder getContentsOrBuilder();
+  }
+  /**
+   * <pre>
+   * An input tensor for an inference request.
+   * </pre>
+   *
+   * Protobuf type {@code inference.ModelInferRequest.InferInputTensor}
+   */
+  public static final class InferInputTensor extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:inference.ModelInferRequest.InferInputTensor)
+      InferInputTensorOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use InferInputTensor.newBuilder() to construct.
+    private InferInputTensor(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private InferInputTensor() {
+      name_ = "";
+      datatype_ = "";
+      shape_ = emptyLongList();
     }
 
     @java.lang.Override
-    @SuppressWarnings({ "unused" })
+    @SuppressWarnings({"unused"})
     protected java.lang.Object newInstance(
-            UnusedPrivateParameter unused) {
-        return new ModelInferRequest();
+        UnusedPrivateParameter unused) {
+      return new InferInputTensor();
     }
 
     @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
-            getUnknownFields() {
-        return this.unknownFields;
+    getUnknownFields() {
+      return this.unknownFields;
     }
+    private InferInputTensor(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
 
-    private ModelInferRequest(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        this();
-        if (extensionRegistry == null) {
-            throw new java.lang.NullPointerException();
+              name_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              datatype_ = s;
+              break;
+            }
+            case 24: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                shape_ = newLongList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              shape_.addLong(input.readInt64());
+              break;
+            }
+            case 26: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
+                shape_ = newLongList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                shape_.addLong(input.readInt64());
+              }
+              input.popLimit(limit);
+              break;
+            }
+            case 34: {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                parameters_ = com.google.protobuf.MapField.newMapField(
+                    ParametersDefaultEntryHolder.defaultEntry);
+                mutable_bitField0_ |= 0x00000002;
+              }
+              com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+              parameters__ = input.readMessage(
+                  ParametersDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              parameters_.getMutableMap().put(
+                  parameters__.getKey(), parameters__.getValue());
+              break;
+            }
+            case 42: {
+              org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder subBuilder = null;
+              if (contents_ != null) {
+                subBuilder = contents_.toBuilder();
+              }
+              contents_ = input.readMessage(org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(contents_);
+                contents_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
         }
-        int mutable_bitField0_ = 0;
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-                com.google.protobuf.UnknownFieldSet.newBuilder();
-        try {
-            boolean done = false;
-            while (!done) {
-                int tag = input.readTag();
-                switch (tag) {
-                    case 0:
-                        done = true;
-                        break;
-                    case 10: {
-                        java.lang.String s = input.readStringRequireUtf8();
-
-                        modelName_ = s;
-                        break;
-                    }
-                    case 18: {
-                        java.lang.String s = input.readStringRequireUtf8();
-
-                        modelVersion_ = s;
-                        break;
-                    }
-                    case 26: {
-                        java.lang.String s = input.readStringRequireUtf8();
-
-                        id_ = s;
-                        break;
-                    }
-                    case 34: {
-                        if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                            parameters_ = com.google.protobuf.MapField.newMapField(
-                                    ParametersDefaultEntryHolder.defaultEntry);
-                            mutable_bitField0_ |= 0x00000001;
-                        }
-                        com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters__ = input.readMessage(
-                                ParametersDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-                        parameters_.getMutableMap().put(
-                                parameters__.getKey(), parameters__.getValue());
-                        break;
-                    }
-                    case 42: {
-                        if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                            inputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor>();
-                            mutable_bitField0_ |= 0x00000002;
-                        }
-                        inputs_.add(
-                                input.readMessage(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.parser(), extensionRegistry));
-                        break;
-                    }
-                    case 50: {
-                        if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                            outputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor>();
-                            mutable_bitField0_ |= 0x00000004;
-                        }
-                        outputs_.add(
-                                input.readMessage(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.parser(), extensionRegistry));
-                        break;
-                    }
-                    case 58: {
-                        if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-                            rawInputContents_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
-                            mutable_bitField0_ |= 0x00000008;
-                        }
-                        rawInputContents_.add(input.readBytes());
-                        break;
-                    }
-                    default: {
-                        if (!parseUnknownField(
-                                input, unknownFields, extensionRegistry, tag)) {
-                            done = true;
-                        }
-                        break;
-                    }
-                }
-            }
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-            throw e.setUnfinishedMessage(this);
-        } catch (java.io.IOException e) {
-            throw new com.google.protobuf.InvalidProtocolBufferException(
-                    e).setUnfinishedMessage(this);
-        } finally {
-            if (((mutable_bitField0_ & 0x00000002) != 0)) {
-                inputs_ = java.util.Collections.unmodifiableList(inputs_);
-            }
-            if (((mutable_bitField0_ & 0x00000004) != 0)) {
-                outputs_ = java.util.Collections.unmodifiableList(outputs_);
-            }
-            if (((mutable_bitField0_ & 0x00000008) != 0)) {
-                rawInputContents_ = java.util.Collections.unmodifiableList(rawInputContents_); // C
-            }
-            this.unknownFields = unknownFields.build();
-            makeExtensionsImmutable();
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          shape_.makeImmutable(); // C
         }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
     }
-
     public static final com.google.protobuf.Descriptors.Descriptor
-            getDescriptor() {
-        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_descriptor;
+        getDescriptor() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_descriptor;
     }
 
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({"rawtypes"})
     @java.lang.Override
     protected com.google.protobuf.MapField internalGetMapField(
-            int number) {
-        switch (number) {
-            case 4:
-                return internalGetParameters();
-            default:
-                throw new RuntimeException(
-                        "Invalid map field number: " + number);
-        }
+        int number) {
+      switch (number) {
+        case 4:
+          return internalGetParameters();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder.class);
+    }
+
+    public static final int NAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object name_;
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DATATYPE_FIELD_NUMBER = 2;
+    private volatile java.lang.Object datatype_;
+    /**
+     * <pre>
+     * The tensor data type.
+     * </pre>
+     *
+     * <code>string datatype = 2;</code>
+     * @return The datatype.
+     */
+    @java.lang.Override
+    public java.lang.String getDatatype() {
+      java.lang.Object ref = datatype_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datatype_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The tensor data type.
+     * </pre>
+     *
+     * <code>string datatype = 2;</code>
+     * @return The bytes for datatype.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatatypeBytes() {
+      java.lang.Object ref = datatype_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datatype_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int SHAPE_FIELD_NUMBER = 3;
+    private com.google.protobuf.Internal.LongList shape_;
+    /**
+     * <pre>
+     * The tensor shape.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @return A list containing the shape.
+     */
+    @java.lang.Override
+    public java.util.List<java.lang.Long>
+        getShapeList() {
+      return shape_;
+    }
+    /**
+     * <pre>
+     * The tensor shape.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @return The count of shape.
+     */
+    public int getShapeCount() {
+      return shape_.size();
+    }
+    /**
+     * <pre>
+     * The tensor shape.
+     * </pre>
+     *
+     * <code>repeated int64 shape = 3;</code>
+     * @param index The index of the element to return.
+     * @return The shape at the given index.
+     */
+    public long getShape(int index) {
+      return shape_.getLong(index);
+    }
+    private int shapeMemoizedSerializedSize = -1;
+
+    public static final int PARAMETERS_FIELD_NUMBER = 4;
+    private static final class ParametersDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>newDefaultInstance(
+                  org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter.getDefaultInstance());
+    }
+    private com.google.protobuf.MapField<
+        java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
+    private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+    internalGetParameters() {
+      if (parameters_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ParametersDefaultEntryHolder.defaultEntry);
+      }
+      return parameters_;
+    }
+
+    public int getParametersCount() {
+      return internalGetParameters().getMap().size();
+    }
+    /**
+     * <pre>
+     * Optional inference input tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+
+    @java.lang.Override
+    public boolean containsParameters(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetParameters().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getParametersMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
+      return getParametersMap();
+    }
+    /**
+     * <pre>
+     * Optional inference input tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+    @java.lang.Override
+
+    public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
+      return internalGetParameters().getMap();
+    }
+    /**
+     * <pre>
+     * Optional inference input tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+    @java.lang.Override
+
+    public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
+        java.lang.String key,
+        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+          internalGetParameters().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Optional inference input tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+    @java.lang.Override
+
+    public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+          internalGetParameters().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    public static final int CONTENTS_FIELD_NUMBER = 5;
+    private org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents contents_;
+    /**
+     * <pre>
+     * The tensor contents using a data-type format. This field must
+     * not be specified if "raw" tensor contents are being used for
+     * the inference request.
+     * </pre>
+     *
+     * <code>.inference.InferTensorContents contents = 5;</code>
+     * @return Whether the contents field is set.
+     */
+    @java.lang.Override
+    public boolean hasContents() {
+      return contents_ != null;
+    }
+    /**
+     * <pre>
+     * The tensor contents using a data-type format. This field must
+     * not be specified if "raw" tensor contents are being used for
+     * the inference request.
+     * </pre>
+     *
+     * <code>.inference.InferTensorContents contents = 5;</code>
+     * @return The contents.
+     */
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getContents() {
+      return contents_ == null ? org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.getDefaultInstance() : contents_;
+    }
+    /**
+     * <pre>
+     * The tensor contents using a data-type format. This field must
+     * not be specified if "raw" tensor contents are being used for
+     * the inference request.
+     * </pre>
+     *
+     * <code>.inference.InferTensorContents contents = 5;</code>
+     */
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder getContentsOrBuilder() {
+      return getContents();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
     }
 
     @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-            internalGetFieldAccessorTable() {
-        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_fieldAccessorTable
-                .ensureFieldAccessorsInitialized(
-                        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.Builder.class);
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datatype_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, datatype_);
+      }
+      if (getShapeList().size() > 0) {
+        output.writeUInt32NoTag(26);
+        output.writeUInt32NoTag(shapeMemoizedSerializedSize);
+      }
+      for (int i = 0; i < shape_.size(); i++) {
+        output.writeInt64NoTag(shape_.getLong(i));
+      }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetParameters(),
+          ParametersDefaultEntryHolder.defaultEntry,
+          4);
+      if (contents_ != null) {
+        output.writeMessage(5, getContents());
+      }
+      unknownFields.writeTo(output);
     }
 
-    public interface InferInputTensorOrBuilder extends
-            // @@protoc_insertion_point(interface_extends:inference.ModelInferRequest.InferInputTensor)
-            com.google.protobuf.MessageOrBuilder {
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
 
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The name.
-         */
-        java.lang.String getName();
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The bytes for name.
-         */
-        com.google.protobuf.ByteString
-                getNameBytes();
-
-        /**
-         * <pre>
-         * The tensor data type.
-         * </pre>
-         *
-         * <code>string datatype = 2;</code>
-         * 
-         * @return The datatype.
-         */
-        java.lang.String getDatatype();
-
-        /**
-         * <pre>
-         * The tensor data type.
-         * </pre>
-         *
-         * <code>string datatype = 2;</code>
-         * 
-         * @return The bytes for datatype.
-         */
-        com.google.protobuf.ByteString
-                getDatatypeBytes();
-
-        /**
-         * <pre>
-         * The tensor shape.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @return A list containing the shape.
-         */
-        java.util.List<java.lang.Long> getShapeList();
-
-        /**
-         * <pre>
-         * The tensor shape.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @return The count of shape.
-         */
-        int getShapeCount();
-
-        /**
-         * <pre>
-         * The tensor shape.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The shape at the given index.
-         */
-        long getShape(int index);
-
-        /**
-         * <pre>
-         * Optional inference input tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-        int getParametersCount();
-
-        /**
-         * <pre>
-         * Optional inference input tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-        boolean containsParameters(
-                java.lang.String key);
-
-        /**
-         * Use {@link #getParametersMap()} instead.
-         */
-        @java.lang.Deprecated
-        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                getParameters();
-
-        /**
-         * <pre>
-         * Optional inference input tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                getParametersMap();
-
-        /**
-         * <pre>
-         * Optional inference input tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-
-        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
-                java.lang.String key,
-                org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue);
-
-        /**
-         * <pre>
-         * Optional inference input tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-
-        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
-                java.lang.String key);
-
-        /**
-         * <pre>
-         * The tensor contents using a data-type format. This field must
-         * not be specified if "raw" tensor contents are being used for
-         * the inference request.
-         * </pre>
-         *
-         * <code>.inference.InferTensorContents contents = 5;</code>
-         * 
-         * @return Whether the contents field is set.
-         */
-        boolean hasContents();
-
-        /**
-         * <pre>
-         * The tensor contents using a data-type format. This field must
-         * not be specified if "raw" tensor contents are being used for
-         * the inference request.
-         * </pre>
-         *
-         * <code>.inference.InferTensorContents contents = 5;</code>
-         * 
-         * @return The contents.
-         */
-        org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getContents();
-
-        /**
-         * <pre>
-         * The tensor contents using a data-type format. This field must
-         * not be specified if "raw" tensor contents are being used for
-         * the inference request.
-         * </pre>
-         *
-         * <code>.inference.InferTensorContents contents = 5;</code>
-         */
-        org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder getContentsOrBuilder();
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datatype_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, datatype_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < shape_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt64SizeNoTag(shape_.getLong(i));
+        }
+        size += dataSize;
+        if (!getShapeList().isEmpty()) {
+          size += 1;
+          size += com.google.protobuf.CodedOutputStream
+              .computeInt32SizeNoTag(dataSize);
+        }
+        shapeMemoizedSerializedSize = dataSize;
+      }
+      for (java.util.Map.Entry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> entry
+           : internalGetParameters().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+        parameters__ = ParametersDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(4, parameters__);
+      }
+      if (contents_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, getContents());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
     }
 
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor)) {
+        return super.equals(obj);
+      }
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor other = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getDatatype()
+          .equals(other.getDatatype())) return false;
+      if (!getShapeList()
+          .equals(other.getShapeList())) return false;
+      if (!internalGetParameters().equals(
+          other.internalGetParameters())) return false;
+      if (hasContents() != other.hasContents()) return false;
+      if (hasContents()) {
+        if (!getContents()
+            .equals(other.getContents())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + DATATYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatatype().hashCode();
+      if (getShapeCount() > 0) {
+        hash = (37 * hash) + SHAPE_FIELD_NUMBER;
+        hash = (53 * hash) + getShapeList().hashCode();
+      }
+      if (!internalGetParameters().getMap().isEmpty()) {
+        hash = (37 * hash) + PARAMETERS_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetParameters().hashCode();
+      }
+      if (hasContents()) {
+        hash = (37 * hash) + CONTENTS_FIELD_NUMBER;
+        hash = (53 * hash) + getContents().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
     /**
      * <pre>
      * An input tensor for an inference request.
@@ -357,1787 +994,1412 @@ public final class ModelInferRequest extends
      *
      * Protobuf type {@code inference.ModelInferRequest.InferInputTensor}
      */
-    public static final class InferInputTensor extends
-            com.google.protobuf.GeneratedMessageV3 implements
-            // @@protoc_insertion_point(message_implements:inference.ModelInferRequest.InferInputTensor)
-            InferInputTensorOrBuilder {
-        private static final long serialVersionUID = 0L;
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:inference.ModelInferRequest.InferInputTensor)
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_descriptor;
+      }
 
-        // Use InferInputTensor.newBuilder() to construct.
-        private InferInputTensor(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-            super(builder);
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMapField(
+          int number) {
+        switch (number) {
+          case 4:
+            return internalGetParameters();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMutableMapField(
+          int number) {
+        switch (number) {
+          case 4:
+            return internalGetMutableParameters();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder.class);
+      }
+
+      // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        name_ = "";
+
+        datatype_ = "";
+
+        shape_ = emptyLongList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        internalGetMutableParameters().clear();
+        if (contentsBuilder_ == null) {
+          contents_ = null;
+        } else {
+          contents_ = null;
+          contentsBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_descriptor;
+      }
+
+      @java.lang.Override
+      public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getDefaultInstanceForType() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor build() {
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor buildPartial() {
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor result = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor(this);
+        int from_bitField0_ = bitField0_;
+        result.name_ = name_;
+        result.datatype_ = datatype_;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          shape_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.shape_ = shape_;
+        result.parameters_ = internalGetParameters();
+        result.parameters_.makeImmutable();
+        if (contentsBuilder_ == null) {
+          result.contents_ = contents_;
+        } else {
+          result.contents_ = contentsBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor) {
+          return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor other) {
+        if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          onChanged();
+        }
+        if (!other.getDatatype().isEmpty()) {
+          datatype_ = other.datatype_;
+          onChanged();
+        }
+        if (!other.shape_.isEmpty()) {
+          if (shape_.isEmpty()) {
+            shape_ = other.shape_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureShapeIsMutable();
+            shape_.addAll(other.shape_);
+          }
+          onChanged();
+        }
+        internalGetMutableParameters().mergeFrom(
+            other.internalGetParameters());
+        if (other.hasContents()) {
+          mergeContents(other.getContents());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object datatype_ = "";
+      /**
+       * <pre>
+       * The tensor data type.
+       * </pre>
+       *
+       * <code>string datatype = 2;</code>
+       * @return The datatype.
+       */
+      public java.lang.String getDatatype() {
+        java.lang.Object ref = datatype_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datatype_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The tensor data type.
+       * </pre>
+       *
+       * <code>string datatype = 2;</code>
+       * @return The bytes for datatype.
+       */
+      public com.google.protobuf.ByteString
+          getDatatypeBytes() {
+        java.lang.Object ref = datatype_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datatype_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The tensor data type.
+       * </pre>
+       *
+       * <code>string datatype = 2;</code>
+       * @param value The datatype to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatatype(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        datatype_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor data type.
+       * </pre>
+       *
+       * <code>string datatype = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatatype() {
+        
+        datatype_ = getDefaultInstance().getDatatype();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor data type.
+       * </pre>
+       *
+       * <code>string datatype = 2;</code>
+       * @param value The bytes for datatype to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatatypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        datatype_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.Internal.LongList shape_ = emptyLongList();
+      private void ensureShapeIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          shape_ = mutableCopy(shape_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <pre>
+       * The tensor shape.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @return A list containing the shape.
+       */
+      public java.util.List<java.lang.Long>
+          getShapeList() {
+        return ((bitField0_ & 0x00000001) != 0) ?
+                 java.util.Collections.unmodifiableList(shape_) : shape_;
+      }
+      /**
+       * <pre>
+       * The tensor shape.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @return The count of shape.
+       */
+      public int getShapeCount() {
+        return shape_.size();
+      }
+      /**
+       * <pre>
+       * The tensor shape.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @param index The index of the element to return.
+       * @return The shape at the given index.
+       */
+      public long getShape(int index) {
+        return shape_.getLong(index);
+      }
+      /**
+       * <pre>
+       * The tensor shape.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The shape to set.
+       * @return This builder for chaining.
+       */
+      public Builder setShape(
+          int index, long value) {
+        ensureShapeIsMutable();
+        shape_.setLong(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor shape.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @param value The shape to add.
+       * @return This builder for chaining.
+       */
+      public Builder addShape(long value) {
+        ensureShapeIsMutable();
+        shape_.addLong(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor shape.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @param values The shape to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllShape(
+          java.lang.Iterable<? extends java.lang.Long> values) {
+        ensureShapeIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, shape_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor shape.
+       * </pre>
+       *
+       * <code>repeated int64 shape = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearShape() {
+        shape_ = emptyLongList();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.MapField<
+          java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
+      private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+      internalGetParameters() {
+        if (parameters_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              ParametersDefaultEntryHolder.defaultEntry);
+        }
+        return parameters_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+      internalGetMutableParameters() {
+        onChanged();;
+        if (parameters_ == null) {
+          parameters_ = com.google.protobuf.MapField.newMapField(
+              ParametersDefaultEntryHolder.defaultEntry);
+        }
+        if (!parameters_.isMutable()) {
+          parameters_ = parameters_.copy();
+        }
+        return parameters_;
+      }
+
+      public int getParametersCount() {
+        return internalGetParameters().getMap().size();
+      }
+      /**
+       * <pre>
+       * Optional inference input tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+       */
+
+      @java.lang.Override
+      public boolean containsParameters(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetParameters().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getParametersMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
+        return getParametersMap();
+      }
+      /**
+       * <pre>
+       * Optional inference input tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+       */
+      @java.lang.Override
+
+      public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
+        return internalGetParameters().getMap();
+      }
+      /**
+       * <pre>
+       * Optional inference input tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+       */
+      @java.lang.Override
+
+      public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
+          java.lang.String key,
+          org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+            internalGetParameters().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Optional inference input tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+       */
+      @java.lang.Override
+
+      public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+            internalGetParameters().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearParameters() {
+        internalGetMutableParameters().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional inference input tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+       */
+
+      public Builder removeParameters(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableParameters().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+      getMutableParameters() {
+        return internalGetMutableParameters().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Optional inference input tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+       */
+      public Builder putParameters(
+          java.lang.String key,
+          org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
+        internalGetMutableParameters().getMutableMap()
+            .put(key, value);
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional inference input tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+       */
+
+      public Builder putAllParameters(
+          java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> values) {
+        internalGetMutableParameters().getMutableMap()
+            .putAll(values);
+        return this;
+      }
+
+      private org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents contents_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder> contentsBuilder_;
+      /**
+       * <pre>
+       * The tensor contents using a data-type format. This field must
+       * not be specified if "raw" tensor contents are being used for
+       * the inference request.
+       * </pre>
+       *
+       * <code>.inference.InferTensorContents contents = 5;</code>
+       * @return Whether the contents field is set.
+       */
+      public boolean hasContents() {
+        return contentsBuilder_ != null || contents_ != null;
+      }
+      /**
+       * <pre>
+       * The tensor contents using a data-type format. This field must
+       * not be specified if "raw" tensor contents are being used for
+       * the inference request.
+       * </pre>
+       *
+       * <code>.inference.InferTensorContents contents = 5;</code>
+       * @return The contents.
+       */
+      public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getContents() {
+        if (contentsBuilder_ == null) {
+          return contents_ == null ? org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.getDefaultInstance() : contents_;
+        } else {
+          return contentsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The tensor contents using a data-type format. This field must
+       * not be specified if "raw" tensor contents are being used for
+       * the inference request.
+       * </pre>
+       *
+       * <code>.inference.InferTensorContents contents = 5;</code>
+       */
+      public Builder setContents(org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents value) {
+        if (contentsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          contents_ = value;
+          onChanged();
+        } else {
+          contentsBuilder_.setMessage(value);
         }
 
-        private InferInputTensor() {
-            name_ = "";
-            datatype_ = "";
-            shape_ = emptyLongList();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor contents using a data-type format. This field must
+       * not be specified if "raw" tensor contents are being used for
+       * the inference request.
+       * </pre>
+       *
+       * <code>.inference.InferTensorContents contents = 5;</code>
+       */
+      public Builder setContents(
+          org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder builderForValue) {
+        if (contentsBuilder_ == null) {
+          contents_ = builderForValue.build();
+          onChanged();
+        } else {
+          contentsBuilder_.setMessage(builderForValue.build());
         }
 
-        @java.lang.Override
-        @SuppressWarnings({ "unused" })
-        protected java.lang.Object newInstance(
-                UnusedPrivateParameter unused) {
-            return new InferInputTensor();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor contents using a data-type format. This field must
+       * not be specified if "raw" tensor contents are being used for
+       * the inference request.
+       * </pre>
+       *
+       * <code>.inference.InferTensorContents contents = 5;</code>
+       */
+      public Builder mergeContents(org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents value) {
+        if (contentsBuilder_ == null) {
+          if (contents_ != null) {
+            contents_ =
+              org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.newBuilder(contents_).mergeFrom(value).buildPartial();
+          } else {
+            contents_ = value;
+          }
+          onChanged();
+        } else {
+          contentsBuilder_.mergeFrom(value);
         }
 
-        @java.lang.Override
-        public final com.google.protobuf.UnknownFieldSet
-                getUnknownFields() {
-            return this.unknownFields;
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor contents using a data-type format. This field must
+       * not be specified if "raw" tensor contents are being used for
+       * the inference request.
+       * </pre>
+       *
+       * <code>.inference.InferTensorContents contents = 5;</code>
+       */
+      public Builder clearContents() {
+        if (contentsBuilder_ == null) {
+          contents_ = null;
+          onChanged();
+        } else {
+          contents_ = null;
+          contentsBuilder_ = null;
         }
 
-        private InferInputTensor(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            this();
-            if (extensionRegistry == null) {
-                throw new java.lang.NullPointerException();
-            }
-            int mutable_bitField0_ = 0;
-            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-                    com.google.protobuf.UnknownFieldSet.newBuilder();
-            try {
-                boolean done = false;
-                while (!done) {
-                    int tag = input.readTag();
-                    switch (tag) {
-                        case 0:
-                            done = true;
-                            break;
-                        case 10: {
-                            java.lang.String s = input.readStringRequireUtf8();
-
-                            name_ = s;
-                            break;
-                        }
-                        case 18: {
-                            java.lang.String s = input.readStringRequireUtf8();
-
-                            datatype_ = s;
-                            break;
-                        }
-                        case 24: {
-                            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                                shape_ = newLongList();
-                                mutable_bitField0_ |= 0x00000001;
-                            }
-                            shape_.addLong(input.readInt64());
-                            break;
-                        }
-                        case 26: {
-                            int length = input.readRawVarint32();
-                            int limit = input.pushLimit(length);
-                            if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
-                                shape_ = newLongList();
-                                mutable_bitField0_ |= 0x00000001;
-                            }
-                            while (input.getBytesUntilLimit() > 0) {
-                                shape_.addLong(input.readInt64());
-                            }
-                            input.popLimit(limit);
-                            break;
-                        }
-                        case 34: {
-                            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                                parameters_ = com.google.protobuf.MapField.newMapField(
-                                        ParametersDefaultEntryHolder.defaultEntry);
-                                mutable_bitField0_ |= 0x00000002;
-                            }
-                            com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters__ = input.readMessage(
-                                    ParametersDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-                            parameters_.getMutableMap().put(
-                                    parameters__.getKey(), parameters__.getValue());
-                            break;
-                        }
-                        case 42: {
-                            org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder subBuilder = null;
-                            if (contents_ != null) {
-                                subBuilder = contents_.toBuilder();
-                            }
-                            contents_ = input.readMessage(org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.parser(), extensionRegistry);
-                            if (subBuilder != null) {
-                                subBuilder.mergeFrom(contents_);
-                                contents_ = subBuilder.buildPartial();
-                            }
-
-                            break;
-                        }
-                        default: {
-                            if (!parseUnknownField(
-                                    input, unknownFields, extensionRegistry, tag)) {
-                                done = true;
-                            }
-                            break;
-                        }
-                    }
-                }
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                throw e.setUnfinishedMessage(this);
-            } catch (java.io.IOException e) {
-                throw new com.google.protobuf.InvalidProtocolBufferException(
-                        e).setUnfinishedMessage(this);
-            } finally {
-                if (((mutable_bitField0_ & 0x00000001) != 0)) {
-                    shape_.makeImmutable(); // C
-                }
-                this.unknownFields = unknownFields.build();
-                makeExtensionsImmutable();
-            }
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor contents using a data-type format. This field must
+       * not be specified if "raw" tensor contents are being used for
+       * the inference request.
+       * </pre>
+       *
+       * <code>.inference.InferTensorContents contents = 5;</code>
+       */
+      public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder getContentsBuilder() {
+        
+        onChanged();
+        return getContentsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The tensor contents using a data-type format. This field must
+       * not be specified if "raw" tensor contents are being used for
+       * the inference request.
+       * </pre>
+       *
+       * <code>.inference.InferTensorContents contents = 5;</code>
+       */
+      public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder getContentsOrBuilder() {
+        if (contentsBuilder_ != null) {
+          return contentsBuilder_.getMessageOrBuilder();
+        } else {
+          return contents_ == null ?
+              org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.getDefaultInstance() : contents_;
         }
-
-        public static final com.google.protobuf.Descriptors.Descriptor
-                getDescriptor() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_descriptor;
+      }
+      /**
+       * <pre>
+       * The tensor contents using a data-type format. This field must
+       * not be specified if "raw" tensor contents are being used for
+       * the inference request.
+       * </pre>
+       *
+       * <code>.inference.InferTensorContents contents = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder> 
+          getContentsFieldBuilder() {
+        if (contentsBuilder_ == null) {
+          contentsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder>(
+                  getContents(),
+                  getParentForChildren(),
+                  isClean());
+          contents_ = null;
         }
-
-        @SuppressWarnings({ "rawtypes" })
-        @java.lang.Override
-        protected com.google.protobuf.MapField internalGetMapField(
-                int number) {
-            switch (number) {
-                case 4:
-                    return internalGetParameters();
-                default:
-                    throw new RuntimeException(
-                            "Invalid map field number: " + number);
-            }
-        }
-
-        @java.lang.Override
-        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-                internalGetFieldAccessorTable() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_fieldAccessorTable
-                    .ensureFieldAccessorsInitialized(
-                            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.class,
-                            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder.class);
-        }
-
-        public static final int NAME_FIELD_NUMBER = 1;
-        private volatile java.lang.Object name_;
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The name.
-         */
-        @java.lang.Override
-        public java.lang.String getName() {
-            java.lang.Object ref = name_;
-            if (ref instanceof java.lang.String) {
-                return (java.lang.String) ref;
-            } else {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                name_ = s;
-                return s;
-            }
-        }
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The bytes for name.
-         */
-        @java.lang.Override
-        public com.google.protobuf.ByteString
-                getNameBytes() {
-            java.lang.Object ref = name_;
-            if (ref instanceof java.lang.String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                name_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        public static final int DATATYPE_FIELD_NUMBER = 2;
-        private volatile java.lang.Object datatype_;
-
-        /**
-         * <pre>
-         * The tensor data type.
-         * </pre>
-         *
-         * <code>string datatype = 2;</code>
-         * 
-         * @return The datatype.
-         */
-        @java.lang.Override
-        public java.lang.String getDatatype() {
-            java.lang.Object ref = datatype_;
-            if (ref instanceof java.lang.String) {
-                return (java.lang.String) ref;
-            } else {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                datatype_ = s;
-                return s;
-            }
-        }
-
-        /**
-         * <pre>
-         * The tensor data type.
-         * </pre>
-         *
-         * <code>string datatype = 2;</code>
-         * 
-         * @return The bytes for datatype.
-         */
-        @java.lang.Override
-        public com.google.protobuf.ByteString
-                getDatatypeBytes() {
-            java.lang.Object ref = datatype_;
-            if (ref instanceof java.lang.String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                datatype_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        public static final int SHAPE_FIELD_NUMBER = 3;
-        private com.google.protobuf.Internal.LongList shape_;
-
-        /**
-         * <pre>
-         * The tensor shape.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @return A list containing the shape.
-         */
-        @java.lang.Override
-        public java.util.List<java.lang.Long>
-                getShapeList() {
-            return shape_;
-        }
-
-        /**
-         * <pre>
-         * The tensor shape.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @return The count of shape.
-         */
-        public int getShapeCount() {
-            return shape_.size();
-        }
-
-        /**
-         * <pre>
-         * The tensor shape.
-         * </pre>
-         *
-         * <code>repeated int64 shape = 3;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The shape at the given index.
-         */
-        public long getShape(int index) {
-            return shape_.getLong(index);
-        }
-
-        private int shapeMemoizedSerializedSize = -1;
-
-        public static final int PARAMETERS_FIELD_NUMBER = 4;
-
-        private static final class ParametersDefaultEntryHolder {
-            static final com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> defaultEntry =
-                    com.google.protobuf.MapEntry.<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> newDefaultInstance(
-                            org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_ParametersEntry_descriptor,
-                            com.google.protobuf.WireFormat.FieldType.STRING,
-                            "",
-                            com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                            org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter.getDefaultInstance());
-        }
-
-        private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
-
-        private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                internalGetParameters() {
-            if (parameters_ == null) {
-                return com.google.protobuf.MapField.emptyMapField(
-                        ParametersDefaultEntryHolder.defaultEntry);
-            }
-            return parameters_;
-        }
-
-        public int getParametersCount() {
-            return internalGetParameters().getMap().size();
-        }
-
-        /**
-         * <pre>
-         * Optional inference input tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-
-        @java.lang.Override
-        public boolean containsParameters(
-                java.lang.String key) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            return internalGetParameters().getMap().containsKey(key);
-        }
-
-        /**
-         * Use {@link #getParametersMap()} instead.
-         */
-        @java.lang.Override
-        @java.lang.Deprecated
-        public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
-            return getParametersMap();
-        }
-
-        /**
-         * <pre>
-         * Optional inference input tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-        @java.lang.Override
-
-        public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
-            return internalGetParameters().getMap();
-        }
-
-        /**
-         * <pre>
-         * Optional inference input tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-        @java.lang.Override
-
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
-                java.lang.String key,
-                org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                    internalGetParameters().getMap();
-            return map.containsKey(key) ? map.get(key) : defaultValue;
-        }
-
-        /**
-         * <pre>
-         * Optional inference input tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-        @java.lang.Override
-
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
-                java.lang.String key) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                    internalGetParameters().getMap();
-            if (!map.containsKey(key)) {
-                throw new java.lang.IllegalArgumentException();
-            }
-            return map.get(key);
-        }
-
-        public static final int CONTENTS_FIELD_NUMBER = 5;
-        private org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents contents_;
-
-        /**
-         * <pre>
-         * The tensor contents using a data-type format. This field must
-         * not be specified if "raw" tensor contents are being used for
-         * the inference request.
-         * </pre>
-         *
-         * <code>.inference.InferTensorContents contents = 5;</code>
-         * 
-         * @return Whether the contents field is set.
-         */
-        @java.lang.Override
-        public boolean hasContents() {
-            return contents_ != null;
-        }
-
-        /**
-         * <pre>
-         * The tensor contents using a data-type format. This field must
-         * not be specified if "raw" tensor contents are being used for
-         * the inference request.
-         * </pre>
-         *
-         * <code>.inference.InferTensorContents contents = 5;</code>
-         * 
-         * @return The contents.
-         */
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getContents() {
-            return contents_ == null ? org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.getDefaultInstance() : contents_;
-        }
-
-        /**
-         * <pre>
-         * The tensor contents using a data-type format. This field must
-         * not be specified if "raw" tensor contents are being used for
-         * the inference request.
-         * </pre>
-         *
-         * <code>.inference.InferTensorContents contents = 5;</code>
-         */
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder getContentsOrBuilder() {
-            return getContents();
-        }
-
-        private byte memoizedIsInitialized = -1;
-
-        @java.lang.Override
-        public final boolean isInitialized() {
-            byte isInitialized = memoizedIsInitialized;
-            if (isInitialized == 1)
-                return true;
-            if (isInitialized == 0)
-                return false;
-
-            memoizedIsInitialized = 1;
-            return true;
-        }
-
-        @java.lang.Override
-        public void writeTo(com.google.protobuf.CodedOutputStream output)
-                throws java.io.IOException {
-            getSerializedSize();
-            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
-            }
-            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datatype_)) {
-                com.google.protobuf.GeneratedMessageV3.writeString(output, 2, datatype_);
-            }
-            if (getShapeList().size() > 0) {
-                output.writeUInt32NoTag(26);
-                output.writeUInt32NoTag(shapeMemoizedSerializedSize);
-            }
-            for (int i = 0; i < shape_.size(); i++) {
-                output.writeInt64NoTag(shape_.getLong(i));
-            }
-            com.google.protobuf.GeneratedMessageV3
-                    .serializeStringMapTo(
-                            output,
-                            internalGetParameters(),
-                            ParametersDefaultEntryHolder.defaultEntry,
-                            4);
-            if (contents_ != null) {
-                output.writeMessage(5, getContents());
-            }
-            unknownFields.writeTo(output);
-        }
-
-        @java.lang.Override
-        public int getSerializedSize() {
-            int size = memoizedSize;
-            if (size != -1)
-                return size;
-
-            size = 0;
-            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
-            }
-            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datatype_)) {
-                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, datatype_);
-            }
-            {
-                int dataSize = 0;
-                for (int i = 0; i < shape_.size(); i++) {
-                    dataSize += com.google.protobuf.CodedOutputStream
-                            .computeInt64SizeNoTag(shape_.getLong(i));
-                }
-                size += dataSize;
-                if (!getShapeList().isEmpty()) {
-                    size += 1;
-                    size += com.google.protobuf.CodedOutputStream
-                            .computeInt32SizeNoTag(dataSize);
-                }
-                shapeMemoizedSerializedSize = dataSize;
-            }
-            for (java.util.Map.Entry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> entry : internalGetParameters().getMap().entrySet()) {
-                com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters__ = ParametersDefaultEntryHolder.defaultEntry.newBuilderForType()
-                        .setKey(entry.getKey())
-                        .setValue(entry.getValue())
-                        .build();
-                size += com.google.protobuf.CodedOutputStream
-                        .computeMessageSize(4, parameters__);
-            }
-            if (contents_ != null) {
-                size += com.google.protobuf.CodedOutputStream
-                        .computeMessageSize(5, getContents());
-            }
-            size += unknownFields.getSerializedSize();
-            memoizedSize = size;
-            return size;
-        }
-
-        @java.lang.Override
-        public boolean equals(final java.lang.Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor)) {
-                return super.equals(obj);
-            }
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor other = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor) obj;
-
-            if (!getName()
-                    .equals(other.getName()))
-                return false;
-            if (!getDatatype()
-                    .equals(other.getDatatype()))
-                return false;
-            if (!getShapeList()
-                    .equals(other.getShapeList()))
-                return false;
-            if (!internalGetParameters().equals(
-                    other.internalGetParameters()))
-                return false;
-            if (hasContents() != other.hasContents())
-                return false;
-            if (hasContents()) {
-                if (!getContents()
-                        .equals(other.getContents()))
-                    return false;
-            }
-            if (!unknownFields.equals(other.unknownFields))
-                return false;
-            return true;
-        }
-
-        @java.lang.Override
-        public int hashCode() {
-            if (memoizedHashCode != 0) {
-                return memoizedHashCode;
-            }
-            int hash = 41;
-            hash = (19 * hash) + getDescriptor().hashCode();
-            hash = (37 * hash) + NAME_FIELD_NUMBER;
-            hash = (53 * hash) + getName().hashCode();
-            hash = (37 * hash) + DATATYPE_FIELD_NUMBER;
-            hash = (53 * hash) + getDatatype().hashCode();
-            if (getShapeCount() > 0) {
-                hash = (37 * hash) + SHAPE_FIELD_NUMBER;
-                hash = (53 * hash) + getShapeList().hashCode();
-            }
-            if (!internalGetParameters().getMap().isEmpty()) {
-                hash = (37 * hash) + PARAMETERS_FIELD_NUMBER;
-                hash = (53 * hash) + internalGetParameters().hashCode();
-            }
-            if (hasContents()) {
-                hash = (37 * hash) + CONTENTS_FIELD_NUMBER;
-                hash = (53 * hash) + getContents().hashCode();
-            }
-            hash = (29 * hash) + unknownFields.hashCode();
-            memoizedHashCode = hash;
-            return hash;
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
-                java.nio.ByteBuffer data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
-                java.nio.ByteBuffer data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
-                com.google.protobuf.ByteString data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
-                com.google.protobuf.ByteString data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(byte[] data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
-                byte[] data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(java.io.InputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
-                java.io.InputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseDelimitedFrom(java.io.InputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseDelimitedWithIOException(PARSER, input);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseDelimitedFrom(
-                java.io.InputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
-                com.google.protobuf.CodedInputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parseFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input, extensionRegistry);
-        }
-
-        @java.lang.Override
-        public Builder newBuilderForType() {
-            return newBuilder();
-        }
-
-        public static Builder newBuilder() {
-            return DEFAULT_INSTANCE.toBuilder();
-        }
-
-        public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor prototype) {
-            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-        }
-
-        @java.lang.Override
-        public Builder toBuilder() {
-            return this == DEFAULT_INSTANCE
-                    ? new Builder()
-                    : new Builder().mergeFrom(this);
-        }
-
-        @java.lang.Override
-        protected Builder newBuilderForType(
-                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-            Builder builder = new Builder(parent);
-            return builder;
-        }
-
-        /**
-         * <pre>
-         * An input tensor for an inference request.
-         * </pre>
-         *
-         * Protobuf type {@code inference.ModelInferRequest.InferInputTensor}
-         */
-        public static final class Builder extends
-                com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-                // @@protoc_insertion_point(builder_implements:inference.ModelInferRequest.InferInputTensor)
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder {
-            public static final com.google.protobuf.Descriptors.Descriptor
-                    getDescriptor() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_descriptor;
-            }
-
-            @SuppressWarnings({ "rawtypes" })
-            protected com.google.protobuf.MapField internalGetMapField(
-                    int number) {
-                switch (number) {
-                    case 4:
-                        return internalGetParameters();
-                    default:
-                        throw new RuntimeException(
-                                "Invalid map field number: " + number);
-                }
-            }
-
-            @SuppressWarnings({ "rawtypes" })
-            protected com.google.protobuf.MapField internalGetMutableMapField(
-                    int number) {
-                switch (number) {
-                    case 4:
-                        return internalGetMutableParameters();
-                    default:
-                        throw new RuntimeException(
-                                "Invalid map field number: " + number);
-                }
-            }
-
-            @java.lang.Override
-            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-                    internalGetFieldAccessorTable() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_fieldAccessorTable
-                        .ensureFieldAccessorsInitialized(
-                                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.class,
-                                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder.class);
-            }
-
-            // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.newBuilder()
-            private Builder() {
-                maybeForceBuilderInitialization();
-            }
-
-            private Builder(
-                    com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-                super(parent);
-                maybeForceBuilderInitialization();
-            }
-
-            private void maybeForceBuilderInitialization() {
-                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
-                }
-            }
-
-            @java.lang.Override
-            public Builder clear() {
-                super.clear();
-                name_ = "";
-
-                datatype_ = "";
-
-                shape_ = emptyLongList();
-                bitField0_ = (bitField0_ & ~0x00000001);
-                internalGetMutableParameters().clear();
-                if (contentsBuilder_ == null) {
-                    contents_ = null;
-                } else {
-                    contents_ = null;
-                    contentsBuilder_ = null;
-                }
-                return this;
-            }
-
-            @java.lang.Override
-            public com.google.protobuf.Descriptors.Descriptor
-                    getDescriptorForType() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferInputTensor_descriptor;
-            }
-
-            @java.lang.Override
-            public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getDefaultInstanceForType() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.getDefaultInstance();
-            }
-
-            @java.lang.Override
-            public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor build() {
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor result = buildPartial();
-                if (!result.isInitialized()) {
-                    throw newUninitializedMessageException(result);
-                }
-                return result;
-            }
-
-            @java.lang.Override
-            public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor buildPartial() {
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor result = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor(this);
-                int from_bitField0_ = bitField0_;
-                result.name_ = name_;
-                result.datatype_ = datatype_;
-                if (((bitField0_ & 0x00000001) != 0)) {
-                    shape_.makeImmutable();
-                    bitField0_ = (bitField0_ & ~0x00000001);
-                }
-                result.shape_ = shape_;
-                result.parameters_ = internalGetParameters();
-                result.parameters_.makeImmutable();
-                if (contentsBuilder_ == null) {
-                    result.contents_ = contents_;
-                } else {
-                    result.contents_ = contentsBuilder_.build();
-                }
-                onBuilt();
-                return result;
-            }
-
-            @java.lang.Override
-            public Builder clone() {
-                return super.clone();
-            }
-
-            @java.lang.Override
-            public Builder setField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    java.lang.Object value) {
-                return super.setField(field, value);
-            }
-
-            @java.lang.Override
-            public Builder clearField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field) {
-                return super.clearField(field);
-            }
-
-            @java.lang.Override
-            public Builder clearOneof(
-                    com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-                return super.clearOneof(oneof);
-            }
-
-            @java.lang.Override
-            public Builder setRepeatedField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    int index, java.lang.Object value) {
-                return super.setRepeatedField(field, index, value);
-            }
-
-            @java.lang.Override
-            public Builder addRepeatedField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    java.lang.Object value) {
-                return super.addRepeatedField(field, value);
-            }
-
-            @java.lang.Override
-            public Builder mergeFrom(com.google.protobuf.Message other) {
-                if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor) {
-                    return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor) other);
-                } else {
-                    super.mergeFrom(other);
-                    return this;
-                }
-            }
-
-            public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor other) {
-                if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.getDefaultInstance())
-                    return this;
-                if (!other.getName().isEmpty()) {
-                    name_ = other.name_;
-                    onChanged();
-                }
-                if (!other.getDatatype().isEmpty()) {
-                    datatype_ = other.datatype_;
-                    onChanged();
-                }
-                if (!other.shape_.isEmpty()) {
-                    if (shape_.isEmpty()) {
-                        shape_ = other.shape_;
-                        bitField0_ = (bitField0_ & ~0x00000001);
-                    } else {
-                        ensureShapeIsMutable();
-                        shape_.addAll(other.shape_);
-                    }
-                    onChanged();
-                }
-                internalGetMutableParameters().mergeFrom(
-                        other.internalGetParameters());
-                if (other.hasContents()) {
-                    mergeContents(other.getContents());
-                }
-                this.mergeUnknownFields(other.unknownFields);
-                onChanged();
-                return this;
-            }
-
-            @java.lang.Override
-            public final boolean isInitialized() {
-                return true;
-            }
-
-            @java.lang.Override
-            public Builder mergeFrom(
-                    com.google.protobuf.CodedInputStream input,
-                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws java.io.IOException {
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor parsedMessage = null;
-                try {
-                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                    parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor) e.getUnfinishedMessage();
-                    throw e.unwrapIOException();
-                } finally {
-                    if (parsedMessage != null) {
-                        mergeFrom(parsedMessage);
-                    }
-                }
-                return this;
-            }
-
-            private int bitField0_;
-
-            private java.lang.Object name_ = "";
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @return The name.
-             */
-            public java.lang.String getName() {
-                java.lang.Object ref = name_;
-                if (!(ref instanceof java.lang.String)) {
-                    com.google.protobuf.ByteString bs =
-                            (com.google.protobuf.ByteString) ref;
-                    java.lang.String s = bs.toStringUtf8();
-                    name_ = s;
-                    return s;
-                } else {
-                    return (java.lang.String) ref;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @return The bytes for name.
-             */
-            public com.google.protobuf.ByteString
-                    getNameBytes() {
-                java.lang.Object ref = name_;
-                if (ref instanceof String) {
-                    com.google.protobuf.ByteString b =
-                            com.google.protobuf.ByteString.copyFromUtf8(
-                                    (java.lang.String) ref);
-                    name_ = b;
-                    return b;
-                } else {
-                    return (com.google.protobuf.ByteString) ref;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @param value The name to set.
-             * @return This builder for chaining.
-             */
-            public Builder setName(
-                    java.lang.String value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-
-                name_ = value;
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @return This builder for chaining.
-             */
-            public Builder clearName() {
-
-                name_ = getDefaultInstance().getName();
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @param value The bytes for name to set.
-             * @return This builder for chaining.
-             */
-            public Builder setNameBytes(
-                    com.google.protobuf.ByteString value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                checkByteStringIsUtf8(value);
-
-                name_ = value;
-                onChanged();
-                return this;
-            }
-
-            private java.lang.Object datatype_ = "";
-
-            /**
-             * <pre>
-             * The tensor data type.
-             * </pre>
-             *
-             * <code>string datatype = 2;</code>
-             * 
-             * @return The datatype.
-             */
-            public java.lang.String getDatatype() {
-                java.lang.Object ref = datatype_;
-                if (!(ref instanceof java.lang.String)) {
-                    com.google.protobuf.ByteString bs =
-                            (com.google.protobuf.ByteString) ref;
-                    java.lang.String s = bs.toStringUtf8();
-                    datatype_ = s;
-                    return s;
-                } else {
-                    return (java.lang.String) ref;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor data type.
-             * </pre>
-             *
-             * <code>string datatype = 2;</code>
-             * 
-             * @return The bytes for datatype.
-             */
-            public com.google.protobuf.ByteString
-                    getDatatypeBytes() {
-                java.lang.Object ref = datatype_;
-                if (ref instanceof String) {
-                    com.google.protobuf.ByteString b =
-                            com.google.protobuf.ByteString.copyFromUtf8(
-                                    (java.lang.String) ref);
-                    datatype_ = b;
-                    return b;
-                } else {
-                    return (com.google.protobuf.ByteString) ref;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor data type.
-             * </pre>
-             *
-             * <code>string datatype = 2;</code>
-             * 
-             * @param value The datatype to set.
-             * @return This builder for chaining.
-             */
-            public Builder setDatatype(
-                    java.lang.String value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-
-                datatype_ = value;
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor data type.
-             * </pre>
-             *
-             * <code>string datatype = 2;</code>
-             * 
-             * @return This builder for chaining.
-             */
-            public Builder clearDatatype() {
-
-                datatype_ = getDefaultInstance().getDatatype();
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor data type.
-             * </pre>
-             *
-             * <code>string datatype = 2;</code>
-             * 
-             * @param value The bytes for datatype to set.
-             * @return This builder for chaining.
-             */
-            public Builder setDatatypeBytes(
-                    com.google.protobuf.ByteString value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                checkByteStringIsUtf8(value);
-
-                datatype_ = value;
-                onChanged();
-                return this;
-            }
-
-            private com.google.protobuf.Internal.LongList shape_ = emptyLongList();
-
-            private void ensureShapeIsMutable() {
-                if (!((bitField0_ & 0x00000001) != 0)) {
-                    shape_ = mutableCopy(shape_);
-                    bitField0_ |= 0x00000001;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor shape.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @return A list containing the shape.
-             */
-            public java.util.List<java.lang.Long>
-                    getShapeList() {
-                return ((bitField0_ & 0x00000001) != 0) ? java.util.Collections.unmodifiableList(shape_) : shape_;
-            }
-
-            /**
-             * <pre>
-             * The tensor shape.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @return The count of shape.
-             */
-            public int getShapeCount() {
-                return shape_.size();
-            }
-
-            /**
-             * <pre>
-             * The tensor shape.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @param index The index of the element to return.
-             * @return The shape at the given index.
-             */
-            public long getShape(int index) {
-                return shape_.getLong(index);
-            }
-
-            /**
-             * <pre>
-             * The tensor shape.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @param index The index to set the value at.
-             * @param value The shape to set.
-             * @return This builder for chaining.
-             */
-            public Builder setShape(
-                    int index, long value) {
-                ensureShapeIsMutable();
-                shape_.setLong(index, value);
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor shape.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @param value The shape to add.
-             * @return This builder for chaining.
-             */
-            public Builder addShape(long value) {
-                ensureShapeIsMutable();
-                shape_.addLong(value);
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor shape.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @param values The shape to add.
-             * @return This builder for chaining.
-             */
-            public Builder addAllShape(
-                    java.lang.Iterable<? extends java.lang.Long> values) {
-                ensureShapeIsMutable();
-                com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                        values, shape_);
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor shape.
-             * </pre>
-             *
-             * <code>repeated int64 shape = 3;</code>
-             * 
-             * @return This builder for chaining.
-             */
-            public Builder clearShape() {
-                shape_ = emptyLongList();
-                bitField0_ = (bitField0_ & ~0x00000001);
-                onChanged();
-                return this;
-            }
-
-            private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
-
-            private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                    internalGetParameters() {
-                if (parameters_ == null) {
-                    return com.google.protobuf.MapField.emptyMapField(
-                            ParametersDefaultEntryHolder.defaultEntry);
-                }
-                return parameters_;
-            }
-
-            private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                    internalGetMutableParameters() {
-                onChanged();
-                ;
-                if (parameters_ == null) {
-                    parameters_ = com.google.protobuf.MapField.newMapField(
-                            ParametersDefaultEntryHolder.defaultEntry);
-                }
-                if (!parameters_.isMutable()) {
-                    parameters_ = parameters_.copy();
-                }
-                return parameters_;
-            }
-
-            public int getParametersCount() {
-                return internalGetParameters().getMap().size();
-            }
-
-            /**
-             * <pre>
-             * Optional inference input tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-             */
-
-            @java.lang.Override
-            public boolean containsParameters(
-                    java.lang.String key) {
-                if (key == null) {
-                    throw new NullPointerException("map key");
-                }
-                return internalGetParameters().getMap().containsKey(key);
-            }
-
-            /**
-             * Use {@link #getParametersMap()} instead.
-             */
-            @java.lang.Override
-            @java.lang.Deprecated
-            public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
-                return getParametersMap();
-            }
-
-            /**
-             * <pre>
-             * Optional inference input tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-             */
-            @java.lang.Override
-
-            public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
-                return internalGetParameters().getMap();
-            }
-
-            /**
-             * <pre>
-             * Optional inference input tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-             */
-            @java.lang.Override
-
-            public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
-                    java.lang.String key,
-                    org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
-                if (key == null) {
-                    throw new NullPointerException("map key");
-                }
-                java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                        internalGetParameters().getMap();
-                return map.containsKey(key) ? map.get(key) : defaultValue;
-            }
-
-            /**
-             * <pre>
-             * Optional inference input tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-             */
-            @java.lang.Override
-
-            public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
-                    java.lang.String key) {
-                if (key == null) {
-                    throw new NullPointerException("map key");
-                }
-                java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                        internalGetParameters().getMap();
-                if (!map.containsKey(key)) {
-                    throw new java.lang.IllegalArgumentException();
-                }
-                return map.get(key);
-            }
-
-            public Builder clearParameters() {
-                internalGetMutableParameters().getMutableMap()
-                        .clear();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * Optional inference input tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-             */
-
-            public Builder removeParameters(
-                    java.lang.String key) {
-                if (key == null) {
-                    throw new NullPointerException("map key");
-                }
-                internalGetMutableParameters().getMutableMap()
-                        .remove(key);
-                return this;
-            }
-
-            /**
-             * Use alternate mutation accessors instead.
-             */
-            @java.lang.Deprecated
-            public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                    getMutableParameters() {
-                return internalGetMutableParameters().getMutableMap();
-            }
-
-            /**
-             * <pre>
-             * Optional inference input tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-             */
-            public Builder putParameters(
-                    java.lang.String key,
-                    org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter value) {
-                if (key == null) {
-                    throw new NullPointerException("map key");
-                }
-                if (value == null) {
-                    throw new NullPointerException("map value");
-                }
-
-                internalGetMutableParameters().getMutableMap()
-                        .put(key, value);
-                return this;
-            }
-
-            /**
-             * <pre>
-             * Optional inference input tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-             */
-
-            public Builder putAllParameters(
-                    java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> values) {
-                internalGetMutableParameters().getMutableMap()
-                        .putAll(values);
-                return this;
-            }
-
-            private org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents contents_;
-            private com.google.protobuf.SingleFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder> contentsBuilder_;
-
-            /**
-             * <pre>
-             * The tensor contents using a data-type format. This field must
-             * not be specified if "raw" tensor contents are being used for
-             * the inference request.
-             * </pre>
-             *
-             * <code>.inference.InferTensorContents contents = 5;</code>
-             * 
-             * @return Whether the contents field is set.
-             */
-            public boolean hasContents() {
-                return contentsBuilder_ != null || contents_ != null;
-            }
-
-            /**
-             * <pre>
-             * The tensor contents using a data-type format. This field must
-             * not be specified if "raw" tensor contents are being used for
-             * the inference request.
-             * </pre>
-             *
-             * <code>.inference.InferTensorContents contents = 5;</code>
-             * 
-             * @return The contents.
-             */
-            public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents getContents() {
-                if (contentsBuilder_ == null) {
-                    return contents_ == null ? org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.getDefaultInstance() : contents_;
-                } else {
-                    return contentsBuilder_.getMessage();
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor contents using a data-type format. This field must
-             * not be specified if "raw" tensor contents are being used for
-             * the inference request.
-             * </pre>
-             *
-             * <code>.inference.InferTensorContents contents = 5;</code>
-             */
-            public Builder setContents(org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents value) {
-                if (contentsBuilder_ == null) {
-                    if (value == null) {
-                        throw new NullPointerException();
-                    }
-                    contents_ = value;
-                    onChanged();
-                } else {
-                    contentsBuilder_.setMessage(value);
-                }
-
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor contents using a data-type format. This field must
-             * not be specified if "raw" tensor contents are being used for
-             * the inference request.
-             * </pre>
-             *
-             * <code>.inference.InferTensorContents contents = 5;</code>
-             */
-            public Builder setContents(
-                    org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder builderForValue) {
-                if (contentsBuilder_ == null) {
-                    contents_ = builderForValue.build();
-                    onChanged();
-                } else {
-                    contentsBuilder_.setMessage(builderForValue.build());
-                }
-
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor contents using a data-type format. This field must
-             * not be specified if "raw" tensor contents are being used for
-             * the inference request.
-             * </pre>
-             *
-             * <code>.inference.InferTensorContents contents = 5;</code>
-             */
-            public Builder mergeContents(org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents value) {
-                if (contentsBuilder_ == null) {
-                    if (contents_ != null) {
-                        contents_ =
-                                org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.newBuilder(contents_).mergeFrom(value).buildPartial();
-                    } else {
-                        contents_ = value;
-                    }
-                    onChanged();
-                } else {
-                    contentsBuilder_.mergeFrom(value);
-                }
-
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor contents using a data-type format. This field must
-             * not be specified if "raw" tensor contents are being used for
-             * the inference request.
-             * </pre>
-             *
-             * <code>.inference.InferTensorContents contents = 5;</code>
-             */
-            public Builder clearContents() {
-                if (contentsBuilder_ == null) {
-                    contents_ = null;
-                    onChanged();
-                } else {
-                    contents_ = null;
-                    contentsBuilder_ = null;
-                }
-
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor contents using a data-type format. This field must
-             * not be specified if "raw" tensor contents are being used for
-             * the inference request.
-             * </pre>
-             *
-             * <code>.inference.InferTensorContents contents = 5;</code>
-             */
-            public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder getContentsBuilder() {
-
-                onChanged();
-                return getContentsFieldBuilder().getBuilder();
-            }
-
-            /**
-             * <pre>
-             * The tensor contents using a data-type format. This field must
-             * not be specified if "raw" tensor contents are being used for
-             * the inference request.
-             * </pre>
-             *
-             * <code>.inference.InferTensorContents contents = 5;</code>
-             */
-            public org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder getContentsOrBuilder() {
-                if (contentsBuilder_ != null) {
-                    return contentsBuilder_.getMessageOrBuilder();
-                } else {
-                    return contents_ == null ? org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.getDefaultInstance() : contents_;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor contents using a data-type format. This field must
-             * not be specified if "raw" tensor contents are being used for
-             * the inference request.
-             * </pre>
-             *
-             * <code>.inference.InferTensorContents contents = 5;</code>
-             */
-            private com.google.protobuf.SingleFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder>
-                    getContentsFieldBuilder() {
-                if (contentsBuilder_ == null) {
-                    contentsBuilder_ =
-                            new com.google.protobuf.SingleFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContentsOrBuilder>(
-                                    getContents(),
-                                    getParentForChildren(),
-                                    isClean());
-                    contents_ = null;
-                }
-                return contentsBuilder_;
-            }
-
-            @java.lang.Override
-            public final Builder setUnknownFields(
-                    final com.google.protobuf.UnknownFieldSet unknownFields) {
-                return super.setUnknownFields(unknownFields);
-            }
-
-            @java.lang.Override
-            public final Builder mergeUnknownFields(
-                    final com.google.protobuf.UnknownFieldSet unknownFields) {
-                return super.mergeUnknownFields(unknownFields);
-            }
-
-            // @@protoc_insertion_point(builder_scope:inference.ModelInferRequest.InferInputTensor)
-        }
-
-        // @@protoc_insertion_point(class_scope:inference.ModelInferRequest.InferInputTensor)
-        private static final org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor DEFAULT_INSTANCE;
-        static {
-            DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor();
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getDefaultInstance() {
-            return DEFAULT_INSTANCE;
-        }
-
-        private static final com.google.protobuf.Parser<InferInputTensor> PARSER = new com.google.protobuf.AbstractParser<InferInputTensor>() {
-            @java.lang.Override
-            public InferInputTensor parsePartialFrom(
-                    com.google.protobuf.CodedInputStream input,
-                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
-                return new InferInputTensor(input, extensionRegistry);
-            }
-        };
-
-        public static com.google.protobuf.Parser<InferInputTensor> parser() {
-            return PARSER;
-        }
-
-        @java.lang.Override
-        public com.google.protobuf.Parser<InferInputTensor> getParserForType() {
-            return PARSER;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getDefaultInstanceForType() {
-            return DEFAULT_INSTANCE;
-        }
-
+        return contentsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:inference.ModelInferRequest.InferInputTensor)
     }
 
-    public interface InferRequestedOutputTensorOrBuilder extends
-            // @@protoc_insertion_point(interface_extends:inference.ModelInferRequest.InferRequestedOutputTensor)
-            com.google.protobuf.MessageOrBuilder {
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The name.
-         */
-        java.lang.String getName();
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The bytes for name.
-         */
-        com.google.protobuf.ByteString
-                getNameBytes();
-
-        /**
-         * <pre>
-         * Optional requested output tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-         */
-        int getParametersCount();
-
-        /**
-         * <pre>
-         * Optional requested output tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-         */
-        boolean containsParameters(
-                java.lang.String key);
-
-        /**
-         * Use {@link #getParametersMap()} instead.
-         */
-        @java.lang.Deprecated
-        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                getParameters();
-
-        /**
-         * <pre>
-         * Optional requested output tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-         */
-        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                getParametersMap();
-
-        /**
-         * <pre>
-         * Optional requested output tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-         */
-
-        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
-                java.lang.String key,
-                org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue);
-
-        /**
-         * <pre>
-         * Optional requested output tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-         */
-
-        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
-                java.lang.String key);
+    // @@protoc_insertion_point(class_scope:inference.ModelInferRequest.InferInputTensor)
+    private static final org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor();
     }
 
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<InferInputTensor>
+        PARSER = new com.google.protobuf.AbstractParser<InferInputTensor>() {
+      @java.lang.Override
+      public InferInputTensor parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new InferInputTensor(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<InferInputTensor> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<InferInputTensor> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface InferRequestedOutputTensorOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:inference.ModelInferRequest.InferRequestedOutputTensor)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * Optional requested output tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+     */
+    int getParametersCount();
+    /**
+     * <pre>
+     * Optional requested output tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+     */
+    boolean containsParameters(
+        java.lang.String key);
+    /**
+     * Use {@link #getParametersMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+    getParameters();
+    /**
+     * <pre>
+     * Optional requested output tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+     */
+    java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+    getParametersMap();
+    /**
+     * <pre>
+     * Optional requested output tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+     */
+
+    org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
+        java.lang.String key,
+        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue);
+    /**
+     * <pre>
+     * Optional requested output tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+     */
+
+    org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
+        java.lang.String key);
+  }
+  /**
+   * <pre>
+   * An output tensor requested for an inference request.
+   * </pre>
+   *
+   * Protobuf type {@code inference.ModelInferRequest.InferRequestedOutputTensor}
+   */
+  public static final class InferRequestedOutputTensor extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:inference.ModelInferRequest.InferRequestedOutputTensor)
+      InferRequestedOutputTensorOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use InferRequestedOutputTensor.newBuilder() to construct.
+    private InferRequestedOutputTensor(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private InferRequestedOutputTensor() {
+      name_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new InferRequestedOutputTensor();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private InferRequestedOutputTensor(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              name_ = s;
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                parameters_ = com.google.protobuf.MapField.newMapField(
+                    ParametersDefaultEntryHolder.defaultEntry);
+                mutable_bitField0_ |= 0x00000001;
+              }
+              com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+              parameters__ = input.readMessage(
+                  ParametersDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              parameters_.getMutableMap().put(
+                  parameters__.getKey(), parameters__.getValue());
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    @java.lang.Override
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 2:
+          return internalGetParameters();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder.class);
+    }
+
+    public static final int NAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object name_;
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The tensor name.
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PARAMETERS_FIELD_NUMBER = 2;
+    private static final class ParametersDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>newDefaultInstance(
+                  org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter.getDefaultInstance());
+    }
+    private com.google.protobuf.MapField<
+        java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
+    private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+    internalGetParameters() {
+      if (parameters_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ParametersDefaultEntryHolder.defaultEntry);
+      }
+      return parameters_;
+    }
+
+    public int getParametersCount() {
+      return internalGetParameters().getMap().size();
+    }
+    /**
+     * <pre>
+     * Optional requested output tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+     */
+
+    @java.lang.Override
+    public boolean containsParameters(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetParameters().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getParametersMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
+      return getParametersMap();
+    }
+    /**
+     * <pre>
+     * Optional requested output tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+     */
+    @java.lang.Override
+
+    public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
+      return internalGetParameters().getMap();
+    }
+    /**
+     * <pre>
+     * Optional requested output tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+     */
+    @java.lang.Override
+
+    public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
+        java.lang.String key,
+        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+          internalGetParameters().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Optional requested output tensor parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+     */
+    @java.lang.Override
+
+    public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+          internalGetParameters().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetParameters(),
+          ParametersDefaultEntryHolder.defaultEntry,
+          2);
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      for (java.util.Map.Entry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> entry
+           : internalGetParameters().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+        parameters__ = ParametersDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(2, parameters__);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor)) {
+        return super.equals(obj);
+      }
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor other = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!internalGetParameters().equals(
+          other.internalGetParameters())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      if (!internalGetParameters().getMap().isEmpty()) {
+        hash = (37 * hash) + PARAMETERS_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetParameters().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
     /**
      * <pre>
      * An output tensor requested for an inference request.
@@ -2145,1188 +2407,1779 @@ public final class ModelInferRequest extends
      *
      * Protobuf type {@code inference.ModelInferRequest.InferRequestedOutputTensor}
      */
-    public static final class InferRequestedOutputTensor extends
-            com.google.protobuf.GeneratedMessageV3 implements
-            // @@protoc_insertion_point(message_implements:inference.ModelInferRequest.InferRequestedOutputTensor)
-            InferRequestedOutputTensorOrBuilder {
-        private static final long serialVersionUID = 0L;
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:inference.ModelInferRequest.InferRequestedOutputTensor)
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor;
+      }
 
-        // Use InferRequestedOutputTensor.newBuilder() to construct.
-        private InferRequestedOutputTensor(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-            super(builder);
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMapField(
+          int number) {
+        switch (number) {
+          case 2:
+            return internalGetParameters();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
         }
-
-        private InferRequestedOutputTensor() {
-            name_ = "";
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMutableMapField(
+          int number) {
+        switch (number) {
+          case 2:
+            return internalGetMutableParameters();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
         }
+      }
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder.class);
+      }
 
-        @java.lang.Override
-        @SuppressWarnings({ "unused" })
-        protected java.lang.Object newInstance(
-                UnusedPrivateParameter unused) {
-            return new InferRequestedOutputTensor();
+      // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
         }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        name_ = "";
 
-        @java.lang.Override
-        public final com.google.protobuf.UnknownFieldSet
-                getUnknownFields() {
-            return this.unknownFields;
+        internalGetMutableParameters().clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor;
+      }
+
+      @java.lang.Override
+      public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getDefaultInstanceForType() {
+        return org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor build() {
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
         }
-
-        private InferRequestedOutputTensor(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            this();
-            if (extensionRegistry == null) {
-                throw new java.lang.NullPointerException();
-            }
-            int mutable_bitField0_ = 0;
-            com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-                    com.google.protobuf.UnknownFieldSet.newBuilder();
-            try {
-                boolean done = false;
-                while (!done) {
-                    int tag = input.readTag();
-                    switch (tag) {
-                        case 0:
-                            done = true;
-                            break;
-                        case 10: {
-                            java.lang.String s = input.readStringRequireUtf8();
-
-                            name_ = s;
-                            break;
-                        }
-                        case 18: {
-                            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                                parameters_ = com.google.protobuf.MapField.newMapField(
-                                        ParametersDefaultEntryHolder.defaultEntry);
-                                mutable_bitField0_ |= 0x00000001;
-                            }
-                            com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters__ = input.readMessage(
-                                    ParametersDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-                            parameters_.getMutableMap().put(
-                                    parameters__.getKey(), parameters__.getValue());
-                            break;
-                        }
-                        default: {
-                            if (!parseUnknownField(
-                                    input, unknownFields, extensionRegistry, tag)) {
-                                done = true;
-                            }
-                            break;
-                        }
-                    }
-                }
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                throw e.setUnfinishedMessage(this);
-            } catch (java.io.IOException e) {
-                throw new com.google.protobuf.InvalidProtocolBufferException(
-                        e).setUnfinishedMessage(this);
-            } finally {
-                this.unknownFields = unknownFields.build();
-                makeExtensionsImmutable();
-            }
-        }
-
-        public static final com.google.protobuf.Descriptors.Descriptor
-                getDescriptor() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor;
-        }
-
-        @SuppressWarnings({ "rawtypes" })
-        @java.lang.Override
-        protected com.google.protobuf.MapField internalGetMapField(
-                int number) {
-            switch (number) {
-                case 2:
-                    return internalGetParameters();
-                default:
-                    throw new RuntimeException(
-                            "Invalid map field number: " + number);
-            }
-        }
-
-        @java.lang.Override
-        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-                internalGetFieldAccessorTable() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_fieldAccessorTable
-                    .ensureFieldAccessorsInitialized(
-                            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.class,
-                            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder.class);
-        }
-
-        public static final int NAME_FIELD_NUMBER = 1;
-        private volatile java.lang.Object name_;
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The name.
-         */
-        @java.lang.Override
-        public java.lang.String getName() {
-            java.lang.Object ref = name_;
-            if (ref instanceof java.lang.String) {
-                return (java.lang.String) ref;
-            } else {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                name_ = s;
-                return s;
-            }
-        }
-
-        /**
-         * <pre>
-         * The tensor name.
-         * </pre>
-         *
-         * <code>string name = 1;</code>
-         * 
-         * @return The bytes for name.
-         */
-        @java.lang.Override
-        public com.google.protobuf.ByteString
-                getNameBytes() {
-            java.lang.Object ref = name_;
-            if (ref instanceof java.lang.String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                name_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        public static final int PARAMETERS_FIELD_NUMBER = 2;
-
-        private static final class ParametersDefaultEntryHolder {
-            static final com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> defaultEntry =
-                    com.google.protobuf.MapEntry.<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> newDefaultInstance(
-                            org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_ParametersEntry_descriptor,
-                            com.google.protobuf.WireFormat.FieldType.STRING,
-                            "",
-                            com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                            org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter.getDefaultInstance());
-        }
-
-        private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
-
-        private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                internalGetParameters() {
-            if (parameters_ == null) {
-                return com.google.protobuf.MapField.emptyMapField(
-                        ParametersDefaultEntryHolder.defaultEntry);
-            }
-            return parameters_;
-        }
-
-        public int getParametersCount() {
-            return internalGetParameters().getMap().size();
-        }
-
-        /**
-         * <pre>
-         * Optional requested output tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-         */
-
-        @java.lang.Override
-        public boolean containsParameters(
-                java.lang.String key) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            return internalGetParameters().getMap().containsKey(key);
-        }
-
-        /**
-         * Use {@link #getParametersMap()} instead.
-         */
-        @java.lang.Override
-        @java.lang.Deprecated
-        public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
-            return getParametersMap();
-        }
-
-        /**
-         * <pre>
-         * Optional requested output tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-         */
-        @java.lang.Override
-
-        public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
-            return internalGetParameters().getMap();
-        }
-
-        /**
-         * <pre>
-         * Optional requested output tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-         */
-        @java.lang.Override
-
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
-                java.lang.String key,
-                org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                    internalGetParameters().getMap();
-            return map.containsKey(key) ? map.get(key) : defaultValue;
-        }
-
-        /**
-         * <pre>
-         * Optional requested output tensor parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-         */
-        @java.lang.Override
-
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
-                java.lang.String key) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                    internalGetParameters().getMap();
-            if (!map.containsKey(key)) {
-                throw new java.lang.IllegalArgumentException();
-            }
-            return map.get(key);
-        }
-
-        private byte memoizedIsInitialized = -1;
-
-        @java.lang.Override
-        public final boolean isInitialized() {
-            byte isInitialized = memoizedIsInitialized;
-            if (isInitialized == 1)
-                return true;
-            if (isInitialized == 0)
-                return false;
-
-            memoizedIsInitialized = 1;
-            return true;
-        }
-
-        @java.lang.Override
-        public void writeTo(com.google.protobuf.CodedOutputStream output)
-                throws java.io.IOException {
-            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-                com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
-            }
-            com.google.protobuf.GeneratedMessageV3
-                    .serializeStringMapTo(
-                            output,
-                            internalGetParameters(),
-                            ParametersDefaultEntryHolder.defaultEntry,
-                            2);
-            unknownFields.writeTo(output);
-        }
-
-        @java.lang.Override
-        public int getSerializedSize() {
-            int size = memoizedSize;
-            if (size != -1)
-                return size;
-
-            size = 0;
-            if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
-                size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
-            }
-            for (java.util.Map.Entry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> entry : internalGetParameters().getMap().entrySet()) {
-                com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters__ = ParametersDefaultEntryHolder.defaultEntry.newBuilderForType()
-                        .setKey(entry.getKey())
-                        .setValue(entry.getValue())
-                        .build();
-                size += com.google.protobuf.CodedOutputStream
-                        .computeMessageSize(2, parameters__);
-            }
-            size += unknownFields.getSerializedSize();
-            memoizedSize = size;
-            return size;
-        }
-
-        @java.lang.Override
-        public boolean equals(final java.lang.Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor)) {
-                return super.equals(obj);
-            }
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor other =
-                    (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor) obj;
-
-            if (!getName()
-                    .equals(other.getName()))
-                return false;
-            if (!internalGetParameters().equals(
-                    other.internalGetParameters()))
-                return false;
-            if (!unknownFields.equals(other.unknownFields))
-                return false;
-            return true;
-        }
-
-        @java.lang.Override
-        public int hashCode() {
-            if (memoizedHashCode != 0) {
-                return memoizedHashCode;
-            }
-            int hash = 41;
-            hash = (19 * hash) + getDescriptor().hashCode();
-            hash = (37 * hash) + NAME_FIELD_NUMBER;
-            hash = (53 * hash) + getName().hashCode();
-            if (!internalGetParameters().getMap().isEmpty()) {
-                hash = (37 * hash) + PARAMETERS_FIELD_NUMBER;
-                hash = (53 * hash) + internalGetParameters().hashCode();
-            }
-            hash = (29 * hash) + unknownFields.hashCode();
-            memoizedHashCode = hash;
-            return hash;
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
-                java.nio.ByteBuffer data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
-                java.nio.ByteBuffer data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
-                com.google.protobuf.ByteString data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
-                com.google.protobuf.ByteString data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(byte[] data)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
-                byte[] data,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return PARSER.parseFrom(data, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(java.io.InputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
-                java.io.InputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseDelimitedFrom(java.io.InputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseDelimitedWithIOException(PARSER, input);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseDelimitedFrom(
-                java.io.InputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
-                com.google.protobuf.CodedInputStream input)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input);
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parseFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            return com.google.protobuf.GeneratedMessageV3
-                    .parseWithIOException(PARSER, input, extensionRegistry);
-        }
-
-        @java.lang.Override
-        public Builder newBuilderForType() {
-            return newBuilder();
-        }
-
-        public static Builder newBuilder() {
-            return DEFAULT_INSTANCE.toBuilder();
-        }
-
-        public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor prototype) {
-            return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-        }
-
-        @java.lang.Override
-        public Builder toBuilder() {
-            return this == DEFAULT_INSTANCE
-                    ? new Builder()
-                    : new Builder().mergeFrom(this);
-        }
-
-        @java.lang.Override
-        protected Builder newBuilderForType(
-                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-            Builder builder = new Builder(parent);
-            return builder;
-        }
-
-        /**
-         * <pre>
-         * An output tensor requested for an inference request.
-         * </pre>
-         *
-         * Protobuf type {@code inference.ModelInferRequest.InferRequestedOutputTensor}
-         */
-        public static final class Builder extends
-                com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-                // @@protoc_insertion_point(builder_implements:inference.ModelInferRequest.InferRequestedOutputTensor)
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder {
-            public static final com.google.protobuf.Descriptors.Descriptor
-                    getDescriptor() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor;
-            }
-
-            @SuppressWarnings({ "rawtypes" })
-            protected com.google.protobuf.MapField internalGetMapField(
-                    int number) {
-                switch (number) {
-                    case 2:
-                        return internalGetParameters();
-                    default:
-                        throw new RuntimeException(
-                                "Invalid map field number: " + number);
-                }
-            }
-
-            @SuppressWarnings({ "rawtypes" })
-            protected com.google.protobuf.MapField internalGetMutableMapField(
-                    int number) {
-                switch (number) {
-                    case 2:
-                        return internalGetMutableParameters();
-                    default:
-                        throw new RuntimeException(
-                                "Invalid map field number: " + number);
-                }
-            }
-
-            @java.lang.Override
-            protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-                    internalGetFieldAccessorTable() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_fieldAccessorTable
-                        .ensureFieldAccessorsInitialized(
-                                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.class,
-                                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder.class);
-            }
-
-            // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.newBuilder()
-            private Builder() {
-                maybeForceBuilderInitialization();
-            }
-
-            private Builder(
-                    com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-                super(parent);
-                maybeForceBuilderInitialization();
-            }
-
-            private void maybeForceBuilderInitialization() {
-                if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
-                }
-            }
-
-            @java.lang.Override
-            public Builder clear() {
-                super.clear();
-                name_ = "";
-
-                internalGetMutableParameters().clear();
-                return this;
-            }
-
-            @java.lang.Override
-            public com.google.protobuf.Descriptors.Descriptor
-                    getDescriptorForType() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_InferRequestedOutputTensor_descriptor;
-            }
-
-            @java.lang.Override
-            public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getDefaultInstanceForType() {
-                return org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.getDefaultInstance();
-            }
-
-            @java.lang.Override
-            public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor build() {
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor result = buildPartial();
-                if (!result.isInitialized()) {
-                    throw newUninitializedMessageException(result);
-                }
-                return result;
-            }
-
-            @java.lang.Override
-            public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor buildPartial() {
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor result =
-                        new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor(this);
-                int from_bitField0_ = bitField0_;
-                result.name_ = name_;
-                result.parameters_ = internalGetParameters();
-                result.parameters_.makeImmutable();
-                onBuilt();
-                return result;
-            }
-
-            @java.lang.Override
-            public Builder clone() {
-                return super.clone();
-            }
-
-            @java.lang.Override
-            public Builder setField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    java.lang.Object value) {
-                return super.setField(field, value);
-            }
-
-            @java.lang.Override
-            public Builder clearField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field) {
-                return super.clearField(field);
-            }
-
-            @java.lang.Override
-            public Builder clearOneof(
-                    com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-                return super.clearOneof(oneof);
-            }
-
-            @java.lang.Override
-            public Builder setRepeatedField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    int index, java.lang.Object value) {
-                return super.setRepeatedField(field, index, value);
-            }
-
-            @java.lang.Override
-            public Builder addRepeatedField(
-                    com.google.protobuf.Descriptors.FieldDescriptor field,
-                    java.lang.Object value) {
-                return super.addRepeatedField(field, value);
-            }
-
-            @java.lang.Override
-            public Builder mergeFrom(com.google.protobuf.Message other) {
-                if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor) {
-                    return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor) other);
-                } else {
-                    super.mergeFrom(other);
-                    return this;
-                }
-            }
-
-            public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor other) {
-                if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.getDefaultInstance())
-                    return this;
-                if (!other.getName().isEmpty()) {
-                    name_ = other.name_;
-                    onChanged();
-                }
-                internalGetMutableParameters().mergeFrom(
-                        other.internalGetParameters());
-                this.mergeUnknownFields(other.unknownFields);
-                onChanged();
-                return this;
-            }
-
-            @java.lang.Override
-            public final boolean isInitialized() {
-                return true;
-            }
-
-            @java.lang.Override
-            public Builder mergeFrom(
-                    com.google.protobuf.CodedInputStream input,
-                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws java.io.IOException {
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parsedMessage = null;
-                try {
-                    parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                    parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor) e.getUnfinishedMessage();
-                    throw e.unwrapIOException();
-                } finally {
-                    if (parsedMessage != null) {
-                        mergeFrom(parsedMessage);
-                    }
-                }
-                return this;
-            }
-
-            private int bitField0_;
-
-            private java.lang.Object name_ = "";
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @return The name.
-             */
-            public java.lang.String getName() {
-                java.lang.Object ref = name_;
-                if (!(ref instanceof java.lang.String)) {
-                    com.google.protobuf.ByteString bs =
-                            (com.google.protobuf.ByteString) ref;
-                    java.lang.String s = bs.toStringUtf8();
-                    name_ = s;
-                    return s;
-                } else {
-                    return (java.lang.String) ref;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @return The bytes for name.
-             */
-            public com.google.protobuf.ByteString
-                    getNameBytes() {
-                java.lang.Object ref = name_;
-                if (ref instanceof String) {
-                    com.google.protobuf.ByteString b =
-                            com.google.protobuf.ByteString.copyFromUtf8(
-                                    (java.lang.String) ref);
-                    name_ = b;
-                    return b;
-                } else {
-                    return (com.google.protobuf.ByteString) ref;
-                }
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @param value The name to set.
-             * @return This builder for chaining.
-             */
-            public Builder setName(
-                    java.lang.String value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-
-                name_ = value;
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @return This builder for chaining.
-             */
-            public Builder clearName() {
-
-                name_ = getDefaultInstance().getName();
-                onChanged();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * The tensor name.
-             * </pre>
-             *
-             * <code>string name = 1;</code>
-             * 
-             * @param value The bytes for name to set.
-             * @return This builder for chaining.
-             */
-            public Builder setNameBytes(
-                    com.google.protobuf.ByteString value) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                checkByteStringIsUtf8(value);
-
-                name_ = value;
-                onChanged();
-                return this;
-            }
-
-            private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
-
-            private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                    internalGetParameters() {
-                if (parameters_ == null) {
-                    return com.google.protobuf.MapField.emptyMapField(
-                            ParametersDefaultEntryHolder.defaultEntry);
-                }
-                return parameters_;
-            }
-
-            private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                    internalGetMutableParameters() {
-                onChanged();
-                ;
-                if (parameters_ == null) {
-                    parameters_ = com.google.protobuf.MapField.newMapField(
-                            ParametersDefaultEntryHolder.defaultEntry);
-                }
-                if (!parameters_.isMutable()) {
-                    parameters_ = parameters_.copy();
-                }
-                return parameters_;
-            }
-
-            public int getParametersCount() {
-                return internalGetParameters().getMap().size();
-            }
-
-            /**
-             * <pre>
-             * Optional requested output tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-             */
-
-            @java.lang.Override
-            public boolean containsParameters(
-                    java.lang.String key) {
-                if (key == null) {
-                    throw new NullPointerException("map key");
-                }
-                return internalGetParameters().getMap().containsKey(key);
-            }
-
-            /**
-             * Use {@link #getParametersMap()} instead.
-             */
-            @java.lang.Override
-            @java.lang.Deprecated
-            public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
-                return getParametersMap();
-            }
-
-            /**
-             * <pre>
-             * Optional requested output tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-             */
-            @java.lang.Override
-
-            public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
-                return internalGetParameters().getMap();
-            }
-
-            /**
-             * <pre>
-             * Optional requested output tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-             */
-            @java.lang.Override
-
-            public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
-                    java.lang.String key,
-                    org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
-                if (key == null) {
-                    throw new NullPointerException("map key");
-                }
-                java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                        internalGetParameters().getMap();
-                return map.containsKey(key) ? map.get(key) : defaultValue;
-            }
-
-            /**
-             * <pre>
-             * Optional requested output tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-             */
-            @java.lang.Override
-
-            public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
-                    java.lang.String key) {
-                if (key == null) {
-                    throw new NullPointerException("map key");
-                }
-                java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                        internalGetParameters().getMap();
-                if (!map.containsKey(key)) {
-                    throw new java.lang.IllegalArgumentException();
-                }
-                return map.get(key);
-            }
-
-            public Builder clearParameters() {
-                internalGetMutableParameters().getMutableMap()
-                        .clear();
-                return this;
-            }
-
-            /**
-             * <pre>
-             * Optional requested output tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-             */
-
-            public Builder removeParameters(
-                    java.lang.String key) {
-                if (key == null) {
-                    throw new NullPointerException("map key");
-                }
-                internalGetMutableParameters().getMutableMap()
-                        .remove(key);
-                return this;
-            }
-
-            /**
-             * Use alternate mutation accessors instead.
-             */
-            @java.lang.Deprecated
-            public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                    getMutableParameters() {
-                return internalGetMutableParameters().getMutableMap();
-            }
-
-            /**
-             * <pre>
-             * Optional requested output tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-             */
-            public Builder putParameters(
-                    java.lang.String key,
-                    org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter value) {
-                if (key == null) {
-                    throw new NullPointerException("map key");
-                }
-                if (value == null) {
-                    throw new NullPointerException("map value");
-                }
-
-                internalGetMutableParameters().getMutableMap()
-                        .put(key, value);
-                return this;
-            }
-
-            /**
-             * <pre>
-             * Optional requested output tensor parameters.
-             * </pre>
-             *
-             * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
-             */
-
-            public Builder putAllParameters(
-                    java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> values) {
-                internalGetMutableParameters().getMutableMap()
-                        .putAll(values);
-                return this;
-            }
-
-            @java.lang.Override
-            public final Builder setUnknownFields(
-                    final com.google.protobuf.UnknownFieldSet unknownFields) {
-                return super.setUnknownFields(unknownFields);
-            }
-
-            @java.lang.Override
-            public final Builder mergeUnknownFields(
-                    final com.google.protobuf.UnknownFieldSet unknownFields) {
-                return super.mergeUnknownFields(unknownFields);
-            }
-
-            // @@protoc_insertion_point(builder_scope:inference.ModelInferRequest.InferRequestedOutputTensor)
-        }
-
-        // @@protoc_insertion_point(class_scope:inference.ModelInferRequest.InferRequestedOutputTensor)
-        private static final org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor DEFAULT_INSTANCE;
-        static {
-            DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor();
-        }
-
-        public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getDefaultInstance() {
-            return DEFAULT_INSTANCE;
-        }
-
-        private static final com.google.protobuf.Parser<InferRequestedOutputTensor> PARSER = new com.google.protobuf.AbstractParser<InferRequestedOutputTensor>() {
-            @java.lang.Override
-            public InferRequestedOutputTensor parsePartialFrom(
-                    com.google.protobuf.CodedInputStream input,
-                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                    throws com.google.protobuf.InvalidProtocolBufferException {
-                return new InferRequestedOutputTensor(input, extensionRegistry);
-            }
-        };
-
-        public static com.google.protobuf.Parser<InferRequestedOutputTensor> parser() {
-            return PARSER;
-        }
-
-        @java.lang.Override
-        public com.google.protobuf.Parser<InferRequestedOutputTensor> getParserForType() {
-            return PARSER;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getDefaultInstanceForType() {
-            return DEFAULT_INSTANCE;
-        }
-
-    }
-
-    public static final int MODEL_NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object modelName_;
-
-    /**
-     * <pre>
-     * The name of the model to use for inferencing.
-     * </pre>
-     *
-     * <code>string model_name = 1;</code>
-     * 
-     * @return The modelName.
-     */
-    @java.lang.Override
-    public java.lang.String getModelName() {
-        java.lang.Object ref = modelName_;
-        if (ref instanceof java.lang.String) {
-            return (java.lang.String) ref;
+        return result;
+      }
+
+      @java.lang.Override
+      public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor buildPartial() {
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor result = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor(this);
+        int from_bitField0_ = bitField0_;
+        result.name_ = name_;
+        result.parameters_ = internalGetParameters();
+        result.parameters_.makeImmutable();
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor) {
+          return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor)other);
         } else {
-            com.google.protobuf.ByteString bs =
-                    (com.google.protobuf.ByteString) ref;
-            java.lang.String s = bs.toStringUtf8();
-            modelName_ = s;
-            return s;
+          super.mergeFrom(other);
+          return this;
         }
-    }
+      }
 
-    /**
-     * <pre>
-     * The name of the model to use for inferencing.
-     * </pre>
-     *
-     * <code>string model_name = 1;</code>
-     * 
-     * @return The bytes for modelName.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-            getModelNameBytes() {
-        java.lang.Object ref = modelName_;
-        if (ref instanceof java.lang.String) {
-            com.google.protobuf.ByteString b =
-                    com.google.protobuf.ByteString.copyFromUtf8(
-                            (java.lang.String) ref);
-            modelName_ = b;
-            return b;
+      public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor other) {
+        if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          onChanged();
+        }
+        internalGetMutableParameters().mergeFrom(
+            other.internalGetParameters());
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
         } else {
-            return (com.google.protobuf.ByteString) ref;
+          return (java.lang.String) ref;
         }
-    }
-
-    public static final int MODEL_VERSION_FIELD_NUMBER = 2;
-    private volatile java.lang.Object modelVersion_;
-
-    /**
-     * <pre>
-     * The version of the model to use for inference. If not given the
-     * server will choose a version based on the model and internal policy.
-     * </pre>
-     *
-     * <code>string model_version = 2;</code>
-     * 
-     * @return The modelVersion.
-     */
-    @java.lang.Override
-    public java.lang.String getModelVersion() {
-        java.lang.Object ref = modelVersion_;
-        if (ref instanceof java.lang.String) {
-            return (java.lang.String) ref;
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
         } else {
-            com.google.protobuf.ByteString bs =
-                    (com.google.protobuf.ByteString) ref;
-            java.lang.String s = bs.toStringUtf8();
-            modelVersion_ = s;
-            return s;
+          return (com.google.protobuf.ByteString) ref;
         }
-    }
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The tensor name.
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        name_ = value;
+        onChanged();
+        return this;
+      }
 
-    /**
-     * <pre>
-     * The version of the model to use for inference. If not given the
-     * server will choose a version based on the model and internal policy.
-     * </pre>
-     *
-     * <code>string model_version = 2;</code>
-     * 
-     * @return The bytes for modelVersion.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-            getModelVersionBytes() {
-        java.lang.Object ref = modelVersion_;
-        if (ref instanceof java.lang.String) {
-            com.google.protobuf.ByteString b =
-                    com.google.protobuf.ByteString.copyFromUtf8(
-                            (java.lang.String) ref);
-            modelVersion_ = b;
-            return b;
-        } else {
-            return (com.google.protobuf.ByteString) ref;
-        }
-    }
-
-    public static final int ID_FIELD_NUMBER = 3;
-    private volatile java.lang.Object id_;
-
-    /**
-     * <pre>
-     * Optional identifier for the request. If specified will be
-     * returned in the response.
-     * </pre>
-     *
-     * <code>string id = 3;</code>
-     * 
-     * @return The id.
-     */
-    @java.lang.Override
-    public java.lang.String getId() {
-        java.lang.Object ref = id_;
-        if (ref instanceof java.lang.String) {
-            return (java.lang.String) ref;
-        } else {
-            com.google.protobuf.ByteString bs =
-                    (com.google.protobuf.ByteString) ref;
-            java.lang.String s = bs.toStringUtf8();
-            id_ = s;
-            return s;
-        }
-    }
-
-    /**
-     * <pre>
-     * Optional identifier for the request. If specified will be
-     * returned in the response.
-     * </pre>
-     *
-     * <code>string id = 3;</code>
-     * 
-     * @return The bytes for id.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-            getIdBytes() {
-        java.lang.Object ref = id_;
-        if (ref instanceof java.lang.String) {
-            com.google.protobuf.ByteString b =
-                    com.google.protobuf.ByteString.copyFromUtf8(
-                            (java.lang.String) ref);
-            id_ = b;
-            return b;
-        } else {
-            return (com.google.protobuf.ByteString) ref;
-        }
-    }
-
-    public static final int PARAMETERS_FIELD_NUMBER = 4;
-
-    private static final class ParametersDefaultEntryHolder {
-        static final com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> defaultEntry =
-                com.google.protobuf.MapEntry.<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> newDefaultInstance(
-                        org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_ParametersEntry_descriptor,
-                        com.google.protobuf.WireFormat.FieldType.STRING,
-                        "",
-                        com.google.protobuf.WireFormat.FieldType.MESSAGE,
-                        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter.getDefaultInstance());
-    }
-
-    private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
-
-    private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-            internalGetParameters() {
+      private com.google.protobuf.MapField<
+          java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
+      private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+      internalGetParameters() {
         if (parameters_ == null) {
-            return com.google.protobuf.MapField.emptyMapField(
-                    ParametersDefaultEntryHolder.defaultEntry);
+          return com.google.protobuf.MapField.emptyMapField(
+              ParametersDefaultEntryHolder.defaultEntry);
         }
         return parameters_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+      internalGetMutableParameters() {
+        onChanged();;
+        if (parameters_ == null) {
+          parameters_ = com.google.protobuf.MapField.newMapField(
+              ParametersDefaultEntryHolder.defaultEntry);
+        }
+        if (!parameters_.isMutable()) {
+          parameters_ = parameters_.copy();
+        }
+        return parameters_;
+      }
+
+      public int getParametersCount() {
+        return internalGetParameters().getMap().size();
+      }
+      /**
+       * <pre>
+       * Optional requested output tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+       */
+
+      @java.lang.Override
+      public boolean containsParameters(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetParameters().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getParametersMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
+        return getParametersMap();
+      }
+      /**
+       * <pre>
+       * Optional requested output tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+       */
+      @java.lang.Override
+
+      public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
+        return internalGetParameters().getMap();
+      }
+      /**
+       * <pre>
+       * Optional requested output tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+       */
+      @java.lang.Override
+
+      public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
+          java.lang.String key,
+          org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+            internalGetParameters().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Optional requested output tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+       */
+      @java.lang.Override
+
+      public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+            internalGetParameters().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearParameters() {
+        internalGetMutableParameters().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional requested output tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+       */
+
+      public Builder removeParameters(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableParameters().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+      getMutableParameters() {
+        return internalGetMutableParameters().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Optional requested output tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+       */
+      public Builder putParameters(
+          java.lang.String key,
+          org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
+        internalGetMutableParameters().getMutableMap()
+            .put(key, value);
+        return this;
+      }
+      /**
+       * <pre>
+       * Optional requested output tensor parameters.
+       * </pre>
+       *
+       * <code>map&lt;string, .inference.InferParameter&gt; parameters = 2;</code>
+       */
+
+      public Builder putAllParameters(
+          java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> values) {
+        internalGetMutableParameters().getMutableMap()
+            .putAll(values);
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:inference.ModelInferRequest.InferRequestedOutputTensor)
+    }
+
+    // @@protoc_insertion_point(class_scope:inference.ModelInferRequest.InferRequestedOutputTensor)
+    private static final org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor();
+    }
+
+    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<InferRequestedOutputTensor>
+        PARSER = new com.google.protobuf.AbstractParser<InferRequestedOutputTensor>() {
+      @java.lang.Override
+      public InferRequestedOutputTensor parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new InferRequestedOutputTensor(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<InferRequestedOutputTensor> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<InferRequestedOutputTensor> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public static final int MODEL_NAME_FIELD_NUMBER = 1;
+  private volatile java.lang.Object modelName_;
+  /**
+   * <pre>
+   * The name of the model to use for inferencing.
+   * </pre>
+   *
+   * <code>string model_name = 1;</code>
+   * @return The modelName.
+   */
+  @java.lang.Override
+  public java.lang.String getModelName() {
+    java.lang.Object ref = modelName_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      modelName_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * The name of the model to use for inferencing.
+   * </pre>
+   *
+   * <code>string model_name = 1;</code>
+   * @return The bytes for modelName.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getModelNameBytes() {
+    java.lang.Object ref = modelName_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      modelName_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int MODEL_VERSION_FIELD_NUMBER = 2;
+  private volatile java.lang.Object modelVersion_;
+  /**
+   * <pre>
+   * The version of the model to use for inference. If not given the
+   * server will choose a version based on the model and internal policy.
+   * </pre>
+   *
+   * <code>string model_version = 2;</code>
+   * @return The modelVersion.
+   */
+  @java.lang.Override
+  public java.lang.String getModelVersion() {
+    java.lang.Object ref = modelVersion_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      modelVersion_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * The version of the model to use for inference. If not given the
+   * server will choose a version based on the model and internal policy.
+   * </pre>
+   *
+   * <code>string model_version = 2;</code>
+   * @return The bytes for modelVersion.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getModelVersionBytes() {
+    java.lang.Object ref = modelVersion_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      modelVersion_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int ID_FIELD_NUMBER = 3;
+  private volatile java.lang.Object id_;
+  /**
+   * <pre>
+   * Optional identifier for the request. If specified will be
+   * returned in the response.
+   * </pre>
+   *
+   * <code>string id = 3;</code>
+   * @return The id.
+   */
+  @java.lang.Override
+  public java.lang.String getId() {
+    java.lang.Object ref = id_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      id_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * Optional identifier for the request. If specified will be
+   * returned in the response.
+   * </pre>
+   *
+   * <code>string id = 3;</code>
+   * @return The bytes for id.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getIdBytes() {
+    java.lang.Object ref = id_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      id_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int PARAMETERS_FIELD_NUMBER = 4;
+  private static final class ParametersDefaultEntryHolder {
+    static final com.google.protobuf.MapEntry<
+        java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> defaultEntry =
+            com.google.protobuf.MapEntry
+            .<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>newDefaultInstance(
+                org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_ParametersEntry_descriptor, 
+                com.google.protobuf.WireFormat.FieldType.STRING,
+                "",
+                com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter.getDefaultInstance());
+  }
+  private com.google.protobuf.MapField<
+      java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
+  private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+  internalGetParameters() {
+    if (parameters_ == null) {
+      return com.google.protobuf.MapField.emptyMapField(
+          ParametersDefaultEntryHolder.defaultEntry);
+    }
+    return parameters_;
+  }
+
+  public int getParametersCount() {
+    return internalGetParameters().getMap().size();
+  }
+  /**
+   * <pre>
+   * Optional inference parameters.
+   * </pre>
+   *
+   * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+   */
+
+  @java.lang.Override
+  public boolean containsParameters(
+      java.lang.String key) {
+    if (key == null) { throw new NullPointerException("map key"); }
+    return internalGetParameters().getMap().containsKey(key);
+  }
+  /**
+   * Use {@link #getParametersMap()} instead.
+   */
+  @java.lang.Override
+  @java.lang.Deprecated
+  public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
+    return getParametersMap();
+  }
+  /**
+   * <pre>
+   * Optional inference parameters.
+   * </pre>
+   *
+   * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+   */
+  @java.lang.Override
+
+  public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
+    return internalGetParameters().getMap();
+  }
+  /**
+   * <pre>
+   * Optional inference parameters.
+   * </pre>
+   *
+   * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+   */
+  @java.lang.Override
+
+  public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
+      java.lang.String key,
+      org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
+    if (key == null) { throw new NullPointerException("map key"); }
+    java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+        internalGetParameters().getMap();
+    return map.containsKey(key) ? map.get(key) : defaultValue;
+  }
+  /**
+   * <pre>
+   * Optional inference parameters.
+   * </pre>
+   *
+   * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+   */
+  @java.lang.Override
+
+  public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
+      java.lang.String key) {
+    if (key == null) { throw new NullPointerException("map key"); }
+    java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+        internalGetParameters().getMap();
+    if (!map.containsKey(key)) {
+      throw new java.lang.IllegalArgumentException();
+    }
+    return map.get(key);
+  }
+
+  public static final int INPUTS_FIELD_NUMBER = 5;
+  private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor> inputs_;
+  /**
+   * <pre>
+   * The input tensors for the inference.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+   */
+  @java.lang.Override
+  public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor> getInputsList() {
+    return inputs_;
+  }
+  /**
+   * <pre>
+   * The input tensors for the inference.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder> 
+      getInputsOrBuilderList() {
+    return inputs_;
+  }
+  /**
+   * <pre>
+   * The input tensors for the inference.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+   */
+  @java.lang.Override
+  public int getInputsCount() {
+    return inputs_.size();
+  }
+  /**
+   * <pre>
+   * The input tensors for the inference.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+   */
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getInputs(int index) {
+    return inputs_.get(index);
+  }
+  /**
+   * <pre>
+   * The input tensors for the inference.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+   */
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder getInputsOrBuilder(
+      int index) {
+    return inputs_.get(index);
+  }
+
+  public static final int OUTPUTS_FIELD_NUMBER = 6;
+  private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor> outputs_;
+  /**
+   * <pre>
+   * The requested output tensors for the inference. Optional, if not
+   * specified all outputs produced by the model will be returned.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+   */
+  @java.lang.Override
+  public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor> getOutputsList() {
+    return outputs_;
+  }
+  /**
+   * <pre>
+   * The requested output tensors for the inference. Optional, if not
+   * specified all outputs produced by the model will be returned.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder> 
+      getOutputsOrBuilderList() {
+    return outputs_;
+  }
+  /**
+   * <pre>
+   * The requested output tensors for the inference. Optional, if not
+   * specified all outputs produced by the model will be returned.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+   */
+  @java.lang.Override
+  public int getOutputsCount() {
+    return outputs_.size();
+  }
+  /**
+   * <pre>
+   * The requested output tensors for the inference. Optional, if not
+   * specified all outputs produced by the model will be returned.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+   */
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getOutputs(int index) {
+    return outputs_.get(index);
+  }
+  /**
+   * <pre>
+   * The requested output tensors for the inference. Optional, if not
+   * specified all outputs produced by the model will be returned.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+   */
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder getOutputsOrBuilder(
+      int index) {
+    return outputs_.get(index);
+  }
+
+  public static final int RAW_INPUT_CONTENTS_FIELD_NUMBER = 7;
+  private java.util.List<com.google.protobuf.ByteString> rawInputContents_;
+  /**
+   * <pre>
+   * The data contained in an input tensor can be represented in "raw"
+   * bytes form or in the repeated type that matches the tensor's data
+   * type. To use the raw representation 'raw_input_contents' must be
+   * initialized with data for each tensor in the same order as
+   * 'inputs'. For each tensor, the size of this content must match
+   * what is expected by the tensor's shape and data type. The raw
+   * data must be the flattened, one-dimensional, row-major order of
+   * the tensor elements without any stride or padding between the
+   * elements. Note that the FP16 and BF16 data types must be represented as
+   * raw content as there is no specific data type for a 16-bit float type.
+   * If this field is specified then InferInputTensor::contents must
+   * not be specified for any input tensor.
+   * </pre>
+   *
+   * <code>repeated bytes raw_input_contents = 7;</code>
+   * @return A list containing the rawInputContents.
+   */
+  @java.lang.Override
+  public java.util.List<com.google.protobuf.ByteString>
+      getRawInputContentsList() {
+    return rawInputContents_;
+  }
+  /**
+   * <pre>
+   * The data contained in an input tensor can be represented in "raw"
+   * bytes form or in the repeated type that matches the tensor's data
+   * type. To use the raw representation 'raw_input_contents' must be
+   * initialized with data for each tensor in the same order as
+   * 'inputs'. For each tensor, the size of this content must match
+   * what is expected by the tensor's shape and data type. The raw
+   * data must be the flattened, one-dimensional, row-major order of
+   * the tensor elements without any stride or padding between the
+   * elements. Note that the FP16 and BF16 data types must be represented as
+   * raw content as there is no specific data type for a 16-bit float type.
+   * If this field is specified then InferInputTensor::contents must
+   * not be specified for any input tensor.
+   * </pre>
+   *
+   * <code>repeated bytes raw_input_contents = 7;</code>
+   * @return The count of rawInputContents.
+   */
+  public int getRawInputContentsCount() {
+    return rawInputContents_.size();
+  }
+  /**
+   * <pre>
+   * The data contained in an input tensor can be represented in "raw"
+   * bytes form or in the repeated type that matches the tensor's data
+   * type. To use the raw representation 'raw_input_contents' must be
+   * initialized with data for each tensor in the same order as
+   * 'inputs'. For each tensor, the size of this content must match
+   * what is expected by the tensor's shape and data type. The raw
+   * data must be the flattened, one-dimensional, row-major order of
+   * the tensor elements without any stride or padding between the
+   * elements. Note that the FP16 and BF16 data types must be represented as
+   * raw content as there is no specific data type for a 16-bit float type.
+   * If this field is specified then InferInputTensor::contents must
+   * not be specified for any input tensor.
+   * </pre>
+   *
+   * <code>repeated bytes raw_input_contents = 7;</code>
+   * @param index The index of the element to return.
+   * @return The rawInputContents at the given index.
+   */
+  public com.google.protobuf.ByteString getRawInputContents(int index) {
+    return rawInputContents_.get(index);
+  }
+
+  private byte memoizedIsInitialized = -1;
+  @java.lang.Override
+  public final boolean isInitialized() {
+    byte isInitialized = memoizedIsInitialized;
+    if (isInitialized == 1) return true;
+    if (isInitialized == 0) return false;
+
+    memoizedIsInitialized = 1;
+    return true;
+  }
+
+  @java.lang.Override
+  public void writeTo(com.google.protobuf.CodedOutputStream output)
+                      throws java.io.IOException {
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(modelName_)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, modelName_);
+    }
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(modelVersion_)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, modelVersion_);
+    }
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, id_);
+    }
+    com.google.protobuf.GeneratedMessageV3
+      .serializeStringMapTo(
+        output,
+        internalGetParameters(),
+        ParametersDefaultEntryHolder.defaultEntry,
+        4);
+    for (int i = 0; i < inputs_.size(); i++) {
+      output.writeMessage(5, inputs_.get(i));
+    }
+    for (int i = 0; i < outputs_.size(); i++) {
+      output.writeMessage(6, outputs_.get(i));
+    }
+    for (int i = 0; i < rawInputContents_.size(); i++) {
+      output.writeBytes(7, rawInputContents_.get(i));
+    }
+    unknownFields.writeTo(output);
+  }
+
+  @java.lang.Override
+  public int getSerializedSize() {
+    int size = memoizedSize;
+    if (size != -1) return size;
+
+    size = 0;
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(modelName_)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, modelName_);
+    }
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(modelVersion_)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, modelVersion_);
+    }
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, id_);
+    }
+    for (java.util.Map.Entry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> entry
+         : internalGetParameters().getMap().entrySet()) {
+      com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+      parameters__ = ParametersDefaultEntryHolder.defaultEntry.newBuilderForType()
+          .setKey(entry.getKey())
+          .setValue(entry.getValue())
+          .build();
+      size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, parameters__);
+    }
+    for (int i = 0; i < inputs_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(5, inputs_.get(i));
+    }
+    for (int i = 0; i < outputs_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(6, outputs_.get(i));
+    }
+    {
+      int dataSize = 0;
+      for (int i = 0; i < rawInputContents_.size(); i++) {
+        dataSize += com.google.protobuf.CodedOutputStream
+          .computeBytesSizeNoTag(rawInputContents_.get(i));
+      }
+      size += dataSize;
+      size += 1 * getRawInputContentsList().size();
+    }
+    size += unknownFields.getSerializedSize();
+    memoizedSize = size;
+    return size;
+  }
+
+  @java.lang.Override
+  public boolean equals(final java.lang.Object obj) {
+    if (obj == this) {
+     return true;
+    }
+    if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest)) {
+      return super.equals(obj);
+    }
+    org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest other = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest) obj;
+
+    if (!getModelName()
+        .equals(other.getModelName())) return false;
+    if (!getModelVersion()
+        .equals(other.getModelVersion())) return false;
+    if (!getId()
+        .equals(other.getId())) return false;
+    if (!internalGetParameters().equals(
+        other.internalGetParameters())) return false;
+    if (!getInputsList()
+        .equals(other.getInputsList())) return false;
+    if (!getOutputsList()
+        .equals(other.getOutputsList())) return false;
+    if (!getRawInputContentsList()
+        .equals(other.getRawInputContentsList())) return false;
+    if (!unknownFields.equals(other.unknownFields)) return false;
+    return true;
+  }
+
+  @java.lang.Override
+  public int hashCode() {
+    if (memoizedHashCode != 0) {
+      return memoizedHashCode;
+    }
+    int hash = 41;
+    hash = (19 * hash) + getDescriptor().hashCode();
+    hash = (37 * hash) + MODEL_NAME_FIELD_NUMBER;
+    hash = (53 * hash) + getModelName().hashCode();
+    hash = (37 * hash) + MODEL_VERSION_FIELD_NUMBER;
+    hash = (53 * hash) + getModelVersion().hashCode();
+    hash = (37 * hash) + ID_FIELD_NUMBER;
+    hash = (53 * hash) + getId().hashCode();
+    if (!internalGetParameters().getMap().isEmpty()) {
+      hash = (37 * hash) + PARAMETERS_FIELD_NUMBER;
+      hash = (53 * hash) + internalGetParameters().hashCode();
+    }
+    if (getInputsCount() > 0) {
+      hash = (37 * hash) + INPUTS_FIELD_NUMBER;
+      hash = (53 * hash) + getInputsList().hashCode();
+    }
+    if (getOutputsCount() > 0) {
+      hash = (37 * hash) + OUTPUTS_FIELD_NUMBER;
+      hash = (53 * hash) + getOutputsList().hashCode();
+    }
+    if (getRawInputContentsCount() > 0) {
+      hash = (37 * hash) + RAW_INPUT_CONTENTS_FIELD_NUMBER;
+      hash = (53 * hash) + getRawInputContentsList().hashCode();
+    }
+    hash = (29 * hash) + unknownFields.hashCode();
+    memoizedHashCode = hash;
+    return hash;
+  }
+
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
+      java.nio.ByteBuffer data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
+      java.nio.ByteBuffer data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
+      com.google.protobuf.ByteString data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
+      com.google.protobuf.ByteString data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(byte[] data)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
+      byte[] data,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws com.google.protobuf.InvalidProtocolBufferException {
+    return PARSER.parseFrom(data, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(java.io.InputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
+      java.io.InputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseDelimitedFrom(java.io.InputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseDelimitedWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseDelimitedFrom(
+      java.io.InputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
+      com.google.protobuf.CodedInputStream input)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input);
+  }
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
+      com.google.protobuf.CodedInputStream input,
+      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+      throws java.io.IOException {
+    return com.google.protobuf.GeneratedMessageV3
+        .parseWithIOException(PARSER, input, extensionRegistry);
+  }
+
+  @java.lang.Override
+  public Builder newBuilderForType() { return newBuilder(); }
+  public static Builder newBuilder() {
+    return DEFAULT_INSTANCE.toBuilder();
+  }
+  public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest prototype) {
+    return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+  }
+  @java.lang.Override
+  public Builder toBuilder() {
+    return this == DEFAULT_INSTANCE
+        ? new Builder() : new Builder().mergeFrom(this);
+  }
+
+  @java.lang.Override
+  protected Builder newBuilderForType(
+      com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+    Builder builder = new Builder(parent);
+    return builder;
+  }
+  /**
+   * Protobuf type {@code inference.ModelInferRequest}
+   */
+  public static final class Builder extends
+      com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+      // @@protoc_insertion_point(builder_implements:inference.ModelInferRequest)
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequestOrBuilder {
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_descriptor;
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 4:
+          return internalGetParameters();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @SuppressWarnings({"rawtypes"})
+    protected com.google.protobuf.MapField internalGetMutableMapField(
+        int number) {
+      switch (number) {
+        case 4:
+          return internalGetMutableParameters();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.Builder.class);
+    }
+
+    // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.newBuilder()
+    private Builder() {
+      maybeForceBuilderInitialization();
+    }
+
+    private Builder(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      super(parent);
+      maybeForceBuilderInitialization();
+    }
+    private void maybeForceBuilderInitialization() {
+      if (com.google.protobuf.GeneratedMessageV3
+              .alwaysUseFieldBuilders) {
+        getInputsFieldBuilder();
+        getOutputsFieldBuilder();
+      }
+    }
+    @java.lang.Override
+    public Builder clear() {
+      super.clear();
+      modelName_ = "";
+
+      modelVersion_ = "";
+
+      id_ = "";
+
+      internalGetMutableParameters().clear();
+      if (inputsBuilder_ == null) {
+        inputs_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);
+      } else {
+        inputsBuilder_.clear();
+      }
+      if (outputsBuilder_ == null) {
+        outputs_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+      } else {
+        outputsBuilder_.clear();
+      }
+      rawInputContents_ = java.util.Collections.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000008);
+      return this;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Descriptors.Descriptor
+        getDescriptorForType() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_descriptor;
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest getDefaultInstanceForType() {
+      return org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.getDefaultInstance();
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest build() {
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest result = buildPartial();
+      if (!result.isInitialized()) {
+        throw newUninitializedMessageException(result);
+      }
+      return result;
+    }
+
+    @java.lang.Override
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest buildPartial() {
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest result = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest(this);
+      int from_bitField0_ = bitField0_;
+      result.modelName_ = modelName_;
+      result.modelVersion_ = modelVersion_;
+      result.id_ = id_;
+      result.parameters_ = internalGetParameters();
+      result.parameters_.makeImmutable();
+      if (inputsBuilder_ == null) {
+        if (((bitField0_ & 0x00000002) != 0)) {
+          inputs_ = java.util.Collections.unmodifiableList(inputs_);
+          bitField0_ = (bitField0_ & ~0x00000002);
+        }
+        result.inputs_ = inputs_;
+      } else {
+        result.inputs_ = inputsBuilder_.build();
+      }
+      if (outputsBuilder_ == null) {
+        if (((bitField0_ & 0x00000004) != 0)) {
+          outputs_ = java.util.Collections.unmodifiableList(outputs_);
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.outputs_ = outputs_;
+      } else {
+        result.outputs_ = outputsBuilder_.build();
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        rawInputContents_ = java.util.Collections.unmodifiableList(rawInputContents_);
+        bitField0_ = (bitField0_ & ~0x00000008);
+      }
+      result.rawInputContents_ = rawInputContents_;
+      onBuilt();
+      return result;
+    }
+
+    @java.lang.Override
+    public Builder clone() {
+      return super.clone();
+    }
+    @java.lang.Override
+    public Builder setField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        java.lang.Object value) {
+      return super.setField(field, value);
+    }
+    @java.lang.Override
+    public Builder clearField(
+        com.google.protobuf.Descriptors.FieldDescriptor field) {
+      return super.clearField(field);
+    }
+    @java.lang.Override
+    public Builder clearOneof(
+        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      return super.clearOneof(oneof);
+    }
+    @java.lang.Override
+    public Builder setRepeatedField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        int index, java.lang.Object value) {
+      return super.setRepeatedField(field, index, value);
+    }
+    @java.lang.Override
+    public Builder addRepeatedField(
+        com.google.protobuf.Descriptors.FieldDescriptor field,
+        java.lang.Object value) {
+      return super.addRepeatedField(field, value);
+    }
+    @java.lang.Override
+    public Builder mergeFrom(com.google.protobuf.Message other) {
+      if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest) {
+        return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest)other);
+      } else {
+        super.mergeFrom(other);
+        return this;
+      }
+    }
+
+    public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest other) {
+      if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.getDefaultInstance()) return this;
+      if (!other.getModelName().isEmpty()) {
+        modelName_ = other.modelName_;
+        onChanged();
+      }
+      if (!other.getModelVersion().isEmpty()) {
+        modelVersion_ = other.modelVersion_;
+        onChanged();
+      }
+      if (!other.getId().isEmpty()) {
+        id_ = other.id_;
+        onChanged();
+      }
+      internalGetMutableParameters().mergeFrom(
+          other.internalGetParameters());
+      if (inputsBuilder_ == null) {
+        if (!other.inputs_.isEmpty()) {
+          if (inputs_.isEmpty()) {
+            inputs_ = other.inputs_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensureInputsIsMutable();
+            inputs_.addAll(other.inputs_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.inputs_.isEmpty()) {
+          if (inputsBuilder_.isEmpty()) {
+            inputsBuilder_.dispose();
+            inputsBuilder_ = null;
+            inputs_ = other.inputs_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+            inputsBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getInputsFieldBuilder() : null;
+          } else {
+            inputsBuilder_.addAllMessages(other.inputs_);
+          }
+        }
+      }
+      if (outputsBuilder_ == null) {
+        if (!other.outputs_.isEmpty()) {
+          if (outputs_.isEmpty()) {
+            outputs_ = other.outputs_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensureOutputsIsMutable();
+            outputs_.addAll(other.outputs_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.outputs_.isEmpty()) {
+          if (outputsBuilder_.isEmpty()) {
+            outputsBuilder_.dispose();
+            outputsBuilder_ = null;
+            outputs_ = other.outputs_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+            outputsBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getOutputsFieldBuilder() : null;
+          } else {
+            outputsBuilder_.addAllMessages(other.outputs_);
+          }
+        }
+      }
+      if (!other.rawInputContents_.isEmpty()) {
+        if (rawInputContents_.isEmpty()) {
+          rawInputContents_ = other.rawInputContents_;
+          bitField0_ = (bitField0_ & ~0x00000008);
+        } else {
+          ensureRawInputContentsIsMutable();
+          rawInputContents_.addAll(other.rawInputContents_);
+        }
+        onChanged();
+      }
+      this.mergeUnknownFields(other.unknownFields);
+      onChanged();
+      return this;
+    }
+
+    @java.lang.Override
+    public final boolean isInitialized() {
+      return true;
+    }
+
+    @java.lang.Override
+    public Builder mergeFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parsedMessage = null;
+      try {
+        parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest) e.getUnfinishedMessage();
+        throw e.unwrapIOException();
+      } finally {
+        if (parsedMessage != null) {
+          mergeFrom(parsedMessage);
+        }
+      }
+      return this;
+    }
+    private int bitField0_;
+
+    private java.lang.Object modelName_ = "";
+    /**
+     * <pre>
+     * The name of the model to use for inferencing.
+     * </pre>
+     *
+     * <code>string model_name = 1;</code>
+     * @return The modelName.
+     */
+    public java.lang.String getModelName() {
+      java.lang.Object ref = modelName_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        modelName_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the model to use for inferencing.
+     * </pre>
+     *
+     * <code>string model_name = 1;</code>
+     * @return The bytes for modelName.
+     */
+    public com.google.protobuf.ByteString
+        getModelNameBytes() {
+      java.lang.Object ref = modelName_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        modelName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the model to use for inferencing.
+     * </pre>
+     *
+     * <code>string model_name = 1;</code>
+     * @param value The modelName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setModelName(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      modelName_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The name of the model to use for inferencing.
+     * </pre>
+     *
+     * <code>string model_name = 1;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearModelName() {
+      
+      modelName_ = getDefaultInstance().getModelName();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The name of the model to use for inferencing.
+     * </pre>
+     *
+     * <code>string model_name = 1;</code>
+     * @param value The bytes for modelName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setModelNameBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      modelName_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object modelVersion_ = "";
+    /**
+     * <pre>
+     * The version of the model to use for inference. If not given the
+     * server will choose a version based on the model and internal policy.
+     * </pre>
+     *
+     * <code>string model_version = 2;</code>
+     * @return The modelVersion.
+     */
+    public java.lang.String getModelVersion() {
+      java.lang.Object ref = modelVersion_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        modelVersion_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The version of the model to use for inference. If not given the
+     * server will choose a version based on the model and internal policy.
+     * </pre>
+     *
+     * <code>string model_version = 2;</code>
+     * @return The bytes for modelVersion.
+     */
+    public com.google.protobuf.ByteString
+        getModelVersionBytes() {
+      java.lang.Object ref = modelVersion_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        modelVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The version of the model to use for inference. If not given the
+     * server will choose a version based on the model and internal policy.
+     * </pre>
+     *
+     * <code>string model_version = 2;</code>
+     * @param value The modelVersion to set.
+     * @return This builder for chaining.
+     */
+    public Builder setModelVersion(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      modelVersion_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The version of the model to use for inference. If not given the
+     * server will choose a version based on the model and internal policy.
+     * </pre>
+     *
+     * <code>string model_version = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearModelVersion() {
+      
+      modelVersion_ = getDefaultInstance().getModelVersion();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The version of the model to use for inference. If not given the
+     * server will choose a version based on the model and internal policy.
+     * </pre>
+     *
+     * <code>string model_version = 2;</code>
+     * @param value The bytes for modelVersion to set.
+     * @return This builder for chaining.
+     */
+    public Builder setModelVersionBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      modelVersion_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object id_ = "";
+    /**
+     * <pre>
+     * Optional identifier for the request. If specified will be
+     * returned in the response.
+     * </pre>
+     *
+     * <code>string id = 3;</code>
+     * @return The id.
+     */
+    public java.lang.String getId() {
+      java.lang.Object ref = id_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        id_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Optional identifier for the request. If specified will be
+     * returned in the response.
+     * </pre>
+     *
+     * <code>string id = 3;</code>
+     * @return The bytes for id.
+     */
+    public com.google.protobuf.ByteString
+        getIdBytes() {
+      java.lang.Object ref = id_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        id_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Optional identifier for the request. If specified will be
+     * returned in the response.
+     * </pre>
+     *
+     * <code>string id = 3;</code>
+     * @param value The id to set.
+     * @return This builder for chaining.
+     */
+    public Builder setId(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      id_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Optional identifier for the request. If specified will be
+     * returned in the response.
+     * </pre>
+     *
+     * <code>string id = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearId() {
+      
+      id_ = getDefaultInstance().getId();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Optional identifier for the request. If specified will be
+     * returned in the response.
+     * </pre>
+     *
+     * <code>string id = 3;</code>
+     * @param value The bytes for id to set.
+     * @return This builder for chaining.
+     */
+    public Builder setIdBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      id_ = value;
+      onChanged();
+      return this;
+    }
+
+    private com.google.protobuf.MapField<
+        java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
+    private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+    internalGetParameters() {
+      if (parameters_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            ParametersDefaultEntryHolder.defaultEntry);
+      }
+      return parameters_;
+    }
+    private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+    internalGetMutableParameters() {
+      onChanged();;
+      if (parameters_ == null) {
+        parameters_ = com.google.protobuf.MapField.newMapField(
+            ParametersDefaultEntryHolder.defaultEntry);
+      }
+      if (!parameters_.isMutable()) {
+        parameters_ = parameters_.copy();
+      }
+      return parameters_;
     }
 
     public int getParametersCount() {
-        return internalGetParameters().getMap().size();
+      return internalGetParameters().getMap().size();
     }
-
     /**
      * <pre>
      * Optional inference parameters.
@@ -3337,22 +4190,18 @@ public final class ModelInferRequest extends
 
     @java.lang.Override
     public boolean containsParameters(
-            java.lang.String key) {
-        if (key == null) {
-            throw new NullPointerException("map key");
-        }
-        return internalGetParameters().getMap().containsKey(key);
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetParameters().getMap().containsKey(key);
     }
-
     /**
      * Use {@link #getParametersMap()} instead.
      */
     @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
-        return getParametersMap();
+      return getParametersMap();
     }
-
     /**
      * <pre>
      * Optional inference parameters.
@@ -3363,9 +4212,8 @@ public final class ModelInferRequest extends
     @java.lang.Override
 
     public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
-        return internalGetParameters().getMap();
+      return internalGetParameters().getMap();
     }
-
     /**
      * <pre>
      * Optional inference parameters.
@@ -3376,16 +4224,13 @@ public final class ModelInferRequest extends
     @java.lang.Override
 
     public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
-            java.lang.String key,
-            org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
-        if (key == null) {
-            throw new NullPointerException("map key");
-        }
-        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                internalGetParameters().getMap();
-        return map.containsKey(key) ? map.get(key) : defaultValue;
+        java.lang.String key,
+        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+          internalGetParameters().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
     }
-
     /**
      * <pre>
      * Optional inference parameters.
@@ -3396,20 +4241,89 @@ public final class ModelInferRequest extends
     @java.lang.Override
 
     public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
-            java.lang.String key) {
-        if (key == null) {
-            throw new NullPointerException("map key");
-        }
-        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                internalGetParameters().getMap();
-        if (!map.containsKey(key)) {
-            throw new java.lang.IllegalArgumentException();
-        }
-        return map.get(key);
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
+          internalGetParameters().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
     }
 
-    public static final int INPUTS_FIELD_NUMBER = 5;
-    private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor> inputs_;
+    public Builder clearParameters() {
+      internalGetMutableParameters().getMutableMap()
+          .clear();
+      return this;
+    }
+    /**
+     * <pre>
+     * Optional inference parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+
+    public Builder removeParameters(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      internalGetMutableParameters().getMutableMap()
+          .remove(key);
+      return this;
+    }
+    /**
+     * Use alternate mutation accessors instead.
+     */
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+    getMutableParameters() {
+      return internalGetMutableParameters().getMutableMap();
+    }
+    /**
+     * <pre>
+     * Optional inference parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+    public Builder putParameters(
+        java.lang.String key,
+        org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter value) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      if (value == null) {
+  throw new NullPointerException("map value");
+}
+
+      internalGetMutableParameters().getMutableMap()
+          .put(key, value);
+      return this;
+    }
+    /**
+     * <pre>
+     * Optional inference parameters.
+     * </pre>
+     *
+     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+     */
+
+    public Builder putAllParameters(
+        java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> values) {
+      internalGetMutableParameters().getMutableMap()
+          .putAll(values);
+      return this;
+    }
+
+    private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor> inputs_ =
+      java.util.Collections.emptyList();
+    private void ensureInputsIsMutable() {
+      if (!((bitField0_ & 0x00000002) != 0)) {
+        inputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor>(inputs_);
+        bitField0_ |= 0x00000002;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder> inputsBuilder_;
 
     /**
      * <pre>
@@ -3418,11 +4332,13 @@ public final class ModelInferRequest extends
      *
      * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
      */
-    @java.lang.Override
     public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor> getInputsList() {
-        return inputs_;
+      if (inputsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(inputs_);
+      } else {
+        return inputsBuilder_.getMessageList();
+      }
     }
-
     /**
      * <pre>
      * The input tensors for the inference.
@@ -3430,24 +4346,13 @@ public final class ModelInferRequest extends
      *
      * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
      */
-    @java.lang.Override
-    public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder>
-            getInputsOrBuilderList() {
-        return inputs_;
-    }
-
-    /**
-     * <pre>
-     * The input tensors for the inference.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-     */
-    @java.lang.Override
     public int getInputsCount() {
+      if (inputsBuilder_ == null) {
         return inputs_.size();
+      } else {
+        return inputsBuilder_.getCount();
+      }
     }
-
     /**
      * <pre>
      * The input tensors for the inference.
@@ -3455,11 +4360,13 @@ public final class ModelInferRequest extends
      *
      * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
      */
-    @java.lang.Override
     public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getInputs(int index) {
+      if (inputsBuilder_ == null) {
         return inputs_.get(index);
+      } else {
+        return inputsBuilder_.getMessage(index);
+      }
     }
-
     /**
      * <pre>
      * The input tensors for the inference.
@@ -3467,14 +4374,268 @@ public final class ModelInferRequest extends
      *
      * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
      */
-    @java.lang.Override
+    public Builder setInputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor value) {
+      if (inputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureInputsIsMutable();
+        inputs_.set(index, value);
+        onChanged();
+      } else {
+        inputsBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public Builder setInputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder builderForValue) {
+      if (inputsBuilder_ == null) {
+        ensureInputsIsMutable();
+        inputs_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        inputsBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public Builder addInputs(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor value) {
+      if (inputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureInputsIsMutable();
+        inputs_.add(value);
+        onChanged();
+      } else {
+        inputsBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public Builder addInputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor value) {
+      if (inputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureInputsIsMutable();
+        inputs_.add(index, value);
+        onChanged();
+      } else {
+        inputsBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public Builder addInputs(
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder builderForValue) {
+      if (inputsBuilder_ == null) {
+        ensureInputsIsMutable();
+        inputs_.add(builderForValue.build());
+        onChanged();
+      } else {
+        inputsBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public Builder addInputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder builderForValue) {
+      if (inputsBuilder_ == null) {
+        ensureInputsIsMutable();
+        inputs_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        inputsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public Builder addAllInputs(
+        java.lang.Iterable<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor> values) {
+      if (inputsBuilder_ == null) {
+        ensureInputsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, inputs_);
+        onChanged();
+      } else {
+        inputsBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public Builder clearInputs() {
+      if (inputsBuilder_ == null) {
+        inputs_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+      } else {
+        inputsBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public Builder removeInputs(int index) {
+      if (inputsBuilder_ == null) {
+        ensureInputsIsMutable();
+        inputs_.remove(index);
+        onChanged();
+      } else {
+        inputsBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder getInputsBuilder(
+        int index) {
+      return getInputsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
     public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder getInputsOrBuilder(
-            int index) {
-        return inputs_.get(index);
+        int index) {
+      if (inputsBuilder_ == null) {
+        return inputs_.get(index);  } else {
+        return inputsBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder> 
+         getInputsOrBuilderList() {
+      if (inputsBuilder_ != null) {
+        return inputsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(inputs_);
+      }
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder addInputsBuilder() {
+      return getInputsFieldBuilder().addBuilder(
+          org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder addInputsBuilder(
+        int index) {
+      return getInputsFieldBuilder().addBuilder(
+          index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * The input tensors for the inference.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+     */
+    public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder> 
+         getInputsBuilderList() {
+      return getInputsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder> 
+        getInputsFieldBuilder() {
+      if (inputsBuilder_ == null) {
+        inputsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder>(
+                inputs_,
+                ((bitField0_ & 0x00000002) != 0),
+                getParentForChildren(),
+                isClean());
+        inputs_ = null;
+      }
+      return inputsBuilder_;
     }
 
-    public static final int OUTPUTS_FIELD_NUMBER = 6;
-    private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor> outputs_;
+    private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor> outputs_ =
+      java.util.Collections.emptyList();
+    private void ensureOutputsIsMutable() {
+      if (!((bitField0_ & 0x00000004) != 0)) {
+        outputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor>(outputs_);
+        bitField0_ |= 0x00000004;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder> outputsBuilder_;
 
     /**
      * <pre>
@@ -3484,11 +4645,13 @@ public final class ModelInferRequest extends
      *
      * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
      */
-    @java.lang.Override
     public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor> getOutputsList() {
-        return outputs_;
+      if (outputsBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(outputs_);
+      } else {
+        return outputsBuilder_.getMessageList();
+      }
     }
-
     /**
      * <pre>
      * The requested output tensors for the inference. Optional, if not
@@ -3497,25 +4660,13 @@ public final class ModelInferRequest extends
      *
      * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
      */
-    @java.lang.Override
-    public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder>
-            getOutputsOrBuilderList() {
-        return outputs_;
-    }
-
-    /**
-     * <pre>
-     * The requested output tensors for the inference. Optional, if not
-     * specified all outputs produced by the model will be returned.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-     */
-    @java.lang.Override
     public int getOutputsCount() {
+      if (outputsBuilder_ == null) {
         return outputs_.size();
+      } else {
+        return outputsBuilder_.getCount();
+      }
     }
-
     /**
      * <pre>
      * The requested output tensors for the inference. Optional, if not
@@ -3524,11 +4675,13 @@ public final class ModelInferRequest extends
      *
      * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
      */
-    @java.lang.Override
     public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getOutputs(int index) {
+      if (outputsBuilder_ == null) {
         return outputs_.get(index);
+      } else {
+        return outputsBuilder_.getMessage(index);
+      }
     }
-
     /**
      * <pre>
      * The requested output tensors for the inference. Optional, if not
@@ -3537,15 +4690,278 @@ public final class ModelInferRequest extends
      *
      * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
      */
-    @java.lang.Override
+    public Builder setOutputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor value) {
+      if (outputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureOutputsIsMutable();
+        outputs_.set(index, value);
+        onChanged();
+      } else {
+        outputsBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public Builder setOutputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder builderForValue) {
+      if (outputsBuilder_ == null) {
+        ensureOutputsIsMutable();
+        outputs_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        outputsBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public Builder addOutputs(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor value) {
+      if (outputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureOutputsIsMutable();
+        outputs_.add(value);
+        onChanged();
+      } else {
+        outputsBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public Builder addOutputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor value) {
+      if (outputsBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureOutputsIsMutable();
+        outputs_.add(index, value);
+        onChanged();
+      } else {
+        outputsBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public Builder addOutputs(
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder builderForValue) {
+      if (outputsBuilder_ == null) {
+        ensureOutputsIsMutable();
+        outputs_.add(builderForValue.build());
+        onChanged();
+      } else {
+        outputsBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public Builder addOutputs(
+        int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder builderForValue) {
+      if (outputsBuilder_ == null) {
+        ensureOutputsIsMutable();
+        outputs_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        outputsBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public Builder addAllOutputs(
+        java.lang.Iterable<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor> values) {
+      if (outputsBuilder_ == null) {
+        ensureOutputsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, outputs_);
+        onChanged();
+      } else {
+        outputsBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public Builder clearOutputs() {
+      if (outputsBuilder_ == null) {
+        outputs_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+      } else {
+        outputsBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public Builder removeOutputs(int index) {
+      if (outputsBuilder_ == null) {
+        ensureOutputsIsMutable();
+        outputs_.remove(index);
+        onChanged();
+      } else {
+        outputsBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder getOutputsBuilder(
+        int index) {
+      return getOutputsFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
     public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder getOutputsOrBuilder(
-            int index) {
-        return outputs_.get(index);
+        int index) {
+      if (outputsBuilder_ == null) {
+        return outputs_.get(index);  } else {
+        return outputsBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder> 
+         getOutputsOrBuilderList() {
+      if (outputsBuilder_ != null) {
+        return outputsBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(outputs_);
+      }
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder addOutputsBuilder() {
+      return getOutputsFieldBuilder().addBuilder(
+          org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder addOutputsBuilder(
+        int index) {
+      return getOutputsFieldBuilder().addBuilder(
+          index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * The requested output tensors for the inference. Optional, if not
+     * specified all outputs produced by the model will be returned.
+     * </pre>
+     *
+     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+     */
+    public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder> 
+         getOutputsBuilderList() {
+      return getOutputsFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder> 
+        getOutputsFieldBuilder() {
+      if (outputsBuilder_ == null) {
+        outputsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder>(
+                outputs_,
+                ((bitField0_ & 0x00000004) != 0),
+                getParentForChildren(),
+                isClean());
+        outputs_ = null;
+      }
+      return outputsBuilder_;
     }
 
-    public static final int RAW_INPUT_CONTENTS_FIELD_NUMBER = 7;
-    private java.util.List<com.google.protobuf.ByteString> rawInputContents_;
-
+    private java.util.List<com.google.protobuf.ByteString> rawInputContents_ = java.util.Collections.emptyList();
+    private void ensureRawInputContentsIsMutable() {
+      if (!((bitField0_ & 0x00000008) != 0)) {
+        rawInputContents_ = new java.util.ArrayList<com.google.protobuf.ByteString>(rawInputContents_);
+        bitField0_ |= 0x00000008;
+       }
+    }
     /**
      * <pre>
      * The data contained in an input tensor can be represented in "raw"
@@ -3563,15 +4979,13 @@ public final class ModelInferRequest extends
      * </pre>
      *
      * <code>repeated bytes raw_input_contents = 7;</code>
-     * 
      * @return A list containing the rawInputContents.
      */
-    @java.lang.Override
     public java.util.List<com.google.protobuf.ByteString>
-            getRawInputContentsList() {
-        return rawInputContents_;
+        getRawInputContentsList() {
+      return ((bitField0_ & 0x00000008) != 0) ?
+               java.util.Collections.unmodifiableList(rawInputContents_) : rawInputContents_;
     }
-
     /**
      * <pre>
      * The data contained in an input tensor can be represented in "raw"
@@ -3589,13 +5003,11 @@ public final class ModelInferRequest extends
      * </pre>
      *
      * <code>repeated bytes raw_input_contents = 7;</code>
-     * 
      * @return The count of rawInputContents.
      */
     public int getRawInputContentsCount() {
-        return rawInputContents_.size();
+      return rawInputContents_.size();
     }
-
     /**
      * <pre>
      * The data contained in an input tensor can be represented in "raw"
@@ -3613,2020 +5025,175 @@ public final class ModelInferRequest extends
      * </pre>
      *
      * <code>repeated bytes raw_input_contents = 7;</code>
-     * 
      * @param index The index of the element to return.
      * @return The rawInputContents at the given index.
      */
     public com.google.protobuf.ByteString getRawInputContents(int index) {
-        return rawInputContents_.get(index);
+      return rawInputContents_.get(index);
     }
-
-    private byte memoizedIsInitialized = -1;
-
-    @java.lang.Override
-    public final boolean isInitialized() {
-        byte isInitialized = memoizedIsInitialized;
-        if (isInitialized == 1)
-            return true;
-        if (isInitialized == 0)
-            return false;
-
-        memoizedIsInitialized = 1;
-        return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-            throws java.io.IOException {
-        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(modelName_)) {
-            com.google.protobuf.GeneratedMessageV3.writeString(output, 1, modelName_);
-        }
-        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(modelVersion_)) {
-            com.google.protobuf.GeneratedMessageV3.writeString(output, 2, modelVersion_);
-        }
-        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
-            com.google.protobuf.GeneratedMessageV3.writeString(output, 3, id_);
-        }
-        com.google.protobuf.GeneratedMessageV3
-                .serializeStringMapTo(
-                        output,
-                        internalGetParameters(),
-                        ParametersDefaultEntryHolder.defaultEntry,
-                        4);
-        for (int i = 0; i < inputs_.size(); i++) {
-            output.writeMessage(5, inputs_.get(i));
-        }
-        for (int i = 0; i < outputs_.size(); i++) {
-            output.writeMessage(6, outputs_.get(i));
-        }
-        for (int i = 0; i < rawInputContents_.size(); i++) {
-            output.writeBytes(7, rawInputContents_.get(i));
-        }
-        unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-        int size = memoizedSize;
-        if (size != -1)
-            return size;
-
-        size = 0;
-        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(modelName_)) {
-            size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, modelName_);
-        }
-        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(modelVersion_)) {
-            size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, modelVersion_);
-        }
-        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
-            size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, id_);
-        }
-        for (java.util.Map.Entry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> entry : internalGetParameters().getMap().entrySet()) {
-            com.google.protobuf.MapEntry<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters__ = ParametersDefaultEntryHolder.defaultEntry.newBuilderForType()
-                    .setKey(entry.getKey())
-                    .setValue(entry.getValue())
-                    .build();
-            size += com.google.protobuf.CodedOutputStream
-                    .computeMessageSize(4, parameters__);
-        }
-        for (int i = 0; i < inputs_.size(); i++) {
-            size += com.google.protobuf.CodedOutputStream
-                    .computeMessageSize(5, inputs_.get(i));
-        }
-        for (int i = 0; i < outputs_.size(); i++) {
-            size += com.google.protobuf.CodedOutputStream
-                    .computeMessageSize(6, outputs_.get(i));
-        }
-        {
-            int dataSize = 0;
-            for (int i = 0; i < rawInputContents_.size(); i++) {
-                dataSize += com.google.protobuf.CodedOutputStream
-                        .computeBytesSizeNoTag(rawInputContents_.get(i));
-            }
-            size += dataSize;
-            size += 1 * getRawInputContentsList().size();
-        }
-        size += unknownFields.getSerializedSize();
-        memoizedSize = size;
-        return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest)) {
-            return super.equals(obj);
-        }
-        org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest other = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest) obj;
-
-        if (!getModelName()
-                .equals(other.getModelName()))
-            return false;
-        if (!getModelVersion()
-                .equals(other.getModelVersion()))
-            return false;
-        if (!getId()
-                .equals(other.getId()))
-            return false;
-        if (!internalGetParameters().equals(
-                other.internalGetParameters()))
-            return false;
-        if (!getInputsList()
-                .equals(other.getInputsList()))
-            return false;
-        if (!getOutputsList()
-                .equals(other.getOutputsList()))
-            return false;
-        if (!getRawInputContentsList()
-                .equals(other.getRawInputContentsList()))
-            return false;
-        if (!unknownFields.equals(other.unknownFields))
-            return false;
-        return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-        if (memoizedHashCode != 0) {
-            return memoizedHashCode;
-        }
-        int hash = 41;
-        hash = (19 * hash) + getDescriptor().hashCode();
-        hash = (37 * hash) + MODEL_NAME_FIELD_NUMBER;
-        hash = (53 * hash) + getModelName().hashCode();
-        hash = (37 * hash) + MODEL_VERSION_FIELD_NUMBER;
-        hash = (53 * hash) + getModelVersion().hashCode();
-        hash = (37 * hash) + ID_FIELD_NUMBER;
-        hash = (53 * hash) + getId().hashCode();
-        if (!internalGetParameters().getMap().isEmpty()) {
-            hash = (37 * hash) + PARAMETERS_FIELD_NUMBER;
-            hash = (53 * hash) + internalGetParameters().hashCode();
-        }
-        if (getInputsCount() > 0) {
-            hash = (37 * hash) + INPUTS_FIELD_NUMBER;
-            hash = (53 * hash) + getInputsList().hashCode();
-        }
-        if (getOutputsCount() > 0) {
-            hash = (37 * hash) + OUTPUTS_FIELD_NUMBER;
-            hash = (53 * hash) + getOutputsList().hashCode();
-        }
-        if (getRawInputContentsCount() > 0) {
-            hash = (37 * hash) + RAW_INPUT_CONTENTS_FIELD_NUMBER;
-            hash = (53 * hash) + getRawInputContentsList().hashCode();
-        }
-        hash = (29 * hash) + unknownFields.hashCode();
-        memoizedHashCode = hash;
-        return hash;
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
-            java.nio.ByteBuffer data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
-            java.nio.ByteBuffer data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
-            com.google.protobuf.ByteString data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
-            com.google.protobuf.ByteString data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(byte[] data)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
-            byte[] data,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws com.google.protobuf.InvalidProtocolBufferException {
-        return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(java.io.InputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseDelimitedFrom(java.io.InputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseDelimitedFrom(
-            java.io.InputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
-            com.google.protobuf.CodedInputStream input)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input);
-    }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parseFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-        return com.google.protobuf.GeneratedMessageV3
-                .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() {
-        return newBuilder();
-    }
-
-    public static Builder newBuilder() {
-        return DEFAULT_INSTANCE.toBuilder();
-    }
-
-    public static Builder newBuilder(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest prototype) {
-        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-
-    @java.lang.Override
-    public Builder toBuilder() {
-        return this == DEFAULT_INSTANCE
-                ? new Builder()
-                : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        Builder builder = new Builder(parent);
-        return builder;
-    }
-
     /**
-     * Protobuf type {@code inference.ModelInferRequest}
+     * <pre>
+     * The data contained in an input tensor can be represented in "raw"
+     * bytes form or in the repeated type that matches the tensor's data
+     * type. To use the raw representation 'raw_input_contents' must be
+     * initialized with data for each tensor in the same order as
+     * 'inputs'. For each tensor, the size of this content must match
+     * what is expected by the tensor's shape and data type. The raw
+     * data must be the flattened, one-dimensional, row-major order of
+     * the tensor elements without any stride or padding between the
+     * elements. Note that the FP16 and BF16 data types must be represented as
+     * raw content as there is no specific data type for a 16-bit float type.
+     * If this field is specified then InferInputTensor::contents must
+     * not be specified for any input tensor.
+     * </pre>
+     *
+     * <code>repeated bytes raw_input_contents = 7;</code>
+     * @param index The index to set the value at.
+     * @param value The rawInputContents to set.
+     * @return This builder for chaining.
      */
-    public static final class Builder extends
-            com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-            // @@protoc_insertion_point(builder_implements:inference.ModelInferRequest)
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequestOrBuilder {
-        public static final com.google.protobuf.Descriptors.Descriptor
-                getDescriptor() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_descriptor;
-        }
-
-        @SuppressWarnings({ "rawtypes" })
-        protected com.google.protobuf.MapField internalGetMapField(
-                int number) {
-            switch (number) {
-                case 4:
-                    return internalGetParameters();
-                default:
-                    throw new RuntimeException(
-                            "Invalid map field number: " + number);
-            }
-        }
-
-        @SuppressWarnings({ "rawtypes" })
-        protected com.google.protobuf.MapField internalGetMutableMapField(
-                int number) {
-            switch (number) {
-                case 4:
-                    return internalGetMutableParameters();
-                default:
-                    throw new RuntimeException(
-                            "Invalid map field number: " + number);
-            }
-        }
-
-        @java.lang.Override
-        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-                internalGetFieldAccessorTable() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_fieldAccessorTable
-                    .ensureFieldAccessorsInitialized(
-                            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.class, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.Builder.class);
-        }
-
-        // Construct using org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.newBuilder()
-        private Builder() {
-            maybeForceBuilderInitialization();
-        }
-
-        private Builder(
-                com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-            super(parent);
-            maybeForceBuilderInitialization();
-        }
-
-        private void maybeForceBuilderInitialization() {
-            if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
-                getInputsFieldBuilder();
-                getOutputsFieldBuilder();
-            }
-        }
-
-        @java.lang.Override
-        public Builder clear() {
-            super.clear();
-            modelName_ = "";
-
-            modelVersion_ = "";
-
-            id_ = "";
-
-            internalGetMutableParameters().clear();
-            if (inputsBuilder_ == null) {
-                inputs_ = java.util.Collections.emptyList();
-                bitField0_ = (bitField0_ & ~0x00000002);
-            } else {
-                inputsBuilder_.clear();
-            }
-            if (outputsBuilder_ == null) {
-                outputs_ = java.util.Collections.emptyList();
-                bitField0_ = (bitField0_ & ~0x00000004);
-            } else {
-                outputsBuilder_.clear();
-            }
-            rawInputContents_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000008);
-            return this;
-        }
-
-        @java.lang.Override
-        public com.google.protobuf.Descriptors.Descriptor
-                getDescriptorForType() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.GrpcPredictV2.internal_static_inference_ModelInferRequest_descriptor;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest getDefaultInstanceForType() {
-            return org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.getDefaultInstance();
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest build() {
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest result = buildPartial();
-            if (!result.isInitialized()) {
-                throw newUninitializedMessageException(result);
-            }
-            return result;
-        }
-
-        @java.lang.Override
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest buildPartial() {
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest result = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest(this);
-            int from_bitField0_ = bitField0_;
-            result.modelName_ = modelName_;
-            result.modelVersion_ = modelVersion_;
-            result.id_ = id_;
-            result.parameters_ = internalGetParameters();
-            result.parameters_.makeImmutable();
-            if (inputsBuilder_ == null) {
-                if (((bitField0_ & 0x00000002) != 0)) {
-                    inputs_ = java.util.Collections.unmodifiableList(inputs_);
-                    bitField0_ = (bitField0_ & ~0x00000002);
-                }
-                result.inputs_ = inputs_;
-            } else {
-                result.inputs_ = inputsBuilder_.build();
-            }
-            if (outputsBuilder_ == null) {
-                if (((bitField0_ & 0x00000004) != 0)) {
-                    outputs_ = java.util.Collections.unmodifiableList(outputs_);
-                    bitField0_ = (bitField0_ & ~0x00000004);
-                }
-                result.outputs_ = outputs_;
-            } else {
-                result.outputs_ = outputsBuilder_.build();
-            }
-            if (((bitField0_ & 0x00000008) != 0)) {
-                rawInputContents_ = java.util.Collections.unmodifiableList(rawInputContents_);
-                bitField0_ = (bitField0_ & ~0x00000008);
-            }
-            result.rawInputContents_ = rawInputContents_;
-            onBuilt();
-            return result;
-        }
-
-        @java.lang.Override
-        public Builder clone() {
-            return super.clone();
-        }
-
-        @java.lang.Override
-        public Builder setField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                java.lang.Object value) {
-            return super.setField(field, value);
-        }
-
-        @java.lang.Override
-        public Builder clearField(
-                com.google.protobuf.Descriptors.FieldDescriptor field) {
-            return super.clearField(field);
-        }
-
-        @java.lang.Override
-        public Builder clearOneof(
-                com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-            return super.clearOneof(oneof);
-        }
-
-        @java.lang.Override
-        public Builder setRepeatedField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                int index, java.lang.Object value) {
-            return super.setRepeatedField(field, index, value);
-        }
-
-        @java.lang.Override
-        public Builder addRepeatedField(
-                com.google.protobuf.Descriptors.FieldDescriptor field,
-                java.lang.Object value) {
-            return super.addRepeatedField(field, value);
-        }
-
-        @java.lang.Override
-        public Builder mergeFrom(com.google.protobuf.Message other) {
-            if (other instanceof org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest) {
-                return mergeFrom((org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest) other);
-            } else {
-                super.mergeFrom(other);
-                return this;
-            }
-        }
-
-        public Builder mergeFrom(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest other) {
-            if (other == org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.getDefaultInstance())
-                return this;
-            if (!other.getModelName().isEmpty()) {
-                modelName_ = other.modelName_;
-                onChanged();
-            }
-            if (!other.getModelVersion().isEmpty()) {
-                modelVersion_ = other.modelVersion_;
-                onChanged();
-            }
-            if (!other.getId().isEmpty()) {
-                id_ = other.id_;
-                onChanged();
-            }
-            internalGetMutableParameters().mergeFrom(
-                    other.internalGetParameters());
-            if (inputsBuilder_ == null) {
-                if (!other.inputs_.isEmpty()) {
-                    if (inputs_.isEmpty()) {
-                        inputs_ = other.inputs_;
-                        bitField0_ = (bitField0_ & ~0x00000002);
-                    } else {
-                        ensureInputsIsMutable();
-                        inputs_.addAll(other.inputs_);
-                    }
-                    onChanged();
-                }
-            } else {
-                if (!other.inputs_.isEmpty()) {
-                    if (inputsBuilder_.isEmpty()) {
-                        inputsBuilder_.dispose();
-                        inputsBuilder_ = null;
-                        inputs_ = other.inputs_;
-                        bitField0_ = (bitField0_ & ~0x00000002);
-                        inputsBuilder_ =
-                                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ? getInputsFieldBuilder() : null;
-                    } else {
-                        inputsBuilder_.addAllMessages(other.inputs_);
-                    }
-                }
-            }
-            if (outputsBuilder_ == null) {
-                if (!other.outputs_.isEmpty()) {
-                    if (outputs_.isEmpty()) {
-                        outputs_ = other.outputs_;
-                        bitField0_ = (bitField0_ & ~0x00000004);
-                    } else {
-                        ensureOutputsIsMutable();
-                        outputs_.addAll(other.outputs_);
-                    }
-                    onChanged();
-                }
-            } else {
-                if (!other.outputs_.isEmpty()) {
-                    if (outputsBuilder_.isEmpty()) {
-                        outputsBuilder_.dispose();
-                        outputsBuilder_ = null;
-                        outputs_ = other.outputs_;
-                        bitField0_ = (bitField0_ & ~0x00000004);
-                        outputsBuilder_ =
-                                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ? getOutputsFieldBuilder() : null;
-                    } else {
-                        outputsBuilder_.addAllMessages(other.outputs_);
-                    }
-                }
-            }
-            if (!other.rawInputContents_.isEmpty()) {
-                if (rawInputContents_.isEmpty()) {
-                    rawInputContents_ = other.rawInputContents_;
-                    bitField0_ = (bitField0_ & ~0x00000008);
-                } else {
-                    ensureRawInputContentsIsMutable();
-                    rawInputContents_.addAll(other.rawInputContents_);
-                }
-                onChanged();
-            }
-            this.mergeUnknownFields(other.unknownFields);
-            onChanged();
-            return this;
-        }
-
-        @java.lang.Override
-        public final boolean isInitialized() {
-            return true;
-        }
-
-        @java.lang.Override
-        public Builder mergeFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws java.io.IOException {
-            org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest parsedMessage = null;
-            try {
-                parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                parsedMessage = (org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest) e.getUnfinishedMessage();
-                throw e.unwrapIOException();
-            } finally {
-                if (parsedMessage != null) {
-                    mergeFrom(parsedMessage);
-                }
-            }
-            return this;
-        }
-
-        private int bitField0_;
-
-        private java.lang.Object modelName_ = "";
-
-        /**
-         * <pre>
-         * The name of the model to use for inferencing.
-         * </pre>
-         *
-         * <code>string model_name = 1;</code>
-         * 
-         * @return The modelName.
-         */
-        public java.lang.String getModelName() {
-            java.lang.Object ref = modelName_;
-            if (!(ref instanceof java.lang.String)) {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                modelName_ = s;
-                return s;
-            } else {
-                return (java.lang.String) ref;
-            }
-        }
-
-        /**
-         * <pre>
-         * The name of the model to use for inferencing.
-         * </pre>
-         *
-         * <code>string model_name = 1;</code>
-         * 
-         * @return The bytes for modelName.
-         */
-        public com.google.protobuf.ByteString
-                getModelNameBytes() {
-            java.lang.Object ref = modelName_;
-            if (ref instanceof String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                modelName_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        /**
-         * <pre>
-         * The name of the model to use for inferencing.
-         * </pre>
-         *
-         * <code>string model_name = 1;</code>
-         * 
-         * @param value The modelName to set.
-         * @return This builder for chaining.
-         */
-        public Builder setModelName(
-                java.lang.String value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-
-            modelName_ = value;
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The name of the model to use for inferencing.
-         * </pre>
-         *
-         * <code>string model_name = 1;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearModelName() {
-
-            modelName_ = getDefaultInstance().getModelName();
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The name of the model to use for inferencing.
-         * </pre>
-         *
-         * <code>string model_name = 1;</code>
-         * 
-         * @param value The bytes for modelName to set.
-         * @return This builder for chaining.
-         */
-        public Builder setModelNameBytes(
-                com.google.protobuf.ByteString value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            checkByteStringIsUtf8(value);
-
-            modelName_ = value;
-            onChanged();
-            return this;
-        }
-
-        private java.lang.Object modelVersion_ = "";
-
-        /**
-         * <pre>
-         * The version of the model to use for inference. If not given the
-         * server will choose a version based on the model and internal policy.
-         * </pre>
-         *
-         * <code>string model_version = 2;</code>
-         * 
-         * @return The modelVersion.
-         */
-        public java.lang.String getModelVersion() {
-            java.lang.Object ref = modelVersion_;
-            if (!(ref instanceof java.lang.String)) {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                modelVersion_ = s;
-                return s;
-            } else {
-                return (java.lang.String) ref;
-            }
-        }
-
-        /**
-         * <pre>
-         * The version of the model to use for inference. If not given the
-         * server will choose a version based on the model and internal policy.
-         * </pre>
-         *
-         * <code>string model_version = 2;</code>
-         * 
-         * @return The bytes for modelVersion.
-         */
-        public com.google.protobuf.ByteString
-                getModelVersionBytes() {
-            java.lang.Object ref = modelVersion_;
-            if (ref instanceof String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                modelVersion_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        /**
-         * <pre>
-         * The version of the model to use for inference. If not given the
-         * server will choose a version based on the model and internal policy.
-         * </pre>
-         *
-         * <code>string model_version = 2;</code>
-         * 
-         * @param value The modelVersion to set.
-         * @return This builder for chaining.
-         */
-        public Builder setModelVersion(
-                java.lang.String value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-
-            modelVersion_ = value;
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The version of the model to use for inference. If not given the
-         * server will choose a version based on the model and internal policy.
-         * </pre>
-         *
-         * <code>string model_version = 2;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearModelVersion() {
-
-            modelVersion_ = getDefaultInstance().getModelVersion();
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The version of the model to use for inference. If not given the
-         * server will choose a version based on the model and internal policy.
-         * </pre>
-         *
-         * <code>string model_version = 2;</code>
-         * 
-         * @param value The bytes for modelVersion to set.
-         * @return This builder for chaining.
-         */
-        public Builder setModelVersionBytes(
-                com.google.protobuf.ByteString value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            checkByteStringIsUtf8(value);
-
-            modelVersion_ = value;
-            onChanged();
-            return this;
-        }
-
-        private java.lang.Object id_ = "";
-
-        /**
-         * <pre>
-         * Optional identifier for the request. If specified will be
-         * returned in the response.
-         * </pre>
-         *
-         * <code>string id = 3;</code>
-         * 
-         * @return The id.
-         */
-        public java.lang.String getId() {
-            java.lang.Object ref = id_;
-            if (!(ref instanceof java.lang.String)) {
-                com.google.protobuf.ByteString bs =
-                        (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
-                id_ = s;
-                return s;
-            } else {
-                return (java.lang.String) ref;
-            }
-        }
-
-        /**
-         * <pre>
-         * Optional identifier for the request. If specified will be
-         * returned in the response.
-         * </pre>
-         *
-         * <code>string id = 3;</code>
-         * 
-         * @return The bytes for id.
-         */
-        public com.google.protobuf.ByteString
-                getIdBytes() {
-            java.lang.Object ref = id_;
-            if (ref instanceof String) {
-                com.google.protobuf.ByteString b =
-                        com.google.protobuf.ByteString.copyFromUtf8(
-                                (java.lang.String) ref);
-                id_ = b;
-                return b;
-            } else {
-                return (com.google.protobuf.ByteString) ref;
-            }
-        }
-
-        /**
-         * <pre>
-         * Optional identifier for the request. If specified will be
-         * returned in the response.
-         * </pre>
-         *
-         * <code>string id = 3;</code>
-         * 
-         * @param value The id to set.
-         * @return This builder for chaining.
-         */
-        public Builder setId(
-                java.lang.String value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-
-            id_ = value;
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Optional identifier for the request. If specified will be
-         * returned in the response.
-         * </pre>
-         *
-         * <code>string id = 3;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearId() {
-
-            id_ = getDefaultInstance().getId();
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Optional identifier for the request. If specified will be
-         * returned in the response.
-         * </pre>
-         *
-         * <code>string id = 3;</code>
-         * 
-         * @param value The bytes for id to set.
-         * @return This builder for chaining.
-         */
-        public Builder setIdBytes(
-                com.google.protobuf.ByteString value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            checkByteStringIsUtf8(value);
-
-            id_ = value;
-            onChanged();
-            return this;
-        }
-
-        private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> parameters_;
-
-        private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                internalGetParameters() {
-            if (parameters_ == null) {
-                return com.google.protobuf.MapField.emptyMapField(
-                        ParametersDefaultEntryHolder.defaultEntry);
-            }
-            return parameters_;
-        }
-
-        private com.google.protobuf.MapField<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                internalGetMutableParameters() {
-            onChanged();
-            ;
-            if (parameters_ == null) {
-                parameters_ = com.google.protobuf.MapField.newMapField(
-                        ParametersDefaultEntryHolder.defaultEntry);
-            }
-            if (!parameters_.isMutable()) {
-                parameters_ = parameters_.copy();
-            }
-            return parameters_;
-        }
-
-        public int getParametersCount() {
-            return internalGetParameters().getMap().size();
-        }
-
-        /**
-         * <pre>
-         * Optional inference parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-
-        @java.lang.Override
-        public boolean containsParameters(
-                java.lang.String key) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            return internalGetParameters().getMap().containsKey(key);
-        }
-
-        /**
-         * Use {@link #getParametersMap()} instead.
-         */
-        @java.lang.Override
-        @java.lang.Deprecated
-        public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParameters() {
-            return getParametersMap();
-        }
-
-        /**
-         * <pre>
-         * Optional inference parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-        @java.lang.Override
-
-        public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> getParametersMap() {
-            return internalGetParameters().getMap();
-        }
-
-        /**
-         * <pre>
-         * Optional inference parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-        @java.lang.Override
-
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
-                java.lang.String key,
-                org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                    internalGetParameters().getMap();
-            return map.containsKey(key) ? map.get(key) : defaultValue;
-        }
-
-        /**
-         * <pre>
-         * Optional inference parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-        @java.lang.Override
-
-        public org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
-                java.lang.String key) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> map =
-                    internalGetParameters().getMap();
-            if (!map.containsKey(key)) {
-                throw new java.lang.IllegalArgumentException();
-            }
-            return map.get(key);
-        }
-
-        public Builder clearParameters() {
-            internalGetMutableParameters().getMutableMap()
-                    .clear();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Optional inference parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-
-        public Builder removeParameters(
-                java.lang.String key) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            internalGetMutableParameters().getMutableMap()
-                    .remove(key);
-            return this;
-        }
-
-        /**
-         * Use alternate mutation accessors instead.
-         */
-        @java.lang.Deprecated
-        public java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-                getMutableParameters() {
-            return internalGetMutableParameters().getMutableMap();
-        }
-
-        /**
-         * <pre>
-         * Optional inference parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-        public Builder putParameters(
-                java.lang.String key,
-                org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter value) {
-            if (key == null) {
-                throw new NullPointerException("map key");
-            }
-            if (value == null) {
-                throw new NullPointerException("map value");
-            }
-
-            internalGetMutableParameters().getMutableMap()
-                    .put(key, value);
-            return this;
-        }
-
-        /**
-         * <pre>
-         * Optional inference parameters.
-         * </pre>
-         *
-         * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-         */
-
-        public Builder putAllParameters(
-                java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter> values) {
-            internalGetMutableParameters().getMutableMap()
-                    .putAll(values);
-            return this;
-        }
-
-        private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor> inputs_ =
-                java.util.Collections.emptyList();
-
-        private void ensureInputsIsMutable() {
-            if (!((bitField0_ & 0x00000002) != 0)) {
-                inputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor>(inputs_);
-                bitField0_ |= 0x00000002;
-            }
-        }
-
-        private com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder> inputsBuilder_;
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor> getInputsList() {
-            if (inputsBuilder_ == null) {
-                return java.util.Collections.unmodifiableList(inputs_);
-            } else {
-                return inputsBuilder_.getMessageList();
-            }
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public int getInputsCount() {
-            if (inputsBuilder_ == null) {
-                return inputs_.size();
-            } else {
-                return inputsBuilder_.getCount();
-            }
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getInputs(int index) {
-            if (inputsBuilder_ == null) {
-                return inputs_.get(index);
-            } else {
-                return inputsBuilder_.getMessage(index);
-            }
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public Builder setInputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor value) {
-            if (inputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureInputsIsMutable();
-                inputs_.set(index, value);
-                onChanged();
-            } else {
-                inputsBuilder_.setMessage(index, value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public Builder setInputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder builderForValue) {
-            if (inputsBuilder_ == null) {
-                ensureInputsIsMutable();
-                inputs_.set(index, builderForValue.build());
-                onChanged();
-            } else {
-                inputsBuilder_.setMessage(index, builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public Builder addInputs(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor value) {
-            if (inputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureInputsIsMutable();
-                inputs_.add(value);
-                onChanged();
-            } else {
-                inputsBuilder_.addMessage(value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public Builder addInputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor value) {
-            if (inputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureInputsIsMutable();
-                inputs_.add(index, value);
-                onChanged();
-            } else {
-                inputsBuilder_.addMessage(index, value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public Builder addInputs(
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder builderForValue) {
-            if (inputsBuilder_ == null) {
-                ensureInputsIsMutable();
-                inputs_.add(builderForValue.build());
-                onChanged();
-            } else {
-                inputsBuilder_.addMessage(builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public Builder addInputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder builderForValue) {
-            if (inputsBuilder_ == null) {
-                ensureInputsIsMutable();
-                inputs_.add(index, builderForValue.build());
-                onChanged();
-            } else {
-                inputsBuilder_.addMessage(index, builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public Builder addAllInputs(
-                java.lang.Iterable<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor> values) {
-            if (inputsBuilder_ == null) {
-                ensureInputsIsMutable();
-                com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                        values, inputs_);
-                onChanged();
-            } else {
-                inputsBuilder_.addAllMessages(values);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public Builder clearInputs() {
-            if (inputsBuilder_ == null) {
-                inputs_ = java.util.Collections.emptyList();
-                bitField0_ = (bitField0_ & ~0x00000002);
-                onChanged();
-            } else {
-                inputsBuilder_.clear();
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public Builder removeInputs(int index) {
-            if (inputsBuilder_ == null) {
-                ensureInputsIsMutable();
-                inputs_.remove(index);
-                onChanged();
-            } else {
-                inputsBuilder_.remove(index);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder getInputsBuilder(
-                int index) {
-            return getInputsFieldBuilder().getBuilder(index);
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder getInputsOrBuilder(
-                int index) {
-            if (inputsBuilder_ == null) {
-                return inputs_.get(index);
-            } else {
-                return inputsBuilder_.getMessageOrBuilder(index);
-            }
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder>
-                getInputsOrBuilderList() {
-            if (inputsBuilder_ != null) {
-                return inputsBuilder_.getMessageOrBuilderList();
-            } else {
-                return java.util.Collections.unmodifiableList(inputs_);
-            }
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder addInputsBuilder() {
-            return getInputsFieldBuilder().addBuilder(
-                    org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.getDefaultInstance());
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder addInputsBuilder(
-                int index) {
-            return getInputsFieldBuilder().addBuilder(
-                    index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.getDefaultInstance());
-        }
-
-        /**
-         * <pre>
-         * The input tensors for the inference.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-         */
-        public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder>
-                getInputsBuilderList() {
-            return getInputsFieldBuilder().getBuilderList();
-        }
-
-        private com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder>
-                getInputsFieldBuilder() {
-            if (inputsBuilder_ == null) {
-                inputsBuilder_ =
-                        new com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder>(
-                                inputs_,
-                                ((bitField0_ & 0x00000002) != 0),
-                                getParentForChildren(),
-                                isClean());
-                inputs_ = null;
-            }
-            return inputsBuilder_;
-        }
-
-        private java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor> outputs_ =
-                java.util.Collections.emptyList();
-
-        private void ensureOutputsIsMutable() {
-            if (!((bitField0_ & 0x00000004) != 0)) {
-                outputs_ = new java.util.ArrayList<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor>(outputs_);
-                bitField0_ |= 0x00000004;
-            }
-        }
-
-        private com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder> outputsBuilder_;
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor> getOutputsList() {
-            if (outputsBuilder_ == null) {
-                return java.util.Collections.unmodifiableList(outputs_);
-            } else {
-                return outputsBuilder_.getMessageList();
-            }
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public int getOutputsCount() {
-            if (outputsBuilder_ == null) {
-                return outputs_.size();
-            } else {
-                return outputsBuilder_.getCount();
-            }
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getOutputs(int index) {
-            if (outputsBuilder_ == null) {
-                return outputs_.get(index);
-            } else {
-                return outputsBuilder_.getMessage(index);
-            }
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public Builder setOutputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor value) {
-            if (outputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureOutputsIsMutable();
-                outputs_.set(index, value);
-                onChanged();
-            } else {
-                outputsBuilder_.setMessage(index, value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public Builder setOutputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder builderForValue) {
-            if (outputsBuilder_ == null) {
-                ensureOutputsIsMutable();
-                outputs_.set(index, builderForValue.build());
-                onChanged();
-            } else {
-                outputsBuilder_.setMessage(index, builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public Builder addOutputs(org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor value) {
-            if (outputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureOutputsIsMutable();
-                outputs_.add(value);
-                onChanged();
-            } else {
-                outputsBuilder_.addMessage(value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public Builder addOutputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor value) {
-            if (outputsBuilder_ == null) {
-                if (value == null) {
-                    throw new NullPointerException();
-                }
-                ensureOutputsIsMutable();
-                outputs_.add(index, value);
-                onChanged();
-            } else {
-                outputsBuilder_.addMessage(index, value);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public Builder addOutputs(
-                org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder builderForValue) {
-            if (outputsBuilder_ == null) {
-                ensureOutputsIsMutable();
-                outputs_.add(builderForValue.build());
-                onChanged();
-            } else {
-                outputsBuilder_.addMessage(builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public Builder addOutputs(
-                int index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder builderForValue) {
-            if (outputsBuilder_ == null) {
-                ensureOutputsIsMutable();
-                outputs_.add(index, builderForValue.build());
-                onChanged();
-            } else {
-                outputsBuilder_.addMessage(index, builderForValue.build());
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public Builder addAllOutputs(
-                java.lang.Iterable<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor> values) {
-            if (outputsBuilder_ == null) {
-                ensureOutputsIsMutable();
-                com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                        values, outputs_);
-                onChanged();
-            } else {
-                outputsBuilder_.addAllMessages(values);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public Builder clearOutputs() {
-            if (outputsBuilder_ == null) {
-                outputs_ = java.util.Collections.emptyList();
-                bitField0_ = (bitField0_ & ~0x00000004);
-                onChanged();
-            } else {
-                outputsBuilder_.clear();
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public Builder removeOutputs(int index) {
-            if (outputsBuilder_ == null) {
-                ensureOutputsIsMutable();
-                outputs_.remove(index);
-                onChanged();
-            } else {
-                outputsBuilder_.remove(index);
-            }
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder getOutputsBuilder(
-                int index) {
-            return getOutputsFieldBuilder().getBuilder(index);
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder getOutputsOrBuilder(
-                int index) {
-            if (outputsBuilder_ == null) {
-                return outputs_.get(index);
-            } else {
-                return outputsBuilder_.getMessageOrBuilder(index);
-            }
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder>
-                getOutputsOrBuilderList() {
-            if (outputsBuilder_ != null) {
-                return outputsBuilder_.getMessageOrBuilderList();
-            } else {
-                return java.util.Collections.unmodifiableList(outputs_);
-            }
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder addOutputsBuilder() {
-            return getOutputsFieldBuilder().addBuilder(
-                    org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.getDefaultInstance());
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder addOutputsBuilder(
-                int index) {
-            return getOutputsFieldBuilder().addBuilder(
-                    index, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.getDefaultInstance());
-        }
-
-        /**
-         * <pre>
-         * The requested output tensors for the inference. Optional, if not
-         * specified all outputs produced by the model will be returned.
-         * </pre>
-         *
-         * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-         */
-        public java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder>
-                getOutputsBuilderList() {
-            return getOutputsFieldBuilder().getBuilderList();
-        }
-
-        private com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder>
-                getOutputsFieldBuilder() {
-            if (outputsBuilder_ == null) {
-                outputsBuilder_ =
-                        new com.google.protobuf.RepeatedFieldBuilderV3<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor.Builder, org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder>(
-                                outputs_,
-                                ((bitField0_ & 0x00000004) != 0),
-                                getParentForChildren(),
-                                isClean());
-                outputs_ = null;
-            }
-            return outputsBuilder_;
-        }
-
-        private java.util.List<com.google.protobuf.ByteString> rawInputContents_ = java.util.Collections.emptyList();
-
-        private void ensureRawInputContentsIsMutable() {
-            if (!((bitField0_ & 0x00000008) != 0)) {
-                rawInputContents_ = new java.util.ArrayList<com.google.protobuf.ByteString>(rawInputContents_);
-                bitField0_ |= 0x00000008;
-            }
-        }
-
-        /**
-         * <pre>
-         * The data contained in an input tensor can be represented in "raw"
-         * bytes form or in the repeated type that matches the tensor's data
-         * type. To use the raw representation 'raw_input_contents' must be
-         * initialized with data for each tensor in the same order as
-         * 'inputs'. For each tensor, the size of this content must match
-         * what is expected by the tensor's shape and data type. The raw
-         * data must be the flattened, one-dimensional, row-major order of
-         * the tensor elements without any stride or padding between the
-         * elements. Note that the FP16 and BF16 data types must be represented as
-         * raw content as there is no specific data type for a 16-bit float type.
-         * If this field is specified then InferInputTensor::contents must
-         * not be specified for any input tensor.
-         * </pre>
-         *
-         * <code>repeated bytes raw_input_contents = 7;</code>
-         * 
-         * @return A list containing the rawInputContents.
-         */
-        public java.util.List<com.google.protobuf.ByteString>
-                getRawInputContentsList() {
-            return ((bitField0_ & 0x00000008) != 0) ? java.util.Collections.unmodifiableList(rawInputContents_) : rawInputContents_;
-        }
-
-        /**
-         * <pre>
-         * The data contained in an input tensor can be represented in "raw"
-         * bytes form or in the repeated type that matches the tensor's data
-         * type. To use the raw representation 'raw_input_contents' must be
-         * initialized with data for each tensor in the same order as
-         * 'inputs'. For each tensor, the size of this content must match
-         * what is expected by the tensor's shape and data type. The raw
-         * data must be the flattened, one-dimensional, row-major order of
-         * the tensor elements without any stride or padding between the
-         * elements. Note that the FP16 and BF16 data types must be represented as
-         * raw content as there is no specific data type for a 16-bit float type.
-         * If this field is specified then InferInputTensor::contents must
-         * not be specified for any input tensor.
-         * </pre>
-         *
-         * <code>repeated bytes raw_input_contents = 7;</code>
-         * 
-         * @return The count of rawInputContents.
-         */
-        public int getRawInputContentsCount() {
-            return rawInputContents_.size();
-        }
-
-        /**
-         * <pre>
-         * The data contained in an input tensor can be represented in "raw"
-         * bytes form or in the repeated type that matches the tensor's data
-         * type. To use the raw representation 'raw_input_contents' must be
-         * initialized with data for each tensor in the same order as
-         * 'inputs'. For each tensor, the size of this content must match
-         * what is expected by the tensor's shape and data type. The raw
-         * data must be the flattened, one-dimensional, row-major order of
-         * the tensor elements without any stride or padding between the
-         * elements. Note that the FP16 and BF16 data types must be represented as
-         * raw content as there is no specific data type for a 16-bit float type.
-         * If this field is specified then InferInputTensor::contents must
-         * not be specified for any input tensor.
-         * </pre>
-         *
-         * <code>repeated bytes raw_input_contents = 7;</code>
-         * 
-         * @param index The index of the element to return.
-         * @return The rawInputContents at the given index.
-         */
-        public com.google.protobuf.ByteString getRawInputContents(int index) {
-            return rawInputContents_.get(index);
-        }
-
-        /**
-         * <pre>
-         * The data contained in an input tensor can be represented in "raw"
-         * bytes form or in the repeated type that matches the tensor's data
-         * type. To use the raw representation 'raw_input_contents' must be
-         * initialized with data for each tensor in the same order as
-         * 'inputs'. For each tensor, the size of this content must match
-         * what is expected by the tensor's shape and data type. The raw
-         * data must be the flattened, one-dimensional, row-major order of
-         * the tensor elements without any stride or padding between the
-         * elements. Note that the FP16 and BF16 data types must be represented as
-         * raw content as there is no specific data type for a 16-bit float type.
-         * If this field is specified then InferInputTensor::contents must
-         * not be specified for any input tensor.
-         * </pre>
-         *
-         * <code>repeated bytes raw_input_contents = 7;</code>
-         * 
-         * @param index The index to set the value at.
-         * @param value The rawInputContents to set.
-         * @return This builder for chaining.
-         */
-        public Builder setRawInputContents(
-                int index, com.google.protobuf.ByteString value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            ensureRawInputContentsIsMutable();
-            rawInputContents_.set(index, value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The data contained in an input tensor can be represented in "raw"
-         * bytes form or in the repeated type that matches the tensor's data
-         * type. To use the raw representation 'raw_input_contents' must be
-         * initialized with data for each tensor in the same order as
-         * 'inputs'. For each tensor, the size of this content must match
-         * what is expected by the tensor's shape and data type. The raw
-         * data must be the flattened, one-dimensional, row-major order of
-         * the tensor elements without any stride or padding between the
-         * elements. Note that the FP16 and BF16 data types must be represented as
-         * raw content as there is no specific data type for a 16-bit float type.
-         * If this field is specified then InferInputTensor::contents must
-         * not be specified for any input tensor.
-         * </pre>
-         *
-         * <code>repeated bytes raw_input_contents = 7;</code>
-         * 
-         * @param value The rawInputContents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addRawInputContents(com.google.protobuf.ByteString value) {
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            ensureRawInputContentsIsMutable();
-            rawInputContents_.add(value);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The data contained in an input tensor can be represented in "raw"
-         * bytes form or in the repeated type that matches the tensor's data
-         * type. To use the raw representation 'raw_input_contents' must be
-         * initialized with data for each tensor in the same order as
-         * 'inputs'. For each tensor, the size of this content must match
-         * what is expected by the tensor's shape and data type. The raw
-         * data must be the flattened, one-dimensional, row-major order of
-         * the tensor elements without any stride or padding between the
-         * elements. Note that the FP16 and BF16 data types must be represented as
-         * raw content as there is no specific data type for a 16-bit float type.
-         * If this field is specified then InferInputTensor::contents must
-         * not be specified for any input tensor.
-         * </pre>
-         *
-         * <code>repeated bytes raw_input_contents = 7;</code>
-         * 
-         * @param values The rawInputContents to add.
-         * @return This builder for chaining.
-         */
-        public Builder addAllRawInputContents(
-                java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
-            ensureRawInputContentsIsMutable();
-            com.google.protobuf.AbstractMessageLite.Builder.addAll(
-                    values, rawInputContents_);
-            onChanged();
-            return this;
-        }
-
-        /**
-         * <pre>
-         * The data contained in an input tensor can be represented in "raw"
-         * bytes form or in the repeated type that matches the tensor's data
-         * type. To use the raw representation 'raw_input_contents' must be
-         * initialized with data for each tensor in the same order as
-         * 'inputs'. For each tensor, the size of this content must match
-         * what is expected by the tensor's shape and data type. The raw
-         * data must be the flattened, one-dimensional, row-major order of
-         * the tensor elements without any stride or padding between the
-         * elements. Note that the FP16 and BF16 data types must be represented as
-         * raw content as there is no specific data type for a 16-bit float type.
-         * If this field is specified then InferInputTensor::contents must
-         * not be specified for any input tensor.
-         * </pre>
-         *
-         * <code>repeated bytes raw_input_contents = 7;</code>
-         * 
-         * @return This builder for chaining.
-         */
-        public Builder clearRawInputContents() {
-            rawInputContents_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000008);
-            onChanged();
-            return this;
-        }
-
-        @java.lang.Override
-        public final Builder setUnknownFields(
-                final com.google.protobuf.UnknownFieldSet unknownFields) {
-            return super.setUnknownFields(unknownFields);
-        }
-
-        @java.lang.Override
-        public final Builder mergeUnknownFields(
-                final com.google.protobuf.UnknownFieldSet unknownFields) {
-            return super.mergeUnknownFields(unknownFields);
-        }
-
-        // @@protoc_insertion_point(builder_scope:inference.ModelInferRequest)
+    public Builder setRawInputContents(
+        int index, com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureRawInputContentsIsMutable();
+      rawInputContents_.set(index, value);
+      onChanged();
+      return this;
     }
-
-    // @@protoc_insertion_point(class_scope:inference.ModelInferRequest)
-    private static final org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest DEFAULT_INSTANCE;
-    static {
-        DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest();
+    /**
+     * <pre>
+     * The data contained in an input tensor can be represented in "raw"
+     * bytes form or in the repeated type that matches the tensor's data
+     * type. To use the raw representation 'raw_input_contents' must be
+     * initialized with data for each tensor in the same order as
+     * 'inputs'. For each tensor, the size of this content must match
+     * what is expected by the tensor's shape and data type. The raw
+     * data must be the flattened, one-dimensional, row-major order of
+     * the tensor elements without any stride or padding between the
+     * elements. Note that the FP16 and BF16 data types must be represented as
+     * raw content as there is no specific data type for a 16-bit float type.
+     * If this field is specified then InferInputTensor::contents must
+     * not be specified for any input tensor.
+     * </pre>
+     *
+     * <code>repeated bytes raw_input_contents = 7;</code>
+     * @param value The rawInputContents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addRawInputContents(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureRawInputContentsIsMutable();
+      rawInputContents_.add(value);
+      onChanged();
+      return this;
     }
-
-    public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest getDefaultInstance() {
-        return DEFAULT_INSTANCE;
+    /**
+     * <pre>
+     * The data contained in an input tensor can be represented in "raw"
+     * bytes form or in the repeated type that matches the tensor's data
+     * type. To use the raw representation 'raw_input_contents' must be
+     * initialized with data for each tensor in the same order as
+     * 'inputs'. For each tensor, the size of this content must match
+     * what is expected by the tensor's shape and data type. The raw
+     * data must be the flattened, one-dimensional, row-major order of
+     * the tensor elements without any stride or padding between the
+     * elements. Note that the FP16 and BF16 data types must be represented as
+     * raw content as there is no specific data type for a 16-bit float type.
+     * If this field is specified then InferInputTensor::contents must
+     * not be specified for any input tensor.
+     * </pre>
+     *
+     * <code>repeated bytes raw_input_contents = 7;</code>
+     * @param values The rawInputContents to add.
+     * @return This builder for chaining.
+     */
+    public Builder addAllRawInputContents(
+        java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+      ensureRawInputContentsIsMutable();
+      com.google.protobuf.AbstractMessageLite.Builder.addAll(
+          values, rawInputContents_);
+      onChanged();
+      return this;
     }
-
-    private static final com.google.protobuf.Parser<ModelInferRequest> PARSER = new com.google.protobuf.AbstractParser<ModelInferRequest>() {
-        @java.lang.Override
-        public ModelInferRequest parsePartialFrom(
-                com.google.protobuf.CodedInputStream input,
-                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-                throws com.google.protobuf.InvalidProtocolBufferException {
-            return new ModelInferRequest(input, extensionRegistry);
-        }
-    };
-
-    public static com.google.protobuf.Parser<ModelInferRequest> parser() {
-        return PARSER;
+    /**
+     * <pre>
+     * The data contained in an input tensor can be represented in "raw"
+     * bytes form or in the repeated type that matches the tensor's data
+     * type. To use the raw representation 'raw_input_contents' must be
+     * initialized with data for each tensor in the same order as
+     * 'inputs'. For each tensor, the size of this content must match
+     * what is expected by the tensor's shape and data type. The raw
+     * data must be the flattened, one-dimensional, row-major order of
+     * the tensor elements without any stride or padding between the
+     * elements. Note that the FP16 and BF16 data types must be represented as
+     * raw content as there is no specific data type for a 16-bit float type.
+     * If this field is specified then InferInputTensor::contents must
+     * not be specified for any input tensor.
+     * </pre>
+     *
+     * <code>repeated bytes raw_input_contents = 7;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearRawInputContents() {
+      rawInputContents_ = java.util.Collections.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000008);
+      onChanged();
+      return this;
+    }
+    @java.lang.Override
+    public final Builder setUnknownFields(
+        final com.google.protobuf.UnknownFieldSet unknownFields) {
+      return super.setUnknownFields(unknownFields);
     }
 
     @java.lang.Override
-    public com.google.protobuf.Parser<ModelInferRequest> getParserForType() {
-        return PARSER;
+    public final Builder mergeUnknownFields(
+        final com.google.protobuf.UnknownFieldSet unknownFields) {
+      return super.mergeUnknownFields(unknownFields);
     }
 
+
+    // @@protoc_insertion_point(builder_scope:inference.ModelInferRequest)
+  }
+
+  // @@protoc_insertion_point(class_scope:inference.ModelInferRequest)
+  private static final org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest DEFAULT_INSTANCE;
+  static {
+    DEFAULT_INSTANCE = new org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest();
+  }
+
+  public static org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest getDefaultInstance() {
+    return DEFAULT_INSTANCE;
+  }
+
+  private static final com.google.protobuf.Parser<ModelInferRequest>
+      PARSER = new com.google.protobuf.AbstractParser<ModelInferRequest>() {
     @java.lang.Override
-    public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest getDefaultInstanceForType() {
-        return DEFAULT_INSTANCE;
+    public ModelInferRequest parsePartialFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return new ModelInferRequest(input, extensionRegistry);
     }
+  };
+
+  public static com.google.protobuf.Parser<ModelInferRequest> parser() {
+    return PARSER;
+  }
+
+  @java.lang.Override
+  public com.google.protobuf.Parser<ModelInferRequest> getParserForType() {
+    return PARSER;
+  }
+
+  @java.lang.Override
+  public org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest getDefaultInstanceForType() {
+    return DEFAULT_INSTANCE;
+  }
 
 }
+

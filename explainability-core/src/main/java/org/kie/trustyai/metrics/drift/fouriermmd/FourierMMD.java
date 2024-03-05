@@ -10,8 +10,8 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 

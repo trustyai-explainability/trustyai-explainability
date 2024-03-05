@@ -7,8 +7,8 @@ import java.util.Map;
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
 import org.apache.commons.math3.stat.inference.TTest;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.utils.PerColumnStatisticalAnalysis;
 import org.kie.trustyai.metrics.utils.PerColumnStatistics;
 

@@ -1,10 +1,13 @@
-package org.kie.trustyai.explainability.model;
+package org.kie.trustyai.explainability.model.dataframe;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 

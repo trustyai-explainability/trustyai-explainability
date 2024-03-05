@@ -3,7 +3,7 @@ package org.kie.trustyai.service.data.parsers;
 import java.nio.ByteBuffer;
 
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.utils.DataframeGenerators;

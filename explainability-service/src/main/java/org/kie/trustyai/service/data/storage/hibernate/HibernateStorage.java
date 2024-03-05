@@ -1,19 +1,12 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import jakarta.persistence.TypedQuery;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.DataframeColumn;
-import org.kie.trustyai.explainability.model.DataframeInternalData;
-import org.kie.trustyai.explainability.model.DataframeMetadata;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
+import org.kie.trustyai.explainability.model.dataframe.DataframeRow;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
@@ -28,11 +21,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.transaction.Transactional;
-
-import javax.xml.crypto.Data;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "HIBERNATE")
 @ApplicationScoped
@@ -67,96 +56,56 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
     }
 
     public Dataframe readAllData(String modelId) throws StorageReadException {
-        LOG.debug("Reading dataframe " + modelId + " from Hibernate");
-        return em.find(Dataframe.class, modelId);
-    }
+        LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
 
-    // get the row count of a persisted dataframe
-    public int rowCount(String modelId){
-        return em.
-                createQuery("select df.internalData.size from Dataframe df where df.id = ?1", int.class)
+        List<DataframeRow> rows = em.createQuery("" +
+                "select dr from DataframeRow dr" +
+                " where dr.modelId = ?1 ", DataframeRow.class)
                 .setParameter(1, modelId)
-                .getSingleResult();
-    }
-
-    public int colCount(String modelId){
-        return (int) em.createQuery("select size(df.data) from Dataframe df WHERE df.id = ?1")
-                .setParameter(1, modelId)
-                .getSingleResult();
+                .getResultList();
+        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+        return Dataframe.untranspose(rows, dm);
     }
 
     @Override
     public Dataframe readData(String modelId, int batchSize) throws StorageReadException {
         LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
 
-        int rowCount = rowCount(modelId);
-        int colCount = colCount(modelId);
-        int startIdx = Math.max(0, rowCount- batchSize);
-        int endIdx = Math.min(rowCount, startIdx + batchSize);
-
-
-        List<List<Value>> batchColumns = new ArrayList<>();
-        for (int colIdx=0; colIdx<colCount; colIdx++){
-            List<Value> colValues = em.createQuery(
-                            "" +
-                                    "select v from Dataframe df " +
-                                    "JOIN df.data d JOIN d.values v " +
-                                    "WHERE df.id = ?1 " +
-                                    "AND index(d) = ?2 " +
-                                    "AND index(v) >= ?3 AND index(v) < ?4 ",
-                            Value.class
-                    )
-                    .setParameter(1, modelId)
-                    .setParameter(2, colIdx)
-                    .setParameter(3, startIdx)
-                    .setParameter(4, endIdx)
-                    .getResultList();
-            batchColumns.add(colValues);
-        }
-
-        List<LocalDateTime> timestamps = em.createQuery("select ts from Dataframe df " +
-                                "JOIN df.internalData internal JOIN internal.timestamps ts " +
-                                "WHERE df.id = ?1 " +
-                                "AND index(ts) >= ?2 and INDEX(ts) < ?3",
-                        LocalDateTime.class
-                )
+        List<DataframeRow> rows = em.createQuery("" +
+                "select dr from DataframeRow dr" +
+                " where dr.modelId = ?1 " +
+                "order by dr.dbId DESC ", DataframeRow.class)
                 .setParameter(1, modelId)
-                .setParameter(2, startIdx)
-                .setParameter(3, endIdx)
-                .getResultList();
-        List<String> ids = em.createQuery("select ids from Dataframe df " +
-                                "JOIN df.internalData internal JOIN internal.ids ids " +
-                                "WHERE df.id = ?1 " +
-                                "AND index(ids) >= ?2 and INDEX(ids) < ?3",
-                        String.class
-                )
-                .setParameter(1, modelId)
-                .setParameter(2, startIdx)
-                .setParameter(3, endIdx)
-                .getResultList();
-        List<String> datapointTags = em.createQuery("select tags from Dataframe df " +
-                                "JOIN df.internalData internal JOIN internal.datapointTags tags " +
-                                "WHERE df.id = ?1 " +
-                                "AND index(tags) >= ?2 and INDEX(tags) < ?3",
-                        String.class
-                )
-                .setParameter(1, modelId)
-                .setParameter(2, startIdx)
-                .setParameter(3, endIdx)
-                .getResultList();
-        DataframeInternalData dfInternalData = new DataframeInternalData(datapointTags, ids, timestamps);
-        DataframeMetadata dfMetadata = em.createQuery("select df.metadata from Dataframe df WHERE df.id = ?1", DataframeMetadata.class)
-                .setParameter(1, modelId).getSingleResult();
+                .setMaxResults(batchSize).getResultList();
+        Collections.reverse(rows);
+        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+        return Dataframe.untranspose(rows, dm);
+    }
 
-        return new Dataframe(batchColumns, dfMetadata, dfInternalData);
+    // get the row count of a persisted dataframe
+    public int colCount(String modelId) {
+        return em.createQuery("select size(dr.row) from DataframeRow dr where dr.modelId = ?1", int.class)
+                .setParameter(1, modelId)
+                .getSingleResult();
+    }
+
+    public long rowCount(String modelId) {
+        return em.createQuery("select count(dr) from DataframeRow dr WHERE dr.modelId = ?1", long.class)
+                .setParameter(1, modelId)
+                .getSingleResult();
     }
 
     @Override
     @Transactional
     public void save(Dataframe dataframe, String modelId) throws StorageWriteException {
         LOG.debug("Writing dataframe=" + modelId + ", rows=" + dataframe.getRowDimension() + " to Hibernate");
-        dataframe.setId(modelId);
-        em.persist(dataframe);
+        List<DataframeRow> transpose = dataframe.transpose(modelId);
+        for (DataframeRow dr : transpose) {
+            em.persist(dr);
+        }
+        DataframeMetadata dm = dataframe.getMetadata();
+        dm.setId(modelId);
+        em.persist(dm);
     }
 
     @Override
@@ -183,10 +132,10 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
     @Transactional
     public void append(Dataframe dataframe, String modelId) throws StorageWriteException {
         LOG.debug("Appending " + dataframe.getRowDimension() + " new rows to dataframe=" + modelId + " within Hibernate");
-        Dataframe original = readData(modelId);
-        original.setId(modelId);
-        original.addPredictions(dataframe.asPredictions());
-        em.merge(original);
+        List<DataframeRow> transpose = dataframe.transpose(modelId);
+        for (DataframeRow dr : transpose) {
+            em.persist(dr);
+        }
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;

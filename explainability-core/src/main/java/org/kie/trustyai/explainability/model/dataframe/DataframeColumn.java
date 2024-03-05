@@ -1,8 +1,10 @@
-package org.kie.trustyai.explainability.model;
+package org.kie.trustyai.explainability.model.dataframe;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+
+import org.kie.trustyai.explainability.model.Value;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;

@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
 import org.kie.trustyai.metrics.drift.meanshift.MeanshiftResult;
 import org.kie.trustyai.metrics.utils.PerColumnStatistics;

@@ -4,306 +4,279 @@
 package org.kie.trustyai.connectors.kserve.v2.grpc;
 
 public interface ModelInferRequestOrBuilder extends
-        // @@protoc_insertion_point(interface_extends:inference.ModelInferRequest)
-        com.google.protobuf.MessageOrBuilder {
+    // @@protoc_insertion_point(interface_extends:inference.ModelInferRequest)
+    com.google.protobuf.MessageOrBuilder {
 
-    /**
-     * <pre>
-     * The name of the model to use for inferencing.
-     * </pre>
-     *
-     * <code>string model_name = 1;</code>
-     * 
-     * @return The modelName.
-     */
-    java.lang.String getModelName();
+  /**
+   * <pre>
+   * The name of the model to use for inferencing.
+   * </pre>
+   *
+   * <code>string model_name = 1;</code>
+   * @return The modelName.
+   */
+  java.lang.String getModelName();
+  /**
+   * <pre>
+   * The name of the model to use for inferencing.
+   * </pre>
+   *
+   * <code>string model_name = 1;</code>
+   * @return The bytes for modelName.
+   */
+  com.google.protobuf.ByteString
+      getModelNameBytes();
 
-    /**
-     * <pre>
-     * The name of the model to use for inferencing.
-     * </pre>
-     *
-     * <code>string model_name = 1;</code>
-     * 
-     * @return The bytes for modelName.
-     */
-    com.google.protobuf.ByteString
-            getModelNameBytes();
+  /**
+   * <pre>
+   * The version of the model to use for inference. If not given the
+   * server will choose a version based on the model and internal policy.
+   * </pre>
+   *
+   * <code>string model_version = 2;</code>
+   * @return The modelVersion.
+   */
+  java.lang.String getModelVersion();
+  /**
+   * <pre>
+   * The version of the model to use for inference. If not given the
+   * server will choose a version based on the model and internal policy.
+   * </pre>
+   *
+   * <code>string model_version = 2;</code>
+   * @return The bytes for modelVersion.
+   */
+  com.google.protobuf.ByteString
+      getModelVersionBytes();
 
-    /**
-     * <pre>
-     * The version of the model to use for inference. If not given the
-     * server will choose a version based on the model and internal policy.
-     * </pre>
-     *
-     * <code>string model_version = 2;</code>
-     * 
-     * @return The modelVersion.
-     */
-    java.lang.String getModelVersion();
+  /**
+   * <pre>
+   * Optional identifier for the request. If specified will be
+   * returned in the response.
+   * </pre>
+   *
+   * <code>string id = 3;</code>
+   * @return The id.
+   */
+  java.lang.String getId();
+  /**
+   * <pre>
+   * Optional identifier for the request. If specified will be
+   * returned in the response.
+   * </pre>
+   *
+   * <code>string id = 3;</code>
+   * @return The bytes for id.
+   */
+  com.google.protobuf.ByteString
+      getIdBytes();
 
-    /**
-     * <pre>
-     * The version of the model to use for inference. If not given the
-     * server will choose a version based on the model and internal policy.
-     * </pre>
-     *
-     * <code>string model_version = 2;</code>
-     * 
-     * @return The bytes for modelVersion.
-     */
-    com.google.protobuf.ByteString
-            getModelVersionBytes();
+  /**
+   * <pre>
+   * Optional inference parameters.
+   * </pre>
+   *
+   * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+   */
+  int getParametersCount();
+  /**
+   * <pre>
+   * Optional inference parameters.
+   * </pre>
+   *
+   * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+   */
+  boolean containsParameters(
+      java.lang.String key);
+  /**
+   * Use {@link #getParametersMap()} instead.
+   */
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+  getParameters();
+  /**
+   * <pre>
+   * Optional inference parameters.
+   * </pre>
+   *
+   * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+   */
+  java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
+  getParametersMap();
+  /**
+   * <pre>
+   * Optional inference parameters.
+   * </pre>
+   *
+   * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+   */
 
-    /**
-     * <pre>
-     * Optional identifier for the request. If specified will be
-     * returned in the response.
-     * </pre>
-     *
-     * <code>string id = 3;</code>
-     * 
-     * @return The id.
-     */
-    java.lang.String getId();
+  org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
+      java.lang.String key,
+      org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue);
+  /**
+   * <pre>
+   * Optional inference parameters.
+   * </pre>
+   *
+   * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
+   */
 
-    /**
-     * <pre>
-     * Optional identifier for the request. If specified will be
-     * returned in the response.
-     * </pre>
-     *
-     * <code>string id = 3;</code>
-     * 
-     * @return The bytes for id.
-     */
-    com.google.protobuf.ByteString
-            getIdBytes();
+  org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
+      java.lang.String key);
 
-    /**
-     * <pre>
-     * Optional inference parameters.
-     * </pre>
-     *
-     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-     */
-    int getParametersCount();
+  /**
+   * <pre>
+   * The input tensors for the inference.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+   */
+  java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor> 
+      getInputsList();
+  /**
+   * <pre>
+   * The input tensors for the inference.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+   */
+  org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getInputs(int index);
+  /**
+   * <pre>
+   * The input tensors for the inference.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+   */
+  int getInputsCount();
+  /**
+   * <pre>
+   * The input tensors for the inference.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+   */
+  java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder> 
+      getInputsOrBuilderList();
+  /**
+   * <pre>
+   * The input tensors for the inference.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
+   */
+  org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder getInputsOrBuilder(
+      int index);
 
-    /**
-     * <pre>
-     * Optional inference parameters.
-     * </pre>
-     *
-     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-     */
-    boolean containsParameters(
-            java.lang.String key);
+  /**
+   * <pre>
+   * The requested output tensors for the inference. Optional, if not
+   * specified all outputs produced by the model will be returned.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+   */
+  java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor> 
+      getOutputsList();
+  /**
+   * <pre>
+   * The requested output tensors for the inference. Optional, if not
+   * specified all outputs produced by the model will be returned.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+   */
+  org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getOutputs(int index);
+  /**
+   * <pre>
+   * The requested output tensors for the inference. Optional, if not
+   * specified all outputs produced by the model will be returned.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+   */
+  int getOutputsCount();
+  /**
+   * <pre>
+   * The requested output tensors for the inference. Optional, if not
+   * specified all outputs produced by the model will be returned.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+   */
+  java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder> 
+      getOutputsOrBuilderList();
+  /**
+   * <pre>
+   * The requested output tensors for the inference. Optional, if not
+   * specified all outputs produced by the model will be returned.
+   * </pre>
+   *
+   * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
+   */
+  org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder getOutputsOrBuilder(
+      int index);
 
-    /**
-     * Use {@link #getParametersMap()} instead.
-     */
-    @java.lang.Deprecated
-    java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-            getParameters();
-
-    /**
-     * <pre>
-     * Optional inference parameters.
-     * </pre>
-     *
-     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-     */
-    java.util.Map<java.lang.String, org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter>
-            getParametersMap();
-
-    /**
-     * <pre>
-     * Optional inference parameters.
-     * </pre>
-     *
-     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-     */
-
-    org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrDefault(
-            java.lang.String key,
-            org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter defaultValue);
-
-    /**
-     * <pre>
-     * Optional inference parameters.
-     * </pre>
-     *
-     * <code>map&lt;string, .inference.InferParameter&gt; parameters = 4;</code>
-     */
-
-    org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter getParametersOrThrow(
-            java.lang.String key);
-
-    /**
-     * <pre>
-     * The input tensors for the inference.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-     */
-    java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor>
-            getInputsList();
-
-    /**
-     * <pre>
-     * The input tensors for the inference.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-     */
-    org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensor getInputs(int index);
-
-    /**
-     * <pre>
-     * The input tensors for the inference.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-     */
-    int getInputsCount();
-
-    /**
-     * <pre>
-     * The input tensors for the inference.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-     */
-    java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder>
-            getInputsOrBuilderList();
-
-    /**
-     * <pre>
-     * The input tensors for the inference.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferInputTensor inputs = 5;</code>
-     */
-    org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferInputTensorOrBuilder getInputsOrBuilder(
-            int index);
-
-    /**
-     * <pre>
-     * The requested output tensors for the inference. Optional, if not
-     * specified all outputs produced by the model will be returned.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-     */
-    java.util.List<org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor>
-            getOutputsList();
-
-    /**
-     * <pre>
-     * The requested output tensors for the inference. Optional, if not
-     * specified all outputs produced by the model will be returned.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-     */
-    org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensor getOutputs(int index);
-
-    /**
-     * <pre>
-     * The requested output tensors for the inference. Optional, if not
-     * specified all outputs produced by the model will be returned.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-     */
-    int getOutputsCount();
-
-    /**
-     * <pre>
-     * The requested output tensors for the inference. Optional, if not
-     * specified all outputs produced by the model will be returned.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-     */
-    java.util.List<? extends org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder>
-            getOutputsOrBuilderList();
-
-    /**
-     * <pre>
-     * The requested output tensors for the inference. Optional, if not
-     * specified all outputs produced by the model will be returned.
-     * </pre>
-     *
-     * <code>repeated .inference.ModelInferRequest.InferRequestedOutputTensor outputs = 6;</code>
-     */
-    org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest.InferRequestedOutputTensorOrBuilder getOutputsOrBuilder(
-            int index);
-
-    /**
-     * <pre>
-     * The data contained in an input tensor can be represented in "raw"
-     * bytes form or in the repeated type that matches the tensor's data
-     * type. To use the raw representation 'raw_input_contents' must be
-     * initialized with data for each tensor in the same order as
-     * 'inputs'. For each tensor, the size of this content must match
-     * what is expected by the tensor's shape and data type. The raw
-     * data must be the flattened, one-dimensional, row-major order of
-     * the tensor elements without any stride or padding between the
-     * elements. Note that the FP16 and BF16 data types must be represented as
-     * raw content as there is no specific data type for a 16-bit float type.
-     * If this field is specified then InferInputTensor::contents must
-     * not be specified for any input tensor.
-     * </pre>
-     *
-     * <code>repeated bytes raw_input_contents = 7;</code>
-     * 
-     * @return A list containing the rawInputContents.
-     */
-    java.util.List<com.google.protobuf.ByteString> getRawInputContentsList();
-
-    /**
-     * <pre>
-     * The data contained in an input tensor can be represented in "raw"
-     * bytes form or in the repeated type that matches the tensor's data
-     * type. To use the raw representation 'raw_input_contents' must be
-     * initialized with data for each tensor in the same order as
-     * 'inputs'. For each tensor, the size of this content must match
-     * what is expected by the tensor's shape and data type. The raw
-     * data must be the flattened, one-dimensional, row-major order of
-     * the tensor elements without any stride or padding between the
-     * elements. Note that the FP16 and BF16 data types must be represented as
-     * raw content as there is no specific data type for a 16-bit float type.
-     * If this field is specified then InferInputTensor::contents must
-     * not be specified for any input tensor.
-     * </pre>
-     *
-     * <code>repeated bytes raw_input_contents = 7;</code>
-     * 
-     * @return The count of rawInputContents.
-     */
-    int getRawInputContentsCount();
-
-    /**
-     * <pre>
-     * The data contained in an input tensor can be represented in "raw"
-     * bytes form or in the repeated type that matches the tensor's data
-     * type. To use the raw representation 'raw_input_contents' must be
-     * initialized with data for each tensor in the same order as
-     * 'inputs'. For each tensor, the size of this content must match
-     * what is expected by the tensor's shape and data type. The raw
-     * data must be the flattened, one-dimensional, row-major order of
-     * the tensor elements without any stride or padding between the
-     * elements. Note that the FP16 and BF16 data types must be represented as
-     * raw content as there is no specific data type for a 16-bit float type.
-     * If this field is specified then InferInputTensor::contents must
-     * not be specified for any input tensor.
-     * </pre>
-     *
-     * <code>repeated bytes raw_input_contents = 7;</code>
-     * 
-     * @param index The index of the element to return.
-     * @return The rawInputContents at the given index.
-     */
-    com.google.protobuf.ByteString getRawInputContents(int index);
+  /**
+   * <pre>
+   * The data contained in an input tensor can be represented in "raw"
+   * bytes form or in the repeated type that matches the tensor's data
+   * type. To use the raw representation 'raw_input_contents' must be
+   * initialized with data for each tensor in the same order as
+   * 'inputs'. For each tensor, the size of this content must match
+   * what is expected by the tensor's shape and data type. The raw
+   * data must be the flattened, one-dimensional, row-major order of
+   * the tensor elements without any stride or padding between the
+   * elements. Note that the FP16 and BF16 data types must be represented as
+   * raw content as there is no specific data type for a 16-bit float type.
+   * If this field is specified then InferInputTensor::contents must
+   * not be specified for any input tensor.
+   * </pre>
+   *
+   * <code>repeated bytes raw_input_contents = 7;</code>
+   * @return A list containing the rawInputContents.
+   */
+  java.util.List<com.google.protobuf.ByteString> getRawInputContentsList();
+  /**
+   * <pre>
+   * The data contained in an input tensor can be represented in "raw"
+   * bytes form or in the repeated type that matches the tensor's data
+   * type. To use the raw representation 'raw_input_contents' must be
+   * initialized with data for each tensor in the same order as
+   * 'inputs'. For each tensor, the size of this content must match
+   * what is expected by the tensor's shape and data type. The raw
+   * data must be the flattened, one-dimensional, row-major order of
+   * the tensor elements without any stride or padding between the
+   * elements. Note that the FP16 and BF16 data types must be represented as
+   * raw content as there is no specific data type for a 16-bit float type.
+   * If this field is specified then InferInputTensor::contents must
+   * not be specified for any input tensor.
+   * </pre>
+   *
+   * <code>repeated bytes raw_input_contents = 7;</code>
+   * @return The count of rawInputContents.
+   */
+  int getRawInputContentsCount();
+  /**
+   * <pre>
+   * The data contained in an input tensor can be represented in "raw"
+   * bytes form or in the repeated type that matches the tensor's data
+   * type. To use the raw representation 'raw_input_contents' must be
+   * initialized with data for each tensor in the same order as
+   * 'inputs'. For each tensor, the size of this content must match
+   * what is expected by the tensor's shape and data type. The raw
+   * data must be the flattened, one-dimensional, row-major order of
+   * the tensor elements without any stride or padding between the
+   * elements. Note that the FP16 and BF16 data types must be represented as
+   * raw content as there is no specific data type for a 16-bit float type.
+   * If this field is specified then InferInputTensor::contents must
+   * not be specified for any input tensor.
+   * </pre>
+   *
+   * <code>repeated bytes raw_input_contents = 7;</code>
+   * @param index The index of the element to return.
+   * @return The rawInputContents at the given index.
+   */
+  com.google.protobuf.ByteString getRawInputContents(int index);
 }
