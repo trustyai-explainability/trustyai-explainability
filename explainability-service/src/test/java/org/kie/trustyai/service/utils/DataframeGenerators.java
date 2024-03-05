@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.Output;
@@ -16,6 +15,7 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;

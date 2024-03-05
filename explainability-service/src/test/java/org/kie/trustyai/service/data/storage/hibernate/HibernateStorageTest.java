@@ -3,16 +3,12 @@ package org.kie.trustyai.service.data.storage.hibernate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
-import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
@@ -22,11 +18,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestProfile(HibernateTestProfile.class)
-@QuarkusTestResource(H2DatabaseTestResource.class)
+//@QuarkusTestResource(H2DatabaseTestResource.class)
 class HibernateStorageTest {
     @Inject
     Instance<MockHibernateStorage> storage;
@@ -67,13 +64,36 @@ class HibernateStorageTest {
         int batch = 10;
 
         Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
-        Dataframe batched = original.filterByRowIndex(IntStream.range(nrows-batch, nrows).boxed().collect(Collectors.toList()));
+        Dataframe batched = original.filterByRowIndex(IntStream.range(nrows - batch, nrows).boxed().collect(Collectors.toList()));
+
+        long start = System.currentTimeMillis();
         storage.get().save(original, MODEL_ID);
+        System.out.println(System.currentTimeMillis() - start);
         Dataframe recovered = storage.get().readData(MODEL_ID, batch);
         DataframeGenerators.roughEqualityCheck(batched, recovered);
     }
 
+    @Test
+    void testBatchedWrite() {
+        int nrows = 1000;
+        int batch = 10;
+        int ncols = 10;
+        int size = nrows;
 
+        Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
+        storage.get().save(original, MODEL_ID);
 
+        for (int i = 0; i < 5; i++) {
+            long start = System.currentTimeMillis();
+            Dataframe appendee = DataframeGenerators.generateRandomNColumnDataframe(batch, ncols);
+            original.addPredictions(appendee.asPredictions());
+            storage.get().append(appendee, MODEL_ID);
+            size += batch;
+            System.out.println(System.currentTimeMillis() - start);
+        }
+
+        assertEquals(size, storage.get().rowCount(MODEL_ID));
+        DataframeGenerators.roughEqualityCheck(original, storage.get().readData(MODEL_ID));
+    }
 
 }

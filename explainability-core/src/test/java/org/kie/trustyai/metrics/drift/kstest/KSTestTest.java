@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 
 import static org.junit.jupiter.api.Assertions.*;

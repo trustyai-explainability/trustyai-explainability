@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;

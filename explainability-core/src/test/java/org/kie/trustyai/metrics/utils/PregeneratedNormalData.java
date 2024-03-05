@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 
 public class PregeneratedNormalData {
     private final static double[][] data = {

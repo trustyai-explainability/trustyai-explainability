@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.kie.trustyai.explainability.model;
+package org.kie.trustyai.explainability.model.dataframe;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -23,7 +23,6 @@ import java.time.LocalTime;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Currency;
 import java.util.HashMap;
@@ -36,35 +35,31 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import jakarta.persistence.OrderColumn;
+import org.kie.trustyai.explainability.model.Dataset;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureFactory;
+import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionMetadata;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
 import org.kie.trustyai.explainability.utils.DataUtils;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 
-@Entity
 public class Dataframe {
-    @OneToMany(cascade = CascadeType.ALL)
-    @OrderColumn(name = "order_column")
     private List<DataframeColumn> data;
-
-    @OneToOne(cascade = CascadeType.ALL)
     private final DataframeMetadata metadata;
     protected final DataframeInternalData internalData;
-
-    @ElementCollection
     private final Map<String, Integer> idToIDX;
 
-    @Id
     private String id;
 
     public Dataframe() {
@@ -1326,5 +1321,43 @@ public class Dataframe {
         public String get() {
             return tagValue;
         }
+    }
+
+    public List<DataframeRow> transpose(String modelId) {
+        List<DataframeRow> out = new ArrayList<>();
+        for (int i = 0; i < getRowDimension(); i++) {
+            List<Value> values = getRow(i);
+            LocalDateTime time = getTimestamps().get(i);
+            String id = getIds().get(i);
+            String tag = getTags().get(i);
+            out.add(new DataframeRow(values, time, id, tag, modelId));
+        }
+        return out;
+    }
+
+    public DataframeMetadata getMetadata() {
+        return metadata;
+    }
+
+    public static Dataframe untranspose(List<DataframeRow> rows, DataframeMetadata metadata) {
+        DataframeInternalData dataframeInternalData = new DataframeInternalData();
+        List<List<Value>> data = new ArrayList<>();
+
+        int colSize = rows.get(0).getRow().size();
+        for (int c = 0; c < colSize; c++) {
+            List<Value> colData = new ArrayList<>();
+            for (int r = 0; r < rows.size(); r++) {
+                DataframeRow row = rows.get(r);
+                colData.add(row.getRow().get(c));
+
+                if (c == 0) {
+                    dataframeInternalData.addDatapointTag(row.getTag());
+                    dataframeInternalData.addId(row.getRowId());
+                    dataframeInternalData.addTimestamp(row.getTimestamp());
+                }
+            }
+            data.add(colData);
+        }
+        return new Dataframe(data, metadata, dataframeInternalData);
     }
 }

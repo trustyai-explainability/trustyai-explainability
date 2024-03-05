@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.fairness.FairnessDefinitions;
 import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;

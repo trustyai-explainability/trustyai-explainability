@@ -8,75 +8,75 @@ x-common-variables: &global-variables
   MARIADB_DATABASE: trustyai-database
 
 services:
-  trustyai:
-    image: quay.io/rgeada/trustyai-service-debug:latest
-    container_name: trustyai-service
-    networks:
-      - data-connection
-    ports:
-      - "8080:8080"
-    depends_on:
-      trustyai-db-container:
-        condition: service_healthy
-    environment:
-      <<: *global-variables
-      SERVICE_STORAGE_FORMAT: "HIBERNATE"
-      SERVICE_DATA_FORMAT: "BEAN"
-      SERVICE_METRICS_SCHEDULE: "5s"
-      SERVICE_BATCH_SIZE: 5000
-      STORAGE_DATA_FILENAME: "data.csv"
-      STORAGE_DATA_FOLDER: "/inputs"
-      LOG_LEVEL: "DEBUG"
-      HIBERNATE: 'true'
-      QUARKUS_DATASOURCE_URL: "jdbc:mariadb://trustyai-db-container:3306/trustyai-database?autoReconnect=true"
-    volumes:
-      - ~/volumes/pvc/inputs:/inputs
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/info" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    ports:
-      - 9090:9090
-    restart: unless-stopped
-    volumes:
-      - ./prometheus:/etc/prometheus
-      - prom_data:/prometheus
-  generator-1:
-    depends_on:
-      trustyai:
-        condition: service_healthy
-    container_name: generator-1
-    networks:
-      - data-connection
-    image: trustyai/trustyai-service-partial
-    build:
-      context: ./logger
-      dockerfile: ./partial.Dockerfile
-    environment:
-      MODEL_NAME: "example-model-1"
-      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
-      PYTHONUNBUFFERED: "1"
-  generator-2:
-    depends_on:
-      trustyai:
-        condition: service_healthy
-    networks:
-      - data-connection
-    container_name: generator-2
-    image: trustyai/trustyai-service-partial
-    build:
-      context: ./logger
-      dockerfile: ./partial.Dockerfile
-    environment:
-      MODEL_NAME: "example-model-2"
-      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
-      PYTHONUNBUFFERED: "1"
+#  trustyai:
+#    image: quay.io/rgeada/trustyai-service-debug:latest
+#    container_name: trustyai-service
+#    networks:
+#      - data-connection
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      trustyai-db-container:
+#        condition: service_healthy
+#    environment:
+#      <<: *global-variables
+#      SERVICE_STORAGE_FORMAT: "HIBERNATE"
+#      SERVICE_DATA_FORMAT: "BEAN"
+#      SERVICE_METRICS_SCHEDULE: "5s"
+#      SERVICE_BATCH_SIZE: 5000
+#      STORAGE_DATA_FILENAME: "data.csv"
+#      STORAGE_DATA_FOLDER: "/inputs"
+#      LOG_LEVEL: "DEBUG"
+#      HIBERNATE: 'true'
+#      QUARKUS_DATASOURCE_URL: "jdbc:mariadb://trustyai-db-container:3306/trustyai-database?autoReconnect=true"
+#    volumes:
+#      - ~/volumes/pvc/inputs:/inputs
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:8080/info" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#  prometheus:
+#    image: prom/prometheus
+#    container_name: prometheus
+#    command:
+#      - '--config.file=/etc/prometheus/prometheus.yml'
+#    ports:
+#      - 9090:9090
+#    restart: unless-stopped
+#    volumes:
+#      - ./prometheus:/etc/prometheus
+#      - prom_data:/prometheus
+#  generator-1:
+#    depends_on:
+#      trustyai:
+#        condition: service_healthy
+#    container_name: generator-1
+#    networks:
+#      - data-connection
+#    image: trustyai/trustyai-service-partial
+#    build:
+#      context: ./logger
+#      dockerfile: ./partial.Dockerfile
+#    environment:
+#      MODEL_NAME: "example-model-1"
+#      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
+#      PYTHONUNBUFFERED: "1"
+#  generator-2:
+#    depends_on:
+#      trustyai:
+#        condition: service_healthy
+#    networks:
+#      - data-connection
+#    container_name: generator-2
+#    image: trustyai/trustyai-service-partial
+#    build:
+#      context: ./logger
+#      dockerfile: ./partial.Dockerfile
+#    environment:
+#      MODEL_NAME: "example-model-2"
+#      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
+#      PYTHONUNBUFFERED: "1"
   trustyai-db-container:
     networks:
       - data-connection
@@ -95,6 +95,8 @@ services:
       timeout: 30s
     ports:
       - 3306:3306
+    expose:
+      - 3306
     volumes:
       - trustyai-db-container:/var/lib/mysql/
     environment:

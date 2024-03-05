@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;

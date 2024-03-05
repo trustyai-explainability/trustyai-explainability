@@ -1,7 +1,7 @@
 package org.kie.trustyai.service.data;
 
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.storage.Storage;

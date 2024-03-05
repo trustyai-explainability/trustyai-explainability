@@ -1,13 +1,13 @@
-package org.kie.trustyai.explainability.model;
-
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.OrderColumn;
+package org.kie.trustyai.explainability.model.dataframe;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.OrderColumn;
 
 @Embeddable
 public class DataframeInternalData {
@@ -81,7 +81,7 @@ public class DataframeInternalData {
     }
 
     public void setDatapointTag(int idx, String tag) {
-        datapointTags.set(idx , tag);
+        datapointTags.set(idx, tag);
     }
 
     public void setId(int idx, String id) {

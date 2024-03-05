@@ -3,7 +3,7 @@ package org.kie.trustyai.service.scenarios.nodata;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.endpoints.consumer.ConsumerEndpoint;

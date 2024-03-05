@@ -1,4 +1,4 @@
-package org.kie.trustyai.explainability.model;
+package org.kie.trustyai.explainability.model.dataframe;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -10,6 +10,16 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureFactory;
+import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionMetadata;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;

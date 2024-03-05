@@ -7,6 +7,7 @@ import java.util.stream.IntStream;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;

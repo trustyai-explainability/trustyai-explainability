@@ -12,7 +12,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.Output;
@@ -22,6 +21,7 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 
 public class FourierMMDTest {
