@@ -5,24 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.OrderColumn;
-
-@Embeddable
+//@Embeddable
 public class DataframeInternalData {
-    @ElementCollection
-    @OrderColumn(name = "tag_order_column")
     private final List<String> datapointTags;
-
-    @ElementCollection
-    @OrderColumn(name = "id_order_column")
     private final List<String> ids;
-
-    @ElementCollection
-    @OrderColumn(name = "time_order_column")
     private final List<LocalDateTime> timestamps;
-
     private Integer size;
 
     public DataframeInternalData() {

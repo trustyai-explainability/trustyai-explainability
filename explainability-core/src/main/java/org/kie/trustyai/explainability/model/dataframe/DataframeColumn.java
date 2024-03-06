@@ -6,22 +6,10 @@ import java.util.stream.Stream;
 
 import org.kie.trustyai.explainability.model.Value;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OrderColumn;
-
 // hibernate wrapper for an arraylist
-@Entity
+//@Entity
 public class DataframeColumn {
-    @ElementCollection
-    @OrderColumn(name = "order_column")
     private List<Value> values;
-
-    @Id
-    @GeneratedValue
-    private Long id;
 
     public DataframeColumn(List<Value> values) {
         this.values = values;
@@ -57,13 +45,5 @@ public class DataframeColumn {
 
     public Stream<Value> stream() {
         return this.values.stream();
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
     }
 }
