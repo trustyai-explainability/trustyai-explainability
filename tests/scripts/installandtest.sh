@@ -49,7 +49,7 @@ fi
 
 success=1
 
-[ $FAILURE = false ] && $HOME/peak/run.sh ${TESTS_REGEX} || echo -e "\033[0;31mSkipping tests due to Operator/ODH installation failure\033[0m"
+[ $INSTALL_FAILURE = false ] && $HOME/peak/run.sh ${TESTS_REGEX} || echo -e "\033[0;31mSkipping tests due to Operator/ODH installation failure\033[0m"
 
 if  [ "$?" -ne 0 ]; then
     echo "The tests failed"
