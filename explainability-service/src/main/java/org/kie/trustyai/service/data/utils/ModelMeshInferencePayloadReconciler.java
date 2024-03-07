@@ -113,44 +113,4 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
             return new SimplePrediction(pi, po);
         }).collect(Collectors.toCollection(ArrayList::new));
     }
-
-    public Dataframe payloadToDataFrame(byte[] inputs, byte[] outputs, String id, Map<String, String> metadata,
-            String modelId) throws DataframeCreateException {
-        final ModelInferRequest input;
-        try {
-            input = ModelInferRequest.parseFrom(inputs);
-        } catch (InvalidProtocolBufferException e) {
-            throw new DataframeCreateException(e.getMessage());
-        }
-        final PredictionInput predictionInput;
-        try {
-            predictionInput = PayloadParser
-                    .requestToInput(input, null);
-        } catch (IllegalArgumentException e) {
-            throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
-        }
-        LOG.debug("Prediction input: " + predictionInput.getFeatures());
-        final List<Feature> features = new ArrayList<>(predictionInput.getFeatures());
-
-        String datapointTag = metadata.containsKey(ExplainerEndpoint.BIAS_IGNORE_PARAM) ? Dataframe.InternalTags.SYNTHETIC.get() : Dataframe.InternalTags.UNLABELED.get();
-        PredictionMetadata predictionMetadata = new PredictionMetadata(id, LocalDateTime.now(), datapointTag);
-
-        final ModelInferResponse output;
-        try {
-            output = ModelInferResponse.parseFrom(outputs);
-        } catch (InvalidProtocolBufferException e) {
-            throw new DataframeCreateException(e.getMessage());
-        }
-        final PredictionOutput predictionOutput;
-        try {
-            predictionOutput = PayloadParser
-                    .responseToOutput(output, null);
-        } catch (IllegalArgumentException e) {
-            throw new DataframeCreateException("Error parsing output payload: " + e.getMessage());
-        }
-        LOG.debug("Prediction output: " + predictionOutput.getOutputs());
-
-        Prediction prediction = new SimplePrediction(new PredictionInput(features), predictionOutput, predictionMetadata);
-        return Dataframe.createFrom(prediction);
-    }
 }
