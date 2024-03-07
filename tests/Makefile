@@ -56,7 +56,7 @@ clean:
 	oc get validatingwebhookconfiguration -o name | grep katib | grep $(ODHPROJECT) | xargs oc delete || true
 	oc delete project $(ODHPROJECT)-model || true
 	oc delete identity htpasswd-provider:admin || true
-	oc patch $(oc get kfdef -o name) --type=merge -p '{"metadata": {"finalizers":null}}' || true
+	oc patch $$(oc get kfdef -o name) --type=merge -p '{"metadata": {"finalizers":null}}' || true
 	echo "Deleting test projects"
-	oc delete $(oc get projects -o name | grep basictests-) || true
-	oc delete $(oc get projects -o name | grep nightly-) || true
+	oc delete $$(oc get projects -o name | grep basictests-) || true
+	oc delete $$(oc get projects -o name | grep nightly-) || true

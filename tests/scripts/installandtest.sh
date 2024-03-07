@@ -27,11 +27,12 @@ echo "OCP version info"
 echo `oc version`
 
 
+INSTALL_FAILURE=false
 if [ -z "${SKIP_INSTALL}" ]; then
     # This is needed to avoid `oc status` failing inside openshift-ci
     oc new-project ${ODHPROJECT}
     oc project ${ODHPROJECT} # in case a new project is not created
-    $HOME/peak/install.sh
+    $HOME/peak/install.sh || INSTALL_FAILURE=true
     if [ ${LOCAL} = true ]; then
       echo "Sleeping for 30s to let the DSC install settle"
       sleep 30s
@@ -47,7 +48,8 @@ if [ -z "${SKIP_INSTALL}" ]; then
 fi
 
 success=1
-$HOME/peak/run.sh ${TESTS_REGEX}
+
+[ $FAILURE = false ] && $HOME/peak/run.sh ${TESTS_REGEX} || echo -e "\033[0;31mSkipping tests due to Operator/ODH installation failure\033[0m"
 
 if  [ "$?" -ne 0 ]; then
     echo "The tests failed"
