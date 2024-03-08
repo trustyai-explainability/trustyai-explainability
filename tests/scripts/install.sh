@@ -14,8 +14,13 @@ if ! [ -z "${SKIP_OPERATOR_INSTALL}" ]; then
     ./setup.sh -t ~/peak/operatorsetup 2>&1
 else
   echo "Installing operator from community marketplace"
+
+
   while [[ $retry -gt 0 ]]; do
-    ./setup.sh -o ~/peak/operatorsetup 2>&1
+
+    # patch bug in peak setup script
+    sed -i "s/path=\"{.status.channels.*/ | jq '.status.channels | .[0].currentCSVDesc.installModes | map(select(.type == \"AllNamespaces\")) | .[0].supported')/" setup.sh
+    ./setup.sh -o ~/peak/operatorsetup
     if [ $? -eq 0 ]; then
       retry=-1
     else
@@ -25,12 +30,12 @@ else
     fi  
     retry=$(( retry - 1))
 
-    finished=false
-    start_t=$(date +%s)
+    finished=false 2>&1
+    start_t=$(date +%s) 2>&1
     echo "Verifying installation of ODH operator"
     while ! $finished; do
         if [ ! -z "$(oc get pods -n openshift-operators | grep 'opendatahub-operator-controller-manager' | grep '1/1')" ]; then
-          finished=true
+          finished=true 2>&1
         else
           sleep 10
         fi

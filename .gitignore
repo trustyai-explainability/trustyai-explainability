@@ -21,6 +21,7 @@ dependency-reduced-pom.xml
 .vscode
 .run/
 .checkstyle
+tests/artifacts/*
 
 *.log
 release.properties
