@@ -19,7 +19,7 @@ import jakarta.validation.ConstraintValidatorContext;
 public class GenericValidationUtils {
     public static boolean validateModelId(ConstraintValidatorContext context, Instance<DataSource> dataSource, String modelId) {
         if (!dataSource.get().hasMetadata(modelId)) {
-            context.buildConstraintViolationWithTemplate("No metadata found for model=" + modelId)
+            context.buildConstraintViolationWithTemplate("No metadata found for model=" + modelId + ". This can happen if TrustyAI has not yet logged any inferences from this model.")
                     .addPropertyNode(modelId)
                     .addConstraintViolation();
             return false;

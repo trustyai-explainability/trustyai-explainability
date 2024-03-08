@@ -1,1 +1,2 @@
-opendatahub-operator rolling https://github.com/opendatahub-io/opendatahub-operator
+opendatahub-operator fast https://github.com/opendatahub-io/opendatahub-operator
+authorino-operator stable https://github.com/Kuadrant/authorino-operator

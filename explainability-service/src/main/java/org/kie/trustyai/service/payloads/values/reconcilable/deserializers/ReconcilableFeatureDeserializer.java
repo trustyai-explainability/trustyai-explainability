@@ -32,14 +32,15 @@ public class ReconcilableFeatureDeserializer extends StdDeserializer<Reconcilabl
         if (value.isValueNode()) {
             return new ReconcilableFeature((ValueNode) value);
         } else {
-            List<ValueNode> valueNodes = new ArrayList<>();
-            for (JsonNode subNode : value) {
-                valueNodes.add((ValueNode) subNode);
-            }
-            if (valueNodes.isEmpty()) {
-                throw new IllegalArgumentException("Passed list of feature values cannot be empty.");
-            }
-            return new ReconcilableFeature(valueNodes);
+            throw new IllegalArgumentException("Only single-valued features are allowed currently.");
+            //            List<ValueNode> valueNodes = new ArrayList<>();
+            //            for (JsonNode subNode : value) {
+            //                valueNodes.add((ValueNode) subNode);
+            //            }
+            //            if (valueNodes.isEmpty()) {
+            //                throw new IllegalArgumentException("Passed list of feature values cannot be empty.");
+            //            }
+            //            return new ReconcilableFeature(valueNodes);
         }
     }
 
