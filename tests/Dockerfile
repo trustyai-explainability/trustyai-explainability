@@ -48,7 +48,7 @@ ENV PATH="${PATH}:$HOME/.local/bin"
 RUN cd $HOME/src/ods-ci && poetry install
     
 
-COPY setup/operatorsetup setup/pipelines-op-setup scripts/install.sh scripts/installandtest.sh $HOME/peak/
+COPY setup/operatorsetup scripts/install.sh scripts/installandtest.sh $HOME/peak/
 COPY resources $HOME/peak/operator-tests/trustyai-explainability/resources
 COPY util $HOME/peak/operator-tests/trustyai-explainability
 COPY setup/odh-core-dsc.yaml setup/odh-core-dsci.yaml $HOME/kfdef/
