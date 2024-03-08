@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.data.utils;
 
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.service.data.reconcilers.ModelMeshInferencePayloadReconciler;
 
 import static org.junit.jupiter.api.Assertions.*;
 

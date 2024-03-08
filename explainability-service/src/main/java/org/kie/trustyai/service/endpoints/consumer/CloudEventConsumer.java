@@ -3,7 +3,7 @@ package org.kie.trustyai.service.endpoints.consumer;
 import java.nio.charset.StandardCharsets;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.service.data.utils.KServeInferencePayloadReconciler;
+import org.kie.trustyai.service.data.reconcilers.KServeInferencePayloadReconciler;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
 import org.kie.trustyai.service.payloads.consumer.KServeInputPayload;
 import org.kie.trustyai.service.payloads.consumer.KServeOutputPayload;

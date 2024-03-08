@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 import org.kie.trustyai.metrics.drift.kstest.KSTest;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;

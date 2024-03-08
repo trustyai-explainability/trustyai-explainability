@@ -14,17 +14,17 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.utils.IOUtils;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.utils.DownloadUtils;
 import org.kie.trustyai.service.data.utils.UploadUtils;
@@ -66,7 +66,7 @@ public class DataEndpoint {
     public Response download(@ValidDataDownloadRequest DataRequestPayload dataRequestPayload) {
         String modelId = dataRequestPayload.getModelId();
         Dataframe df = dataSource.get().getDataframe(modelId).copy();
-        Metadata metadata = dataSource.get().getMetadata(modelId);
+        StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId);
 
         for (RowMatcher rowMatcher : dataRequestPayload.getMatchAll()) {
             if (rowMatcher.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
@@ -78,7 +78,7 @@ public class DataEndpoint {
                 }
             } else {
                 int columnIndex = df.getColumnNames().indexOf(rowMatcher.getColumnName());
-                DataType columnType = DownloadUtils.getDataType(metadata, rowMatcher);
+                DataType columnType = DownloadUtils.getDataType(storageMetadata, rowMatcher);
 
                 // row match
                 if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
@@ -99,7 +99,7 @@ public class DataEndpoint {
                 }
             } else {
                 int columnIndex = df.getColumnNames().indexOf(rowMatcher.getColumnName());
-                DataType columnType = DownloadUtils.getDataType(metadata, rowMatcher);
+                DataType columnType = DownloadUtils.getDataType(storageMetadata, rowMatcher);
 
                 // row match
                 if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {
@@ -123,7 +123,7 @@ public class DataEndpoint {
                     }
                 } else {
                     int columnIndex = df.getColumnNames().indexOf(rowMatcher.getColumnName());
-                    DataType columnType = DownloadUtils.getDataType(metadata, rowMatcher);
+                    DataType columnType = DownloadUtils.getDataType(storageMetadata, rowMatcher);
 
                     // row match
                     if (MatchOperation.valueOf(rowMatcher.getOperation()) == MatchOperation.BETWEEN) {

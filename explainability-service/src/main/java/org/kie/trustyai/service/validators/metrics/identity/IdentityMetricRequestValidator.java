@@ -3,7 +3,7 @@ package org.kie.trustyai.service.validators.metrics.identity;
 import java.util.Objects;
 
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 
@@ -30,10 +30,10 @@ public class IdentityMetricRequestValidator implements ConstraintValidator<Valid
         if (!GenericValidationUtils.validateModelId(context, dataSource, modelId)) {
             return false;
         } else {
-            final Metadata metadata = dataSource.get().getMetadata(modelId);
+            final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId);
             final String columnName = request.getColumnName();
             // Outcome name is not present
-            boolean columnValidation = GenericValidationUtils.validateColumnName(context, metadata, modelId, columnName);
+            boolean columnValidation = GenericValidationUtils.validateColumnName(context, storageMetadata, modelId, columnName);
 
             boolean batchValidation = true;
             if (Objects.nonNull(request.getBatchSize()) && request.getBatchSize() <= 0) {

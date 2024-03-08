@@ -3,12 +3,12 @@ package org.kie.trustyai.metrics.anomaly;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.utils.PregeneratedNormalData;
 
 import static org.junit.jupiter.api.Assertions.*;

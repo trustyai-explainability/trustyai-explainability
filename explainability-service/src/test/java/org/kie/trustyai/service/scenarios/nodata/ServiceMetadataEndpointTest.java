@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.endpoints.service.ServiceMetadataEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;

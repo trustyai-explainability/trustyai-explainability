@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 
 public class KSTest {

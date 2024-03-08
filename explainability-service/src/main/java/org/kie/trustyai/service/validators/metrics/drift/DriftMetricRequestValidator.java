@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 
@@ -31,13 +31,13 @@ public class DriftMetricRequestValidator implements ConstraintValidator<ValidDri
         if (!GenericValidationUtils.validateModelId(context, dataSource, modelId)) {
             return false;
         } else {
-            final Metadata metadata = dataSource.get().getMetadata(modelId);
+            final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId);
 
             // check that the fitting is valid, if provided
             boolean columnValidation = true;
             if (request.getFitColumns() != null) {
                 for (String columnName : request.getFitColumns()) {
-                    columnValidation = GenericValidationUtils.validateColumnName(context, metadata, modelId, columnName) && columnValidation;
+                    columnValidation = GenericValidationUtils.validateColumnName(context, storageMetadata, modelId, columnName) && columnValidation;
                 }
             }
             boolean batchValidation = true;
