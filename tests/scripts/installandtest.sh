@@ -32,7 +32,7 @@ if [ -z "${SKIP_INSTALL}" ]; then
     # This is needed to avoid `oc status` failing inside openshift-ci
     oc new-project ${ODHPROJECT}
     oc project ${ODHPROJECT} # in case a new project is not created
-    $HOME/peak/install.sh
+    $HOME/peak/install.sh || INSTALL_FAILURE=true
     if [ ${LOCAL:-false} = true ]; then
       echo "Sleeping for 30s to let the DSC install settle"
       sleep 30s
