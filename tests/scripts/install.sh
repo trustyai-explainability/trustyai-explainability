@@ -94,7 +94,7 @@ else
   oc apply -f ./${DSC_FILENAME}
   kfctl_result=$?
   if [ "$kfctl_result" -ne 0 ]; then
-    echo "The installation failed"a
+    echo "The installation failed"
     exit $kfctl_result
   fi
 fi
