@@ -1,7 +1,7 @@
 #!/bin/bash
-
 echo "Installing DSC from test directory"
 DSC_FILENAME=odh-core-dsc.yaml
+
 
 set -x
 ## Install the opendatahub-operator
@@ -24,7 +24,23 @@ else
       sleep 3m
     fi  
     retry=$(( retry - 1))
-    sleep 1m
+
+    finished=false
+    start_t=$(date +%s)
+    echo "Verifying installation of ODH operator"
+    while ! $finished; do
+        if [ ! -z "$(oc get pods -n openshift-operators | grep 'opendatahub-operator-controller-manager' | grep '1/1')" ]; then
+          finished=true
+        else
+          sleep 10
+        fi
+
+        if [ $(($(date +%s)-start_t)) -gt 300 ]; then
+          echo "ODH Operator installation timeout, existing test"
+          exit 1
+        fi
+    done
+
   done
 fi
 
