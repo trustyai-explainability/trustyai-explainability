@@ -48,8 +48,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * Create a {@link KServeV2GRPCPredictionProvider} for a model with an endpoint at {@code target} and named {@code modelName}.
      * In this case, the output names will be generated as {@code output-0}, {@code output-1}, ...
      *
-     * @param target The remote KServe v2 model server
-     * @param modelName The model's name
+     * @param kServeConfig The remote KServe v2 model server configuration
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig) {
@@ -60,9 +59,9 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * Create a {@link KServeV2GRPCPredictionProvider} with an endpoint at {@code target} and named {@code modelName}.
      * In this case, the output names are specified with {@code outputNames}.
      *
-     * @param target The remote KServe v2 model server
-     * @param modelName The model's name
+     * @param kServeConfig The remote KServe v2 model server configuration
      * @param outputNames A {@link List} of output names to be used
+     * @param optionalParameters A {@link Map} of parameters to pass to the gRPC
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, List<String> outputNames, Map<String, String> optionalParameters) {
@@ -73,9 +72,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * Create a {@link KServeV2GRPCPredictionProvider} with an endpoint at {@code target} and named {@code modelName}.
      * In this case, the output names are specified with {@code outputNames}.
      *
-     * @param target The remote KServe v2 model server
-     * @param modelName The model's name
-     * @param outputNames A {@link List} of output names to be used
+     * @param kServeConfig The remote KServe v2 model server configuration
      * @param parameters A {@link Map} of parameters to pass to the gRPC method call
      * @return A {@link PredictionProvider}
      */
@@ -109,16 +106,6 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
         request.addInputs(tensor);
         return request;
-    }
-
-    private List<PredictionOutput> responseToPredictionOutput(ModelInferResponse response) {
-
-        final List<ModelInferResponse.InferOutputTensor> responseOutputs = response.getOutputsList();
-
-        return responseOutputs
-                .stream()
-                .map(tensor -> PayloadParser.outputTensorToPredictionOutput(tensor, this.outputNames))
-                .collect(Collectors.toList());
     }
 
     @Override
