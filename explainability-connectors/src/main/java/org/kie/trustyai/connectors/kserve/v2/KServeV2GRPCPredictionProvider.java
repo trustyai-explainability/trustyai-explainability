@@ -1,11 +1,7 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
@@ -32,14 +28,16 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
     private final KServeConfig kServeConfig;
     private final ManagedChannel channel;
     private final List<String> outputNames;
+    private final String inputName;
     private final Map<String, String> optionalParameters;
 
-    private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, List<String> outputNames, Map<String, String> optionalParameters) {
+    private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, String inputName, List<String> outputNames, Map<String, String> optionalParameters) {
 
         this.kServeConfig = kServeConfig;
         this.channel = ManagedChannelBuilder.forTarget(kServeConfig.getTarget())
                 .usePlaintext()
                 .build();
+        this.inputName = inputName;
         this.outputNames = outputNames;
         this.optionalParameters = optionalParameters;
     }
@@ -52,7 +50,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig) {
-        return KServeV2GRPCPredictionProvider.forTarget(kServeConfig, null, null);
+        return KServeV2GRPCPredictionProvider.forTarget(kServeConfig, null, null, null);
     }
 
     /**
@@ -64,8 +62,8 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @param optionalParameters A {@link Map} of parameters to pass to the gRPC
      * @return A {@link PredictionProvider}
      */
-    public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, List<String> outputNames, Map<String, String> optionalParameters) {
-        return new KServeV2GRPCPredictionProvider(kServeConfig, outputNames, null);
+    public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, String inputName, List<String> outputNames, Map<String, String> optionalParameters) {
+        return new KServeV2GRPCPredictionProvider(kServeConfig, inputName, outputNames, null);
     }
 
     /**
@@ -77,14 +75,14 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, Map<String, String> parameters) {
-        return new KServeV2GRPCPredictionProvider(kServeConfig, null, parameters);
+        return new KServeV2GRPCPredictionProvider(kServeConfig, null, null, parameters);
     }
 
     private ModelInferRequest.InferInputTensor.Builder buildTensor(InferTensorContents.Builder contents, int nSamples, int nFeatures) {
 
         final ModelInferRequest.InferInputTensor.Builder tensor = ModelInferRequest.InferInputTensor
                 .newBuilder();
-        tensor.setName(DEFAULT_TENSOR_NAME)
+        tensor.setName(inputName != null ? inputName : DEFAULT_TENSOR_NAME)
                 .addShape(nSamples)
                 .addShape(nFeatures)
                 .setDatatype(DEFAULT_DATATYPE.toString())
@@ -133,6 +131,6 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
         final CompletableFuture<ModelInferResponse> futureResponse = ListenableFutureUtils.asCompletableFuture(listenableResponse);
 
-        return futureResponse.thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, inputs.size(), Optional.of(this.outputNames)));
+        return futureResponse.thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, inputs.size(), Objects.isNull(this.outputNames) ? Optional.empty() : Optional.of(this.outputNames)));
     }
 }

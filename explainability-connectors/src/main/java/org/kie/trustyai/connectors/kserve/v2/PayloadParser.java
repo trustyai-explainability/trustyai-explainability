@@ -227,8 +227,9 @@ public class PayloadParser {
 
         switch (type) {
             case NUMBER:
+                // Default all numeric types to FP64
                 if (object instanceof Integer) {
-                    content.addIntContents((Integer) object);
+                    content.addFp64Contents(((Integer) object).doubleValue());
                 } else if (object instanceof Double) {
                     content.addFp64Contents((Double) object);
                 }

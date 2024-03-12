@@ -1297,4 +1297,20 @@ public class Dataframe {
             return tagValue;
         }
     }
+
+    public String getInputTensorName() {
+        return metadata.getInputTensorName();
+    }
+
+    public void setInputTensorName(String inputTensorName) {
+        metadata.setInputTensorName(inputTensorName);
+    }
+
+    public String getOutputTensorName() {
+        return metadata.getOutputTensorName();
+    }
+
+    public void setOutputTensorName(String outputTensorName) {
+        metadata.setOutputTensorName(outputTensorName);
+    }
 }
