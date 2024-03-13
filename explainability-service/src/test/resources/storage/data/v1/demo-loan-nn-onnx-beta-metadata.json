@@ -1,0 +1,344 @@
+{
+  "inputSchema":
+  {
+    "items":
+    {
+      "customer_data_input-6":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-6",
+        "values":
+        [
+          0,
+          1
+        ],
+        "index": 6
+      },
+      "customer_data_input-5":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-5",
+        "values":
+        [
+          1,
+          0
+        ],
+        "index": 5
+      },
+      "customer_data_input-4":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-4",
+        "values":
+        [
+          0,
+          1
+        ],
+        "index": 4
+      },
+      "customer_data_input-3":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-3",
+        "values":
+        [
+          0,
+          1
+        ],
+        "index": 3
+      },
+      "customer_data_input-2":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-2",
+        "values":
+        [
+          1,
+          2,
+          4,
+          3
+        ],
+        "index": 2
+      },
+      "customer_data_input-1":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-1",
+        "values":
+        [
+          135000,
+          297000,
+          157500,
+          315000,
+          180000,
+          216000,
+          126000,
+          130500
+        ],
+        "index": 1
+      },
+      "customer_data_input-0":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-0",
+        "values":
+        [
+          0,
+          1,
+          2
+        ],
+        "index": 0
+      },
+      "customer_data_input-10":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-10",
+        "values":
+        [
+          130,
+          2077,
+          1103,
+          3174,
+          3112,
+          3234,
+          1773,
+          921,
+          3720
+        ],
+        "index": 10
+      },
+      "customer_data_input-9":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-9",
+        "values":
+        [
+          9957,
+          10669,
+          21155,
+          10450,
+          12411,
+          12915,
+          15519,
+          15825,
+          15444
+        ],
+        "index": 9
+      },
+      "customer_data_input-8":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-8",
+        "values":
+        [
+          0
+        ],
+        "index": 8
+      },
+      "customer_data_input-7":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-7",
+        "values":
+        [
+          1
+        ],
+        "index": 7
+      }
+    },
+    "remapCount": 0,
+    "nameMapping": {},
+    "nameMappedItems":
+    {
+      "customer_data_input-6":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-6",
+        "values":
+        [
+          0,
+          1
+        ],
+        "index": 6
+      },
+      "customer_data_input-5":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-5",
+        "values":
+        [
+          1,
+          0
+        ],
+        "index": 5
+      },
+      "customer_data_input-4":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-4",
+        "values":
+        [
+          0,
+          1
+        ],
+        "index": 4
+      },
+      "customer_data_input-3":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-3",
+        "values":
+        [
+          0,
+          1
+        ],
+        "index": 3
+      },
+      "customer_data_input-2":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-2",
+        "values":
+        [
+          1,
+          2,
+          4,
+          3
+        ],
+        "index": 2
+      },
+      "customer_data_input-1":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-1",
+        "values":
+        [
+          135000,
+          297000,
+          157500,
+          315000,
+          180000,
+          216000,
+          126000,
+          130500
+        ],
+        "index": 1
+      },
+      "customer_data_input-0":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-0",
+        "values":
+        [
+          0,
+          1,
+          2
+        ],
+        "index": 0
+      },
+      "customer_data_input-10":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-10",
+        "values":
+        [
+          130,
+          2077,
+          1103,
+          3174,
+          3112,
+          3234,
+          1773,
+          921,
+          3720
+        ],
+        "index": 10
+      },
+      "customer_data_input-9":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-9",
+        "values":
+        [
+          9957,
+          10669,
+          21155,
+          10450,
+          12411,
+          12915,
+          15519,
+          15825,
+          15444
+        ],
+        "index": 9
+      },
+      "customer_data_input-8":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-8",
+        "values":
+        [
+          0
+        ],
+        "index": 8
+      },
+      "customer_data_input-7":
+      {
+        "type": "DOUBLE",
+        "name": "customer_data_input-7",
+        "values":
+        [
+          1
+        ],
+        "index": 7
+      }
+    }
+  },
+  "outputSchema":
+  {
+    "items":
+    {
+      "predict":
+      {
+        "type": "INT64",
+        "name": "predict",
+        "values":
+        [
+          [
+            "java.lang.Long",
+            0
+          ],
+          [
+            "java.lang.Long",
+            1
+          ]
+        ],
+        "index": 11
+      }
+    },
+    "remapCount": 0,
+    "nameMapping": {},
+    "nameMappedItems":
+    {
+      "predict":
+      {
+        "type": "INT64",
+        "name": "predict",
+        "values":
+        [
+          [
+            "java.lang.Long",
+            0
+          ],
+          [
+            "java.lang.Long",
+            1
+          ]
+        ],
+        "index": 11
+      }
+    }
+  },
+  "observations": 10,
+  "modelId": "demo-loan-nn-onnx-beta"
+}
