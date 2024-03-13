@@ -20,6 +20,9 @@ else
 
     # patch bug in peak setup script
     sed -i "s/path=\"{.status.channels.*/ | jq '.status.channels | .[0].currentCSVDesc.installModes | map(select(.type == \"AllNamespaces\")) | .[0].supported')/" setup.sh
+    sed -i "s/csource=.*/echo \$3; csource=\$3/" setup.sh
+    sed -i 's/installop \$.*/installop \${vals[0]} \${vals[1]} \${vals[3]}/' setup.sh
+
     ./setup.sh -o ~/peak/operatorsetup
     if [ $? -eq 0 ]; then
       retry=-1
@@ -40,7 +43,7 @@ else
           sleep 10
         fi
 
-        if [ $(($(date +%s)-start_t)) -gt 3600 ]; then
+        if [ $(($(date +%s)-start_t)) -gt 300 ]; then
           echo "ODH Operator installation timeout, existing test"
           exit 1
         fi
