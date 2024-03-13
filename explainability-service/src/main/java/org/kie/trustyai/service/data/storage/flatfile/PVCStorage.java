@@ -8,6 +8,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -41,7 +44,7 @@ public class PVCStorage extends FlatFileStorage {
 
         LOG.info("Starting PVC storage consumer");
         if (serviceConfig.batchSize().isPresent()) {
-            this.batchSize = serviceConfig.batchSize().getAsInt();
+           this.batchSize = serviceConfig.batchSize().getAsInt();
         } else {
             final String message = "Missing data batch size";
             LOG.error(message);
@@ -58,9 +61,24 @@ public class PVCStorage extends FlatFileStorage {
             LOG.error(message);
             throw new IllegalArgumentException(message);
         }
-
         LOG.info("PVC data locations: data=*-" + this.dataPath + ", metadata=*-" + this.metadataPath);
     }
+
+    public PVCStorage(String dataFolder, String dataFilename, int batchSize){
+        this.batchSize = batchSize;
+        this.metadataPath = Paths.get(dataFolder, DataSource.METADATA_FILENAME);
+        this.dataFilename = dataFilename;
+        this.dataPath = Paths.get(dataFolder, dataFilename);
+        this.dataFolder = Path.of(dataFolder);
+
+        if (metadataPath.equals(dataPath)) {
+            final String message = "Data file and metadata file cannot have the same name (" + this.dataPath + ")";
+            LOG.error(message);
+            throw new IllegalArgumentException(message);
+        }
+        LOG.info("PVC data locations: data=*-" + this.dataPath + ", metadata=*-" + this.metadataPath);
+    }
+
 
     @Override
     public ByteBuffer readData(String modelId) throws StorageReadException {
@@ -165,6 +183,10 @@ public class PVCStorage extends FlatFileStorage {
     @Override
     public boolean dataExists(String modelId) throws StorageReadException {
         return fileExists(getDataFilename(modelId));
+    }
+
+    public List<String> listAllModelIds(){
+        return Arrays.stream(new File(this.dataFolder.toString()).listFiles((fName) -> fName.getName().contains(dataFilename))).map(File::getName).collect(Collectors.toList());
     }
 
     @Override

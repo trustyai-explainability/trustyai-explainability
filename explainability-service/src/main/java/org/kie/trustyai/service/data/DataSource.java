@@ -5,8 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import io.quarkus.logging.Log;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -40,11 +42,31 @@ public class DataSource {
 
     @Inject
     Instance<Storage> storage;
-
+    Optional<Storage> storageOverride = Optional.empty();
+    
+    
     @Inject
     DataParser parser;
     @Inject
     ServiceConfig serviceConfig;
+
+
+    public void setStorageOverride(Storage storage) {
+        this.storageOverride = Optional.of(storage);
+    }
+    
+    public void clearStorageOverride(){
+        this.storageOverride = Optional.empty();
+    }
+
+    private Storage getStorage(){
+        if (storageOverride.isPresent()){
+            LOG.debug("Using overridden storage");
+            return storageOverride.get();
+        } else {
+            return storage.get();
+        }
+    }
 
     public Set<String> getKnownModels() {
         return knownModels;
@@ -59,7 +81,7 @@ public class DataSource {
 
     public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
         Dataframe df;
-        Storage st = storage.get();
+        Storage st = getStorage();
         if (st.getDataFormat() == DataFormat.CSV) {
             FlatFileStorage ffst = (FlatFileStorage) st;
 
@@ -88,7 +110,7 @@ public class DataSource {
             df = parser.toDataframe(dataByteBuffer, internalDataByteBuffer, storageMetadata);
             df.setColumnAliases(getJointNameAliases(storageMetadata));
         } else {
-            HibernateStorage hst = (HibernateStorage) storage.get();
+            HibernateStorage hst = (HibernateStorage) getStorage();
             df = hst.readData(modelId);
         }
         return df;
@@ -96,8 +118,8 @@ public class DataSource {
 
     public Dataframe getDataframe(final String modelId, int batchSize) throws DataframeCreateException {
         Dataframe df;
-        if (storage.get().getDataFormat() == DataFormat.CSV) {
-            FlatFileStorage ffst = (FlatFileStorage) storage.get();
+        if (getStorage().getDataFormat() == DataFormat.CSV) {
+            FlatFileStorage ffst = (FlatFileStorage) getStorage();
 
             final ByteBuffer byteBuffer;
             try {
@@ -124,7 +146,7 @@ public class DataSource {
             df = parser.toDataframe(byteBuffer, internalDataByteBuffer, storageMetadata);
             df.setColumnAliases(getJointNameAliases(storageMetadata));
         } else {
-            HibernateStorage hst = (HibernateStorage) storage.get();
+            HibernateStorage hst = (HibernateStorage) getStorage();
             df = hst.readData(modelId, batchSize);
         }
 
@@ -179,8 +201,8 @@ public class DataSource {
             }
         }
 
-        if (storage.get().getDataFormat() == DataFormat.CSV) {
-            FlatFileStorage ffst = (FlatFileStorage) storage.get();
+        if (getStorage().getDataFormat() == DataFormat.CSV) {
+            FlatFileStorage ffst = (FlatFileStorage) getStorage();
             ByteBuffer[] byteBuffers = parser.toByteBuffers(dataframe, false);
             if (!ffst.dataExists(modelId) || overwrite) {
                 ffst.saveData(byteBuffers[0], modelId);
@@ -190,7 +212,7 @@ public class DataSource {
                 ffst.append(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
             }
         } else {
-            HibernateStorage hst = (HibernateStorage) storage.get();
+            HibernateStorage hst = (HibernateStorage) getStorage();
             if (!hst.dataframeExists(modelId) || overwrite) {
                 hst.save(dataframe, modelId);
             } else {
@@ -211,7 +233,7 @@ public class DataSource {
     }
 
     public void saveMetadata(StorageMetadata storageMetadata, String modelId, boolean isUpdate) throws StorageWriteException {
-        if (storage.get().getDataFormat() == DataFormat.CSV) {
+        if (getStorage().getDataFormat() == DataFormat.CSV) {
             final ObjectMapper mapper = new ObjectMapper();
             mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
             final ByteBuffer byteBuffer;
@@ -221,7 +243,7 @@ public class DataSource {
                 throw new StorageWriteException("Could not save metadata: " + e.getMessage());
             }
 
-            ((FlatFileStorage) storage.get()).save(byteBuffer, modelId + "-" + METADATA_FILENAME);
+            ((FlatFileStorage) getStorage()).save(byteBuffer, modelId + "-" + METADATA_FILENAME);
         } else {
             if (isUpdate) {
                 if (!storageMetadata.getModelId().equals(modelId)) {
@@ -230,18 +252,18 @@ public class DataSource {
                                     "metadata.getModelId()=%s, modelId passed to saveMetadata()=%s",
                             storageMetadata.getModelId(), modelId));
                 }
-                ((HibernateStorage) storage.get()).updateMetadata(storageMetadata);
+                ((HibernateStorage) getStorage()).updateMetadata(storageMetadata);
             } else {
-                ((HibernateStorage) storage.get()).saveMetadata(storageMetadata, modelId);
+                ((HibernateStorage) getStorage()).saveMetadata(storageMetadata, modelId);
             }
         }
     }
 
     public StorageMetadata getMetadata(String modelId) throws StorageReadException {
-        if (storage.get().getDataFormat() == DataFormat.CSV) {
+        if (getStorage().getDataFormat() == DataFormat.CSV) {
             final ObjectMapper mapper = new ObjectMapper();
             mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
-            final ByteBuffer metadataBytes = ((FlatFileStorage) storage.get()).read(modelId + "-" + METADATA_FILENAME);
+            final ByteBuffer metadataBytes = ((FlatFileStorage) getStorage()).read(modelId + "-" + METADATA_FILENAME);
             try {
                 return mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), StorageMetadata.class);
             } catch (JsonProcessingException e) {
@@ -249,7 +271,7 @@ public class DataSource {
                 throw new StorageReadException(e.getMessage());
             }
         } else {
-            return ((HibernateStorage) storage.get()).readMetadata(modelId);
+            return ((HibernateStorage) getStorage()).readMetadata(modelId);
         }
     }
 
@@ -258,10 +280,10 @@ public class DataSource {
     }
 
     public boolean hasMetadata(String modelId) {
-        if (storage.get().getDataFormat() == DataFormat.CSV) {
-            return ((FlatFileStorage) storage.get()).fileExists(modelId + "-" + METADATA_FILENAME);
+        if (getStorage().getDataFormat() == DataFormat.CSV) {
+            return ((FlatFileStorage) getStorage()).fileExists(modelId + "-" + METADATA_FILENAME);
         } else {
-            return ((HibernateStorage) storage.get()).dataframeExists(modelId);
+            return ((HibernateStorage) getStorage()).dataframeExists(modelId);
         }
     }
 

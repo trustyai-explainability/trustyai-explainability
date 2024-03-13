@@ -8,4 +8,8 @@ public interface StorageConfig {
     String dataFilename();
 
     String dataFolder();
+
+    MigrationConfig migrationConfig();
+
+
 }
