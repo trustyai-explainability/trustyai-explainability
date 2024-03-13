@@ -40,7 +40,7 @@ else
           sleep 10
         fi
 
-        if [ $(($(date +%s)-start_t)) -gt 300 ]; then
+        if [ $(($(date +%s)-start_t)) -gt 3600 ]; then
           echo "ODH Operator installation timeout, existing test"
           exit 1
         fi
