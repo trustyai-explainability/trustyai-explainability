@@ -50,7 +50,6 @@ public class TensorConverter {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
         }
-
         int contentsCount = 0;
         try {
             switch (type) {
@@ -231,8 +230,9 @@ public class TensorConverter {
                     for (int batch = 0; batch < firstShape; batch++) {
                         final List<Feature> features = new ArrayList<>();
                         for (int featureIndex = 0; featureIndex < secondShape; featureIndex++) {
-                            String name = featureNames.isPresent() ? featureNames.get().get(featureIndex) : tensor.getName() + "-" + featureIndex;
-                            features.add(rawHandlerSingle(data, tensor, name, secondShape * batch + featureIndex, raw));
+                            final String name = featureNames.isPresent() ? featureNames.get().get(featureIndex) : tensor.getName() + "-" + featureIndex;
+                            final int idx = secondShape * batch + featureIndex;
+                            features.add(rawHandlerSingle(data, tensor, name, idx, raw));
                         }
                         predictionInputs.add(new PredictionInput(features));
                     }

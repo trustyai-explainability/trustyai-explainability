@@ -78,6 +78,8 @@ public class DataSource {
 
         Dataframe df = parser.toDataframe(dataByteBuffer, internalDataByteBuffer, metadata);
         df.setColumnAliases(getJointNameAliases(metadata));
+        df.setInputTensorName(metadata.getInputTensorName());
+        df.setOutputTensorName(metadata.getOutputTensorName());
         return df;
     }
 
@@ -106,6 +108,8 @@ public class DataSource {
 
         Dataframe df = parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
         df.setColumnAliases(getJointNameAliases(metadata));
+        df.setInputTensorName(metadata.getInputTensorName());
+        df.setOutputTensorName(metadata.getOutputTensorName());
         return df;
     }
 
@@ -125,6 +129,8 @@ public class DataSource {
             metadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
             metadata.setModelId(modelId);
             metadata.setObservations(dataframe.getRowDimension());
+            metadata.setInputTensorName(dataframe.getInputTensorName());
+            metadata.setOutputTensorName(dataframe.getOutputTensorName());
             try {
                 saveMetadata(metadata, modelId);
             } catch (StorageWriteException e) {

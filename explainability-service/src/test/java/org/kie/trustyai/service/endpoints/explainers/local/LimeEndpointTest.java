@@ -1,16 +1,23 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.utils.models.TestModels;
+import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
+import org.kie.trustyai.service.endpoints.explainers.GrpcMockServer;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -26,6 +33,7 @@ import jakarta.ws.rs.core.Response;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 @TestProfile(ExplainersEndpointTestProfile.class)
@@ -38,13 +46,21 @@ class LimeEndpointTest {
     Instance<MockDatasource> datasource;
     @Inject
     Instance<MockMemoryStorage> storage;
+    private GrpcMockServer mockServer;
 
     @BeforeEach
-    void populateStorage() {
+    void populateStorage() throws IOException {
         storage.get().emptyStorage();
         final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        mockServer = new GrpcMockServer(TestModels.getSumSkipModel(1));
+        mockServer.start();
+    }
+
+    @AfterEach
+    void tearDown() {
+        mockServer.stop();
     }
 
     @Test
@@ -70,4 +86,41 @@ class LimeEndpointTest {
                 .then()
                 .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
+
+    @Test
+    @DisplayName("Test LIME request with default input tensor name")
+    void testInputTensorName() throws JsonProcessingException {
+        datasource.get().reset();
+        final Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
+        final Random random = new Random();
+        int randomIndex = random.nextInt(dataframe.getIds().size());
+        final String id = dataframe.getIds().get(randomIndex);
+        final LocalExplanationRequest payload = new LocalExplanationRequest();
+        payload.setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.setPredictionId(id);
+
+        final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
+                .when().post()
+                .then()
+                .extract().body().as(SaliencyExplanationResponse.class);
+
+        assertEquals(3, response.getSaliencies().get("income").size());
+
+
+        final Metadata metadata = datasource.get().getMetadata(MODEL_ID);
+        final Set<String> inputNames = Set.of("gender", "race", "age");
+        final Set<String> outputNames = Set.of("income");
+        assertEquals(inputNames, metadata.getInputSchema().getItems().keySet().stream().collect(Collectors.toUnmodifiableSet()));
+        assertEquals(outputNames, metadata.getOutputSchema().getItems().keySet().stream().collect(Collectors.toUnmodifiableSet()));
+
+        final Dataframe storedDataframe = datasource.get().getDataframe(MODEL_ID);
+
+        assertEquals(DataframeMetadata.DEFAULT_INPUT_TENSOR_NAME, metadata.getInputTensorName());
+        assertEquals(DataframeMetadata.DEFAULT_OUTPUT_TENSOR_NAME, metadata.getOutputTensorName());
+        assertEquals(storedDataframe.getInputTensorName(), metadata.getInputTensorName());
+        assertEquals(storedDataframe.getOutputTensorName(), metadata.getOutputTensorName());
+        assertEquals(inputNames, new HashSet<>(storedDataframe.getInputNames()));
+        assertEquals(outputNames, new HashSet<>(storedDataframe.getOutputNames()));
+    }
+
 }

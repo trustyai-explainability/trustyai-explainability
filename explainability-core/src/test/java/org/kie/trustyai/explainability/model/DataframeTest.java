@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -721,5 +722,25 @@ class DataframeTest {
         assertThat(filteredByIdNegated.getRowDimension()).isEqualTo(9);
         Dataframe filteredByIdNegated2 = df.filterRowsById(predictionId, true, 5);
         assertThat(filteredByIdNegated2.getRowDimension()).isEqualTo(5);
+    }
+
+    @Test
+    @DisplayName("Test default tensor names")
+    void testNoTensorNames() {
+        Dataframe df = createTestDataframe(1);
+        assertEquals(DataframeMetadata.DEFAULT_INPUT_TENSOR_NAME, df.getInputTensorName());
+        assertEquals(DataframeMetadata.DEFAULT_OUTPUT_TENSOR_NAME, df.getOutputTensorName());
+    }
+
+    @Test
+    @DisplayName("Test custom tensor names")
+    void testTensorNames() {
+        Dataframe df = createTestDataframe(1);
+        final String inputTensorName = "input-for-test";
+        final String outputTensorName = "output-for-test";
+        df.setInputTensorName(inputTensorName);
+        df.setOutputTensorName(outputTensorName);
+        assertEquals(inputTensorName, df.getInputTensorName());
+        assertEquals(outputTensorName, df.getOutputTensorName());
     }
 }

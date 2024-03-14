@@ -1,6 +1,5 @@
 package org.kie.trustyai.service.data.utils;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.connectors.kserve.v2.PayloadParser;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
@@ -17,7 +15,6 @@ import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
-import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -53,9 +50,7 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
         LOG.debug("Reconciling partial input and output, id=" + id);
 
         // save
-
-        final List<Prediction> prediction = payloadToPrediction(input, output, id, input.getMetadata());
-        final Dataframe dataframe = Dataframe.createFrom(prediction);
+        final Dataframe dataframe = payloadToDataframe(input, output, id, input.getMetadata());
 
         datasource.get().saveDataframe(dataframe, standardizeModelId(modelId));
 
@@ -72,7 +67,7 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
      * @return A {@link Prediction}
      * @throws DataframeCreateException
      */
-    public List<Prediction> payloadToPrediction(InferencePartialPayload inputPayload, InferencePartialPayload outputPayload, String id, Map<String, String> metadata) throws DataframeCreateException {
+    public Dataframe payloadToDataframe(InferencePartialPayload inputPayload, InferencePartialPayload outputPayload, String id, Map<String, String> metadata) throws DataframeCreateException {
         final byte[] inputBytes = Base64.getDecoder().decode(inputPayload.getData().getBytes());
         final byte[] outputBytes = Base64.getDecoder().decode(outputPayload.getData().getBytes());
 
@@ -107,10 +102,17 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
 
         // Aggregate features and outputs
         final int size = predictionInput.size();
-        return IntStream.range(0, size).mapToObj(i -> {
+        final List<Prediction> predictions = IntStream.range(0, size).mapToObj(i -> {
             final PredictionInput pi = predictionInput.get(i);
             final PredictionOutput po = predictionOutput.get(i);
             return new SimplePrediction(pi, po);
         }).collect(Collectors.toCollection(ArrayList::new));
+
+        final Dataframe dataframe = Dataframe.createFrom(predictions);
+
+        dataframe.setInputTensorName(input.getInputs(0).getName());
+        dataframe.setOutputTensorName(output.getOutputs(0).getName());
+
+        return dataframe;
     }
 }
