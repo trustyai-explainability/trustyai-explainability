@@ -5,13 +5,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
-import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
-import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
+import org.kie.trustyai.connectors.kserve.v2.grpc.*;
 import org.kie.trustyai.explainability.model.*;
 
 import io.grpc.stub.StreamObserver;
+import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 
 public class MockInferenceServiceImpl extends GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase {
     private static final Logger logger = Logger.getLogger(MockInferenceServiceImpl.class.getName());
@@ -21,7 +19,7 @@ public class MockInferenceServiceImpl extends GRPCInferenceServiceGrpc.GRPCInfer
         this.predictionProvider = predictionProvider;
     }
 
-    private ModelInferResponse convertToModelInferResponse(List<PredictionOutput> predictionOutputs) {
+    private ModelInferResponse convertToModelInferResponse(List<PredictionOutput> predictionOutputs, boolean synthetic) {
         ModelInferResponse.Builder responseBuilder = ModelInferResponse.newBuilder();
 
         InferTensorContents.Builder tensorContentsBuilder = InferTensorContents.newBuilder();
@@ -39,6 +37,12 @@ public class MockInferenceServiceImpl extends GRPCInferenceServiceGrpc.GRPCInfer
                 .addShape(predictionOutputs.size())
                 .addShape(predictionOutputs.get(0).getOutputs().size());
 
+        if (synthetic) {
+            final InferParameter syntheticParam = InferParameter.getDefaultInstance().toBuilder().setStringParam("true").build();
+            responseBuilder.putParameters(ExplainerEndpoint.BIAS_IGNORE_PARAM, syntheticParam);
+        }
+
+
         responseBuilder.addOutputs(tensorBuilder);
 
         return responseBuilder.build();
@@ -50,7 +54,12 @@ public class MockInferenceServiceImpl extends GRPCInferenceServiceGrpc.GRPCInfer
         try {
             final List<PredictionInput> inputs = TensorConverter.parseKserveModelInferRequest(request);
             final List<PredictionOutput> outputs = predictionProvider.predictAsync(inputs).get();
-            ModelInferResponse response = convertToModelInferResponse(outputs);
+            ModelInferResponse response;
+            if (request.getInputsList().get(0).containsParameters(ExplainerEndpoint.BIAS_IGNORE_PARAM)) {
+                 response = convertToModelInferResponse(outputs, true);
+            } else {
+                response = convertToModelInferResponse(outputs, false);
+            }
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (InterruptedException | ExecutionException e) {
