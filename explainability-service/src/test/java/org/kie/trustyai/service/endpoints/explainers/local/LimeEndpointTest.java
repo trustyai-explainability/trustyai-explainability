@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,6 +61,7 @@ class LimeEndpointTest {
 
     @AfterEach
     void tearDown() {
+        storage.get().emptyStorage();
         mockServer.stop();
     }
 
@@ -102,10 +104,10 @@ class LimeEndpointTest {
         final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
                 .when().post()
                 .then()
+                .statusCode(Response.Status.OK.getStatusCode())
                 .extract().body().as(SaliencyExplanationResponse.class);
 
         assertEquals(3, response.getSaliencies().get("income").size());
-
 
         final Metadata metadata = datasource.get().getMetadata(MODEL_ID);
         final Set<String> inputNames = Set.of("gender", "race", "age");
@@ -121,6 +123,82 @@ class LimeEndpointTest {
         assertEquals(storedDataframe.getOutputTensorName(), metadata.getOutputTensorName());
         assertEquals(inputNames, new HashSet<>(storedDataframe.getInputNames()));
         assertEquals(outputNames, new HashSet<>(storedDataframe.getOutputNames()));
+    }
+
+    @Test
+    @DisplayName("Test LIME request with custom input tensor name")
+    void testInputCustomTensorName() throws JsonProcessingException {
+        datasource.get().reset();
+        storage.get().emptyStorage();
+        final Dataframe _dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        final Metadata _metadata = datasource.get().createMetadata(_dataframe);
+        final String INPUT_NAME = "custom-input-a";
+        final String OUTPUT_NAME = "custom-output-a";
+        _metadata.setInputTensorName(INPUT_NAME);
+        _metadata.setOutputTensorName(OUTPUT_NAME);
+        datasource.get().saveDataframe(_dataframe, MODEL_ID);
+        datasource.get().saveMetadata(_metadata, MODEL_ID);
+
+        final Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
+        final Random random = new Random();
+        int randomIndex = random.nextInt(dataframe.getIds().size());
+        final String id = dataframe.getIds().get(randomIndex);
+        final LocalExplanationRequest payload = new LocalExplanationRequest();
+        payload.setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.setPredictionId(id);
+
+        final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract().body().as(SaliencyExplanationResponse.class);
+
+        assertEquals(3, response.getSaliencies().get("income").size());
+
+        final Metadata metadata = datasource.get().getMetadata(MODEL_ID);
+        final Set<String> inputNames = Set.of("gender", "race", "age");
+        final Set<String> outputNames = Set.of("income");
+        assertEquals(inputNames, metadata.getInputSchema().getItems().keySet().stream().collect(Collectors.toUnmodifiableSet()));
+        assertEquals(outputNames, metadata.getOutputSchema().getItems().keySet().stream().collect(Collectors.toUnmodifiableSet()));
+
+        final Dataframe storedDataframe = datasource.get().getDataframe(MODEL_ID);
+
+        assertEquals(INPUT_NAME, metadata.getInputTensorName());
+        assertEquals(OUTPUT_NAME, metadata.getOutputTensorName());
+        assertEquals(INPUT_NAME, storedDataframe.getInputTensorName());
+        assertEquals(OUTPUT_NAME, storedDataframe.getOutputTensorName());
+        assertEquals(inputNames, new HashSet<>(storedDataframe.getInputNames()));
+        assertEquals(outputNames, new HashSet<>(storedDataframe.getOutputNames()));
+    }
+
+    @Test
+    @DisplayName("Test LIME request should not add observations to bias data")
+    void testInputDataFilter() throws JsonProcessingException {
+        datasource.get().reset();
+
+        final Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
+
+        final int initialSize = dataframe.getRowDimension();
+
+        final Random random = new Random();
+        int randomIndex = random.nextInt(dataframe.getIds().size());
+        final String id = dataframe.getIds().get(randomIndex);
+        final LocalExplanationRequest payload = new LocalExplanationRequest();
+        payload.setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.setPredictionId(id);
+
+        final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract().body().as(SaliencyExplanationResponse.class);
+
+        assertEquals(3, response.getSaliencies().get("income").size());
+
+        final Dataframe storedDataframe = datasource.get().getDataframe(MODEL_ID);
+
+        assertEquals(initialSize, storedDataframe.getRowDimension());
+
     }
 
 }

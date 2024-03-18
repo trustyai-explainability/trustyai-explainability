@@ -63,7 +63,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, String inputName, List<String> outputNames, Map<String, String> optionalParameters) {
-        return new KServeV2GRPCPredictionProvider(kServeConfig, inputName, outputNames, null);
+        return new KServeV2GRPCPredictionProvider(kServeConfig, inputName, outputNames, optionalParameters);
     }
 
     /**
@@ -131,6 +131,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
         final CompletableFuture<ModelInferResponse> futureResponse = ListenableFutureUtils.asCompletableFuture(listenableResponse);
 
-        return futureResponse.thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, inputs.size(), Objects.isNull(this.outputNames) ? Optional.empty() : Optional.of(this.outputNames)));
+        return futureResponse
+                .thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, inputs.size(), Objects.isNull(this.outputNames) ? Optional.empty() : Optional.of(this.outputNames)));
     }
 }

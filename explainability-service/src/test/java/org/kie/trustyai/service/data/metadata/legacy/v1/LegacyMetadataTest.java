@@ -1,10 +1,13 @@
 package org.kie.trustyai.service.data.metadata.legacy.v1;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
@@ -13,13 +16,13 @@ import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -51,6 +54,7 @@ public class LegacyMetadataTest {
         }
 
     }
+
     private static ByteBuffer readFile(String filename) throws IOException {
         String resourcePath = "storage/data/v1/" + filename;
 
@@ -97,8 +101,6 @@ public class LegacyMetadataTest {
         // Old metadata not changed
         assertEquals(DataframeMetadata.DEFAULT_INPUT_TENSOR_NAME, loadedDataframe.getInputTensorName());
         assertEquals(DataframeMetadata.DEFAULT_OUTPUT_TENSOR_NAME, loadedDataframe.getOutputTensorName());
-
-
 
     }
 }
