@@ -1,6 +1,5 @@
 package org.kie.trustyai.service.data.utils;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -81,7 +80,8 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
 
         // Construct record of synthetic data tags
         List<Dataframe.InternalTags> tags = input.getInputsList().stream().map(inferInputTensor -> {
-            if (inferInputTensor.containsParameters(ExplainerEndpoint.BIAS_IGNORE_PARAM) && inferInputTensor.getParametersMap().get(ExplainerEndpoint.BIAS_IGNORE_PARAM).getStringParam().equals("true")) {
+            if (inferInputTensor.containsParameters(ExplainerEndpoint.BIAS_IGNORE_PARAM)
+                    && inferInputTensor.getParametersMap().get(ExplainerEndpoint.BIAS_IGNORE_PARAM).getStringParam().equals("true")) {
                 return Dataframe.InternalTags.SYNTHETIC;
             } else {
                 return Dataframe.InternalTags.UNLABELED;

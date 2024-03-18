@@ -11,8 +11,8 @@ public class SentenceUtils {
     private SentenceUtils() {
     }
 
-    public static String[] splitSentences(String text){
-          try (InputStream modelIn = new FileInputStream("/opennlp/models/en-token.bin")) {
+    public static String[] splitSentences(String text) {
+        try (InputStream modelIn = new FileInputStream("/opennlp/models/en-token.bin")) {
             SentenceDetectorME detector = new SentenceDetectorME(new SentenceModel(modelIn));
             return detector.sentDetect(text);
         } catch (IOException e) {

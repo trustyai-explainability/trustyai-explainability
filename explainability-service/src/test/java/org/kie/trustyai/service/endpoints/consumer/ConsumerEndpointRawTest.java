@@ -54,6 +54,7 @@ class ConsumerEndpointRawTest {
 
     /**
      * Create an input partial payload with no synthetic flag
+     * 
      * @param id
      * @return
      */
@@ -63,6 +64,7 @@ class ConsumerEndpointRawTest {
 
     /**
      * Create an input partial payload with the specified synthetic flag
+     * 
      * @param id
      * @param synthetic
      * @return

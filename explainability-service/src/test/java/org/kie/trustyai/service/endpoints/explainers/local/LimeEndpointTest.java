@@ -1,7 +1,6 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
