@@ -26,7 +26,6 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
     private static final String DEFAULT_TENSOR_NAME = "predict";
     private static final KServeDatatype DEFAULT_DATATYPE = KServeDatatype.FP64;
     private final KServeConfig kServeConfig;
-    private final ManagedChannel channel;
     private final List<String> outputNames;
     private final String inputName;
     private final Map<String, String> optionalParameters;
@@ -34,9 +33,6 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
     private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, String inputName, List<String> outputNames, Map<String, String> optionalParameters) {
 
         this.kServeConfig = kServeConfig;
-        this.channel = ManagedChannelBuilder.forTarget(kServeConfig.getTarget())
-                .usePlaintext()
-                .build();
         this.inputName = inputName;
         this.outputNames = outputNames;
         this.optionalParameters = optionalParameters;
@@ -108,30 +104,37 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
     @Override
     public CompletableFuture<List<PredictionOutput>> predictAsync(List<PredictionInput> inputs) {
-
+        // Guard clauses for inputs validation
         if (inputs.isEmpty()) {
             throw new IllegalArgumentException("Prediction inputs must not be empty.");
         }
-
         final int nFeatures = inputs.get(0).getFeatures().size();
-
         if (nFeatures == 0) {
             throw new IllegalArgumentException("Prediction inputs must have at least one feature.");
         }
 
-        final InferTensorContents.Builder contents = PayloadParser.predictionInputToTensorContents(inputs);
+        // Create a new channel for each prediction request
+        final ManagedChannel localChannel = ManagedChannelBuilder.forTarget(kServeConfig.getTarget())
+                .usePlaintext()
+                .build();
 
-        final ModelInferRequest.InferInputTensor.Builder tensor = buildTensor(contents, inputs.size(), nFeatures);
+        try {
+            final InferTensorContents.Builder contents = PayloadParser.predictionInputToTensorContents(inputs);
+            final ModelInferRequest.InferInputTensor.Builder tensor = buildTensor(contents, inputs.size(), nFeatures);
+            final ModelInferRequest.Builder request = buildRequest(tensor);
 
-        final ModelInferRequest.Builder request = buildRequest(tensor);
+            final GRPCInferenceServiceGrpc.GRPCInferenceServiceFutureStub futureStub = GRPCInferenceServiceGrpc.newFutureStub(localChannel);
 
-        final GRPCInferenceServiceGrpc.GRPCInferenceServiceFutureStub futureStub = GRPCInferenceServiceGrpc.newFutureStub(channel);
+            final ListenableFuture<ModelInferResponse> listenableResponse = futureStub.modelInfer(request.build());
+            final CompletableFuture<ModelInferResponse> futureResponse = ListenableFutureUtils.asCompletableFuture(listenableResponse);
 
-        final ListenableFuture<ModelInferResponse> listenableResponse = futureStub.modelInfer(request.build());
-
-        final CompletableFuture<ModelInferResponse> futureResponse = ListenableFutureUtils.asCompletableFuture(listenableResponse);
-
-        return futureResponse
-                .thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, inputs.size(), Objects.isNull(this.outputNames) ? Optional.empty() : Optional.of(this.outputNames)));
+            return futureResponse
+                    .thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, inputs.size(), Objects.isNull(this.outputNames) ? Optional.empty() : Optional.of(this.outputNames)))
+                    .whenComplete((response, throwable) -> localChannel.shutdown());
+        } catch (Exception e) {
+            localChannel.shutdownNow();
+            throw e;
+        }
     }
+
 }
