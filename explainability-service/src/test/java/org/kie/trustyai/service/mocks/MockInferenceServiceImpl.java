@@ -7,9 +7,9 @@ import java.util.logging.Logger;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.*;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 
 import io.grpc.stub.StreamObserver;
-import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 
 public class MockInferenceServiceImpl extends GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase {
     private static final Logger logger = Logger.getLogger(MockInferenceServiceImpl.class.getName());
@@ -42,7 +42,6 @@ public class MockInferenceServiceImpl extends GRPCInferenceServiceGrpc.GRPCInfer
             responseBuilder.putParameters(ExplainerEndpoint.BIAS_IGNORE_PARAM, syntheticParam);
         }
 
-
         responseBuilder.addOutputs(tensorBuilder);
 
         return responseBuilder.build();
@@ -56,7 +55,7 @@ public class MockInferenceServiceImpl extends GRPCInferenceServiceGrpc.GRPCInfer
             final List<PredictionOutput> outputs = predictionProvider.predictAsync(inputs).get();
             ModelInferResponse response;
             if (request.getInputsList().get(0).containsParameters(ExplainerEndpoint.BIAS_IGNORE_PARAM)) {
-                 response = convertToModelInferResponse(outputs, true);
+                response = convertToModelInferResponse(outputs, true);
             } else {
                 response = convertToModelInferResponse(outputs, false);
             }

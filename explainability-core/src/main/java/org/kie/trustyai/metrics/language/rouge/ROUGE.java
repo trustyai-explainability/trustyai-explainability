@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.kie.trustyai.metrics.language.AbstractNLPPerformanceMetric;
+import org.kie.trustyai.metrics.language.utils.F1Score;
 import org.kie.trustyai.metrics.language.utils.NGramUtils;
 import org.kie.trustyai.metrics.language.utils.SentenceUtils;
-import org.kie.trustyai.metrics.language.utils.F1Score;
 
-public class ROUGE extends AbstractNLPPerformanceMetric<Double, String>{
+public class ROUGE extends AbstractNLPPerformanceMetric<Double, String> {
 
     public enum RougeTypes {
         ROUGE_LSUM,
@@ -31,7 +31,7 @@ public class ROUGE extends AbstractNLPPerformanceMetric<Double, String>{
 
     private RougeTypes rougeType;
 
-    public ROUGE(RougeTypes rougeType){
+    public ROUGE(RougeTypes rougeType) {
         super();
         this.rougeType = rougeType;
     }
@@ -50,9 +50,9 @@ public class ROUGE extends AbstractNLPPerformanceMetric<Double, String>{
      * @return The ROUGE score.
      */
     public Double calculate(String reference, String hypothesis, RougeTypes rougeType) {
-        switch (rougeType){
-            case ROUGE_LSUM:{
-                 // Split the reference and hypothesis into sentences
+        switch (rougeType) {
+            case ROUGE_LSUM: {
+                // Split the reference and hypothesis into sentences
                 final String[] referenceSentences = SentenceUtils.splitSentences(reference);
                 final String[] hypothesisSentences = SentenceUtils.splitSentences(hypothesis);
                 return rougeLsum(referenceSentences, hypothesisSentences);
@@ -64,9 +64,9 @@ public class ROUGE extends AbstractNLPPerformanceMetric<Double, String>{
                 reference = reference.replaceAll("\\p{Punct}", "");
                 hypothesis = hypothesis.replaceAll("\\p{Punct}", "");
                 // Tokenize the reference and hypothesis
-                final List<String> referenceTokens =  Arrays.asList(this.getTokenizer().tokenize(reference));
+                final List<String> referenceTokens = Arrays.asList(this.getTokenizer().tokenize(reference));
                 final List<String> hypothesisTokens = Arrays.asList(this.getTokenizer().tokenize(hypothesis));
-                if (rougeType != rougeType.ROUGEL){
+                if (rougeType != rougeType.ROUGEL) {
                     // Get the ROUGE-N type and calculate the n-grams in the reference and hypothesis accordingly
                     final int n = rougeType.getN();
                     final Map<String, Integer> referenceNgramCount = NGramUtils.countNgrams(referenceTokens, n);
@@ -79,23 +79,24 @@ public class ROUGE extends AbstractNLPPerformanceMetric<Double, String>{
         }
     }
 
-     /**
+    /**
      * Calculate ROUGE-N score given the reference and hypothesis n-gram count
      *
      * @param referenceNgramCount N-grams for reference
      * @param hypothesisNgramCount N-grams for hypothesis
      * @return ROUGE-N score
      */
-    public Double rougeN(Map<String, Integer> referenceNgramCount,  Map<String, Integer> hypothesisNgramCount){
+    public Double rougeN(Map<String, Integer> referenceNgramCount, Map<String, Integer> hypothesisNgramCount) {
         // Initalize total match count between reference and hypothesis tokens
         int totalMatchCount = 0;
 
         // Get length of reference and hypothesis tokens
         int referenceTokensLength = referenceNgramCount.values().stream().mapToInt(Integer::intValue).sum();
-        int hypothesisTokensLength = hypothesisNgramCount.values().stream().mapToInt(Integer::intValue).sum();;
+        int hypothesisTokensLength = hypothesisNgramCount.values().stream().mapToInt(Integer::intValue).sum();
+        ;
 
         // Count matches between reference and hypothesis tokens
-        for (Map.Entry<String, Integer> entry : hypothesisNgramCount.entrySet()){
+        for (Map.Entry<String, Integer> entry : hypothesisNgramCount.entrySet()) {
             final String ngram = entry.getKey();
             final int count = entry.getValue();
             totalMatchCount += Math.min(count, referenceNgramCount.getOrDefault(ngram, 0));
@@ -115,7 +116,7 @@ public class ROUGE extends AbstractNLPPerformanceMetric<Double, String>{
      * @param hypothesisTokens Hypothesis tokens
      * @return ROUGE-L score
      */
-    public Double rougeL(List<String> referenceTokens,  List<String> hypothesisTokens){
+    public Double rougeL(List<String> referenceTokens, List<String> hypothesisTokens) {
         // Initialize matrix to store the number of consecutive token matches between
         // the reference and hypothesis
         int rows = referenceTokens.size();
@@ -124,12 +125,11 @@ public class ROUGE extends AbstractNLPPerformanceMetric<Double, String>{
 
         // Iterate through each reference-hypothesis token pair and add 1 to the previous
         // value of the diagonal if they are equal
-        for (int i=1; i <= rows; i++){
-            for (int j=1; j <= cols; j++){
-                if (referenceTokens.get(i - 1).equals(hypothesisTokens.get(j - 1))){
+        for (int i = 1; i <= rows; i++) {
+            for (int j = 1; j <= cols; j++) {
+                if (referenceTokens.get(i - 1).equals(hypothesisTokens.get(j - 1))) {
                     lcsTable[i][j] = lcsTable[i - 1][j - 1] + 1;
-                }
-                else {
+                } else {
                     lcsTable[i][j] = Math.max(lcsTable[i - 1][j], lcsTable[i][j - 1]);
                 }
             }
@@ -148,14 +148,14 @@ public class ROUGE extends AbstractNLPPerformanceMetric<Double, String>{
      * @param hypothesisSentences A list of hypothesis sentences
      * @return The ROUGE-LSum score
      */
-    public Double rougeLsum(String[] referenceSentences, String[] hypothesisSentences){
+    public Double rougeLsum(String[] referenceSentences, String[] hypothesisSentences) {
         // Initialize F1 score
         double fScore = 0;
 
         // Calculate and aggregate the ROUGE-L score for each reference-hypothesis sentence pair
-        for (int i=0; i < referenceSentences.length; i++){
+        for (int i = 0; i < referenceSentences.length; i++) {
             final List<String> hypothesisTokens = Arrays.asList(this.getTokenizer().tokenize(hypothesisSentences[i]));
-            final List<String> referenceTokens =  Arrays.asList(this.getTokenizer().tokenize(referenceSentences[i]));
+            final List<String> referenceTokens = Arrays.asList(this.getTokenizer().tokenize(referenceSentences[i]));
             fScore += rougeL(referenceTokens, hypothesisTokens);
         }
         // Average the F1 score over the number of reference sentences
