@@ -17,12 +17,15 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wraps a KServe v2-compatible model server as a TrustyAI {@link PredictionProvider}
  */
 public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(KServeV2GRPCPredictionProvider.class);
     private static final String DEFAULT_TENSOR_NAME = "predict";
     private static final KServeDatatype DEFAULT_DATATYPE = KServeDatatype.FP64;
     private final KServeConfig kServeConfig;
@@ -130,9 +133,21 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
             return futureResponse
                     .thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, inputs.size(), Objects.isNull(this.outputNames) ? Optional.empty() : Optional.of(this.outputNames)))
-                    .whenComplete((response, throwable) -> localChannel.shutdown());
+                    .exceptionally(ex -> {
+                        logger.error("Error during model inference: " + ex.getMessage());
+                        // Shutdown the channel
+                        localChannel.shutdown();
+                         throw new RuntimeException("Failed to get inference", ex);
+                    })
+                    .whenComplete((response, throwable) -> {
+                        if (!localChannel.isShutdown()) { // In case channel already closed in .exceptionally()
+                            localChannel.shutdown();
+                        }
+                    });
         } catch (Exception e) {
-            localChannel.shutdownNow();
+            if (!localChannel.isShutdown()) { // In case channel already closed in .exceptionally()
+                localChannel.shutdown();
+            }
             throw e;
         }
     }
