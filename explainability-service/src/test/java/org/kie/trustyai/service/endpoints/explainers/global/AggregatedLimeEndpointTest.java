@@ -61,6 +61,6 @@ class AggregatedLimeEndpointTest {
         given().contentType(ContentType.JSON).body(payload)
                 .when().post()
                 .then()
-                .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+                .statusCode(Response.Status.OK.getStatusCode());
     }
 }
