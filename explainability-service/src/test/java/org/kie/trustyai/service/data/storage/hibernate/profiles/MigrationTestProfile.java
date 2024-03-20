@@ -23,6 +23,7 @@ public class MigrationTestProfile extends BaseTestProfile {
         overrides.put("service.data-format", String.valueOf(BEAN));
         overrides.put("storage.migration-config.from-folder", "/tmp");
         overrides.put("storage.migration-config.from-filename", "data.csv");
+        overrides.put("quarkus.hibernate-orm.active", "true");
         return overrides;
     }
 

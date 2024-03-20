@@ -24,6 +24,7 @@ public class BatchedMigrationTestProfile extends BaseTestProfile {
         overrides.put("storage.migration-config.from-folder", "/tmp");
         overrides.put("storage.migration-config.from-filename", "data.csv");
         overrides.put("service.batch-size", "50");
+        overrides.put("quarkus.hibernate-orm.active", "true");
         return overrides;
     }
 

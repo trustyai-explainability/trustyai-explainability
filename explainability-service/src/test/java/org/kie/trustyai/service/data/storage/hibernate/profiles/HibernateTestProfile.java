@@ -19,6 +19,7 @@ public class HibernateTestProfile extends BaseTestProfile {
         final Map<String, String> overrides = super.getConfigOverrides();
         overrides.put("service.storage-format", String.valueOf(HIBERNATE));
         overrides.put("service.data-format", String.valueOf(DataFormat.BEAN));
+        overrides.put("quarkus.hibernate-orm.active", "true");
         return overrides;
     }
 
