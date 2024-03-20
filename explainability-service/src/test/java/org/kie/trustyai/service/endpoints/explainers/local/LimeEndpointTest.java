@@ -8,10 +8,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
@@ -21,10 +19,8 @@ import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.ModelConfig;
-
-import org.kie.trustyai.service.utils.DataframeGenerators;
-
 import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

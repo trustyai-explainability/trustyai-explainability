@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -19,6 +21,7 @@ import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "StorageSchema")
+@JsonIgnoreProperties(value = { "remapCount" }, allowGetters = true)
 public class Schema {
     private static final Logger LOG = Logger.getLogger(Schema.class);
 

@@ -2,9 +2,13 @@ package org.kie.trustyai.service.payloads.service;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.kie.trustyai.explainability.model.UnderlyingObject;
 import org.kie.trustyai.service.payloads.values.DataType;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -16,9 +20,11 @@ public class SchemaItem {
     private DataType type;
     private String name;
 
+    @JsonAlias({ "values" })
     @ElementCollection
     private Set<UnderlyingObject> columnValues;
 
+    @JsonAlias({ "index" })
     private int columnIndex;
 
     @Id
@@ -53,6 +59,14 @@ public class SchemaItem {
 
     public Set<UnderlyingObject> getColumnValues() {
         return columnValues;
+    }
+
+    // for compatibility with legacy metadata
+    @JsonProperty("values")
+    public void setColumnValuesFromLegacy(Set<Object> values) {
+        this.columnValues =
+                values.stream().map(v -> v instanceof UnderlyingObject ? (UnderlyingObject) v : new UnderlyingObject(v))
+                        .collect(Collectors.toSet());
     }
 
     public void setColumnValues(Set<UnderlyingObject> values) {

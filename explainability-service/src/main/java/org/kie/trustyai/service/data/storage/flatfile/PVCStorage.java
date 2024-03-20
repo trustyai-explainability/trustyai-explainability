@@ -118,7 +118,6 @@ public class PVCStorage extends FlatFileStorage {
         }
     }
 
-
     private boolean pathExists(Path path) {
         return (path.toFile().exists() && path.toFile().isDirectory());
     }
@@ -182,10 +181,9 @@ public class PVCStorage extends FlatFileStorage {
     }
 
     public ByteBuffer read(String filename, int startPos, int endPos) throws StorageReadException {
-        if (endPos <= startPos){
-            throw new IllegalArgumentException("read endPos must be greater than startPos. Got startPos="+startPos + ", endPos="+endPos);
+        if (endPos <= startPos) {
+            throw new IllegalArgumentException("read endPos must be greater than startPos. Got startPos=" + startPos + ", endPos=" + endPos);
         }
-
 
         final Path path = Paths.get(this.dataFolder.toString(), filename);
         final File file = path.toFile();
@@ -197,7 +195,6 @@ public class PVCStorage extends FlatFileStorage {
             throw new StorageWriteException(e.getMessage());
         }
     }
-
 
     @Override
     public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {

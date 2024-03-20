@@ -32,8 +32,8 @@ public class BatchReader {
 
     public static List<String> readEntries(InputStream stream, int startPos, int endPos) throws IOException {
 
-        if (endPos <= startPos){
-            throw new IllegalArgumentException("BatchReader endPos must be greater than startPos. Got startPos="+startPos + ", endPos="+endPos);
+        if (endPos <= startPos) {
+            throw new IllegalArgumentException("BatchReader endPos must be greater than startPos. Got startPos=" + startPos + ", endPos=" + endPos);
         }
 
         final CircularFifoQueue<String> queue = new CircularFifoQueue<>(endPos - startPos);

@@ -5,9 +5,7 @@ import java.util.Set;
 
 import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.storage.DataFormat;
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.h2.H2DatabaseTestResource;

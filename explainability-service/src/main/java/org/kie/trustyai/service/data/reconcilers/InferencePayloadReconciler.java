@@ -3,7 +3,7 @@ package org.kie.trustyai.service.data.reconcilers;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;

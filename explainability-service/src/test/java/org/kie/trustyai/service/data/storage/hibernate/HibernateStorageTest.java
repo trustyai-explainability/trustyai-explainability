@@ -28,7 +28,6 @@ class HibernateStorageTest {
     @Inject
     Instance<MockHibernateStorage> storage;
 
-
     String MODEL_ID = "example_model";
 
     @BeforeEach

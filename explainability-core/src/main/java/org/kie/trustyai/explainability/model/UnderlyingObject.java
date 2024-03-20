@@ -7,7 +7,7 @@ public class UnderlyingObject implements Serializable {
     private Object object;
 
     public UnderlyingObject() {
-        object = null;
+
     }
 
     public UnderlyingObject(Object o) {

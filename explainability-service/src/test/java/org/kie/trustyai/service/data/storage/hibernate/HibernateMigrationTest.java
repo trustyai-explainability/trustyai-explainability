@@ -44,9 +44,9 @@ class HibernateMigrationTest {
     void populateOriginal() {
         datasource.get().setStorageOverride(oldStorage.get());
         for (int i = 0; i < N_DFS; i++) {
-            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME+i + "-data.csv");
-            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME+i + "-metadata.json");
-            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME+i + "-internal_data.csv");
+            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-data.csv");
+            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-metadata.json");
+            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-internal_data.csv");
             datasource.get().saveDataframe(dfs.get(i), MODEL_NAME + i);
         }
 
@@ -57,7 +57,7 @@ class HibernateMigrationTest {
     void retrieveMigratedDF() {
         for (int i = 0; i < N_DFS; i++) {
             Dataframe original = dfs.get(i);
-            Dataframe retrieved =  datasource.get().getDataframe(MODEL_NAME + i);
+            Dataframe retrieved = datasource.get().getDataframe(MODEL_NAME + i);
             DataframeGenerators.roughEqualityCheck(original, retrieved);
         }
     }
@@ -66,15 +66,15 @@ class HibernateMigrationTest {
     void saveOnTopOfMigratedDF() {
         for (int i = 0; i < N_DFS; i++) {
             int dfLen = 100 + i;
-            Dataframe newDF =  DataframeGenerators.generatePositionalHintedDataframe(dfLen, i+ 5);
-            datasource.get().saveDataframe(newDF, MODEL_NAME+i);
+            Dataframe newDF = DataframeGenerators.generatePositionalHintedDataframe(dfLen, i + 5);
+            datasource.get().saveDataframe(newDF, MODEL_NAME + i);
             Dataframe original = dfs.get(i);
 
             // retrieve migrated DF
-            Dataframe retrievedFirst =  datasource.get().getDataframe(MODEL_NAME + i, 0, dfLen);
+            Dataframe retrievedFirst = datasource.get().getDataframe(MODEL_NAME + i, 0, dfLen);
 
             // retrieve normally saved DF after migration
-            Dataframe retrievedSecond =  datasource.get().getDataframe(MODEL_NAME + i, dfLen, dfLen+dfLen);
+            Dataframe retrievedSecond = datasource.get().getDataframe(MODEL_NAME + i, dfLen, dfLen + dfLen);
             DataframeGenerators.roughEqualityCheck(original, retrievedFirst);
             DataframeGenerators.roughEqualityCheck(newDF, retrievedSecond);
         }

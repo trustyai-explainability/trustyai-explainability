@@ -43,6 +43,7 @@ public class DataframeMetadata {
     @ElementCollection
     private final List<Boolean> inputs;
 
+    @Id
     private String id;
 
     private String inputTensorName = DEFAULT_INPUT_TENSOR_NAME;
@@ -214,7 +215,6 @@ public class DataframeMetadata {
     public synchronized void setInput(int i, Boolean input) {
         this.inputs.set(i, input);
     }
-
 
     public void setId(String id) {
         this.id = id;

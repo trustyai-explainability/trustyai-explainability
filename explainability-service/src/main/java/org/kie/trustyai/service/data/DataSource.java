@@ -8,10 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.ejb.Stateless;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Singleton;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -33,7 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
+import jakarta.inject.Singleton;
 
 @Singleton
 public class DataSource {
@@ -162,8 +158,8 @@ public class DataSource {
     }
 
     public Dataframe getDataframe(final String modelId, int startPos, int endPos) throws DataframeCreateException {
-        if (endPos <= startPos){
-            throw new IllegalArgumentException("DataSource.getDataframe endPos must be greater than startPos. Got startPos="+startPos + ", endPos="+endPos);
+        if (endPos <= startPos) {
+            throw new IllegalArgumentException("DataSource.getDataframe endPos must be greater than startPos. Got startPos=" + startPos + ", endPos=" + endPos);
         }
 
         Dataframe df;

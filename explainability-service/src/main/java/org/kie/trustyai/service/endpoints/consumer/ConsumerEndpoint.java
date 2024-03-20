@@ -1,12 +1,9 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.reactive.RestResponse;
-import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
-import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.reconcilers.ModelMeshInferencePayloadReconciler;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;

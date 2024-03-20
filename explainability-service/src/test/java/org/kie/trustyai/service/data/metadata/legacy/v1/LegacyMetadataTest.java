@@ -11,10 +11,12 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.service.BaseTestProfile;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,7 +40,7 @@ public class LegacyMetadataTest {
 
     private static final String MODEL_ID = "demo-loan-nn-onnx-beta";
 
-    private static Metadata readMetadataFile(String filename) throws IOException {
+    private static StorageMetadata readMetadataFile(String filename) throws IOException {
 
         final String resourcePath = "storage/data/v1/" + filename;
 
@@ -50,7 +52,7 @@ public class LegacyMetadataTest {
                 throw new IllegalArgumentException("file not found! " + resourcePath);
             }
 
-            return objectMapper.readValue(is, Metadata.class);
+            return objectMapper.readValue(is, StorageMetadata.class);
         }
 
     }

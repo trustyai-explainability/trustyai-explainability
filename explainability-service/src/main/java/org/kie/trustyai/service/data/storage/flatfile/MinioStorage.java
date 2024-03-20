@@ -207,7 +207,6 @@ public class MinioStorage extends FlatFileStorage {
         throw new StorageReadException("Data read slicing not supported for MinIO storage");
     }
 
-
     @Override
     public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
         save(data, this.dataFilename);

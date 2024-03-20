@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.inject.Singleton;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
@@ -20,15 +18,16 @@ import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
+import org.kie.trustyai.service.data.storage.flatfile.PVCStorage;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import org.kie.trustyai.service.data.storage.flatfile.PVCStorage;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "HIBERNATE")
 @ApplicationScoped
@@ -56,7 +55,6 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
         }
 
     }
-
 
     @PostConstruct
     protected void migrate() {
@@ -138,18 +136,18 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
 
     @Override
     public Dataframe readData(String modelId, int startPos, int endPos) throws StorageReadException {
-        if (endPos <= startPos){
-            throw new IllegalArgumentException("HibernateStorage.readData endPos must be greater than startPos. Got startPos="+startPos + ", endPos="+endPos);
+        if (endPos <= startPos) {
+            throw new IllegalArgumentException("HibernateStorage.readData endPos must be greater than startPos. Got startPos=" + startPos + ", endPos=" + endPos);
         }
 
         LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
         List<DataframeRow> rows = em.createQuery("" +
-                        "select dr from DataframeRow dr" +
-                        " where dr.modelId = ?1 " +
-                        "order by dr.dbId ASC ", DataframeRow.class)
+                "select dr from DataframeRow dr" +
+                " where dr.modelId = ?1 " +
+                "order by dr.dbId ASC ", DataframeRow.class)
                 .setParameter(1, modelId)
                 .setFirstResult(startPos)
-                .setMaxResults(endPos-startPos).getResultList();
+                .setMaxResults(endPos - startPos).getResultList();
         DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
         return Dataframe.untranspose(rows, dm);
     }
@@ -166,7 +164,6 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
                 .setParameter(1, modelId)
                 .getSingleResult();
     }
-
 
     @Override
     @Transactional
@@ -199,7 +196,6 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
         em.persist(storageMetadata);
     }
 
-
     @Transactional
     public void updateMetadata(StorageMetadata storageMetadata) throws StorageWriteException {
         LOG.debug("Updating existing metadata for " + storageMetadata.getModelId() + " in Hibernate");
@@ -216,9 +212,8 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
         }
     }
 
-
     @Override
-    public boolean dataframeExists(String modelId){
+    public boolean dataframeExists(String modelId) {
         try {
             return em.find(DataframeMetadata.class, modelId) != null;
         } catch (EntityNotFoundException e) {
@@ -247,6 +242,5 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
                     .executeUpdate();
         }
     }
-
 
 }

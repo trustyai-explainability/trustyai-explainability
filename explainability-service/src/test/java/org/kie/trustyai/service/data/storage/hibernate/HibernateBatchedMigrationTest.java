@@ -1,11 +1,9 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
-import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.h2.H2DatabaseTestResource;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -15,9 +13,13 @@ import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.h2.H2DatabaseTestResource;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(BatchedMigrationTestProfile.class)
@@ -42,9 +44,9 @@ class HibernateBatchedMigrationTest {
     void populateOriginal() {
         datasource.get().setStorageOverride(oldStorage.get());
         for (int i = 0; i < N_DFS; i++) {
-            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME+i + "-data.csv");
-            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME+i + "-metadata.json");
-            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME+i + "-internal_data.csv");
+            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-data.csv");
+            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-metadata.json");
+            oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-internal_data.csv");
             datasource.get().saveDataframe(dfs.get(i), MODEL_NAME + i);
         }
 
@@ -55,7 +57,7 @@ class HibernateBatchedMigrationTest {
     void retrieveMigratedDF() {
         for (int i = 0; i < N_DFS; i++) {
             Dataframe original = dfs.get(i);
-            Dataframe retrieved =  datasource.get().getDataframe(MODEL_NAME + i);
+            Dataframe retrieved = datasource.get().getDataframe(MODEL_NAME + i);
             DataframeGenerators.roughEqualityCheck(original, retrieved);
         }
     }
@@ -64,15 +66,15 @@ class HibernateBatchedMigrationTest {
     void saveOnTopOfMigratedDF() {
         for (int i = 0; i < N_DFS; i++) {
             int dfLen = 100 + i;
-            Dataframe newDF =  DataframeGenerators.generatePositionalHintedDataframe(dfLen, i+ 5);
-            datasource.get().saveDataframe(newDF, MODEL_NAME+i);
+            Dataframe newDF = DataframeGenerators.generatePositionalHintedDataframe(dfLen, i + 5);
+            datasource.get().saveDataframe(newDF, MODEL_NAME + i);
             Dataframe original = dfs.get(i);
 
             // retrieve migrated DF
-            Dataframe retrievedFirst =  datasource.get().getDataframe(MODEL_NAME + i, 0, dfLen);
+            Dataframe retrievedFirst = datasource.get().getDataframe(MODEL_NAME + i, 0, dfLen);
 
             // retrieve df saved after migrated df
-            Dataframe retrievedSecond =  datasource.get().getDataframe(MODEL_NAME + i, dfLen, dfLen+dfLen);
+            Dataframe retrievedSecond = datasource.get().getDataframe(MODEL_NAME + i, dfLen, dfLen + dfLen);
             DataframeGenerators.roughEqualityCheck(original, retrievedFirst);
             DataframeGenerators.roughEqualityCheck(newDF, retrievedSecond);
         }
