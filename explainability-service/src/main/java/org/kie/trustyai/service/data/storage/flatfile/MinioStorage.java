@@ -125,6 +125,11 @@ public class MinioStorage extends FlatFileStorage {
         throw new StorageReadException("Batch size not supported for MinIO storage");
     }
 
+    @Override
+    public ByteBuffer readData(String modelId, int startPos, int endPos) throws StorageReadException {
+        throw new StorageReadException("Data read slicing not supported for MinIO storage");
+    }
+
     private void saveData(ByteBuffer byteBuffer, String bucketName, String filename) throws StorageWriteException, StorageReadException {
 
         try {
@@ -196,6 +201,12 @@ public class MinioStorage extends FlatFileStorage {
             throw new StorageReadException("Could not read file: " + e.getMessage());
         }
     }
+
+    @Override
+    public ByteBuffer read(String location, int startPos, int endPot) throws StorageReadException {
+        throw new StorageReadException("Data read slicing not supported for MinIO storage");
+    }
+
 
     @Override
     public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {

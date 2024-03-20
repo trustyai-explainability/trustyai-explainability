@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.data.storage.hibernate.HibernateTestProfile;
+import org.kie.trustyai.service.data.storage.hibernate.profiles.HibernateTestProfile;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 

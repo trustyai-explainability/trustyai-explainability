@@ -30,6 +30,31 @@ public class BatchReader {
         return new ArrayList<>(queue);
     }
 
+    public static List<String> readEntries(InputStream stream, int startPos, int endPos) throws IOException {
+
+        if (endPos <= startPos){
+            throw new IllegalArgumentException("BatchReader endPos must be greater than startPos. Got startPos="+startPos + ", endPos="+endPos);
+        }
+
+        final CircularFifoQueue<String> queue = new CircularFifoQueue<>(endPos - startPos);
+
+        int readLines = 0;
+        try (Scanner sc = new Scanner(stream, StandardCharsets.UTF_8)) {
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                queue.add(line);
+                readLines += 1;
+                if (readLines >= endPos) {
+                    break;
+                }
+            }
+            if (sc.ioException() != null) {
+                throw sc.ioException();
+            }
+        }
+        return new ArrayList<>(queue);
+    }
+
     public static InputStream getDataInputStream(String filename) throws FileNotFoundException {
         return new FileInputStream(filename);
     }

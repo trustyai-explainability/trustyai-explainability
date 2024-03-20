@@ -2,16 +2,22 @@ package org.kie.trustyai.service.data.storage.hibernate;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Singleton;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.explainability.model.dataframe.DataframeRow;
 import org.kie.trustyai.service.config.ServiceConfig;
+import org.kie.trustyai.service.config.storage.MigrationConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
+import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
+import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
 
@@ -22,6 +28,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import org.kie.trustyai.service.data.storage.flatfile.PVCStorage;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "HIBERNATE")
 @ApplicationScoped
@@ -31,9 +38,10 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
 
     private static final Logger LOG = Logger.getLogger(HibernateStorage.class);
     private final int batchSize;
+    private Optional<MigrationConfig> migrationConfig = Optional.empty();
 
     public HibernateStorage(ServiceConfig serviceConfig, StorageConfig storageConfig) {
-        LOG.info("Starting Hibernate storage consumer");
+        LOG.info("Starting Hibernate storage consumer" + this);
 
         if (serviceConfig.batchSize().isPresent()) {
             this.batchSize = serviceConfig.batchSize().getAsInt();
@@ -41,6 +49,53 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
             final String message = "Missing data batch size";
             LOG.error(message);
             throw new IllegalArgumentException(message);
+        }
+
+        if (storageConfig.migrationConfig().fromFilename().isPresent() && storageConfig.migrationConfig().fromFolder().isPresent()) {
+            migrationConfig = Optional.of(storageConfig.migrationConfig());
+        }
+
+    }
+
+
+    @PostConstruct
+    protected void migrate() {
+        if (migrationConfig.isPresent()) {
+            MigrationConfig mc = migrationConfig.get();
+            if (mc.fromFolder().isPresent() && mc.fromFilename().isPresent()) {
+                String fromFolder = mc.fromFolder().get();
+                String fromFile = mc.fromFilename().get();
+
+                PVCStorage pvcStorage = new PVCStorage(fromFolder, fromFile, batchSize);
+                DataSource oldDataSource = new DataSource();
+                oldDataSource.setParser(new CSVParser());
+                oldDataSource.setStorageOverride(pvcStorage);
+                List<String> modelIds = pvcStorage.listAllModelIds();
+
+                if (!modelIds.isEmpty()) {
+                    LOG.info("Starting migration");
+                    for (String modelId : modelIds) {
+                        LOG.info("Migrating " + modelId + " metadata");
+                        StorageMetadata sm = oldDataSource.getMetadata(modelId);
+                        saveMetadata(sm, modelId);
+
+                        // batch save the df
+                        int nObs = sm.getObservations();
+                        int startIdx = 0;
+                        while (startIdx < nObs) {
+                            int endIdx = Math.min(startIdx + batchSize, nObs);
+                            LOG.info("Migrating " + modelId + " data, rows " + startIdx + "-" + endIdx + " of " + nObs);
+                            Dataframe df = oldDataSource.getDataframe(modelId, startIdx, endIdx);
+                            save(df, modelId);
+                            startIdx += batchSize;
+                        }
+                    }
+                }
+                LOG.info("Migration complete, the PVC is now safe to remove.");
+                migrationConfig = Optional.empty();
+            } else {
+                throw new IllegalArgumentException("Both migration file and folder must be specified to perform database migration.");
+            }
         }
     }
 
@@ -70,7 +125,6 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
     @Override
     public Dataframe readData(String modelId, int batchSize) throws StorageReadException {
         LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
-
         List<DataframeRow> rows = em.createQuery("" +
                 "select dr from DataframeRow dr" +
                 " where dr.modelId = ?1 " +
@@ -78,6 +132,24 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
                 .setParameter(1, modelId)
                 .setMaxResults(batchSize).getResultList();
         Collections.reverse(rows);
+        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+        return Dataframe.untranspose(rows, dm);
+    }
+
+    @Override
+    public Dataframe readData(String modelId, int startPos, int endPos) throws StorageReadException {
+        if (endPos <= startPos){
+            throw new IllegalArgumentException("HibernateStorage.readData endPos must be greater than startPos. Got startPos="+startPos + ", endPos="+endPos);
+        }
+
+        LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
+        List<DataframeRow> rows = em.createQuery("" +
+                        "select dr from DataframeRow dr" +
+                        " where dr.modelId = ?1 " +
+                        "order by dr.dbId ASC ", DataframeRow.class)
+                .setParameter(1, modelId)
+                .setFirstResult(startPos)
+                .setMaxResults(endPos-startPos).getResultList();
         DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
         return Dataframe.untranspose(rows, dm);
     }
@@ -95,6 +167,7 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
                 .getSingleResult();
     }
 
+
     @Override
     @Transactional
     public void save(Dataframe dataframe, String modelId) throws StorageWriteException {
@@ -105,7 +178,11 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
         }
         DataframeMetadata dm = dataframe.getMetadata();
         dm.setId(modelId);
-        em.persist(dm);
+        if (dataframeExists(modelId)) {
+            em.merge(dm);
+        } else {
+            em.persist(dm);
+        }
     }
 
     @Override
@@ -121,6 +198,7 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
         storageMetadata.setModelId(modelId);
         em.persist(storageMetadata);
     }
+
 
     @Transactional
     public void updateMetadata(StorageMetadata storageMetadata) throws StorageWriteException {
@@ -138,8 +216,9 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
         }
     }
 
+
     @Override
-    public boolean dataframeExists(String modelId) throws StorageReadException {
+    public boolean dataframeExists(String modelId){
         try {
             return em.find(DataframeMetadata.class, modelId) != null;
         } catch (EntityNotFoundException e) {
@@ -168,4 +247,6 @@ public class HibernateStorage extends Storage implements HibernateStorageInterfa
                     .executeUpdate();
         }
     }
+
+
 }

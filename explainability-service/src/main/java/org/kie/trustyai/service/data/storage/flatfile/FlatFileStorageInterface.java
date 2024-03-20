@@ -15,6 +15,8 @@ public interface FlatFileStorageInterface extends StorageInterface {
 
     ByteBuffer readData(String modelId, int batchSize) throws StorageReadException;
 
+    ByteBuffer readData(String modelId, int startPos, int endPos) throws StorageReadException;
+
     boolean dataExists(String modelId) throws StorageReadException;
 
     void save(ByteBuffer data, String location) throws StorageWriteException;
@@ -24,6 +26,8 @@ public interface FlatFileStorageInterface extends StorageInterface {
     void appendData(ByteBuffer data, String modelId) throws StorageWriteException;
 
     ByteBuffer read(String location) throws StorageReadException;
+
+    ByteBuffer read(String location, int startPos, int endPos) throws StorageReadException;
 
     void saveData(ByteBuffer data, String modelId) throws StorageWriteException;
 

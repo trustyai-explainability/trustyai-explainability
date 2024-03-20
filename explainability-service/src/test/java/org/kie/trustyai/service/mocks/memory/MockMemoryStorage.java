@@ -11,7 +11,7 @@ import jakarta.enterprise.inject.Alternative;
 @Mock
 @Alternative
 @ApplicationScoped
-@Priority(1)
+@Priority(2)
 public class MockMemoryStorage extends MemoryStorage {
 
     public MockMemoryStorage() {

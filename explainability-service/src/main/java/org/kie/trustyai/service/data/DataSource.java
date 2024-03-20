@@ -8,7 +8,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import io.quarkus.logging.Log;
+import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -30,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+
 
 @Singleton
 public class DataSource {
@@ -42,25 +45,28 @@ public class DataSource {
 
     @Inject
     Instance<Storage> storage;
+
     Optional<Storage> storageOverride = Optional.empty();
-    
-    
+
     @Inject
     DataParser parser;
     @Inject
     ServiceConfig serviceConfig;
 
+    public void setParser(DataParser parser) {
+        this.parser = parser;
+    }
 
     public void setStorageOverride(Storage storage) {
         this.storageOverride = Optional.of(storage);
     }
-    
-    public void clearStorageOverride(){
+
+    public void clearStorageOverride() {
         this.storageOverride = Optional.empty();
     }
 
-    private Storage getStorage(){
-        if (storageOverride.isPresent()){
+    private Storage getStorage() {
+        if (storageOverride.isPresent()) {
             LOG.debug("Using overridden storage");
             return storageOverride.get();
         } else {
@@ -150,6 +156,46 @@ public class DataSource {
             df = hst.readData(modelId, batchSize);
         }
 
+        return df;
+    }
+
+    public Dataframe getDataframe(final String modelId, int startPos, int endPos) throws DataframeCreateException {
+        if (endPos <= startPos){
+            throw new IllegalArgumentException("DataSource.getDataframe endPos must be greater than startPos. Got startPos="+startPos + ", endPos="+endPos);
+        }
+
+        Dataframe df;
+        if (getStorage().getDataFormat() == DataFormat.CSV) {
+            FlatFileStorage ffst = (FlatFileStorage) getStorage();
+
+            final ByteBuffer byteBuffer;
+            try {
+                byteBuffer = ffst.readData(modelId, startPos, endPos);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException(e.getMessage());
+            }
+
+            final ByteBuffer internalDataByteBuffer;
+            try {
+                internalDataByteBuffer = ffst.read(modelId + "-" + INTERNAL_DATA_FILENAME, startPos, endPos);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException(e.getMessage());
+            }
+
+            // Fetch metadata, if not yet read
+            final StorageMetadata storageMetadata;
+            try {
+                storageMetadata = getMetadata(modelId);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+            }
+
+            df = parser.toDataframe(byteBuffer, internalDataByteBuffer, storageMetadata);
+            df.setColumnAliases(getJointNameAliases(storageMetadata));
+        } else {
+            HibernateStorage hst = (HibernateStorage) getStorage();
+            df = hst.readData(modelId, startPos, endPos);
+        }
         return df;
     }
 

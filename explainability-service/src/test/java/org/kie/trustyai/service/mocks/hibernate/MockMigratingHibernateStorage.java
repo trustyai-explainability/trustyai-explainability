@@ -10,9 +10,9 @@ import jakarta.enterprise.inject.Alternative;
 @Mock
 @Alternative
 @ApplicationScoped
-public class MockHibernateStorage extends HibernateStorage {
-    public MockHibernateStorage() {
-        super(new MockHibernateServiceConfig(), MockHibernateStorageConfigFactory.mock());
+public class MockMigratingHibernateStorage extends HibernateStorage {
+    public MockMigratingHibernateStorage() {
+        super(new MockHibernateServiceConfig(), MockHibernateStorageConfigFactory.migratingMock());
     }
 
 }

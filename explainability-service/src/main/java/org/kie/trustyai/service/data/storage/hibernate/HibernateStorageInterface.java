@@ -16,6 +16,8 @@ public interface HibernateStorageInterface extends StorageInterface {
 
     Dataframe readData(String modelId, int batchSize) throws StorageReadException;
 
+    Dataframe readData(String modelId, int startPos, int endPos) throws StorageReadException;
+
     void save(Dataframe dataframe, String modelId) throws StorageWriteException;
 
     // metadata

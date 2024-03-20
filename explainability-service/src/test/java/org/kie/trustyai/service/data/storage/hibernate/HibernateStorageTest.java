@@ -6,6 +6,7 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.storage.hibernate.profiles.HibernateTestProfile;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
@@ -16,9 +17,6 @@ import io.quarkus.test.junit.TestProfile;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,17 +28,12 @@ class HibernateStorageTest {
     @Inject
     Instance<MockHibernateStorage> storage;
 
-    @PersistenceContext
-    EntityManager em;
 
     String MODEL_ID = "example_model";
 
-    @Transactional
     @BeforeEach
     void emptyStorage() {
         storage.get().clearData(MODEL_ID);
-        em.clear();
-
     }
 
     @Test
@@ -87,6 +80,21 @@ class HibernateStorageTest {
     }
 
     @Test
+    void testSlicedRead() {
+        int nrows = 10;
+        int ncols = 10;
+        int startPos = 5;
+        int endPos = 8;
+
+        Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
+        Dataframe batched = original.filterByRowIndex(IntStream.range(startPos, endPos).boxed().collect(Collectors.toList()));
+
+        storage.get().save(original, MODEL_ID);
+        Dataframe recovered = storage.get().readData(MODEL_ID, startPos, endPos);
+        DataframeGenerators.roughEqualityCheck(batched, recovered);
+    }
+
+    @Test
     void testBatchedWrite() {
         int nrows = 1000;
         int batch = 10;
@@ -97,12 +105,10 @@ class HibernateStorageTest {
         storage.get().save(original, MODEL_ID);
 
         for (int i = 0; i < 5; i++) {
-            long start = System.currentTimeMillis();
             Dataframe appendee = DataframeGenerators.generateRandomNColumnDataframe(batch, ncols);
             original.addPredictions(appendee.asPredictions());
             storage.get().append(appendee, MODEL_ID);
             size += batch;
-            System.out.println(System.currentTimeMillis() - start);
         }
 
         assertEquals(size, storage.get().rowCount(MODEL_ID));

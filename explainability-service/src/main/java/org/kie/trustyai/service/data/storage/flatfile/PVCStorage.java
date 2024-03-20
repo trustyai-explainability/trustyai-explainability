@@ -42,9 +42,9 @@ public class PVCStorage extends FlatFileStorage {
     public PVCStorage(ServiceConfig serviceConfig, StorageConfig storageConfig) {
         super();
 
-        LOG.info("Starting PVC storage consumer");
+        LOG.info("Starting PVC storage consumer: ");
         if (serviceConfig.batchSize().isPresent()) {
-           this.batchSize = serviceConfig.batchSize().getAsInt();
+            this.batchSize = serviceConfig.batchSize().getAsInt();
         } else {
             final String message = "Missing data batch size";
             LOG.error(message);
@@ -61,10 +61,11 @@ public class PVCStorage extends FlatFileStorage {
             LOG.error(message);
             throw new IllegalArgumentException(message);
         }
-        LOG.info("PVC data locations: data=*-" + this.dataPath + ", metadata=*-" + this.metadataPath);
+        LOG.info(
+                "PVC data locations: data=" + Paths.get(storageConfig.dataFolder(), getDataFilename("*")) + ", metadata=" + Paths.get(storageConfig.dataFolder(), "*-" + DataSource.METADATA_FILENAME));
     }
 
-    public PVCStorage(String dataFolder, String dataFilename, int batchSize){
+    public PVCStorage(String dataFolder, String dataFilename, int batchSize) {
         this.batchSize = batchSize;
         this.metadataPath = Paths.get(dataFolder, DataSource.METADATA_FILENAME);
         this.dataFilename = dataFilename;
@@ -76,9 +77,8 @@ public class PVCStorage extends FlatFileStorage {
             LOG.error(message);
             throw new IllegalArgumentException(message);
         }
-        LOG.info("PVC data locations: data=*-" + this.dataPath + ", metadata=*-" + this.metadataPath);
+        LOG.info("PVC data locations: data=" + Paths.get(dataFolder, getDataFilename("*")) + ", metadata=" + Paths.get(dataFolder, "*-" + DataSource.METADATA_FILENAME));
     }
-
 
     @Override
     public ByteBuffer readData(String modelId) throws StorageReadException {
@@ -101,6 +101,23 @@ public class PVCStorage extends FlatFileStorage {
             throw new StorageReadException(e.getMessage());
         }
     }
+
+    @Override
+    public ByteBuffer readData(String modelId, int startPos, int endPos) throws StorageReadException {
+        LOG.debug("Cache miss. Reading data for " + modelId);
+        try {
+            return ByteBuffer.wrap(
+                    BatchReader.linesToBytes(
+                            BatchReader.readEntries(
+                                    BatchReader.getDataInputStream(
+                                            buildDataPath(modelId).toString()),
+                                    startPos, endPos)));
+        } catch (IOException e) {
+            LOG.error("Error reading input file for model " + modelId);
+            throw new StorageReadException(e.getMessage());
+        }
+    }
+
 
     private boolean pathExists(Path path) {
         return (path.toFile().exists() && path.toFile().isDirectory());
@@ -164,6 +181,24 @@ public class PVCStorage extends FlatFileStorage {
         }
     }
 
+    public ByteBuffer read(String filename, int startPos, int endPos) throws StorageReadException {
+        if (endPos <= startPos){
+            throw new IllegalArgumentException("read endPos must be greater than startPos. Got startPos="+startPos + ", endPos="+endPos);
+        }
+
+
+        final Path path = Paths.get(this.dataFolder.toString(), filename);
+        final File file = path.toFile();
+
+        try {
+            final FileInputStream stream = new FileInputStream(file);
+            return ByteBuffer.wrap(BatchReader.linesToBytes(BatchReader.readEntries(stream, startPos, endPos)));
+        } catch (IOException e) {
+            throw new StorageWriteException(e.getMessage());
+        }
+    }
+
+
     @Override
     public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
         save(data, getDataFilename(modelId));
@@ -185,8 +220,12 @@ public class PVCStorage extends FlatFileStorage {
         return fileExists(getDataFilename(modelId));
     }
 
-    public List<String> listAllModelIds(){
-        return Arrays.stream(new File(this.dataFolder.toString()).listFiles((fName) -> fName.getName().contains(dataFilename))).map(File::getName).collect(Collectors.toList());
+    public List<String> listAllModelIds() {
+        return Arrays.stream(new File(this.dataFolder.toString())
+                .listFiles((fName) -> fName.getName().contains(dataFilename) && !fName.getName().contains(DataSource.INTERNAL_DATA_FILENAME)))
+                .map(File::getName)
+                .map(s -> s.substring(0, s.indexOf("-" + dataFilename)))
+                .collect(Collectors.toList());
     }
 
     @Override

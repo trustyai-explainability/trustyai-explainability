@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
@@ -60,6 +61,11 @@ public class MemoryStorage extends FlatFileStorage {
     }
 
     @Override
+    public ByteBuffer readData(String modelId, int startPos, int endPos) throws StorageReadException {
+        throw new NotImplementedException("Sliced file reads not supported by MemoryStorage");
+    }
+
+    @Override
     public boolean dataExists(String modelId) throws StorageReadException {
         return data.containsKey(getDataFilename(modelId));
     }
@@ -92,10 +98,14 @@ public class MemoryStorage extends FlatFileStorage {
         } else {
             throw new StorageReadException("File not found: " + location);
         }
-
     }
 
     @Override
+    public ByteBuffer read(String location, int startPos, int endPos) throws StorageReadException {
+        throw new NotImplementedException("Sliced file reads not supported by MemoryStorage");
+    }
+
+        @Override
     public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
         save(data, getDataFilename(modelId));
     }

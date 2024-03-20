@@ -91,7 +91,7 @@ public class DataframeGenerators {
         for (int i = 0; i < rows; i++) {
             int finalI = i;
             final List<Feature> featureList = IntStream.range(0, columns)
-                    .mapToObj(idx -> FeatureFactory.newTextFeature("f" + idx, String.format("%d,%d", finalI, idx)))
+                    .mapToObj(idx -> FeatureFactory.newCategoricalFeature("f" + idx, String.format("%d,%d", finalI, idx)))
                     .collect(Collectors.toList());
             final PredictionInput predictionInput = new PredictionInput(featureList);
 
