@@ -14,7 +14,6 @@ import com.google.protobuf.ByteString;
 public class PayloadParser {
 
     public static PredictionInput requestToInput(ModelInferRequest request, List<String> inputNames) throws IllegalArgumentException {
-
         // If we don't have raw contents, process with the default parser
         if (request.getRawInputContentsList().isEmpty()) {
             return inputTensorToPredictionInput(request.getInputs(0), inputNames);
@@ -109,16 +108,6 @@ public class PayloadParser {
         }
     }
 
-    public static PredictionOutput responseToOutput(ModelInferResponse response, List<String> outputNames) throws IllegalArgumentException {
-
-        // If we don't have raw contents, process with the default parser
-        if (response.getRawOutputContentsList().isEmpty()) {
-            return outputTensorToPredictionOutput(response.getOutputs(0), outputNames);
-        } else { // We have raw contents and need to parse accordingly
-            return rawContentToPredictionOutput(response, outputNames);
-        }
-    }
-
     public static PredictionOutput rawContentToPredictionOutput(ModelInferResponse response, List<String> outputNames) {
         return rawContentToPredictionOutput(response, outputNames, 0);
     }
@@ -152,7 +141,7 @@ public class PayloadParser {
         }
     }
 
-    // this is less efficient than converting converting everything to a PredictionOutput, so avoid when possible
+    // this is less efficient than converting everything to a PredictionOutput, so avoid when possible
     public static Output rawContentToOutput(ModelInferResponse request, String outputName, int tensorIDX, int outputIDX) throws IllegalArgumentException {
         final ModelInferResponse.InferOutputTensor tensor = request.getOutputs(tensorIDX);
         final ByteString raw = request.getRawOutputContents(tensorIDX);
@@ -238,8 +227,9 @@ public class PayloadParser {
 
         switch (type) {
             case NUMBER:
+                // Default all numeric types to FP64
                 if (object instanceof Integer) {
-                    content.addIntContents((Integer) object);
+                    content.addFp64Contents(((Integer) object).doubleValue());
                 } else if (object instanceof Double) {
                     content.addFp64Contents((Double) object);
                 }

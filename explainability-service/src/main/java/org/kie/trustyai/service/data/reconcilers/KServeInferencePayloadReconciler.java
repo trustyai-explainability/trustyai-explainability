@@ -47,8 +47,7 @@ public class KServeInferencePayloadReconciler extends InferencePayloadReconciler
 
         // Parse input
         // TODO: Add metadata support to KServe payloads and interface
-        final List<Prediction> prediction = payloadToPrediction(input, output, id, null);
-        final Dataframe dataframe = Dataframe.createFrom(prediction);
+        final Dataframe dataframe = payloadToDataframe(input, output, id, null);
 
         datasource.get().saveDataframe(dataframe, modelId);
 
@@ -56,7 +55,7 @@ public class KServeInferencePayloadReconciler extends InferencePayloadReconciler
         unreconciledOutputs.remove(id);
     }
 
-    public List<Prediction> payloadToPrediction(KServeInputPayload inputs, KServeOutputPayload outputs, String id, Map<String, String> metadata) throws DataframeCreateException {
+    public Dataframe payloadToDataframe(KServeInputPayload inputs, KServeOutputPayload outputs, String id, Map<String, String> metadata) throws DataframeCreateException {
 
         final ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode;
@@ -93,7 +92,7 @@ public class KServeInferencePayloadReconciler extends InferencePayloadReconciler
 
         final List<Prediction> predictions = List.of(new SimplePrediction(predictionInput, predictionOutput));
 
-        return predictions;
+        return Dataframe.createFrom(predictions);
     }
 
 }

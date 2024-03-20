@@ -115,6 +115,8 @@ public class DataSource {
 
             df = parser.toDataframe(dataByteBuffer, internalDataByteBuffer, storageMetadata);
             df.setColumnAliases(getJointNameAliases(storageMetadata));
+            df.setInputTensorName(storageMetadata.getInputTensorName());
+            df.setOutputTensorName(storageMetadata.getOutputTensorName());
         } else {
             HibernateStorage hst = (HibernateStorage) getStorage();
             df = hst.readData(modelId);
@@ -192,6 +194,8 @@ public class DataSource {
 
             df = parser.toDataframe(byteBuffer, internalDataByteBuffer, storageMetadata);
             df.setColumnAliases(getJointNameAliases(storageMetadata));
+            df.setInputTensorName(storageMetadata.getInputTensorName());
+            df.setOutputTensorName(storageMetadata.getOutputTensorName());
         } else {
             HibernateStorage hst = (HibernateStorage) getStorage();
             df = hst.readData(modelId, startPos, endPos);
@@ -210,11 +214,14 @@ public class DataSource {
         if (!hasMetadata(modelId) || overwrite) {
             // If metadata is not present, create it
             // alternatively, overwrite existing metadata if requested
+
             final StorageMetadata storageMetadata = new StorageMetadata();
             storageMetadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
             storageMetadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
             storageMetadata.setModelId(modelId);
             storageMetadata.setObservations(dataframe.getRowDimension());
+            storageMetadata.setInputTensorName(dataframe.getInputTensorName());
+            storageMetadata.setOutputTensorName(dataframe.getOutputTensorName());
             try {
                 saveMetadata(storageMetadata, modelId, false);
             } catch (StorageWriteException e) {

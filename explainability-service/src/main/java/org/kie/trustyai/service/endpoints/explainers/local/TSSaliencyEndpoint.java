@@ -48,7 +48,7 @@ public class TSSaliencyEndpoint extends ExplainerEndpoint {
         final KServeConfig kServeConfig = KServeConfig.create(modelConfig.getTarget(), modelConfig.getName(), modelConfig.getVersion(), CodecParameter.NP);
         final Map<String, String> optionalParameters = new HashMap<>();
         optionalParameters.put(BIAS_IGNORE_PARAM, "true");
-        final PredictionProvider originalModel = KServeV2GRPCPredictionProvider.forTarget(kServeConfig, new ArrayList<>(request.getData().keySet()), optionalParameters);
+        final PredictionProvider originalModel = KServeV2GRPCPredictionProvider.forTarget(kServeConfig, null, new ArrayList<>(request.getData().keySet()), optionalParameters);
         final PredictionProvider wrappedModel = new TSSaliencyModelWrapper(originalModel);
 
         // Convert the request data to Prediction Inputs

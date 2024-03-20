@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.logging.Logger;
+import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.payloads.service.Schema;
 
@@ -20,6 +21,9 @@ public class StorageMetadata {
     // List of InputSchema, OutputSchema
     // needed for oneToX abstraction to work
     private List<Schema> schemas = Arrays.asList(new Schema(), new Schema());
+
+    private String inputTensorName = DataframeMetadata.DEFAULT_INPUT_TENSOR_NAME;
+    private String outputTensorName = DataframeMetadata.DEFAULT_OUTPUT_TENSOR_NAME;
 
     private int observations = 0;
 
@@ -95,5 +99,21 @@ public class StorageMetadata {
 
     public void setModelId(String modelId) {
         this.modelId = modelId;
+    }
+
+    public String getInputTensorName() {
+        return inputTensorName;
+    }
+
+    public void setInputTensorName(String inputTensorName) {
+        this.inputTensorName = inputTensorName;
+    }
+
+    public String getOutputTensorName() {
+        return outputTensorName;
+    }
+
+    public void setOutputTensorName(String outputTensorName) {
+        this.outputTensorName = outputTensorName;
     }
 }

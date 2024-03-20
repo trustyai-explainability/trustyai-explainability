@@ -1,11 +1,7 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
@@ -21,25 +17,26 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wraps a KServe v2-compatible model server as a TrustyAI {@link PredictionProvider}
  */
 public class KServeV2GRPCPredictionProvider implements PredictionProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(KServeV2GRPCPredictionProvider.class);
     private static final String DEFAULT_TENSOR_NAME = "predict";
     private static final KServeDatatype DEFAULT_DATATYPE = KServeDatatype.FP64;
     private final KServeConfig kServeConfig;
-    private final ManagedChannel channel;
     private final List<String> outputNames;
+    private final String inputName;
     private final Map<String, String> optionalParameters;
 
-    private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, List<String> outputNames, Map<String, String> optionalParameters) {
+    private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, String inputName, List<String> outputNames, Map<String, String> optionalParameters) {
 
         this.kServeConfig = kServeConfig;
-        this.channel = ManagedChannelBuilder.forTarget(kServeConfig.getTarget())
-                .usePlaintext()
-                .build();
+        this.inputName = inputName;
         this.outputNames = outputNames;
         this.optionalParameters = optionalParameters;
     }
@@ -48,46 +45,43 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
      * Create a {@link KServeV2GRPCPredictionProvider} for a model with an endpoint at {@code target} and named {@code modelName}.
      * In this case, the output names will be generated as {@code output-0}, {@code output-1}, ...
      *
-     * @param target The remote KServe v2 model server
-     * @param modelName The model's name
+     * @param kServeConfig The remote KServe v2 model server configuration
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig) {
-        return KServeV2GRPCPredictionProvider.forTarget(kServeConfig, null, null);
+        return KServeV2GRPCPredictionProvider.forTarget(kServeConfig, null, null, null);
     }
 
     /**
      * Create a {@link KServeV2GRPCPredictionProvider} with an endpoint at {@code target} and named {@code modelName}.
      * In this case, the output names are specified with {@code outputNames}.
      *
-     * @param target The remote KServe v2 model server
-     * @param modelName The model's name
+     * @param kServeConfig The remote KServe v2 model server configuration
      * @param outputNames A {@link List} of output names to be used
+     * @param optionalParameters A {@link Map} of parameters to pass to the gRPC
      * @return A {@link PredictionProvider}
      */
-    public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, List<String> outputNames, Map<String, String> optionalParameters) {
-        return new KServeV2GRPCPredictionProvider(kServeConfig, outputNames, null);
+    public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, String inputName, List<String> outputNames, Map<String, String> optionalParameters) {
+        return new KServeV2GRPCPredictionProvider(kServeConfig, inputName, outputNames, optionalParameters);
     }
 
     /**
      * Create a {@link KServeV2GRPCPredictionProvider} with an endpoint at {@code target} and named {@code modelName}.
      * In this case, the output names are specified with {@code outputNames}.
      *
-     * @param target The remote KServe v2 model server
-     * @param modelName The model's name
-     * @param outputNames A {@link List} of output names to be used
+     * @param kServeConfig The remote KServe v2 model server configuration
      * @param parameters A {@link Map} of parameters to pass to the gRPC method call
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, Map<String, String> parameters) {
-        return new KServeV2GRPCPredictionProvider(kServeConfig, null, parameters);
+        return new KServeV2GRPCPredictionProvider(kServeConfig, null, null, parameters);
     }
 
     private ModelInferRequest.InferInputTensor.Builder buildTensor(InferTensorContents.Builder contents, int nSamples, int nFeatures) {
 
         final ModelInferRequest.InferInputTensor.Builder tensor = ModelInferRequest.InferInputTensor
                 .newBuilder();
-        tensor.setName(DEFAULT_TENSOR_NAME)
+        tensor.setName(inputName != null ? inputName : DEFAULT_TENSOR_NAME)
                 .addShape(nSamples)
                 .addShape(nFeatures)
                 .setDatatype(DEFAULT_DATATYPE.toString())
@@ -111,41 +105,51 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
         return request;
     }
 
-    private List<PredictionOutput> responseToPredictionOutput(ModelInferResponse response) {
-
-        final List<ModelInferResponse.InferOutputTensor> responseOutputs = response.getOutputsList();
-
-        return responseOutputs
-                .stream()
-                .map(tensor -> PayloadParser.outputTensorToPredictionOutput(tensor, this.outputNames))
-                .collect(Collectors.toList());
-    }
-
     @Override
     public CompletableFuture<List<PredictionOutput>> predictAsync(List<PredictionInput> inputs) {
-
+        // Guard clauses for inputs validation
         if (inputs.isEmpty()) {
             throw new IllegalArgumentException("Prediction inputs must not be empty.");
         }
-
         final int nFeatures = inputs.get(0).getFeatures().size();
-
         if (nFeatures == 0) {
             throw new IllegalArgumentException("Prediction inputs must have at least one feature.");
         }
 
-        final InferTensorContents.Builder contents = PayloadParser.predictionInputToTensorContents(inputs);
+        // Create a new channel for each prediction request
+        final ManagedChannel localChannel = ManagedChannelBuilder.forTarget(kServeConfig.getTarget())
+                .usePlaintext()
+                .build();
 
-        final ModelInferRequest.InferInputTensor.Builder tensor = buildTensor(contents, inputs.size(), nFeatures);
+        try {
+            final InferTensorContents.Builder contents = PayloadParser.predictionInputToTensorContents(inputs);
+            final ModelInferRequest.InferInputTensor.Builder tensor = buildTensor(contents, inputs.size(), nFeatures);
+            final ModelInferRequest.Builder request = buildRequest(tensor);
 
-        final ModelInferRequest.Builder request = buildRequest(tensor);
+            final GRPCInferenceServiceGrpc.GRPCInferenceServiceFutureStub futureStub = GRPCInferenceServiceGrpc.newFutureStub(localChannel);
 
-        final GRPCInferenceServiceGrpc.GRPCInferenceServiceFutureStub futureStub = GRPCInferenceServiceGrpc.newFutureStub(channel);
+            final ListenableFuture<ModelInferResponse> listenableResponse = futureStub.modelInfer(request.build());
+            final CompletableFuture<ModelInferResponse> futureResponse = ListenableFutureUtils.asCompletableFuture(listenableResponse);
 
-        final ListenableFuture<ModelInferResponse> listenableResponse = futureStub.modelInfer(request.build());
-
-        final CompletableFuture<ModelInferResponse> futureResponse = ListenableFutureUtils.asCompletableFuture(listenableResponse);
-
-        return futureResponse.thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, inputs.size(), Optional.of(this.outputNames)));
+            return futureResponse
+                    .thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, inputs.size(), Objects.isNull(this.outputNames) ? Optional.empty() : Optional.of(this.outputNames)))
+                    .exceptionally(ex -> {
+                        logger.error("Error during model inference: " + ex.getMessage());
+                        // Shutdown the channel
+                        localChannel.shutdown();
+                         throw new RuntimeException("Failed to get inference", ex);
+                    })
+                    .whenComplete((response, throwable) -> {
+                        if (!localChannel.isShutdown()) { // In case channel already closed in .exceptionally()
+                            localChannel.shutdown();
+                        }
+                    });
+        } catch (Exception e) {
+            if (!localChannel.isShutdown()) { // In case channel already closed in .exceptionally()
+                localChannel.shutdown();
+            }
+            throw e;
+        }
     }
+
 }

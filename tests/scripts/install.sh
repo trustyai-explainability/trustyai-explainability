@@ -1,7 +1,7 @@
 #!/bin/bash
-
 echo "Installing DSC from test directory"
 DSC_FILENAME=odh-core-dsc.yaml
+
 
 set -x
 ## Install the opendatahub-operator
@@ -14,8 +14,16 @@ if ! [ -z "${SKIP_OPERATOR_INSTALL}" ]; then
     ./setup.sh -t ~/peak/operatorsetup 2>&1
 else
   echo "Installing operator from community marketplace"
+
+
   while [[ $retry -gt 0 ]]; do
-    ./setup.sh -o ~/peak/operatorsetup 2>&1
+
+    # patch bug in peak setup script
+    sed -i "s/path=\"{.status.channels.*/ | jq '.status.channels | .[0].currentCSVDesc.installModes | map(select(.type == \"AllNamespaces\")) | .[0].supported')/" setup.sh
+    sed -i "s/csource=.*/echo \$3; csource=\$3/" setup.sh
+    sed -i 's/installop \$.*/installop \${vals[0]} \${vals[1]} \${vals[3]}/' setup.sh
+
+    ./setup.sh -o ~/peak/operatorsetup
     if [ $? -eq 0 ]; then
       retry=-1
     else
@@ -24,7 +32,23 @@ else
       sleep 3m
     fi  
     retry=$(( retry - 1))
-    sleep 1m
+
+    finished=false 2>&1
+    start_t=$(date +%s) 2>&1
+    echo "Verifying installation of ODH operator"
+    while ! $finished; do
+        if [ ! -z "$(oc get pods -n openshift-operators | grep 'opendatahub-operator-controller-manager' | grep '1/1')" ]; then
+          finished=true 2>&1
+        else
+          sleep 10
+        fi
+
+        if [ $(($(date +%s)-start_t)) -gt 300 ]; then
+          echo "ODH Operator installation timeout, existing test"
+          exit 1
+        fi
+    done
+
   done
 fi
 
@@ -94,7 +118,7 @@ else
   oc apply -f ./${DSC_FILENAME}
   kfctl_result=$?
   if [ "$kfctl_result" -ne 0 ]; then
-    echo "The installation failed"a
+    echo "The installation failed"
     exit $kfctl_result
   fi
 fi

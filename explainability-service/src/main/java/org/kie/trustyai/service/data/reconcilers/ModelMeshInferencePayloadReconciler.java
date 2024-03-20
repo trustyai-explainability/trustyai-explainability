@@ -1,15 +1,10 @@
 package org.kie.trustyai.service.data.reconcilers;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.connectors.kserve.v2.PayloadParser;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
@@ -54,9 +49,7 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
         LOG.debug("Reconciling partial input and output, id=" + id);
 
         // save
-
-        final List<Prediction> prediction = payloadToPrediction(input, output, id, input.getMetadata());
-        final Dataframe dataframe = Dataframe.createFrom(prediction);
+        final Dataframe dataframe = payloadToDataframe(input, output, id, input.getMetadata());
 
         datasource.get().saveDataframe(dataframe, standardizeModelId(modelId));
 
@@ -66,6 +59,8 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
 
     /**
      * Convert both input and output {@link InferencePartialPayload} to a TrustyAI {@link Prediction}.
+     * If the input tensor contains a {@link ExplainerEndpoint#BIAS_IGNORE_PARAM} set, then {@link PredictionMetadata}
+     * will be attached marking these inferences as synthetic.
      * 
      * @param inputPayload Input {@link InferencePartialPayload}
      * @param outputPayload Output {@link InferencePartialPayload}
@@ -73,7 +68,7 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
      * @return A {@link Prediction}
      * @throws DataframeCreateException
      */
-    public List<Prediction> payloadToPrediction(InferencePartialPayload inputPayload, InferencePartialPayload outputPayload, String id, Map<String, String> metadata) throws DataframeCreateException {
+    public Dataframe payloadToDataframe(InferencePartialPayload inputPayload, InferencePartialPayload outputPayload, String id, Map<String, String> metadata) throws DataframeCreateException {
         final byte[] inputBytes = Base64.getDecoder().decode(inputPayload.getData().getBytes());
         final byte[] outputBytes = Base64.getDecoder().decode(outputPayload.getData().getBytes());
 
@@ -83,75 +78,59 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
         } catch (InvalidProtocolBufferException e) {
             throw new DataframeCreateException(e.getMessage());
         }
-        final List<PredictionInput> predictionInput;
+
+        // Construct record of synthetic data tags
+        List<Dataframe.InternalTags> tags = input.getInputsList().stream().map(inferInputTensor -> {
+            if (inferInputTensor.containsParameters(ExplainerEndpoint.BIAS_IGNORE_PARAM)
+                    && inferInputTensor.getParametersMap().get(ExplainerEndpoint.BIAS_IGNORE_PARAM).getStringParam().equals("true")) {
+                return Dataframe.InternalTags.SYNTHETIC;
+            } else {
+                return Dataframe.InternalTags.UNLABELED;
+            }
+        }).collect(Collectors.toList());
+        LOG.debug("Payload tags: " + tags);
+
+        final List<PredictionInput> predictionInputs;
         final int enforcedFirstDimension;
         try {
-            predictionInput = TensorConverter.parseKserveModelInferRequest(input);
-            enforcedFirstDimension = predictionInput.size();
+            predictionInputs = TensorConverter.parseKserveModelInferRequest(input);
+            enforcedFirstDimension = predictionInputs.size();
         } catch (IllegalArgumentException e) {
             throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
         }
-        LOG.debug("Prediction input: " + predictionInput);
+        LOG.debug("Prediction input: " + predictionInputs);
         final ModelInferResponse output;
         try {
             output = ModelInferResponse.parseFrom(outputBytes);
         } catch (InvalidProtocolBufferException e) {
             throw new DataframeCreateException(e.getMessage());
         }
-        final List<PredictionOutput> predictionOutput;
+        final List<PredictionOutput> predictionOutputs;
         try {
-            predictionOutput = TensorConverter.parseKserveModelInferResponse(output, enforcedFirstDimension);
+            predictionOutputs = TensorConverter.parseKserveModelInferResponse(output, enforcedFirstDimension);
         } catch (IllegalArgumentException e) {
             throw new DataframeCreateException("Error parsing output payload: " + e.getMessage());
         }
-        LOG.debug("Prediction output: " + predictionOutput);
+        LOG.debug("Prediction output: " + predictionOutputs);
 
         // Aggregate features and outputs
-        final int size = predictionInput.size();
-        return IntStream.range(0, size).mapToObj(i -> {
-            final PredictionInput pi = predictionInput.get(i);
-            final PredictionOutput po = predictionOutput.get(i);
-            return new SimplePrediction(pi, po);
+        final int size = predictionInputs.size();
+        // Use the tensor tag for a batch
+        // If no tags are recorded, use unlabelled by default
+        final String tag = tags.isEmpty() ? Dataframe.InternalTags.UNLABELED.get() : tags.get(0).get();
+        final List<Prediction> predictions = IntStream.range(0, size).mapToObj(i -> {
+            final PredictionInput pi = predictionInputs.get(i);
+            final PredictionOutput po = predictionOutputs.get(i);
+            final PredictionMetadata predictionMetadata = PredictionMetadata.fromTag(tag);
+            return (Prediction) new SimplePrediction(pi, po, predictionMetadata);
+
         }).collect(Collectors.toCollection(ArrayList::new));
-    }
 
-    public Dataframe payloadToDataFrame(byte[] inputs, byte[] outputs, String id, Map<String, String> metadata,
-            String modelId) throws DataframeCreateException {
-        final ModelInferRequest input;
-        try {
-            input = ModelInferRequest.parseFrom(inputs);
-        } catch (InvalidProtocolBufferException e) {
-            throw new DataframeCreateException(e.getMessage());
-        }
-        final PredictionInput predictionInput;
-        try {
-            predictionInput = PayloadParser
-                    .requestToInput(input, null);
-        } catch (IllegalArgumentException e) {
-            throw new DataframeCreateException("Error parsing input payload: " + e.getMessage());
-        }
-        LOG.debug("Prediction input: " + predictionInput.getFeatures());
-        final List<Feature> features = new ArrayList<>(predictionInput.getFeatures());
+        final Dataframe dataframe = Dataframe.createFrom(predictions);
 
-        String datapointTag = metadata.containsKey(ExplainerEndpoint.BIAS_IGNORE_PARAM) ? Dataframe.InternalTags.SYNTHETIC.get() : Dataframe.InternalTags.UNLABELED.get();
-        PredictionMetadata predictionMetadata = new PredictionMetadata(id, LocalDateTime.now(), datapointTag);
+        dataframe.setInputTensorName(input.getInputs(0).getName());
+        dataframe.setOutputTensorName(output.getOutputs(0).getName());
 
-        final ModelInferResponse output;
-        try {
-            output = ModelInferResponse.parseFrom(outputs);
-        } catch (InvalidProtocolBufferException e) {
-            throw new DataframeCreateException(e.getMessage());
-        }
-        final PredictionOutput predictionOutput;
-        try {
-            predictionOutput = PayloadParser
-                    .responseToOutput(output, null);
-        } catch (IllegalArgumentException e) {
-            throw new DataframeCreateException("Error parsing output payload: " + e.getMessage());
-        }
-        LOG.debug("Prediction output: " + predictionOutput.getOutputs());
-
-        Prediction prediction = new SimplePrediction(new PredictionInput(features), predictionOutput, predictionMetadata);
-        return Dataframe.createFrom(prediction);
+        return dataframe;
     }
 }

@@ -28,6 +28,10 @@ public class SaliencyExplanationResponse extends BaseExplanationResponse {
         this.saliencies = saliencies;
     }
 
+    public SaliencyExplanationResponse() {
+        // NO-OP
+    }
+
     @Override
     public String toString() {
         return "SaliencyExplanationResponse{" +

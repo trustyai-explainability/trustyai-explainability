@@ -19,6 +19,8 @@ import jakarta.persistence.OneToMany;
 
 @Entity
 public class DataframeMetadata {
+    public static final String DEFAULT_INPUT_TENSOR_NAME = "input";
+    public static final String DEFAULT_OUTPUT_TENSOR_NAME = "output";
 
     @ElementCollection
     private final List<String> names;
@@ -41,8 +43,10 @@ public class DataframeMetadata {
     @ElementCollection
     private final List<Boolean> inputs;
 
-    @Id
     private String id;
+
+    private String inputTensorName = DEFAULT_INPUT_TENSOR_NAME;
+    private String outputTensorName = DEFAULT_OUTPUT_TENSOR_NAME;
 
     // constructors ====================================================================================================
     public DataframeMetadata() {
@@ -211,11 +215,28 @@ public class DataframeMetadata {
         this.inputs.set(i, input);
     }
 
+
     public void setId(String id) {
         this.id = id;
     }
 
     public String getId() {
         return id;
+    }
+
+    public String getInputTensorName() {
+        return inputTensorName;
+    }
+
+    public void setInputTensorName(String inputTensorName) {
+        this.inputTensorName = inputTensorName;
+    }
+
+    public String getOutputTensorName() {
+        return outputTensorName;
+    }
+
+    public void setOutputTensorName(String outputTensorName) {
+        this.outputTensorName = outputTensorName;
     }
 }

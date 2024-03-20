@@ -33,20 +33,21 @@ public abstract class LocalExplainerEndpoint extends ExplainerEndpoint {
 
     protected Response processRequest(LocalExplanationRequest request, DataSource dataSource, ServiceConfig serviceConfig) {
         try {
-            PredictionProvider model = getModel(request.getModelConfig());
 
-            Dataframe dataframe = dataSource.getDataframe(request.getModelConfig().getName());
+            final Dataframe dataframe = dataSource.getDataframe(request.getModelConfig().getName());
+            final PredictionProvider model = getModel(request.getModelConfig(), dataframe.getInputTensorName());
+
             Prediction predictionToExplain;
-            List<Prediction> predictions = dataframe.filterRowsById(request.getPredictionId()).asPredictions();
+            final List<Prediction> predictions = dataframe.filterRowsById(request.getPredictionId()).asPredictions();
             if (predictions.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("No prediction found with id="
                         + request.getPredictionId()).build();
             } else if (predictions.size() == 1) {
                 predictionToExplain = predictions.get(0);
-                List<PredictionInput> testDataDistribution = dataframe.filterRowsById(request.getPredictionId(), true,
+                final List<PredictionInput> testDataDistribution = dataframe.filterRowsById(request.getPredictionId(), true,
                         serviceConfig.batchSize().orElse(100)).asPredictionInputs();
                 predictionToExplain = prepare(predictionToExplain, request, testDataDistribution);
-                BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution);
+                final BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution);
                 return Response.ok(entity).build();
             } else {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Found " + predictions.size()
