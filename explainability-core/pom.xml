@@ -87,7 +87,7 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-hibernate-orm</artifactId>
-      <version>3.2.7.Final</version>
+      <version>3.2.11.Final</version>
     </dependency>
   </dependencies>
 
