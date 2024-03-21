@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
@@ -341,5 +342,19 @@ class TensorConverterTest {
                 assertTrue(Math.abs(o.getValue().asNumber()) < 3);
             }
         }
+    }
+
+    @Test
+    @DisplayName("Test mismatch between output tensor type and tensor data")
+    void testMismatchOutputTypeData() {
+        final String NAME = "output";
+        final ModelInferResponse.InferOutputTensor outputTensor = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("INT32")
+                .addShape(1).addShape(1).setContents(InferTensorContents.newBuilder().addFp64Contents(1.0)).build();
+        final Output output = TensorConverter.contentsToOutput(outputTensor, NAME, 0);
+        assertEquals(1.0, output.getValue().asNumber());
+        assertEquals(Double.class, output.getValue().getUnderlyingObject().getClass());
+        assertEquals(NAME, output.getName());
+        assertEquals(Type.NUMBER, output.getType());
     }
 }
