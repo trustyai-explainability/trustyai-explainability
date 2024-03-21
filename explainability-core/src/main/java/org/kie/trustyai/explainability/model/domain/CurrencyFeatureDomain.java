@@ -21,10 +21,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+
+@Entity
 public class CurrencyFeatureDomain extends AbstractCategoricalFeatureDomain<Currency> {
 
     private CurrencyFeatureDomain(Set<Currency> categories) {
         super(categories);
+    }
+
+    public CurrencyFeatureDomain() {
+        super(new HashSet<>());
     }
 
     /**
@@ -43,5 +53,12 @@ public class CurrencyFeatureDomain extends AbstractCategoricalFeatureDomain<Curr
 
     public static FeatureDomain<Currency> create(Currency... categories) {
         return new CurrencyFeatureDomain(new HashSet<>(Arrays.asList(categories)));
+    }
+
+    @ElementCollection
+    @Access(AccessType.FIELD)
+    @Override
+    public Set<Currency> getCategories() {
+        return this.categories;
     }
 }

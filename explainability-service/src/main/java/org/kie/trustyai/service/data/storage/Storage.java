@@ -1,11 +1,13 @@
 package org.kie.trustyai.service.data.storage;
 
-import java.nio.file.Path;
+import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
 public abstract class Storage implements StorageInterface {
+    public DataFormat getDataFormat() {
+        return DataFormat.CSV;
+    }
 
-    public abstract String getDataFilename(String modelId);
+    public void save(Object data, String location) throws StorageWriteException {
 
-    public abstract Path buildDataPath(String modelId);
-
+    }
 }

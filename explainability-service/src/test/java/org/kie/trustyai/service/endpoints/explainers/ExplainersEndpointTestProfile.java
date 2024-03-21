@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
 

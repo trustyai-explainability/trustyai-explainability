@@ -2,7 +2,7 @@ package org.kie.trustyai.service.endpoints.metrics.drift;
 
 import java.util.Objects;
 
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;

@@ -26,6 +26,7 @@ tests/artifacts/*
 *.log
 release.properties
 *.releaseBackup
+**/*.db
 pom.xml.tag
 pom.xml.next
 release-pom.xml

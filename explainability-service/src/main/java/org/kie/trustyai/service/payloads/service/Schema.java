@@ -7,22 +7,37 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.MapKey;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
+@Entity
+@Table(name = "StorageSchema")
+@JsonIgnoreProperties(value = { "remapCount" }, allowGetters = true)
 public class Schema {
     private static final Logger LOG = Logger.getLogger(Schema.class);
 
-    private final Map<String, SchemaItem> items;
+    @OneToMany(cascade = CascadeType.ALL)
+    @MapKey(name = "name")
+    private Map<String, SchemaItem> items;
 
-    public int getRemapCount() {
-        return remapCount;
-    }
-
-    public void setRemapCount(int remapCount) {
-        this.remapCount = remapCount;
-    }
-
-    private int remapCount = 0;
+    @ElementCollection
     private Map<String, String> nameMapping = new HashMap<>();
+
+    @Transient
     private Map<String, SchemaItem> mappedItems = new HashMap<>();
+
+    @Id
+    @GeneratedValue
+    private Long id;
 
     public Schema() {
         this.items = new ConcurrentHashMap<>();
@@ -52,7 +67,6 @@ public class Schema {
     private void calculateNameMappedItems() {
         this.mappedItems = new HashMap<>(items);
         if (!nameMapping.isEmpty()) {
-            this.remapCount++;
             // for key, value pair in the name mapping
             for (Map.Entry<String, String> mapping : nameMapping.entrySet()) {
 
@@ -100,5 +114,13 @@ public class Schema {
                 "items=" + items +
                 ", nameMapping=" + nameMapping +
                 '}';
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

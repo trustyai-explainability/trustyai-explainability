@@ -17,29 +17,38 @@ package org.kie.trustyai.explainability.model.domain;
 
 import java.util.Set;
 
-public class EmptyFeatureDomain implements FeatureDomain<Object> {
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
+
+@Entity
+public class EmptyFeatureDomain extends FeatureDomain<Object> {
 
     public static FeatureDomain<Object> create() {
         return new EmptyFeatureDomain();
     }
 
     @Override
+    @Transient
     public boolean isEmpty() {
         return true;
     }
 
     @Override
+    @Transient
     public Double getLowerBound() {
         return null;
     }
 
     @Override
+    @Transient
     public Double getUpperBound() {
         return null;
     }
 
     @Override
+    @Transient
     public Set<Object> getCategories() {
         return null;
     }
+
 }

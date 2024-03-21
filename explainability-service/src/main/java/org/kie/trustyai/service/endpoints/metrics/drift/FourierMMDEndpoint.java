@@ -1,7 +1,7 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMD;
 import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMDFitting;

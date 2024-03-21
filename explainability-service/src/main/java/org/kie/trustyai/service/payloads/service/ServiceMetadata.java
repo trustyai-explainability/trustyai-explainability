@@ -1,11 +1,11 @@
 package org.kie.trustyai.service.payloads.service;
 
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 
 public class ServiceMetadata {
 
     private ServiceMetricsMetadata metrics = new ServiceMetricsMetadata();
-    private Metadata data = new Metadata();
+    private StorageMetadata data = new StorageMetadata();
 
     public ServiceMetadata() {
         // empty constructor
@@ -19,11 +19,11 @@ public class ServiceMetadata {
         this.metrics = metrics;
     }
 
-    public Metadata getData() {
+    public StorageMetadata getData() {
         return data;
     }
 
-    public void setData(Metadata data) {
+    public void setData(StorageMetadata data) {
         this.data = data;
     }
 

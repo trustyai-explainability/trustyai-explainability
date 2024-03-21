@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.utils.PerColumnStatistics;
 import org.kie.trustyai.metrics.utils.PregeneratedNormalData;
 

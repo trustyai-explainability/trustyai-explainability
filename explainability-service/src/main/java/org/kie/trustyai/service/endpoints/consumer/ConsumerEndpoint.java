@@ -4,7 +4,7 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
-import org.kie.trustyai.service.data.utils.ModelMeshInferencePayloadReconciler;
+import org.kie.trustyai.service.data.reconcilers.ModelMeshInferencePayloadReconciler;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
 

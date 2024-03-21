@@ -1,0 +1,41 @@
+x-common-variables: &global-variables
+  QUARKUS_DATASOURCE_USER: quarkus
+  QUARKUS_DATASOURCE_PASSWORD: quarkus
+  QUARKUS_DATASOURCE_DATABASE: trustyai-database
+  MARIADB_ROOT_PASSWORD: root
+  MARIADB_USER: quarkus
+  MARIADB_PASSWORD: quarkus
+  MARIADB_DATABASE: trustyai-database
+
+services:
+  trustyai-db-container:
+    networks:
+      - data-connection
+    container_name: trustyai-db-container
+    healthcheck:
+      interval: 30s
+      retries: 3
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--su-mysql",
+          "--connect",
+          "--innodb_initialized"
+        ]
+      timeout: 30s
+    ports:
+      - 3306:3306
+    expose:
+      - 3306
+    volumes:
+      - trustyai-db-container:/var/lib/mysql/
+    environment:
+      <<: *global-variables
+    image: mariadb
+volumes:
+  prom_data:
+  trustyai-db-container:
+
+networks:
+  data-connection:
