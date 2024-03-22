@@ -16,7 +16,7 @@ import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.BaseTestProfile;
+import org.kie.trustyai.service.profiles.MemoryTestProfile;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
@@ -42,7 +42,7 @@ import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
  * Test the {@link ConsumerEndpoint} with raw content payloads.
  */
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
 class ConsumerEndpointRawTest {
 

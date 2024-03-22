@@ -5,7 +5,7 @@ import java.util.List;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.service.BaseTestProfile;
+import org.kie.trustyai.service.profiles.MemoryTestProfile;
 import org.kie.trustyai.service.endpoints.service.ServiceMetadataEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
@@ -23,7 +23,7 @@ import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(ServiceMetadataEndpoint.class)
 class ServiceMetadataEndpointTest {
 

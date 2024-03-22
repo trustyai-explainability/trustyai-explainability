@@ -1,4 +1,4 @@
-package org.kie.trustyai.service;
+package org.kie.trustyai.service.profiles;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +13,7 @@ import io.quarkus.test.junit.QuarkusTestProfile;
 import static org.kie.trustyai.service.data.storage.DataFormat.CSV;
 import static org.kie.trustyai.service.data.storage.StorageFormat.MEMORY;
 
-public class BaseTestProfile implements QuarkusTestProfile {
+public class MemoryTestProfile implements QuarkusTestProfile {
     @Override
     public Map<String, String> getConfigOverrides() {
         final Map<String, String> overrides = new HashMap<>();

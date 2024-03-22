@@ -24,6 +24,16 @@ public interface StorageInterface {
 
     ByteBuffer read(String location) throws StorageReadException;
 
+    /**
+     * Read {@link ByteBuffer} from the file system, for a given filename and batch size.
+     *
+     * @param location The filename to read
+     * @param batchSize The batch size
+     * @return A {@link ByteBuffer} containing the data
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    ByteBuffer read(String location, int batchSize) throws StorageReadException;
+
     void saveData(ByteBuffer data, String modelId) throws StorageWriteException;
 
     boolean fileExists(String location) throws StorageReadException;

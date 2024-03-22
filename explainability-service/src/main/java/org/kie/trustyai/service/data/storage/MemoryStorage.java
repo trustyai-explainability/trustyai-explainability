@@ -94,6 +94,34 @@ public class MemoryStorage extends Storage {
 
     }
 
+    /**
+     * Read {@link ByteBuffer} from the memory storage, for a given filename and batch size.
+     * @param location The filename to read
+     * @param batchSize The batch size
+     * @return A {@link ByteBuffer} containing the data
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    @Override
+    public ByteBuffer read(String location, int batchSize) throws StorageReadException {
+        if (data.containsKey(location)) {
+            final String content = data.get(location);
+            final String[] lines = content.split("\n");
+
+            final int start = Math.max(0, lines.length - batchSize);
+
+            final StringBuilder lastLines = new StringBuilder();
+            for (int i = start; i < lines.length; i++) {
+                lastLines.append(lines[i]);
+                if (i < lines.length - 1) {
+                    lastLines.append("\n");
+                }
+            }
+            return ByteBuffer.wrap(lastLines.toString().getBytes());
+        } else {
+            throw new StorageReadException("File not found: " + location);
+        }
+    }
+
     @Override
     public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
         save(data, getDataFilename(modelId));
