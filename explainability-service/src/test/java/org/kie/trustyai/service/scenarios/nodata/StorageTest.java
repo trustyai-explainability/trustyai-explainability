@@ -38,6 +38,7 @@ class StorageTest {
     @BeforeEach
     void emptyStorage() {
         datasource.get().empty();
+        storage.get().emptyStorage();
     }
 
     @Test

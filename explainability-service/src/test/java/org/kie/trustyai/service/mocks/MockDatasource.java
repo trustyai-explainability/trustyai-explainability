@@ -158,7 +158,6 @@ public class MockDatasource extends DataSource {
     }
 
     public void empty() {
-//        storage.get().emptyStorage();
         this.knownModels.clear();
     }
 

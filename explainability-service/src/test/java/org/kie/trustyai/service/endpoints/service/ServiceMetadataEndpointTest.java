@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.profiles.MemoryTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
@@ -47,10 +48,14 @@ class ServiceMetadataEndpointTest {
     Instance<MockDatasource> datasource;
 
     @Inject
+    Instance<MockMemoryStorage> storage;
+
+    @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
     @BeforeEach
     void clearStorage() {
+        storage.get().emptyStorage();
         datasource.get().empty();
         scheduler.get().empty();
     }
