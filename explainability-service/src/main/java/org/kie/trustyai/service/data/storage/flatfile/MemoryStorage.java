@@ -37,13 +37,13 @@ public class MemoryStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer readData(final String modelId) throws StorageReadException {
+    public ByteBuffer readDataframe(final String modelId) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);
-        return readData(modelId, this.batchSize);
+        return readDataframe(modelId, this.batchSize);
     }
 
     @Override
-    public ByteBuffer readData(String modelId, int batchSize) throws StorageReadException {
+    public ByteBuffer readDataframe(String modelId, int batchSize) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);
         final String key = getDataFilename(modelId);
         if (data.containsKey(key)) {
@@ -61,7 +61,7 @@ public class MemoryStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer readData(String modelId, int startPos, int endPos) throws StorageReadException {
+    public ByteBuffer readDataframe(String modelId, int startPos, int endPos) throws StorageReadException {
         throw new NotImplementedException("Sliced file reads not supported by MemoryStorage");
     }
 
@@ -71,7 +71,7 @@ public class MemoryStorage extends FlatFileStorage {
     }
 
     @Override
-    public void save(ByteBuffer data, String location) throws StorageWriteException {
+    public void saveDataframe(ByteBuffer data, String location) throws StorageWriteException {
         final String stringData = new String(data.array(), StandardCharsets.UTF_8);
         LOG.debug("Saving data to " + location);
         this.data.put(location, stringData);
@@ -87,12 +87,12 @@ public class MemoryStorage extends FlatFileStorage {
     }
 
     @Override
-    public void appendData(ByteBuffer data, String modelId) throws StorageWriteException {
+    public void appendMetaOrInternalData(ByteBuffer data, String modelId) throws StorageWriteException {
         append(data, getDataFilename(modelId));
     }
 
     @Override
-    public ByteBuffer read(String location) throws StorageReadException {
+    public ByteBuffer readMetaOrInternalData(String location) throws StorageReadException {
         if (data.containsKey(location)) {
             return ByteBuffer.wrap(data.get(location).getBytes());
         } else {
@@ -101,13 +101,13 @@ public class MemoryStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer read(String location, int startPos, int endPos) throws StorageReadException {
+    public ByteBuffer readMetaOrInternalData(String location, int startPos, int endPos) throws StorageReadException {
         throw new NotImplementedException("Sliced file reads not supported by MemoryStorage");
     }
 
     @Override
-    public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
-        save(data, getDataFilename(modelId));
+    public void saveMetaOrInternalData(ByteBuffer data, String modelId) throws StorageWriteException {
+        saveDataframe(data, getDataFilename(modelId));
     }
 
     @Override
@@ -128,7 +128,7 @@ public class MemoryStorage extends FlatFileStorage {
     @Override
     public long getLastModified(final String modelId) {
         final Checksum crc32 = new CRC32();
-        crc32.update(readData(modelId));
+        crc32.update(readDataframe(modelId));
         return crc32.getValue();
     }
 }

@@ -78,8 +78,8 @@ public class LegacyMetadataTest {
     @BeforeEach
     void emptyStorage() throws IOException {
         storage.get().emptyStorage();
-        storage.get().save(readFile("demo-loan-nn-onnx-beta-data.csv"), "demo-loan-nn-onnx-beta-data.csv");
-        storage.get().save(readFile("demo-loan-nn-onnx-beta-internal_data.csv"), "demo-loan-nn-onnx-beta-internal_data.csv");
+        storage.get().saveDataframe(readFile("demo-loan-nn-onnx-beta-data.csv"), "demo-loan-nn-onnx-beta-data.csv");
+        storage.get().saveDataframe(readFile("demo-loan-nn-onnx-beta-internal_data.csv"), "demo-loan-nn-onnx-beta-internal_data.csv");
         datasource.get().saveMetadata(readMetadataFile("demo-loan-nn-onnx-beta-metadata.json"), "demo-loan-nn-onnx-beta");
     }
 

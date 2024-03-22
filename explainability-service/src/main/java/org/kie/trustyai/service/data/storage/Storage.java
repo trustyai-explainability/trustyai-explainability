@@ -1,13 +1,8 @@
 package org.kie.trustyai.service.data.storage;
 
-import org.kie.trustyai.service.data.exceptions.StorageWriteException;
-
-public abstract class Storage implements StorageInterface {
+public abstract class Storage<DATAFRAME_TYPE, AUX_DATA_TYPE> implements StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
     public DataFormat getDataFormat() {
         return DataFormat.CSV;
     }
 
-    public void save(Object data, String location) throws StorageWriteException {
-
-    }
 }

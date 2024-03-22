@@ -1,10 +1,11 @@
 package org.kie.trustyai.service.data.storage.flatfile;
 
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
 import org.kie.trustyai.service.data.storage.Storage;
 
-public abstract class FlatFileStorage extends Storage implements FlatFileStorageInterface {
+public abstract class FlatFileStorage extends Storage<ByteBuffer, ByteBuffer> implements FlatFileStorageInterface {
 
     public abstract String getDataFilename(String modelId);
 
