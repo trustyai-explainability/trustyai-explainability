@@ -30,7 +30,7 @@ class HibernateStoragePerformanceTest extends PerformanceTest {
     @BeforeAll
     void emptyStorage() {
         storage.get().clearData(MODEL_ID);
-        storage.get().save(generateDF(), MODEL_ID);
+        storage.get().saveDataframe(generateDF(), MODEL_ID);
 
         for (int i = 0; i < N_DF_COPIES; i++) {
             storage.get().append(generateDF(), MODEL_ID);
@@ -43,7 +43,7 @@ class HibernateStoragePerformanceTest extends PerformanceTest {
     void testBatchedRead() {
         test((i) -> {
             Dataframe batched = last.filterByRowIndex(IntStream.range(N_ROWS - randomBatchSizes[(int) i], N_ROWS).boxed().collect(Collectors.toList()));
-            Dataframe df = storage.get().readData(MODEL_ID, randomBatchSizes[(int) i]);
+            Dataframe df = storage.get().readDataframe(MODEL_ID, randomBatchSizes[(int) i]);
             DataframeGenerators.roughEqualityCheck(batched, df);
 
         });

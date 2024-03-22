@@ -40,9 +40,9 @@ public class DataSource {
     protected final Set<String> knownModels = new HashSet<>();
 
     @Inject
-    Instance<Storage> storage;
+    Instance<Storage<?, ?>> storage;
 
-    Optional<Storage> storageOverride = Optional.empty();
+    Optional<Storage<?, ?>> storageOverride = Optional.empty();
 
     @Inject
     DataParser parser;
@@ -89,14 +89,14 @@ public class DataSource {
 
             final ByteBuffer dataByteBuffer;
             try {
-                dataByteBuffer = ffst.readData(modelId);
+                dataByteBuffer = ffst.readDataframe(modelId);
             } catch (StorageReadException e) {
                 throw new DataframeCreateException(e.getMessage());
             }
 
             final ByteBuffer internalDataByteBuffer;
             try {
-                internalDataByteBuffer = ffst.read(modelId + "-" + INTERNAL_DATA_FILENAME);
+                internalDataByteBuffer = ffst.readMetaOrInternalData(modelId + "-" + INTERNAL_DATA_FILENAME);
             } catch (StorageReadException e) {
                 throw new DataframeCreateException(e.getMessage());
             }
@@ -115,7 +115,7 @@ public class DataSource {
             df.setOutputTensorName(storageMetadata.getOutputTensorName());
         } else {
             HibernateStorage hst = (HibernateStorage) getStorage();
-            df = hst.readData(modelId);
+            df = hst.readDataframe(modelId);
         }
         return df;
     }
@@ -127,14 +127,14 @@ public class DataSource {
 
             final ByteBuffer byteBuffer;
             try {
-                byteBuffer = ffst.readData(modelId, batchSize);
+                byteBuffer = ffst.readDataframe(modelId, batchSize);
             } catch (StorageReadException e) {
                 throw new DataframeCreateException(e.getMessage());
             }
 
             final ByteBuffer internalDataByteBuffer;
             try {
-                internalDataByteBuffer = ffst.read(modelId + "-" + INTERNAL_DATA_FILENAME);
+                internalDataByteBuffer = ffst.readMetaOrInternalData(modelId + "-" + INTERNAL_DATA_FILENAME);
             } catch (StorageReadException e) {
                 throw new DataframeCreateException(e.getMessage());
             }
@@ -151,7 +151,7 @@ public class DataSource {
             df.setColumnAliases(getJointNameAliases(storageMetadata));
         } else {
             HibernateStorage hst = (HibernateStorage) getStorage();
-            df = hst.readData(modelId, batchSize);
+            df = hst.readDataframe(modelId, batchSize);
         }
 
         return df;
@@ -168,14 +168,14 @@ public class DataSource {
 
             final ByteBuffer byteBuffer;
             try {
-                byteBuffer = ffst.readData(modelId, startPos, endPos);
+                byteBuffer = ffst.readDataframe(modelId, startPos, endPos);
             } catch (StorageReadException e) {
                 throw new DataframeCreateException(e.getMessage());
             }
 
             final ByteBuffer internalDataByteBuffer;
             try {
-                internalDataByteBuffer = ffst.read(modelId + "-" + INTERNAL_DATA_FILENAME, startPos, endPos);
+                internalDataByteBuffer = ffst.readMetaOrInternalData(modelId + "-" + INTERNAL_DATA_FILENAME, startPos, endPos);
             } catch (StorageReadException e) {
                 throw new DataframeCreateException(e.getMessage());
             }
@@ -194,7 +194,7 @@ public class DataSource {
             df.setOutputTensorName(storageMetadata.getOutputTensorName());
         } else {
             HibernateStorage hst = (HibernateStorage) getStorage();
-            df = hst.readData(modelId, startPos, endPos);
+            df = hst.readDataframe(modelId, startPos, endPos);
         }
         return df;
     }
@@ -254,16 +254,16 @@ public class DataSource {
             FlatFileStorage ffst = (FlatFileStorage) getStorage();
             ByteBuffer[] byteBuffers = parser.toByteBuffers(dataframe, false);
             if (!ffst.dataExists(modelId) || overwrite) {
-                ffst.saveData(byteBuffers[0], modelId);
-                ffst.save(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
+                ffst.saveMetaOrInternalData(byteBuffers[0], modelId);
+                ffst.saveDataframe(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
             } else {
-                ffst.appendData(byteBuffers[0], modelId);
+                ffst.appendMetaOrInternalData(byteBuffers[0], modelId);
                 ffst.append(byteBuffers[1], modelId + "-" + INTERNAL_DATA_FILENAME);
             }
         } else {
             HibernateStorage hst = (HibernateStorage) getStorage();
-            if (!hst.dataframeExists(modelId) || overwrite) {
-                hst.save(dataframe, modelId);
+            if (!hst.dataExists(modelId) || overwrite) {
+                hst.saveDataframe(dataframe, modelId);
             } else {
                 hst.append(dataframe, modelId);
             }
@@ -292,7 +292,7 @@ public class DataSource {
                 throw new StorageWriteException("Could not save metadata: " + e.getMessage());
             }
 
-            ((FlatFileStorage) getStorage()).save(byteBuffer, modelId + "-" + METADATA_FILENAME);
+            ((FlatFileStorage) getStorage()).saveDataframe(byteBuffer, modelId + "-" + METADATA_FILENAME);
         } else {
             if (isUpdate) {
                 if (!storageMetadata.getModelId().equals(modelId)) {
@@ -303,7 +303,7 @@ public class DataSource {
                 }
                 ((HibernateStorage) getStorage()).updateMetadata(storageMetadata);
             } else {
-                ((HibernateStorage) getStorage()).saveMetadata(storageMetadata, modelId);
+                ((HibernateStorage) getStorage()).saveMetaOrInternalData(storageMetadata, modelId);
             }
         }
     }
@@ -312,7 +312,7 @@ public class DataSource {
         if (getStorage().getDataFormat() == DataFormat.CSV) {
             final ObjectMapper mapper = new ObjectMapper();
             mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
-            final ByteBuffer metadataBytes = ((FlatFileStorage) getStorage()).read(modelId + "-" + METADATA_FILENAME);
+            final ByteBuffer metadataBytes = ((FlatFileStorage) getStorage()).readMetaOrInternalData(modelId + "-" + METADATA_FILENAME);
             try {
                 return mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), StorageMetadata.class);
             } catch (JsonProcessingException e) {
@@ -320,7 +320,7 @@ public class DataSource {
                 throw new StorageReadException(e.getMessage());
             }
         } else {
-            return ((HibernateStorage) getStorage()).readMetadata(modelId);
+            return ((HibernateStorage) getStorage()).readMetaOrInternalData(modelId);
         }
     }
 
@@ -332,7 +332,7 @@ public class DataSource {
         if (getStorage().getDataFormat() == DataFormat.CSV) {
             return ((FlatFileStorage) getStorage()).fileExists(modelId + "-" + METADATA_FILENAME);
         } else {
-            return ((HibernateStorage) getStorage()).dataframeExists(modelId);
+            return ((HibernateStorage) getStorage()).dataExists(modelId);
         }
     }
 

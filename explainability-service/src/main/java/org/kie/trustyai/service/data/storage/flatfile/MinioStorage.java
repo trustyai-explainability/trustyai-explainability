@@ -110,7 +110,7 @@ public class MinioStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer readData(String modelId) throws StorageReadException {
+    public ByteBuffer readDataframe(String modelId) throws StorageReadException {
         isObjectAvailable(this.bucketName, this.dataFilename);
         try {
             return ByteBuffer.wrap(readFile(this.bucketName, this.dataFilename));
@@ -121,12 +121,12 @@ public class MinioStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer readData(String modelId, int batchSize) throws StorageReadException {
+    public ByteBuffer readDataframe(String modelId, int batchSize) throws StorageReadException {
         throw new StorageReadException("Batch size not supported for MinIO storage");
     }
 
     @Override
-    public ByteBuffer readData(String modelId, int startPos, int endPos) throws StorageReadException {
+    public ByteBuffer readDataframe(String modelId, int startPos, int endPos) throws StorageReadException {
         throw new StorageReadException("Data read slicing not supported for MinIO storage");
     }
 
@@ -179,7 +179,7 @@ public class MinioStorage extends FlatFileStorage {
     }
 
     @Override
-    public void save(ByteBuffer data, String location) throws StorageWriteException {
+    public void saveDataframe(ByteBuffer data, String location) throws StorageWriteException {
         saveData(data, this.bucketName, location);
     }
 
@@ -189,12 +189,12 @@ public class MinioStorage extends FlatFileStorage {
     }
 
     @Override
-    public void appendData(ByteBuffer data, String modelId) throws StorageWriteException {
+    public void appendMetaOrInternalData(ByteBuffer data, String modelId) throws StorageWriteException {
         append(data, this.dataFilename);
     }
 
     @Override
-    public ByteBuffer read(String location) throws StorageReadException {
+    public ByteBuffer readMetaOrInternalData(String location) throws StorageReadException {
         try {
             return ByteBuffer.wrap(readFile(this.bucketName, location));
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
@@ -203,13 +203,13 @@ public class MinioStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer read(String location, int startPos, int endPot) throws StorageReadException {
+    public ByteBuffer readMetaOrInternalData(String location, int startPos, int endPot) throws StorageReadException {
         throw new StorageReadException("Data read slicing not supported for MinIO storage");
     }
 
     @Override
-    public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
-        save(data, this.dataFilename);
+    public void saveMetaOrInternalData(ByteBuffer data, String modelId) throws StorageWriteException {
+        saveDataframe(data, this.dataFilename);
     }
 
     @Override

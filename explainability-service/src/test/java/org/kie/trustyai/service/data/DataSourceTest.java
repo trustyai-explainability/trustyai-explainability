@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class DataSourceTest {
 
     @Inject
-    Instance<Storage> storage;
+    Instance<Storage<?, ?>> storage;
 
     @Test
     void testSavingAndReadingDataframe() {

@@ -1,5 +1,9 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -38,8 +42,8 @@ class HibernateStorageTest {
     @Test
     void testWrite() {
         Dataframe df = DataframeGenerators.generateRandomNColumnDataframe(100, 10);
-        storage.get().save(df, MODEL_ID);
-        assertTrue(storage.get().dataframeExists(MODEL_ID));
+        storage.get().saveDataframe(df, MODEL_ID);
+        assertTrue(storage.get().dataExists(MODEL_ID));
     }
 
     @Test
@@ -48,8 +52,8 @@ class HibernateStorageTest {
         int ncols = 10;
 
         Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
-        storage.get().save(original, MODEL_ID);
-        Dataframe recovered = storage.get().readData(MODEL_ID, nrows);
+        storage.get().saveDataframe(original, MODEL_ID);
+        Dataframe recovered = storage.get().readDataframe(MODEL_ID, nrows);
         DataframeGenerators.roughEqualityCheck(original, recovered);
     }
 
@@ -59,7 +63,7 @@ class HibernateStorageTest {
         int ncols = 10;
 
         Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
-        storage.get().save(original, MODEL_ID);
+        storage.get().saveDataframe(original, MODEL_ID);
         assertEquals(nrows, storage.get().rowCount(MODEL_ID));
         assertEquals(original.getColumnDimension(), storage.get().colCount(MODEL_ID));
     }
@@ -73,8 +77,8 @@ class HibernateStorageTest {
         Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
         Dataframe batched = original.filterByRowIndex(IntStream.range(nrows - batch, nrows).boxed().collect(Collectors.toList()));
 
-        storage.get().save(original, MODEL_ID);
-        Dataframe recovered = storage.get().readData(MODEL_ID, batch);
+        storage.get().saveDataframe(original, MODEL_ID);
+        Dataframe recovered = storage.get().readDataframe(MODEL_ID, batch);
         DataframeGenerators.roughEqualityCheck(batched, recovered);
     }
 
@@ -88,9 +92,35 @@ class HibernateStorageTest {
         Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
         Dataframe batched = original.filterByRowIndex(IntStream.range(startPos, endPos).boxed().collect(Collectors.toList()));
 
-        storage.get().save(original, MODEL_ID);
-        Dataframe recovered = storage.get().readData(MODEL_ID, startPos, endPos);
+        storage.get().saveDataframe(original, MODEL_ID);
+        Dataframe recovered = storage.get().readDataframe(MODEL_ID, startPos, endPos);
         DataframeGenerators.roughEqualityCheck(batched, recovered);
+    }
+
+    @Test
+    void testNonSyntheticRead() {
+        int nrows = 100;
+        int ncols = 10;
+
+        // alternate synthetic/nonsynthetic data every $freq rows
+        int syntheticFreq = 5;
+
+        Dataframe original = DataframeGenerators.generatePositionalHintedDataframe(nrows, ncols);
+        Map<String, List<List<Integer>>> tagMap = new HashMap<>();
+        List<Integer> nonSyntheticIdxs = new ArrayList<>();
+        List<List<Integer>> syntheticSlices = new ArrayList<>();
+        for (int i = 0; i < nrows; i += 2 * syntheticFreq) {
+            syntheticSlices.add(List.of(i, i + syntheticFreq));
+            nonSyntheticIdxs.addAll(IntStream.range(i + syntheticFreq, i + 2 * syntheticFreq).boxed().collect(Collectors.toList()));
+        }
+        tagMap.put(Dataframe.InternalTags.SYNTHETIC.get(), syntheticSlices);
+
+        original.tagDataPoints(tagMap);
+        storage.get().saveDataframe(original, MODEL_ID);
+
+        Dataframe nonSynthetic = original.filterByRowIndex(nonSyntheticIdxs);
+        Dataframe recovered = storage.get().readNonSyntheticDataframe(MODEL_ID, nonSyntheticIdxs.size());
+        DataframeGenerators.roughEqualityCheck(nonSynthetic, recovered);
     }
 
     @Test
@@ -101,7 +131,7 @@ class HibernateStorageTest {
         int size = nrows;
 
         Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
-        storage.get().save(original, MODEL_ID);
+        storage.get().saveDataframe(original, MODEL_ID);
 
         for (int i = 0; i < 5; i++) {
             Dataframe appendee = DataframeGenerators.generateRandomNColumnDataframe(batch, ncols);
@@ -111,7 +141,7 @@ class HibernateStorageTest {
         }
 
         assertEquals(size, storage.get().rowCount(MODEL_ID));
-        DataframeGenerators.roughEqualityCheck(original, storage.get().readData(MODEL_ID));
+        DataframeGenerators.roughEqualityCheck(original, storage.get().readDataframe(MODEL_ID));
     }
 
 }

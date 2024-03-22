@@ -81,13 +81,13 @@ public class PVCStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer readData(String modelId) throws StorageReadException {
+    public ByteBuffer readDataframe(String modelId) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);
-        return readData(modelId, batchSize);
+        return readDataframe(modelId, batchSize);
     }
 
     @Override
-    public ByteBuffer readData(String modelId, int batchSize) throws StorageReadException {
+    public ByteBuffer readDataframe(String modelId, int batchSize) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);
         try {
             return ByteBuffer.wrap(
@@ -103,7 +103,7 @@ public class PVCStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer readData(String modelId, int startPos, int endPos) throws StorageReadException {
+    public ByteBuffer readDataframe(String modelId, int startPos, int endPos) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);
         try {
             return ByteBuffer.wrap(
@@ -147,7 +147,7 @@ public class PVCStorage extends FlatFileStorage {
     }
 
     @Override
-    public void save(ByteBuffer byteBuffer, String filename) throws StorageWriteException, StorageReadException {
+    public void saveDataframe(ByteBuffer byteBuffer, String filename) throws StorageWriteException, StorageReadException {
         final Path filepath = Paths.get(this.dataFolder.toString(), filename);
         writeData(byteBuffer, filepath, false);
     }
@@ -165,7 +165,7 @@ public class PVCStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer read(String filename) throws StorageReadException {
+    public ByteBuffer readMetaOrInternalData(String filename) throws StorageReadException {
         final Path path = Paths.get(this.dataFolder.toString(), filename);
         final File file = path.toFile();
 
@@ -180,7 +180,7 @@ public class PVCStorage extends FlatFileStorage {
         }
     }
 
-    public ByteBuffer read(String filename, int startPos, int endPos) throws StorageReadException {
+    public ByteBuffer readMetaOrInternalData(String filename, int startPos, int endPos) throws StorageReadException {
         if (endPos <= startPos) {
             throw new IllegalArgumentException("read endPos must be greater than startPos. Got startPos=" + startPos + ", endPos=" + endPos);
         }
@@ -197,12 +197,12 @@ public class PVCStorage extends FlatFileStorage {
     }
 
     @Override
-    public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
-        save(data, getDataFilename(modelId));
+    public void saveMetaOrInternalData(ByteBuffer data, String modelId) throws StorageWriteException {
+        saveDataframe(data, getDataFilename(modelId));
     }
 
     @Override
-    public void appendData(ByteBuffer byteBuffer, String modelId) throws StorageWriteException, StorageReadException {
+    public void appendMetaOrInternalData(ByteBuffer byteBuffer, String modelId) throws StorageWriteException, StorageReadException {
         append(byteBuffer, getDataFilename(modelId));
     }
 

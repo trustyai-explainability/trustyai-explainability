@@ -46,11 +46,11 @@ class PVCStorageTest {
     @Test
     void readData() {
         TEST_BUFFER.rewind();
-        Exception exception = assertThrows(StorageReadException.class, () -> storage.get().readData(MODEL_ID));
+        Exception exception = assertThrows(StorageReadException.class, () -> storage.get().readDataframe(MODEL_ID));
         assertEquals("/tmp/example-model-data.csv (No such file or directory)", exception.getMessage());
 
-        storage.get().saveData(TEST_BUFFER, MODEL_ID);
-        final String readData = new String(storage.get().readData(MODEL_ID).array());
+        storage.get().saveMetaOrInternalData(TEST_BUFFER, MODEL_ID);
+        final String readData = new String(storage.get().readDataframe(MODEL_ID).array());
         assertEquals(TEST_DATA, readData);
     }
 
@@ -58,9 +58,9 @@ class PVCStorageTest {
     void save() {
         TEST_BUFFER.rewind();
         assertFalse(storage.get().fileExists(FILENAME));
-        storage.get().save(TEST_BUFFER, FILENAME);
+        storage.get().saveDataframe(TEST_BUFFER, FILENAME);
         assertTrue(storage.get().fileExists(FILENAME));
-        final String readData = new String(storage.get().read(FILENAME).array());
+        final String readData = new String(storage.get().readMetaOrInternalData(FILENAME).array());
         assertEquals(TEST_DATA, readData);
     }
 
@@ -70,12 +70,12 @@ class PVCStorageTest {
         Exception exception = assertThrows(StorageWriteException.class, () -> storage.get().append(TEST_BUFFER, FILENAME));
         assertEquals("Cannot append to non-existing file " + FILENAME, exception.getMessage());
         TEST_BUFFER.rewind();
-        storage.get().save(TEST_BUFFER, FILENAME);
+        storage.get().saveDataframe(TEST_BUFFER, FILENAME);
         assertTrue(storage.get().fileExists(FILENAME));
         EXTRA_BUFFER.rewind();
         storage.get().append(EXTRA_BUFFER, FILENAME);
 
-        final String readData = new String(storage.get().read(FILENAME).array());
+        final String readData = new String(storage.get().readMetaOrInternalData(FILENAME).array());
         assertEquals(TEST_DATA + EXTRA_DATA, readData);
     }
 
@@ -83,10 +83,10 @@ class PVCStorageTest {
     void read() {
         TEST_BUFFER.rewind();
         assertFalse(storage.get().fileExists(FILENAME));
-        Exception exception = assertThrows(StorageWriteException.class, () -> storage.get().read(FILENAME));
+        Exception exception = assertThrows(StorageWriteException.class, () -> storage.get().readMetaOrInternalData(FILENAME));
         assertEquals("/tmp/" + FILENAME + " (No such file or directory)", exception.getMessage());
-        storage.get().save(TEST_BUFFER, FILENAME);
-        final String readData = new String(storage.get().read(FILENAME).array(), StandardCharsets.UTF_8);
+        storage.get().saveDataframe(TEST_BUFFER, FILENAME);
+        final String readData = new String(storage.get().readMetaOrInternalData(FILENAME).array(), StandardCharsets.UTF_8);
         assertEquals(TEST_DATA, readData);
     }
 
@@ -94,9 +94,9 @@ class PVCStorageTest {
     void saveData() {
         EXTRA_BUFFER.rewind();
         assertFalse(storage.get().dataExists(MODEL_ID));
-        storage.get().saveData(EXTRA_BUFFER, MODEL_ID);
+        storage.get().saveMetaOrInternalData(EXTRA_BUFFER, MODEL_ID);
         assertTrue(storage.get().dataExists(MODEL_ID));
-        final String readData = new String(storage.get().readData(MODEL_ID).array());
+        final String readData = new String(storage.get().readDataframe(MODEL_ID).array());
         assertEquals(EXTRA_DATA, readData);
     }
 
@@ -106,16 +106,16 @@ class PVCStorageTest {
         assertFalse(storage.get().dataExists(MODEL_ID));
         final MockPVCStorage pvc = storage.get();
         Exception exception = assertThrows(StorageWriteException.class, () -> {
-            pvc.appendData(TEST_BUFFER, MODEL_ID);
+            pvc.appendMetaOrInternalData(TEST_BUFFER, MODEL_ID);
         });
         assertEquals("Cannot append to non-existing file " + MODEL_ID + "-data.csv", exception.getMessage());
         TEST_BUFFER.rewind();
-        storage.get().saveData(TEST_BUFFER, MODEL_ID);
+        storage.get().saveMetaOrInternalData(TEST_BUFFER, MODEL_ID);
         assertTrue(storage.get().dataExists(MODEL_ID));
         EXTRA_BUFFER.rewind();
-        storage.get().appendData(EXTRA_BUFFER, MODEL_ID);
+        storage.get().appendMetaOrInternalData(EXTRA_BUFFER, MODEL_ID);
 
-        final String readData = new String(storage.get().readData(MODEL_ID).array());
+        final String readData = new String(storage.get().readDataframe(MODEL_ID).array());
         assertEquals(TEST_DATA + EXTRA_DATA, readData);
 
     }
@@ -124,14 +124,14 @@ class PVCStorageTest {
     void fileExists() {
         TEST_BUFFER.rewind();
         assertFalse(storage.get().fileExists(FILENAME));
-        storage.get().save(TEST_BUFFER, FILENAME);
+        storage.get().saveDataframe(TEST_BUFFER, FILENAME);
         assertTrue(storage.get().fileExists(FILENAME));
     }
 
     @Test
     void dataExists() {
         assertFalse(storage.get().dataExists(MODEL_ID));
-        storage.get().saveData(TEST_BUFFER, MODEL_ID);
+        storage.get().saveMetaOrInternalData(TEST_BUFFER, MODEL_ID);
         assertTrue(storage.get().dataExists(MODEL_ID));
     }
 
@@ -153,7 +153,7 @@ class PVCStorageTest {
         final int N = 1000;
         final String data = "123456789";
         // create file
-        storage.get().save(ByteBuffer.wrap((data + "\n").getBytes()), FILENAME);
+        storage.get().saveDataframe(ByteBuffer.wrap((data + "\n").getBytes()), FILENAME);
         assertTrue(storage.get().fileExists(FILENAME));
         ExecutorService service = Executors.newFixedThreadPool(threads);
         CountDownLatch latch = new CountDownLatch(threads);
@@ -166,7 +166,7 @@ class PVCStorageTest {
             });
         }
         latch.await();
-        final String result = new String(storage.get().read(FILENAME).array());
+        final String result = new String(storage.get().readMetaOrInternalData(FILENAME).array());
         final String[] lines = result.split("\n");
 
         assertTrue(Arrays.stream(lines).allMatch(line -> line.equals(data)));
