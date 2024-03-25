@@ -52,16 +52,12 @@ success=1
 if [ $INSTALL_FAILURE = false ]; then
   HOME/peak/run.sh ${TESTS_REGEX}
 else
-  echo -e "Skipping tests due to ODH Operator/DSC installation failure"
+  echo -e "Skipping tests due to ODH Operator/DSC installation failure, marking suite as failed."
+  success=0
 fi
 
 if  [ "$?" -ne 0 ]; then
     echo "The tests failed"
-    success=0
-fi
-
-if [ $INSTALL_FAILURE = true ]; then
-    echo "The ODH Operator/DSC installation failed."
     success=0
 fi
 
