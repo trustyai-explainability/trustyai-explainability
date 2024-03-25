@@ -93,7 +93,7 @@ public class DataSource {
 
         final ByteBuffer internalDataByteBuffer;
         try {
-            internalDataByteBuffer = storage.get().read(modelId + "-" + INTERNAL_DATA_FILENAME);
+            internalDataByteBuffer = storage.get().read(modelId + "-" + INTERNAL_DATA_FILENAME, batchSize);
         } catch (StorageReadException e) {
             throw new DataframeCreateException(e.getMessage());
         }

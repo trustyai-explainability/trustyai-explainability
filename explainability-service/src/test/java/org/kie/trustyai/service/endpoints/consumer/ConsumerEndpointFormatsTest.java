@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.service.BaseTestProfile;
+import org.kie.trustyai.service.profiles.MemoryTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.mocks.MockDatasource;
@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
 class ConsumerEndpointFormatsTest {
 

@@ -195,6 +195,11 @@ public class MinioStorage extends Storage {
     }
 
     @Override
+    public ByteBuffer read(String location, int batchSize) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    @Override
     public void saveData(ByteBuffer data, String modelId) throws StorageWriteException {
         save(data, this.dataFilename);
     }

@@ -19,6 +19,7 @@ import io.quarkus.test.junit.TestProfile;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import org.kie.trustyai.service.profiles.PVCTestProfile;
 
 import static org.junit.jupiter.api.Assertions.*;
 
