@@ -12,13 +12,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.kserve.MockKServeInputPayload;
 import org.kie.trustyai.service.mocks.kserve.MockKServeOutputPayload;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import io.quarkus.funqy.knative.events.CloudEvent;
 import io.quarkus.test.junit.QuarkusTest;
@@ -31,7 +31,7 @@ import static io.smallrye.common.constraint.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 public class CloudEventConsumerTest {
 
     final static String MODEL_NAME = "someModelId";

@@ -12,15 +12,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
+import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,7 +40,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 class ServiceMetadataEndpointTest {
 
     private static final String MODEL_ID = "example1";
@@ -48,10 +49,14 @@ class ServiceMetadataEndpointTest {
     Instance<MockDatasource> datasource;
 
     @Inject
+    Instance<MockMemoryStorage> storage;
+
+    @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
     @BeforeEach
     void clearStorage() {
+        storage.get().emptyStorage();
         datasource.get().empty();
         scheduler.get().empty();
     }

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.utils.CSVUtils;
 import org.kie.trustyai.service.mocks.MockDatasource;
@@ -20,6 +19,7 @@ import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.DataResponsePayload;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferJointPayload;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 import org.kie.trustyai.service.utils.KserveRestPayloads;
 
@@ -41,7 +41,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(DataEndpoint.class)
 class DataEndpointTest {
     @Inject

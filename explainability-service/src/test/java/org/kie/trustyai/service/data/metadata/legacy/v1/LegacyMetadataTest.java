@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
-import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -29,7 +29,7 @@ import jakarta.inject.Inject;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 public class LegacyMetadataTest {
 
     @Inject

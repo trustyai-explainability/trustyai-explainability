@@ -9,7 +9,6 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.mocks.MockDatasource;
@@ -17,6 +16,7 @@ import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
 class ConsumerEndpointTest {
 

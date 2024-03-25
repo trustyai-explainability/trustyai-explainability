@@ -203,7 +203,12 @@ public class MinioStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer readMetaOrInternalData(String location, int startPos, int endPot) throws StorageReadException {
+    public ByteBuffer readMetaOrInternalData(String location, int batchSize) throws StorageReadException {
+        throw new StorageReadException("Data read batching not supported for MinIO storage");
+    }
+
+    @Override
+    public ByteBuffer readMetaOrInternalData(String location, int startPos, int endPos) throws StorageReadException {
         throw new StorageReadException("Data read slicing not supported for MinIO storage");
     }
 

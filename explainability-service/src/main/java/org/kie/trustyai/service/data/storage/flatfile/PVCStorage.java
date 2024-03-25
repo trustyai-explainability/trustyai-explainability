@@ -1,9 +1,6 @@
 package org.kie.trustyai.service.data.storage.flatfile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
@@ -86,16 +83,21 @@ public class PVCStorage extends FlatFileStorage {
         return readDataframe(modelId, batchSize);
     }
 
+    /**
+     * Read data from the file system, for a given model id and batch size.
+     * 
+     * @param modelId The model id
+     * @param batchSize The batch size
+     * @return A {@link ByteBuffer} containing the data
+     * @throws StorageReadException If an error occurs while reading the data
+     */
     @Override
     public ByteBuffer readDataframe(String modelId, int batchSize) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);
         try {
+            final InputStream dataStream = BatchReader.getFileInputStream(buildDataPath(modelId).toString());
             return ByteBuffer.wrap(
-                    BatchReader.linesToBytes(
-                            BatchReader.readEntries(
-                                    BatchReader.getDataInputStream(
-                                            buildDataPath(modelId).toString()),
-                                    batchSize)));
+                    BatchReader.linesToBytes(BatchReader.readEntries(dataStream, batchSize)));
         } catch (IOException e) {
             LOG.error("Error reading input file for model " + modelId);
             throw new StorageReadException(e.getMessage());
@@ -109,7 +111,7 @@ public class PVCStorage extends FlatFileStorage {
             return ByteBuffer.wrap(
                     BatchReader.linesToBytes(
                             BatchReader.readEntries(
-                                    BatchReader.getDataInputStream(
+                                    BatchReader.getFileInputStream(
                                             buildDataPath(modelId).toString()),
                                     startPos, endPos)));
         } catch (IOException e) {
@@ -164,6 +166,13 @@ public class PVCStorage extends FlatFileStorage {
         }
     }
 
+    /**
+     * Read an entire file into a {@link ByteBuffer}.
+     * 
+     * @param filename The filename to read
+     * @return A {@link ByteBuffer} containing the data
+     * @throws StorageReadException If an error occurs while reading the data
+     */
     @Override
     public ByteBuffer readMetaOrInternalData(String filename) throws StorageReadException {
         final Path path = Paths.get(this.dataFolder.toString(), filename);
@@ -193,6 +202,29 @@ public class PVCStorage extends FlatFileStorage {
             return ByteBuffer.wrap(BatchReader.linesToBytes(BatchReader.readEntries(stream, startPos, endPos)));
         } catch (IOException e) {
             throw new StorageWriteException(e.getMessage());
+        }
+    }
+
+    /**
+     * Read {@link ByteBuffer} from the file system, for a given filename and batch size.
+     * 
+     * @param filename The filename to read
+     * @param batchSize The batch size
+     * @return A {@link ByteBuffer} containing the data
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    @Override
+    public ByteBuffer readMetaOrInternalData(String filename, int batchSize) throws StorageReadException {
+        final Path path = Paths.get(this.dataFolder.toString(), filename);
+        final File file = path.toFile();
+
+        try {
+            final InputStream stream = BatchReader.getFileInputStream(file.toString());
+            return ByteBuffer.wrap(
+                    BatchReader.linesToBytes(BatchReader.readEntries(stream, batchSize)));
+        } catch (IOException e) {
+            LOG.error("Error reading file for " + file.toString());
+            throw new StorageReadException(e.getMessage());
         }
     }
 

@@ -8,9 +8,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.data.storage.hibernate.profiles.MigrationTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
+import org.kie.trustyai.service.profiles.hibernate.MigrationTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import io.quarkus.test.common.QuarkusTestResource;

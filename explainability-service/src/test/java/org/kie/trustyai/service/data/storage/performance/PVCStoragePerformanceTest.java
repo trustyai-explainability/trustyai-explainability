@@ -7,8 +7,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.data.storage.flatflle.PVCTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.profiles.flatfile.PVCTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -5,7 +5,6 @@ import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
-import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -14,8 +13,6 @@ import io.quarkus.test.Mock;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 
 import static org.kie.trustyai.service.utils.DataframeGenerators.generateRandomDataframe;
 
@@ -26,8 +23,6 @@ import static org.kie.trustyai.service.utils.DataframeGenerators.generateRandomD
 public class MockDatasource extends DataSource {
 
     private static final String MODEL_ID = "example1";
-    @Inject
-    Instance<MockMemoryStorage> storage;
 
     public MockDatasource() {
     }
@@ -50,7 +45,6 @@ public class MockDatasource extends DataSource {
     }
 
     public void empty() {
-        storage.get().emptyStorage();
         this.knownModels.clear();
     }
 

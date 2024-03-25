@@ -22,6 +22,8 @@ import java.util.Objects;
  */
 public class Output {
 
+    public static final double DEFAULT_SCORE = 1.0;
+
     private final Value value;
     private final Type type;
     private final double score;

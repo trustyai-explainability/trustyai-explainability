@@ -100,9 +100,54 @@ public class MemoryStorage extends FlatFileStorage {
         }
     }
 
+    /**
+     * Read {@link ByteBuffer} from the memory storage, for a given filename and batch size.
+     * 
+     * @param location The filename to read
+     * @param batchSize The batch size
+     * @return A {@link ByteBuffer} containing the data
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    @Override
+    public ByteBuffer readMetaOrInternalData(String location, int batchSize) throws StorageReadException {
+        if (data.containsKey(location)) {
+            final String content = data.get(location);
+            final String[] lines = content.split("\n");
+
+            final int start = Math.max(0, lines.length - batchSize);
+
+            final StringBuilder lastLines = new StringBuilder();
+            for (int i = start; i < lines.length; i++) {
+                lastLines.append(lines[i]);
+                if (i < lines.length - 1) {
+                    lastLines.append("\n");
+                }
+            }
+            return ByteBuffer.wrap(lastLines.toString().getBytes());
+        } else {
+            throw new StorageReadException("File not found: " + location);
+        }
+    }
+
     @Override
     public ByteBuffer readMetaOrInternalData(String location, int startPos, int endPos) throws StorageReadException {
-        throw new NotImplementedException("Sliced file reads not supported by MemoryStorage");
+        if (data.containsKey(location)) {
+            final String content = data.get(location);
+            final String[] lines = content.split("\n");
+
+            final StringBuilder lastLines = new StringBuilder();
+            int endPosAdj = Math.min(endPos, lines.length);
+
+            for (int i = startPos; i < endPosAdj; i++) {
+                lastLines.append(lines[i]);
+                if (i < endPosAdj - 1) {
+                    lastLines.append("\n");
+                }
+            }
+            return ByteBuffer.wrap(lastLines.toString().getBytes());
+        } else {
+            throw new StorageReadException("File not found: " + location);
+        }
     }
 
     @Override

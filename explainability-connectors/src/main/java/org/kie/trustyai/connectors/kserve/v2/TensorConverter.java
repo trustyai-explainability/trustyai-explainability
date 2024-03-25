@@ -84,6 +84,16 @@ public class TensorConverter {
         }
     }
 
+    /**
+     * Convert a {@link ModelInferResponse.InferOutputTensor} to a {@link Output}.
+     * The datatype is inferred from the contents of the tensor, rather than the datatype field, since these can
+     * sometimes be mismatched by the model itself.
+     *
+     * @param tensor A {@link ModelInferResponse.InferOutputTensor} to convert
+     * @param name The name of the output
+     * @param index The index of the output
+     * @return An {@link Output} object
+     */
     static Output contentsToOutput(ModelInferResponse.InferOutputTensor tensor, String name, int index) {
         final KServeDatatype type;
         InferTensorContents tensorContents = tensor.getContents();
@@ -96,29 +106,20 @@ public class TensorConverter {
 
         int contentsCount = 0;
         try {
-            switch (type) {
-                case BOOL:
-                    contentsCount = tensorContents.getBoolContentsCount();
-                    return new Output(name, Type.BOOLEAN, new Value(tensorContents.getBoolContents(index)), 1.0);
-                case INT8:
-                case INT16:
-                case INT32:
-                    contentsCount = tensorContents.getIntContentsCount();
-                    return new Output(name, Type.NUMBER, new Value(tensorContents.getIntContents(index)), 1.0);
-                case INT64:
-                    contentsCount = tensorContents.getInt64ContentsCount();
-                    return new Output(name, Type.NUMBER, new Value(tensorContents.getInt64Contents(index)), 1.0);
-                case FP32:
-                    contentsCount = tensorContents.getFp32ContentsCount();
-                    return new Output(name, Type.NUMBER, new Value(tensorContents.getFp32Contents(index)), 1.0);
-                case FP64:
-                    contentsCount = tensorContents.getFp64ContentsCount();
-                    return new Output(name, Type.NUMBER, new Value(tensorContents.getFp64Contents(index)), 1.0);
-                case BYTES:
-                    contentsCount = tensorContents.getBytesContentsCount();
-                    return new Output(name, Type.CATEGORICAL, new Value(String.valueOf(tensorContents.getBytesContents(index))), 1.0);
-                default:
-                    throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
+            if (tensorContents.getBoolContentsCount() != 0) {
+                return new Output(name, Type.BOOLEAN, new Value(tensorContents.getBoolContents(index)), Output.DEFAULT_SCORE);
+            } else if (tensorContents.getIntContentsCount() != 0) {
+                return new Output(name, Type.NUMBER, new Value(tensorContents.getIntContents(index)), Output.DEFAULT_SCORE);
+            } else if (tensorContents.getInt64ContentsCount() != 0) {
+                return new Output(name, Type.NUMBER, new Value(tensorContents.getInt64Contents(index)), Output.DEFAULT_SCORE);
+            } else if (tensorContents.getFp32ContentsCount() != 0) {
+                return new Output(name, Type.NUMBER, new Value(tensorContents.getFp32Contents(index)), Output.DEFAULT_SCORE);
+            } else if (tensorContents.getFp64ContentsCount() != 0) {
+                return new Output(name, Type.NUMBER, new Value(tensorContents.getFp64Contents(index)), Output.DEFAULT_SCORE);
+            } else if (tensorContents.getBytesContentsCount() != 0) {
+                return new Output(name, Type.CATEGORICAL, new Value(String.valueOf(tensorContents.getBytesContents(index))), Output.DEFAULT_SCORE);
+            } else {
+                throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
             }
         } catch (IndexOutOfBoundsException e) {
             throw new IllegalArgumentException(

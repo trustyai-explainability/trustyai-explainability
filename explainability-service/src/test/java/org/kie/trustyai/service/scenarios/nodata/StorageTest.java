@@ -9,11 +9,11 @@ import java.util.concurrent.Executors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -24,7 +24,7 @@ import jakarta.inject.Inject;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 class StorageTest {
 
     private final static String FILENAME = "file.txt";
@@ -38,6 +38,7 @@ class StorageTest {
     @BeforeEach
     void emptyStorage() {
         datasource.get().empty();
+        storage.get().emptyStorage();
     }
 
     @Test

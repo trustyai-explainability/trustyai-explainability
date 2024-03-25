@@ -134,7 +134,7 @@ public class DataSource {
 
             final ByteBuffer internalDataByteBuffer;
             try {
-                internalDataByteBuffer = ffst.readMetaOrInternalData(modelId + "-" + INTERNAL_DATA_FILENAME);
+                internalDataByteBuffer = ffst.readMetaOrInternalData(modelId + "-" + INTERNAL_DATA_FILENAME, batchSize);
             } catch (StorageReadException e) {
                 throw new DataframeCreateException(e.getMessage());
             }
@@ -149,6 +149,8 @@ public class DataSource {
 
             df = parser.toDataframe(byteBuffer, internalDataByteBuffer, storageMetadata);
             df.setColumnAliases(getJointNameAliases(storageMetadata));
+            df.setInputTensorName(storageMetadata.getInputTensorName());
+            df.setOutputTensorName(storageMetadata.getOutputTensorName());
         } else {
             HibernateStorage hst = (HibernateStorage) getStorage();
             df = hst.readDataframe(modelId, batchSize);

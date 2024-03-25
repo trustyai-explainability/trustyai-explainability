@@ -12,13 +12,13 @@ import org.kie.trustyai.connectors.utils.ListenableFutureUtils;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Wraps a KServe v2-compatible model server as a TrustyAI {@link PredictionProvider}
@@ -137,7 +137,7 @@ public class KServeV2GRPCPredictionProvider implements PredictionProvider {
                         logger.error("Error during model inference: " + ex.getMessage());
                         // Shutdown the channel
                         localChannel.shutdown();
-                         throw new RuntimeException("Failed to get inference", ex);
+                        throw new RuntimeException("Failed to get inference", ex);
                     })
                     .whenComplete((response, throwable) -> {
                         if (!localChannel.isShutdown()) { // In case channel already closed in .exceptionally()

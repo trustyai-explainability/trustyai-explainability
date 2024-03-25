@@ -55,7 +55,14 @@ public class BatchReader {
         return new ArrayList<>(queue);
     }
 
-    public static InputStream getDataInputStream(String filename) throws FileNotFoundException {
+    /**
+     * Returns an InputStream for the given filename
+     * 
+     * @param filename The filename to open
+     * @return An {@link InputStream} for the given filename
+     * @throws FileNotFoundException If the file does not exist
+     */
+    public static InputStream getFileInputStream(String filename) throws FileNotFoundException {
         return new FileInputStream(filename);
     }
 
