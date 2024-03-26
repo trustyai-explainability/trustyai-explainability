@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.profiles.MemoryTestProfile;
@@ -36,8 +37,8 @@ class StorageTest {
     Instance<MockDatasource> datasource;
 
     @BeforeEach
-    void emptyStorage() {
-        datasource.get().empty();
+    void emptyStorage() throws JsonProcessingException {
+        datasource.get().reset();
         storage.get().emptyStorage();
     }
 

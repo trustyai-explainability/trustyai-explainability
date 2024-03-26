@@ -4,18 +4,14 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.jboss.resteasy.reactive.RestResponse;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.explainability.model.SimplePrediction;
-import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
@@ -25,9 +21,6 @@ import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;
@@ -364,13 +357,8 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         Double value = response.getValue();
         assertFalse(Double.isNaN(value));
 
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
-        Prediction prediction = dataframe.asPredictions().get(0);
-        PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), Dataframe.InternalTags.SYNTHETIC.get());
-        Prediction newPrediction = new SimplePrediction(prediction.getInput(), prediction.getOutput(), predictionMetadata);
-        Dataframe newDataframe = Dataframe.createFrom(newPrediction);
-
-        datasource.get().saveDataframe(newDataframe, MODEL_ID);
+        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
 
         final BaseMetricResponse responseSecond = given()
                 .contentType(ContentType.JSON)
@@ -386,4 +374,40 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         assertEquals(value, responseSecond.getValue());
     }
 
+    @Test
+    @DisplayName("SPD request with only synthetic data")
+    void postCorrectFilteringOnlySynthetic() throws JsonProcessingException {
+        datasource.get().reset();
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+
+        final BaseMetricResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("SPD", response.getName());
+        Double value = response.getValue();
+        assertFalse(Double.isNaN(value));
+
+        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
+
+        final BaseMetricResponse responseSecond = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        assertEquals("metric", responseSecond.getType());
+        assertEquals("SPD", responseSecond.getName());
+        assertEquals(value, responseSecond.getValue());
+    }
 }

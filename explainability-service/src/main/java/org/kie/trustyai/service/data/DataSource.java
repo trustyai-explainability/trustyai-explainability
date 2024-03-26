@@ -137,7 +137,14 @@ public class DataSource {
             throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
         }
 
-        Dataframe df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
+        Dataframe df;
+        try {
+         df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
+        } catch (IllegalArgumentException e) {
+            LOG.error(e.getMessage());
+            throw new DataframeCreateException("Could not parse create dataframe: " + e.getMessage());
+        }
+
         df.setColumnAliases(getJointNameAliases(metadata));
         df.setInputTensorName(metadata.getInputTensorName());
         df.setOutputTensorName(metadata.getOutputTensorName());
@@ -168,7 +175,14 @@ public class DataSource {
             throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
         }
 
-        Dataframe df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
+        Dataframe df;
+        try {
+            df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
+        } catch (IllegalArgumentException e) {
+            LOG.error(e.getMessage());
+            throw new DataframeCreateException("Could not parse create dataframe: " + e.getMessage());
+        }
+
         df.setColumnAliases(getJointNameAliases(metadata));
         df.setInputTensorName(metadata.getInputTensorName());
         df.setOutputTensorName(metadata.getOutputTensorName());

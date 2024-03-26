@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,8 +59,8 @@ class DataEndpointTest {
      * Empty the storage before each test.
      */
     @BeforeEach
-    void emptyStorage() {
-        datasource.get().empty();
+    void emptyStorage() throws JsonProcessingException {
+        datasource.get().reset();
         storage.get().emptyStorage();
     }
 
@@ -360,7 +361,7 @@ class DataEndpointTest {
 
     // data upload tests ===============================================================================================
     @Test
-    void uploadData() {
+    void uploadData() throws JsonProcessingException {
         int[] testInputRows = new int[] { 1, 5, 250 };
         int[] testInputCols = new int[] { 1, 4 };
         int[] testOutputCols = new int[] { 1, 2 };
@@ -459,7 +460,7 @@ class DataEndpointTest {
     }
 
     @Test
-    void uploadDataAndGroundTruth() {
+    void uploadDataAndGroundTruth() throws JsonProcessingException {
         int[] testInputRows = new int[] { 1, 5, 250 };
         int[] testInputCols = new int[] { 1, 4 };
         int[] testOutputCols = new int[] { 1, 2 };

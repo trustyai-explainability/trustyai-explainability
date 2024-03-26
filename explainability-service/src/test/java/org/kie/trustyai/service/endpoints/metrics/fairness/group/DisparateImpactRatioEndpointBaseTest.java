@@ -1,6 +1,5 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +10,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionMetadata;
-import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
@@ -51,8 +47,16 @@ abstract class DisparateImpactRatioEndpointBaseTest {
         scheduler.get().getAllRequests().clear();
     }
 
+
+    private void populate() {
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(dataframe, MODEL_ID);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+    }
+
     @Test
     void get() {
+        populate();
         when().get()
                 .then()
                 .statusCode(Response.Status.METHOD_NOT_ALLOWED.getStatusCode())
@@ -61,7 +65,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
     @Test
     void postCorrect() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final GroupMetricRequest payload = RequestPayloadGenerator.correct();
 
@@ -115,7 +119,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
     @Test
     void postThresh() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         // with large threshold, the DIR is inside bounds
         GroupMetricRequest payload = RequestPayloadGenerator.correct();
@@ -153,7 +157,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
     @Test
     @DisplayName("DIR request incorrectly typed")
     void postIncorrectType() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectType();
 
@@ -169,7 +173,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
     @Test
     @DisplayName("DIR request with incorrect input")
     void postIncorrectInput() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
@@ -185,7 +189,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
     @Test
     void postUnknownType() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final Map<String, Object> payload = RequestPayloadGenerator.unknownType();
 
@@ -201,7 +205,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
     @Test
     void postManyWrongNames() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectManyWrongNames();
 
@@ -218,7 +222,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
     @Test
     void postManyWrongTypes() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectManyWrongTypes();
 
@@ -236,7 +240,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
     @Test
     void listSchedules() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
@@ -319,6 +323,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
     @Test
     void requestWrongType() {
+        populate();
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
@@ -375,6 +380,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
     @Test
     void requestUnknowType() {
+        populate();
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
@@ -429,6 +435,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
     @Test
     void listNames() {
+        populate();
         // No schedule request made yet
         final ScheduleList emptyList = given()
                 .when()
@@ -488,6 +495,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
     @Test
     void listThresholds() {
+        populate();
         // No schedule request made yet
         final ScheduleList emptyList = given()
                 .when()
@@ -549,6 +557,8 @@ abstract class DisparateImpactRatioEndpointBaseTest {
     @Test
     @DisplayName("DIR request should produce correct result")
     void postCorrectFilteringSynthetic() throws JsonProcessingException {
+        populate();
+
         final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         final BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
@@ -564,13 +574,8 @@ abstract class DisparateImpactRatioEndpointBaseTest {
         assertEquals("DIR", response.getName());
         assertFalse(Double.isNaN(value));
 
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
-        final Prediction prediction = dataframe.asPredictions().get(0);
-        final PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), Dataframe.InternalTags.SYNTHETIC.get());
-        final Prediction newPrediction = new SimplePrediction(prediction.getInput(), prediction.getOutput(), predictionMetadata);
-        Dataframe newDataframe = Dataframe.createFrom(newPrediction);
-
-        datasource.get().saveDataframe(newDataframe, MODEL_ID);
+        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
 
         final BaseMetricResponse responseSecond = given()
                 .contentType(ContentType.JSON)
@@ -585,4 +590,39 @@ abstract class DisparateImpactRatioEndpointBaseTest {
         assertEquals("DIR", responseSecond.getName());
         assertEquals(value, responseSecond.getValue());
     }
+
+
+    @Test
+    @DisplayName("DIR request with no organic data")
+    void postCorrectFilteringOnlySynthetic() throws JsonProcessingException {
+
+        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
+
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+
+        final Dataframe organicDataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(organicDataframe, MODEL_ID);
+
+        final BaseMetricResponse responseSecond = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        assertEquals("metric", responseSecond.getType());
+        assertEquals("DIR", responseSecond.getName());
+        assertFalse(Double.isNaN(responseSecond.getValue()));
+        System.out.println(responseSecond.getValue());
+    }
+
 }

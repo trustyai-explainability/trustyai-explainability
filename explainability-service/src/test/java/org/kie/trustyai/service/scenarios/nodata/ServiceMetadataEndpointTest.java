@@ -2,6 +2,7 @@ package org.kie.trustyai.service.scenarios.nodata;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +40,8 @@ class ServiceMetadataEndpointTest {
     }
 
     @Test
-    void get() {
-        datasource.get().empty();
+    void get() throws JsonProcessingException {
+        datasource.get().reset();
         final List<ServiceMetadata> serviceMetadata = given()
                 .when().get()
                 .then()

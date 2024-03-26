@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,8 +44,8 @@ public class CloudEventConsumerTest {
     Instance<MockMemoryStorage> storage;
 
     @BeforeEach
-    void emptyStorage() {
-        datasource.get().empty();
+    void emptyStorage() throws JsonProcessingException {
+        datasource.get().reset();
         storage.get().emptyStorage();
     }
 

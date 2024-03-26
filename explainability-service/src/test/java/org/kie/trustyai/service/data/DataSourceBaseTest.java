@@ -3,6 +3,7 @@ package org.kie.trustyai.service.data;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.mocks.MockDatasource;
 
 import jakarta.enterprise.inject.Instance;
@@ -172,7 +173,7 @@ abstract class DataSourceBaseTest {
         // Get a batch slightly smaller than N3 (guaranteed positive)
         final int BATCH_SIZE = N1 - 10;
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(DataframeCreateException.class, () -> {
             datasource.get().getOrganicDataframe("fake-model", BATCH_SIZE);
         }, "Cannot create a dataframe from an empty list of predictions.");
     }

@@ -23,12 +23,8 @@ class DisparateImpactRatioEndpointMemoryTest extends DisparateImpactRatioEndpoin
 
     @BeforeEach
     void reset() throws IOException {
-
+        datasource.get().reset();
         storage.get().emptyStorage();
-
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }
 
 }

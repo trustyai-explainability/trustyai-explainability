@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,8 +48,8 @@ class ConsumerEndpointTest {
      * Empty the storage before each test.
      */
     @BeforeEach
-    void emptyStorage() {
-        datasource.get().empty();
+    void emptyStorage() throws JsonProcessingException {
+        datasource.get().reset();
         storage.get().emptyStorage();
     }
 

@@ -48,7 +48,7 @@ public class BatchReader {
                     String metadataLine = CSVUtils.recordToString(metadataRecord);
                     String metadataTag = metadataRecord.get(0); // Tag is the first column
 
-                    if (tags.contains(metadataTag)) { // TODO: Handle exception
+                    if (tags.contains(metadataTag)) {
                         dataQueue.add(dataLine);
                         metadataQueue.add(metadataLine);
                     }
