@@ -30,43 +30,24 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
-
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@QuarkusTest
-@TestProfile(MetricsEndpointTestProfile.class)
-@TestHTTPEndpoint(GroupStatisticalParityDifferenceEndpoint.class)
-class GroupStatisticalParityDifferenceEndpointTest {
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
-    private static final String MODEL_ID = "example1";
-    private static final int N_SAMPLES = 100;
+abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
+
+    protected static final String MODEL_ID = "example1";
+    protected static final int N_SAMPLES = 100;
     @Inject
     Instance<MockDatasource> datasource;
-    @Inject
-    Instance<MockMemoryStorage> storage;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
-
-    @BeforeEach
-    void populateStorage() throws JsonProcessingException {
-        storage.get().emptyStorage();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-    }
-
-    @AfterEach
-    void clearRequests() {
-        // prevent a failing test from failing other tests erroneously
-        scheduler.get().getAllRequests().clear();
-    }
 
     @Test
     void get() {
