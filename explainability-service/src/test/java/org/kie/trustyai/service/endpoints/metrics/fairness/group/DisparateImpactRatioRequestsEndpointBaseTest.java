@@ -26,40 +26,27 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
-@QuarkusTest
-@TestProfile(MetricsEndpointTestProfile.class)
-@TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
-class DisparateImpactRatioRequestsEndpointTest {
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
-    private static final int N_SAMPLES = 100;
-    private static final String MODEL_ID = "example1";
+abstract class DisparateImpactRatioRequestsEndpointBaseTest {
+
+    protected static final int N_SAMPLES = 100;
+    protected static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
 
-    @Inject
-    Instance<MockMemoryStorage> storage;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
     @Inject
     Instance<ServiceConfig> serviceConfig;
-
-    @BeforeEach
-    void populateStorage() throws JsonProcessingException {
-        storage.get().emptyStorage();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-    }
 
     /**
      * When no batch size is specified in the request, the service's default batch size should be used
