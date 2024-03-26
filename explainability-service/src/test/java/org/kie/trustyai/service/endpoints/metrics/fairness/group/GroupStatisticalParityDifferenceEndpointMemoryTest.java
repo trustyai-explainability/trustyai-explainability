@@ -52,11 +52,8 @@ class GroupStatisticalParityDifferenceEndpointMemoryTest extends GroupStatistica
     Instance<MockPrometheusScheduler> scheduler;
 
     @BeforeEach
-    void populateStorage() throws JsonProcessingException {
+    void reset() throws JsonProcessingException {
         storage.get().emptyStorage();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }
 
     @AfterEach

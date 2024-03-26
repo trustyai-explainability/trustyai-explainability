@@ -42,6 +42,12 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
+    void populate() {
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        datasource.get().saveDataframe(dataframe, MODEL_ID);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+    }
+
     @Test
     void get() {
         when().get()
@@ -52,6 +58,8 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
     @Test
     void postCorrect() {
+        populate();
+
         final GroupMetricRequest payload = RequestPayloadGenerator.correct();
 
         final BaseMetricResponse response = given()
@@ -70,7 +78,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
     @Test
     void postThresh() throws JsonProcessingException {
-        datasource.get();
+        populate();
 
         // with large threshold, the DIR is inside bounds
         GroupMetricRequest payload = RequestPayloadGenerator.correct();
@@ -108,6 +116,8 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
     @Test
     @DisplayName("SPD request with incorrect type")
     void postIncorrectType() {
+        populate();
+
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectType();
 
         given()
@@ -122,6 +132,8 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
     @Test
     @DisplayName("SPD request with incorrect input")
     void postIncorrectInput() {
+        populate();
+
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
         given()
@@ -150,6 +162,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
     @Test
     void listSchedules() {
+        populate();
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
@@ -232,6 +245,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
     @Test
     void requestWrongType() {
+        populate();
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
@@ -287,6 +301,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
     @Test
     void requestUnknowType() {
+        populate();
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
@@ -341,6 +356,8 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
     @Test
     void postCorrectFilteringSynthetic() throws JsonProcessingException {
+        populate();
+
         final GroupMetricRequest payload = RequestPayloadGenerator.correct();
 
         final BaseMetricResponse response = given()
@@ -377,25 +394,50 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
     @Test
     @DisplayName("SPD request with only synthetic data")
     void postCorrectFilteringOnlySynthetic() throws JsonProcessingException {
-        datasource.get().reset();
         final GroupMetricRequest payload = RequestPayloadGenerator.correct();
 
-        final BaseMetricResponse response = given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
-                .statusCode(200)
-                .extract()
-                .body().as(BaseMetricResponse.class);
-
-        assertEquals("metric", response.getType());
-        assertEquals("SPD", response.getName());
-        Double value = response.getValue();
-        assertFalse(Double.isNaN(value));
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 
         final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
         datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("SPD request with only synthetic data and then organic")
+    void postCorrectFilteringOnlySyntheticThenOrganic() throws JsonProcessingException {
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+
+        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+
+        final Dataframe organicDataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(organicDataframe, MODEL_ID);
 
         final BaseMetricResponse responseSecond = given()
                 .contentType(ContentType.JSON)
@@ -408,6 +450,6 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
         assertEquals("metric", responseSecond.getType());
         assertEquals("SPD", responseSecond.getName());
-        assertEquals(value, responseSecond.getValue());
+        assertFalse(Double.isNaN(responseSecond.getValue()));
     }
 }
