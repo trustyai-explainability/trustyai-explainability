@@ -24,43 +24,27 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
-@QuarkusTest
-@TestProfile(MetricsEndpointTestProfile.class)
-@TestHTTPEndpoint(GroupStatisticalParityDifferenceEndpoint.class)
-class GroupStatisticalParityDifferenceRequestsEndpointTest {
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
-    private static final String MODEL_ID = "example1";
-    private static final int N_SAMPLES = 100;
+abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
+
+    protected static final String MODEL_ID = "example1";
+    protected static final int N_SAMPLES = 100;
     @Inject
     Instance<MockDatasource> datasource;
 
-    @Inject
-    Instance<MockMemoryStorage> storage;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
     @Inject
     Instance<ServiceConfig> serviceConfig;
-
-    @BeforeEach
-    void populateStorage() {
-        // Empty mock storage
-        storage.get().emptyStorage();
-        // Clear any requests between tests
-        scheduler.get().getAllRequestsFlat().clear();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-    }
 
     /**
      * When no batch size is specified in the request, the service's default batch size should be used
