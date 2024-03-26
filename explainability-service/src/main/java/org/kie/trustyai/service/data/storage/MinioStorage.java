@@ -10,8 +10,10 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.storage.MinioConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
@@ -122,6 +124,16 @@ public class MinioStorage extends Storage {
         throw new StorageReadException("Batch size not supported for MinIO storage");
     }
 
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataWithTags(String modelId, Set<String> tags) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
+    }
+
     private void saveData(ByteBuffer byteBuffer, String bucketName, String filename) throws StorageWriteException, StorageReadException {
 
         try {
@@ -220,8 +232,18 @@ public class MinioStorage extends Storage {
     }
 
     @Override
+    public String getInternalDataFilename(String modelId) {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    @Override
     public Path buildDataPath(String modelId) {
         return Path.of(this.bucketName, getDataFilename(modelId));
+    }
+
+    @Override
+    public Path buildInternalDataPath(String modelId) {
+        throw new StorageReadException("Storage type not supported");
     }
 
     @Override

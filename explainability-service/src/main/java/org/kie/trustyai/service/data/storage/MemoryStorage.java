@@ -1,14 +1,18 @@
 package org.kie.trustyai.service.data.storage;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
@@ -18,6 +22,8 @@ import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
+
+import static org.kie.trustyai.service.data.DataSource.INTERNAL_DATA_FILENAME;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "MEMORY")
 @ApplicationScoped
@@ -57,6 +63,58 @@ public class MemoryStorage extends Storage {
             throw new StorageReadException("Data file '" + key + "' not found");
         }
     }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataWithTags(String modelId, Set<String> tags) throws StorageReadException {
+        return readDataWithTags(modelId, this.batchSize, tags);
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+            final List<String> dataLines = new ArrayList<>();
+            final List<String> metadataLines = new ArrayList<>();
+
+            final String dataKey = getDataFilename(modelId);
+            final String metadataKey = getInternalDataFilename(modelId);
+
+            if (data.containsKey(dataKey) && data.containsKey(metadataKey)) {
+                String dataContent = data.get(dataKey);
+                String metadataContent = data.get(metadataKey);
+                String[] dataContentLines = dataContent.split("\n");
+
+                try (CSVParser parser = CSVParser.parse(metadataContent, CSVFormat.DEFAULT.withTrim())) {
+                    int index = 0;
+                    for (CSVRecord record : parser) {
+                        if (index >= dataContentLines.length) {
+                            // Ensuring we do not go out of bounds if metadata lines are more than data lines
+                            break;
+                        }
+                        String metadataLine = record.get(0); // Assuming the tag is in the first column
+                        if (tags.contains(metadataLine)) {
+                            metadataLines.add(String.join(",", record));
+                            dataLines.add(dataContentLines[index]);
+                        }
+                        index++;
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // Apply batch size limit
+                if (dataLines.size() > batchSize) {
+                    final String dataLinesString = String.join("\n", dataLines.subList(dataLines.size() - batchSize, dataLines.size()));
+                    final String metadataLinesString = String.join("\n", metadataLines.subList(metadataLines.size() - batchSize, metadataLines.size()));
+                    return Pair.of(ByteBuffer.wrap(dataLinesString.getBytes()), ByteBuffer.wrap(metadataLinesString.getBytes()));
+                } else {
+                    final String dataLinesString = String.join("\n", dataLines);
+                    final String metadataLinesString = String.join("\n", metadataLines);
+
+                    return Pair.of(ByteBuffer.wrap(dataLinesString.getBytes()), ByteBuffer.wrap(metadataLinesString.getBytes()));
+                }
+            } else {
+                throw new StorageReadException("Data or Metadata file not found for modelId: " + modelId);
+            }
+        }
 
     @Override
     public boolean dataExists(String modelId) throws StorageReadException {
@@ -138,8 +196,18 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
+    public String getInternalDataFilename(String modelId) {
+        return modelId + "-" + INTERNAL_DATA_FILENAME;
+    }
+
+    @Override
     public Path buildDataPath(String modelId) {
         return Path.of(getDataFilename(modelId));
+    }
+
+    @Override
+    public Path buildInternalDataPath(String modelId) {
+        return Path.of(getInternalDataFilename(modelId));
     }
 
     @Override

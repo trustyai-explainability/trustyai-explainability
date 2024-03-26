@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -107,6 +108,67 @@ public class DataSource {
         }
 
         Dataframe df = parser.toDataframe(byteBuffer, internalDataByteBuffer, metadata);
+        df.setColumnAliases(getJointNameAliases(metadata));
+        df.setInputTensorName(metadata.getInputTensorName());
+        df.setOutputTensorName(metadata.getOutputTensorName());
+        return df;
+    }
+
+    /**
+     * Get a dataframe with the organic (non-synthetic) data and metadata for a given model
+     * @param modelId the model id
+     * @param batchSize the batch size
+     * @return a dataframe with the organic data and metadata for a given model
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public Dataframe getOrganicDataframe(final String modelId, int batchSize) throws DataframeCreateException {
+        final Pair<ByteBuffer, ByteBuffer> pair;
+        try {
+            pair = storage.get().readDataWithTags(modelId, batchSize, Set.of(Dataframe.InternalTags.UNLABELED.get()));
+        } catch (StorageReadException e) {
+            throw new DataframeCreateException(e.getMessage());
+        }
+
+        // Fetch metadata, if not yet read
+        final Metadata metadata;
+        try {
+            metadata = getMetadata(modelId);
+        } catch (StorageReadException e) {
+            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+        }
+
+        Dataframe df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
+        df.setColumnAliases(getJointNameAliases(metadata));
+        df.setInputTensorName(metadata.getInputTensorName());
+        df.setOutputTensorName(metadata.getOutputTensorName());
+        return df;
+    }
+
+    /**
+     * Get a dataframe with the organic (non-synthetic) data and metadata for a given model.
+     * No batch size is given, so the default batch size is used.
+     *
+     * @param modelId the model id
+     * @return a dataframe with the organic data and metadata for a given model
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public Dataframe getOrganicDataframe(final String modelId) throws DataframeCreateException {
+        final Pair<ByteBuffer, ByteBuffer> pair;
+        try {
+            pair = storage.get().readDataWithTags(modelId, Set.of(Dataframe.InternalTags.UNLABELED.get()));
+        } catch (StorageReadException e) {
+            throw new DataframeCreateException(e.getMessage());
+        }
+
+        // Fetch metadata, if not yet read
+        final Metadata metadata;
+        try {
+            metadata = getMetadata(modelId);
+        } catch (StorageReadException e) {
+            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+        }
+
+        Dataframe df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
         df.setColumnAliases(getJointNameAliases(metadata));
         df.setInputTensorName(metadata.getInputTensorName());
         df.setOutputTensorName(metadata.getOutputTensorName());

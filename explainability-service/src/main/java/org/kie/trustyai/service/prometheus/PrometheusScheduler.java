@@ -78,7 +78,7 @@ public class PrometheusScheduler {
                     final int maxBatchSize = requestsSet.stream()
                             .mapToInt(entry -> entry.getValue().getBatchSize()).max()
                             .orElse(serviceConfig.batchSize().getAsInt());
-                    final Dataframe df = ds.getDataframe(modelId, maxBatchSize);
+                    final Dataframe df = ds.getOrganicDataframe(modelId, maxBatchSize);
 
                     requestsSet.forEach(entry -> {
                         // entry value: BaseMetricRequest
