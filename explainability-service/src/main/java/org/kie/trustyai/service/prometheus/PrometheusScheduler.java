@@ -1,12 +1,9 @@
 package org.kie.trustyai.service.prometheus;
 
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import io.quarkus.scheduler.Scheduled;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -16,26 +13,25 @@ import org.kie.trustyai.service.endpoints.metrics.MetricsDirectory;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.RequestReconciler;
 
-import io.quarkus.scheduler.Scheduled;
-
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class PrometheusScheduler {
 
     private static final Logger LOG = Logger.getLogger(PrometheusScheduler.class);
     private final ConcurrentHashMap<String, ConcurrentHashMap<UUID, BaseMetricRequest>> requests = new ConcurrentHashMap<>();
+    private final MetricsDirectory metricsDirectory = new MetricsDirectory();
+    @Inject
+    protected PrometheusPublisher publisher;
     @Inject
     Instance<DataSource> dataSource;
     @Inject
-    protected PrometheusPublisher publisher;
-
-    @Inject
     ServiceConfig serviceConfig;
-
-    private final MetricsDirectory metricsDirectory = new MetricsDirectory();
 
     public MetricsDirectory getMetricsDirectory() {
         return metricsDirectory;
@@ -121,7 +117,7 @@ public class PrometheusScheduler {
 
     /**
      * Get unique model ids with registered Prometheus metrics
-     * 
+     *
      * @return Unique models ids
      */
     public Set<String> getModelIds() {

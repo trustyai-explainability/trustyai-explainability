@@ -1,12 +1,10 @@
 package org.kie.trustyai.service.data;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -21,12 +19,12 @@ import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.payloads.service.Schema;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Singleton
 public class DataSource {
@@ -42,6 +40,10 @@ public class DataSource {
     DataParser parser;
     @Inject
     ServiceConfig serviceConfig;
+
+    public static String getGroundTruthName(String modelId) {
+        return modelId + GROUND_TRUTH_SUFFIX;
+    }
 
     public Set<String> getKnownModels() {
         return knownModels;
@@ -116,7 +118,8 @@ public class DataSource {
 
     /**
      * Get a dataframe with the organic (non-synthetic) data and metadata for a given model
-     * @param modelId the model id
+     *
+     * @param modelId   the model id
      * @param batchSize the batch size
      * @return a dataframe with the organic data and metadata for a given model
      * @throws DataframeCreateException if the dataframe cannot be created
@@ -139,7 +142,7 @@ public class DataSource {
 
         Dataframe df;
         try {
-         df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
+            df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
         } catch (IllegalArgumentException e) {
             LOG.error(e.getMessage());
             throw new DataframeCreateException("Could not parse create dataframe: " + e.getMessage());
@@ -288,10 +291,6 @@ public class DataSource {
 
     public boolean hasMetadata(String modelId) {
         return storage.get().fileExists(modelId + "-" + METADATA_FILENAME);
-    }
-
-    public static String getGroundTruthName(String modelId) {
-        return modelId + GROUND_TRUTH_SUFFIX;
     }
 
     // ground truth access and settors

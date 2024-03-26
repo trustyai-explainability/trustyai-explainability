@@ -1,10 +1,9 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group.legacy;
 
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.kie.trustyai.service.endpoints.metrics.fairness.group.DisparateImpactRatioEndpoint;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.kie.trustyai.service.endpoints.metrics.fairness.group.DisparateImpactRatioEndpoint;
 
 @ApplicationScoped
 @Tag(name = "Disparate Impact Ratio Endpoint (Legacy)", description = "Disparate Impact Ratio (DIR) measures imbalances in " +

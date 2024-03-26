@@ -1,18 +1,20 @@
 package org.kie.trustyai.service.endpoints.data;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.utils.CSVUtils;
 import org.kie.trustyai.service.mocks.MockDatasource;
@@ -21,37 +23,29 @@ import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.DataResponsePayload;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferJointPayload;
+import org.kie.trustyai.service.profiles.MemoryTestProfile;
 import org.kie.trustyai.service.utils.KserveRestPayloads;
 
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
-
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 @TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(DataEndpoint.class)
 class DataEndpointTest {
+    private static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
-
     @Inject
     CSVParser csvParser;
-
-    private static final String MODEL_ID = "example1";
-
     @Inject
     Instance<MockMemoryStorage> storage;
 
@@ -362,10 +356,10 @@ class DataEndpointTest {
     // data upload tests ===============================================================================================
     @Test
     void uploadData() throws JsonProcessingException {
-        int[] testInputRows = new int[] { 1, 5, 250 };
-        int[] testInputCols = new int[] { 1, 4 };
-        int[] testOutputCols = new int[] { 1, 2 };
-        String[] testDatatypes = new String[] { "INT64", "INT32", "FP32", "FP64", "BOOL" };
+        int[] testInputRows = new int[]{1, 5, 250};
+        int[] testInputCols = new int[]{1, 4};
+        int[] testOutputCols = new int[]{1, 2};
+        String[] testDatatypes = new String[]{"INT64", "INT32", "FP32", "FP64", "BOOL"};
         String dataTag = "TRAINING";
 
         for (int nInputRows : testInputRows) {
@@ -461,10 +455,10 @@ class DataEndpointTest {
 
     @Test
     void uploadDataAndGroundTruth() throws JsonProcessingException {
-        int[] testInputRows = new int[] { 1, 5, 250 };
-        int[] testInputCols = new int[] { 1, 4 };
-        int[] testOutputCols = new int[] { 1, 2 };
-        String[] testDatatypes = new String[] { "INT64", "INT32", "FP32", "FP64", "BOOL" };
+        int[] testInputRows = new int[]{1, 5, 250};
+        int[] testInputCols = new int[]{1, 4};
+        int[] testOutputCols = new int[]{1, 2};
+        String[] testDatatypes = new String[]{"INT64", "INT32", "FP32", "FP64", "BOOL"};
 
         // sorry for the quad loop
         for (int nInputRows : testInputRows) {

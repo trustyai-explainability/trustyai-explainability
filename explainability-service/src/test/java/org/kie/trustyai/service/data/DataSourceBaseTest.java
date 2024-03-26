@@ -1,13 +1,13 @@
 package org.kie.trustyai.service.data;
 
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.mocks.MockDatasource;
 
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,10 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 abstract class DataSourceBaseTest {
 
+    public static final String MODEL_ID = "fake-model";
     @Inject
     Instance<MockDatasource> datasource;
-
-    public static final String MODEL_ID = "fake-model";
 
     @Test
     void testSavingAndReadingDataframe() {
@@ -41,7 +40,7 @@ abstract class DataSourceBaseTest {
         final Random random = new Random();
         final List<String> ids = new ArrayList<>();
         final List<Prediction> predictions = new ArrayList<>();
-        for (int i = 0 ; i < N ; i++) {
+        for (int i = 0; i < N; i++) {
             final PredictionInput input = new PredictionInput(List.of(FeatureFactory.newNumericalFeature("a", random.nextDouble())));
             final PredictionOutput output = new PredictionOutput(List.of(new Output("b", Type.NUMBER, new Value(random.nextDouble()), 1.0)));
             final String id = UUID.randomUUID().toString();
@@ -72,7 +71,7 @@ abstract class DataSourceBaseTest {
         final Random random = new Random();
         final List<String> ids = new ArrayList<>();
         final List<Prediction> predictions = new ArrayList<>();
-        for (int i = 0 ; i < N ; i++) {
+        for (int i = 0; i < N; i++) {
             final PredictionInput input = new PredictionInput(List.of(FeatureFactory.newNumericalFeature("a", random.nextDouble())));
             final PredictionOutput output = new PredictionOutput(List.of(new Output("b", Type.NUMBER, new Value(random.nextDouble()), 1.0)));
             final String id = UUID.randomUUID().toString();
@@ -106,7 +105,7 @@ abstract class DataSourceBaseTest {
         final List<String> organicIds = new ArrayList<>();
         final List<String> syntheticIds = new ArrayList<>();
         final List<Prediction> predictions = new ArrayList<>();
-        for (int i = 0 ; i < N1 ; i++) {
+        for (int i = 0; i < N1; i++) {
             final PredictionInput input = new PredictionInput(List.of(FeatureFactory.newNumericalFeature("a", random.nextDouble())));
             final PredictionOutput output = new PredictionOutput(List.of(new Output("b", Type.NUMBER, new Value(random.nextDouble()), 1.0)));
             final String id = UUID.randomUUID().toString();
@@ -115,7 +114,7 @@ abstract class DataSourceBaseTest {
             final Prediction prediction = new SimplePrediction(input, output, metadata);
             predictions.add(prediction);
         }
-        for (int i = 0 ; i < N2 ; i++) {
+        for (int i = 0; i < N2; i++) {
             final PredictionInput input = new PredictionInput(List.of(FeatureFactory.newNumericalFeature("a", random.nextDouble())));
             final PredictionOutput output = new PredictionOutput(List.of(new Output("b", Type.NUMBER, new Value(random.nextDouble()), 1.0)));
             final String id = UUID.randomUUID().toString();
@@ -124,7 +123,7 @@ abstract class DataSourceBaseTest {
             final Prediction prediction = new SimplePrediction(input, output, metadata);
             predictions.add(prediction);
         }
-        for (int i = 0 ; i < N3 ; i++) {
+        for (int i = 0; i < N3; i++) {
             final PredictionInput input = new PredictionInput(List.of(FeatureFactory.newNumericalFeature("a", random.nextDouble())));
             final PredictionOutput output = new PredictionOutput(List.of(new Output("b", Type.NUMBER, new Value(random.nextDouble()), 1.0)));
             final String id = UUID.randomUUID().toString();
@@ -157,7 +156,7 @@ abstract class DataSourceBaseTest {
         final int N1 = random.nextInt(300) + 100;
         final List<String> syntheticIds = new ArrayList<>();
         final List<Prediction> predictions = new ArrayList<>();
-        for (int i = 0 ; i < N1 ; i++) {
+        for (int i = 0; i < N1; i++) {
             final PredictionInput input = new PredictionInput(List.of(FeatureFactory.newNumericalFeature("a", random.nextDouble())));
             final PredictionOutput output = new PredictionOutput(List.of(new Output("b", Type.NUMBER, new Value(random.nextDouble()), 1.0)));
             final String id = UUID.randomUUID().toString();
@@ -185,7 +184,7 @@ abstract class DataSourceBaseTest {
         final int N1 = random.nextInt(300) + 100;
         final List<String> organicIds = new ArrayList<>();
         final List<Prediction> predictions = new ArrayList<>();
-        for (int i = 0 ; i < N1 ; i++) {
+        for (int i = 0; i < N1; i++) {
             final PredictionInput input = new PredictionInput(List.of(FeatureFactory.newNumericalFeature("a", random.nextDouble())));
             final PredictionOutput output = new PredictionOutput(List.of(new Output("b", Type.NUMBER, new Value(random.nextDouble()), 1.0)));
             final String id = UUID.randomUUID().toString();

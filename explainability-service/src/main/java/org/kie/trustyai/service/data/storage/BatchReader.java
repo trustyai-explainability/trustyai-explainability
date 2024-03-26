@@ -1,18 +1,18 @@
 package org.kie.trustyai.service.data.storage;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Set;
-
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.service.data.utils.CSVUtils;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
 public class BatchReader {
 
@@ -62,8 +62,10 @@ public class BatchReader {
         }
         return Pair.of(new ArrayList<>(dataQueue), new ArrayList<>(metadataQueue));
     }
+
     /**
      * Returns an InputStream for the given filename
+     *
      * @param filename The filename to open
      * @return An {@link InputStream} for the given filename
      * @throws FileNotFoundException If the file does not exist

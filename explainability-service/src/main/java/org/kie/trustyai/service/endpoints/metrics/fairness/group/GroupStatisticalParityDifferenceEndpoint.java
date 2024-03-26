@@ -1,8 +1,8 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import io.quarkus.cache.CacheResult;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.Path;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
@@ -20,16 +20,18 @@ import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
-import io.quarkus.cache.CacheResult;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @Tag(name = "Statistical Parity Difference Endpoint", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
         "difference between the proportion of the majority and protected classes getting a particular outcome.")
 @Path("/metrics/group/fairness/spd")
 public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
+    public GroupStatisticalParityDifferenceEndpoint() {
+        super("SPD");
+    }
+
     @Override
     public MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue) {
         if (delta == null) {
@@ -47,7 +49,7 @@ public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
 
     @Override
     public String specificDefinitionFunction(String outcomeName, List<Value> favorableOutcomeAttr, String protectedAttribute, List<String> privileged, List<String> unprivileged,
-            MetricValueCarrier metricValue) {
+                                             MetricValueCarrier metricValue) {
         return FairnessDefinitions.defineGroupStatisticalParityDifference(
                 protectedAttribute,
                 privileged,
@@ -55,7 +57,7 @@ public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
                 outcomeName,
                 favorableOutcomeAttr,
                 metricValue.getValue());
-    };
+    }
 
     @Override
     @CacheResult(cacheName = "metrics-calculator-spd", keyGenerator = MetricCalculationCacheKeyGen.class)
@@ -88,10 +90,6 @@ public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
     @Override
     public String getGeneralDefinition() {
         return FairnessDefinitions.defineGroupStatisticalParityDifference();
-    }
-
-    public GroupStatisticalParityDifferenceEndpoint() {
-        super("SPD");
     }
 
 }

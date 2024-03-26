@@ -1,13 +1,12 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
-import java.util.Base64;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.http.ContentType;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,21 +16,20 @@ import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
+import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.http.ContentType;
-
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.util.Base64;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
@@ -55,7 +53,7 @@ class ConsumerEndpointRawTest {
 
     /**
      * Create an input partial payload with no synthetic flag
-     * 
+     *
      * @param id
      * @return
      */
@@ -65,7 +63,7 @@ class ConsumerEndpointRawTest {
 
     /**
      * Create an input partial payload with the specified synthetic flag
-     * 
+     *
      * @param id
      * @param synthetic
      * @return

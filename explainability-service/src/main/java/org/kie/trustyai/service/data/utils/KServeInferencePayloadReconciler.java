@@ -1,10 +1,11 @@
 package org.kie.trustyai.service.data.utils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.DataSource;
@@ -15,13 +16,10 @@ import org.kie.trustyai.service.payloads.consumer.InferenceLoggerInput;
 import org.kie.trustyai.service.payloads.consumer.KServeInputPayload;
 import org.kie.trustyai.service.payloads.consumer.KServeOutputPayload;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Reconcile partial input and output inference payloads in the KServe v2 protobuf format.

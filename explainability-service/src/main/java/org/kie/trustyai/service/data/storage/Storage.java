@@ -8,6 +8,7 @@ public abstract class Storage implements StorageInterface {
 
     /**
      * Get the internal data filename for a given model ID.
+     *
      * @param modelId The model ID
      * @return The internal data filename
      */
@@ -17,6 +18,7 @@ public abstract class Storage implements StorageInterface {
 
     /**
      * Build the internal data path for a given model ID.
+     *
      * @param modelId The model ID
      * @return The internal data path
      */
