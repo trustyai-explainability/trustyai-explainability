@@ -1,24 +1,17 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.restassured.http.ContentType;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionMetadata;
-import org.kie.trustyai.explainability.model.SimplePrediction;
-import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
@@ -26,52 +19,41 @@ import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricReque
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.http.ContentType;
-
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@QuarkusTest
-@TestProfile(MetricsEndpointTestProfile.class)
-@TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
-class DisparateImpactRatioEndpointTest {
+abstract class DisparateImpactRatioEndpointBaseTest {
 
-    private static final String MODEL_ID = "example1";
-    private static final int N_SAMPLES = 100;
+    protected static final String MODEL_ID = "example1";
+    protected static final int N_SAMPLES = 100;
     @Inject
     Instance<MockDatasource> datasource;
-    @Inject
-    Instance<MockMemoryStorage> storage;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
-
-    @BeforeEach
-    void populateStorage() throws JsonProcessingException {
-        storage.get().emptyStorage();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-    }
 
     @AfterEach
     void clearRequests() {
         scheduler.get().getAllRequests().clear();
     }
 
+
+    private void populate() {
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(dataframe, MODEL_ID);
+        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+    }
+
     @Test
     void get() {
+        populate();
         when().get()
                 .then()
                 .statusCode(Response.Status.METHOD_NOT_ALLOWED.getStatusCode())
@@ -80,7 +62,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void postCorrect() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final GroupMetricRequest payload = RequestPayloadGenerator.correct();
 
@@ -134,7 +116,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void postThresh() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         // with large threshold, the DIR is inside bounds
         GroupMetricRequest payload = RequestPayloadGenerator.correct();
@@ -172,7 +154,7 @@ class DisparateImpactRatioEndpointTest {
     @Test
     @DisplayName("DIR request incorrectly typed")
     void postIncorrectType() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectType();
 
@@ -188,7 +170,7 @@ class DisparateImpactRatioEndpointTest {
     @Test
     @DisplayName("DIR request with incorrect input")
     void postIncorrectInput() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
@@ -204,7 +186,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void postUnknownType() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final Map<String, Object> payload = RequestPayloadGenerator.unknownType();
 
@@ -220,7 +202,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void postManyWrongNames() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectManyWrongNames();
 
@@ -237,7 +219,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void postManyWrongTypes() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectManyWrongTypes();
 
@@ -255,7 +237,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void listSchedules() throws JsonProcessingException {
-        datasource.get().reset();
+        populate();
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
@@ -338,6 +320,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void requestWrongType() {
+        populate();
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
@@ -394,6 +377,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void requestUnknowType() {
+        populate();
 
         // No schedule request made yet
         final ScheduleList emptyList = given()
@@ -448,6 +432,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void listNames() {
+        populate();
         // No schedule request made yet
         final ScheduleList emptyList = given()
                 .when()
@@ -507,6 +492,7 @@ class DisparateImpactRatioEndpointTest {
 
     @Test
     void listThresholds() {
+        populate();
         // No schedule request made yet
         final ScheduleList emptyList = given()
                 .when()
@@ -566,7 +552,10 @@ class DisparateImpactRatioEndpointTest {
     }
 
     @Test
+    @DisplayName("DIR request should produce correct result")
     void postCorrectFilteringSynthetic() throws JsonProcessingException {
+        populate();
+
         final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         final BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
@@ -577,18 +566,13 @@ class DisparateImpactRatioEndpointTest {
                 .extract()
                 .body().as(BaseMetricResponse.class);
 
-        Double value = response.getValue();
+        final Double value = response.getValue();
         assertEquals("metric", response.getType());
         assertEquals("DIR", response.getName());
         assertFalse(Double.isNaN(value));
 
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
-        Prediction prediction = dataframe.asPredictions().get(0);
-        PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), Dataframe.InternalTags.SYNTHETIC.get());
-        Prediction newPrediction = new SimplePrediction(prediction.getInput(), prediction.getOutput(), predictionMetadata);
-        Dataframe newDataframe = Dataframe.createFrom(newPrediction);
-
-        datasource.get().saveDataframe(newDataframe, MODEL_ID);
+        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
 
         final BaseMetricResponse responseSecond = given()
                 .contentType(ContentType.JSON)
@@ -603,4 +587,38 @@ class DisparateImpactRatioEndpointTest {
         assertEquals("DIR", responseSecond.getName());
         assertEquals(value, responseSecond.getValue());
     }
+
+
+    @Test
+    @DisplayName("DIR request with no organic data")
+    void postCorrectFilteringOnlySynthetic() throws JsonProcessingException {
+
+        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
+
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+
+        final Dataframe organicDataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        datasource.get().saveDataframe(organicDataframe, MODEL_ID);
+
+        final BaseMetricResponse responseSecond = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        assertEquals("metric", responseSecond.getType());
+        assertEquals("DIR", responseSecond.getName());
+        assertFalse(Double.isNaN(responseSecond.getValue()));
+    }
+
 }

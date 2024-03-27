@@ -1,11 +1,8 @@
 package org.kie.trustyai.service.data.storage;
 
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
+import io.quarkus.arc.lookup.LookupIfProperty;
+import jakarta.enterprise.context.ApplicationScoped;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
@@ -13,9 +10,15 @@ import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
-import io.quarkus.arc.lookup.LookupIfProperty;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Set;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import static org.kie.trustyai.service.data.DataSource.INTERNAL_DATA_FILENAME;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "PVC")
 @ApplicationScoped
@@ -63,7 +66,8 @@ public class PVCStorage extends Storage {
 
     /**
      * Read data from the file system, for a given model id and batch size.
-     * @param modelId The model id
+     *
+     * @param modelId   The model id
      * @param batchSize The batch size
      * @return A {@link ByteBuffer} containing the data
      * @throws StorageReadException If an error occurs while reading the data
@@ -79,6 +83,25 @@ public class PVCStorage extends Storage {
             LOG.error("Error reading input file for model " + modelId);
             throw new StorageReadException(e.getMessage());
         }
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        LOG.debug("Cache miss. Reading data for " + modelId);
+        try {
+            final InputStream dataStream = BatchReader.getFileInputStream(buildDataPath(modelId).toString());
+            final InputStream internalDataStream = BatchReader.getFileInputStream(buildInternalDataPath(modelId).toString());
+            final Pair<List<String>, List<String>> pair = BatchReader.readEntriesWithTags(dataStream, internalDataStream, batchSize, tags);
+            return Pair.of(ByteBuffer.wrap(BatchReader.linesToBytes(pair.getLeft())), ByteBuffer.wrap(BatchReader.linesToBytes(pair.getRight())));
+        } catch (IOException e) {
+            LOG.error("Error reading input file for model " + modelId);
+            throw new StorageReadException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataWithTags(String modelId, Set<String> tags) throws StorageReadException {
+        return readDataWithTags(modelId, this.batchSize, tags);
     }
 
     private boolean pathExists(Path path) {
@@ -129,6 +152,7 @@ public class PVCStorage extends Storage {
 
     /**
      * Read an entire file into a {@link ByteBuffer}.
+     *
      * @param filename The filename to read
      * @return A {@link ByteBuffer} containing the data
      * @throws StorageReadException If an error occurs while reading the data
@@ -151,8 +175,8 @@ public class PVCStorage extends Storage {
 
     /**
      * Read {@link ByteBuffer} from the file system, for a given filename and batch size.
-     * 
-     * @param filename The filename to read
+     *
+     * @param filename  The filename to read
      * @param batchSize The batch size
      * @return A {@link ByteBuffer} containing the data
      * @throws StorageReadException If an error occurs while reading the data
@@ -161,13 +185,13 @@ public class PVCStorage extends Storage {
     public ByteBuffer read(String filename, int batchSize) throws StorageReadException {
         final Path path = Paths.get(this.dataFolder.toString(), filename);
         final File file = path.toFile();
-        
+
         try {
             final InputStream stream = BatchReader.getFileInputStream(file.toString());
             return ByteBuffer.wrap(
                     BatchReader.linesToBytes(BatchReader.readEntries(stream, batchSize)));
         } catch (IOException e) {
-            LOG.error("Error reading file for " + file.toString());
+            LOG.error("Error reading file for " + file);
             throw new StorageReadException(e.getMessage());
         }
     }
@@ -199,7 +223,17 @@ public class PVCStorage extends Storage {
     }
 
     @Override
+    public String getInternalDataFilename(String modelId) {
+        return modelId + "-" + INTERNAL_DATA_FILENAME;
+    }
+
+    @Override
     public Path buildDataPath(String modelId) {
         return Path.of(this.dataFolder.toString(), getDataFilename(modelId));
+    }
+
+    @Override
+    public Path buildInternalDataPath(String modelId) {
+        return Path.of(this.dataFolder.toString(), getInternalDataFilename(modelId));
     }
 }

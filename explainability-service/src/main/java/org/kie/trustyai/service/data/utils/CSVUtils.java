@@ -1,7 +1,18 @@
 package org.kie.trustyai.service.data.utils;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.payloads.PayloadConverter;
+import org.kie.trustyai.service.payloads.service.SchemaItem;
+import org.kie.trustyai.service.payloads.values.DataType;
+
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,15 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.service.data.metadata.Metadata;
-import org.kie.trustyai.service.payloads.PayloadConverter;
-import org.kie.trustyai.service.payloads.service.SchemaItem;
-import org.kie.trustyai.service.payloads.values.DataType;
 
 import static org.kie.trustyai.service.data.parsers.CSVParser.ZONE_OFFSET;
 
@@ -129,5 +131,12 @@ public class CSVUtils {
     public static List<List<Value>> parseRaw(String in) throws IOException {
         CSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(in));
         return parser.stream().map(entry -> entry.stream().map(Value::new).collect(Collectors.toList())).collect(Collectors.toList());
+    }
+
+    public static String recordToString(CSVRecord record) throws IOException {
+        final StringWriter writer = new StringWriter();
+        final CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT);
+        printer.printRecord(record);
+        return writer.toString().trim();
     }
 }

@@ -1,8 +1,8 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import io.quarkus.cache.CacheResult;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.Path;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
@@ -20,10 +20,8 @@ import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
-import io.quarkus.cache.CacheResult;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.Path;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @Tag(name = "Disparate Impact Ratio Endpoint", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
@@ -31,6 +29,10 @@ import jakarta.ws.rs.Path;
         " a particular outcome.")
 @Path("/metrics/group/fairness/dir")
 public class DisparateImpactRatioEndpoint extends GroupEndpoint {
+    public DisparateImpactRatioEndpoint() {
+        super("DIR");
+    }
+
     @Override
     public MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue) {
         if (delta == null) {
@@ -48,7 +50,7 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
 
     @Override
     public String specificDefinitionFunction(String outcomeName, List<Value> favorableOutcomeAttr, String protectedAttribute, List<String> privileged, List<String> unprivileged,
-            MetricValueCarrier metricValue) {
+                                             MetricValueCarrier metricValue) {
         return FairnessDefinitions.defineGroupDisparateImpactRatio(
                 protectedAttribute,
                 privileged,
@@ -89,9 +91,5 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
     @Override
     public String getGeneralDefinition() {
         return FairnessDefinitions.defineGroupDisparateImpactRatio();
-    }
-
-    public DisparateImpactRatioEndpoint() {
-        super("DIR");
     }
 }

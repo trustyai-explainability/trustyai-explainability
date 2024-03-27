@@ -1,13 +1,13 @@
 package org.kie.trustyai.service.data.utils;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.PartialPayload;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class InferencePayloadReconciler<T extends PartialPayload, U extends PartialPayload> {
 
@@ -33,7 +33,7 @@ public abstract class InferencePayloadReconciler<T extends PartialPayload, U ext
      * Add a {@link InferencePartialPayload} output to the (yet) unreconciled mapping.
      * If there is a corresponding (based on unique id) input {@link InferencePartialPayload},
      * both are saved to storage and removed from the unreconciled mapping.
-     * 
+     *
      * @param output
      */
     public synchronized void addUnreconciledOutput(U output) throws InvalidSchemaException, DataframeCreateException {

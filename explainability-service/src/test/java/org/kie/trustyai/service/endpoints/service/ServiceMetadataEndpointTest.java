@@ -1,20 +1,21 @@
 package org.kie.trustyai.service.endpoints.service;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.IntStream;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.IntNode;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.common.mapper.TypeRef;
+import io.restassured.http.ContentType;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.service.DataTagging;
@@ -22,17 +23,13 @@ import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
+import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.node.IntNode;
-
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.common.mapper.TypeRef;
-import io.restassured.http.ContentType;
-
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
@@ -54,9 +51,9 @@ class ServiceMetadataEndpointTest {
     Instance<MockPrometheusScheduler> scheduler;
 
     @BeforeEach
-    void clearStorage() {
+    void clearStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
-        datasource.get().empty();
+        datasource.get().reset();
         scheduler.get().empty();
     }
 
@@ -90,7 +87,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void getThousandObservations() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 50);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 50, false);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -116,7 +113,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void getThousandDiverseObservations() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 1000);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 1000, false);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -134,15 +131,15 @@ class ServiceMetadataEndpointTest {
         assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
 
         // check column values
-        assertEquals(null, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues());
+        assertNull(serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getValues());
         assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("race").getValues().size());
         assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
         assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
     }
 
     @Test
-    void getNoObservations() {
-        datasource.get().empty();
+    void getNoObservations() throws JsonProcessingException {
+        datasource.get().reset();
         final List<ServiceMetadata> serviceMetadata = given()
                 .when().get(metadataUrl)
                 .then()
@@ -156,7 +153,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void setNameMapping() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10, false);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -196,7 +193,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void setNameMappingPartial() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10, false);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -248,7 +245,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void setNameMappingWrongInputs() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10, false);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -268,7 +265,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void setNameMappingWrongOutputs() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10, false);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
@@ -498,7 +495,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void setDatapointTagging() throws JsonProcessingException {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(50, 10);
+        final Dataframe dataframe = datasource.get().generateRandomDataframe(50, 10, false);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
         List<String> originalTags = datasource.get().getDataframe(MODEL_ID).getTags();

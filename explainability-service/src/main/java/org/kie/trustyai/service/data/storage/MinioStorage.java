@@ -1,5 +1,16 @@
 package org.kie.trustyai.service.data.storage;
 
+import io.minio.*;
+import io.minio.errors.*;
+import io.quarkus.arc.lookup.LookupIfProperty;
+import jakarta.enterprise.context.ApplicationScoped;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jboss.logging.Logger;
+import org.kie.trustyai.service.config.storage.MinioConfig;
+import org.kie.trustyai.service.config.storage.StorageConfig;
+import org.kie.trustyai.service.data.exceptions.StorageReadException;
+import org.kie.trustyai.service.data.exceptions.StorageWriteException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,19 +21,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
-
-import org.jboss.logging.Logger;
-import org.kie.trustyai.service.config.storage.MinioConfig;
-import org.kie.trustyai.service.config.storage.StorageConfig;
-import org.kie.trustyai.service.data.exceptions.StorageReadException;
-import org.kie.trustyai.service.data.exceptions.StorageWriteException;
-
-import io.minio.*;
-import io.minio.errors.*;
-import io.quarkus.arc.lookup.LookupIfProperty;
-
-import jakarta.enterprise.context.ApplicationScoped;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "MINIO")
 @ApplicationScoped
@@ -90,8 +90,9 @@ public class MinioStorage extends Storage {
     private boolean bucketExists(String bucketName) throws StorageReadException {
         try {
             return minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
-        } catch (ErrorResponseException | InsufficientDataException | InternalException | InvalidKeyException | InvalidResponseException | IOException | NoSuchAlgorithmException | ServerException
-                | XmlParserException e) {
+        } catch (ErrorResponseException | InsufficientDataException | InternalException | InvalidKeyException |
+                 InvalidResponseException | IOException | NoSuchAlgorithmException | ServerException
+                 | XmlParserException e) {
             throw new StorageReadException(e.getMessage());
         }
     }
@@ -99,10 +100,10 @@ public class MinioStorage extends Storage {
     private byte[] readFile(String bucketName, String filename)
             throws MinioException, IOException, NoSuchAlgorithmException, InvalidKeyException {
         return minioClient.getObject(
-                GetObjectArgs.builder()
-                        .bucket(bucketName)
-                        .object(filename)
-                        .build())
+                        GetObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(filename)
+                                .build())
                 .readAllBytes();
     }
 
@@ -120,6 +121,16 @@ public class MinioStorage extends Storage {
     @Override
     public ByteBuffer readData(String modelId, int batchSize) throws StorageReadException {
         throw new StorageReadException("Batch size not supported for MinIO storage");
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataWithTags(String modelId, Set<String> tags) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
     }
 
     private void saveData(ByteBuffer byteBuffer, String bucketName, String filename) throws StorageWriteException, StorageReadException {
@@ -154,8 +165,9 @@ public class MinioStorage extends Storage {
                     .sources(sources).build());
             // Delete temporary file
             minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).object(tempFilename).build());
-        } catch (StorageWriteException | StorageReadException | ServerException | InsufficientDataException | ErrorResponseException | IOException | NoSuchAlgorithmException | InvalidKeyException
-                | InvalidResponseException | XmlParserException | InternalException e) {
+        } catch (StorageWriteException | StorageReadException | ServerException | InsufficientDataException |
+                 ErrorResponseException | IOException | NoSuchAlgorithmException | InvalidKeyException
+                 | InvalidResponseException | XmlParserException | InternalException e) {
             throw new StorageWriteException(e.getMessage());
         }
     }
@@ -220,8 +232,18 @@ public class MinioStorage extends Storage {
     }
 
     @Override
+    public String getInternalDataFilename(String modelId) {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    @Override
     public Path buildDataPath(String modelId) {
         return Path.of(this.bucketName, getDataFilename(modelId));
+    }
+
+    @Override
+    public Path buildInternalDataPath(String modelId) {
+        throw new StorageReadException("Storage type not supported");
     }
 
     @Override

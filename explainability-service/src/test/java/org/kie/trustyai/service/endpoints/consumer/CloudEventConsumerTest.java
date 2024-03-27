@@ -1,5 +1,23 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.quarkus.funqy.knative.events.CloudEvent;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
+import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockKServeInputPayload;
+import org.kie.trustyai.service.mocks.MockKServeOutputPayload;
+import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
+import org.kie.trustyai.service.profiles.MemoryTestProfile;
+
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
@@ -7,25 +25,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
-import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockKServeInputPayload;
-import org.kie.trustyai.service.mocks.MockKServeOutputPayload;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
-
-import io.quarkus.funqy.knative.events.CloudEvent;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 
 import static io.smallrye.common.constraint.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,8 +42,8 @@ public class CloudEventConsumerTest {
     Instance<MockMemoryStorage> storage;
 
     @BeforeEach
-    void emptyStorage() {
-        datasource.get().empty();
+    void emptyStorage() throws JsonProcessingException {
+        datasource.get().reset();
         storage.get().emptyStorage();
     }
 

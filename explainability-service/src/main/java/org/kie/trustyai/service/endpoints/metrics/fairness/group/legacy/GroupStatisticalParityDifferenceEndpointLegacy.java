@@ -1,10 +1,9 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group.legacy;
 
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.kie.trustyai.service.endpoints.metrics.fairness.group.GroupStatisticalParityDifferenceEndpoint;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.kie.trustyai.service.endpoints.metrics.fairness.group.GroupStatisticalParityDifferenceEndpoint;
 
 @ApplicationScoped
 @Tag(name = "Statistical Parity Difference Endpoint (Legacy)", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
