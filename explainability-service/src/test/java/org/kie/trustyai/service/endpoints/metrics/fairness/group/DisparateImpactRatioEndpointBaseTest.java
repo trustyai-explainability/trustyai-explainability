@@ -619,7 +619,6 @@ abstract class DisparateImpactRatioEndpointBaseTest {
         assertEquals("metric", responseSecond.getType());
         assertEquals("DIR", responseSecond.getName());
         assertFalse(Double.isNaN(responseSecond.getValue()));
-        System.out.println(responseSecond.getValue());
     }
 
 }

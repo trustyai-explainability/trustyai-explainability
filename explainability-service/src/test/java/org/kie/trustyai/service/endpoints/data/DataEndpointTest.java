@@ -447,7 +447,6 @@ class DataEndpointTest {
                 .when().post("/upload")
                 .then();
 
-        System.out.println(r.extract().body().asString());
         for (String checkMsg : checkMsgs) {
             r.statusCode(statusCode).body(containsString(checkMsg));
         }
