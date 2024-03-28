@@ -42,7 +42,6 @@ class DisparateImpactRatioEndpointTest {
 
     /**
      * Populate storage with 1000 random observations before each test.
-     *
      */
     @BeforeEach
     void populateStorage() {

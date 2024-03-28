@@ -4,5 +4,4 @@ public abstract class Storage<DATAFRAME_TYPE, AUX_DATA_TYPE> implements StorageI
     public DataFormat getDataFormat() {
         return DataFormat.CSV;
     }
-
 }

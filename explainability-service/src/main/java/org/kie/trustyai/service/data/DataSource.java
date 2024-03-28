@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -68,6 +69,10 @@ public class DataSource {
         } else {
             return storage.get();
         }
+    }
+
+    public static String getGroundTruthName(String modelId) {
+        return modelId + GROUND_TRUTH_SUFFIX;
     }
 
     public Set<String> getKnownModels() {
@@ -197,6 +202,94 @@ public class DataSource {
         } else {
             HibernateStorage hst = (HibernateStorage) getStorage();
             df = hst.readDataframe(modelId, startPos, endPos);
+        }
+        return df;
+    }
+
+    /**
+     * Get a dataframe with the organic (non-synthetic) data and metadata for a given model
+     *
+     * @param modelId the model id
+     * @param batchSize the batch size
+     * @return a dataframe with the organic data and metadata for a given model
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public Dataframe getOrganicDataframe(final String modelId, int batchSize) throws DataframeCreateException {
+        Dataframe df;
+        if (getStorage().getDataFormat() == DataFormat.CSV) {
+            FlatFileStorage ffst = (FlatFileStorage) getStorage();
+            final Pair<ByteBuffer, ByteBuffer> pair;
+            try {
+                pair = ffst.readDataframeAndMetadataWithTags(modelId, batchSize, Set.of(Dataframe.InternalTags.UNLABELED.get()));
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException(e.getMessage());
+            }
+
+            // Fetch metadata, if not yet read
+            final StorageMetadata metadata;
+            try {
+                metadata = getMetadata(modelId);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+            }
+
+            try {
+                df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
+            } catch (IllegalArgumentException e) {
+                LOG.error(e.getMessage());
+                throw new DataframeCreateException("Could not parse create dataframe: " + e.getMessage());
+            }
+
+            df.setColumnAliases(getJointNameAliases(metadata));
+            df.setInputTensorName(metadata.getInputTensorName());
+            df.setOutputTensorName(metadata.getOutputTensorName());
+        } else {
+            HibernateStorage hst = (HibernateStorage) getStorage();
+            df = hst.readDataframeAndMetadataWithTags(modelId, batchSize, Set.of(Dataframe.InternalTags.UNLABELED.get())).getLeft();
+        }
+        return df;
+    }
+
+    /**
+     * Get a dataframe with the organic (non-synthetic) data and metadata for a given model.
+     * No batch size is given, so the default batch size is used.
+     *
+     * @param modelId the model id
+     * @return a dataframe with the organic data and metadata for a given model
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public Dataframe getOrganicDataframe(final String modelId) throws DataframeCreateException {
+        Dataframe df;
+        if (getStorage().getDataFormat() == DataFormat.CSV) {
+            FlatFileStorage ffst = (FlatFileStorage) getStorage();
+            final Pair<ByteBuffer, ByteBuffer> pair;
+            try {
+                pair = ffst.readDataframeAndMetadataWithTags(modelId, Set.of(Dataframe.InternalTags.UNLABELED.get()));
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException(e.getMessage());
+            }
+
+            // Fetch metadata, if not yet read
+            final StorageMetadata metadata;
+            try {
+                metadata = getMetadata(modelId);
+            } catch (StorageReadException e) {
+                throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+            }
+
+            try {
+                df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
+            } catch (IllegalArgumentException e) {
+                LOG.error(e.getMessage());
+                throw new DataframeCreateException("Could not parse create dataframe: " + e.getMessage());
+            }
+
+            df.setColumnAliases(getJointNameAliases(metadata));
+            df.setInputTensorName(metadata.getInputTensorName());
+            df.setOutputTensorName(metadata.getOutputTensorName());
+        } else {
+            HibernateStorage hst = (HibernateStorage) getStorage();
+            df = hst.readDataframeAndMetadataWithTags(modelId, Set.of(Dataframe.InternalTags.UNLABELED.get())).getLeft();
         }
         return df;
     }
@@ -336,10 +429,6 @@ public class DataSource {
         } else {
             return ((HibernateStorage) getStorage()).dataExists(modelId);
         }
-    }
-
-    public static String getGroundTruthName(String modelId) {
-        return modelId + GROUND_TRUTH_SUFFIX;
     }
 
     // ground truth access and settors

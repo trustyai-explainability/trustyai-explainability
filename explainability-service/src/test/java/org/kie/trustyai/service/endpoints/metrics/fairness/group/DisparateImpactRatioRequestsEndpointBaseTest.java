@@ -4,27 +4,17 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.jboss.resteasy.reactive.RestResponse;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
-import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
-import org.kie.trustyai.service.utils.DataframeGenerators;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
 import jakarta.enterprise.inject.Instance;
@@ -35,32 +25,18 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
-@QuarkusTest
-@TestProfile(MetricsEndpointTestProfile.class)
-@TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
-class DisparateImpactRatioRequestsEndpointTest {
+abstract class DisparateImpactRatioRequestsEndpointBaseTest {
 
-    private static final int N_SAMPLES = 100;
-    private static final String MODEL_ID = "example1";
+    protected static final int N_SAMPLES = 100;
+    protected static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
-
-    @Inject
-    Instance<MockMemoryStorage> storage;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
     @Inject
     Instance<ServiceConfig> serviceConfig;
-
-    @BeforeEach
-    void populateStorage() throws JsonProcessingException {
-        storage.get().emptyStorage();
-        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-    }
 
     /**
      * When no batch size is specified in the request, the service's default batch size should be used

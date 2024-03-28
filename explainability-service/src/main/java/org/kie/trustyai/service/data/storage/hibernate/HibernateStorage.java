@@ -3,7 +3,9 @@ package org.kie.trustyai.service.data.storage.hibernate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
@@ -243,6 +245,16 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         } catch (EntityNotFoundException e) {
             return false;
         }
+    }
+
+    @Override
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        return null;
+    }
+
+    @Override
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException {
+        return null;
     }
 
     @Override

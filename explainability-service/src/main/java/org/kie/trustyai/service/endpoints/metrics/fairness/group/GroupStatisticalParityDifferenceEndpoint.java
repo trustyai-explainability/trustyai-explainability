@@ -23,13 +23,17 @@ import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetr
 import io.quarkus.cache.CacheResult;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Path;
 
 @ApplicationScoped
 @Tag(name = "Statistical Parity Difference Endpoint", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
         "difference between the proportion of the majority and protected classes getting a particular outcome.")
 @Path("/metrics/group/fairness/spd")
 public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
+    public GroupStatisticalParityDifferenceEndpoint() {
+        super("SPD");
+    }
+
     @Override
     public MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue) {
         if (delta == null) {
@@ -55,7 +59,7 @@ public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
                 outcomeName,
                 favorableOutcomeAttr,
                 metricValue.getValue());
-    };
+    }
 
     @Override
     @CacheResult(cacheName = "metrics-calculator-spd", keyGenerator = MetricCalculationCacheKeyGen.class)
@@ -88,10 +92,6 @@ public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
     @Override
     public String getGeneralDefinition() {
         return FairnessDefinitions.defineGroupStatisticalParityDifference();
-    }
-
-    public GroupStatisticalParityDifferenceEndpoint() {
-        super("SPD");
     }
 
 }

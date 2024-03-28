@@ -31,6 +31,10 @@ import jakarta.ws.rs.Path;
         " a particular outcome.")
 @Path("/metrics/group/fairness/dir")
 public class DisparateImpactRatioEndpoint extends GroupEndpoint {
+    public DisparateImpactRatioEndpoint() {
+        super("DIR");
+    }
+
     @Override
     public MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue) {
         if (delta == null) {
@@ -89,9 +93,5 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
     @Override
     public String getGeneralDefinition() {
         return FairnessDefinitions.defineGroupDisparateImpactRatio();
-    }
-
-    public DisparateImpactRatioEndpoint() {
-        super("DIR");
     }
 }

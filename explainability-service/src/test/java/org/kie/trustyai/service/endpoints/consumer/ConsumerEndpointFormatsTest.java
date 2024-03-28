@@ -22,6 +22,8 @@ import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -57,14 +59,14 @@ class ConsumerEndpointFormatsTest {
      * Empty the storage before each test.
      */
     @BeforeEach
-    void emptyStorage() {
-        datasource.get().empty();
+    void emptyStorage() throws JsonProcessingException {
+        datasource.get().reset();
         storage.get().emptyStorage();
     }
 
     /**
      * Scenario 1:
-     *
+     * <p>
      * Consume a single payload with a single input and multiple outputs, using the NP codec.
      * The input corresponds to:
      *
@@ -81,7 +83,7 @@ class ConsumerEndpointFormatsTest {
      *   }
      * }
      * </pre>
-     *
+     * <p>
      * and the output corresponds to:
      *
      * <pre>
@@ -300,7 +302,7 @@ class ConsumerEndpointFormatsTest {
 
     /**
      * Scenario: 2 inputs, 1 output, PD codec, no batch
-     *
+     * <p>
      * The input corresponds to:
      *
      * <pre>
@@ -322,7 +324,6 @@ class ConsumerEndpointFormatsTest {
      *   }
      * }
      * </pre>
-     *
      */
     @Test
     void consumeMultiInputSingleOutputPDCodecNoBatch() {

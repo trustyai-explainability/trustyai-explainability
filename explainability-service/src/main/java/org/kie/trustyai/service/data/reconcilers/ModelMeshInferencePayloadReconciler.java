@@ -1,6 +1,9 @@
 package org.kie.trustyai.service.data.reconcilers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,14 +30,12 @@ import jakarta.inject.Singleton;
  */
 @Singleton
 public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconciler<InferencePartialPayload, InferencePartialPayload> {
+    protected static final String MM_MODEL_SUFFIX = "__isvc";
     private static final Logger LOG = Logger.getLogger(ModelMeshInferencePayloadReconciler.class);
-
     @Inject
     Instance<DataSource> datasource;
 
-    protected static final String MM_MODEL_SUFFIX = "__isvc";
-
-    public static String standardizeModelId(String inboundModelId) {
+    protected static String standardizeModelId(String inboundModelId) {
         if (inboundModelId != null && inboundModelId.contains(MM_MODEL_SUFFIX)) {
             int index = inboundModelId.lastIndexOf(MM_MODEL_SUFFIX);
             return inboundModelId.substring(0, index);
@@ -61,7 +62,7 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
      * Convert both input and output {@link InferencePartialPayload} to a TrustyAI {@link Prediction}.
      * If the input tensor contains a {@link ExplainerEndpoint#BIAS_IGNORE_PARAM} set, then {@link PredictionMetadata}
      * will be attached marking these inferences as synthetic.
-     * 
+     *
      * @param inputPayload Input {@link InferencePartialPayload}
      * @param outputPayload Output {@link InferencePartialPayload}
      * @param id The unique id of the payload

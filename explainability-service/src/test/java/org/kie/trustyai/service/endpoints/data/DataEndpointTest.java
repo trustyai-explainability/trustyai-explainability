@@ -23,6 +23,7 @@ import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 import org.kie.trustyai.service.utils.KserveRestPayloads;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
@@ -38,20 +39,17 @@ import jakarta.inject.Inject;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 @TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(DataEndpoint.class)
 class DataEndpointTest {
+    private static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
-
     @Inject
     CSVParser csvParser;
-
-    private static final String MODEL_ID = "example1";
-
     @Inject
     Instance<MockMemoryStorage> storage;
 
@@ -59,8 +57,8 @@ class DataEndpointTest {
      * Empty the storage before each test.
      */
     @BeforeEach
-    void emptyStorage() {
-        datasource.get().empty();
+    void emptyStorage() throws JsonProcessingException {
+        datasource.get().reset();
         storage.get().emptyStorage();
     }
 
@@ -361,7 +359,7 @@ class DataEndpointTest {
 
     // data upload tests ===============================================================================================
     @Test
-    void uploadData() {
+    void uploadData() throws JsonProcessingException {
         int[] testInputRows = new int[] { 1, 5, 250 };
         int[] testInputCols = new int[] { 1, 4 };
         int[] testOutputCols = new int[] { 1, 2 };
@@ -453,14 +451,13 @@ class DataEndpointTest {
                 .when().post("/upload")
                 .then();
 
-        System.out.println(r.extract().body().asString());
         for (String checkMsg : checkMsgs) {
             r.statusCode(statusCode).body(containsString(checkMsg));
         }
     }
 
     @Test
-    void uploadDataAndGroundTruth() {
+    void uploadDataAndGroundTruth() throws JsonProcessingException {
         int[] testInputRows = new int[] { 1, 5, 250 };
         int[] testInputCols = new int[] { 1, 4 };
         int[] testOutputCols = new int[] { 1, 2 };
