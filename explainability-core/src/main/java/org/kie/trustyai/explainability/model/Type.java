@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.NotImplementedException;
 import org.kie.trustyai.explainability.utils.DataUtils;
 
 /**
@@ -483,6 +484,28 @@ public enum Type {
         }
     },
 
+    TENSOR("tensor") {
+        @Override
+        public Value drop(Value value) {
+            throw new NotImplementedException();
+        }
+
+        @Override
+        public Value perturb(Value value, PerturbationContext perturbationContext) {
+            throw new NotImplementedException();
+        }
+
+        @Override
+        public List<double[]> encode(EncodingParams params, Value target, Value... values) {
+            throw new NotImplementedException();
+        }
+
+        @Override
+        public Value randomValue(PerturbationContext perturbationContext) {
+            throw new NotImplementedException();
+        }
+    },
+
     CURRENCY("currency") {
         @Override
         public Value drop(Value value) {
@@ -510,6 +533,7 @@ public enum Type {
             return new Value(currencies.get(perturbationContext.getRandom().nextInt(currencies.size() - 1)));
         }
     };
+
 
     static List<double[]> encodeEquals(Value target, Value[] values) {
         List<double[]> result = new ArrayList<>(values.length);
