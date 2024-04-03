@@ -1,8 +1,10 @@
 package org.kie.trustyai.service.utils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -11,6 +13,7 @@ import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Type;
@@ -43,6 +46,45 @@ public class DataframeGenerators {
             predictions.add(new SimplePrediction(predictionInput, predictionOutput));
         }
         return Dataframe.createFrom(predictions);
+    }
+
+    /**
+     * Generate a random dataframe with a given number of observations and feature diversity.
+     * The data can also be labelled as synthetic or non-synthetic.
+     * 
+     * @param observations the number of observations
+     * @param featureDiversity the number of unique values for the feature "age"
+     * @param synthetic whether the data is synthetic or not
+     * @return a random {@link Dataframe}
+     */
+    public static Dataframe generateRandomDataframe(int observations, int featureDiversity, boolean synthetic) {
+        final List<Prediction> predictions = new ArrayList<>();
+        final Random random = new Random(0);
+        for (int i = 0; i < observations; i++) {
+            final List<Feature> featureList = List.of(
+                    // guarantee feature diversity for age is min(observations, featureDiversity)
+                    FeatureFactory.newNumericalFeature("age", i % featureDiversity),
+                    FeatureFactory.newNumericalFeature("gender", random.nextBoolean() ? 1 : 0),
+                    FeatureFactory.newNumericalFeature("race", random.nextBoolean() ? 1 : 0));
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+
+            final List<Output> outputList = List.of(
+                    new Output("income", Type.NUMBER, new Value(random.nextBoolean() ? 1 : 0), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            if (synthetic) {
+                final PredictionMetadata predictionMetadata = new PredictionMetadata(UUID.randomUUID().toString(),
+                        LocalDateTime.now(), Dataframe.InternalTags.SYNTHETIC.get());
+                predictions.add(new SimplePrediction(predictionInput, predictionOutput, predictionMetadata));
+            } else {
+                predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+            }
+
+        }
+        return Dataframe.createFrom(predictions);
+    }
+
+    public static Dataframe generateRandomSyntheticDataframe(int observations) {
+        return generateRandomDataframe(observations, 100, true);
     }
 
     public static Dataframe generateDataframeFromNormalDistributions(int observations, double mean, double stdDeviation) {

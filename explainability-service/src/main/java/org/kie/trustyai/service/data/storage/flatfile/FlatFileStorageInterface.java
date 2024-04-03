@@ -17,9 +17,10 @@ public interface FlatFileStorageInterface extends StorageInterface<ByteBuffer, B
      * @return A {@link ByteBuffer} containing the data
      * @throws StorageReadException If an error occurs while reading the data
      */
-    ByteBuffer readMetaOrInternalData(String location, int batchSize) throws StorageReadException;
+    ByteBuffer readMetaOrInternalData(String modelId, int batchSize) throws StorageReadException;
 
-    ByteBuffer readMetaOrInternalData(String location, int startPos, int endPos) throws StorageReadException;
+    ByteBuffer readMetaOrInternalData(String modelId, int startPos, int endPos) throws StorageReadException;
 
     boolean fileExists(String location) throws StorageReadException;
+
 }

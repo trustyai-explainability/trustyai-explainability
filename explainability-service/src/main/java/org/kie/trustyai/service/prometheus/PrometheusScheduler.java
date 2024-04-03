@@ -27,15 +27,13 @@ public class PrometheusScheduler {
 
     private static final Logger LOG = Logger.getLogger(PrometheusScheduler.class);
     private final ConcurrentHashMap<String, ConcurrentHashMap<UUID, BaseMetricRequest>> requests = new ConcurrentHashMap<>();
+    private final MetricsDirectory metricsDirectory = new MetricsDirectory();
+    @Inject
+    protected PrometheusPublisher publisher;
     @Inject
     Instance<DataSource> dataSource;
     @Inject
-    protected PrometheusPublisher publisher;
-
-    @Inject
     ServiceConfig serviceConfig;
-
-    private final MetricsDirectory metricsDirectory = new MetricsDirectory();
 
     public MetricsDirectory getMetricsDirectory() {
         return metricsDirectory;
@@ -78,7 +76,7 @@ public class PrometheusScheduler {
                     final int maxBatchSize = requestsSet.stream()
                             .mapToInt(entry -> entry.getValue().getBatchSize()).max()
                             .orElse(serviceConfig.batchSize().getAsInt());
-                    final Dataframe df = ds.getDataframe(modelId, maxBatchSize);
+                    final Dataframe df = ds.getOrganicDataframe(modelId, maxBatchSize);
 
                     requestsSet.forEach(entry -> {
                         // entry value: BaseMetricRequest
@@ -121,7 +119,7 @@ public class PrometheusScheduler {
 
     /**
      * Get unique model ids with registered Prometheus metrics
-     * 
+     *
      * @return Unique models ids
      */
     public Set<String> getModelIds() {

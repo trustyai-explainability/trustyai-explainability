@@ -20,11 +20,7 @@ import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -55,7 +51,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
                 .map(Value::toString)
                 .collect(Collectors.toList());
         return specificDefinitionFunction(outcomeName, favorableOutcomeAttrs, protectedAttribute, privilegeds, unprivilegeds, metricValue);
-    };
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -70,8 +66,10 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
                 LOG.warn("Request batch size is empty. Using the default value of " + defaultBatchSize);
                 request.setBatchSize(defaultBatchSize);
             }
-            dataframe = super.dataSource.get().getDataframe(request.getModelId(), request.getBatchSize()).filterRowsBySynthetic(false);
+
+            dataframe = super.dataSource.get().getOrganicDataframe(request.getModelId(), request.getBatchSize());
             storageMetadata = dataSource.get().getMetadata(request.getModelId());
+
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();

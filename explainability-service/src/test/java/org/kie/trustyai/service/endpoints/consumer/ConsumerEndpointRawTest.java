@@ -24,6 +24,8 @@ import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -54,7 +56,7 @@ class ConsumerEndpointRawTest {
 
     /**
      * Create an input partial payload with no synthetic flag
-     * 
+     *
      * @param id
      * @return
      */
@@ -64,7 +66,7 @@ class ConsumerEndpointRawTest {
 
     /**
      * Create an input partial payload with the specified synthetic flag
-     * 
+     *
      * @param id
      * @param synthetic
      * @return
@@ -204,8 +206,8 @@ class ConsumerEndpointRawTest {
      * Empty the storage before each test.
      */
     @BeforeEach
-    void emptyStorage() {
-        datasource.get().empty();
+    void emptyStorage() throws JsonProcessingException {
+        datasource.get().reset();
         storage.get().emptyStorage();
     }
 

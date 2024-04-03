@@ -11,6 +11,8 @@ import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -39,8 +41,8 @@ class ServiceMetadataEndpointTest {
     }
 
     @Test
-    void get() {
-        datasource.get().empty();
+    void get() throws JsonProcessingException {
+        datasource.get().reset();
         final List<ServiceMetadata> serviceMetadata = given()
                 .when().get()
                 .then()

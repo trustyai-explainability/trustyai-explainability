@@ -20,6 +20,8 @@ import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.quarkus.funqy.knative.events.CloudEvent;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -43,8 +45,8 @@ public class CloudEventConsumerTest {
     Instance<MockMemoryStorage> storage;
 
     @BeforeEach
-    void emptyStorage() {
-        datasource.get().empty();
+    void emptyStorage() throws JsonProcessingException {
+        datasource.get().reset();
         storage.get().emptyStorage();
     }
 

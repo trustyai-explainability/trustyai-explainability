@@ -1,5 +1,9 @@
 package org.kie.trustyai.service.data.storage;
 
+import java.nio.ByteBuffer;
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.service.data.cache.DataCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
@@ -38,4 +42,25 @@ public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
     // info queries ====================================================================================================
     boolean dataExists(String modelId) throws StorageReadException;
 
+    /**
+     * Read data and metadata with the specified tags and batch size.
+     *
+     * @param modelId The model ID
+     * @param batchSize The batch size
+     * @param tags The tags
+     * @return A pair of {@link ByteBuffer} containing the data and metadata
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException;
+
+    /**
+     * Read data and metadata with the specified tags and batch size.
+     * Since no batch size is specified, the default batch size is used.
+     *
+     * @param modelId The model ID
+     * @param tags The tags
+     * @return A pair of {@link ByteBuffer} containing the data and metadata
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException;
 }
