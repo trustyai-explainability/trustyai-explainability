@@ -34,6 +34,8 @@ import java.util.stream.DoubleStream;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.NotImplementedException;
+import org.kie.trustyai.explainability.model.tensor.BaseTensor;
+import org.kie.trustyai.explainability.model.tensor.Tensor2D;
 import org.kie.trustyai.explainability.utils.DataUtils;
 
 /**
@@ -487,22 +489,31 @@ public enum Type {
     TENSOR("tensor") {
         @Override
         public Value drop(Value value) {
-            throw new NotImplementedException();
+            BaseTensor<?, ?> tensor = ((BaseTensor<?, ?>) value.getUnderlyingObject()).copy();
+            tensor.fill(null);
+            return new Value(tensor);
         }
 
         @Override
         public Value perturb(Value value, PerturbationContext perturbationContext) {
-            throw new NotImplementedException();
+            throw new NotImplementedException("Value perturbation not supported for TENSOR data.");
         }
 
         @Override
         public List<double[]> encode(EncodingParams params, Value target, Value... values) {
-            throw new NotImplementedException();
+            return encodeEquals(target, values);
         }
 
         @Override
+        // generates a random 5x5 double tensor
         public Value randomValue(PerturbationContext perturbationContext) {
-            throw new NotImplementedException();
+            Double[][] random = new Double[5][5];
+            for (int i = 0; i < 5; i++) {
+                for (int ii = 0; ii < 5; ii++) {
+                    random[i][ii] = perturbationContext.getRandom().nextDouble();
+                }
+            }
+            return new Value(Tensor2D.fromArray(random));
         }
     },
 
@@ -533,7 +544,6 @@ public enum Type {
             return new Value(currencies.get(perturbationContext.getRandom().nextInt(currencies.size() - 1)));
         }
     };
-
 
     static List<double[]> encodeEquals(Value target, Value[] values) {
         List<double[]> result = new ArrayList<>(values.length);

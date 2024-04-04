@@ -53,6 +53,7 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
+import org.kie.trustyai.explainability.model.tensor.Tensor1D;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -310,7 +311,12 @@ class DataUtilsTest {
     @Test
     void testDropFeature() {
         for (Type t : Type.values()) {
-            Feature target = TestUtils.getMockedFeature(t, new Value(1d));
+            Feature target;
+            if (t.equals(Type.TENSOR)) {
+                target = TestUtils.getMockedFeature(t, new Value(Tensor1D.fromArray(new Double[] { 1d })));
+            } else {
+                target = TestUtils.getMockedFeature(t, new Value(1d));
+            }
             List<Feature> features = new LinkedList<>();
             features.add(TestUtils.getMockedNumericFeature());
             features.add(target);
@@ -324,7 +330,13 @@ class DataUtilsTest {
     @Test
     void testDropLinearizedFeature() {
         for (Type t : Type.values()) {
-            Feature target = TestUtils.getMockedFeature(t, new Value(1d));
+
+            Feature target;
+            if (t.equals(Type.TENSOR)) {
+                target = TestUtils.getMockedFeature(t, new Value(Tensor1D.fromArray(new Double[] { 1d })));
+            } else {
+                target = TestUtils.getMockedFeature(t, new Value(1d));
+            }
             List<Feature> features = new LinkedList<>();
             features.add(TestUtils.getMockedNumericFeature());
             features.add(target);

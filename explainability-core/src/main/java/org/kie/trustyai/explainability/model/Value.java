@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Transient;
 
 /**
@@ -40,6 +41,7 @@ import jakarta.persistence.Transient;
 @Embeddable
 public class Value {
 
+    @Lob
     private final UnderlyingObject wrappedUnderlyingObject;
 
     public Value(Object underlyingObject) {

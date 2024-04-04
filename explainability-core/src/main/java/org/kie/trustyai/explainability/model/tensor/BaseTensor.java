@@ -1,78 +1,61 @@
 package org.kie.trustyai.explainability.model.tensor;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.OneToMany;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-@MappedSuperclass
-public class BaseTensor<E> {
+public abstract class BaseTensor<E, T> implements Serializable {
     int dimensions;
 
-    @OneToMany
+    protected Class tClass;
     List<E> data;
-
-    @ElementCollection
     List<Integer> shape;
-    private Long id;
-
-
-    // default constructor
-    public BaseTensor(){}
 
     // constructor from list of subelements
-    public BaseTensor(List<E> data){
-        this.data = data;
-    }
-
-    // hibernate ids
-    @Id
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    protected BaseTensor() {
     }
 
     // tensor info
-    public List<Integer> getShape(){
+    public List<Integer> getShape() {
         return shape;
     }
 
-    public int getDimensions(){
+    public int getDimensions() {
         return dimensions;
     }
 
-    public int length(){
+    public int length() {
         return data.size();
     }
 
+    public Class getDataClass() {
+        return tClass;
+    }
+
     // get element at position idx
-    public E get(int idx){
+    public E get(int idx) {
         return data.get(idx);
     }
 
+    // fill with value
+    public abstract void fill(T val);
 
-    public Object[] toArray(){
-        return null;
-    }
+    public abstract Object[] toArray();
 
-    @Override
     public String toString() {
         return Arrays.deepToString(toArray());
     }
 
+    // copy
+    public abstract <E extends BaseTensor> E copy();
+
     // shape processing
-    protected <E extends BaseTensor> List<Integer> computeShape(List<E> data){
+    protected <E extends BaseTensor> List<Integer> computeShape(List<E> data) {
         List<Integer> shape = new ArrayList<Integer>(data.get(0).getShape());
         shape.add(0, data.size());
         return Collections.unmodifiableList(shape);
@@ -81,8 +64,24 @@ public class BaseTensor<E> {
     //check that all shapes are of a consistent size
     protected static <E extends BaseTensor> void validateShapes(List<E> data) throws IllegalArgumentException {
         Set<Integer> shapes = data.stream().mapToInt(BaseTensor::length).boxed().collect(Collectors.toSet());
-        if (shapes.size() != 1){
+        if (shapes.size() != 1) {
             throw new IllegalArgumentException("All slices of a tensor dimension must have the same shape: found the following sizes: " + shapes);
         }
+    }
+
+    // equality checks
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof BaseTensor))
+            return false;
+        BaseTensor<?, ?> that = (BaseTensor<?, ?>) o;
+        return Objects.equals(data, that.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data);
     }
 }

@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.kie.trustyai.explainability.model.tensor.Tensor1D;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -251,7 +252,12 @@ class TypeTest {
     @ParameterizedTest
     @EnumSource
     void testDrop(Type type) {
-        Value v = new Value(1.0);
+        Value v;
+        if (type == Type.TENSOR) {
+            v = new Value(Tensor1D.fromArray(new Double[] { 1. }));
+        } else {
+            v = new Value(1.0);
+        }
         Value dropped = type.drop(v);
         assertNotEquals(v, dropped);
     }
@@ -259,6 +265,9 @@ class TypeTest {
     @ParameterizedTest
     @EnumSource
     void testPerturb(Type type) {
+        if (type == Type.TENSOR) {
+            return;
+        }
         for (long seed = 0; seed < 5; seed++) {
             Value v = new Value(1.0);
             Random random = new Random();
@@ -330,12 +339,16 @@ class TypeTest {
     @ParameterizedTest
     @EnumSource
     void testRandomValue(Type type) {
+
         for (long seed = 0; seed < 5; seed++) {
             Random random = new Random();
             PerturbationContext perturbationContext = new PerturbationContext(seed, random, random.nextInt());
             Value value = type.randomValue(perturbationContext);
             assertNotNull(value);
             assertDoesNotThrow(() -> type.drop(value));
+            if (type == Type.TENSOR) {
+                continue;
+            }
             assertDoesNotThrow(() -> type.perturb(value, perturbationContext));
         }
     }

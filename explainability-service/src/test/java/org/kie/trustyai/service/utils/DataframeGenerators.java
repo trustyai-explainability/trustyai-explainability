@@ -197,7 +197,12 @@ public class DataframeGenerators {
 
         for (int col = 0; col < df1.getColumnDimension(); col++) {
             for (int row = 0; row < df1.getRowDimension(); row++) {
-                assertEquals(df1.getValue(row, col), df2.getValue(row, col));
+
+                if (df1.getValue(row, col).getUnderlyingObject() instanceof Double[][][][]) {
+                    assertArrayEquals((Double[][][][]) df1.getValue(row, col).getUnderlyingObject(), (Double[][][][]) df2.getValue(row, col).getUnderlyingObject());
+                } else {
+                    assertEquals(df1.getValue(row, col), df2.getValue(row, col));
+                }
 
                 FeatureDomain df1Domain = df1.getDomain(col);
                 FeatureDomain df2Domain = df2.getDomain(col);
