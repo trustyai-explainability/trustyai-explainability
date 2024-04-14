@@ -1,6 +1,6 @@
-package org.kie.trustyai.connectors.kserve.v2;
+package org.kie.trustyai.connectors.kserve;
 
-enum KServeDatatype {
+public enum KServeDatatype {
     BOOL,
     INT8,
     INT16,

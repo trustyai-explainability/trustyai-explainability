@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.kie.trustyai.connectors.kserve.KServeDatatype;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;

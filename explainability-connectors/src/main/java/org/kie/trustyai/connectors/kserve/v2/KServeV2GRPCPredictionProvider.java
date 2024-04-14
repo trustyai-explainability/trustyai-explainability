@@ -3,6 +3,7 @@ package org.kie.trustyai.connectors.kserve.v2;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+import org.kie.trustyai.connectors.kserve.AbstractKServePredictionProvider;
 import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
@@ -21,23 +22,19 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
 /**
- * Wraps a KServe v2-compatible model server as a TrustyAI {@link PredictionProvider}
+ * Wraps a KServe v2-compatible gRPC model server as a TrustyAI {@link PredictionProvider}
  */
-public class KServeV2GRPCPredictionProvider implements PredictionProvider {
+public class KServeV2GRPCPredictionProvider extends AbstractKServePredictionProvider implements PredictionProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(KServeV2GRPCPredictionProvider.class);
-    private static final String DEFAULT_TENSOR_NAME = "predict";
-    private static final KServeDatatype DEFAULT_DATATYPE = KServeDatatype.FP64;
+
     private final KServeConfig kServeConfig;
-    private final List<String> outputNames;
-    private final String inputName;
     private final Map<String, String> optionalParameters;
 
     private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, String inputName, List<String> outputNames, Map<String, String> optionalParameters) {
 
+        super(outputNames, inputName);
         this.kServeConfig = kServeConfig;
-        this.inputName = inputName;
-        this.outputNames = outputNames;
         this.optionalParameters = optionalParameters;
     }
 
