@@ -28,6 +28,7 @@ else
       retry=-1
     else
       echo "Trying restart of marketplace pods"
+      oc get pods -n openshift-marketplace
       oc delete pods --all -n openshift-marketplace
       sleep 3m
     fi  
