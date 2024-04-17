@@ -27,8 +27,8 @@ else
     if [ $? -eq 0 ]; then
       retry=-1
     else
-      echo "Trying restart of marketplace community operator pod"
-      oc delete pod -n openshift-marketplace $(oc get pod -n openshift-marketplace -l marketplace.operatorSource=community-operators -o jsonpath="{$.items[*].metadata.name}")
+      echo "Trying restart of marketplace pods"
+      oc delete pods --all -n openshift-marketplace
       sleep 3m
     fi  
     retry=$(( retry - 1))
