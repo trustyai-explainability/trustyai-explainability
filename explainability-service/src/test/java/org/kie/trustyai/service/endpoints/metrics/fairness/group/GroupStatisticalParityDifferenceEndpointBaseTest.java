@@ -1,10 +1,7 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.restassured.http.ContentType;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
+import java.util.Map;
+
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +15,13 @@ import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricReque
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.restassured.http.ContentType;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;

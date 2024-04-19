@@ -1,15 +1,15 @@
 package org.kie.trustyai.service.data.utils;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class MetadataUtils {
 

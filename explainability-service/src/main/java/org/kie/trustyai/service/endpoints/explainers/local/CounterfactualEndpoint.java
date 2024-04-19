@@ -44,6 +44,8 @@ import org.kie.trustyai.service.payloads.explainers.CounterfactualExplanationReq
 import org.kie.trustyai.service.payloads.explainers.CounterfactualExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
 
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
+
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -54,6 +56,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Tag(name = "Counterfactual Explainer Endpoint")
+@EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
 @Path("/explainers/local/cf")
 public class CounterfactualEndpoint extends LocalExplainerEndpoint {
 

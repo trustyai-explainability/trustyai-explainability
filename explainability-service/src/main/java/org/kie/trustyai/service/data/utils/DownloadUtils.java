@@ -1,15 +1,16 @@
 package org.kie.trustyai.service.data.utils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ValueNode;
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.payloads.values.DataType;
 
-import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 public class DownloadUtils {
 

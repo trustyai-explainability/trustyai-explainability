@@ -29,6 +29,7 @@ import jakarta.enterprise.inject.Alternative;
 public class MockDatasource extends DataSource {
 
     private static final String MODEL_ID = "example1";
+
     public MockDatasource() {
     }
 
@@ -43,6 +44,7 @@ public class MockDatasource extends DataSource {
     /**
      * Generate a random dataframe with a given number of observations and feature diversity.
      * The data can also be labelled as synthetic or non-synthetic.
+     * 
      * @param observations the number of observations
      * @param featureDiversity the number of unique values for the feature "age"
      * @param synthetic whether the data is synthetic or not

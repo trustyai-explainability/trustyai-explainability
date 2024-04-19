@@ -1,9 +1,12 @@
 package org.kie.trustyai.service.data.utils;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.jboss.logging.Logger;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
@@ -15,12 +18,11 @@ import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 /**
  * Reconcile partial input and output inference payloads in the KServe v2 protobuf format.
@@ -60,9 +62,9 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
      * If the input tensor contains a {@link ExplainerEndpoint#BIAS_IGNORE_PARAM} set, then {@link PredictionMetadata}
      * will be attached marking these inferences as synthetic.
      *
-     * @param inputPayload  Input {@link InferencePartialPayload}
+     * @param inputPayload Input {@link InferencePartialPayload}
      * @param outputPayload Output {@link InferencePartialPayload}
-     * @param id            The unique id of the payload
+     * @param id The unique id of the payload
      * @return A {@link Prediction}
      * @throws DataframeCreateException
      */

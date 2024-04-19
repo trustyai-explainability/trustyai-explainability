@@ -1,11 +1,13 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.quarkus.funqy.knative.events.CloudEvent;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,13 +20,14 @@ import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
 import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.quarkus.funqy.knative.events.CloudEvent;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import static io.smallrye.common.constraint.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;

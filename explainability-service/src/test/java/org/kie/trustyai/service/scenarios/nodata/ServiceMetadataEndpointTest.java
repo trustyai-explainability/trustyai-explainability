@@ -1,12 +1,7 @@
 package org.kie.trustyai.service.scenarios.nodata;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.common.mapper.TypeRef;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.util.List;
+
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +11,15 @@ import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.common.mapper.TypeRef;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;

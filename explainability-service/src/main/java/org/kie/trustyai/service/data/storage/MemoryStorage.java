@@ -1,7 +1,14 @@
 package org.kie.trustyai.service.data.storage;
 
-import io.quarkus.arc.lookup.LookupIfProperty;
-import jakarta.enterprise.context.ApplicationScoped;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -12,14 +19,9 @@ import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.zip.CRC32;
-import java.util.zip.Checksum;
+import io.quarkus.arc.lookup.LookupIfProperty;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 import static org.kie.trustyai.service.data.DataSource.INTERNAL_DATA_FILENAME;
 
@@ -153,7 +155,7 @@ public class MemoryStorage extends Storage {
     /**
      * Read {@link ByteBuffer} from the memory storage, for a given filename and batch size.
      *
-     * @param location  The filename to read
+     * @param location The filename to read
      * @param batchSize The batch size
      * @return A {@link ByteBuffer} containing the data
      * @throws StorageReadException If an error occurs while reading the data

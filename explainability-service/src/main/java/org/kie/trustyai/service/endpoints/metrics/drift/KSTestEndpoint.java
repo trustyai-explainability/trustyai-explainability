@@ -18,6 +18,7 @@ import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
 
 import io.quarkus.cache.CacheResult;
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
@@ -25,6 +26,7 @@ import jakarta.ws.rs.Path;
 @ApplicationScoped
 @Tag(name = "KSTest Drift Endpoint", description = "Kolmogorov-Smirnov Test measures the columns of the tested dataframe come " +
         "from the same distribution as the training dataframe.")
+@EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
 @Path("/metrics/drift/kstest")
 public class KSTestEndpoint extends DriftEndpoint<KSTestMetricRequest> {
     public KSTestEndpoint() {

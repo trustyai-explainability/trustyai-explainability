@@ -1,10 +1,12 @@
 package org.kie.trustyai.service.data;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
@@ -19,12 +21,12 @@ import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.payloads.service.Schema;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class DataSource {
@@ -119,7 +121,7 @@ public class DataSource {
     /**
      * Get a dataframe with the organic (non-synthetic) data and metadata for a given model
      *
-     * @param modelId   the model id
+     * @param modelId the model id
      * @param batchSize the batch size
      * @return a dataframe with the organic data and metadata for a given model
      * @throws DataframeCreateException if the dataframe cannot be created

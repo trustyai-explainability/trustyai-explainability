@@ -31,6 +31,8 @@ import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
 
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
+
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -41,6 +43,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Tag(name = "SHAP Explainer Endpoint")
+@EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
 @Path("/explainers/local/shap")
 public class SHAPEndpoint extends LocalExplainerEndpoint {
 

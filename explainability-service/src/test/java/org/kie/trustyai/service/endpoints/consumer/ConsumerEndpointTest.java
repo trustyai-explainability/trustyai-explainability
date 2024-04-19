@@ -1,12 +1,10 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.http.ContentType;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,10 +18,15 @@ import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
 import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.http.ContentType;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;

@@ -1,15 +1,18 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.MockPVCStorage;
 import org.kie.trustyai.service.profiles.PVCTestProfile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(PVCTestProfile.class)
@@ -18,7 +21,6 @@ class DisparateImpactRatioRequestsEndpointPVCTest extends DisparateImpactRatioRe
 
     @Inject
     Instance<MockPVCStorage> storage;
-
 
     @BeforeEach
     void populateStorage() throws JsonProcessingException {

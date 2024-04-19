@@ -1,13 +1,13 @@
 package org.kie.trustyai.service.data.utils;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.PartialPayload;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class InferencePayloadReconciler<T extends PartialPayload, U extends PartialPayload> {
 
