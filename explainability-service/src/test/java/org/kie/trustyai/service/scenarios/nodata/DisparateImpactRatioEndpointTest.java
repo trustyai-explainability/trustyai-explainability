@@ -1,11 +1,7 @@
 package org.kie.trustyai.service.scenarios.nodata;
 
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.http.ContentType;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.util.UUID;
+
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +15,13 @@ import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
-import java.util.UUID;
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.http.ContentType;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;

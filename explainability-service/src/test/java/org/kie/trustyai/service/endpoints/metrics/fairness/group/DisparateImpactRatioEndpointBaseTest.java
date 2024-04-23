@@ -1,10 +1,10 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.restassured.http.ContentType;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,10 +19,13 @@ import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricReque
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.restassured.http.ContentType;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
@@ -43,7 +46,6 @@ abstract class DisparateImpactRatioEndpointBaseTest {
     void clearRequests() {
         scheduler.get().getAllRequests().clear();
     }
-
 
     private void populate() {
         final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
@@ -587,7 +589,6 @@ abstract class DisparateImpactRatioEndpointBaseTest {
         assertEquals("DIR", responseSecond.getName());
         assertEquals(value, responseSecond.getValue());
     }
-
 
     @Test
     @DisplayName("DIR request with no organic data")

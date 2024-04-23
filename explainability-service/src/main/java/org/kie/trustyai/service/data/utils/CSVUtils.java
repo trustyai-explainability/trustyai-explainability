@@ -1,15 +1,5 @@
 package org.kie.trustyai.service.data.utils;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
-import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.service.data.metadata.Metadata;
-import org.kie.trustyai.service.payloads.PayloadConverter;
-import org.kie.trustyai.service.payloads.service.SchemaItem;
-import org.kie.trustyai.service.payloads.values.DataType;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -21,6 +11,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.payloads.PayloadConverter;
+import org.kie.trustyai.service.payloads.service.SchemaItem;
+import org.kie.trustyai.service.payloads.values.DataType;
 
 import static org.kie.trustyai.service.data.parsers.CSVParser.ZONE_OFFSET;
 

@@ -1,8 +1,9 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -19,9 +20,9 @@ import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     protected GroupEndpoint(String name) {
@@ -31,7 +32,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     public abstract MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue);
 
     public abstract String specificDefinitionFunction(String outcomeName, List<Value> favorableOutcomeAttr, String protectedAttribute, List<String> privileged, List<String> unprivileged,
-                                                      MetricValueCarrier metricvalue);
+            MetricValueCarrier metricvalue);
 
     public abstract String getGeneralDefinition();
 

@@ -21,6 +21,8 @@ import org.kie.trustyai.service.payloads.explainers.ModelConfig;
 import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyParameters;
 import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyRequest;
 
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -30,6 +32,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Tag(name = "TSSaliency Explainer Endpoint")
+@EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
 @Path("/explainers/local/tssaliency")
 public class TSSaliencyEndpoint extends ExplainerEndpoint {
 

@@ -1,7 +1,13 @@
 package org.kie.trustyai.service.data.storage;
 
-import io.quarkus.arc.lookup.LookupIfProperty;
-import jakarta.enterprise.context.ApplicationScoped;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -10,13 +16,9 @@ import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Set;
+import io.quarkus.arc.lookup.LookupIfProperty;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 import static org.kie.trustyai.service.data.DataSource.INTERNAL_DATA_FILENAME;
 
@@ -67,7 +69,7 @@ public class PVCStorage extends Storage {
     /**
      * Read data from the file system, for a given model id and batch size.
      *
-     * @param modelId   The model id
+     * @param modelId The model id
      * @param batchSize The batch size
      * @return A {@link ByteBuffer} containing the data
      * @throws StorageReadException If an error occurs while reading the data
@@ -176,7 +178,7 @@ public class PVCStorage extends Storage {
     /**
      * Read {@link ByteBuffer} from the file system, for a given filename and batch size.
      *
-     * @param filename  The filename to read
+     * @param filename The filename to read
      * @param batchSize The batch size
      * @return A {@link ByteBuffer} containing the data
      * @throws StorageReadException If an error occurs while reading the data

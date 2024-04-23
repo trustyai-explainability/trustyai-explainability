@@ -1,13 +1,11 @@
 package org.kie.trustyai.service.endpoints.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.node.IntNode;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.common.mapper.TypeRef;
-import io.restassured.http.ContentType;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.IntStream;
+
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,11 +23,16 @@ import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.IntStream;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.node.IntNode;
+
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.common.mapper.TypeRef;
+import io.restassured.http.ContentType;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;

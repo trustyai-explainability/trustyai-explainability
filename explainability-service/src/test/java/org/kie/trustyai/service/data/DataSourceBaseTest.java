@@ -1,19 +1,19 @@
 package org.kie.trustyai.service.data;
 
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.mocks.MockDatasource;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 
 abstract class DataSourceBaseTest {
 
@@ -57,7 +57,6 @@ abstract class DataSourceBaseTest {
         final Dataframe readDataframe = datasource.get().getDataframe("fake-model", BATCH_SIZE);
         assertNotNull(readDataframe);
 
-
         assertEquals(BATCH_SIZE, readDataframe.getRowDimension());
         final List<String> readIds = readDataframe.getIds();
         final List<String> originalIds = ids.subList(ids.size() - BATCH_SIZE, ids.size());
@@ -87,7 +86,6 @@ abstract class DataSourceBaseTest {
 
         final Dataframe readDataframe = datasource.get().getDataframe("fake-model", BATCH_SIZE);
         assertNotNull(readDataframe);
-
 
         assertEquals(N, readDataframe.getRowDimension());
         final List<String> readIds = readDataframe.getIds();
@@ -140,7 +138,6 @@ abstract class DataSourceBaseTest {
 
         final Dataframe readDataframe = datasource.get().getOrganicDataframe("fake-model", BATCH_SIZE);
         assertNotNull(readDataframe);
-
 
         assertEquals(BATCH_SIZE, readDataframe.getRowDimension());
         final Set<String> tags = readDataframe.getTags().stream().collect(Collectors.toUnmodifiableSet());
@@ -209,6 +206,5 @@ abstract class DataSourceBaseTest {
         assertEquals(Dataframe.InternalTags.UNLABELED.get(), tags.iterator().next());
         assertEquals(organicIds.subList(organicIds.size() - BATCH_SIZE, organicIds.size()), readDataframe.getIds());
     }
-
 
 }

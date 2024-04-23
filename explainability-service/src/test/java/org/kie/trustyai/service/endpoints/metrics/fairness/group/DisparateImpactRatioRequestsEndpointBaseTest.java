@@ -1,9 +1,8 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import io.restassured.http.ContentType;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
+import java.util.Map;
+import java.util.UUID;
+
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,8 +15,11 @@ import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
-import java.util.Map;
-import java.util.UUID;
+import io.restassured.http.ContentType;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
@@ -29,7 +31,6 @@ abstract class DisparateImpactRatioRequestsEndpointBaseTest {
     protected static final String MODEL_ID = "example1";
     @Inject
     Instance<MockDatasource> datasource;
-
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;

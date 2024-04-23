@@ -15,6 +15,7 @@ import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
 
 import io.quarkus.cache.CacheResult;
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.GET;
@@ -26,6 +27,7 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 @Tag(name = "FourierMMD Drift Endpoint", description = "Meanshift measures the distance between distributions as " +
         "distance between mean embeddings of features from the test dataframe and the training dataframe.")
+@EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
 @Path("/metrics/drift/fouriermmd")
 public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
 

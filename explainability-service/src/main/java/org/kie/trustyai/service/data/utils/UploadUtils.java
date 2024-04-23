@@ -1,6 +1,8 @@
 package org.kie.trustyai.service.data.utils;
 
-import com.google.protobuf.ByteString;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.jboss.logging.Logger;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
@@ -10,8 +12,7 @@ import org.kie.trustyai.service.payloads.data.upload.ModelInferRequestPayload;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferResponsePayload;
 import org.kie.trustyai.service.payloads.data.upload.TensorPayload;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.google.protobuf.ByteString;
 
 public class UploadUtils {
     private static final Logger LOG = Logger.getLogger(UploadUtils.class);

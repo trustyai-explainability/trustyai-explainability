@@ -30,6 +30,8 @@ import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.GlobalExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.PartialDependencePlotExplanationResponse;
 
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
+
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -39,6 +41,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+@EndpointDisabled(name = "endpoints.explainers.global", stringValue = "disable")
 @Tag(name = "Partial Dependence Plot Explainer Endpoint")
 @Path("/explainers/global/pdp")
 public class PartialDependencePlotEndpoint extends GlobalExplainerEndpoint {

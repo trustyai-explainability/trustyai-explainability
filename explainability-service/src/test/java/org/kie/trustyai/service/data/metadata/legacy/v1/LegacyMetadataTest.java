@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

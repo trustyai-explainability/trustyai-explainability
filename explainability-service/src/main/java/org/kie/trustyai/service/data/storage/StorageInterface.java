@@ -1,13 +1,14 @@
 package org.kie.trustyai.service.data.storage;
 
-import io.quarkus.cache.CacheResult;
+import java.nio.ByteBuffer;
+import java.util.Set;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.service.data.cache.DataCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
-import java.nio.ByteBuffer;
-import java.util.Set;
+import io.quarkus.cache.CacheResult;
 
 public interface StorageInterface {
     @CacheResult(cacheName = "dataframe", keyGenerator = DataCacheKeyGen.class)
@@ -18,9 +19,9 @@ public interface StorageInterface {
     /**
      * Read data and metadata with the specified tags and batch size.
      *
-     * @param modelId   The model ID
+     * @param modelId The model ID
      * @param batchSize The batch size
-     * @param tags      The tags
+     * @param tags The tags
      * @return A pair of {@link ByteBuffer} containing the data and metadata
      * @throws StorageReadException If an error occurs while reading the data
      */
@@ -31,7 +32,7 @@ public interface StorageInterface {
      * Since no batch size is specified, the default batch size is used.
      *
      * @param modelId The model ID
-     * @param tags    The tags
+     * @param tags The tags
      * @return A pair of {@link ByteBuffer} containing the data and metadata
      * @throws StorageReadException If an error occurs while reading the data
      */
@@ -50,7 +51,7 @@ public interface StorageInterface {
     /**
      * Read {@link ByteBuffer} from the file system, for a given filename and batch size.
      *
-     * @param location  The filename to read
+     * @param location The filename to read
      * @param batchSize The batch size
      * @return A {@link ByteBuffer} containing the data
      * @throws StorageReadException If an error occurs while reading the data

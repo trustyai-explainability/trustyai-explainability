@@ -1,15 +1,17 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.io.IOException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
-import java.io.IOException;
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(MemoryTestProfile.class)
