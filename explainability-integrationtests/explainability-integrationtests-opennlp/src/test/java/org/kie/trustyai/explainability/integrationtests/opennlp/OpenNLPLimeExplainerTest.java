@@ -36,7 +36,6 @@ import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
 import org.kie.trustyai.explainability.local.lime.optim.LimeConfigOptimizer;
-import org.kie.trustyai.explainability.metrics.ExplainabilityMetrics;
 import org.kie.trustyai.explainability.model.DataDistribution;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureFactory;
@@ -53,6 +52,7 @@ import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.ValidationUtils;
+import org.kie.trustyai.metrics.explainability.ExplainabilityMetrics;
 
 import opennlp.tools.langdetect.Language;
 import opennlp.tools.langdetect.LanguageDetector;
