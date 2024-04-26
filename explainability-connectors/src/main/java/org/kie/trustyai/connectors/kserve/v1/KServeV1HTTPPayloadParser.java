@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class KServeV1HTTPPayloadParser extends PayloadParser<String> {
     private static final Logger logger = LoggerFactory.getLogger(KServeV1HTTPPayloadParser.class);
     private static KServeV1HTTPPayloadParser instance;
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     private KServeV1HTTPPayloadParser() {
         this.mapper = new ObjectMapper();

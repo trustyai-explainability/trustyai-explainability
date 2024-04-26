@@ -59,7 +59,7 @@ public class KServeV1HTTPServerPayloadTest {
     }
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         port = getFreePort();
         server = new KServeV1HTTPMockServer(port, endpoint, null);
     }
