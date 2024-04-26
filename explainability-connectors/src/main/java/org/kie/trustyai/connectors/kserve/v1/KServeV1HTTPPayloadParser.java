@@ -46,33 +46,28 @@ public class KServeV1HTTPPayloadParser extends PayloadParser<String> {
     }
 
     @Override
-    public List<PredictionOutput> parseResponse(String jsonResponse) throws JsonProcessingException {
+    public List<PredictionOutput> parseResponse(String jsonResponse, int outputShape) throws JsonProcessingException {
         logger.debug("Parsing response " + jsonResponse);
         final KServeV1ResponsePayload response = mapper.readValue(jsonResponse, KServeV1ResponsePayload.class);
         final List<PredictionOutput> predictionOutputs = new ArrayList<>();
 
-        for (Object prediction : response.getPredictions()) {
-            if (prediction instanceof List) {
-                // Iterate over each element in the list, treating each as a separate PredictionOutput
-                for (Object value : (List<?>) prediction) {
-                    final List<Output> outputs = new ArrayList<>();
-                    if (value instanceof Integer) {
-                        outputs.add(new Output("value", Type.NUMBER, new Value((int) value), 1.0));
-                    } else {
-                        outputs.add(new Output("value", Type.NUMBER, new Value((double) value), 1.0));
-                    }
-                    predictionOutputs.add(new PredictionOutput(outputs));
-                }
-            } else {
-                // Handle non-list single values by creating one PredictionOutput per value
-                final List<Output> outputs = new ArrayList<>();
-                if (prediction instanceof Integer) {
-                    outputs.add(new Output("value", Type.NUMBER, new Value((int) prediction), 1.0));
+        final List<?> predictions = response.getPredictions();
+        final int numPredictions = predictions.size();
+
+        for (int i = 0; i < numPredictions; i += outputShape) {
+            final List<Output> outputs = new ArrayList<>();
+
+            for (int j = 0; j < outputShape && i + j < numPredictions; j++) {
+                final Object value = predictions.get(i + j);
+
+                if (value instanceof Integer) {
+                    outputs.add(new Output("value", Type.NUMBER, new Value((int) value), 1.0));
                 } else {
-                    outputs.add(new Output("value", Type.NUMBER, new Value((double) prediction), 1.0));
+                    outputs.add(new Output("value", Type.NUMBER, new Value((double) value), 1.0));
                 }
-                predictionOutputs.add(new PredictionOutput(outputs));
             }
+
+            predictionOutputs.add(new PredictionOutput(outputs));
         }
 
         return predictionOutputs;
