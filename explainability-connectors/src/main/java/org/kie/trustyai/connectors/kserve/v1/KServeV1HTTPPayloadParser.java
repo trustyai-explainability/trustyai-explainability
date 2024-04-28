@@ -37,7 +37,7 @@ public class KServeV1HTTPPayloadParser extends PayloadParser<String> {
         for (List<Double> featureValues : payload.instances) {
             final List<Feature> features = new ArrayList<>();
             for (int i = 0; i < featureValues.size(); i++) {
-                features.add(new Feature("Feature" + (i + 1), Type.NUMBER, new Value(featureValues.get(i))));
+                features.add(new Feature(DEFAULT_INPUT_PREFIX + "-" + (i + 1), Type.NUMBER, new Value(featureValues.get(i))));
             }
             predictionInputs.add(new PredictionInput(features));
         }
@@ -57,9 +57,9 @@ public class KServeV1HTTPPayloadParser extends PayloadParser<String> {
                 for (Object value : (List<?>) prediction) {
                     final List<Output> outputs = new ArrayList<>();
                     if (value instanceof Integer) {
-                        outputs.add(new Output("value", Type.NUMBER, new Value((int) value), 1.0));
+                        outputs.add(new Output(DEFAULT_OUTPUT_PREFIX + "-0", Type.NUMBER, new Value((int) value), 1.0));
                     } else {
-                        outputs.add(new Output("value", Type.NUMBER, new Value((double) value), 1.0));
+                        outputs.add(new Output(DEFAULT_OUTPUT_PREFIX + "-0", Type.NUMBER, new Value((double) value), 1.0));
                     }
                     predictionOutputs.add(new PredictionOutput(outputs));
                 }
@@ -67,9 +67,9 @@ public class KServeV1HTTPPayloadParser extends PayloadParser<String> {
                 // Handle non-list single values by creating one PredictionOutput per value
                 final List<Output> outputs = new ArrayList<>();
                 if (prediction instanceof Integer) {
-                    outputs.add(new Output("value", Type.NUMBER, new Value((int) prediction), 1.0));
+                    outputs.add(new Output(DEFAULT_OUTPUT_PREFIX, Type.NUMBER, new Value((int) prediction), 1.0));
                 } else {
-                    outputs.add(new Output("value", Type.NUMBER, new Value((double) prediction), 1.0));
+                    outputs.add(new Output(DEFAULT_OUTPUT_PREFIX, Type.NUMBER, new Value((double) prediction), 1.0));
                 }
                 predictionOutputs.add(new PredictionOutput(outputs));
             }

@@ -9,6 +9,10 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 public abstract class PayloadParser<T> {
+
+    public static final String DEFAULT_INPUT_PREFIX = "inputs";
+    public static final String DEFAULT_OUTPUT_PREFIX = "outputs";
+
     public abstract List<PredictionInput> parseRequest(T request) throws IOException;
 
     public abstract List<PredictionOutput> parseResponse(T response) throws JsonProcessingException;

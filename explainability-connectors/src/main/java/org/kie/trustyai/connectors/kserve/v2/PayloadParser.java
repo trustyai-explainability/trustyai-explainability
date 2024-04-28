@@ -12,6 +12,9 @@ import org.kie.trustyai.explainability.model.*;
 
 import com.google.protobuf.ByteString;
 
+import static org.kie.trustyai.connectors.kserve.PayloadParser.DEFAULT_INPUT_PREFIX;
+import static org.kie.trustyai.connectors.kserve.PayloadParser.DEFAULT_OUTPUT_PREFIX;
+
 public class PayloadParser {
 
     public static PredictionInput requestToInput(ModelInferRequest request, List<String> inputNames) throws IllegalArgumentException {
@@ -200,7 +203,7 @@ public class PayloadParser {
 
     public static PredictionOutput outputFromContentList(List<?> values, Type type, List<String> outputNames) {
         final int size = values.size();
-        List<String> names = outputNames == null ? IntStream.range(0, size).mapToObj(i -> "outputs-" + i).collect(Collectors.toList()) : outputNames;
+        List<String> names = outputNames == null ? IntStream.range(0, size).mapToObj(i -> DEFAULT_OUTPUT_PREFIX + "-" + i).collect(Collectors.toList()) : outputNames;
         if (names.size() != size) {
             throw new IllegalArgumentException("Output names list has an incorrect size (" + names.size() + ", when it should be " + size + ")");
         }
@@ -212,7 +215,7 @@ public class PayloadParser {
 
     public static PredictionInput inputFromContentList(List<?> values, Type type, List<String> outputNames) {
         final int size = values.size();
-        List<String> names = outputNames == null ? IntStream.range(0, size).mapToObj(i -> "inputs-" + i).collect(Collectors.toList()) : outputNames;
+        List<String> names = outputNames == null ? IntStream.range(0, size).mapToObj(i -> DEFAULT_INPUT_PREFIX + "-" + i).collect(Collectors.toList()) : outputNames;
         if (names.size() != size) {
             throw new IllegalArgumentException("Input names list has an incorrect size (" + names.size() + ", when it should be " + size + ")");
         }
