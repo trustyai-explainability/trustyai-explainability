@@ -11,5 +11,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public abstract class PayloadParser<T> {
     public abstract List<PredictionInput> parseRequest(T request) throws IOException;
 
-    public abstract List<PredictionOutput> parseResponse(T response) throws JsonProcessingException;
+    public abstract List<PredictionOutput> parseResponse(T response, int outputShape) throws JsonProcessingException;
+
+    public List<PredictionOutput> parseResponse(T response) throws JsonProcessingException {
+        return parseResponse(response, 1);
+    }
 }
