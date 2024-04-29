@@ -25,11 +25,17 @@ public class KServeV1HTTPPredictionProvider extends AbstractKServePredictionProv
     private static final Logger logger = LoggerFactory.getLogger(KServeV1HTTPPredictionProvider.class);
     private final HttpClient httpClient;
     private final String endpointUrl;
+    private final int outputShape;
 
     public KServeV1HTTPPredictionProvider(String inputName, List<String> outputNames, String endpointUrl) {
+        this(inputName, outputNames, endpointUrl, 1);
+    }
+
+    public KServeV1HTTPPredictionProvider(String inputName, List<String> outputNames, String endpointUrl, int outputShape) {
         super(outputNames, inputName);
         this.httpClient = HttpClient.newHttpClient();
         this.endpointUrl = endpointUrl;
+        this.outputShape = outputShape;
     }
 
     public CompletableFuture<List<PredictionOutput>> predictAsync(List<PredictionInput> inputs) {
@@ -57,7 +63,7 @@ public class KServeV1HTTPPredictionProvider extends AbstractKServePredictionProv
                     .thenApply(HttpResponse::body)
                     .thenApply(response -> {
                         try {
-                            return KServeV1HTTPPayloadParser.getInstance().parseResponse(response);
+                            return KServeV1HTTPPayloadParser.getInstance().parseResponse(response, outputShape);
                         } catch (JsonProcessingException e) {
                             throw new CompletionException(e);
                         }
