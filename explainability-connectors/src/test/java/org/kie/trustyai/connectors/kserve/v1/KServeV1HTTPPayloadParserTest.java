@@ -13,6 +13,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.kie.trustyai.connectors.kserve.PayloadParser.DEFAULT_INPUT_PREFIX;
+import static org.kie.trustyai.connectors.kserve.PayloadParser.DEFAULT_OUTPUT_PREFIX;
 
 class KServeV1HTTPPayloadParserTest {
 
@@ -56,6 +58,7 @@ class KServeV1HTTPPayloadParserTest {
 
         assertEquals(1, predictionOutput.size());
         assertEquals(1, predictionOutput.get(0).getOutputs().size());
+        assertEquals(DEFAULT_OUTPUT_PREFIX + "-0", predictionOutput.get(0).getOutputs().get(0).getName());
     }
 
     @Test
@@ -72,6 +75,7 @@ class KServeV1HTTPPayloadParserTest {
         assertEquals(1, predictionOutput.get(0).getOutputs().size());
         for (int i = 0; i < 3; i++) {
             assertEquals(values.get(i), predictionOutput.get(i).getOutputs().get(0).getValue().asNumber());
+            assertEquals(DEFAULT_OUTPUT_PREFIX + "-0", predictionOutput.get(i).getOutputs().get(0).getName());
         }
     }
 
@@ -88,6 +92,7 @@ class KServeV1HTTPPayloadParserTest {
         assertEquals(1, predictionOutput.get(0).getOutputs().size());
         for (int i = 0; i < 3; i++) {
             assertEquals(values.get(i), Double.valueOf(predictionOutput.get(i).getOutputs().get(0).getValue().asNumber()).floatValue());
+            assertEquals(DEFAULT_OUTPUT_PREFIX + "-0", predictionOutput.get(i).getOutputs().get(0).getName());
         }
     }
 
@@ -104,6 +109,7 @@ class KServeV1HTTPPayloadParserTest {
         assertEquals(1, predictionOutput.get(0).getOutputs().size());
         for (int i = 0; i < 3; i++) {
             assertEquals(values.get(i), predictionOutput.get(i).getOutputs().get(0).getValue().asNumber());
+            assertEquals(DEFAULT_OUTPUT_PREFIX + "-0", predictionOutput.get(i).getOutputs().get(0).getName());
         }
     }
 
@@ -117,6 +123,7 @@ class KServeV1HTTPPayloadParserTest {
 
         assertEquals(1, inputs.size());
         assertEquals(1, inputs.get(0).getFeatures().size());
+        assertEquals(DEFAULT_INPUT_PREFIX + "-0", inputs.get(0).getFeatures().get(0).getName());
     }
 
     @Test
@@ -128,6 +135,9 @@ class KServeV1HTTPPayloadParserTest {
 
         assertEquals(1, inputs.size());
         assertEquals(3, inputs.get(0).getFeatures().size());
+        for (int i = 0; i < 3; i++) {
+            assertEquals(DEFAULT_INPUT_PREFIX + "-" + i, inputs.get(0).getFeatures().get(i).getName());
+        }
     }
 
     @Test
@@ -139,8 +149,50 @@ class KServeV1HTTPPayloadParserTest {
 
         assertEquals(3, inputs.size());
         assertEquals(1, inputs.get(0).getFeatures().size());
+        for (int i = 0; i < 3; i++) {
+            assertEquals(DEFAULT_INPUT_PREFIX + "-0", inputs.get(i).getFeatures().get(0).getName());
+        }
     }
 
+    @Test
+    void modelResponseToSinglePredictionOutputMulti() throws JsonProcessingException {
+
+        final Random random = new Random(0);
+        final int OUTPUT_SHAPE = 6;
+        final List<Object> values = random.doubles(OUTPUT_SHAPE).boxed().collect(Collectors.toList());
+
+        final String json = toJson(values);
+
+        final List<PredictionOutput> predictionOutput = KServeV1HTTPPayloadParser.getInstance().parseResponse(json, OUTPUT_SHAPE);
+
+        assertEquals(1, predictionOutput.size());
+        assertEquals(OUTPUT_SHAPE, predictionOutput.get(0).getOutputs().size());
+        for (int i = 0; i < OUTPUT_SHAPE; i++) {
+            assertEquals(values.get(i), predictionOutput.get(0).getOutputs().get(i).getValue().asNumber());
+            assertEquals(DEFAULT_OUTPUT_PREFIX + "-" + i, predictionOutput.get(0).getOutputs().get(i).getName());
+        }
+    }
+
+    @Test
+    void modelResponseToMultiPredictionOutputMulti() throws JsonProcessingException {
+
+        final Random random = new Random(0);
+        final int OUTPUT_SHAPE = 6;
+        final List<Object> values = random.doubles(OUTPUT_SHAPE).boxed().collect(Collectors.toList());
+
+        final String json = toJson(values);
+
+        final List<PredictionOutput> predictionOutput = KServeV1HTTPPayloadParser.getInstance().parseResponse(json, 2);
+
+        assertEquals(3, predictionOutput.size());
+        assertEquals(2, predictionOutput.get(0).getOutputs().size());
+        for (int i = 0 ; i < 3 ; i++) {
+            for (int j = 0; j < 2; j++) {
+                assertEquals(values.get(i*2 + j), predictionOutput.get(i).getOutputs().get(j).getValue().asNumber());
+                assertEquals(DEFAULT_OUTPUT_PREFIX + "-" + j, predictionOutput.get(i).getOutputs().get(j).getName());
+            }
+        }
+    }
 
 
 }
