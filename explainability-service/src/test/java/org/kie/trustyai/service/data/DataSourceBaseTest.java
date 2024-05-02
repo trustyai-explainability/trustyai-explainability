@@ -2,6 +2,7 @@ package org.kie.trustyai.service.data;
 
 import java.time.LocalDateTime;
 import java.util.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -11,14 +12,15 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;

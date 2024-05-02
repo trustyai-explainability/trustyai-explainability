@@ -28,6 +28,14 @@ public class RequestPayloadGenerator {
         return request;
     }
 
+    public static IdentityMetricRequest identityCorrect() {
+        IdentityMetricRequest request = new IdentityMetricRequest();
+        request.setColumnName("gender");
+        request.setModelId(MODEL_ID);
+
+        return request;
+    }
+
     // multi valued requests disabled until better integrated with ODH UI
     //    public static GroupMetricRequest multiValueCorrect() {
     //        GroupMetricRequest request = new GroupMetricRequest();

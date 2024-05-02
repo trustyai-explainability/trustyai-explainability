@@ -15,6 +15,7 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
+
 @QuarkusTest
 @TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)

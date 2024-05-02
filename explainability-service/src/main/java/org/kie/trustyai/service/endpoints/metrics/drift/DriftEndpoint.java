@@ -14,6 +14,8 @@ import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
 
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
+
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -22,6 +24,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+@EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
 public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEndpoint<T> {
     protected DriftEndpoint(String name) {
         super(name);

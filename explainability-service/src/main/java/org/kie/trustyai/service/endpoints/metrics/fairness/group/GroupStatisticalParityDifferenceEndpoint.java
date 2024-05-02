@@ -21,6 +21,8 @@ import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 import io.quarkus.cache.CacheResult;
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
+
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
@@ -28,6 +30,7 @@ import jakarta.ws.rs.Path;
 @ApplicationScoped
 @Tag(name = "Statistical Parity Difference Endpoint", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
         "difference between the proportion of the majority and protected classes getting a particular outcome.")
+@EndpointDisabled(name = "endpoints.fairness", stringValue = "disable")
 @Path("/metrics/group/fairness/spd")
 public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
     public GroupStatisticalParityDifferenceEndpoint() {

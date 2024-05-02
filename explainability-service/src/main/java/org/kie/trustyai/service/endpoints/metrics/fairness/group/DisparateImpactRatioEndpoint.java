@@ -21,6 +21,7 @@ import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 import io.quarkus.cache.CacheResult;
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
@@ -29,6 +30,7 @@ import jakarta.ws.rs.Path;
 @Tag(name = "Disparate Impact Ratio Endpoint", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
         "classifications by calculating the ratio between the proportion of the majority and protected classes getting" +
         " a particular outcome.")
+@EndpointDisabled(name = "endpoints.fairness", stringValue = "disable")
 @Path("/metrics/group/fairness/dir")
 public class DisparateImpactRatioEndpoint extends GroupEndpoint {
     public DisparateImpactRatioEndpoint() {

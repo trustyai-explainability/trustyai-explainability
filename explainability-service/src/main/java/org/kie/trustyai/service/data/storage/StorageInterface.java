@@ -62,5 +62,7 @@ public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
      * @return A pair of {@link ByteBuffer} containing the data and metadata
      * @throws StorageReadException If an error occurs while reading the data
      */
+
     Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException;
+
 }
