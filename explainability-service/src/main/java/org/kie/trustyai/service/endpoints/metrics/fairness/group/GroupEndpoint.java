@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
-import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;

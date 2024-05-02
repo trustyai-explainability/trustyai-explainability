@@ -94,7 +94,6 @@ class UniversalListingEndpointTest {
         assertNotNull(thirdRequest.getRequestId());
         final UUID third = thirdRequest.getRequestId();
 
-
         ScheduleList scheduleList = given()
                 .when()
                 .get("/metrics/all/requests").peek()
@@ -106,7 +105,7 @@ class UniversalListingEndpointTest {
                 assertFalse(gmr.privilegedAttribute.isMultipleValued());
             } else if (sr.id.equals(second)) {
                 assertEquals("SPD", sr.request.getMetricName());
-            }  else if (sr.id.equals(third)) {
+            } else if (sr.id.equals(third)) {
                 assertEquals("IDENTITY", sr.request.getMetricName());
             }
 
@@ -127,7 +126,7 @@ class UniversalListingEndpointTest {
                 assertFalse(gmr.privilegedAttribute.isMultipleValued());
             } else if (sr.id.equals(second)) {
                 assertEquals("SPD", sr.request.getMetricName());
-            }  else if (sr.id.equals(third)) {
+            } else if (sr.id.equals(third)) {
                 assertEquals("IDENTITY", sr.request.getMetricName());
             }
 
@@ -179,7 +178,6 @@ class UniversalListingEndpointTest {
                 .then().statusCode(200).extract().body().as(BaseScheduledResponse.class);
         assertNotNull(thirdRequest.getRequestId());
         final UUID third = thirdRequest.getRequestId();
-
 
         ScheduleList scheduleList = given()
                 .when()

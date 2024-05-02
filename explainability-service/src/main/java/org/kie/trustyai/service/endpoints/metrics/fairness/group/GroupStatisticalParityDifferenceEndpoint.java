@@ -23,7 +23,6 @@ import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetr
 import io.quarkus.cache.CacheResult;
 import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
 

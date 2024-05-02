@@ -5,34 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-<<<<<<< HEAD
-=======
-
-import org.jboss.resteasy.reactive.RestResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
-import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.service.PayloadProducer;
-import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
-import org.kie.trustyai.service.payloads.consumer.InferencePayload;
-import org.kie.trustyai.service.payloads.consumer.PartialKind;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.http.ContentType;
-
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
->>>>>>> 735c6e77a450570e5590dbd03c5f5e632de641d0
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;

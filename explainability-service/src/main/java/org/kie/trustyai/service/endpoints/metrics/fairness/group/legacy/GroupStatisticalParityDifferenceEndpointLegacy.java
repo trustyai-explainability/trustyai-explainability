@@ -2,6 +2,7 @@ package org.kie.trustyai.service.endpoints.metrics.fairness.group.legacy;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.service.endpoints.metrics.fairness.group.GroupStatisticalParityDifferenceEndpoint;
+
 import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
 import jakarta.enterprise.context.ApplicationScoped;

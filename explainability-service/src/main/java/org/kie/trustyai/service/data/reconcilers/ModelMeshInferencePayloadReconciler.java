@@ -25,8 +25,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
-
-
 /**
  * Reconcile partial input and output inference payloads in the KServe v2 protobuf format.
  */
