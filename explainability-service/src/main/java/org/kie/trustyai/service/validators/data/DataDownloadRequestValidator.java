@@ -10,13 +10,8 @@ import java.util.stream.Stream;
 
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
-<<<<<<< HEAD
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
-import org.kie.trustyai.service.endpoints.data.DataEndpoint;
-=======
-import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.endpoints.data.DownloadEndpoint;
->>>>>>> 6a21c1aa49b24316ddd11b92f2d33db4c7e69030
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.MatchOperation;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;

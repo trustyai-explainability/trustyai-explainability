@@ -1,9 +1,9 @@
 package org.kie.trustyai.service.endpoints.data;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.utils.DownloadUtils;
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
@@ -45,7 +45,7 @@ public class DownloadEndpoint {
     public Response download(@ValidDataDownloadRequest DataRequestPayload dataRequestPayload) {
         String modelId = dataRequestPayload.getModelId();
         Dataframe df = dataSource.get().getDataframe(modelId).copy();
-        Metadata metadata = dataSource.get().getMetadata(modelId);
+        StorageMetadata metadata = dataSource.get().getMetadata(modelId);
 
         for (RowMatcher rowMatcher : dataRequestPayload.getMatchAll()) {
             if (rowMatcher.getColumnName().startsWith(DownloadEndpoint.TRUSTY_PREFIX)) {

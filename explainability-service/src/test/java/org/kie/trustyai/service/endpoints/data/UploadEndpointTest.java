@@ -5,11 +5,11 @@ import java.util.List;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferJointPayload;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 import org.kie.trustyai.service.utils.KserveRestPayloads;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
