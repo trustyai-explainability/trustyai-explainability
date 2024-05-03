@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.metadata.Metadata;
-import org.kie.trustyai.service.endpoints.data.DataEndpoint;
+import org.kie.trustyai.service.endpoints.data.DownloadEndpoint;
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.MatchOperation;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
@@ -60,7 +60,7 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
         } catch (IllegalArgumentException e) {
             context.buildConstraintViolationWithTemplate(String.format(
                     "Invalid internal column passed, %s* columns must be one of %s, got %s",
-                    DataEndpoint.TRUSTY_PREFIX,
+                    DownloadEndpoint.TRUSTY_PREFIX,
                     Arrays.toString(Dataframe.InternalColumn.values()),
                     internalColumn))
                     .addPropertyNode(modelId)
@@ -119,7 +119,7 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
         }
 
         List<ValueNode> nonNumerics = rowMatch.getValues().stream().filter(vn -> !vn.isNumber()).collect(Collectors.toList());
-        if (!nonNumerics.isEmpty() && !rowMatch.getColumnName().equals(DataEndpoint.TRUSTY_PREFIX + "TIMESTAMP")) {
+        if (!nonNumerics.isEmpty() && !rowMatch.getColumnName().equals(DownloadEndpoint.TRUSTY_PREFIX + "TIMESTAMP")) {
             context.buildConstraintViolationWithTemplate(
                     String.format(
                             "BETWEEN operation must only contain numbers, describing the lower and upper bounds of the desired range. Received non-numeric values: %s",
@@ -161,8 +161,8 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
                 boolean validOp = checkOperationExists(rowMatch, modelId, context);
                 result = validOp && result;
 
-                if (rowMatch.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
-                    String internalColumn = rowMatch.getColumnName().replace(DataEndpoint.TRUSTY_PREFIX, "");
+                if (rowMatch.getColumnName().startsWith(DownloadEndpoint.TRUSTY_PREFIX)) {
+                    String internalColumn = rowMatch.getColumnName().replace(DownloadEndpoint.TRUSTY_PREFIX, "");
 
                     // check internal column specification
                     result = checkInternalColumnValid(rowMatch, modelId, internalColumn, context) && result;
