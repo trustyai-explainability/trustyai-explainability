@@ -9,7 +9,7 @@ x-common-variables: &global-variables
 
 services:
   trustyai:
-    image: quay.io/rgeada/trustyai-service-debug:latest
+    image: trustyai/trustyai-service:999-SNAPSHOT
     container_name: trustyai-service
     networks:
       - data-connection

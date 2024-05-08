@@ -1,6 +1,6 @@
 services:
   trustyai:
-    image: quay.io/rgeada/trustyai-service-debug:latest
+    image: trustyai/trustyai-service:999-SNAPSHOT
     container_name: trustyai-service
     ports:
       - "8080:8080"

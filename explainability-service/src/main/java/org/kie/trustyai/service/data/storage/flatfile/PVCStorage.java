@@ -66,21 +66,6 @@ public class PVCStorage extends FlatFileStorage {
                 "PVC data locations: data=" + Paths.get(storageConfig.dataFolder(), getDataFilename("*")) + ", metadata=" + Paths.get(storageConfig.dataFolder(), "*-" + DataSource.METADATA_FILENAME));
     }
 
-    public PVCStorage(String dataFolder, String dataFilename, int batchSize) {
-        this.batchSize = batchSize;
-        this.metadataPath = Paths.get(dataFolder, DataSource.METADATA_FILENAME);
-        this.dataFilename = dataFilename;
-        this.dataPath = Paths.get(dataFolder, dataFilename);
-        this.dataFolder = Path.of(dataFolder);
-
-        if (metadataPath.equals(dataPath)) {
-            final String message = "Data file and metadata file cannot have the same name (" + this.dataPath + ")";
-            LOG.error(message);
-            throw new IllegalArgumentException(message);
-        }
-        LOG.info("PVC data locations: data=" + Paths.get(dataFolder, getDataFilename("*")) + ", metadata=" + Paths.get(dataFolder, "*-" + DataSource.METADATA_FILENAME));
-    }
-
     @Override
     public ByteBuffer readDataframe(String modelId) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);

@@ -3,6 +3,7 @@ package org.kie.trustyai.service.data.storage.hibernate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -10,7 +11,9 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.explainability.model.dataframe.DataframeRow;
+import org.kie.trustyai.service.config.CustomServiceConfig;
 import org.kie.trustyai.service.config.ServiceConfig;
+import org.kie.trustyai.service.config.storage.CustomStorageConfig;
 import org.kie.trustyai.service.config.storage.MigrationConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.DataSource;
@@ -66,7 +69,9 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 String fromFolder = mc.fromFolder().get();
                 String fromFile = mc.fromFilename().get();
 
-                PVCStorage pvcStorage = new PVCStorage(fromFolder, fromFile, batchSize);
+                CustomStorageConfig customStorageConfig = new CustomStorageConfig(fromFile, fromFolder, null);
+                CustomServiceConfig customServiceConfig = new CustomServiceConfig(OptionalInt.of(batchSize), null, null, null);
+                PVCStorage pvcStorage = new PVCStorage(customServiceConfig, customStorageConfig);
                 DataSource oldDataSource = new DataSource();
                 oldDataSource.setParser(new CSVParser());
                 oldDataSource.setStorageOverride(pvcStorage);

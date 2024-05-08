@@ -40,6 +40,8 @@ public class MemoryStorage extends FlatFileStorage {
 
     public MemoryStorage(ServiceConfig serviceConfig, StorageConfig config) {
         super();
+        LOG.info("Starting memory storage consumer: ");
+
         this.dataFilename = config.dataFilename();
         this.batchSize = serviceConfig.batchSize().getAsInt();
     }
