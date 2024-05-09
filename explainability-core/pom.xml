@@ -85,9 +85,10 @@
       <artifactId>opennlp-tools</artifactId>
     </dependency>
     <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-hibernate-orm</artifactId>
-      <version>3.2.11.Final</version>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>3.1.0</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 
