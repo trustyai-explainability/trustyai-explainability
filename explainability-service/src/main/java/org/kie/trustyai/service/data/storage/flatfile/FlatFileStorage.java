@@ -3,9 +3,14 @@ package org.kie.trustyai.service.data.storage.flatfile;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
+import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
 
 public abstract class FlatFileStorage extends Storage<ByteBuffer, ByteBuffer> implements FlatFileStorageInterface {
+    public DataFormat getDataFormat() {
+        return DataFormat.CSV;
+    }
+
     public abstract String getDataFilename(String modelId);
 
     /**

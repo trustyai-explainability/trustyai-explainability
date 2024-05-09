@@ -27,6 +27,11 @@ public class HibernateTestProfile implements QuarkusTestProfile {
         // needed for validation
         overrides.put("storage.data-filename", "data.csv");
         overrides.put("storage.data-folder", "/inputs");
+
+        // hibernate args
+        overrides.put("quarkus.datasource.jdbc.url", "jdbc:h2:file:./trustyai_test_H2_DB");
+        overrides.put("quarkus.hibernate-orm.database.generation", "drop-and-create");
+
         return overrides;
     }
 

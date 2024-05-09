@@ -123,7 +123,7 @@ public class DataframeMetadata {
     private void updateCachedColumnNames() {
         List<String> newNames = new ArrayList<>();
         for (int i = 0; i < this.names.size(); i++) {
-            if (!this.nameAliases.get(i).equals("")) {
+            if (!"".equals(this.nameAliases.get(i))) {
                 newNames.add(this.nameAliases.get(i));
             } else {
                 newNames.add(this.names.get(i));

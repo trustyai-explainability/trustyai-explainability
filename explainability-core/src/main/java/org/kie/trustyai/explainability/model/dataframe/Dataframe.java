@@ -1207,7 +1207,7 @@ public class Dataframe {
         for (int i = 0; i < getColumnDimension(); i++) {
 
             builder.append("\tColumn ").append(i);
-            if (!metadata.getNameAlias(i).equals("")) {
+            if (!"".equals(metadata.getNameAlias(i))) {
                 builder.append(" (").append(metadata.getRawName(i)).append("-> ").append(metadata.getNameAlias(i)).append(")\n");
             } else {
                 builder.append("\n");

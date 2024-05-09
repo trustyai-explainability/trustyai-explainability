@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-//@Embeddable
 public class DataframeInternalData {
     private final List<String> datapointTags;
     private final List<String> ids;

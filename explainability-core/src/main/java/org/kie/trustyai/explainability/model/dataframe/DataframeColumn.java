@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 import org.kie.trustyai.explainability.model.Value;
 
 // hibernate wrapper for an arraylist
-//@Entity
 public class DataframeColumn {
     private List<Value> values;
 
