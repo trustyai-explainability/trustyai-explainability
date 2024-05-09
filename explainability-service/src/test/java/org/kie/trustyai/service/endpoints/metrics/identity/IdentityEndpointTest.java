@@ -153,7 +153,7 @@ class IdentityEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST. The valid list of feature or output names is as follows: [gender, race, age]"));
+                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST. The valid list of feature or output names is as follows: [income, gender, race, age]"));
     }
 
     @Test
@@ -168,10 +168,10 @@ class IdentityEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post()
+                .when().post().peek()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST. The valid list of feature or output names is too long to display (length=50)"));
+                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST. The valid list of feature or output names is too long to display (length=51)"));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.validators.generic;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -59,7 +60,7 @@ public class GenericValidationUtils {
         if (!metadata.getOutputSchema().getNameMappedItems().containsKey(columnName)) {
             context.buildConstraintViolationWithTemplate(
                     String.format(
-                            "No %s found with name=%s. %s", objectName, columnName, getEnumerateMessage(metadata.getInputSchema().getNameMappedItems().keySet(), objectName)))
+                            "No %s found with name=%s. %s", objectName, columnName, getEnumerateMessage(metadata.getOutputSchema().getNameMappedItems().keySet(), objectName)))
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
                     .addConstraintViolation();
@@ -75,7 +76,7 @@ public class GenericValidationUtils {
     public static boolean validateColumnName(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName) {
         String objectName = "feature or output";
         if (!metadata.getOutputSchema().getNameMappedItems().containsKey(columnName) && !metadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
-            Set<String> nameSet = metadata.getInputSchema().getNameMappedItems().keySet();
+            Set<String> nameSet = new HashSet<>(metadata.getInputSchema().getNameMappedItems().keySet());
             nameSet.addAll(metadata.getOutputSchema().getNameMappedItems().keySet());
             context.buildConstraintViolationWithTemplate(String.format(
                     "No %s found with name=%s. %s", objectName, columnName, getEnumerateMessage(nameSet, objectName)))
