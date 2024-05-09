@@ -75,8 +75,10 @@ public class GenericValidationUtils {
     public static boolean validateColumnName(ConstraintValidatorContext context, Metadata metadata, String modelId, String columnName) {
         String objectName = "feature or output";
         if (!metadata.getOutputSchema().getNameMappedItems().containsKey(columnName) && !metadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
+            Set<String> nameSet = metadata.getInputSchema().getNameMappedItems().keySet();
+            nameSet.addAll(metadata.getOutputSchema().getNameMappedItems().keySet());
             context.buildConstraintViolationWithTemplate(String.format(
-                    "No %s found with name=%s. %s", objectName, columnName, getEnumerateMessage(metadata.getInputSchema().getNameMappedItems().keySet(), objectName)))
+                    "No %s found with name=%s. %s", objectName, columnName, getEnumerateMessage(nameSet, objectName)))
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
                     .addConstraintViolation();
