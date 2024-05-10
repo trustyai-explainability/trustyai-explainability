@@ -1,7 +1,9 @@
 package org.kie.trustyai.service.validators.generic;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.DataSource;
@@ -17,6 +19,16 @@ import jakarta.validation.ConstraintValidatorContext;
 
 @ApplicationScoped
 public class GenericValidationUtils {
+
+    private static String getEnumerateMessage(Set<String> names, String objectName) {
+        if (names.size() > 10) {
+            return String.format(
+                    "The valid list of %s names is too long to display (length=%d), please query TrustyAI's metadata endpoint (/info) to see the list in full.", objectName, names.size());
+        } else {
+            return "The valid list of " + objectName + " names is as follows: " + names.toString();
+        }
+    }
+
     public static boolean validateModelId(ConstraintValidatorContext context, Instance<DataSource> dataSource, String modelId) {
         if (!dataSource.get().hasMetadata(modelId)) {
             context.buildConstraintViolationWithTemplate("No metadata found for model=" + modelId + ". This can happen if TrustyAI has not yet logged any inferences from this model.")
@@ -27,9 +39,11 @@ public class GenericValidationUtils {
         return true;
     }
 
-    public static boolean validateFeatureColumnName(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, String objectName) {
-        if (!storageMetadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
-            context.buildConstraintViolationWithTemplate("No " + objectName + " found with name=" + columnName)
+    public static boolean validateFeatureColumnName(ConstraintValidatorContext context, StorageMetadata metadata, String modelId, String columnName, String objectName) {
+        if (!metadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
+            context.buildConstraintViolationWithTemplate(
+                    String.format(
+                            "No %s found with name=%s. %s", objectName, columnName, getEnumerateMessage(metadata.getInputSchema().getNameMappedItems().keySet(), objectName)))
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
                     .addConstraintViolation();
@@ -42,9 +56,11 @@ public class GenericValidationUtils {
         return validateFeatureColumnName(context, storageMetadata, modelId, columnName, "feature");
     }
 
-    public static boolean validateOutputColumnName(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName, String objectName) {
-        if (!storageMetadata.getOutputSchema().getNameMappedItems().containsKey(columnName)) {
-            context.buildConstraintViolationWithTemplate("No " + objectName + " found with name=" + columnName)
+    public static boolean validateOutputColumnName(ConstraintValidatorContext context, StorageMetadata metadata, String modelId, String columnName, String objectName) {
+        if (!metadata.getOutputSchema().getNameMappedItems().containsKey(columnName)) {
+            context.buildConstraintViolationWithTemplate(
+                    String.format(
+                            "No %s found with name=%s. %s", objectName, columnName, getEnumerateMessage(metadata.getOutputSchema().getNameMappedItems().keySet(), objectName)))
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
                     .addConstraintViolation();
@@ -57,9 +73,13 @@ public class GenericValidationUtils {
         return validateOutputColumnName(context, storageMetadata, modelId, columnName, "output");
     }
 
-    public static boolean validateColumnName(ConstraintValidatorContext context, StorageMetadata storageMetadata, String modelId, String columnName) {
-        if (!storageMetadata.getOutputSchema().getNameMappedItems().containsKey(columnName) && !storageMetadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
-            context.buildConstraintViolationWithTemplate("No feature or output found with name=" + columnName)
+    public static boolean validateColumnName(ConstraintValidatorContext context, StorageMetadata metadata, String modelId, String columnName) {
+        String objectName = "feature or output";
+        if (!metadata.getOutputSchema().getNameMappedItems().containsKey(columnName) && !metadata.getInputSchema().getNameMappedItems().containsKey(columnName)) {
+            Set<String> nameSet = new HashSet<>(metadata.getInputSchema().getNameMappedItems().keySet());
+            nameSet.addAll(metadata.getOutputSchema().getNameMappedItems().keySet());
+            context.buildConstraintViolationWithTemplate(String.format(
+                    "No %s found with name=%s. %s", objectName, columnName, getEnumerateMessage(nameSet, objectName)))
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
                     .addConstraintViolation();

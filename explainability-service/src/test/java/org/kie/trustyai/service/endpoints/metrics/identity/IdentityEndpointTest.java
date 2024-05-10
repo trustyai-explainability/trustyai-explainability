@@ -154,7 +154,25 @@ class IdentityEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST"));
+                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST. The valid list of feature or output names is as follows: [income, gender, race, age]"));
+    }
+
+    @Test
+    @DisplayName("IDENTITY request incorrectly typed, many column case")
+    void postIncorrectTypeManyColums() throws JsonProcessingException {
+        datasource.get().reset();
+        storage.get().emptyStorage();
+        final Dataframe dataframe = DataframeGenerators.generateRandomNColumnDataframe(N_SAMPLES, 50);
+        datasource.get().saveDataframe(dataframe, MODEL_ID);
+        final IdentityMetricRequest payload = RequestPayloadGenerator.incorrectIdentityInput();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post().peek()
+                .then()
+                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST. The valid list of feature or output names is too long to display (length=51)"));
     }
 
     @Test
@@ -284,9 +302,9 @@ class IdentityEndpointTest {
                 .contentType(ContentType.JSON)
                 .body(wrongPayload)
                 .when()
-                .post("/request")
+                .post("/request").peek()
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST"));
+                .body(containsString("No feature or output found with name=THIS_FIELD_DOES_NOT_EXIST."));
 
         ScheduleList scheduleList = given()
                 .when()
