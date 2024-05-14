@@ -254,12 +254,35 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     @Override
     public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
-        return null;
+        LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched and tagged)");
+        List<DataframeRow> rows = em.createQuery("" +
+                        "select dr from DataframeRow dr" +
+                        " where dr.modelId = ?1 AND dr.tag in (?2)" +
+                        "order by dr.dbId DESC ", DataframeRow.class)
+                .setParameter(1, modelId)
+                .setParameter(2, tags)
+                .setMaxResults(batchSize).getResultList();
+        Collections.reverse(rows);
+        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+        Dataframe df = Dataframe.untranspose(rows, dm);
+
+        return Pair.of(df, readMetaOrInternalData(modelId));
     }
 
     @Override
     public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException {
-        return null;
+        LOG.debug("Reading dataframe " + modelId + " from Hibernate (tagged)");
+        List<DataframeRow> rows = em.createQuery("" +
+                        "select dr from DataframeRow dr" +
+                        " where dr.modelId = ?1 AND dr.tag in (?2)" +
+                        "order by dr.dbId DESC ", DataframeRow.class)
+                .setParameter(1, modelId)
+                .setParameter(2, tags)
+                .getResultList();
+        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+        Dataframe df = Dataframe.untranspose(rows, dm);
+
+        return Pair.of(df, readMetaOrInternalData(modelId));
     }
 
     @Override

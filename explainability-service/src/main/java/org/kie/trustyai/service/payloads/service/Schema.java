@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.persistence.JoinTable;
 import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,13 +27,16 @@ public class Schema {
     private static final Logger LOG = Logger.getLogger(Schema.class);
 
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name="originalItems")
     @MapKey(name = "name")
     private Map<String, SchemaItem> items;
 
     @ElementCollection
     private Map<String, String> nameMapping = new HashMap<>();
 
-    @Transient
+    @OneToMany(cascade = CascadeType.ALL)
+    @MapKey(name = "name")
+    @JoinTable(name="mappedItems")
     private Map<String, SchemaItem> mappedItems = new HashMap<>();
 
     @Id
