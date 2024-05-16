@@ -18,7 +18,12 @@ TRUSTY_POD=$(oc get pods -o name | grep trustyai-service)
 INFER_ROUTE_ALPHA=$(oc get route demo-loan-nn-onnx-alpha --template={{.spec.host}}{{.spec.path}})
 INFER_ROUTE_BETA=$(oc get route demo-loan-nn-onnx-beta --template={{.spec.host}}{{.spec.path}})
 
-check_for_reception () {
+function curl_trustyai_token() {
+    TOKEN=$(oc create token user-one -n ${MM_NAMESPACE}) || eval "$FAILURE_HANDLING"
+    curl -s -H "Authorization: Bearer ${TOKEN}"  "$@"
+}
+
+function check_for_reception () {
   CHECKS=0
   THRESHOLD=${3:-950}
   MAX_RETRIES=${4:-5}
@@ -40,12 +45,12 @@ check_for_reception () {
   echo -e "\033[0;32m [done]\033[0m"
 }
 
-get_counter () {
-  FILE_PRESENT=$(oc exec $TRUSTY_POD -c trustyai-service -- bash -c "ls /inputs/ | grep $1 || echo ''")
+function get_counter () {
+  FILE_PRESENT=$(curl_trustyai_token $TRUSTY_ROUTE/info | grep $1 || echo '')
   if [[ -z $FILE_PRESENT ]]; then
     echo 0
   else
-    echo $(oc exec $TRUSTY_POD -c trustyai-service -- bash -c "cat /inputs/$1-metadata.json"  | jq .observations)
+    echo $(curl_trustyai_token $TRUSTY_ROUTE/info | jq ".[].data | select(.modelId==\"$1\")" | jq .observations)
   fi
 }
 
