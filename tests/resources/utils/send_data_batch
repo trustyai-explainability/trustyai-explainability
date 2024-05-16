@@ -14,6 +14,7 @@ MM_NAMESPACE=opendatahub-model
 
 oc project $MM_NAMESPACE 2>&1 1>/dev/null
 TRUSTY_POD=$(oc get pods -o name | grep trustyai-service)
+TRUSTY_ROUTE=https://$(oc get route/trustyai-service --template={{.spec.host}})
 
 INFER_ROUTE_ALPHA=$(oc get route demo-loan-nn-onnx-alpha --template={{.spec.host}}{{.spec.path}})
 INFER_ROUTE_BETA=$(oc get route demo-loan-nn-onnx-beta --template={{.spec.host}}{{.spec.path}})
@@ -48,7 +49,7 @@ function check_for_reception () {
 function get_counter () {
   FILE_PRESENT=$(curl_trustyai_token $TRUSTY_ROUTE/info | grep $1 || echo '')
   if [[ -z $FILE_PRESENT ]]; then
-    echo 0
+    echo 13
   else
     echo $(curl_trustyai_token $TRUSTY_ROUTE/info | jq ".[].data | select(.modelId==\"$1\")" | jq .observations)
   fi
@@ -102,12 +103,12 @@ while [ "$SUCCESS_ALPHA" != true ] || [ "$SUCCESS_BETA" != true ]; do
   fi
 
   if [ "$SUCCESS_ALPHA" != true ]; then
-    curl -k https://$INFER_ROUTE_ALPHA/infer -d @$1 > /dev/null 2>&1
+    curl -k -H "Authorization: Bearer ${TOKEN}" https://$INFER_ROUTE_ALPHA/infer -d @$1 > /dev/null 2>&1
     ( check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_ALPHA )) $MODEL_ALPHA; ) && SUCCESS_ALPHA=true
   fi;
 
   if [ "$SUCCESS_BETA" != true ]; then
-    curl -k https://$INFER_ROUTE_BETA/infer -d @$1 > /dev/null 2>&1
+    curl -k -H "Authorization: Bearer ${TOKEN}"  -k https://$INFER_ROUTE_BETA/infer -d @$1 > /dev/null 2>&1
     ( check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_BETA )) $MODEL_BETA; ) && SUCCESS_BETA=true
   fi;
 
