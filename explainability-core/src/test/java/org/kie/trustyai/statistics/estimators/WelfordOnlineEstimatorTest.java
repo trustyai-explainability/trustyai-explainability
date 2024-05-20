@@ -50,8 +50,8 @@ class WelfordOnlineEstimatorTest {
 
     @DisplayName("Test default mean and variance")
     @Test
-    void testWelforOnlineDefaultCov() {
-        WelfordOnlineEstimator s = new WelfordOnlineEstimator(2);
+    void testWelfordOnlineDefaultCov() {
+        final WelfordOnlineEstimator s = new WelfordOnlineEstimator(2);
 
         final MultivariateGaussianParameters parameters = s.getParameters();
 

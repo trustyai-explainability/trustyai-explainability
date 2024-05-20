@@ -37,7 +37,7 @@ public class WelfordOnlineEstimator implements MultivariateOnlineEstimator<Multi
      * @param observation An observation as a {@link RealVector}
      */
     @Override
-    public void update(RealVector observation) {
+    public synchronized void update(RealVector observation) {
         // delta = x - mean
         final RealVector delta = observation.subtract(mean);
         // mean = mean + delta / (1 + n)
