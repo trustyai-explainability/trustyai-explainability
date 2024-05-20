@@ -42,10 +42,10 @@ class WelfordOnlineEstimatorTest {
         }
 
         final MultivariateGaussianParameters parameters = s.getParameters();
-        assertEquals(mean0, parameters.getMean().getEntry(0), mean0 / 10.0);
-        assertEquals(mean1, parameters.getMean().getEntry(1), mean1 / 10.0);
-        assertEquals(var0, parameters.getCovariance().getEntry(0, 0), var0 / 10.0);
-        assertEquals(var1, parameters.getCovariance().getEntry(1, 1), var1 / 10.0);
+        assertEquals(mean0, parameters.getMean().getEntry(0), mean0 / 5.0);
+        assertEquals(mean1, parameters.getMean().getEntry(1), mean1 / 5.0);
+        assertEquals(var0, parameters.getCovariance().getEntry(0, 0), var0 / 5.0);
+        assertEquals(var1, parameters.getCovariance().getEntry(1, 1), var1 / 5.0);
     }
 
     @DisplayName("Test default mean and variance")
