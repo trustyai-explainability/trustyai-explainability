@@ -23,6 +23,7 @@ public class WelfordOnlineEstimator implements MultivariateOnlineEstimator<Multi
 
     /**
      * Instantiate a Welford online estimator.
+     * 
      * @param dimension The observation's dimension as a {@code int}
      */
     public WelfordOnlineEstimator(int dimension) {
@@ -56,6 +57,7 @@ public class WelfordOnlineEstimator implements MultivariateOnlineEstimator<Multi
 
     /**
      * Return the estimated parameters of the multivariate Gaussian distribution
+     * 
      * @return Estimated parameters as {@link MultivariateGaussianParameters}
      */
     @Override
