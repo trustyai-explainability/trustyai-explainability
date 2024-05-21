@@ -27,6 +27,7 @@ public class MultivariateGaussianParameters implements DistributionParameters {
 
     /**
      * Create the parameters of a multivariate Gaussian distribution
+     * 
      * @param mean The mean as a {@link RealVector}
      * @param covariance The covariance as a {@link RealMatrix}
      * @return
