@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import jakarta.persistence.JoinTable;
 import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,10 +14,9 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.MapKey;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "StorageSchema")
@@ -27,16 +25,16 @@ public class Schema {
     private static final Logger LOG = Logger.getLogger(Schema.class);
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(name="originalItems")
-    @MapKey(name = "name")
+    @JoinTable(name = "storageSchema_originalItems")
+    // a map of the original column names keying their corresponding schemaItems
     private Map<String, SchemaItem> items;
 
     @ElementCollection
     private Map<String, String> nameMapping = new HashMap<>();
 
     @OneToMany(cascade = CascadeType.ALL)
-    @MapKey(name = "name")
-    @JoinTable(name="mappedItems")
+    @JoinTable(name = "storageSchema_mappedItems")
+    // a constructed map containing any aliased columns, keying their schemaItems
     private Map<String, SchemaItem> mappedItems = new HashMap<>();
 
     @Id
@@ -45,18 +43,18 @@ public class Schema {
 
     public Schema() {
         this.items = new ConcurrentHashMap<>();
-        calculateNameMappedItems();
+        calculateNameMappedItems("cnull"); // trivial state: just sets mappedItems == items
     }
 
     public Schema(Map<String, SchemaItem> items) {
         this.items = items;
-        calculateNameMappedItems();
+        calculateNameMappedItems("c1"); // trivial state: just sets mappedItems == items
     }
 
     public Schema(Map<String, SchemaItem> items, Map<String, String> nameMapping) {
         this.items = items;
         this.nameMapping = nameMapping;
-        calculateNameMappedItems();
+        calculateNameMappedItems("c2");
     }
 
     public static Schema from(Map<String, SchemaItem> items) {
@@ -68,7 +66,7 @@ public class Schema {
     }
 
     //@CacheResult(cacheName = "schema-name-mapped-items", keyGenerator = SchemaNameMappingCacheKeyGen.class)
-    private void calculateNameMappedItems() {
+    private void calculateNameMappedItems(String source) {
         this.mappedItems = new HashMap<>(items);
         if (!nameMapping.isEmpty()) {
             // for key, value pair in the name mapping
@@ -84,17 +82,27 @@ public class Schema {
         }
     }
 
+    // getters and setters =============================================================================================
     public Map<String, String> getNameMapping() {
         return nameMapping;
     }
 
-    public void setNameMapping(Map<String, String> nameMapping) {
-        this.nameMapping = nameMapping;
-        calculateNameMappedItems();
-    }
-
     public Map<String, SchemaItem> getNameMappedItems() {
         return this.mappedItems;
+    }
+
+    // for specific usage for Hibernate initialization
+    public void setNameMapping(Map<String, String> nameMapping) {
+        this.nameMapping = nameMapping;
+        calculateNameMappedItems("update nm");
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     @Override
@@ -118,13 +126,5 @@ public class Schema {
                 "items=" + items +
                 ", nameMapping=" + nameMapping +
                 '}';
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
     }
 }

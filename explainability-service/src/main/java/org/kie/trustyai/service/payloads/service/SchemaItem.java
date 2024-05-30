@@ -10,18 +10,18 @@ import org.kie.trustyai.service.payloads.values.DataType;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 
 @Entity
 public class SchemaItem {
     private DataType type;
     private String name;
 
-    @JsonAlias({ "values" })
-    @ElementCollection
+    @Transient
+    // marking this transient to avoid double-saving dataframe values in DB
     private Set<UnderlyingObject> columnValues;
 
     @JsonAlias({ "index" })

@@ -102,7 +102,6 @@ public class UploadEndpoint {
 
                     // if any names or types don't match, add to errors
                     if (outputMismatch) {
-                        System.out.println("output mismatch");
                         String[] diffTable = IOUtils.outputListComparison(matchingOutputs, uploadedOutputs, "Original", "Uploaded", false).getFirst().split("\\R");
                         String subTable = String.join(System.lineSeparator(), Arrays.copyOfRange(diffTable, 1, diffTable.length - 1));
                         rowMismatchErrors.add(String.format(" - ID=%s output names, classes, or TrustyAI types do not match:%n%s%n",

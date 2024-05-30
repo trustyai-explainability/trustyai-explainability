@@ -32,6 +32,7 @@ public class MockDatasource extends DataSource {
         storageMetadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
         storageMetadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
         storageMetadata.setObservations(dataframe.getRowDimension());
+        storageMetadata.setModelId(dataframe.getId());
 
         return storageMetadata;
     }

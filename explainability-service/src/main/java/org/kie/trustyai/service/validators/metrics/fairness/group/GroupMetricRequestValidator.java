@@ -39,6 +39,10 @@ public class GroupMetricRequestValidator implements ConstraintValidator<ValidGro
             final String protectedAttribute = request.getProtectedAttribute();
 
             // Outcome name or attribute name not present
+            LOG.info("protectedAttr: " + protectedAttribute);
+            LOG.info("sM: " + storageMetadata.getInputSchema().getNameMappedItems());
+            LOG.info("sM: " + storageMetadata.getInputSchema().getNameMappedItems().keySet());
+
             boolean validOutputName = GenericValidationUtils.validateOutputColumnName(context, storageMetadata, modelId, outcomeName);
             boolean validAttributeName = GenericValidationUtils.validateFeatureColumnName(context, storageMetadata, modelId, protectedAttribute, "protected attribute");
 

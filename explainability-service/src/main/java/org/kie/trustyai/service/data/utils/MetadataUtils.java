@@ -13,6 +13,7 @@ import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
 
 public class MetadataUtils {
+    public static final Integer MAX_VALUE_ENUMERATION = 200;
 
     private MetadataUtils() {
 
@@ -44,8 +45,7 @@ public class MetadataUtils {
         Set<UnderlyingObject> uniqueValues = dataframe.getColumn(i).stream()
                 .map(Value::getUnderlyingObjectContainer)
                 .collect(Collectors.toSet());
-        schemaItem.setColumnValues(uniqueValues.size() < 200 ? uniqueValues : null);
-
+        schemaItem.setColumnValues(uniqueValues.size() < MetadataUtils.MAX_VALUE_ENUMERATION ? uniqueValues : null);
         schemaItem.setColumnIndex(i);
         return schemaItem;
     }

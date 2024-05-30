@@ -2,14 +2,18 @@ package org.kie.trustyai.service.data.storage.hibernate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
+import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.profiles.hibernate.HibernateTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
@@ -23,12 +27,15 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestProfile(HibernateTestProfile.class)
 @QuarkusTestResource(H2DatabaseTestResource.class)
 class HibernateStorageTest {
+
     @Inject
     Instance<MockHibernateStorage> storage;
 
@@ -58,6 +65,22 @@ class HibernateStorageTest {
     }
 
     @Test
+    void testClear() {
+        int nrows = 100;
+        int ncols = 10;
+
+        Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
+        storage.get().saveDataframe(original, MODEL_ID);
+
+        Dataframe recovered = storage.get().readDataframe(MODEL_ID, nrows);
+        DataframeGenerators.roughEqualityCheck(original, recovered);
+
+        storage.get().clearData(MODEL_ID);
+        assertFalse(storage.get().dataExists(MODEL_ID));
+
+    }
+
+    @Test
     void testCounts() {
         int nrows = 100;
         int ncols = 10;
@@ -66,6 +89,21 @@ class HibernateStorageTest {
         storage.get().saveDataframe(original, MODEL_ID);
         assertEquals(nrows, storage.get().rowCount(MODEL_ID));
         assertEquals(original.getColumnDimension(), storage.get().colCount(MODEL_ID));
+    }
+
+    @Test
+    void testColumnValueCollection() {
+        int nrows = 100;
+        int ncols = 10;
+
+        Dataframe original = DataframeGenerators.generatePositionalHintedDataframe(nrows, ncols);
+        storage.get().saveDataframe(original, MODEL_ID);
+
+        assertThrows(IllegalArgumentException.class, () -> storage.get().getColumnValues(MODEL_ID, "f-1"));
+        for (int i = 0; i < original.getInputsCount(); i++) {
+            assertEquals(original.getColumn(i), storage.get().getColumnValues(MODEL_ID, "f" + i));
+        }
+        assertEquals(original.getColumn(original.getOutputsIndices().get(0)), storage.get().getColumnValues(MODEL_ID, "o0"));
     }
 
     @Test
@@ -142,6 +180,59 @@ class HibernateStorageTest {
 
         assertEquals(size, storage.get().rowCount(MODEL_ID));
         DataframeGenerators.roughEqualityCheck(original, storage.get().readDataframe(MODEL_ID));
+    }
+
+    @Test
+    void testStorageMetadataSaveLoad() {
+        int nrows = 1000;
+        int batch = 10;
+        int ncols = 10;
+        int size = nrows;
+
+        Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
+
+        HashMap<String, String> inputMapping = new HashMap<>();
+        inputMapping.put("f1", "f1 Mapped");
+        inputMapping.put("f2", "f2 Mapped");
+
+        StorageMetadata sm = new StorageMetadata();
+        sm.setInputSchema(MetadataUtils.getInputSchema(original));
+        sm.setOutputSchema(MetadataUtils.getOutputSchema(original));
+        sm.getInputSchema().setNameMapping(inputMapping);
+
+        Set<String> originalMapping = new HashSet<>(sm.getInputSchema().getNameMappedItems().keySet());
+        storage.get().saveMetaOrInternalData(sm, MODEL_ID);
+
+        StorageMetadata smLoaded = storage.get().readMetaOrInternalData(MODEL_ID);
+
+        assertEquals(originalMapping, new HashSet<>(smLoaded.getInputSchema().getNameMappedItems().keySet()));
+    }
+
+    @Test
+    void testTagSaveLoad() {
+        int nrows = 1000;
+        int ncols = 10;
+
+        Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
+
+        List<String> tags = List.of("TRAINING", "SYNTHETIC");
+        int idx = 0;
+        HashMap<String, List<Integer>> tagIDXGroundTruth = new HashMap<>();
+        HashMap<String, List<List<Integer>>> tagMap = new HashMap<>();
+
+        for (String tag : tags) {
+            tagMap.put(tag, List.of(List.of(idx, idx + 3), List.of(idx + 5, idx + 7), List.of(idx + 9)));
+            tagIDXGroundTruth.put(tag, List.of(idx, idx + 1, idx + 2, idx + 5, idx + 6, idx + 9));
+            idx += 10;
+        }
+
+        storage.get().saveDataframe(original, MODEL_ID);
+        storage.get().setTags(MODEL_ID, tagMap);
+
+        original.tagDataPoints(tagMap);
+        Dataframe loaded = storage.get().readDataframe(MODEL_ID);
+
+        assertEquals(original.getTags(), loaded.getTags());
     }
 
 }

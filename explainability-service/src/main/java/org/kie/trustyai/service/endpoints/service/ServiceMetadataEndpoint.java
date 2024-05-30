@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -49,9 +48,7 @@ public class ServiceMetadataEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response serviceInfo() throws JsonProcessingException {
-
         final List<ServiceMetadata> serviceMetadataList = new ArrayList<>();
-
         for (String modelId : dataSource.get().getKnownModels()) {
             final ServiceMetadata serviceMetadata = new ServiceMetadata();
 
@@ -65,7 +62,7 @@ public class ServiceMetadataEndpoint {
             }
 
             try {
-                final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId);
+                final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId, true);
                 serviceMetadata.setData(storageMetadata);
             } catch (DataframeCreateException | StorageReadException | NullPointerException e) {
                 LOG.warn("Problem creating dataframe: " + e.getMessage(), e);
@@ -105,9 +102,7 @@ public class ServiceMetadataEndpoint {
                 return Response.serverError().entity(String.join(", ", tagErrors)).status(Response.Status.BAD_REQUEST).build();
             }
 
-            Dataframe df = dataSource.get().getDataframe(dataTagging.getModelId());
-            df.tagDataPoints(tagMapping);
-            dataSource.get().saveDataframe(df, dataTagging.getModelId(), true);
+            dataSource.get().tagDataframeRows(dataTagging.getModelId(), tagMapping);
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
             return Response.serverError()
                     .status(Response.Status.BAD_REQUEST)
@@ -130,6 +125,7 @@ public class ServiceMetadataEndpoint {
                     .entity("Model ID " + nameMapping.getModelId() + " does not exist in TrustyAI metadata.")
                     .build();
         }
+
         final StorageMetadata storageMetadata = dataSource.get().getMetadata(nameMapping.getModelId());
 
         Schema inputSchema = storageMetadata.getInputSchema();
@@ -137,8 +133,9 @@ public class ServiceMetadataEndpoint {
 
         inputSchema.setNameMapping(nameMapping.getInputMapping());
         outputSchema.setNameMapping(nameMapping.getOutputMapping());
-        dataSource.get().saveMetadata(storageMetadata, nameMapping.getModelId(), true);
+        dataSource.get().saveMetadata(storageMetadata, nameMapping.getModelId());
 
+        LOG.info("Name mappings successfully applied to model=" + nameMapping.getModelId() + ".");
         return Response.ok().entity("Feature and output name mapping successfully applied.").build();
     }
 

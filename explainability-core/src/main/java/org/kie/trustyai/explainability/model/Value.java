@@ -39,7 +39,7 @@ import jakarta.persistence.Transient;
  */
 @Embeddable
 public class Value {
-
+    @Access(AccessType.FIELD)
     private final UnderlyingObject wrappedUnderlyingObject;
 
     public Value(Object underlyingObject) {
@@ -92,7 +92,6 @@ public class Value {
         return wrappedUnderlyingObject.getObject();
     }
 
-    @Access(AccessType.FIELD)
     public UnderlyingObject getUnderlyingObjectContainer() {
         return wrappedUnderlyingObject;
     }

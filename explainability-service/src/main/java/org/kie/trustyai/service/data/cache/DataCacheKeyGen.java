@@ -29,7 +29,7 @@ public class DataCacheKeyGen implements CacheKeyGenerator {
     @Override
     public Object generate(Method method, Object... methodParams) {
         final String modelId = (String) methodParams[0];
-        LOG.debug("Creating cache key for " + modelId + " data");
+        LOG.info("Creating cache key for " + modelId + " data");
 
         return new CompositeCacheKey(modelId, storage.get().getLastModified(modelId));
     }

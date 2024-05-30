@@ -53,7 +53,7 @@ public class DataframeRow {
         this.rowId = id;
     }
 
-    protected void setTag(String tag) {
+    public void setTag(String tag) {
         this.tag = tag;
     }
 

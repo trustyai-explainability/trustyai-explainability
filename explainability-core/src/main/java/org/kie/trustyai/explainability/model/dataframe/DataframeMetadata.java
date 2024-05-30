@@ -14,6 +14,7 @@ import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
@@ -22,25 +23,25 @@ public class DataframeMetadata {
     public static final String DEFAULT_INPUT_TENSOR_NAME = "input";
     public static final String DEFAULT_OUTPUT_TENSOR_NAME = "output";
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private final List<String> names;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> nameAliases;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> cachedColumnNames;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<Type> types;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private final List<Boolean> constrained;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<FeatureDomain> domains;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private final List<Boolean> inputs;
 
     @Id
@@ -132,7 +133,7 @@ public class DataframeMetadata {
         this.cachedColumnNames = newNames;
     }
 
-    protected List<String> getNames() {
+    public List<String> getNames() {
         return Collections.unmodifiableList(cachedColumnNames);
     }
 

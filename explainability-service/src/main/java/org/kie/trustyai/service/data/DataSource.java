@@ -3,10 +3,11 @@ package org.kie.trustyai.service.data;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
@@ -28,6 +29,8 @@ import org.kie.trustyai.service.payloads.service.Schema;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.vertx.core.impl.ConcurrentHashSet;
+
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -38,7 +41,7 @@ public class DataSource {
     public static final String GROUND_TRUTH_SUFFIX = "-ground-truths";
     public static final String INTERNAL_DATA_FILENAME = "internal_data.csv";
     private static final Logger LOG = Logger.getLogger(DataSource.class);
-    protected final Set<String> knownModels = new HashSet<>();
+    protected final Set<String> knownModels = new ConcurrentHashSet<>();
 
     @Inject
     Instance<Storage<?, ?>> storage;
@@ -77,6 +80,10 @@ public class DataSource {
 
     public Set<String> getKnownModels() {
         return knownModels;
+    }
+
+    public void addModelToKnown(String modelId) {
+        this.knownModels.add(modelId);
     }
 
     private Map<String, String> getJointNameAliases(StorageMetadata storageMetadata) {
@@ -300,7 +307,7 @@ public class DataSource {
 
     public void saveDataframe(final Dataframe dataframe, final String modelId, boolean overwrite) throws InvalidSchemaException {
         // Add to known models
-        this.knownModels.add(modelId);
+        addModelToKnown(modelId);
 
         if (!hasMetadata(modelId) || overwrite) {
             // If metadata is not present, create it
@@ -314,7 +321,7 @@ public class DataSource {
             storageMetadata.setInputTensorName(dataframe.getInputTensorName());
             storageMetadata.setOutputTensorName(dataframe.getOutputTensorName());
             try {
-                saveMetadata(storageMetadata, modelId, false);
+                saveMetadata(storageMetadata, modelId);
             } catch (StorageWriteException e) {
                 throw new DataframeCreateException(e.getMessage());
             }
@@ -334,7 +341,7 @@ public class DataSource {
                 storageMetadata.mergeOutputSchema(newOutputSchema);
 
                 try {
-                    saveMetadata(storageMetadata, modelId, true);
+                    saveMetadata(storageMetadata, modelId);
                 } catch (StorageWriteException e) {
                     throw new DataframeCreateException(e.getMessage());
                 }
@@ -357,8 +364,10 @@ public class DataSource {
             }
         } else {
             HibernateStorage hst = (HibernateStorage) getStorage();
-            if (!hst.dataExists(modelId) || overwrite) {
+            if (!hst.dataExists(modelId)) {
                 hst.saveDataframe(dataframe, modelId);
+            } else if (overwrite) {
+                hst.overwriteDataframe(dataframe, modelId);
             } else {
                 hst.append(dataframe, modelId);
             }
@@ -369,14 +378,10 @@ public class DataSource {
     public void updateMetadataObservations(int number, String modelId) {
         final StorageMetadata storageMetadata = getMetadata(modelId);
         storageMetadata.incrementObservations(number);
-        saveMetadata(storageMetadata, modelId, true);
+        saveMetadata(storageMetadata, modelId);
     }
 
     public void saveMetadata(StorageMetadata storageMetadata, String modelId) throws StorageWriteException {
-        saveMetadata(storageMetadata, modelId, false);
-    }
-
-    public void saveMetadata(StorageMetadata storageMetadata, String modelId, boolean isUpdate) throws StorageWriteException {
         if (getStorage().getDataFormat() == DataFormat.CSV) {
             final ObjectMapper mapper = new ObjectMapper();
             mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
@@ -389,21 +394,15 @@ public class DataSource {
 
             ((FlatFileStorage) getStorage()).saveDataframe(byteBuffer, modelId + "-" + METADATA_FILENAME);
         } else {
-            if (isUpdate) {
-                if (!storageMetadata.getModelId().equals(modelId)) {
-                    throw new IllegalArgumentException(String.format(
-                            "When updating metadata record in database, the metadata's modelId must match the modelId passed to saveMetadata(). " +
-                                    "metadata.getModelId()=%s, modelId passed to saveMetadata()=%s",
-                            storageMetadata.getModelId(), modelId));
-                }
-                ((HibernateStorage) getStorage()).updateMetadata(storageMetadata);
-            } else {
-                ((HibernateStorage) getStorage()).saveMetaOrInternalData(storageMetadata, modelId);
-            }
+            ((HibernateStorage) getStorage()).saveMetaOrInternalData(storageMetadata, modelId);
         }
     }
 
     public StorageMetadata getMetadata(String modelId) throws StorageReadException {
+        return getMetadata(modelId, false);
+    }
+
+    public StorageMetadata getMetadata(String modelId, boolean loadColumnValues) throws StorageReadException {
         if (getStorage().getDataFormat() == DataFormat.CSV) {
             final ObjectMapper mapper = new ObjectMapper();
             mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
@@ -415,19 +414,36 @@ public class DataSource {
                 throw new StorageReadException(e.getMessage());
             }
         } else {
-            return ((HibernateStorage) getStorage()).readMetaOrInternalData(modelId);
+            HibernateStorage hibernateStorage = (HibernateStorage) getStorage();
+            StorageMetadata sm = hibernateStorage.readMetaOrInternalData(modelId);
+
+            // only grab column enumerations from DB if explicitly requested, to save time
+            if (loadColumnValues) {
+                hibernateStorage.loadColumnValues(modelId, sm);
+            }
+            return sm;
         }
     }
 
-    public void verifyKnownModels() {
-        knownModels.removeIf(modelID -> !hasMetadata(modelID));
+    // shortcut the observation count for the DB case, to avoid loading all metadata unnecessarily
+    public long getNumObservations(String modelId) {
+        if (getStorage().getDataFormat() == DataFormat.CSV) {
+            return getMetadata(modelId).getObservations();
+        } else {
+            return ((HibernateStorage) getStorage()).rowCount(modelId);
+        }
+    }
+
+    public List<String> getVerifiedModels() {
+        return knownModels.stream().filter(this::hasMetadata).collect(Collectors.toList());
     }
 
     public boolean hasMetadata(String modelId) {
         if (getStorage().getDataFormat() == DataFormat.CSV) {
             return ((FlatFileStorage) getStorage()).fileExists(modelId + "-" + METADATA_FILENAME);
         } else {
-            return ((HibernateStorage) getStorage()).dataExists(modelId);
+            boolean dataExists = ((HibernateStorage) getStorage()).dataExists(modelId);
+            return dataExists;
         }
     }
 
@@ -442,6 +458,17 @@ public class DataSource {
 
     public Dataframe getGroundTruths(String modelId) {
         return getDataframe(getGroundTruthName(modelId));
+    }
+
+    // tagging handler
+    public void tagDataframeRows(String modelId, HashMap<String, List<List<Integer>>> tagMapping) {
+        if (getStorage().getDataFormat() == DataFormat.CSV) {
+            Dataframe df = getDataframe(modelId);
+            df.tagDataPoints(tagMapping);
+            saveDataframe(df, modelId, true);
+        } else {
+            ((HibernateStorage) getStorage()).setTags(modelId, tagMapping);
+        }
     }
 
 }

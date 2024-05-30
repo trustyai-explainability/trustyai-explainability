@@ -1,13 +1,18 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
+import org.kie.trustyai.explainability.model.UnderlyingObject;
+import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.explainability.model.dataframe.DataframeRow;
@@ -24,13 +29,15 @@ import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.data.storage.flatfile.PVCStorage;
+import org.kie.trustyai.service.data.utils.MetadataUtils;
+import org.kie.trustyai.service.payloads.service.Schema;
+import org.kie.trustyai.service.payloads.service.SchemaItem;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
@@ -41,11 +48,14 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     EntityManager em;
 
     private static final Logger LOG = Logger.getLogger(HibernateStorage.class);
+
     private final int batchSize;
     private Optional<MigrationConfig> migrationConfig = Optional.empty();
+    private boolean dataDirty = false;
+    private final String NO_DATA_ERROR_MSG = "No inference data for that model found in database.";
 
     public HibernateStorage(ServiceConfig serviceConfig, StorageConfig storageConfig) {
-        LOG.info("Starting Hibernate storage consumer" + this);
+        LOG.info("Starting Hibernate storage consumer.");
 
         if (serviceConfig.batchSize().isPresent()) {
             this.batchSize = serviceConfig.batchSize().getAsInt();
@@ -78,7 +88,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 List<String> modelIds = pvcStorage.listAllModelIds();
 
                 if (!modelIds.isEmpty()) {
-                    LOG.info("Starting migration");
+                    LOG.info("Starting migration, found " + modelIds.size() + " models.");
                     for (String modelId : modelIds) {
                         LOG.info("Migrating " + modelId + " metadata");
                         StorageMetadata sm = oldDataSource.getMetadata(modelId);
@@ -109,6 +119,30 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         return DataFormat.BEAN;
     }
 
+    // READ UTILITIES ==================================================================================================
+    private List<DataframeRow> getRowsBetween(String modelId, int startPos, int endPos) {
+        refreshIfDirty();
+        return em.createQuery("" +
+                "select dr from DataframeRow dr" +
+                " where dr.modelId = ?1 " +
+                "order by dr.dbId ASC ", DataframeRow.class)
+                .setParameter(1, modelId)
+                .setFirstResult(startPos)
+                .setMaxResults(endPos - startPos).getResultList();
+    }
+
+    private DataframeRow getRow(String modelId, int idx) {
+        refreshIfDirty();
+        return em.createQuery("" +
+                "select dr from DataframeRow dr" +
+                " where dr.modelId = ?1 " +
+                "order by dr.dbId ASC ", DataframeRow.class)
+                .setParameter(1, modelId)
+                .setFirstResult(idx)
+                .setMaxResults(1)
+                .getSingleResult();
+    }
+
     // DATAFRAME READ + WRITES =========================================================================================
     @Override
     public Dataframe readDataframe(String modelId) throws StorageReadException {
@@ -117,29 +151,48 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     }
 
     public Dataframe readAllData(String modelId) throws StorageReadException {
-        LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
-
-        List<DataframeRow> rows = em.createQuery("" +
-                "select dr from DataframeRow dr" +
-                " where dr.modelId = ?1 ", DataframeRow.class)
-                .setParameter(1, modelId)
-                .getResultList();
-        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
-        return Dataframe.untranspose(rows, dm);
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
+                refreshIfDirty();
+                List<DataframeRow> rows = em.createQuery("" +
+                        "select dr from DataframeRow dr" +
+                        " where dr.modelId = ?1 ", DataframeRow.class)
+                        .setParameter(1, modelId)
+                        .getResultList();
+                DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+                return Dataframe.untranspose(rows, dm);
+            } catch (Exception e) {
+                LOG.error("Error reading all data for model=" + modelId);
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("Error reading all data for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
     }
 
     @Override
     public Dataframe readDataframe(String modelId, int batchSize) throws StorageReadException {
-        LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
-        List<DataframeRow> rows = em.createQuery("" +
-                "select dr from DataframeRow dr" +
-                " where dr.modelId = ?1 " +
-                "order by dr.dbId DESC ", DataframeRow.class)
-                .setParameter(1, modelId)
-                .setMaxResults(batchSize).getResultList();
-        Collections.reverse(rows);
-        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
-        return Dataframe.untranspose(rows, dm);
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
+                refreshIfDirty();
+                List<DataframeRow> rows = em.createQuery("" +
+                        "select dr from DataframeRow dr" +
+                        " where dr.modelId = ?1 " +
+                        "order by dr.dbId DESC ", DataframeRow.class)
+                        .setParameter(1, modelId)
+                        .setMaxResults(batchSize).getResultList();
+                Collections.reverse(rows);
+                DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+                return Dataframe.untranspose(rows, dm);
+            } catch (Exception e) {
+                LOG.error("Error reading dataframe for model=" + modelId);
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
     }
 
     @Override
@@ -148,32 +201,61 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             throw new IllegalArgumentException("HibernateStorage.readData endPos must be greater than startPos. Got startPos=" + startPos + ", endPos=" + endPos);
         }
 
-        LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
-        List<DataframeRow> rows = em.createQuery("" +
-                "select dr from DataframeRow dr" +
-                " where dr.modelId = ?1 " +
-                "order by dr.dbId ASC ", DataframeRow.class)
-                .setParameter(1, modelId)
-                .setFirstResult(startPos)
-                .setMaxResults(endPos - startPos).getResultList();
-        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
-        return Dataframe.untranspose(rows, dm);
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
+                refreshIfDirty();
+                List<DataframeRow> rows = getRowsBetween(modelId, startPos, endPos);
+                DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+                return Dataframe.untranspose(rows, dm);
+            } catch (Exception e) {
+                LOG.error("Error reading dataframe for model=" + modelId);
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
     }
 
     @Override
     @Transactional
     public void saveDataframe(Dataframe dataframe, String modelId) throws StorageWriteException {
-        LOG.debug("Writing dataframe=" + modelId + ", rows=" + dataframe.getRowDimension() + " to Hibernate");
-        List<DataframeRow> transpose = dataframe.transpose(modelId);
-        for (DataframeRow dr : transpose) {
-            em.persist(dr);
+        try {
+            LOG.debug("Writing dataframe=" + modelId + ", rows=" + dataframe.getRowDimension() + " to Hibernate");
+            List<DataframeRow> transpose = dataframe.transpose(modelId);
+            for (DataframeRow dr : transpose) {
+                em.persist(dr);
+            }
+            DataframeMetadata dm = dataframe.getMetadata();
+            dm.setId(modelId);
+            if (dataExists(modelId)) {
+                em.merge(dm);
+            } else {
+                em.persist(dm);
+            }
+        } catch (Exception e) {
+            LOG.error("Error saving dataframe for model=" + modelId);
+            throw new StorageWriteException(e.getMessage());
         }
-        DataframeMetadata dm = dataframe.getMetadata();
-        dm.setId(modelId);
+    }
+
+    @Transactional
+    public void overwriteDataframe(Dataframe dataframe, String modelId) throws StorageWriteException {
         if (dataExists(modelId)) {
-            em.merge(dm);
+            try {
+                LOG.debug("Overwriting dataframe=" + modelId + ", rows=" + dataframe.getRowDimension() + " to Hibernate");
+                em.createQuery("" +
+                        "DELETE from DataframeRow dr " +
+                        "where dr.modelId = ?1")
+                        .setParameter(1, modelId)
+                        .executeUpdate();
+                saveDataframe(dataframe, modelId);
+            } catch (Exception e) {
+                LOG.error("Error overwriting dataframe for model=" + modelId);
+                throw new StorageWriteException(e.getMessage());
+            }
         } else {
-            em.persist(dm);
+            throw new IllegalArgumentException("Error overwriting dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
@@ -184,18 +266,28 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     }
 
     public Dataframe readNonSyntheticDataframe(String modelId, int batchSize) throws StorageReadException {
-        LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
-        List<DataframeRow> rows = em.createQuery("" +
-                "select dr from DataframeRow dr" +
-                " where dr.modelId = ?1 AND" +
-                " dr.tag <>  ?2 " +
-                "order by dr.dbId DESC ", DataframeRow.class)
-                .setParameter(1, modelId)
-                .setParameter(2, Dataframe.InternalTags.SYNTHETIC.get())
-                .setMaxResults(batchSize).getResultList();
-        Collections.reverse(rows);
-        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
-        return Dataframe.untranspose(rows, dm);
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
+                refreshIfDirty();
+                List<DataframeRow> rows = em.createQuery("" +
+                        "select dr from DataframeRow dr" +
+                        " where dr.modelId = ?1 AND" +
+                        " dr.tag <>  ?2 " +
+                        "order by dr.dbId DESC ", DataframeRow.class)
+                        .setParameter(1, modelId)
+                        .setParameter(2, Dataframe.InternalTags.SYNTHETIC.get())
+                        .setMaxResults(batchSize).getResultList();
+                Collections.reverse(rows);
+                DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+                return Dataframe.untranspose(rows, dm);
+            } catch (Exception e) {
+                LOG.error("Error reading non-synthetic dataframe for model=" + modelId);
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("Error reading non-synthetic dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
     }
 
     // get the row count of a persisted dataframe
@@ -211,78 +303,216 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 .getSingleResult();
     }
 
+    public List<Value> getColumnValues(String modelId, String columnName) {
+        if (dataExists(modelId)) {
+            List<String> colNames = em.find(DataframeMetadata.class, modelId).getNames();
+            if (colNames.contains(columnName)) {
+                Integer targetColIdx = colNames.indexOf(columnName);
+                refreshIfDirty();
+                return em.createQuery(
+                        "select dr.row from DataframeRow dr " +
+                                "where dr.modelId = ?1 AND " +
+                                "index(dr.row) = ?2 ",
+                        Value.class)
+                        .setParameter(1, modelId)
+                        .setParameter(2, targetColIdx)
+                        .getResultList();
+            } else {
+                throw new IllegalArgumentException(String.format(
+                        "Error reading column values for model=%s, column=%s. Column %s not within available model columns=%s",
+                        modelId, columnName, columnName, colNames.toString()));
+            }
+        } else {
+            throw new IllegalArgumentException("Error reading column values for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
+    }
+
+    private void setSchemaEnumeration(String modelId, Schema schema) {
+        for (Map.Entry<String, SchemaItem> entry : schema.getItems().entrySet()) {
+            Set<UnderlyingObject> columnValues = getColumnValues(modelId, entry.getKey())
+                    .stream()
+                    .map(Value::getUnderlyingObjectContainer)
+                    .collect(Collectors.toSet());
+            if (columnValues.size() > MetadataUtils.MAX_VALUE_ENUMERATION) {
+                entry.getValue().setColumnValues(null);
+            } else {
+                entry.getValue().setColumnValues(columnValues);
+            }
+        }
+    }
+
+    @Transactional
+    public void loadColumnValues(String modelId, StorageMetadata storageMetadata) {
+        setSchemaEnumeration(modelId, storageMetadata.getInputSchema());
+        setSchemaEnumeration(modelId, storageMetadata.getOutputSchema());
+    }
+
     // METADATA READ + WRITES ==========================================================================================
     @Override
     public StorageMetadata readMetaOrInternalData(String modelId) throws StorageReadException {
-        LOG.debug("Reading metadata for " + modelId + " from Hibernate");
-        return em.find(StorageMetadata.class, modelId);
+        if (metadataExists(modelId)) {
+            try {
+                LOG.debug("Reading metadata for " + modelId + " from Hibernate");
+                refreshIfDirty();
+                return em.find(StorageMetadata.class, modelId);
+            } catch (Exception e) {
+                LOG.error("Error reading metadata for model=" + modelId);
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("Error reading metadata for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
     }
 
     @Override
     @Transactional
     public void saveMetaOrInternalData(StorageMetadata storageMetadata, String modelId) throws StorageWriteException {
-        LOG.debug("Saving metadata for " + modelId + " into Hibernate");
-        storageMetadata.setModelId(modelId);
-        em.persist(storageMetadata);
+        try {
+
+            storageMetadata.setModelId(modelId);
+            if (metadataExists(modelId)) {
+                LOG.debug("Updating metadata for " + modelId + " into Hibernate");
+                em.merge(storageMetadata);
+            } else {
+                LOG.debug("Saving metadata for " + modelId + " into Hibernate");
+                em.persist(storageMetadata);
+            }
+        } catch (Exception e) {
+            LOG.error("Error saving metadata for model=" + modelId);
+            throw new StorageWriteException(e.getMessage());
+        }
     }
 
-    @Transactional
-    public void updateMetadata(StorageMetadata storageMetadata) throws StorageWriteException {
-        LOG.debug("Updating existing metadata for " + storageMetadata.getModelId() + " in Hibernate");
-        em.merge(storageMetadata);
+    @Override
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched and tagged)");
+                refreshIfDirty();
+                List<DataframeRow> rows = em.createQuery("" +
+                        "select dr from DataframeRow dr" +
+                        " where dr.modelId = ?1 AND dr.tag in (?2)" +
+                        "order by dr.dbId DESC ", DataframeRow.class)
+                        .setParameter(1, modelId)
+                        .setParameter(2, tags)
+                        .setMaxResults(batchSize).getResultList();
+                Collections.reverse(rows);
+                DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+                Dataframe df = Dataframe.untranspose(rows, dm);
+
+                return Pair.of(df, readMetaOrInternalData(modelId));
+            } catch (Exception e) {
+                LOG.error("Error reading dataframe for model=" + modelId);
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
+    }
+
+    @Override
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException {
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate (tagged)");
+                refreshIfDirty();
+                List<DataframeRow> rows = em.createQuery("" +
+                        "select dr from DataframeRow dr" +
+                        " where dr.modelId = ?1 AND dr.tag in (?2)" +
+                        "order by dr.dbId DESC ", DataframeRow.class)
+                        .setParameter(1, modelId)
+                        .setParameter(2, tags)
+                        .getResultList();
+                DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+                Dataframe df = Dataframe.untranspose(rows, dm);
+
+                return Pair.of(df, readMetaOrInternalData(modelId));
+            } catch (Exception e) {
+                LOG.error("Error reading dataframe for model=" + modelId);
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
     }
 
     @Override
     @Transactional
     public void append(Dataframe dataframe, String modelId) throws StorageWriteException {
-        LOG.debug("Appending " + dataframe.getRowDimension() + " new rows to dataframe=" + modelId + " within Hibernate");
-        List<DataframeRow> transpose = dataframe.transpose(modelId);
-        for (DataframeRow dr : transpose) {
-            em.persist(dr);
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Appending " + dataframe.getRowDimension() + " new rows to dataframe=" + modelId + " within Hibernate");
+                List<DataframeRow> transpose = dataframe.transpose(modelId);
+                for (DataframeRow dr : transpose) {
+                    em.persist(dr);
+                }
+            } catch (Exception e) {
+                LOG.error("Error appending to model=" + modelId);
+                throw new StorageWriteException(e.getMessage());
+            }
+        } else {
+            throw new IllegalArgumentException("Error appending to model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
+    }
+
+    // TAG MANIPULATION ================================================================================================
+    @Transactional
+    public void setTags(String modelId, HashMap<String, List<List<Integer>>> dataTagging) {
+        long nrows = rowCount(modelId);
+        for (Map.Entry<String, List<List<Integer>>> entry : dataTagging.entrySet()) {
+            for (List<Integer> idxs : entry.getValue()) {
+                if (idxs.size() > 2) {
+                    throw new IllegalArgumentException("Tag " + entry.getValue() + " keys (" + entry.getKey() + ") contain a sublist with more than two items. Please ensure sublists" +
+                            "contain either one element (to indicate a single index) or a pair of elements (to indicate a slice of indices)");
+                }
+
+                if (idxs.get(0) >= nrows || (idxs.size() > 1 && idxs.get(1) > nrows)) {
+                    throw new IndexOutOfBoundsException("Tag " + entry.getValue() + " sublists contain an out-of-range index: " + idxs + ". Dataframe only has " + nrows + " rows.");
+                }
+
+                // if a tuple, assign all points in slice to tag
+                if (idxs.size() == 2) {
+                    List<DataframeRow> rows = getRowsBetween(modelId, idxs.get(0), idxs.get(1));
+                    for (DataframeRow row : rows) {
+                        row.setTag(entry.getKey());
+                    }
+                } else { //otherwise just assign the one provided point
+                    DataframeRow row = getRow(modelId, idxs.get(0));
+                    row.setTag(entry.getKey());
+                }
+            }
+        }
+        dataDirty = true;
+    }
+
+    // if a single field of an entity has changed
+    public void refreshIfDirty() {
+        if (dataDirty) {
+            LOG.debug("Refreshing dirty data");
+            em.clear();
+            dataDirty = false;
         }
     }
 
     // INFO QUERIES ====================================================================================================
     @Override
     public boolean dataExists(String modelId) {
-        try {
-            return em.find(DataframeMetadata.class, modelId) != null;
-        } catch (EntityNotFoundException e) {
-            return false;
-        }
+        Long rows = em.createQuery("" +
+                "select count(dm) from DataframeMetadata dm" +
+                " where dm.id = ?1", Long.class)
+                .setParameter(1, modelId)
+                .getSingleResult();
+        return rows > 0;
     }
 
-    @Override
-    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
-        LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched and tagged)");
-        List<DataframeRow> rows = em.createQuery("" +
-                        "select dr from DataframeRow dr" +
-                        " where dr.modelId = ?1 AND dr.tag in (?2)" +
-                        "order by dr.dbId DESC ", DataframeRow.class)
+    @Transactional
+    public boolean metadataExists(String modelId) {
+        Long rows = em.createQuery("" +
+                "select count(sm) from StorageMetadata sm" +
+                " where sm.modelId = ?1", Long.class)
                 .setParameter(1, modelId)
-                .setParameter(2, tags)
-                .setMaxResults(batchSize).getResultList();
-        Collections.reverse(rows);
-        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
-        Dataframe df = Dataframe.untranspose(rows, dm);
-
-        return Pair.of(df, readMetaOrInternalData(modelId));
-    }
-
-    @Override
-    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException {
-        LOG.debug("Reading dataframe " + modelId + " from Hibernate (tagged)");
-        List<DataframeRow> rows = em.createQuery("" +
-                        "select dr from DataframeRow dr" +
-                        " where dr.modelId = ?1 AND dr.tag in (?2)" +
-                        "order by dr.dbId DESC ", DataframeRow.class)
-                .setParameter(1, modelId)
-                .setParameter(2, tags)
-                .getResultList();
-        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
-        Dataframe df = Dataframe.untranspose(rows, dm);
-
-        return Pair.of(df, readMetaOrInternalData(modelId));
+                .getSingleResult();
+        return rows > 0;
     }
 
     @Override
@@ -292,18 +522,21 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     @Transactional
     public void clearData(String modelId) {
-        if (dataExists(modelId)) {
-            LOG.debug("Deleting all data from " + modelId + " within Hibernate");
-            em.createQuery("" +
-                    "DELETE from DataframeRow dr " +
-                    "where dr.modelId = ?1")
-                    .setParameter(1, modelId)
-                    .executeUpdate();
-            em.createQuery("" +
-                    "DELETE from DataframeMetadata dm " +
-                    "where dm.id = ?1")
-                    .setParameter(1, modelId)
-                    .executeUpdate();
+        LOG.info("Deleting all data from " + modelId + " within database.");
+        em.createQuery("" +
+                "DELETE from DataframeRow dr " +
+                "where dr.modelId = ?1")
+                .setParameter(1, modelId)
+                .executeUpdate();
+
+        DataframeMetadata dataframeMetadataToDelete = em.find(DataframeMetadata.class, modelId);
+        if (dataframeMetadataToDelete != null) {
+            em.remove(dataframeMetadataToDelete);
+        }
+
+        StorageMetadata storageMetadataToDelete = em.find(StorageMetadata.class, modelId);
+        if (storageMetadataToDelete != null) {
+            em.remove(storageMetadataToDelete);
         }
     }
 

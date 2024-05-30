@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kie.trustyai.service.data.storage.DataFormat;
+import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
+import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.h2.H2DatabaseTestResource;
@@ -29,7 +31,7 @@ public class HibernateTestProfile implements QuarkusTestProfile {
         overrides.put("storage.data-folder", "/inputs");
 
         // hibernate args
-        overrides.put("quarkus.datasource.jdbc.url", "jdbc:h2:file:./trustyai_test_H2_DB");
+        overrides.put("quarkus.datasource.jdbc.url", "jdbc:h2:tcp://localhost:9092/~/trustyai_test_H2_DB");
         overrides.put("quarkus.hibernate-orm.database.generation", "drop-and-create");
 
         return overrides;
@@ -37,7 +39,7 @@ public class HibernateTestProfile implements QuarkusTestProfile {
 
     @Override
     public Set<Class<?>> getEnabledAlternatives() {
-        return Set.of(MockPrometheusScheduler.class);
+        return Set.of(MockDatasource.class, MockHibernateStorage.class, MockPrometheusScheduler.class);
     }
 
 }
