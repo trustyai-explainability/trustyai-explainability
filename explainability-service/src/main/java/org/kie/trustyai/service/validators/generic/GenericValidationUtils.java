@@ -156,4 +156,20 @@ public class GenericValidationUtils {
         }
         return Optional.empty();
     }
+
+    // validate actual dataframe columns, not mapping
+    public static boolean validateNonMappedColumnName(ConstraintValidatorContext context, StorageMetadata metadata, String modelId, String columnName) {
+        String objectName = "feature or output";
+        if (!metadata.getOutputSchema().getItems().containsKey(columnName) && !metadata.getInputSchema().getItems().containsKey(columnName)) {
+            Set<String> nameSet = new HashSet<>(metadata.getInputSchema().getItems().keySet());
+            nameSet.addAll(metadata.getOutputSchema().getItems().keySet());
+            context.buildConstraintViolationWithTemplate(String.format(
+                            "No %s found in original dataframe columns with name=%s. %s", objectName, columnName, getEnumerateMessage(nameSet, objectName)))
+                    .addPropertyNode(modelId)
+                    .addPropertyNode(columnName)
+                    .addConstraintViolation();
+            return false;
+        }
+        return true;
+    }
 }
