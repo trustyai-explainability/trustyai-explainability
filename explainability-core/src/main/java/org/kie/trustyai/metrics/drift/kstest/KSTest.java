@@ -20,8 +20,8 @@ public class KSTest {
     public HashMap<String, HypothesisTestResult> calculate(Dataframe dfTrain, Dataframe dfTest, double signif) {
         double d = 0.0d;
         List<Type> types = dfTrain.getColumnTypes();
-        List<String> trainNames = dfTrain.getColumnNames();
-        List<String> testNames = dfTest.getColumnNames();
+        List<String> trainNames = dfTrain.getRawColumnNames();
+        List<String> testNames = dfTest.getRawColumnNames();
 
         HashMap<String, HypothesisTestResult> result = new HashMap<>();
         for (int i = 0; i < dfTest.getColumnDimension(); i++) {

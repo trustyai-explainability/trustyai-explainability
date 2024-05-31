@@ -137,6 +137,10 @@ public class DataframeMetadata {
         return Collections.unmodifiableList(cachedColumnNames);
     }
 
+    public List<String> getRawNames() {
+        return Collections.unmodifiableList(names);
+    }
+
     protected String getNames(int i) {
         return cachedColumnNames.get(i);
     }

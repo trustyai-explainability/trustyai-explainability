@@ -474,7 +474,6 @@ class ServiceMetadataEndpointHibernateTest {
                 .extract()
                 .body().asString();
 
-
         assertEquals(2, serviceMetadata.size());
         // Model A
         assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));

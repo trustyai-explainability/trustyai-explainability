@@ -47,7 +47,7 @@ public class ApproxKSTest {
                 // build epsilon sketch for given column
                 GKSketch sketch = new GKSketch(eps);
                 dfTrain.getColumn(i).stream().mapToDouble(Value::asNumber).forEach(sketch::insert);
-                sketches.put(dfTrain.getColumnNames().get(i), sketch);
+                sketches.put(dfTrain.getRawColumnNames().get(i), sketch);
             }
         }
         return new ApproxKSFitting(sketches);
@@ -58,7 +58,7 @@ public class ApproxKSTest {
      */
     public HashMap<String, HypothesisTestResult> calculate(Dataframe dfTest, double signif) {
         List<Type> types = dfTest.getColumnTypes();
-        List<String> testNames = dfTest.getColumnNames();
+        List<String> testNames = dfTest.getRawColumnNames();
 
         HashMap<String, HypothesisTestResult> result = new HashMap<>();
         for (int i = 0; i < dfTest.getColumnDimension(); i++) {

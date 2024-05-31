@@ -1,11 +1,7 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.http.ContentType;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
+import java.util.HashMap;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -17,7 +13,13 @@ import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 
-import java.util.HashMap;
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.http.ContentType;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
@@ -35,7 +37,6 @@ abstract class MeanshiftEndpointBaseTest {
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
-
 
     @AfterEach
     void clearRequests() {
@@ -101,7 +102,6 @@ abstract class MeanshiftEndpointBaseTest {
                 .statusCode(Response.Status.OK.getStatusCode());
     }
 
-
     @Test
     void meanshiftNameMappedNonPreFitRequest() throws InterruptedException {
         MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
@@ -113,7 +113,6 @@ abstract class MeanshiftEndpointBaseTest {
         inputMapping.put("age", "Age Mapped");
         inputMapping.put("gender", "Gender Mapped");
         NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
-
 
         given()
                 .contentType(ContentType.JSON)
@@ -127,7 +126,7 @@ abstract class MeanshiftEndpointBaseTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post()
+                .when().post().peek()
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode());
     }

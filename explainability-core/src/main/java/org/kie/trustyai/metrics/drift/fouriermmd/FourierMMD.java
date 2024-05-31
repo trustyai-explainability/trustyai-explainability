@@ -69,7 +69,7 @@ public class FourierMMD {
 
         FourierMMDFitting computedStats = new FourierMMDFitting(randomSeed, deltaStat, n_mode);
         final Dataframe numericData = data.getNumericColumns();
-        final List<String> columns = numericData.getColumnNames();
+        final List<String> columns = numericData.getRawColumnNames();
         final int numColumns = columns.size();
 
         final Dataframe xIn = deltaStat ? delta(numericData, numColumns) : numericData;
@@ -181,7 +181,7 @@ public class FourierMMD {
 
     public HypothesisTestResult calculate(Dataframe data, double threshold, double gamma) {
         final Dataframe numericData = data.getNumericColumns();
-        final List<String> colNames = numericData.getColumnNames();
+        final List<String> colNames = numericData.getRawColumnNames();
         final int numColumns = colNames.size();
 
         Dataframe xIn = fitStats.isDeltaStat() ? delta(numericData, numColumns) : numericData;

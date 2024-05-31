@@ -29,7 +29,7 @@ public class PerColumnStatisticalAnalysis {
         for (int i = 0; i < dfTrain.getColumnDimension(); i++) {
             // check that average + std have semantic meaning
             if (types.get(i).equals(Type.NUMBER)) {
-                computedStats.put(dfTrain.getColumnNames().get(i), getColumnStats(dfTrain.getColumn(i)));
+                computedStats.put(dfTrain.getRawColumnNames().get(i), getColumnStats(dfTrain.getColumn(i)));
             }
         }
 

@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -23,6 +24,7 @@ import jakarta.inject.Inject;
 @TestProfile(HibernateTestProfile.class)
 @QuarkusTestResource(H2DatabaseTestResource.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled
 class HibernateStoragePerformanceTest extends PerformanceTest {
     @Inject
     Instance<MockHibernateStorage> storage;

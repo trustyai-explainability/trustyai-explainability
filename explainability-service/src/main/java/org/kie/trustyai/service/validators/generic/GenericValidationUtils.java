@@ -164,7 +164,7 @@ public class GenericValidationUtils {
             Set<String> nameSet = new HashSet<>(metadata.getInputSchema().getItems().keySet());
             nameSet.addAll(metadata.getOutputSchema().getItems().keySet());
             context.buildConstraintViolationWithTemplate(String.format(
-                            "No %s found in original dataframe columns with name=%s. %s", objectName, columnName, getEnumerateMessage(nameSet, objectName)))
+                    "No %s found in original dataframe columns with name=%s. %s", objectName, columnName, getEnumerateMessage(nameSet, objectName)))
                     .addPropertyNode(modelId)
                     .addPropertyNode(columnName)
                     .addConstraintViolation();

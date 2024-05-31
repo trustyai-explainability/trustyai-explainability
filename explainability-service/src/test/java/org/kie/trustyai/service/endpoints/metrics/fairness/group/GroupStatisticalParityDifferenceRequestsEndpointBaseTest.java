@@ -4,9 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.specification.RequestSpecification;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.config.ServiceConfig;
@@ -17,13 +16,13 @@ import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.payloads.service.NameMapping;
 
 import io.restassured.http.ContentType;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
-import org.kie.trustyai.service.payloads.service.NameMapping;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
@@ -42,6 +41,11 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
 
     @Inject
     Instance<ServiceConfig> serviceConfig;
+
+    @AfterEach
+    void clearRequests() {
+        scheduler.get().getAllRequests().clear();
+    }
 
     /**
      * When no batch size is specified in the request, the service's default batch size should be used
@@ -190,7 +194,6 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
         inputMapping.put("age", "Age Mapped");
         inputMapping.put("gender", "Gender Mapped");
         NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
-
 
         given()
                 .contentType(ContentType.JSON)

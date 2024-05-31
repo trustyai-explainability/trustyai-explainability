@@ -27,7 +27,7 @@ public class Meanshift extends PerColumnStatisticalAnalysis {
 
     public Map<String, MeanshiftResult> calculate(Dataframe dfTest, double alpha) {
         List<Type> types = dfTest.getColumnTypes();
-        List<String> testNames = dfTest.getColumnNames();
+        List<String> testNames = dfTest.getRawColumnNames();
 
         // all degs of freedom are the same for each column
         TDistribution tDistribution = new TDistribution(this.getFitStats().values().iterator().next().getN() + dfTest.getRowDimension() - 2);

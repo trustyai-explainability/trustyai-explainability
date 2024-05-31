@@ -655,6 +655,11 @@ public class Dataframe {
         return metadata.getNames();
     }
 
+    @Transient
+    public List<String> getRawColumnNames() {
+        return metadata.getRawNames();
+    }
+
     public void setColumnAliases(Map<String, String> aliases) {
         metadata.setNameAliases(aliases);
     }

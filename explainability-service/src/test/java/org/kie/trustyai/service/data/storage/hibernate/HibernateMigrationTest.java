@@ -43,6 +43,9 @@ class HibernateMigrationTest {
     @BeforeAll
     void populateOriginal() {
         datasource.get().setStorageOverride(oldStorage.get());
+        oldStorage.get().emptyStorage("/tmp/" + "example-model" + "-data.csv");
+        oldStorage.get().emptyStorage("/tmp/" + "example-model" + "-metadata.json");
+        oldStorage.get().emptyStorage("/tmp/" + "example-model" + "-internal_data.csv");
         for (int i = 0; i < N_DFS; i++) {
             oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-data.csv");
             oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-metadata.json");
