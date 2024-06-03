@@ -20,7 +20,7 @@ public class MockHibernateServiceConfig implements ServiceConfig {
 
     @Override
     public DataFormat dataFormat() {
-        return DataFormat.BEAN;
+        return DataFormat.HIBERNATE;
     }
 
     @Override

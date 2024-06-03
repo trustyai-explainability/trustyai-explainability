@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.values.DataType;
 import org.kie.trustyai.service.payloads.values.TypedValue;

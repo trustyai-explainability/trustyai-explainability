@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kie.trustyai.service.data.storage.DataFormat;
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
+import org.kie.trustyai.service.mocks.hibernate.MockHibernateDatasource;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 
 import io.quarkus.test.common.QuarkusTestResource;
@@ -21,7 +21,7 @@ public class HibernateTestProfile implements QuarkusTestProfile {
     public Map<String, String> getConfigOverrides() {
         final Map<String, String> overrides = new HashMap<>();
         overrides.put("service.storage-format", String.valueOf(HIBERNATE));
-        overrides.put("service.data-format", String.valueOf(DataFormat.BEAN));
+        overrides.put("service.data-format", String.valueOf(DataFormat.HIBERNATE));
         overrides.put("quarkus.hibernate-orm.active", "true");
         overrides.put("service.metrics-schedule", "5s");
         overrides.put("service.batch-size", "5000");
@@ -39,7 +39,7 @@ public class HibernateTestProfile implements QuarkusTestProfile {
 
     @Override
     public Set<Class<?>> getEnabledAlternatives() {
-        return Set.of(MockDatasource.class, MockHibernateStorage.class, MockPrometheusScheduler.class);
+        return Set.of(MockHibernateDatasource.class, MockHibernateStorage.class, MockPrometheusScheduler.class);
     }
 
 }

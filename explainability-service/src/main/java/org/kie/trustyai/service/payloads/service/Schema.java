@@ -43,18 +43,18 @@ public class Schema {
 
     public Schema() {
         this.items = new ConcurrentHashMap<>();
-        calculateNameMappedItems("cnull"); // trivial state: just sets mappedItems == items
+        calculateNameMappedItems(); // trivial state: just sets mappedItems == items
     }
 
     public Schema(Map<String, SchemaItem> items) {
         this.items = items;
-        calculateNameMappedItems("c1"); // trivial state: just sets mappedItems == items
+        calculateNameMappedItems(); // trivial state: just sets mappedItems == items
     }
 
     public Schema(Map<String, SchemaItem> items, Map<String, String> nameMapping) {
         this.items = items;
         this.nameMapping = nameMapping;
-        calculateNameMappedItems("c2");
+        calculateNameMappedItems();
     }
 
     public static Schema from(Map<String, SchemaItem> items) {
@@ -66,7 +66,7 @@ public class Schema {
     }
 
     //@CacheResult(cacheName = "schema-name-mapped-items", keyGenerator = SchemaNameMappingCacheKeyGen.class)
-    private void calculateNameMappedItems(String source) {
+    private void calculateNameMappedItems() {
         this.mappedItems = new HashMap<>(items);
         if (!nameMapping.isEmpty()) {
             // for key, value pair in the name mapping
@@ -94,7 +94,7 @@ public class Schema {
     // for specific usage for Hibernate initialization
     public void setNameMapping(Map<String, String> nameMapping) {
         this.nameMapping = nameMapping;
-        calculateNameMappedItems("update nm");
+        calculateNameMappedItems();
     }
 
     public void setId(Long id) {

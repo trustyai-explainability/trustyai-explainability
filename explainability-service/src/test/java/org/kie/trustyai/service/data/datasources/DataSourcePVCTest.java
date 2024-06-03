@@ -1,7 +1,8 @@
-package org.kie.trustyai.service.data;
+package org.kie.trustyai.service.data.datasources;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
 import org.kie.trustyai.service.profiles.flatfile.PVCTestProfile;
@@ -19,6 +20,7 @@ public class DataSourcePVCTest extends DataSourceBaseTest {
     @Inject
     Instance<MockPVCStorage> storage;
 
+    @AfterEach
     @BeforeEach
     void reset() throws IOException {
         storage.get().emptyStorage("/tmp/" + MODEL_ID + "-data.csv");

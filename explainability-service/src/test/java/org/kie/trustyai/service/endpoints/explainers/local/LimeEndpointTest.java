@@ -15,7 +15,7 @@ import org.kie.trustyai.explainability.utils.models.TestModels;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.explainers.GrpcMockServer;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.ModelConfig;
@@ -46,7 +46,7 @@ class LimeEndpointTest {
     private static final String MODEL_ID = "example1";
     private static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
     @Inject
     Instance<MockMemoryStorage> storage;
     private GrpcMockServer mockServer;

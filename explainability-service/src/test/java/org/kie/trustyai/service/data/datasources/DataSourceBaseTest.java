@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.data;
+package org.kie.trustyai.service.data.datasources;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -14,7 +14,6 @@ import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import jakarta.enterprise.inject.Instance;
@@ -28,7 +27,7 @@ abstract class DataSourceBaseTest {
 
     public static final String MODEL_ID = "fake-model";
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<DataSource> datasource;
 
     @Test
     void testSavingAndReadingDataframe() {

@@ -10,7 +10,7 @@ import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.kstest.ApproxKSFitting;
 import org.kie.trustyai.metrics.drift.kstest.ApproxKSTest;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
@@ -40,7 +40,7 @@ class ApproxKSTestEndpointTest {
     private static final String TRAINING_TAG = "TRAINING";
     private static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
     @Inject
     Instance<MockMemoryStorage> storage;
 

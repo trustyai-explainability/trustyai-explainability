@@ -37,7 +37,7 @@ import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.service.config.ServiceConfig;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.CounterfactualExplanationRequest;

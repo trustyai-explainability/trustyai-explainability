@@ -23,7 +23,7 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.global.lime.AggregatedLimeExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.GlobalExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;

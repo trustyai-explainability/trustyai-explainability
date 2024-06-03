@@ -22,7 +22,7 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.utils.IOUtils;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.utils.UploadUtils;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferJointPayload;

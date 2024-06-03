@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -87,6 +88,7 @@ public class GroupStatisticalParityDifferenceEndpoint extends GroupEndpoint {
                             unprivileged,
                             favorableOutcomeAttrs.stream().map(v -> new Output(gmRequest.getOutcomeName(), favorableOutcomeAttrType, v, 1.0)).collect(Collectors.toList())));
         } catch (Exception e) {
+            System.out.println(Arrays.toString(e.getStackTrace()));
             throw new MetricCalculationException(e.getMessage(), e);
         }
     }

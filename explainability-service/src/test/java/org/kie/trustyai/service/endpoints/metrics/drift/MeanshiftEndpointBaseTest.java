@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
 import org.kie.trustyai.metrics.utils.PerColumnStatistics;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
@@ -33,7 +33,7 @@ abstract class MeanshiftEndpointBaseTest {
     protected static final String TRAINING_TAG = "TRAINING";
     protected static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<DataSource> datasource;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
@@ -52,7 +52,7 @@ abstract class MeanshiftEndpointBaseTest {
         BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post()
+                .when().post().peek()
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode())
                 .extract()

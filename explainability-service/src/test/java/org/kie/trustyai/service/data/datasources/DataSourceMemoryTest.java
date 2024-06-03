@@ -1,5 +1,6 @@
-package org.kie.trustyai.service.data;
+package org.kie.trustyai.service.data.datasources;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
@@ -17,6 +18,7 @@ public class DataSourceMemoryTest extends DataSourceBaseTest {
     @Inject
     Instance<MockMemoryStorage> storage;
 
+    @AfterEach
     @BeforeEach
     void reset() {
         storage.get().emptyStorage();

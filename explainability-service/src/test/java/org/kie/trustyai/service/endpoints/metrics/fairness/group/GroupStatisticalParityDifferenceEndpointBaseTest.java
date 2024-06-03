@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.resteasy.reactive.RestResponse;
@@ -10,14 +11,15 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,16 +40,12 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
     protected static final String MODEL_ID = "example1";
     protected static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<DataSource> datasource;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
-    void populate() {
-        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-    }
+    abstract void populate();
 
     @Test
     void get() {
@@ -460,4 +458,41 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         assertEquals("SPD", responseSecond.getName());
         assertFalse(Double.isNaN(responseSecond.getValue()));
     }
+
+    @Test
+    void postCorrectNameMapped() throws InterruptedException {
+        populate();
+
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        payload.setProtectedAttribute("Gender Mapped");
+
+        HashMap<String, String> inputMapping = new HashMap<>();
+        HashMap<String, String> outputMapping = new HashMap<>();
+        inputMapping.put("age", "Age Mapped");
+        inputMapping.put("gender", "Gender Mapped");
+        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(nameMapping)
+                .basePath("/info")
+                .when().post("/names").peek()
+                .then()
+                .statusCode(200)
+                .body(is("Feature and output name mapping successfully applied."));
+
+        final BaseMetricResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("SPD", response.getName());
+        assertFalse(Double.isNaN(response.getValue()));
+    }
+
 }

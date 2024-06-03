@@ -3,7 +3,7 @@ package org.kie.trustyai.service.validators.metrics.drift;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;

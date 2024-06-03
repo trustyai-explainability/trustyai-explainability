@@ -1,7 +1,9 @@
 package org.kie.trustyai.service.data.metadata;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
@@ -115,5 +117,12 @@ public class StorageMetadata {
 
     public void setOutputTensorName(String outputTensorName) {
         this.outputTensorName = outputTensorName;
+    }
+
+    public Map<String, String> getJointNameAliases() {
+        HashMap<String, String> jointMapping = new HashMap<>();
+        jointMapping.putAll(getInputSchema().getNameMapping());
+        jointMapping.putAll(getOutputSchema().getNameMapping());
+        return jointMapping;
     }
 }

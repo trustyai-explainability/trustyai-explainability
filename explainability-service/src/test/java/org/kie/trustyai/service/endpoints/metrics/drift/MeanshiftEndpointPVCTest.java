@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
 import org.kie.trustyai.service.profiles.flatfile.PVCTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
@@ -38,6 +39,6 @@ class MeanshiftEndpointPVCTest extends MeanshiftEndpointBaseTest {
         dataframe.tagDataPoints(tagging);
         dataframe.addPredictions(DataframeGenerators.generateRandomDataframeDrifted(N_SAMPLES).asPredictions());
         datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        datasource.get().saveMetadata(MockCSVDatasource.createMetadata(dataframe), MODEL_ID);
     }
 }

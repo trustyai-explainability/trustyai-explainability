@@ -15,7 +15,7 @@ import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
@@ -50,7 +50,7 @@ class ConsumerEndpointFormatsTest {
 
     private static final int BATCH_SIZE = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     @Inject
     Instance<MockMemoryStorage> storage;

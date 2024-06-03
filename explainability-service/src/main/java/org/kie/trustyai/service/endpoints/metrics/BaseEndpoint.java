@@ -9,7 +9,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;

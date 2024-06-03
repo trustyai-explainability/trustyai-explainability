@@ -2,6 +2,7 @@ package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
@@ -29,7 +30,7 @@ class GroupStatisticalParityDifferenceRequestsEndpointMemoryTest extends GroupSt
         scheduler.get().getAllRequestsFlat().clear();
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        datasource.get().saveMetadata(MockCSVDatasource.createMetadata(dataframe), MODEL_ID);
     }
 
 }

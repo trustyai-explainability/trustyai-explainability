@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.profiles.flatfile.PVCTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
@@ -27,7 +27,7 @@ import jakarta.inject.Inject;
 class PVCStoragePerformanceTest extends PerformanceTest {
 
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
     private final static String MODEL_ID = "example-model";
     private final static String FILENAME = "file.txt";
 

@@ -1,7 +1,7 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.data.reconcilers.ModelMeshInferencePayloadReconciler;

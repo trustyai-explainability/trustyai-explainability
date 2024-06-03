@@ -1,7 +1,9 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.profiles.hibernate.HibernateTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
@@ -26,11 +28,15 @@ class GroupStatisticalParityDifferenceRequestsEndpointHibernateTest extends Grou
         // Empty mock storage
         storage.get().clearData(MODEL_ID);
 
-        // Clear any requests between tests
-        scheduler.get().getAllRequestsFlat().clear();
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        datasource.get().saveMetadata(MockCSVDatasource.createMetadata(dataframe), MODEL_ID);
+    }
+
+    @AfterEach
+    void clearRequests() {
+        // prevent a failing test from failing other tests erroneously
+        scheduler.get().getAllRequests().clear();
     }
 
 }

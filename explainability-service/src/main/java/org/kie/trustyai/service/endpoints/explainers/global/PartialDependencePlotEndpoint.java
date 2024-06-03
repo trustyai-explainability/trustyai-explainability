@@ -25,7 +25,7 @@ import org.kie.trustyai.explainability.global.pdp.PartialDependencePlotExplainer
 import org.kie.trustyai.explainability.model.PartialDependenceGraph;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.GlobalExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.PartialDependencePlotExplanationResponse;

@@ -5,14 +5,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
-import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
@@ -102,7 +101,7 @@ public class ServiceMetadataEndpoint {
                 return Response.serverError().entity(String.join(", ", tagErrors)).status(Response.Status.BAD_REQUEST).build();
             }
 
-            dataSource.get().tagDataframeRows(dataTagging.getModelId(), tagMapping);
+            dataSource.get().tagDataframeRows(dataTagging);
         } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
             return Response.serverError()
                     .status(Response.Status.BAD_REQUEST)
@@ -126,14 +125,7 @@ public class ServiceMetadataEndpoint {
                     .build();
         }
 
-        final StorageMetadata storageMetadata = dataSource.get().getMetadata(nameMapping.getModelId());
-
-        Schema inputSchema = storageMetadata.getInputSchema();
-        Schema outputSchema = storageMetadata.getOutputSchema();
-
-        inputSchema.setNameMapping(nameMapping.getInputMapping());
-        outputSchema.setNameMapping(nameMapping.getOutputMapping());
-        dataSource.get().saveMetadata(storageMetadata, nameMapping.getModelId());
+        dataSource.get().applyNameMapping(nameMapping);
 
         LOG.info("Name mappings successfully applied to model=" + nameMapping.getModelId() + ".");
         return Response.ok().entity("Feature and output name mapping successfully applied.").build();

@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.endpoints.metrics.MetricsDirectory;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;

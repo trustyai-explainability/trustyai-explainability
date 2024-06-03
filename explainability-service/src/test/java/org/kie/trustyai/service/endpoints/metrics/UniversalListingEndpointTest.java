@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class UniversalListingEndpointTest {
     private static final String MODEL_ID = "example1";
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
     @Inject
     Instance<MockMemoryStorage> storage;
 

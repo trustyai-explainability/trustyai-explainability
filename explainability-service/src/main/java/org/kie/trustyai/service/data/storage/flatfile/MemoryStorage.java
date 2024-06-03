@@ -26,7 +26,7 @@ import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
-import static org.kie.trustyai.service.data.DataSource.INTERNAL_DATA_FILENAME;
+import static org.kie.trustyai.service.data.datasources.DataSource.INTERNAL_DATA_FILENAME;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "MEMORY")
 @ApplicationScoped

@@ -1,7 +1,6 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +20,7 @@ import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.CustomStorageConfig;
 import org.kie.trustyai.service.config.storage.MigrationConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.CSVDataSource;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
@@ -30,6 +29,8 @@ import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.data.storage.flatfile.PVCStorage;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
+import org.kie.trustyai.service.payloads.service.DataTagging;
+import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 
@@ -68,9 +69,14 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         if (storageConfig.migrationConfig().fromFilename().isPresent() && storageConfig.migrationConfig().fromFolder().isPresent()) {
             migrationConfig = Optional.of(storageConfig.migrationConfig());
         }
-
     }
 
+    @Override
+    public DataFormat getDataFormat() {
+        return DataFormat.HIBERNATE;
+    }
+
+    // MIGRATIONS ======================================================================================================
     @PostConstruct
     protected void migrate() {
         if (migrationConfig.isPresent()) {
@@ -82,7 +88,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 CustomStorageConfig customStorageConfig = new CustomStorageConfig(fromFile, fromFolder, null);
                 CustomServiceConfig customServiceConfig = new CustomServiceConfig(OptionalInt.of(batchSize), null, null, null);
                 PVCStorage pvcStorage = new PVCStorage(customServiceConfig, customStorageConfig);
-                DataSource oldDataSource = new DataSource();
+                CSVDataSource oldDataSource = new CSVDataSource();
                 oldDataSource.setParser(new CSVParser());
                 oldDataSource.setStorageOverride(pvcStorage);
                 List<String> modelIds = pvcStorage.listAllModelIds();
@@ -114,36 +120,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
-    @Override
-    public DataFormat getDataFormat() {
-        return DataFormat.BEAN;
-    }
-
-    // READ UTILITIES ==================================================================================================
-    private List<DataframeRow> getRowsBetween(String modelId, int startPos, int endPos) {
-        refreshIfDirty();
-        return em.createQuery("" +
-                "select dr from DataframeRow dr" +
-                " where dr.modelId = ?1 " +
-                "order by dr.dbId ASC ", DataframeRow.class)
-                .setParameter(1, modelId)
-                .setFirstResult(startPos)
-                .setMaxResults(endPos - startPos).getResultList();
-    }
-
-    private DataframeRow getRow(String modelId, int idx) {
-        refreshIfDirty();
-        return em.createQuery("" +
-                "select dr from DataframeRow dr" +
-                " where dr.modelId = ?1 " +
-                "order by dr.dbId ASC ", DataframeRow.class)
-                .setParameter(1, modelId)
-                .setFirstResult(idx)
-                .setMaxResults(1)
-                .getSingleResult();
-    }
-
-    // DATAFRAME READ + WRITES =========================================================================================
+    // DATAFRAME READS =================================================================================================
     @Override
     public Dataframe readDataframe(String modelId) throws StorageReadException {
         LOG.debug("Reading dataframe " + modelId + " from Hibernate");
@@ -153,7 +130,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     public Dataframe readAllData(String modelId) throws StorageReadException {
         if (dataExists(modelId)) {
             try {
-                LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate");
                 refreshIfDirty();
                 List<DataframeRow> rows = em.createQuery("" +
                         "select dr from DataframeRow dr" +
@@ -217,6 +194,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
+    // DATAFRAME WRITES ================================================================================================
     @Override
     @Transactional
     public void saveDataframe(Dataframe dataframe, String modelId) throws StorageWriteException {
@@ -259,37 +237,50 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
-    // SPECIFIC DATAFRAME QUERIES ======================================================================================
-    public Dataframe readNonSyntheticDataframe(String modelId) throws StorageReadException {
-        LOG.debug("Reading dataframe " + modelId + " from Hibernate");
-        return readNonSyntheticDataframe(modelId, batchSize);
-    }
-
-    public Dataframe readNonSyntheticDataframe(String modelId, int batchSize) throws StorageReadException {
+    @Override
+    @Transactional
+    public void append(Dataframe dataframe, String modelId) throws StorageWriteException {
         if (dataExists(modelId)) {
             try {
-                LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched)");
-                refreshIfDirty();
-                List<DataframeRow> rows = em.createQuery("" +
-                        "select dr from DataframeRow dr" +
-                        " where dr.modelId = ?1 AND" +
-                        " dr.tag <>  ?2 " +
-                        "order by dr.dbId DESC ", DataframeRow.class)
-                        .setParameter(1, modelId)
-                        .setParameter(2, Dataframe.InternalTags.SYNTHETIC.get())
-                        .setMaxResults(batchSize).getResultList();
-                Collections.reverse(rows);
-                DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
-                return Dataframe.untranspose(rows, dm);
+                LOG.debug("Appending " + dataframe.getRowDimension() + " new rows to dataframe=" + modelId + " within Hibernate");
+                List<DataframeRow> transpose = dataframe.transpose(modelId);
+                for (DataframeRow dr : transpose) {
+                    em.persist(dr);
+                }
             } catch (Exception e) {
-                LOG.error("Error reading non-synthetic dataframe for model=" + modelId);
-                throw new StorageReadException(e.getMessage());
+                LOG.error("Error appending to model=" + modelId);
+                throw new StorageWriteException(e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Error reading non-synthetic dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+            throw new IllegalArgumentException("Error appending to model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
+    // INDIVIDUAL ROW READS ========-===================================================================================
+    private List<DataframeRow> getRowsBetween(String modelId, int startPos, int endPos) {
+        refreshIfDirty();
+        return em.createQuery("" +
+                "select dr from DataframeRow dr" +
+                " where dr.modelId = ?1 " +
+                "order by dr.dbId ASC ", DataframeRow.class)
+                .setParameter(1, modelId)
+                .setFirstResult(startPos)
+                .setMaxResults(endPos - startPos).getResultList();
+    }
+
+    private DataframeRow getRow(String modelId, int idx) {
+        refreshIfDirty();
+        return em.createQuery("" +
+                "select dr from DataframeRow dr" +
+                " where dr.modelId = ?1 " +
+                "order by dr.dbId ASC ", DataframeRow.class)
+                .setParameter(1, modelId)
+                .setFirstResult(idx)
+                .setMaxResults(1)
+                .getSingleResult();
+    }
+
+    // SPECIFIC DATAFRAME QUERIES ======================================================================================
     // get the row count of a persisted dataframe
     public int colCount(String modelId) {
         return em.createQuery("select size(dr.row) from DataframeRow dr where dr.modelId = ?1", int.class)
@@ -305,7 +296,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     public List<Value> getColumnValues(String modelId, String columnName) {
         if (dataExists(modelId)) {
-            List<String> colNames = em.find(DataframeMetadata.class, modelId).getNames();
+            List<String> colNames = em.find(DataframeMetadata.class, modelId).getRawNames();
             if (colNames.contains(columnName)) {
                 Integer targetColIdx = colNames.indexOf(columnName);
                 refreshIfDirty();
@@ -354,7 +345,8 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             try {
                 LOG.debug("Reading metadata for " + modelId + " from Hibernate");
                 refreshIfDirty();
-                return em.find(StorageMetadata.class, modelId);
+                StorageMetadata sm = em.find(StorageMetadata.class, modelId);
+                return sm;
             } catch (Exception e) {
                 LOG.error("Error reading metadata for model=" + modelId);
                 throw new StorageReadException(e.getMessage());
@@ -372,6 +364,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             storageMetadata.setModelId(modelId);
             if (metadataExists(modelId)) {
                 LOG.debug("Updating metadata for " + modelId + " into Hibernate");
+                dataDirty = true;
                 em.merge(storageMetadata);
             } else {
                 LOG.debug("Saving metadata for " + modelId + " into Hibernate");
@@ -383,6 +376,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
+    // JOINT DATAFRAME AND METADATA READS ==============================================================================
     @Override
     public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
         if (dataExists(modelId)) {
@@ -436,30 +430,12 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
-    @Override
-    @Transactional
-    public void append(Dataframe dataframe, String modelId) throws StorageWriteException {
-        if (dataExists(modelId)) {
-            try {
-                LOG.debug("Appending " + dataframe.getRowDimension() + " new rows to dataframe=" + modelId + " within Hibernate");
-                List<DataframeRow> transpose = dataframe.transpose(modelId);
-                for (DataframeRow dr : transpose) {
-                    em.persist(dr);
-                }
-            } catch (Exception e) {
-                LOG.error("Error appending to model=" + modelId);
-                throw new StorageWriteException(e.getMessage());
-            }
-        } else {
-            throw new IllegalArgumentException("Error appending to model=" + modelId + ": " + NO_DATA_ERROR_MSG);
-        }
-    }
-
     // TAG MANIPULATION ================================================================================================
     @Transactional
-    public void setTags(String modelId, HashMap<String, List<List<Integer>>> dataTagging) {
+    public void setTags(DataTagging dataTagging) {
+        String modelId = dataTagging.getModelId();
         long nrows = rowCount(modelId);
-        for (Map.Entry<String, List<List<Integer>>> entry : dataTagging.entrySet()) {
+        for (Map.Entry<String, List<List<Integer>>> entry : dataTagging.getDataTagging().entrySet()) {
             for (List<Integer> idxs : entry.getValue()) {
                 if (idxs.size() > 2) {
                     throw new IllegalArgumentException("Tag " + entry.getValue() + " keys (" + entry.getKey() + ") contain a sublist with more than two items. Please ensure sublists" +
@@ -494,7 +470,21 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
-    // INFO QUERIES ====================================================================================================
+    // NAME MAPPING MANIPULATION =======================================================================================
+    @Transactional
+    public void applyNameMapping(NameMapping nameMapping) {
+        final StorageMetadata storageMetadata = readMetaOrInternalData(nameMapping.getModelId());
+        Schema inputSchema = storageMetadata.getInputSchema();
+        Schema outputSchema = storageMetadata.getOutputSchema();
+        inputSchema.setNameMapping(nameMapping.getInputMapping());
+        outputSchema.setNameMapping(nameMapping.getOutputMapping());
+
+        DataframeMetadata dm = em.find(DataframeMetadata.class, nameMapping.getModelId());
+        dm.setNameAliases(storageMetadata.getJointNameAliases());
+        dataDirty = true;
+    }
+
+    // METADATA INFO QUERIES ===========================================================================================
     @Override
     public boolean dataExists(String modelId) {
         Long rows = em.createQuery("" +
@@ -520,6 +510,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         return 0;
     }
 
+    // TESTING OPERATIONS ==============================================================================================
     @Transactional
     public void clearData(String modelId) {
         LOG.info("Deleting all data from " + modelId + " within database.");

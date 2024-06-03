@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;

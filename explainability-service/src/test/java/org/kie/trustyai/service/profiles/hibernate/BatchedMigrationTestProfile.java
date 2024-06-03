@@ -3,9 +3,10 @@ package org.kie.trustyai.service.profiles.hibernate;
 import java.util.Map;
 import java.util.Set;
 
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
+import org.kie.trustyai.service.mocks.hibernate.MockHibernateDatasource;
 import org.kie.trustyai.service.mocks.hibernate.MockMigratingHibernateStorage;
+import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.h2.H2DatabaseTestResource;
@@ -21,6 +22,6 @@ public class BatchedMigrationTestProfile extends MigrationTestProfile {
 
     @Override
     public Set<Class<?>> getEnabledAlternatives() {
-        return Set.of(MockDatasource.class, MockMigratingHibernateStorage.class, MockPrometheusScheduler.class);
+        return Set.of(MockHibernateDatasource.class, MockPVCStorage.class, MockMigratingHibernateStorage.class, MockPrometheusScheduler.class);
     }
 }

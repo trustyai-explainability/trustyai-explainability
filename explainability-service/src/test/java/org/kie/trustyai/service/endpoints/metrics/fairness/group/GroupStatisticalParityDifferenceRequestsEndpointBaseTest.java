@@ -1,6 +1,5 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -9,14 +8,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.config.ServiceConfig;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
-import org.kie.trustyai.service.payloads.service.NameMapping;
 
 import io.restassured.http.ContentType;
 
@@ -34,7 +32,7 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
     protected static final String MODEL_ID = "example1";
     protected static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<DataSource> datasource;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
@@ -179,49 +177,4 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
         // Correct number of active requests
         assertEquals(2, scheduleList.requests.size());
     }
-
-    /**
-     * When no batch size is specified in the request, the service's default batch size should be used
-     */
-    @Test
-    void postCorrectRequestNameMapped() {
-
-        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
-        payload.setProtectedAttribute("Gender Mapped");
-
-        HashMap<String, String> inputMapping = new HashMap<>();
-        HashMap<String, String> outputMapping = new HashMap<>();
-        inputMapping.put("age", "Age Mapped");
-        inputMapping.put("gender", "Gender Mapped");
-        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(nameMapping)
-                .basePath("/info")
-                .when().post("/names").peek()
-                .then()
-                .statusCode(200)
-                .body(is("Feature and output name mapping successfully applied."));
-
-        final BaseScheduledResponse response = given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/request")
-                .then()
-                .statusCode(Response.Status.OK.getStatusCode())
-                .extract()
-                .body().as(BaseScheduledResponse.class);
-
-        // Get stored request
-        final GroupMetricRequest request = (GroupMetricRequest) scheduler
-                .get()
-                .getRequests("SPD")
-                .get(response.getRequestId());
-
-        final int defaultBatchSize = serviceConfig.get().batchSize().getAsInt();
-        assertEquals(defaultBatchSize, request.getBatchSize());
-
-    }
-
 }

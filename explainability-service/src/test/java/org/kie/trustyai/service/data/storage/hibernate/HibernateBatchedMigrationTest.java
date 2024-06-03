@@ -8,10 +8,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.hibernate.MockHibernateDatasource;
 import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
 import org.kie.trustyai.service.profiles.hibernate.BatchedMigrationTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.h2.H2DatabaseTestResource;
@@ -30,7 +33,10 @@ class HibernateBatchedMigrationTest {
     Instance<MockPVCStorage> oldStorage;
 
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockHibernateDatasource> datasource;
+
+    @Inject
+    Instance<MockCSVDatasource> oldDatasource;
 
     String MODEL_NAME = "EXAMPLE_MODEL_";
 
@@ -41,16 +47,14 @@ class HibernateBatchedMigrationTest {
             .collect(Collectors.toList());
 
     @BeforeAll
-    void populateOriginal() {
-        datasource.get().setStorageOverride(oldStorage.get());
+    void populateOriginal() throws JsonProcessingException {
+        oldDatasource.get().reset();
         for (int i = 0; i < N_DFS; i++) {
             oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-data.csv");
             oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-metadata.json");
             oldStorage.get().emptyStorage("/tmp/" + MODEL_NAME + i + "-internal_data.csv");
-            datasource.get().saveDataframe(dfs.get(i), MODEL_NAME + i);
+            oldDatasource.get().saveDataframe(dfs.get(i), MODEL_NAME + i);
         }
-
-        datasource.get().clearStorageOverride();
     }
 
     @Test

@@ -12,8 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
+import org.kie.trustyai.service.mocks.hibernate.MockHibernateDatasource;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.service.DataTagging;
@@ -49,7 +49,7 @@ class ServiceMetadataEndpointHibernateTest {
     private static final String MODEL_ID = "example1";
     private final String metadataUrl = "/info";
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockHibernateDatasource> datasource;
 
     @Inject
     Instance<MockHibernateStorage> storage;

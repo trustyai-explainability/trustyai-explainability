@@ -13,7 +13,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.utils.CSVUtils;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.DataResponsePayload;
@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class DownloadEndpointTest {
     private static final String MODEL_ID = "example1";
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
     @Inject
     CSVParser csvParser;
     @Inject

@@ -3,7 +3,7 @@ package org.kie.trustyai.service.validators.metrics.fairness.group;
 import java.util.Objects;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;

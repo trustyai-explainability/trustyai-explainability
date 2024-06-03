@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
@@ -52,7 +52,7 @@ class IdentityEndpointTest {
     private static final String MODEL_ID = "example1";
     private static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
     @Inject
     Instance<MockMemoryStorage> storage;
 

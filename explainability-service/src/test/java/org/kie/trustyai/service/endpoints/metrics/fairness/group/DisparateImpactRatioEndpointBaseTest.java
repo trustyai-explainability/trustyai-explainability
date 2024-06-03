@@ -15,7 +15,7 @@ import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
@@ -42,7 +42,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
     protected static final String MODEL_ID = "example1";
     protected static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;

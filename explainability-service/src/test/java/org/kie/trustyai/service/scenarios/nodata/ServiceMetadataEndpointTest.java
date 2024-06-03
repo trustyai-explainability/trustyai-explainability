@@ -6,7 +6,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.endpoints.service.ServiceMetadataEndpoint;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
@@ -33,7 +33,7 @@ class ServiceMetadataEndpointTest {
     Instance<MockMemoryStorage> storage;
 
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     @BeforeEach
     void emptyStorage() {

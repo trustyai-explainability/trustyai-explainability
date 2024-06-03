@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.data;
+package org.kie.trustyai.service.data.datasources;
 
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -23,9 +23,12 @@ class DataSourceTest {
     @Inject
     Instance<Storage<?, ?>> storage;
 
+    @Inject
+    Instance<DataSource> dataSourceInstance;
+
     @Test
     void testSavingAndReadingDataframe() {
-        DataSource dataSource = new DataSource();
+        DataSource dataSource = dataSourceInstance.get();
         dataSource.storage = storage;
         dataSource.parser = new CSVParser();
         Dataframe dataframe = DataframeGenerators.generateRandomDataframe(10);

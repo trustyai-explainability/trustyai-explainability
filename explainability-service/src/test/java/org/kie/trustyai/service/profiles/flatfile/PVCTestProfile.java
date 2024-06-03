@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
 
@@ -28,7 +28,7 @@ public class PVCTestProfile implements QuarkusTestProfile {
 
     @Override
     public Set<Class<?>> getEnabledAlternatives() {
-        return Set.of(MockDatasource.class, MockPVCStorage.class, MockPrometheusScheduler.class);
+        return Set.of(MockCSVDatasource.class, MockPVCStorage.class, MockPrometheusScheduler.class);
     }
 
 }

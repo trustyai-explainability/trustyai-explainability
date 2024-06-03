@@ -15,6 +15,7 @@ import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
+import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.profiles.hibernate.HibernateTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
@@ -157,7 +158,15 @@ class HibernateStorageTest {
         storage.get().saveDataframe(original, MODEL_ID);
 
         Dataframe nonSynthetic = original.filterByRowIndex(nonSyntheticIdxs);
-        Dataframe recovered = storage.get().readNonSyntheticDataframe(MODEL_ID, nonSyntheticIdxs.size());
+        final StorageMetadata storageMetadata = new StorageMetadata();
+
+        storageMetadata.setInputSchema(MetadataUtils.getInputSchema(original));
+        storageMetadata.setOutputSchema(MetadataUtils.getOutputSchema(original));
+        storageMetadata.setObservations(original.getRowDimension());
+        storageMetadata.setModelId(original.getId());
+        storage.get().saveMetaOrInternalData(storageMetadata, MODEL_ID);
+
+        Dataframe recovered = storage.get().readDataframeAndMetadataWithTags(MODEL_ID, nonSyntheticIdxs.size(), Set.of(Dataframe.InternalTags.UNLABELED.get())).getLeft();
         DataframeGenerators.roughEqualityCheck(nonSynthetic, recovered);
     }
 
@@ -225,9 +234,10 @@ class HibernateStorageTest {
             tagIDXGroundTruth.put(tag, List.of(idx, idx + 1, idx + 2, idx + 5, idx + 6, idx + 9));
             idx += 10;
         }
+        DataTagging dataTagging = new DataTagging(MODEL_ID, tagMap);
 
         storage.get().saveDataframe(original, MODEL_ID);
-        storage.get().setTags(MODEL_ID, tagMap);
+        storage.get().setTags(dataTagging);
 
         original.tagDataPoints(tagMap);
         Dataframe loaded = storage.get().readDataframe(MODEL_ID);

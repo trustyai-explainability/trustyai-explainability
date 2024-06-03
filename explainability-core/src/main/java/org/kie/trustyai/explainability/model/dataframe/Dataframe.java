@@ -52,8 +52,6 @@ import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.ObjectFeatureDomain;
 import org.kie.trustyai.explainability.utils.DataUtils;
 
-import jakarta.persistence.Transient;
-
 public class Dataframe {
     private List<DataframeColumn> data;
     private final DataframeMetadata metadata;
@@ -213,7 +211,6 @@ public class Dataframe {
      *
      * @return A @link{Dataframe}
      */
-    @Transient
     public Dataframe getInputDataframe() {
         final Dataframe df = this.copy();
         df.dropColumns(getOutputsIndices());
@@ -225,7 +222,6 @@ public class Dataframe {
      *
      * @return A @link{Dataframe}
      */
-    @Transient
     public Dataframe getOutputDataframe() {
         final Dataframe df = this.copy();
         df.dropColumns(getInputsIndices());
@@ -307,7 +303,6 @@ public class Dataframe {
      *
      * @return A {@link List} of input column names.
      */
-    @Transient
     public List<String> getInputNames() {
         return getColumnNames(getInputsIndices());
     }
@@ -317,7 +312,6 @@ public class Dataframe {
      *
      * @return A {@link List} of output column names.
      */
-    @Transient
     public List<String> getOutputNames() {
         return getColumnNames(getOutputsIndices());
     }
@@ -435,7 +429,6 @@ public class Dataframe {
      *
      * @return A {@link List} of indices.
      */
-    @Transient
     public List<Integer> getConstrained() {
         return columnIndexStream()
                 .filter(this.metadata::getConstrained)
@@ -487,12 +480,10 @@ public class Dataframe {
      *
      * @return Number of columns.
      */
-    @Transient
     public int getColumnDimension() {
         return this.data.size();
     }
 
-    @Transient
     public int getInputsCount() {
         return getInputsIndices().size();
     }
@@ -527,7 +518,6 @@ public class Dataframe {
      * @return A {@link List} of {@link List<Value>} rows.
      */
 
-    @Transient
     public List<List<Value>> getRows() {
         return rowIndexStream()
                 .mapToObj(row -> columnIndexStream()
@@ -536,7 +526,6 @@ public class Dataframe {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    @Transient
     public List<Integer> getInputsIndices() {
         return columnIndexStream()
                 .filter(metadata::getInput)
@@ -562,7 +551,6 @@ public class Dataframe {
         return IntStream.range(0, getRowDimension());
     }
 
-    @Transient
     public List<Integer> getOutputsIndices() {
         return columnIndexStream()
                 .filter(i -> !metadata.getInput(i))
@@ -650,12 +638,10 @@ public class Dataframe {
      *
      * @return A {@link List} with the column names
      */
-    @Transient
     public List<String> getColumnNames() {
         return metadata.getNames();
     }
 
-    @Transient
     public List<String> getRawColumnNames() {
         return metadata.getRawNames();
     }
@@ -678,7 +664,6 @@ public class Dataframe {
      *
      * @return A {@link List} with the column types
      */
-    @Transient
     public List<Type> getColumnTypes() {
         return this.metadata.getTypes();
     }
@@ -688,7 +673,6 @@ public class Dataframe {
      *
      * @return The number of outputs.
      */
-    @Transient
     public int getOutputsCount() {
         if (data.isEmpty()) {
             return 0;
@@ -775,7 +759,6 @@ public class Dataframe {
      *
      * @return A {@link List} of {@link List<Value>}
      */
-    @Transient
     public List<List<Value>> getInputRows() {
 
         final List<Integer> inputColumns = getInputsIndices();
@@ -793,7 +776,6 @@ public class Dataframe {
      *
      * @return A {@link List} of {@link List<Value>}
      */
-    @Transient
     public List<List<Value>> getOutputRows() {
 
         final List<Integer> outputColumns = getOutputsIndices();
@@ -1186,17 +1168,14 @@ public class Dataframe {
         return predictions;
     }
 
-    @Transient
     public List<String> getIds() {
         return internalData.getIds();
     }
 
-    @Transient
     public List<String> getTags() {
         return internalData.getDatapointTags();
     }
 
-    @Transient
     public List<LocalDateTime> getTimestamps() {
         return internalData.getTimestamps();
     }
@@ -1265,7 +1244,6 @@ public class Dataframe {
     /**
      * Return a subset of the dataframe containing only numeric columns
      */
-    @Transient
     public Dataframe getNumericColumns() {
         final List<Type> colTypes = this.metadata.getTypes();
         final List<Integer> dropColumns = new ArrayList<>(colTypes.size());

@@ -14,7 +14,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.storage.BatchReader;
@@ -24,7 +24,7 @@ import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
-import static org.kie.trustyai.service.data.DataSource.INTERNAL_DATA_FILENAME;
+import static org.kie.trustyai.service.data.datasources.DataSource.INTERNAL_DATA_FILENAME;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "PVC")
 @ApplicationScoped

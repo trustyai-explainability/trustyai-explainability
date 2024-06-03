@@ -14,7 +14,7 @@ import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
@@ -36,7 +36,7 @@ public class LegacyMetadataTest {
     Instance<MockMemoryStorage> storage;
 
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     private static final String MODEL_ID = "demo-loan-nn-onnx-beta";
 

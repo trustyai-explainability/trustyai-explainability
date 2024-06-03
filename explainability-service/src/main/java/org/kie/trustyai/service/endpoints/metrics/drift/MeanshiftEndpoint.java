@@ -95,7 +95,6 @@ public class MeanshiftEndpoint extends DriftEndpoint<MeanshiftMetricRequest> {
             Dataframe fitting = super.dataSource.get()
                     .getDataframe(request.getModelId())
                     .filterRowsByTagEquals(request.getReferenceTag());
-            System.out.println(fitting.getColumnNames());
             msf = Meanshift.precompute(fitting);
             request.setFitting(msf.getFitStats());
         } else {

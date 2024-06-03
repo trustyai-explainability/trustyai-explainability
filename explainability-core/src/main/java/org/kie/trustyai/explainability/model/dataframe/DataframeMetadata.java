@@ -145,7 +145,7 @@ public class DataframeMetadata {
         return cachedColumnNames.get(i);
     }
 
-    protected void setNameAliases(Map<String, String> aliases) {
+    public void setNameAliases(Map<String, String> aliases) {
         List<String> newAliases = new ArrayList<>();
         for (String name : names) {
             newAliases.add(aliases.getOrDefault(name, ""));

@@ -2,7 +2,7 @@ package org.kie.trustyai.service.validators.metrics.identity;
 
 import java.util.Objects;
 
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
