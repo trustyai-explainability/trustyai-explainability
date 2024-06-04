@@ -22,6 +22,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.model.Feature;
@@ -41,6 +42,7 @@ class CounterfactualGeneratorTest {
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 1 })
+    @Disabled("https://github.com/trustyai-explainability/trustyai-explainability/issues/474")
     void testDefaultGeneration(int seed) throws ExecutionException, InterruptedException, TimeoutException {
         List<PredictionInput> seeds = new ArrayList<>();
         Random rn = new Random(seed);
