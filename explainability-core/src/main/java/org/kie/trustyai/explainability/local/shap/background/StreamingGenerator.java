@@ -1,5 +1,12 @@
 package org.kie.trustyai.explainability.local.shap.background;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -10,13 +17,6 @@ import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.statistics.MultivariateOnlineEstimator;
 import org.kie.trustyai.statistics.distributions.gaussian.MultivariateGaussianParameters;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Streaming background generator for SHAP.
@@ -41,34 +41,34 @@ public class StreamingGenerator implements BackgroundGenerator {
      * Creates a SHAP streaming background generator.
      * The replacement method use is random.
      *
-     * @param dimensions    The observation's dimension
-     * @param queueSize     The required number of real observations
+     * @param dimensions The observation's dimension
+     * @param queueSize The required number of real observations
      * @param diversitySize The required number of diversity samples
-     * @param estimator     The estimator to use as a {@link MultivariateOnlineEstimator}
+     * @param estimator The estimator to use as a {@link MultivariateOnlineEstimator}
      */
     public StreamingGenerator(int dimensions,
-                              int queueSize,
-                              int diversitySize,
-                              MultivariateOnlineEstimator<MultivariateGaussianParameters> estimator) {
+            int queueSize,
+            int diversitySize,
+            MultivariateOnlineEstimator<MultivariateGaussianParameters> estimator) {
         this(dimensions, queueSize, diversitySize, estimator, ReplacementType.RANDOM, null);
     }
 
     /**
      * Creates a SHAP streaming background generator.
      *
-     * @param dimensions      The observation's dimension
-     * @param queueSize       The required number of real observations
-     * @param diversitySize   The required number of diversity samples
-     * @param estimator       The estimator to use as a {@link MultivariateOnlineEstimator}
+     * @param dimensions The observation's dimension
+     * @param queueSize The required number of real observations
+     * @param diversitySize The required number of diversity samples
+     * @param estimator The estimator to use as a {@link MultivariateOnlineEstimator}
      * @param replacementType The replacement type as a {@link ReplacementType}
-     * @param featureNames    The list of feature names. If {@code null} a default set of names will be created.
+     * @param featureNames The list of feature names. If {@code null} a default set of names will be created.
      */
     public StreamingGenerator(int dimensions,
-                              int queueSize,
-                              int diversitySize,
-                              MultivariateOnlineEstimator<MultivariateGaussianParameters> estimator,
-                              ReplacementType replacementType,
-                              List<String> featureNames) {
+            int queueSize,
+            int diversitySize,
+            MultivariateOnlineEstimator<MultivariateGaussianParameters> estimator,
+            ReplacementType replacementType,
+            List<String> featureNames) {
         if (dimensions <= 0) {
             throw new IllegalArgumentException("Data dimension must be positive.");
         }
@@ -143,7 +143,6 @@ public class StreamingGenerator implements BackgroundGenerator {
             final RealVector syntheticData = new ArrayRealVector(dataDistribution.sample());
             inputs.add(vectorToPredictionInput(syntheticData));
         }
-
 
         return inputs;
     }
