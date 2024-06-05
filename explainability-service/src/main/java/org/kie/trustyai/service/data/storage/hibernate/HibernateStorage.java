@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,9 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     private Optional<MigrationConfig> migrationConfig = Optional.empty();
     private boolean dataDirty = false;
     private final String NO_DATA_ERROR_MSG = "No inference data for that model found in database.";
+
+    private Random rng = new Random(0);
+    private long updateHash;
 
     public HibernateStorage(ServiceConfig serviceConfig, StorageConfig storageConfig) {
         LOG.info("Starting Hibernate storage consumer.");
@@ -201,6 +205,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         try {
             LOG.debug("Writing dataframe=" + modelId + ", rows=" + dataframe.getRowDimension() + " to Hibernate");
             List<DataframeRow> transpose = dataframe.transpose(modelId);
+            setDataDirty();
             for (DataframeRow dr : transpose) {
                 em.persist(dr);
             }
@@ -222,6 +227,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         if (dataExists(modelId)) {
             try {
                 LOG.debug("Overwriting dataframe=" + modelId + ", rows=" + dataframe.getRowDimension() + " to Hibernate");
+                setDataDirty();
                 em.createQuery("" +
                         "DELETE from DataframeRow dr " +
                         "where dr.modelId = ?1")
@@ -244,6 +250,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             try {
                 LOG.debug("Appending " + dataframe.getRowDimension() + " new rows to dataframe=" + modelId + " within Hibernate");
                 List<DataframeRow> transpose = dataframe.transpose(modelId);
+                setDataDirty();
                 for (DataframeRow dr : transpose) {
                     em.persist(dr);
                 }
@@ -362,9 +369,9 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         try {
 
             storageMetadata.setModelId(modelId);
+            setDataDirty();
             if (metadataExists(modelId)) {
                 LOG.debug("Updating metadata for " + modelId + " into Hibernate");
-                dataDirty = true;
                 em.merge(storageMetadata);
             } else {
                 LOG.debug("Saving metadata for " + modelId + " into Hibernate");
@@ -393,7 +400,6 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 Collections.reverse(rows);
                 DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
                 Dataframe df = Dataframe.untranspose(rows, dm);
-
                 return Pair.of(df, readMetaOrInternalData(modelId));
             } catch (Exception e) {
                 LOG.error("Error reading dataframe for model=" + modelId);
@@ -420,6 +426,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
                 Dataframe df = Dataframe.untranspose(rows, dm);
 
+
                 return Pair.of(df, readMetaOrInternalData(modelId));
             } catch (Exception e) {
                 LOG.error("Error reading dataframe for model=" + modelId);
@@ -435,6 +442,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     public void setTags(DataTagging dataTagging) {
         String modelId = dataTagging.getModelId();
         long nrows = rowCount(modelId);
+        setDataDirty();
         for (Map.Entry<String, List<List<Integer>>> entry : dataTagging.getDataTagging().entrySet()) {
             for (List<Integer> idxs : entry.getValue()) {
                 if (idxs.size() > 2) {
@@ -458,21 +466,12 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 }
             }
         }
-        dataDirty = true;
-    }
-
-    // if a single field of an entity has changed
-    public void refreshIfDirty() {
-        if (dataDirty) {
-            LOG.debug("Refreshing dirty data");
-            em.clear();
-            dataDirty = false;
-        }
     }
 
     // NAME MAPPING MANIPULATION =======================================================================================
     @Transactional
     public void applyNameMapping(NameMapping nameMapping) {
+        setDataDirty();
         final StorageMetadata storageMetadata = readMetaOrInternalData(nameMapping.getModelId());
         Schema inputSchema = storageMetadata.getInputSchema();
         Schema outputSchema = storageMetadata.getOutputSchema();
@@ -507,13 +506,29 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     @Override
     public long getLastModified(String modelId) {
-        return 0;
+        return updateHash;
+    }
+
+    // UPDATE HASHING AND TRACKING =====================================================================================
+    public void setDataDirty(){
+        dataDirty = true;
+        updateHash = rng.nextLong();
+    }
+
+    // if a single field of an entity has changed
+    public void refreshIfDirty() {
+        if (dataDirty) {
+            LOG.debug("Refreshing dirty data");
+            em.clear();
+            dataDirty = false;
+        }
     }
 
     // TESTING OPERATIONS ==============================================================================================
     @Transactional
     public void clearData(String modelId) {
         LOG.info("Deleting all data from " + modelId + " within database.");
+        setDataDirty();
         em.createQuery("" +
                 "DELETE from DataframeRow dr " +
                 "where dr.modelId = ?1")

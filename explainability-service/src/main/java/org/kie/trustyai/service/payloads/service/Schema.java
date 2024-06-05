@@ -1,9 +1,12 @@
 package org.kie.trustyai.service.payloads.service;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 
@@ -89,6 +92,10 @@ public class Schema {
 
     public Map<String, SchemaItem> getNameMappedItems() {
         return this.mappedItems;
+    }
+
+    public Set<String> getNameMappedKeySet() {
+        return new HashSet<>(this.mappedItems.keySet());
     }
 
     // for specific usage for Hibernate initialization
