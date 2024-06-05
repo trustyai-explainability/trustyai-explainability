@@ -1,6 +1,5 @@
 package org.kie.trustyai.statistics.estimators;
 
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -15,11 +14,11 @@ import org.kie.trustyai.statistics.distributions.gaussian.MultivariateGaussianPa
  */
 public class WelfordOnlineEstimator implements MultivariateOnlineEstimator<MultivariateGaussianParameters> {
 
+    public static double DEFAULT_VARIANCE = 100.0; // Default variance element for the initial estimation
+    private final RealMatrix DEFAULT_COVARIANCE; // Default element for the initial estimation
     private int counter = 0;
     private RealVector mean;
     private RealMatrix covariance;
-    public static double DEFAULT_VARIANCE = 100.0; // Default variance element for the initial estimation
-    private final RealMatrix DEFAULT_COVARIANCE; // Default element for the initial estimation
 
     /**
      * Instantiate a Welford online estimator.
@@ -28,7 +27,7 @@ public class WelfordOnlineEstimator implements MultivariateOnlineEstimator<Multi
      */
     public WelfordOnlineEstimator(int dimension) {
         mean = new ArrayRealVector(dimension);
-        covariance = new Array2DRowRealMatrix(dimension, dimension);
+        covariance = MatrixUtils.createRealIdentityMatrix(dimension).scalarMultiply(DEFAULT_VARIANCE);
         DEFAULT_COVARIANCE = MatrixUtils.createRealIdentityMatrix(dimension).scalarMultiply(DEFAULT_VARIANCE);
     }
 
@@ -62,7 +61,7 @@ public class WelfordOnlineEstimator implements MultivariateOnlineEstimator<Multi
      */
     @Override
     public MultivariateGaussianParameters getParameters() {
-        if (counter < 1) {
+        if (counter < 2) {
             return MultivariateGaussianParameters.create(mean, DEFAULT_COVARIANCE);
         } else {
             return MultivariateGaussianParameters.create(mean, covariance.scalarMultiply(counter / (counter - 1.0)));

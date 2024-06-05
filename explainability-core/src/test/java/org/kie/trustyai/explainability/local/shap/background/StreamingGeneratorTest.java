@@ -20,6 +20,10 @@ import org.kie.trustyai.statistics.MultivariateOnlineEstimator;
 import org.kie.trustyai.statistics.distributions.gaussian.MultivariateGaussianParameters;
 import org.kie.trustyai.statistics.estimators.WelfordOnlineEstimator;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class StreamingGeneratorTest {
@@ -97,6 +101,7 @@ class StreamingGeneratorTest {
         }
 
     }
+
 
     @DisplayName("Test streaming generator returns correct dimensions")
     @ParameterizedTest
