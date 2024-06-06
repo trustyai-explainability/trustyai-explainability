@@ -26,18 +26,15 @@ class MeanshiftEndpointPVCTest extends MeanshiftEndpointBaseTest {
     @Inject
     Instance<MockPVCStorage> storage;
 
-    @BeforeEach
-    void populateStorage() throws JsonProcessingException {
+    @Override
+    void clearData() {
         storage.get().emptyStorage("/tmp/" + MODEL_ID + "-data.csv");
         storage.get().emptyStorage("/tmp/" + MODEL_ID + "-internal_data.csv");
         storage.get().emptyStorage("/tmp/" + MODEL_ID + "-metadata.json");
+    }
 
-        Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
-
-        HashMap<String, List<List<Integer>>> tagging = new HashMap<>();
-        tagging.put(TRAINING_TAG, List.of(List.of(0, N_SAMPLES)));
-        dataframe.tagDataPoints(tagging);
-        dataframe.addPredictions(DataframeGenerators.generateRandomDataframeDrifted(N_SAMPLES).asPredictions());
+    @Override
+    void saveDF(Dataframe dataframe) {
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(MockCSVDatasource.createMetadata(dataframe), MODEL_ID);
     }

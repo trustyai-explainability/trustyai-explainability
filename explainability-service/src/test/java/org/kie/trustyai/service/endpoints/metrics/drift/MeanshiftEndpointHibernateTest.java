@@ -25,16 +25,13 @@ class MeanshiftEndpointHibernateTest extends MeanshiftEndpointBaseTest {
     @Inject
     Instance<MockHibernateStorage> storage;
 
-    @BeforeEach
-    void populateStorage() throws JsonProcessingException {
+    @Override
+    void clearData() {
         storage.get().clearData(MODEL_ID);
-        Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
-
-        HashMap<String, List<List<Integer>>> tagging = new HashMap<>();
-        tagging.put(TRAINING_TAG, List.of(List.of(0, N_SAMPLES)));
-        dataframe.tagDataPoints(tagging);
-        dataframe.addPredictions(DataframeGenerators.generateRandomDataframeDrifted(N_SAMPLES).asPredictions());
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
     }
 
+    @Override
+    void saveDF(Dataframe dataframe) {
+        datasource.get().saveDataframe(dataframe, MODEL_ID);
+    }
 }
