@@ -1,4 +1,4 @@
-FROM quay.io/centos/centos:stream8
+FROM registry.access.redhat.com/ubi8:8.10-901.1716497712
 
 ARG ORG=trustyai-explainability
 ARG BRANCH=main
@@ -11,8 +11,8 @@ ARG OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/l
 ENV HOME /root
 WORKDIR /root
 
-RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&\
-    dnf install -y jq bc git go-toolset python3.11 python3.11-devel python3.11-pip unzip chromium chromedriver && \
+RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&  \
+    dnf install -y jq bc git go-toolset python3.11 python3.11-devel python3.11-pip unzip && \
     dnf clean all && \
     git clone https://github.com/opendatahub-io/peak $HOME/peak && \
     cd $HOME/peak && \
