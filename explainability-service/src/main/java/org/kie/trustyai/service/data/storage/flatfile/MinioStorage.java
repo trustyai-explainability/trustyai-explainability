@@ -66,7 +66,7 @@ public class MinioStorage extends FlatFileStorage {
         } else {
             this.secretKey = config.secretKey().get();
         }
-        this.dataFilename = storageConfig.dataFilename();
+        this.dataFilename = storageConfig.dataFilename().orElseThrow(() -> new IllegalArgumentException("Minio storage must provide a configured data filename in StorageConfig"));
 
         LOG.info("MinIO data location: endpoint=" + config.endpoint() + ", bucket=" + bucketName + ", data file="
                 + this.dataFilename);

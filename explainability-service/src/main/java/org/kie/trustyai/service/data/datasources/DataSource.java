@@ -144,6 +144,7 @@ public abstract class DataSource {
             storageMetadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
             storageMetadata.setModelId(modelId);
             storageMetadata.setObservations(dataframe.getRowDimension());
+            storageMetadata.setRecordedInferences(dataframe.getTags().contains(Dataframe.InternalTags.UNLABELED.get()));
             storageMetadata.setInputTensorName(dataframe.getInputTensorName());
             storageMetadata.setOutputTensorName(dataframe.getOutputTensorName());
             try {
@@ -161,6 +162,7 @@ public abstract class DataSource {
 
             if (storageMetadata.getInputSchema().equals(newInputSchema) && storageMetadata.getOutputSchema().equals(newOutputSchema)) {
                 storageMetadata.incrementObservations(dataframe.getRowDimension());
+                storageMetadata.setRecordedInferences(storageMetadata.isRecordedInferences() || dataframe.getTags().contains(Dataframe.InternalTags.UNLABELED.get()));
 
                 // update value list
                 storageMetadata.mergeInputSchema(newInputSchema);
@@ -242,6 +244,14 @@ public abstract class DataSource {
      * @return the number of observations
      */
     public abstract long getNumObservations(String modelId);
+
+    /**
+     * Check to see if a particular model has recorded inferences
+     *
+     * @param modelId the modelId to check
+     * @return true if the model has received inference data
+     */
+    public abstract boolean hasRecordedInferences(String modelId);
 
     /**
      * @return the list of modelIds that are confirmed to have metadata in storage.

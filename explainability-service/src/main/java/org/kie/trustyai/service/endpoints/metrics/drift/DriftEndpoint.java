@@ -89,7 +89,7 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
             }
 
             // grab the slice of the requested data according to the provided batch size
-            dataframe = super.dataSource.get().getDataframe(request.getModelId(), request.getBatchSize()).filterRowsBySynthetic(false);
+            dataframe = super.dataSource.get().getOrganicDataframe(request.getModelId(), request.getBatchSize());
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();

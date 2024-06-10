@@ -1,17 +1,17 @@
-package org.kie.trustyai.service.mocks.pvc;
+package org.kie.trustyai.service.mocks.hibernate;
 
 import java.util.Optional;
 
 import org.kie.trustyai.service.config.storage.StorageConfig;
 
-public class MockPVCStorageConfig implements StorageConfig {
+public class MockHibernateStorageConfig implements StorageConfig {
     @Override
     public Optional<String> dataFilename() {
-        return Optional.of("data.csv");
+        return Optional.empty();
     }
 
     @Override
     public Optional<String> dataFolder() {
-        return Optional.of("/tmp");
+        return Optional.empty();
     }
 }

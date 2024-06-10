@@ -28,6 +28,7 @@ public class StorageMetadata {
     private String outputTensorName = DataframeMetadata.DEFAULT_OUTPUT_TENSOR_NAME;
 
     private int observations = 0;
+    private boolean recordedInferences = false;
 
     @Id
     private String modelId;
@@ -61,6 +62,14 @@ public class StorageMetadata {
 
     public void incrementObservations(int observations) {
         this.observations += observations;
+    }
+
+    public boolean isRecordedInferences() {
+        return recordedInferences;
+    }
+
+    public void setRecordedInferences(boolean recordedInferences) {
+        this.recordedInferences = recordedInferences;
     }
 
     public void mergeInputSchema(Schema otherSchema) {

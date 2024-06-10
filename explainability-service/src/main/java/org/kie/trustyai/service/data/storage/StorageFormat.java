@@ -4,5 +4,5 @@ public enum StorageFormat {
     MEMORY,
     PVC,
     MINIO,
-    HIBERNATE,
+    DATABASE,
 }

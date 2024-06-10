@@ -52,10 +52,12 @@ public class PVCStorage extends FlatFileStorage {
             throw new IllegalArgumentException(message);
         }
 
-        this.metadataPath = Paths.get(storageConfig.dataFolder(), DataSource.METADATA_FILENAME);
-        this.dataFilename = storageConfig.dataFilename();
-        this.dataPath = Paths.get(storageConfig.dataFolder(), storageConfig.dataFilename());
-        this.dataFolder = Path.of(storageConfig.dataFolder());
+        String rawDataFolder = storageConfig.dataFolder().orElseThrow(() -> new IllegalArgumentException("PVC storage must provide a configured data folder in StorageConfig"));
+        String rawDataFilename = storageConfig.dataFilename().orElseThrow(() -> new IllegalArgumentException("PVC storage must provide a configured data filename in StorageConfig"));
+        this.metadataPath = Paths.get(rawDataFolder, DataSource.METADATA_FILENAME);
+        this.dataFilename = rawDataFilename;
+        this.dataPath = Paths.get(rawDataFolder, rawDataFilename);
+        this.dataFolder = Path.of(rawDataFolder);
 
         if (metadataPath.equals(dataPath)) {
             final String message = "Data file and metadata file cannot have the same name (" + this.dataPath + ")";
@@ -63,7 +65,7 @@ public class PVCStorage extends FlatFileStorage {
             throw new IllegalArgumentException(message);
         }
         LOG.info(
-                "PVC data locations: data=" + Paths.get(storageConfig.dataFolder(), getDataFilename("*")) + ", metadata=" + Paths.get(storageConfig.dataFolder(), "*-" + DataSource.METADATA_FILENAME));
+                "PVC data locations: data=" + Paths.get(rawDataFolder, getDataFilename("*")) + ", metadata=" + Paths.get(rawDataFolder, "*-" + DataSource.METADATA_FILENAME));
     }
 
     @Override

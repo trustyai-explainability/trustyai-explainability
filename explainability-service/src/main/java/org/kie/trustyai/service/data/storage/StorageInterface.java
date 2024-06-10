@@ -4,8 +4,11 @@ import java.nio.ByteBuffer;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.kie.trustyai.service.data.cache.DataCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
+
+import io.quarkus.cache.CacheResult;
 
 public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
     DataFormat getDataFormat();
@@ -13,7 +16,7 @@ public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
     long getLastModified(String modelId);
 
     // dataframes ======================================================================================================
-    //@CacheResult(cacheName = "dataframe", keyGenerator = DataCacheKeyGen.class)
+    @CacheResult(cacheName = "dataframe", keyGenerator = DataCacheKeyGen.class)
     DATAFRAME_TYPE readDataframe(String modelId) throws StorageReadException;
 
     DATAFRAME_TYPE readDataframe(String modelId, int batchSize) throws StorageReadException;

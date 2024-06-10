@@ -51,7 +51,6 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
 
         // save
         final Dataframe dataframe = payloadToDataframe(input, output, id, input.getMetadata());
-
         datasource.get().saveDataframe(dataframe, standardizeModelId(modelId));
 
         unreconciledInputs.remove(id);

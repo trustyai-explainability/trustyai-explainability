@@ -219,7 +219,7 @@ abstract class DataSourceBaseTest {
     @DisplayName("Reading an organic batch should account for synthetic data (no synthetic data)")
     void testReadingOrganicBatchesOverTime() {
         Dataframe df;
-        for (int i=0; i<10; i++){
+        for (int i = 0; i < 10; i++) {
             df = DataframeGenerators.generateRandomDataframe(50);
             datasource.get().saveDataframe(df, MODEL_ID);
             final Dataframe readDataframe = datasource.get().getOrganicDataframe(MODEL_ID, 50);

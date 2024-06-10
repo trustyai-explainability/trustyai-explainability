@@ -70,8 +70,8 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             throw new IllegalArgumentException(message);
         }
 
-        if (storageConfig.migrationConfig().fromFilename().isPresent() && storageConfig.migrationConfig().fromFolder().isPresent()) {
-            migrationConfig = Optional.of(storageConfig.migrationConfig());
+        if (storageConfig.dataFilename().isPresent() && storageConfig.dataFolder().isPresent()) {
+            migrationConfig = Optional.of(new MigrationConfig(storageConfig.dataFolder().get(), storageConfig.dataFilename().get()));
         }
     }
 
@@ -82,55 +82,55 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     // MIGRATIONS ======================================================================================================
     @PostConstruct
+    @Transactional
     protected void migrate() {
         if (migrationConfig.isPresent()) {
             MigrationConfig mc = migrationConfig.get();
-            if (mc.fromFolder().isPresent() && mc.fromFilename().isPresent()) {
-                String fromFolder = mc.fromFolder().get();
-                String fromFile = mc.fromFilename().get();
+            String fromFolder = mc.getFromFolder();
+            String fromFile = mc.getFromFilename();
 
-                CustomStorageConfig customStorageConfig = new CustomStorageConfig(fromFile, fromFolder, null);
-                CustomServiceConfig customServiceConfig = new CustomServiceConfig(OptionalInt.of(batchSize), null, null, null);
-                PVCStorage pvcStorage = new PVCStorage(customServiceConfig, customStorageConfig);
-                CSVDataSource oldDataSource = new CSVDataSource();
-                oldDataSource.setParser(new CSVParser());
-                oldDataSource.setStorageOverride(pvcStorage);
-                List<String> modelIds = pvcStorage.listAllModelIds();
+            CustomStorageConfig customStorageConfig = new CustomStorageConfig(fromFile, fromFolder);
+            CustomServiceConfig customServiceConfig = new CustomServiceConfig(OptionalInt.of(batchSize), null, null, null);
+            PVCStorage pvcStorage = new PVCStorage(customServiceConfig, customStorageConfig);
+            CSVDataSource oldDataSource = new CSVDataSource();
+            oldDataSource.setParser(new CSVParser());
+            oldDataSource.setStorageOverride(pvcStorage);
+            List<String> modelIds = pvcStorage.listAllModelIds();
 
-                if (!modelIds.isEmpty()) {
-                    LOG.info("Starting migration, found " + modelIds.size() + " models.");
-                    for (String modelId : modelIds) {
-                        LOG.info("Migrating " + modelId + " metadata");
-                        StorageMetadata sm = oldDataSource.getMetadata(modelId);
-                        saveMetaOrInternalData(sm, modelId);
+            if (!modelIds.isEmpty()) {
+                LOG.info("Starting migration, found " + modelIds.size() + " models.");
+                for (String modelId : modelIds) {
+                    LOG.info("Migrating " + modelId + " metadata");
+                    StorageMetadata sm = oldDataSource.getMetadata(modelId);
+                    saveMetaOrInternalData(sm, modelId);
 
-                        // batch save the df
-                        int nObs = sm.getObservations();
-                        int startIdx = 0;
-                        while (startIdx < nObs) {
-                            int endIdx = Math.min(startIdx + batchSize, nObs);
-                            LOG.info("Migrating " + modelId + " data, rows " + startIdx + "-" + endIdx + " of " + nObs);
-                            Dataframe df = oldDataSource.getDataframe(modelId, startIdx, endIdx);
-                            saveDataframe(df, modelId);
-                            startIdx += batchSize;
-                        }
+                    // batch save the df
+                    int nObs = sm.getObservations();
+                    int startIdx = 0;
+                    while (startIdx < nObs) {
+                        int endIdx = Math.min(startIdx + batchSize, nObs);
+                        LOG.info("Migrating " + modelId + " data, rows " + startIdx + "-" + endIdx + " of " + nObs);
+                        Dataframe df = oldDataSource.getDataframe(modelId, startIdx, endIdx);
+                        saveDataframe(df, modelId);
+                        startIdx += batchSize;
                     }
                 }
-                LOG.info("Migration complete, the PVC is now safe to remove.");
-                migrationConfig = Optional.empty();
-            } else {
-                throw new IllegalArgumentException("Both migration file and folder must be specified to perform database migration.");
             }
+            LOG.info("Migration complete, the PVC is now safe to remove.");
+            migrationConfig = Optional.empty();
+
         }
     }
 
     // DATAFRAME READS =================================================================================================
     @Override
+    @Transactional
     public Dataframe readDataframe(String modelId) throws StorageReadException {
         LOG.debug("Reading dataframe " + modelId + " from Hibernate");
         return readDataframe(modelId, batchSize);
     }
 
+    @Transactional
     public Dataframe readAllData(String modelId) throws StorageReadException {
         if (dataExists(modelId)) {
             try {
@@ -153,6 +153,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     }
 
     @Override
+    @Transactional
     public Dataframe readDataframe(String modelId, int batchSize) throws StorageReadException {
         if (dataExists(modelId)) {
             try {
@@ -164,6 +165,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                         "order by dr.dbId DESC ", DataframeRow.class)
                         .setParameter(1, modelId)
                         .setMaxResults(batchSize).getResultList();
+
                 Collections.reverse(rows);
                 DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
                 return Dataframe.untranspose(rows, dm);
@@ -177,6 +179,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     }
 
     @Override
+    @Transactional
     public Dataframe readDataframe(String modelId, int startPos, int endPos) throws StorageReadException {
         if (endPos <= startPos) {
             throw new IllegalArgumentException("HibernateStorage.readData endPos must be greater than startPos. Got startPos=" + startPos + ", endPos=" + endPos);
@@ -289,12 +292,14 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     // SPECIFIC DATAFRAME QUERIES ======================================================================================
     // get the row count of a persisted dataframe
+    @Transactional
     public int colCount(String modelId) {
         return em.createQuery("select size(dr.row) from DataframeRow dr where dr.modelId = ?1", int.class)
                 .setParameter(1, modelId)
                 .getSingleResult();
     }
 
+    @Transactional
     public long rowCount(String modelId) {
         return em.createQuery("select count(dr) from DataframeRow dr WHERE dr.modelId = ?1", long.class)
                 .setParameter(1, modelId)
@@ -385,6 +390,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     // JOINT DATAFRAME AND METADATA READS ==============================================================================
     @Override
+    @Transactional
     public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
         if (dataExists(modelId)) {
             try {
@@ -411,6 +417,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     }
 
     @Override
+    @Transactional
     public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException {
         if (dataExists(modelId)) {
             try {
@@ -425,7 +432,6 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                         .getResultList();
                 DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
                 Dataframe df = Dataframe.untranspose(rows, dm);
-
 
                 return Pair.of(df, readMetaOrInternalData(modelId));
             } catch (Exception e) {
@@ -485,6 +491,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     // METADATA INFO QUERIES ===========================================================================================
     @Override
+    @Transactional
     public boolean dataExists(String modelId) {
         Long rows = em.createQuery("" +
                 "select count(dm) from DataframeMetadata dm" +
@@ -492,6 +499,15 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 .setParameter(1, modelId)
                 .getSingleResult();
         return rows > 0;
+    }
+
+    @Transactional
+    public boolean hasRecordedInferences(String modelId) {
+        return em.createQuery("" +
+                "select sm.recordedInferences from StorageMetadata sm" +
+                " where sm.modelId = ?1", Boolean.class)
+                .setParameter(1, modelId)
+                .getSingleResult();
     }
 
     @Transactional
@@ -510,7 +526,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     }
 
     // UPDATE HASHING AND TRACKING =====================================================================================
-    public void setDataDirty(){
+    public void setDataDirty() {
         dataDirty = true;
         updateHash = rng.nextLong();
     }
@@ -519,7 +535,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     public void refreshIfDirty() {
         if (dataDirty) {
             LOG.debug("Refreshing dirty data");
-            em.clear();
+            //em.clear();
             dataDirty = false;
         }
     }

@@ -42,7 +42,7 @@ public class MemoryStorage extends FlatFileStorage {
         super();
         LOG.info("Starting memory storage consumer: ");
 
-        this.dataFilename = config.dataFilename();
+        this.dataFilename = config.dataFilename().orElseThrow(() -> new IllegalArgumentException("Memory storage must provide a configured data filename in StorageConfig"));
         this.batchSize = serviceConfig.batchSize().getAsInt();
     }
 

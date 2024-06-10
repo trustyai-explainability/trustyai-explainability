@@ -1,16 +1,9 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
-import java.util.HashMap;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
 import org.kie.trustyai.service.profiles.flatfile.PVCTestProfile;
-import org.kie.trustyai.service.utils.DataframeGenerators;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;

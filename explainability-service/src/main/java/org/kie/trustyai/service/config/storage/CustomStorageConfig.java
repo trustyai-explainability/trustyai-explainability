@@ -1,25 +1,22 @@
 package org.kie.trustyai.service.config.storage;
 
+import java.util.Optional;
+
 public class CustomStorageConfig implements StorageConfig {
     final String storedDataFilename;
     final String storedDataFolder;
-    final MigrationConfig storedMigrationConfig;
 
-    public CustomStorageConfig(String dataFilename, String dataFolder, MigrationConfig migrationConfig) {
+    public CustomStorageConfig(String dataFilename, String dataFolder) {
         this.storedDataFilename = dataFilename;
         this.storedDataFolder = dataFolder;
-        this.storedMigrationConfig = migrationConfig;
     }
 
-    public String dataFilename() {
-        return storedDataFilename;
+    public Optional<String> dataFilename() {
+        return Optional.of(storedDataFilename);
     }
 
-    public String dataFolder() {
-        return storedDataFolder;
+    public Optional<String> dataFolder() {
+        return Optional.of(storedDataFolder);
     }
 
-    public MigrationConfig migrationConfig() {
-        return storedMigrationConfig;
-    }
 }

@@ -290,7 +290,8 @@ public class CSVDataSource extends DataSource {
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer metadataBytes = getStorage().readMetaOrInternalData(modelId + "-" + METADATA_FILENAME);
         try {
-            return mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), StorageMetadata.class);
+            StorageMetadata res = mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), StorageMetadata.class);
+            return res;
         } catch (JsonProcessingException e) {
             LOG.error("Could not parse metadata: " + e.getMessage());
             throw new StorageReadException(e.getMessage());
@@ -337,6 +338,16 @@ public class CSVDataSource extends DataSource {
      */
     public long getNumObservations(String modelId) {
         return getMetadata(modelId).getObservations();
+    }
+
+    /**
+     * Check to see if a particular model has recorded inferences
+     *
+     * @param modelId the modelId to check
+     * @return true if the model has received inference data
+     */
+    public boolean hasRecordedInferences(String modelId) {
+        return getMetadata(modelId).isRecordedInferences();
     }
 
     // TAG OPERATIONS ==================================================================================================

@@ -32,6 +32,7 @@ public class MockCSVDatasource extends CSVDataSource {
         storageMetadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
         storageMetadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
         storageMetadata.setObservations(dataframe.getRowDimension());
+        storageMetadata.setRecordedInferences(dataframe.getTags().contains(Dataframe.InternalTags.UNLABELED.get()));
         storageMetadata.setModelId(dataframe.getId());
 
         return storageMetadata;

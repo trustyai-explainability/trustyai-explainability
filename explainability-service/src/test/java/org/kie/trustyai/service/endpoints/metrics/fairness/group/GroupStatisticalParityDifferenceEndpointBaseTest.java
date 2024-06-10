@@ -495,4 +495,36 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         assertFalse(Double.isNaN(response.getValue()));
     }
 
+    @Test
+    void postCorrectNameMappedRequest() throws InterruptedException {
+        populate();
+
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        payload.setProtectedAttribute("Gender Mapped");
+
+        HashMap<String, String> inputMapping = new HashMap<>();
+        HashMap<String, String> outputMapping = new HashMap<>();
+        inputMapping.put("age", "Age Mapped");
+        inputMapping.put("gender", "Gender Mapped");
+        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(nameMapping)
+                .basePath("/info")
+                .when().post("/names").peek()
+                .then()
+                .statusCode(200)
+                .body(is("Feature and output name mapping successfully applied."));
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/request/")
+                .then()
+                .statusCode(200);
+
+        assertDoesNotThrow(() -> scheduler.get().calculateManual(true));
+    }
+
 }

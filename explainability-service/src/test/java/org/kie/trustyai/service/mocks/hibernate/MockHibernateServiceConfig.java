@@ -15,7 +15,7 @@ public class MockHibernateServiceConfig implements ServiceConfig {
 
     @Override
     public StorageFormat storageFormat() {
-        return StorageFormat.HIBERNATE;
+        return StorageFormat.DATABASE;
     }
 
     @Override

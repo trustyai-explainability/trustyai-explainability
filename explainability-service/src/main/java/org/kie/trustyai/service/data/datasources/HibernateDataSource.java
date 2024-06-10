@@ -38,7 +38,7 @@ public class HibernateDataSource extends DataSource {
      * @throws DataframeCreateException if the dataframe cannot be created
      */
     public Dataframe getDataframe(final String modelId) throws DataframeCreateException {
-        HibernateStorage hst = (HibernateStorage) getStorage();
+        HibernateStorage hst = getStorage();
         return hst.readDataframe(modelId);
     }
 
@@ -51,7 +51,7 @@ public class HibernateDataSource extends DataSource {
      * @throws DataframeCreateException if the dataframe cannot be created
      */
     public Dataframe getDataframe(final String modelId, int batchSize) throws DataframeCreateException {
-        HibernateStorage hst = (HibernateStorage) getStorage();
+        HibernateStorage hst = getStorage();
         return hst.readDataframe(modelId, batchSize);
     }
 
@@ -70,7 +70,7 @@ public class HibernateDataSource extends DataSource {
             throw new IllegalArgumentException("DataSource.getDataframe endPos must be greater than startPos. Got startPos=" + startPos + ", endPos=" + endPos);
         }
 
-        HibernateStorage hst = (HibernateStorage) getStorage();
+        HibernateStorage hst = getStorage();
         return hst.readDataframe(modelId, startPos, endPos);
     }
 
@@ -83,7 +83,7 @@ public class HibernateDataSource extends DataSource {
      * @throws DataframeCreateException if the dataframe cannot be created
      */
     public Dataframe getOrganicDataframe(final String modelId, int batchSize) throws DataframeCreateException {
-        HibernateStorage hst = (HibernateStorage) getStorage();
+        HibernateStorage hst = getStorage();
         try {
             return hst.readDataframeAndMetadataWithTags(modelId, batchSize, Set.of(Dataframe.InternalTags.UNLABELED.get())).getLeft();
         } catch (StorageReadException e) {
@@ -101,7 +101,7 @@ public class HibernateDataSource extends DataSource {
      */
     public Dataframe getOrganicDataframe(final String modelId) throws DataframeCreateException {
         try {
-            HibernateStorage hst = (HibernateStorage) getStorage();
+            HibernateStorage hst = getStorage();
             return hst.readDataframeAndMetadataWithTags(modelId, Set.of(Dataframe.InternalTags.UNLABELED.get())).getLeft();
         } catch (StorageReadException e) {
             throw new DataframeCreateException(e.getMessage());
@@ -118,7 +118,7 @@ public class HibernateDataSource extends DataSource {
      * @throws InvalidSchemaException if the passed dataframe does not match the schema of existing data for the modelId.
      */
     protected void saveDataframeIntoStorage(final Dataframe dataframe, final String modelId, boolean overwrite) throws InvalidSchemaException {
-        HibernateStorage hst = (HibernateStorage) getStorage();
+        HibernateStorage hst = getStorage();
         if (!hst.dataExists(modelId)) {
             hst.saveDataframe(dataframe, modelId);
         } else if (overwrite) {
@@ -138,7 +138,7 @@ public class HibernateDataSource extends DataSource {
      * @throws StorageReadException if the metadata cannot be read
      */
     public StorageMetadata getMetadata(String modelId, boolean loadColumnValues) throws StorageReadException {
-        HibernateStorage hibernateStorage = (HibernateStorage) getStorage();
+        HibernateStorage hibernateStorage = getStorage();
         StorageMetadata sm = hibernateStorage.readMetaOrInternalData(modelId);
 
         // only grab column enumerations from DB if explicitly requested, to save time
@@ -179,7 +179,17 @@ public class HibernateDataSource extends DataSource {
      * @return the number of observations
      */
     public long getNumObservations(String modelId) {
-        return ((HibernateStorage) getStorage()).rowCount(modelId);
+        return getStorage().rowCount(modelId);
+    }
+
+    /**
+     * Check to see if a particular model has recorded inferences
+     *
+     * @param modelId the modelId to check
+     * @return true if the model has received inference data
+     */
+    public boolean hasRecordedInferences(String modelId) {
+        return getStorage().hasRecordedInferences(modelId);
     }
 
     // TAG OPERATIONS ==================================================================================================
@@ -189,12 +199,12 @@ public class HibernateDataSource extends DataSource {
      * @param dataTagging the dataTagging to apply. This contains both the modelId and the corresponding tag labels.
      */
     public void tagDataframeRows(DataTagging dataTagging) {
-        ((HibernateStorage) getStorage()).setTags(dataTagging);
+        getStorage().setTags(dataTagging);
     }
 
     // name aliasing handler
     public void applyNameMapping(NameMapping nameMapping) {
-        ((HibernateStorage) getStorage()).applyNameMapping(nameMapping);
+        getStorage().applyNameMapping(nameMapping);
     }
 
 }
