@@ -1,5 +1,9 @@
 package org.kie.trustyai.explainability.local.shap.background;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -15,10 +19,6 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.statistics.MultivariateOnlineEstimator;
 import org.kie.trustyai.statistics.distributions.gaussian.MultivariateGaussianParameters;
 import org.kie.trustyai.statistics.estimators.WelfordOnlineEstimator;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,12 +42,12 @@ class StreamingGeneratorTest {
         final MultivariateOnlineEstimator<MultivariateGaussianParameters> estimator = new WelfordOnlineEstimator(
                 dimension);
 
-        final RealVector mean = new ArrayRealVector(new double[]{1.0, 123.0, 90.0, 90000.0});
-        final RealMatrix covariance = MatrixUtils.createRealMatrix(new double[][]{
-                {10.0, 0.0, 0.0, 0.0},
-                {0.0, 52.0, 0.0, 0.0},
-                {0.0, 0.0, 13.9, 0.0},
-                {0.0, 0.0, 0.0, 30.0}
+        final RealVector mean = new ArrayRealVector(new double[] { 1.0, 123.0, 90.0, 90000.0 });
+        final RealMatrix covariance = MatrixUtils.createRealMatrix(new double[][] {
+                { 10.0, 0.0, 0.0, 0.0 },
+                { 0.0, 52.0, 0.0, 0.0 },
+                { 0.0, 0.0, 13.9, 0.0 },
+                { 0.0, 0.0, 0.0, 30.0 }
         });
 
         final MultivariateNormalDistribution dist = new MultivariateNormalDistribution(mean.toArray(),
@@ -98,7 +98,6 @@ class StreamingGeneratorTest {
 
     }
 
-
     @DisplayName("Test streaming generator returns correct dimensions")
     @ParameterizedTest
     @MethodSource("replacementType")
@@ -111,12 +110,12 @@ class StreamingGeneratorTest {
         final MultivariateOnlineEstimator<MultivariateGaussianParameters> estimator = new WelfordOnlineEstimator(
                 dimension);
 
-        final RealVector mean = new ArrayRealVector(new double[]{1.0, 123.0, 90.0, 90000.0});
-        final RealMatrix covariance = MatrixUtils.createRealMatrix(new double[][]{
-                {10.0, 0.0, 0.0, 0.0},
-                {0.0, 52.0, 0.0, 0.0},
-                {0.0, 0.0, 13.9, 0.0},
-                {0.0, 0.0, 0.0, 30.0}
+        final RealVector mean = new ArrayRealVector(new double[] { 1.0, 123.0, 90.0, 90000.0 });
+        final RealMatrix covariance = MatrixUtils.createRealMatrix(new double[][] {
+                { 10.0, 0.0, 0.0, 0.0 },
+                { 0.0, 52.0, 0.0, 0.0 },
+                { 0.0, 0.0, 13.9, 0.0 },
+                { 0.0, 0.0, 0.0, 30.0 }
         });
 
         final MultivariateNormalDistribution dist = new MultivariateNormalDistribution(mean.toArray(),
