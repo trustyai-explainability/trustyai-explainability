@@ -33,9 +33,11 @@ import java.util.stream.Stream;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.kie.trustyai.explainability.Config;
+import org.kie.trustyai.explainability.ThreadDumpOnTimeoutExtension;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CategoricalNumericalEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.CounterfactualEntity;
 import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualGoalCriteria;
@@ -87,6 +89,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(ThreadDumpOnTimeoutExtension.class)
 class CounterfactualExplainerTest {
 
     private static final Logger logger =
@@ -147,6 +150,7 @@ class CounterfactualExplainerTest {
     @ParameterizedTest
     @ValueSource(ints = { 0, 1, 2 })
     void testCounterfactualMatch(int seed) throws ExecutionException, InterruptedException, TimeoutException {
+
         Random random = new Random();
         random.setSeed(seed);
 

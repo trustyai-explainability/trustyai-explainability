@@ -16,8 +16,10 @@
 package org.kie.trustyai.explainability.local.counterfactual;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -53,14 +55,8 @@ public class CounterfactualUtils {
             PredictionProvider model,
             double goalThreshold,
             long steps) throws InterruptedException, ExecutionException, TimeoutException {
-        final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
-        final SolverConfig solverConfig = SolverConfigBuilder
-                .builder().withTerminationConfig(terminationConfig).build();
-        solverConfig.setRandomSeed(randomSeed);
-        solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
-        final CounterfactualConfig counterfactualConfig = new CounterfactualConfig();
-        counterfactualConfig.withSolverConfig(solverConfig);
-        final CounterfactualExplainer explainer = new CounterfactualExplainer(counterfactualConfig);
+
+        final CounterfactualExplainer explainer = new CounterfactualExplainer(getCounterfactualConfig(randomSeed, steps));
         final PredictionInput input = new PredictionInput(features);
         PredictionOutput output = new PredictionOutput(goal);
         Prediction prediction =
@@ -80,14 +76,8 @@ public class CounterfactualUtils {
             double goalThreshold,
             CounterfactualGoalCriteria goalCriteria,
             long steps) throws InterruptedException, ExecutionException, TimeoutException {
-        final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
-        final SolverConfig solverConfig = SolverConfigBuilder
-                .builder().withTerminationConfig(terminationConfig).build();
-        solverConfig.setRandomSeed(randomSeed);
-        solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
-        final CounterfactualConfig counterfactualConfig = new CounterfactualConfig();
-        counterfactualConfig.withSolverConfig(solverConfig);
-        final CounterfactualExplainer explainer = new CounterfactualExplainer(counterfactualConfig);
+
+        final CounterfactualExplainer explainer = new CounterfactualExplainer(getCounterfactualConfig(randomSeed, steps));
         final PredictionInput input = new PredictionInput(features);
         Prediction prediction =
                 new CounterfactualPrediction(input,
@@ -98,6 +88,20 @@ public class CounterfactualUtils {
                         goalCriteria);
         return explainer.explainAsync(prediction, model)
                 .get(CounterfactualUtils.predictionTimeOut, CounterfactualUtils.predictionTimeUnit);
+    }
+
+    public static CounterfactualConfig getCounterfactualConfig(Long seed, long steps) {
+        Random random = new Random();
+        random.setSeed(seed);
+        final TerminationConfig terminationConfig = new TerminationConfig().withScoreCalculationCountLimit(steps);
+        // for the purpose of this test, only a few steps are necessary
+        final SolverConfig solverConfig = SolverConfigBuilder
+                .builder().withTerminationConfig(terminationConfig).build();
+        solverConfig.setRandomSeed(seed);
+        solverConfig.setEnvironmentMode(EnvironmentMode.REPRODUCIBLE);
+        return new CounterfactualConfig()
+                .withSolverConfig(solverConfig)
+                .withExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
     }
 
 }
