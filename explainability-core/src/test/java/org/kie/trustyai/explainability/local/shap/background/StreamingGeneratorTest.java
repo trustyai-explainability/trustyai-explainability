@@ -20,10 +20,6 @@ import org.kie.trustyai.statistics.MultivariateOnlineEstimator;
 import org.kie.trustyai.statistics.distributions.gaussian.MultivariateGaussianParameters;
 import org.kie.trustyai.statistics.estimators.WelfordOnlineEstimator;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class StreamingGeneratorTest {
@@ -102,6 +98,23 @@ class StreamingGeneratorTest {
 
     }
 
+    @DisplayName("Test streaming generator with non-convergent values returns correct values ")
+    @ParameterizedTest
+    @MethodSource("replacementType")
+    void testGenerateNonConvergent(StreamingGenerator.ReplacementType type) {
+        final int queueSize = 200;
+        final int diversitySize = 50;
+
+        final double[] data = new double[] { 404, 1, 1, 20, 1, 144481.56, 1, 56482.48, 1, 372, 0, 0, 1, 2 };
+
+        final MultivariateOnlineEstimator<MultivariateGaussianParameters> estimator = new WelfordOnlineEstimator(
+                data.length);
+
+        final StreamingGenerator generator = new StreamingGenerator(data.length, queueSize, diversitySize, estimator, type, null);
+        generator.update(new ArrayRealVector(data));
+
+       assertNotNull(generator.generate(queueSize + diversitySize));
+    }
 
     @DisplayName("Test streaming generator returns correct dimensions")
     @ParameterizedTest
