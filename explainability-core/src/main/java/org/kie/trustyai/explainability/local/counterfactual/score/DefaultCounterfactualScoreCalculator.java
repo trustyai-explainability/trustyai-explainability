@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Counterfactual score calculator.
- * The score is implementabled as a {@link BendableBigDecimalScore} with two hard levels and one soft level.
+ * The score is implementable as a {@link BendableBigDecimalScore} with two hard levels and one soft level.
  * The primary hard level penalizes solutions which do not meet the required outcome.
  * The second hard level penalizes solutions which change constrained {@link CounterfactualEntity}.
  * The soft level penalizes solutions according to their distance from the original prediction inputs.
