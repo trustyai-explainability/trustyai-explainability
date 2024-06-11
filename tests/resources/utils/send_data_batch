@@ -103,12 +103,12 @@ while [ "$SUCCESS_ALPHA" != true ] || [ "$SUCCESS_BETA" != true ]; do
   fi
 
   if [ "$SUCCESS_ALPHA" != true ]; then
-    curl -k -H "Authorization: Bearer ${TOKEN}" https://$INFER_ROUTE_ALPHA/infer -d @$1 > /dev/null 2>&1
+    curl -k https://$INFER_ROUTE_ALPHA/infer -d @$1 > /dev/null 2>&1
     ( check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_ALPHA )) $MODEL_ALPHA; ) && SUCCESS_ALPHA=true
   fi;
 
   if [ "$SUCCESS_BETA" != true ]; then
-    curl -k -H "Authorization: Bearer ${TOKEN}"  -k https://$INFER_ROUTE_BETA/infer -d @$1 > /dev/null 2>&1
+    curl -k https://$INFER_ROUTE_BETA/infer -d @$1 > /dev/null 2>&1
     ( check_for_reception $(( $(jq '.inputs[0].data | length' $1) + $START_OBS_BETA )) $MODEL_BETA; ) && SUCCESS_BETA=true
   fi;
 
