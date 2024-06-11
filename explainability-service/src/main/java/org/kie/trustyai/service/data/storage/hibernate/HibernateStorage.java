@@ -44,7 +44,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
-@LookupIfProperty(name = "service.storage.format", stringValue = "HIBERNATE")
+@LookupIfProperty(name = "service.storage.format", stringValue = "DATABASE")
 @ApplicationScoped
 public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     @PersistenceContext

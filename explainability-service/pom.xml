@@ -68,6 +68,10 @@
     </dependency>
     <dependency>
       <groupId>${quarkus.platform.group-id}</groupId>
+      <artifactId>quarkus-jdbc-mysql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${quarkus.platform.group-id}</groupId>
       <artifactId>quarkus-jdbc-h2</artifactId>
     </dependency>
     <dependency>
