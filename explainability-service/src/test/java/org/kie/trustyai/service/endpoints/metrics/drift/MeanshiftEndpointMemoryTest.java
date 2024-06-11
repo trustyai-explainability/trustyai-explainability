@@ -1,8 +1,8 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.mocks.MockCSVDatasource;
-import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;

@@ -3,7 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockPVCStorage;
 import org.kie.trustyai.service.profiles.flatfile.PVCTestProfile;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;

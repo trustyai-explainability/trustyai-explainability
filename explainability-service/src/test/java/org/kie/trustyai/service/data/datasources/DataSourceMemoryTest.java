@@ -2,7 +2,7 @@ package org.kie.trustyai.service.data.datasources;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import io.quarkus.test.junit.QuarkusTest;

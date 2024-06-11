@@ -11,8 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
-import org.kie.trustyai.service.mocks.MockCSVDatasource;
-import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

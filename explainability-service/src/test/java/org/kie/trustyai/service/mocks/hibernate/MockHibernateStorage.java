@@ -1,6 +1,8 @@
 package org.kie.trustyai.service.mocks.hibernate;
 
 import org.kie.trustyai.service.data.storage.hibernate.HibernateStorage;
+import org.kie.trustyai.service.mocks.MockServiceConfig;
+import org.kie.trustyai.service.mocks.MockStorageConfig;
 
 import io.quarkus.test.Mock;
 
@@ -12,7 +14,7 @@ import jakarta.enterprise.inject.Alternative;
 @ApplicationScoped
 public class MockHibernateStorage extends HibernateStorage {
     public MockHibernateStorage() {
-        super(new MockHibernateServiceConfig(), new MockHibernateStorageConfig());
+        super(new MockServiceConfig(), new MockStorageConfig());
     }
 
 }

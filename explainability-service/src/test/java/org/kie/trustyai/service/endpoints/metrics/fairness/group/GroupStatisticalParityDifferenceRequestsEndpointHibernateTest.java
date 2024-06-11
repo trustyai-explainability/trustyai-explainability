@@ -3,7 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.mocks.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.profiles.hibernate.HibernateTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;

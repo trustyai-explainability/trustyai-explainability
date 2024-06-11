@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.mocks;
+package org.kie.trustyai.service.mocks.flatfile;
 
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.datasources.CSVDataSource;

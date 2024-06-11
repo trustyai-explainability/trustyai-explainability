@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,11 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             String fromFolder = mc.getFromFolder();
             String fromFile = mc.getFromFilename();
 
+            if (!Paths.get(fromFolder).toFile().isDirectory()) {
+                LOG.warn("A storage folder \"" + fromFolder + "\" was provided in the service configuration, but no such directory exists. Migration will be skipped.");
+                return;
+            }
+
             CustomStorageConfig customStorageConfig = new CustomStorageConfig(fromFile, fromFolder);
             CustomServiceConfig customServiceConfig = new CustomServiceConfig(OptionalInt.of(batchSize), null, null, null);
             PVCStorage pvcStorage = new PVCStorage(customServiceConfig, customStorageConfig);
@@ -114,11 +120,12 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                         saveDataframe(df, modelId);
                         startIdx += batchSize;
                     }
+                    LOG.info("Migration of " + modelId + " is complete, " + rowCount(modelId) + " total rows migrated.");
                 }
             }
             LOG.info("Migration complete, the PVC is now safe to remove.");
             migrationConfig = Optional.empty();
-
+            setDataDirty();
         }
     }
 
@@ -535,7 +542,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     public void refreshIfDirty() {
         if (dataDirty) {
             LOG.debug("Refreshing dirty data");
-            //em.clear();
+            em.clear();
             dataDirty = false;
         }
     }

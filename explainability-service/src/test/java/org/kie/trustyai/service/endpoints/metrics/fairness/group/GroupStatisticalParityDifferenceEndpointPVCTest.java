@@ -3,9 +3,9 @@ package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockPVCStorage;
 import org.kie.trustyai.service.profiles.flatfile.PVCTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 

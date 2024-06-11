@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
 

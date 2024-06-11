@@ -26,10 +26,6 @@ public class HibernateTestProfile implements QuarkusTestProfile {
         overrides.put("service.metrics-schedule", "5s");
         overrides.put("service.batch-size", "5000");
 
-        // needed for validation
-        //overrides.put("storage.data-filename", "data.csv");
-        //overrides.put("storage.data-folder", "/inputs");
-
         // hibernate args
         overrides.put("quarkus.datasource.jdbc.url", "jdbc:h2:tcp://localhost:9092/~/trustyai_test_H2_DB");
         overrides.put("quarkus.hibernate-orm.database.generation", "drop-and-create");

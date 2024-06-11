@@ -1,6 +1,8 @@
-package org.kie.trustyai.service.mocks.memory;
+package org.kie.trustyai.service.mocks.flatfile;
 
 import org.kie.trustyai.service.data.storage.flatfile.MemoryStorage;
+import org.kie.trustyai.service.mocks.MockServiceConfig;
+import org.kie.trustyai.service.mocks.MockStorageConfig;
 
 import io.quarkus.test.Mock;
 
@@ -15,7 +17,7 @@ import jakarta.enterprise.inject.Alternative;
 public class MockMemoryStorage extends MemoryStorage {
 
     public MockMemoryStorage() {
-        super(new MockMemoryServiceConfig(), new MockMemoryStorageConfig());
+        super(new MockServiceConfig(), new MockStorageConfig());
     }
 
     public void emptyStorage() {

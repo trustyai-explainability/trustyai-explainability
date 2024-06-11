@@ -14,8 +14,8 @@ import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
-import org.kie.trustyai.service.mocks.MockCSVDatasource;
-import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

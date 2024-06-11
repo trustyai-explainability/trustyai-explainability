@@ -13,10 +13,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.mocks.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.kserve.MockKServeInputPayload;
 import org.kie.trustyai.service.mocks.kserve.MockKServeOutputPayload;
-import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 

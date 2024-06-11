@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
-import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockPVCStorage;
 import org.kie.trustyai.service.profiles.flatfile.PVCTestProfile;
 
 import io.quarkus.test.junit.QuarkusTest;

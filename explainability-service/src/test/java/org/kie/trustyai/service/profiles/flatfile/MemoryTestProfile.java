@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.kie.trustyai.service.mocks.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.mocks.memory.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
 
@@ -21,7 +21,7 @@ public class MemoryTestProfile implements QuarkusTestProfile {
         overrides.put("service.data-format", String.valueOf(CSV));
         overrides.put("service.metrics-schedule", "5s");
         overrides.put("storage.data-filename", "data.csv");
-        overrides.put("storage.data-folder", "/inputs");
+        overrides.put("storage.data-folder", "/tmp");
         overrides.put("service.batch-size", "5000");
         return overrides;
     }

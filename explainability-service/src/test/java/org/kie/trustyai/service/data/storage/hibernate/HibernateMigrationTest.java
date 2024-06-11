@@ -8,9 +8,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.mocks.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockPVCStorage;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateDatasource;
-import org.kie.trustyai.service.mocks.pvc.MockPVCStorage;
 import org.kie.trustyai.service.profiles.hibernate.MigrationTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
