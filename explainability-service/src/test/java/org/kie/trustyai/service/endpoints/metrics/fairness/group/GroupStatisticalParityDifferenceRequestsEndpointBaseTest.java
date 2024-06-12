@@ -14,6 +14,7 @@ import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
 import io.restassured.http.ContentType;
@@ -128,7 +129,7 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
         assertTrue(requests.isEmpty());
     }
 
-    @DisplayName("DIR request with custom batch size")
+    @DisplayName("SPD request with custom batch size")
     void requestCustomBatchSize() {
 
         // No schedule request made yet
@@ -176,5 +177,83 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
 
         // Correct number of active requests
         assertEquals(2, scheduleList.requests.size());
+    }
+
+    /**
+     * Deleting a request should work
+     */
+    @Test
+    void deleteRequest() {
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseScheduledResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/request")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseScheduledResponse.class);
+
+        final ScheduleId requestId = new ScheduleId();
+        requestId.requestId = response.getRequestId();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestId)
+                .when().delete("/request").peek()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode());
+    }
+
+    /**
+     * Deleting a request when passing a null ID should return a sensible error message
+     */
+    @Test
+    void deleteRequestNullID() {
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseScheduledResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/request")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseScheduledResponse.class);
+
+        final ScheduleId requestId = new ScheduleId();
+        requestId.requestId = null;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestId)
+                .when().delete("/request")
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    /**
+     * Deleting a request when passing an invalid UUID should return a sensible error message
+     */
+    @Test
+    void deleteRequestInvalidID() {
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseScheduledResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/request")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseScheduledResponse.class);
+
+        final ScheduleId requestId = new ScheduleId();
+        requestId.requestId = null;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"id\": \"invalidUUID\"}")
+                .when().delete("/request")
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
     }
 }
