@@ -55,7 +55,8 @@ fi
 success=1
 
 if [ $INSTALL_FAILURE = false ]; then
-  $HOME/peak/run.sh ${TESTS_REGEX}
+  cd peak/trustyai-tests
+  poetry run pytest -s --log-cli-level=DEBUG
 else
   echo -e "Skipping tests due to ODH Operator/DSC installation failure, marking suite as failed."
   success=0

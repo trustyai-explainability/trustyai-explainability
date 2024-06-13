@@ -27,12 +27,17 @@ RUN tar -C /usr/local/bin -xvf $HOME/peak/oc-cli.tar.gz && \
 
 COPY Pipfile Pipfile.lock $HOME/peak/
 
+# Install poetry to support the exeuction of trustyai-tests
+RUN curl -sSL https://install.python-poetry.org | python3 -
+ENV PATH="${PATH}:$HOME/.local/bin"
+RUN cd $HOME/peak && \
+    git clone https://github.com/trustyai-explainability/trustyai-tests.git && \
+    cd trustyai-tests && \
+    poetry install
 
 COPY setup/operatorsetup scripts/install.sh scripts/installandtest.sh $HOME/peak/
-COPY resources $HOME/peak/operator-tests/trustyai-explainability/resources
 COPY util $HOME/peak/operator-tests/trustyai-explainability
 COPY setup/odh-core-dsc.yaml setup/odh-core-dsci.yaml $HOME/kfdef/
-COPY basictests $HOME/peak/operator-tests/trustyai-explainability/basictests
 COPY scripts/setup.sh $HOME/peak/setup.sh
 
 RUN chmod -R 777 $HOME/kfdef && \
