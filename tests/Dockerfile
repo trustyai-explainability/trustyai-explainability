@@ -36,7 +36,6 @@ RUN cd $HOME/peak && \
     poetry install
 
 COPY setup/operatorsetup scripts/install.sh scripts/installandtest.sh $HOME/peak/
-COPY resources $HOME/peak/operator-tests/trustyai-explainability/resources
 COPY util $HOME/peak/operator-tests/trustyai-explainability
 COPY setup/odh-core-dsc.yaml setup/odh-core-dsci.yaml $HOME/kfdef/
 COPY scripts/setup.sh $HOME/peak/setup.sh
