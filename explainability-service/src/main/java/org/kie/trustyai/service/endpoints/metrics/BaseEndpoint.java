@@ -66,12 +66,16 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     @Path("/request")
     public Response deleteRequest(ScheduleId request) {
         final UUID id = request.requestId;
-        if (scheduler.getRequests(this.name).containsKey(id)) {
+
+        if (null == id) {
+            LOG.error("Scheduled requestId in DELETE payload was null. This can occur if the provided requestId was not a valid UUID, please check the parameters of the DELETE payload.");
+            return RestResponse.ResponseBuilder.notFound().build().toResponse();
+        } else if (scheduler.getRequests(this.name).containsKey(id)) {
             scheduler.delete(this.name, request.requestId);
-            LOG.info("Removing scheduled request id=" + id);
+            LOG.info("Removing scheduled request ID=" + id);
             return RestResponse.ResponseBuilder.ok("Removed").build().toResponse();
         } else {
-            LOG.error("Scheduled request id=" + id + " not found");
+            LOG.error("Scheduled requestId=" + id + " not found");
             return RestResponse.ResponseBuilder.notFound().build().toResponse();
         }
     }
