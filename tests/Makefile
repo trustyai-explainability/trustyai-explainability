@@ -25,6 +25,7 @@ BUILD_TOOL?=podman
 NO_CACHE?=false
 LOCAL?=false
 TEARDOWN?=false
+PLATFORM?=linux/amd64
 
 SERVICE_IMAGE?=quay.io/trustyai/trustyai-service:latest
 OPERATOR_IMAGE?=quay.io/trustyai/trustyai-service-operator:latest
@@ -33,10 +34,11 @@ all: test
 test: build run clean
 
 build:
-	${BUILD_TOOL} build -t $(IMAGE) --build-arg ORG=$(GIT_ORG) --build-arg BRANCH=$(GIT_BRANCH) --build-arg ODS_CI_REPO=$(ODS_CI_REPO) --build-arg ODS_CI_GITREF=$(ODS_CI_GITREF) --build-arg OC_CLI_URL=$(OC_CLI_URL) .
+	${BUILD_TOOL} build -t $(IMAGE) --build-arg ORG=$(GIT_ORG) --build-arg BRANCH=$(GIT_BRANCH) --build-arg ODS_CI_REPO=$(ODS_CI_REPO) --build-arg ODS_CI_GITREF=$(ODS_CI_GITREF) --build-arg OC_CLI_URL=$(OC_CLI_URL) --platform=$(PLATFORM) .
 run:
 	# Confirm that we have a directory for storing any screenshots from selenium tests
 	mkdir -p ${LOCAL_ARTIFACT_DIR}/screenshots
+
 	oc config view --flatten --minify > /tmp/tests-kubeconfig
 	${BUILD_TOOL} run -e SKIP_INSTALL=$(SKIP_INSTALL) -e TESTS_REGEX=$(TESTS_REGEX) -e SKIP_OPERATOR_INSTALL=$(SKIP_OPERATOR_INSTALL) \
 	    -e SKIP_DSC_INSTALL=$(SKIP_DSC_INSTALL) -e ODHPROJECT=$(ODHPROJECT) \
