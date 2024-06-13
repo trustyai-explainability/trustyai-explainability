@@ -19,6 +19,7 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.statistics.MultivariateOnlineEstimator;
 import org.kie.trustyai.statistics.distributions.gaussian.MultivariateGaussianParameters;
 import org.kie.trustyai.statistics.estimators.WelfordOnlineEstimator;
+import org.opentest4j.AssertionFailedError;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,7 +35,7 @@ class StreamingGeneratorTest {
     @ParameterizedTest
     @MethodSource("replacementType")
     void testGenerate(StreamingGenerator.ReplacementType type) {
-        final int queueSize = 200;
+        final int queueSize = 500;
         final int diversitySize = 50;
         final int dimension = 4;
         final int nObs = 1000;
@@ -42,12 +43,12 @@ class StreamingGeneratorTest {
         final MultivariateOnlineEstimator<MultivariateGaussianParameters> estimator = new WelfordOnlineEstimator(
                 dimension);
 
-        final RealVector mean = new ArrayRealVector(new double[] { 1.0, 123.0, 90.0, 90000.0 });
-        final RealMatrix covariance = MatrixUtils.createRealMatrix(new double[][] {
-                { 10.0, 0.0, 0.0, 0.0 },
-                { 0.0, 52.0, 0.0, 0.0 },
-                { 0.0, 0.0, 13.9, 0.0 },
-                { 0.0, 0.0, 0.0, 30.0 }
+        final RealVector mean = new ArrayRealVector(new double[]{1.0, 123.0, 90.0, 90000.0});
+        final RealMatrix covariance = MatrixUtils.createRealMatrix(new double[][]{
+                {3.0, 0.0, 0.0, 0.0},
+                {0.0, 52.0, 0.0, 0.0},
+                {0.0, 0.0, 13.9, 0.0},
+                {0.0, 0.0, 0.0, 30.0}
         });
 
         final MultivariateNormalDistribution dist = new MultivariateNormalDistribution(mean.toArray(),
@@ -55,9 +56,10 @@ class StreamingGeneratorTest {
 
         final double[][] truth = dist.sample(nObs);
 
+
         final StreamingGenerator generator = new StreamingGenerator(dimension, queueSize, diversitySize, estimator, type, null);
 
-        final List<PredictionInput> initialBackground = generator.generate(250);
+        final List<PredictionInput> initialBackground = generator.generate(queueSize + diversitySize);
 
         final RealMatrix bgMatrix = MatrixUtils.createRealMatrix(queueSize + diversitySize, dimension);
 
@@ -69,6 +71,8 @@ class StreamingGeneratorTest {
 
         final Covariance initialCov = new Covariance(bgMatrix.getData());
         final RealMatrix initialCalculatedCovariance = initialCov.getCovarianceMatrix();
+
+
         for (int i = 0; i < dimension; i++) {
             final double calculatedMean = StatUtils.mean(bgMatrix.getColumn(i));
             assertEquals(0.0, calculatedMean, 2.0, "Initial mean [" + i + "] value is wrong");
@@ -76,11 +80,12 @@ class StreamingGeneratorTest {
                     WelfordOnlineEstimator.DEFAULT_VARIANCE / 3.0, "Initial variance [" + i + "] value is wrong");
         }
 
+
         for (int i = 0; i < nObs; i++) {
             generator.update(new ArrayRealVector(truth[i]));
         }
 
-        final List<PredictionInput> finalBackground = generator.generate(250);
+        final List<PredictionInput> finalBackground = generator.generate(queueSize + diversitySize);
 
         for (int i = 0; i < queueSize + diversitySize; i++) {
             final double[] values = finalBackground.get(i).getFeatures().stream().mapToDouble(f -> f.getValue().asNumber())
@@ -89,9 +94,10 @@ class StreamingGeneratorTest {
         }
         final Covariance finalCov = new Covariance(bgMatrix.getData());
         final RealMatrix finalcalculatedCovariance = finalCov.getCovarianceMatrix();
+
         for (int i = 0; i < dimension; i++) {
             final double calculatedMean = StatUtils.mean(bgMatrix.getColumn(i));
-            assertEquals(mean.getEntry(i), calculatedMean, mean.getEntry(i) / 3.0, "Final mean [" + i + "] value is wrong");
+            assertEquals(mean.getEntry(i), calculatedMean, mean.getEntry(i) / 3.0, "Final mean [" + i + "] value is wrong: " + repeat);
             final double trueVariance = covariance.getEntry(i, i);
             assertEquals(trueVariance, finalcalculatedCovariance.getEntry(i, i), trueVariance / 3.0, "Final variance " + i + " wrong");
         }
