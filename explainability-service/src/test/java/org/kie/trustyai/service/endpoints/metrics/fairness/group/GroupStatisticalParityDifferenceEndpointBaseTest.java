@@ -25,8 +25,8 @@ import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
-import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+
 
 abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
@@ -46,10 +46,14 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
     @Test
     void get() {
-        when().get()
-                .then()
-                .statusCode(405)
-                .body(is(""));
+        String responseBody = when().get()
+            .then()
+            .statusCode(405)
+            .extract()
+            .body()
+            .asString();
+
+        assertEquals("", responseBody);
     }
 
     @Test
@@ -116,13 +120,16 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectType();
 
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post()
-                .then()
-                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("got 'male', expected object compatible with 'INT32'"));
+        final String response = given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+            .when().post()
+            .then()
+            .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+            .extract()
+            .body().asString();
+
+        assertTrue(response.contains("got 'male', expected object compatible with 'INT32'"));
     }
 
     @Test
@@ -132,13 +139,16 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
 
         final GroupMetricRequest payload = RequestPayloadGenerator.incorrectInput();
 
-        given()
+        final String response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post()
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .body(containsString("No protected attribute found with name=city"));
+                .extract()
+                .body().asString();
+
+            assertTrue(response.contains("No protected attribute found with name=city"));
 
     }
 
@@ -146,13 +156,16 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
     void postUnknownType() {
         final Map<String, Object> payload = RequestPayloadGenerator.unknownType();
 
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post()
-                .then()
-                .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
-                .body(any(String.class));
+        final String response = given()
+            .contentType(ContentType.JSON)
+            .body(payload)
+            .when().post()
+            .then()
+            .statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+            .extract()
+            .body().asString();
+
+        assertNotNull(response);
 
     }
 
@@ -199,8 +212,10 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         // Remove one request
         final ScheduleId firstRequestId = new ScheduleId();
         firstRequestId.requestId = firstRequest.getRequestId();
-        given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
-                .then().statusCode(200).body(is("Removed"));
+        final String firstDeleteRequest = given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
+                .then().statusCode(200).extract().body().asString();
+
+        assertEquals("Removed", firstDeleteRequest);
 
         scheduleList = given()
                 .when()
@@ -213,8 +228,10 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         // Remove second request
         final ScheduleId secondRequestId = new ScheduleId();
         secondRequestId.requestId = secondRequest.getRequestId();
-        given().contentType(ContentType.JSON).when().body(secondRequestId).delete("/request")
-                .then().statusCode(200).body(is("Removed"));
+        final String secondDeleteRequest = given().contentType(ContentType.JSON).when().body(secondRequestId).delete("/request")
+                .then().statusCode(200).extract().body().asString();
+
+        assertEquals("Removed", secondDeleteRequest);
 
         scheduleList = given()
                 .when()
@@ -227,8 +244,9 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         // Remove non-existing request
         final ScheduleId nonExistingRequestId = new ScheduleId();
         nonExistingRequestId.requestId = secondRequest.getRequestId();
-        given().contentType(ContentType.JSON).when().body(nonExistingRequestId).delete("/request")
-                .then().statusCode(RestResponse.StatusCode.NOT_FOUND).body(is(""));
+        final String nonExistingIdDeleteRequest = given().contentType(ContentType.JSON).when().body(nonExistingRequestId).delete("/request")
+                .then().statusCode(RestResponse.StatusCode.NOT_FOUND).extract().body().asString();
+        assertEquals("", nonExistingIdDeleteRequest);
 
         scheduleList = given()
                 .when()
@@ -263,13 +281,16 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         assertNotNull(firstRequest.getRequestId());
 
         final GroupMetricRequest wrongPayload = RequestPayloadGenerator.incorrectType();
-        given()
+        final String wrongPayloadRequest= given()
                 .contentType(ContentType.JSON)
                 .body(wrongPayload)
                 .when()
                 .post("/request")
                 .then().statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(containsString("got 'male', expected object compatible with 'INT32'"));
+                .extract().body().asString();
+
+
+        assertTrue(wrongPayloadRequest.contains("got 'male', expected object compatible with 'INT32'"));
 
         ScheduleList scheduleList = given()
                 .when()
@@ -282,8 +303,10 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         // Remove one request
         final ScheduleId firstRequestId = new ScheduleId();
         firstRequestId.requestId = firstRequest.getRequestId();
-        given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
-                .then().statusCode(200).body(is("Removed"));
+        final String deleteRequest = given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
+                .then().statusCode(200).extract().body().asString();
+
+        assertEquals("Removed", deleteRequest);
 
         scheduleList = given()
                 .when()
@@ -337,8 +360,10 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         // Remove one request
         final ScheduleId firstRequestId = new ScheduleId();
         firstRequestId.requestId = firstRequest.getRequestId();
-        given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
-                .then().statusCode(200).body(is("Removed"));
+        final String deleteRequest = given().contentType(ContentType.JSON).when().body(firstRequestId).delete("/request")
+                .then().statusCode(200).extract().body().asString();
+
+        assertEquals("Removed", deleteRequest);
 
         scheduleList = given()
                 .when()
