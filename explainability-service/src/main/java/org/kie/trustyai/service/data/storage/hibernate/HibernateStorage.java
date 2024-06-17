@@ -96,7 +96,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             }
 
             CustomStorageConfig customStorageConfig = new CustomStorageConfig(fromFile, fromFolder);
-            CustomServiceConfig customServiceConfig = new CustomServiceConfig(OptionalInt.of(batchSize), null, null, null);
+            CustomServiceConfig customServiceConfig = new CustomServiceConfig(OptionalInt.of(batchSize), null, null);
             PVCStorage pvcStorage = new PVCStorage(customServiceConfig, customStorageConfig);
             CSVDataSource oldDataSource = new CSVDataSource();
             oldDataSource.setParser(new CSVParser());

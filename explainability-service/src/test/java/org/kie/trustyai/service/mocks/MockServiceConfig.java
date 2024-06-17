@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.mocks;
 
+import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -28,9 +29,10 @@ public class MockServiceConfig implements ServiceConfig {
     }
 
     @Override
-    public DataFormat dataFormat() {
+    public Optional<DataFormat> dataFormat() {
         return serviceConfig.dataFormat();
     }
+    explainability-service/src/test/java/org/kie/trustyai/service/mocks/
 
     @Override
     public String metricsSchedule() {

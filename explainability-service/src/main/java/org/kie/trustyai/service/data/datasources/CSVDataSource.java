@@ -19,14 +19,14 @@ import org.kie.trustyai.service.payloads.service.Schema;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkus.arc.lookup.LookupIfProperty;
+import io.quarkus.arc.lookup.LookupUnlessProperty;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
-@LookupIfProperty(name = "service.data.format", stringValue = "CSV")
+@LookupUnlessProperty(name = "service.storage.format", stringValue = "DATABASE")
 public class CSVDataSource extends DataSource {
     @Inject
     Instance<FlatFileStorage> storage;

@@ -19,7 +19,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
-@LookupIfProperty(name = "service.data.format", stringValue = "HIBERNATE")
+@LookupIfProperty(name = "service.storage.format", stringValue = "DATABASE")
 public class HibernateDataSource extends DataSource {
     @Inject
     Instance<HibernateStorage> storage;
