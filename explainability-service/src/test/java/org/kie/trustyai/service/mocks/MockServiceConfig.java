@@ -32,7 +32,6 @@ public class MockServiceConfig implements ServiceConfig {
     public Optional<DataFormat> dataFormat() {
         return serviceConfig.dataFormat();
     }
-    explainability-service/src/test/java/org/kie/trustyai/service/mocks/
 
     @Override
     public String metricsSchedule() {
