@@ -481,6 +481,21 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
+    @Transactional
+    public List<String> getTags(String modelId) {
+        if (dataExists(modelId)) {
+            refreshIfDirty();
+            return em.createQuery(
+                    "select dr.tag from DataframeRow dr " +
+                            "where dr.modelId = ?1",
+                    String.class)
+                    .setParameter(1, modelId)
+                    .getResultList();
+        } else {
+            throw new IllegalArgumentException("Error reading tags for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
+    }
+
     // NAME MAPPING MANIPULATION =======================================================================================
     @Transactional
     public void applyNameMapping(NameMapping nameMapping) {

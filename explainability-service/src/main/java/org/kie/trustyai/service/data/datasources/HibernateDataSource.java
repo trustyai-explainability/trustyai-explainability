@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.data.datasources;
 
+import java.util.List;
 import java.util.Set;
 
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -200,6 +201,11 @@ public class HibernateDataSource extends DataSource {
      */
     public void tagDataframeRows(DataTagging dataTagging) {
         getStorage().setTags(dataTagging);
+    }
+
+    @Override
+    public List<String> getTags(String modelId) {
+        return getStorage().getTags(modelId);
     }
 
     // name aliasing handler

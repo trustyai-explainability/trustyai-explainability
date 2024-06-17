@@ -3,32 +3,28 @@ package org.kie.trustyai.service.endpoints.service;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.reactive.RestResponse;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
-import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
-import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.IntNode;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 
@@ -39,33 +35,22 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
-@QuarkusTest
-@TestProfile(MemoryTestProfile.class)
-class ServiceMetadataEndpointTest {
+abstract class ServiceMetadataEndpointBaseTest {
 
     private static final String MODEL_ID = "example1";
     private final String metadataUrl = "/info";
-    @Inject
-    Instance<MockCSVDatasource> datasource;
 
     @Inject
-    Instance<MockMemoryStorage> storage;
+    Instance<DataSource> datasource;
 
-    @Inject
-    Instance<MockPrometheusScheduler> scheduler;
+    public abstract void resetDatasource() throws JsonProcessingException;
 
-    @BeforeEach
-    void clearStorage() throws JsonProcessingException {
-        storage.get().emptyStorage();
-        datasource.get().reset();
-        scheduler.get().empty();
-    }
+    public abstract void saveDataframe(Dataframe dataframe, String modelId);
 
     @Test
     void getTwoObservations() throws JsonProcessingException {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(2);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        saveDataframe(dataframe, MODEL_ID);
 
         final List<ServiceMetadata> serviceMetadata = given()
                 .when().get(metadataUrl)
@@ -92,8 +77,7 @@ class ServiceMetadataEndpointTest {
     @Test
     void getThousandObservations() throws JsonProcessingException {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 50, false);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        saveDataframe(dataframe, MODEL_ID);
 
         final List<ServiceMetadata> serviceMetadata = given()
                 .when().get(metadataUrl)
@@ -118,8 +102,7 @@ class ServiceMetadataEndpointTest {
     @Test
     void getThousandDiverseObservations() throws JsonProcessingException {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 1000, false);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        saveDataframe(dataframe, MODEL_ID);
 
         final List<ServiceMetadata> serviceMetadata = given()
                 .when().get(metadataUrl)
@@ -146,7 +129,7 @@ class ServiceMetadataEndpointTest {
 
     @Test
     void getNoObservations() throws JsonProcessingException {
-        datasource.get().reset();
+        resetDatasource();
         final List<ServiceMetadata> serviceMetadata = given()
                 .when().get(metadataUrl)
                 .then()
@@ -161,8 +144,7 @@ class ServiceMetadataEndpointTest {
     @Test
     void setNameMapping() throws JsonProcessingException {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 10, false);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        saveDataframe(dataframe, MODEL_ID);
 
         HashMap<String, String> inputMapping = new HashMap<>();
         HashMap<String, String> outputMapping = new HashMap<>();
@@ -201,8 +183,7 @@ class ServiceMetadataEndpointTest {
     @Test
     void setNameMappingPartial() throws JsonProcessingException {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 10, false);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        saveDataframe(dataframe, MODEL_ID);
 
         HashMap<String, String> inputMapping = new HashMap<>();
         HashMap<String, String> outputMapping = new HashMap<>();
@@ -252,8 +233,7 @@ class ServiceMetadataEndpointTest {
     @Test
     void setNameMappingWrongInputs() throws JsonProcessingException {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 10, false);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        saveDataframe(dataframe, MODEL_ID);
 
         HashMap<String, String> inputMapping = new HashMap<>();
         HashMap<String, String> outputMapping = new HashMap<>();
@@ -272,8 +252,7 @@ class ServiceMetadataEndpointTest {
     @Test
     void setNameMappingWrongOutputs() throws JsonProcessingException {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 10, false);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        saveDataframe(dataframe, MODEL_ID);
 
         HashMap<String, String> inputMapping = new HashMap<>();
         HashMap<String, String> outputMapping = new HashMap<>();
@@ -295,14 +274,12 @@ class ServiceMetadataEndpointTest {
         final int modelANobs = 2000;
         final Dataframe dataframeA = DataframeGenerators.generateRandomDataframe(modelANobs);
         final String MODEL_A = "example-model-a";
-        datasource.get().saveDataframe(dataframeA, MODEL_A);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeA), MODEL_A);
+        saveDataframe(dataframeA, MODEL_A);
 
         final int modelBNobs = 3000;
         final Dataframe dataframeB = DataframeGenerators.generateRandomDataframe(modelBNobs);
         final String MODEL_B = "example-model-b";
-        datasource.get().saveDataframe(dataframeB, MODEL_B);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeB), MODEL_B);
+        saveDataframe(dataframeB, MODEL_B);
 
         final int nRequestsModelA = 3;
         final int nRequestsModelB = 2;
@@ -376,14 +353,12 @@ class ServiceMetadataEndpointTest {
         final int modelANobs = 2000;
         final Dataframe dataframeA = DataframeGenerators.generateRandomDataframe(modelANobs);
         final String MODEL_A = "example-model-a";
-        datasource.get().saveDataframe(dataframeA, MODEL_A);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeA), MODEL_A);
+        saveDataframe(dataframeA, MODEL_A);
 
         final int modelBNobs = 3000;
         final Dataframe dataframeB = DataframeGenerators.generateRandomDataframe(modelBNobs);
         final String MODEL_B = "example-model-b";
-        datasource.get().saveDataframe(dataframeB, MODEL_B);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeB), MODEL_B);
+        saveDataframe(dataframeB, MODEL_B);
 
         final int nRequestsModelA = 7;
         final int nRequestsModelB = 7;
@@ -457,14 +432,12 @@ class ServiceMetadataEndpointTest {
         final int modelANobs = 2000;
         final Dataframe dataframeA = DataframeGenerators.generateRandomDataframe(modelANobs);
         final String MODEL_A = "example-model-a";
-        datasource.get().saveDataframe(dataframeA, MODEL_A);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeA), MODEL_A);
+        saveDataframe(dataframeA, MODEL_A);
 
         final int modelBNobs = 3000;
         final Dataframe dataframeB = DataframeGenerators.generateRandomDataframe(modelBNobs);
         final String MODEL_B = "example-model-b";
-        datasource.get().saveDataframe(dataframeB, MODEL_B);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframeB), MODEL_B);
+        saveDataframe(dataframeB, MODEL_B);
 
         final List<ServiceMetadata> serviceMetadata = given()
                 .when().get(metadataUrl)
@@ -502,8 +475,7 @@ class ServiceMetadataEndpointTest {
     @Test
     void setDatapointTagging() throws JsonProcessingException {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(50, 10, false);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        saveDataframe(dataframe, MODEL_ID);
         List<String> originalTags = datasource.get().getDataframe(MODEL_ID).getTags();
 
         List<String> tags = List.of("TRAINING", "SYNTHETIC");
@@ -540,6 +512,56 @@ class ServiceMetadataEndpointTest {
             // check that each datapoint we tagged has the correct tag
             for (Integer i : tagIDXGroundTruth.get(tag)) {
                 assertTrue(subDF.getIds().contains(df.getIds().get(i)));
+            }
+        }
+    }
+
+    @Test
+    void getDatapointTagging() throws JsonProcessingException {
+        int nModels = 3;
+        final List<Dataframe> dataframes = IntStream.range(0, nModels).mapToObj(
+                i -> DataframeGenerators.generateRandomDataframe(500, 10, false)).collect(Collectors.toList());
+
+        List<String> tags = List.of("A", "B", "C", "D");
+
+        // for each model m, assign n A-tags, 2n B-tags, 3n C-tags, etc, where n=m+10
+        for (int modelIdx = 0; modelIdx < nModels; modelIdx++) {
+            String modelId = MODEL_ID + "_" + modelIdx;
+            saveDataframe(dataframes.get(modelIdx), modelId);
+            int idx = 0;
+            int spacing = modelIdx + 10;
+
+            HashMap<String, List<List<Integer>>> tagMapToPost = new HashMap<>();
+
+            for (int tagIdx = 0; tagIdx < tags.size(); tagIdx++) {
+                int endIdx = idx + (spacing * (tagIdx + 1));
+                tagMapToPost.put(tags.get(tagIdx), List.of(List.of(idx, endIdx)));
+                idx = endIdx + spacing;
+            }
+
+            DataTagging dataTagging = new DataTagging(modelId, tagMapToPost);
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(dataTagging)
+                    .when().post(metadataUrl + "/tags")
+                    .then()
+                    .statusCode(200)
+                    .body(is("Datapoints successfully tagged."));
+        }
+
+        Map<String, Map<String, Long>> tagCounts = given()
+                .get(metadataUrl + "/tags")
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().as(new TypeRef<Map<String, Map<String, Long>>>() {
+                });
+
+        for (int modelIdx = 0; modelIdx < nModels; modelIdx++) {
+            String modelId = MODEL_ID + "_" + modelIdx;
+            for (int tagIdx = 0; tagIdx < tags.size(); tagIdx++) {
+                assertEquals((10 + modelIdx) * (tagIdx + 1), tagCounts.get(modelId).get(tags.get(tagIdx)));
             }
         }
     }

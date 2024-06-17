@@ -2,6 +2,7 @@ package org.kie.trustyai.service.endpoints.service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
@@ -73,6 +74,19 @@ public class ServiceMetadataEndpoint {
 
         return Response.ok(serviceMetadataList).build();
 
+    }
+
+    @GET
+    @Path("/tags")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getTagInformation() {
+        Map<String, Map<String, Long>> perModelTagCounts = new HashMap<>();
+        for (String modelId : dataSource.get().getKnownModels()) {
+            List<String> tags = dataSource.get().getTags(modelId);
+            Map<String, Long> tagCounts = tags.stream().collect(Collectors.groupingBy(s -> s, Collectors.counting()));
+            perModelTagCounts.put(modelId, tagCounts);
+        }
+        return Response.ok(perModelTagCounts).build();
     }
 
     @POST
