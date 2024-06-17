@@ -23,6 +23,8 @@ public class ExplainersEndpointTestProfile implements QuarkusTestProfile {
         overrides.put("service.metrics-schedule", "5s");
         overrides.put("storage.data-filename", "data.csv");
         overrides.put("storage.data-folder", "/inputs");
+        overrides.put("quarkus.http.ssl.certificate.files", "");
+        overrides.put("quarkus.http.ssl.certificate.key-files", "");
         return overrides;
     }
 
