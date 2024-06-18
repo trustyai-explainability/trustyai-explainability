@@ -8,7 +8,7 @@ import java.util.List;
 public class Tensor1D<T> extends BaseTensor<T, T> {
     public Tensor1D(List<T> data) {
         dimensions = 1;
-        this.data = data;
+        this.data = new ArrayList<>(data);
         this.shape = List.of(data.size());
         this.tClass = this.get(0).getClass();
     }
