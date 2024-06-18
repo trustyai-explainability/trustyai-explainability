@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
@@ -100,7 +101,7 @@ class HibernateStorageTest {
         Dataframe original = DataframeGenerators.generatePositionalHintedDataframe(nrows, ncols);
         storage.get().saveDataframe(original, MODEL_ID);
 
-        assertThrows(IllegalArgumentException.class, () -> storage.get().getColumnValues(MODEL_ID, "f-1"));
+        assertThrows(StorageReadException.class, () -> storage.get().getColumnValues(MODEL_ID, "f-1"));
         for (int i = 0; i < original.getInputsCount(); i++) {
             assertEquals(original.getColumn(i), storage.get().getColumnValues(MODEL_ID, "f" + i));
         }

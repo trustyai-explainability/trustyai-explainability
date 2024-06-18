@@ -81,7 +81,7 @@ public class ServiceMetadataEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTagInformation() {
         Map<String, Map<String, Long>> perModelTagCounts = new HashMap<>();
-        for (String modelId : dataSource.get().getKnownModels()) {
+        for (String modelId : dataSource.get().getVerifiedModels()) {
             List<String> tags = dataSource.get().getTags(modelId);
             Map<String, Long> tagCounts = tags.stream().collect(Collectors.groupingBy(s -> s, Collectors.counting()));
             perModelTagCounts.put(modelId, tagCounts);

@@ -566,4 +566,47 @@ abstract class ServiceMetadataEndpointBaseTest {
         }
     }
 
+    @Test
+    void getDatapointTaggingMissingModel() throws JsonProcessingException {
+        int nModels = 3;
+        final List<Dataframe> dataframes = IntStream.range(0, nModels).mapToObj(
+                i -> DataframeGenerators.generateRandomDataframe(500, 10, false)).collect(Collectors.toList());
+
+        List<String> tags = List.of("A", "B", "C", "D");
+
+        // for each model m, assign n A-tags, 2n B-tags, 3n C-tags, etc, where n=m+10
+        for (int modelIdx = 0; modelIdx < nModels; modelIdx++) {
+            String modelId = MODEL_ID + "_" + modelIdx;
+            saveDataframe(dataframes.get(modelIdx), modelId);
+            int idx = 0;
+            int spacing = modelIdx + 10;
+
+            HashMap<String, List<List<Integer>>> tagMapToPost = new HashMap<>();
+
+            for (int tagIdx = 0; tagIdx < tags.size(); tagIdx++) {
+                int endIdx = idx + (spacing * (tagIdx + 1));
+                tagMapToPost.put(tags.get(tagIdx), List.of(List.of(idx, endIdx)));
+                idx = endIdx + spacing;
+            }
+
+            DataTagging dataTagging = new DataTagging(modelId, tagMapToPost);
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(dataTagging)
+                    .when().post(metadataUrl + "/tags")
+                    .then()
+                    .statusCode(200)
+                    .body(is("Datapoints successfully tagged."));
+        }
+
+        // contaminate known models
+        datasource.get().addModelToKnown("nonexistant");
+
+        given()
+                .get(metadataUrl + "/tags")
+                .then()
+                .statusCode(200);
+    }
+
 }
