@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.config;
 
+import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.kie.trustyai.service.data.storage.DataFormat;
@@ -14,7 +15,8 @@ public interface ServiceConfig {
 
     StorageFormat storageFormat();
 
-    DataFormat dataFormat();
+    @Deprecated
+    Optional<DataFormat> dataFormat();
 
     String metricsSchedule();
 
