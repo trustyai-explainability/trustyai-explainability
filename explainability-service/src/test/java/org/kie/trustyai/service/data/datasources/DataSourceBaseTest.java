@@ -14,6 +14,8 @@ import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
+import org.kie.trustyai.service.data.exceptions.StorageReadException;
+import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import jakarta.enterprise.inject.Instance;
@@ -224,6 +226,16 @@ abstract class DataSourceBaseTest {
             datasource.get().saveDataframe(df, MODEL_ID);
             final Dataframe readDataframe = datasource.get().getOrganicDataframe(MODEL_ID, 50);
         }
+    }
+
+    @Test
+    @DisplayName("Asking for the tags of a non-existant model should raise an error")
+    void testGetTagsOfUnknownModel() {
+        Dataframe df = DataframeGenerators.generateRandomDataframe(50);
+        datasource.get().saveDataframe(df, MODEL_ID);
+
+        assertThrows(StorageReadException.class, ()->datasource.get().getTags("nonexistant"));
+
     }
 
 }

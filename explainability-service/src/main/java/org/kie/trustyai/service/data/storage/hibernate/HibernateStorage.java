@@ -155,7 +155,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 throw new StorageReadException(e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Error reading all data for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+            throw new StorageReadException("Error reading all data for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
@@ -181,7 +181,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 throw new StorageReadException(e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
@@ -204,7 +204,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 throw new StorageReadException(e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
@@ -249,7 +249,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 throw new StorageWriteException(e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Error overwriting dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+            throw new StorageWriteException("Error overwriting dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
@@ -269,7 +269,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 throw new StorageWriteException(e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Error appending to model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+            throw new StorageWriteException("Error appending to model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
@@ -328,12 +328,12 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                         .setParameter(2, targetColIdx)
                         .getResultList();
             } else {
-                throw new IllegalArgumentException(String.format(
+                throw new StorageReadException(String.format(
                         "Error reading column values for model=%s, column=%s. Column %s not within available model columns=%s",
                         modelId, columnName, columnName, colNames.toString()));
             }
         } else {
-            throw new IllegalArgumentException("Error reading column values for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+            throw new StorageReadException("Error reading column values for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
@@ -371,7 +371,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 throw new StorageReadException(e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Error reading metadata for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+            throw new StorageReadException("Error reading metadata for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
@@ -419,7 +419,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 throw new StorageReadException(e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
@@ -446,7 +446,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                 throw new StorageReadException(e.getMessage());
             }
         } else {
-            throw new IllegalArgumentException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 
@@ -478,6 +478,21 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                     row.setTag(entry.getKey());
                 }
             }
+        }
+    }
+
+    @Transactional
+    public List<String> getTags(String modelId) {
+        if (dataExists(modelId)) {
+            refreshIfDirty();
+            return em.createQuery(
+                    "select dr.tag from DataframeRow dr " +
+                            "where dr.modelId = ?1",
+                    String.class)
+                    .setParameter(1, modelId)
+                    .getResultList();
+        } else {
+            throw new StorageReadException("Error reading tags for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
         }
     }
 

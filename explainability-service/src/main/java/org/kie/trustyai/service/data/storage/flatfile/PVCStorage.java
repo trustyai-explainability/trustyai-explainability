@@ -197,7 +197,7 @@ public class PVCStorage extends FlatFileStorage {
             stream.close();
             return ByteBuffer.wrap(arr);
         } catch (IOException e) {
-            throw new StorageWriteException(e.getMessage());
+            throw new StorageReadException(e.getMessage());
         }
     }
 
@@ -213,7 +213,7 @@ public class PVCStorage extends FlatFileStorage {
             final FileInputStream stream = new FileInputStream(file);
             return ByteBuffer.wrap(BatchReader.linesToBytes(BatchReader.readEntries(stream, startPos, endPos)));
         } catch (IOException e) {
-            throw new StorageWriteException(e.getMessage());
+            throw new StorageReadException(e.getMessage());
         }
     }
 

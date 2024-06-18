@@ -84,7 +84,7 @@ class PVCStorageTest {
     void read() {
         TEST_BUFFER.rewind();
         assertFalse(storage.get().fileExists(FILENAME));
-        Exception exception = assertThrows(StorageWriteException.class, () -> storage.get().readMetaOrInternalData(FILENAME));
+        Exception exception = assertThrows(StorageReadException.class, () -> storage.get().readMetaOrInternalData(FILENAME));
         assertEquals("/tmp/" + FILENAME + " (No such file or directory)", exception.getMessage());
         storage.get().saveDataframe(TEST_BUFFER, FILENAME);
         final String readData = new String(storage.get().readMetaOrInternalData(FILENAME).array(), StandardCharsets.UTF_8);

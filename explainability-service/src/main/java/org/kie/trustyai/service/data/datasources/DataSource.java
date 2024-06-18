@@ -303,6 +303,15 @@ public abstract class DataSource {
      */
     public abstract void tagDataframeRows(DataTagging dataTagging);
 
+    /**
+     * Return just the tag column of a specific dataframe
+     *
+     * @param modelId the dataframe to query
+     *
+     * @return the tag column of the requested dataframe
+     */
+    public abstract List<String> getTags(String modelId);
+
     // NAME MAPPING OPERATIONS =========================================================================================
     /**
      * Apply a name mapping to a dataframe

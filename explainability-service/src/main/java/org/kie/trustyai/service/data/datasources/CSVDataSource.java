@@ -2,6 +2,7 @@ package org.kie.trustyai.service.data.datasources;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -360,6 +361,12 @@ public class CSVDataSource extends DataSource {
         Dataframe df = getDataframe(dataTagging.getModelId());
         df.tagDataPoints(dataTagging.getDataTagging());
         saveDataframe(df, dataTagging.getModelId(), true);
+    }
+
+    @Override
+    public List<String> getTags(String modelId) {
+        int numObs = (int) getNumObservations(modelId);
+        return getDataframe(modelId, numObs).getTags();
     }
 
     // NAME MAPPING OPERATIONS =========================================================================================
