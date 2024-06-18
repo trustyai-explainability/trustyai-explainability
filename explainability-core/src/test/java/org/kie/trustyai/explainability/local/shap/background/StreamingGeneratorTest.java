@@ -19,7 +19,6 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.statistics.MultivariateOnlineEstimator;
 import org.kie.trustyai.statistics.distributions.gaussian.MultivariateGaussianParameters;
 import org.kie.trustyai.statistics.estimators.WelfordOnlineEstimator;
-import org.opentest4j.AssertionFailedError;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,19 +42,18 @@ class StreamingGeneratorTest {
         final MultivariateOnlineEstimator<MultivariateGaussianParameters> estimator = new WelfordOnlineEstimator(
                 dimension);
 
-        final RealVector mean = new ArrayRealVector(new double[]{1.0, 123.0, 90.0, 90000.0});
-        final RealMatrix covariance = MatrixUtils.createRealMatrix(new double[][]{
-                {3.0, 0.0, 0.0, 0.0},
-                {0.0, 52.0, 0.0, 0.0},
-                {0.0, 0.0, 13.9, 0.0},
-                {0.0, 0.0, 0.0, 30.0}
+        final RealVector mean = new ArrayRealVector(new double[] { 1.0, 123.0, 90.0, 90000.0 });
+        final RealMatrix covariance = MatrixUtils.createRealMatrix(new double[][] {
+                { 3.0, 0.0, 0.0, 0.0 },
+                { 0.0, 52.0, 0.0, 0.0 },
+                { 0.0, 0.0, 13.9, 0.0 },
+                { 0.0, 0.0, 0.0, 30.0 }
         });
 
         final MultivariateNormalDistribution dist = new MultivariateNormalDistribution(mean.toArray(),
                 covariance.getData());
 
         final double[][] truth = dist.sample(nObs);
-
 
         final StreamingGenerator generator = new StreamingGenerator(dimension, queueSize, diversitySize, estimator, type, null);
 
@@ -72,14 +70,12 @@ class StreamingGeneratorTest {
         final Covariance initialCov = new Covariance(bgMatrix.getData());
         final RealMatrix initialCalculatedCovariance = initialCov.getCovarianceMatrix();
 
-
         for (int i = 0; i < dimension; i++) {
             final double calculatedMean = StatUtils.mean(bgMatrix.getColumn(i));
             assertEquals(0.0, calculatedMean, 2.0, "Initial mean [" + i + "] value is wrong");
             assertEquals(WelfordOnlineEstimator.DEFAULT_VARIANCE, initialCalculatedCovariance.getEntry(i, i),
                     WelfordOnlineEstimator.DEFAULT_VARIANCE / 3.0, "Initial variance [" + i + "] value is wrong");
         }
-
 
         for (int i = 0; i < nObs; i++) {
             generator.update(new ArrayRealVector(truth[i]));
@@ -97,7 +93,7 @@ class StreamingGeneratorTest {
 
         for (int i = 0; i < dimension; i++) {
             final double calculatedMean = StatUtils.mean(bgMatrix.getColumn(i));
-            assertEquals(mean.getEntry(i), calculatedMean, mean.getEntry(i) / 3.0, "Final mean [" + i + "] value is wrong: " + repeat);
+            assertEquals(mean.getEntry(i), calculatedMean, mean.getEntry(i) / 3.0, "Final mean [" + i + "] value is wrong");
             final double trueVariance = covariance.getEntry(i, i);
             assertEquals(trueVariance, finalcalculatedCovariance.getEntry(i, i), trueVariance / 3.0, "Final variance " + i + " wrong");
         }
