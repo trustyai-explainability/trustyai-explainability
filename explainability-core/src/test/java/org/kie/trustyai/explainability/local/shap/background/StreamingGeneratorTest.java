@@ -34,7 +34,7 @@ class StreamingGeneratorTest {
     @ParameterizedTest
     @MethodSource("replacementType")
     void testGenerate(StreamingGenerator.ReplacementType type) {
-        final int queueSize = 200;
+        final int queueSize = 500;
         final int diversitySize = 50;
         final int dimension = 4;
         final int nObs = 1000;
@@ -44,7 +44,7 @@ class StreamingGeneratorTest {
 
         final RealVector mean = new ArrayRealVector(new double[] { 1.0, 123.0, 90.0, 90000.0 });
         final RealMatrix covariance = MatrixUtils.createRealMatrix(new double[][] {
-                { 10.0, 0.0, 0.0, 0.0 },
+                { 3.0, 0.0, 0.0, 0.0 },
                 { 0.0, 52.0, 0.0, 0.0 },
                 { 0.0, 0.0, 13.9, 0.0 },
                 { 0.0, 0.0, 0.0, 30.0 }
@@ -57,7 +57,7 @@ class StreamingGeneratorTest {
 
         final StreamingGenerator generator = new StreamingGenerator(dimension, queueSize, diversitySize, estimator, type, null);
 
-        final List<PredictionInput> initialBackground = generator.generate(250);
+        final List<PredictionInput> initialBackground = generator.generate(queueSize + diversitySize);
 
         final RealMatrix bgMatrix = MatrixUtils.createRealMatrix(queueSize + diversitySize, dimension);
 
@@ -69,6 +69,7 @@ class StreamingGeneratorTest {
 
         final Covariance initialCov = new Covariance(bgMatrix.getData());
         final RealMatrix initialCalculatedCovariance = initialCov.getCovarianceMatrix();
+
         for (int i = 0; i < dimension; i++) {
             final double calculatedMean = StatUtils.mean(bgMatrix.getColumn(i));
             assertEquals(0.0, calculatedMean, 2.0, "Initial mean [" + i + "] value is wrong");
@@ -80,7 +81,7 @@ class StreamingGeneratorTest {
             generator.update(new ArrayRealVector(truth[i]));
         }
 
-        final List<PredictionInput> finalBackground = generator.generate(250);
+        final List<PredictionInput> finalBackground = generator.generate(queueSize + diversitySize);
 
         for (int i = 0; i < queueSize + diversitySize; i++) {
             final double[] values = finalBackground.get(i).getFeatures().stream().mapToDouble(f -> f.getValue().asNumber())
@@ -89,6 +90,7 @@ class StreamingGeneratorTest {
         }
         final Covariance finalCov = new Covariance(bgMatrix.getData());
         final RealMatrix finalcalculatedCovariance = finalCov.getCovarianceMatrix();
+
         for (int i = 0; i < dimension; i++) {
             final double calculatedMean = StatUtils.mean(bgMatrix.getColumn(i));
             assertEquals(mean.getEntry(i), calculatedMean, mean.getEntry(i) / 3.0, "Final mean [" + i + "] value is wrong");
