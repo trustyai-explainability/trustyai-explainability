@@ -115,7 +115,7 @@ class StreamingGeneratorTest {
         final StreamingGenerator generator = new StreamingGenerator(data.length, queueSize, diversitySize, estimator, type, null);
         generator.update(new ArrayRealVector(data));
 
-       assertNotNull(generator.generate(queueSize + diversitySize));
+        assertNotNull(generator.generate(queueSize + diversitySize));
     }
 
     @DisplayName("Test streaming generator returns correct dimensions")

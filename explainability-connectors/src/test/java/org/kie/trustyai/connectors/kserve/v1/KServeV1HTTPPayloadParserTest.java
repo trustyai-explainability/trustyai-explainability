@@ -1,16 +1,17 @@
 package org.kie.trustyai.connectors.kserve.v1;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.kie.trustyai.connectors.kserve.PayloadParser.DEFAULT_INPUT_PREFIX;
@@ -113,7 +114,6 @@ class KServeV1HTTPPayloadParserTest {
         }
     }
 
-
     @Test
     void modelSingleToRequestToPredictionInput() throws IOException {
 
@@ -186,13 +186,12 @@ class KServeV1HTTPPayloadParserTest {
 
         assertEquals(3, predictionOutput.size());
         assertEquals(2, predictionOutput.get(0).getOutputs().size());
-        for (int i = 0 ; i < 3 ; i++) {
+        for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 2; j++) {
-                assertEquals(values.get(i*2 + j), predictionOutput.get(i).getOutputs().get(j).getValue().asNumber());
+                assertEquals(values.get(i * 2 + j), predictionOutput.get(i).getOutputs().get(j).getValue().asNumber());
                 assertEquals(DEFAULT_OUTPUT_PREFIX + "-" + j, predictionOutput.get(i).getOutputs().get(j).getName());
             }
         }
     }
-
 
 }
