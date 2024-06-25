@@ -1,8 +1,14 @@
 package org.kie.trustyai.service.endpoints.service;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
@@ -11,22 +17,16 @@ import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.metadata.Metadata;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.service.DataTagging;
-import org.kie.trustyai.service.payloads.service.NameMapping;
-import org.kie.trustyai.service.payloads.service.Schema;
-import org.kie.trustyai.service.payloads.service.ServiceMetadata;
+import org.kie.trustyai.service.payloads.service.*;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 import org.kie.trustyai.service.validators.serviceRequests.ValidNameMappingRequest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @ApplicationScoped
 @Path("/info")
@@ -55,11 +55,13 @@ public class ServiceMetadataEndpoint {
         for (String modelId : dataSource.get().getKnownModels()) {
             final ServiceMetadata serviceMetadata = new ServiceMetadata();
 
-            for (Map.Entry<String, ConcurrentHashMap<UUID, BaseMetricRequest>> metricDict : scheduler.getAllRequests().entrySet()) {
+            for (Map.Entry<String, ConcurrentHashMap<UUID, BaseMetricRequest>> metricDict : scheduler.getAllRequests()
+                    .entrySet()) {
                 metricDict.getValue().values().forEach(metric -> {
                     if (metric.getModelId().equals(modelId)) {
                         final String metricName = metricDict.getKey();
-                        serviceMetadata.getMetrics().scheduledMetadata.setCount(metricName, serviceMetadata.getMetrics().scheduledMetadata.getCount(metricName) + 1);
+                        serviceMetadata.getMetrics().scheduledMetadata.setCount(metricName,
+                                serviceMetadata.getMetrics().scheduledMetadata.getCount(metricName) + 1);
                     }
                 });
             }
@@ -140,6 +142,40 @@ public class ServiceMetadataEndpoint {
         dataSource.get().saveMetadata(metadata, nameMapping.getModelId());
 
         return Response.ok().entity("Feature and output name mapping successfully applied.").build();
+    }
+
+    @GET
+    @Path("/inference/ids/{model}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get model's prediction ids", description = "Get all the prediction ids for a given model")
+    public Response predictionsIdsByModel(@Parameter(description = "The model to get prediction ids from", required = true) @PathParam("model") String model,
+                                          @Parameter(description = "The type of predictions to retrieve", required = false) @QueryParam("type") @DefaultValue("all") String type) {
+        try {
+
+            final Dataframe df;
+            if ("organic".equalsIgnoreCase(type)) {
+                df = dataSource.get().getOrganicDataframe(model);
+
+            } else if ("all".equalsIgnoreCase(type)) {
+                df = dataSource.get().getDataframe(model);
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Invalid type parameter. Valid values must be in ['organic', 'all'].")
+                        .build();
+            }
+            final List<LocalDateTime> timestamps = df.getTimestamps();
+            final List<String>  ids = df.getIds();
+
+            return Response.ok().entity(IntStream.range(0, df.getRowDimension())
+                    .mapToObj(row -> new PredictionId(ids.get(row), timestamps.get(row)))
+                    .collect(Collectors.toUnmodifiableList())).build();
+        } catch (DataframeCreateException e) {
+            return Response.serverError()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("Model ID " + model + " does not exist in TrustyAI metadata.")
+                    .build();
+
+        }
     }
 
 }
