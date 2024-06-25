@@ -11,7 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.payloads.service.PredictionId;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
 @TestProfile(MemoryTestProfile.class)
-abstract public class PredictionIdsServiceMetadataEndpointBaseTest {
+abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
 
     public static final String MODEL_ID = "example1";
 
@@ -94,14 +94,14 @@ abstract public class PredictionIdsServiceMetadataEndpointBaseTest {
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
 
         List.of(getEndpoint(MODEL_ID), getEndpointAll(MODEL_ID), getEndpointOrganic(MODEL_ID)).forEach(endpoint -> {
-            final List<PredictionId> predictionIds = given()
+            final List<InferenceId> inferenceIds = given()
                     .when().get(endpoint)
                     .then()
                     .statusCode(RestResponse.StatusCode.OK)
                     .extract()
-                    .body().as(new TypeRef<List<PredictionId>>() {
+                    .body().as(new TypeRef<List<InferenceId>>() {
                     });
-            assertEquals(N, predictionIds.size());
+            assertEquals(N, inferenceIds.size());
         });
 
     }
@@ -121,25 +121,25 @@ abstract public class PredictionIdsServiceMetadataEndpointBaseTest {
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
                 .body(is("Model ID " + MODEL_ID + " does not exist in TrustyAI metadata."));
-        List<PredictionId> predictionIds = given()
+        List<InferenceId> inferenceIds = given()
                 .when().get(getEndpoint(MODEL_ID))
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<PredictionId>>() {
+                .body().as(new TypeRef<List<InferenceId>>() {
                 });
 
-        assertEquals(N, predictionIds.size());
+        assertEquals(N, inferenceIds.size());
 
-        predictionIds = given()
+        inferenceIds = given()
                 .when().get(getEndpointAll(MODEL_ID))
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<PredictionId>>() {
+                .body().as(new TypeRef<List<InferenceId>>() {
                 });
 
-        assertEquals(N, predictionIds.size());
+        assertEquals(N, inferenceIds.size());
 
     }
 
@@ -155,35 +155,35 @@ abstract public class PredictionIdsServiceMetadataEndpointBaseTest {
         datasource.get().saveDataframe(organicDataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(organicDataframe), MODEL_ID);
 
-        List<PredictionId> predictionIds = given()
+        List<InferenceId> inferenceIds = given()
                 .when().get(getEndpoint(MODEL_ID))
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<PredictionId>>() {
+                .body().as(new TypeRef<List<InferenceId>>() {
                 });
 
-        assertEquals(N + N * 2, predictionIds.size());
+        assertEquals(N + N * 2, inferenceIds.size());
 
-        predictionIds = given()
+        inferenceIds = given()
                 .when().get(getEndpointAll(MODEL_ID))
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<PredictionId>>() {
+                .body().as(new TypeRef<List<InferenceId>>() {
                 });
 
-        assertEquals(N + N * 2, predictionIds.size());
+        assertEquals(N + N * 2, inferenceIds.size());
 
-        predictionIds = given()
+        inferenceIds = given()
                 .when().get(getEndpointOrganic(MODEL_ID))
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<PredictionId>>() {
+                .body().as(new TypeRef<List<InferenceId>>() {
                 });
 
-        assertEquals(N * 2, predictionIds.size());
+        assertEquals(N * 2, inferenceIds.size());
 
 
     }

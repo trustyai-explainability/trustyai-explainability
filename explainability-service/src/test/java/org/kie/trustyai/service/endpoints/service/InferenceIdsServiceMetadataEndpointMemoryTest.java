@@ -10,7 +10,7 @@ import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
 @QuarkusTest
 @TestProfile(MemoryTestProfile.class)
-public class PredictionIdsServiceMetadataEndpointMemoryTest extends PredictionIdsServiceMetadataEndpointBaseTest {
+public class InferenceIdsServiceMetadataEndpointMemoryTest extends InferenceIdsServiceMetadataEndpointBaseTest {
 
     @Inject
     Instance<MockMemoryStorage> storage;

@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class PredictionId {
+public class InferenceId {
     @JsonProperty("id")
     private final String id;
     @JsonProperty("timestamp")
     private final LocalDateTime timestamp;
 
-    public PredictionId(String id, LocalDateTime timestamp) {
+    public InferenceId(String id, LocalDateTime timestamp) {
         this.id = id;
         this.timestamp = timestamp;
     }
@@ -22,7 +22,7 @@ public class PredictionId {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        PredictionId that = (PredictionId) o;
+        InferenceId that = (InferenceId) o;
         return Objects.equals(id, that.id) && Objects.equals(timestamp, that.timestamp);
     }
 
@@ -41,7 +41,7 @@ public class PredictionId {
 
     @Override
     public String toString() {
-        return "PredictionId{" +
+        return "InferenceId{" +
                 "id='" + id + '\'' +
                 ", timestamp=" + timestamp +
                 '}';

@@ -12,7 +12,7 @@ import java.io.IOException;
 
 @QuarkusTest
 @TestProfile(PVCTestProfile.class)
-public class PredictionIdsServiceMetadataEndpointPVCTest extends PredictionIdsServiceMetadataEndpointBaseTest {
+public class InferenceIdsServiceMetadataEndpointPVCTest extends InferenceIdsServiceMetadataEndpointBaseTest {
 
     @Inject
     Instance<MockPVCStorage> storage;
