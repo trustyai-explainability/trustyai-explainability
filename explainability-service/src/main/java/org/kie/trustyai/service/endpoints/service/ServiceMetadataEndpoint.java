@@ -147,7 +147,7 @@ public class ServiceMetadataEndpoint {
     @GET
     @Path("/inference/ids/{model}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get model's prediction ids", description = "Get all the inference ids for a given model")
+    @Operation(summary = "Get model's inference ids", description = "Get all the inference ids for a given model")
     public Response inferenceIdsByModel(@Parameter(description = "The model to get inference ids from", required = true) @PathParam("model") String model,
                                         @Parameter(description = "The type of inferences to retrieve", required = false) @QueryParam("type") @DefaultValue("all") String type) {
         try {
