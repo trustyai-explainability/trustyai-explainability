@@ -45,9 +45,7 @@ public class ServiceMetadataEndpoint {
 
     }
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response serviceInfo() throws JsonProcessingException {
+    private List<ServiceMetadata> getServiceMetadata(boolean loadColumnValues) {
         final List<ServiceMetadata> serviceMetadataList = new ArrayList<>();
         for (String modelId : dataSource.get().getKnownModels()) {
             final ServiceMetadata serviceMetadata = new ServiceMetadata();
@@ -62,18 +60,28 @@ public class ServiceMetadataEndpoint {
             }
 
             try {
-                final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId, true);
+                final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId, loadColumnValues);
                 serviceMetadata.setData(storageMetadata);
             } catch (DataframeCreateException | StorageReadException | NullPointerException e) {
                 LOG.warn("Problem creating dataframe: " + e.getMessage(), e);
             }
 
             serviceMetadataList.add(serviceMetadata);
-
         }
+        return serviceMetadataList;
+    }
 
-        return Response.ok(serviceMetadataList).build();
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response serviceInfo() throws JsonProcessingException {
+        return Response.ok(getServiceMetadata(false)).build();
+    }
 
+    @GET
+    @Path("/values")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response serviceInfoWithValues() throws JsonProcessingException {
+        return Response.ok(getServiceMetadata(true)).build();
     }
 
     @GET
@@ -98,7 +106,7 @@ public class ServiceMetadataEndpoint {
         if (!dataSource.get().getKnownModels().contains(dataTagging.getModelId())) {
             return Response.serverError()
                     .status(Response.Status.BAD_REQUEST)
-                    .entity("Model ID " + dataTagging.getModelId() + " does not exist in TrustyAI metadata.")
+                    .entity("No metadata found for model=" + dataTagging.getModelId() + ". This can happen if TrustyAI has not yet logged any inferences from this model.")
                     .build();
         }
 
@@ -130,12 +138,12 @@ public class ServiceMetadataEndpoint {
     @Path("/names")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response labelSchema(@ValidNameMappingRequest NameMapping nameMapping) {
+    public Response applyNameMappings(@ValidNameMappingRequest NameMapping nameMapping) {
 
         if (!dataSource.get().getKnownModels().contains(nameMapping.getModelId())) {
             return Response.serverError()
                     .status(Response.Status.BAD_REQUEST)
-                    .entity("Model ID " + nameMapping.getModelId() + " does not exist in TrustyAI metadata.")
+                    .entity("No metadata found for model=" + nameMapping.getModelId() + ". This can happen if TrustyAI has not yet logged any inferences from this model.")
                     .build();
         }
 
@@ -143,6 +151,25 @@ public class ServiceMetadataEndpoint {
 
         LOG.info("Name mappings successfully applied to model=" + nameMapping.getModelId() + ".");
         return Response.ok().entity("Feature and output name mapping successfully applied.").build();
+    }
+
+    @DELETE
+    @Path("/names")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response clearNameMappings(String modelId) {
+
+        if (!dataSource.get().getKnownModels().contains(modelId)) {
+            return Response.serverError()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity("No metadata found for model=" + modelId + ". This can happen if TrustyAI has not yet logged any inferences from this model.")
+                    .build();
+        }
+
+        dataSource.get().clearNameMapping(modelId);
+
+        LOG.info("Name mappings successfully cleared from model=" + modelId + ".");
+        return Response.ok().entity("Feature and output name mapping successfully cleared.").build();
     }
 
 }

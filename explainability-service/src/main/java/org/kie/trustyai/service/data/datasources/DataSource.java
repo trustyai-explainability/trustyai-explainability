@@ -320,4 +320,11 @@ public abstract class DataSource {
      */
     public abstract void applyNameMapping(NameMapping nameMapping);
 
+    /**
+     * Clear a name mapping from a dataframe
+     *
+     * @param modelId the model for which to clear the name mappings
+     */
+    public abstract void clearNameMapping(String modelId);
+
 }

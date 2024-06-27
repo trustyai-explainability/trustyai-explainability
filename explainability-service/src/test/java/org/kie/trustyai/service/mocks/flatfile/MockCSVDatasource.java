@@ -11,14 +11,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.Mock;
 
-import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 
 @Mock
 @Alternative
 @ApplicationScoped
-@Priority(1)
 public class MockCSVDatasource extends CSVDataSource {
 
     private static final String MODEL_ID = "example1";
@@ -28,13 +26,11 @@ public class MockCSVDatasource extends CSVDataSource {
 
     public static StorageMetadata createMetadata(Dataframe dataframe) {
         final StorageMetadata storageMetadata = new StorageMetadata();
-
         storageMetadata.setInputSchema(MetadataUtils.getInputSchema(dataframe));
         storageMetadata.setOutputSchema(MetadataUtils.getOutputSchema(dataframe));
         storageMetadata.setObservations(dataframe.getRowDimension());
         storageMetadata.setRecordedInferences(dataframe.getTags().contains(Dataframe.InternalTags.UNLABELED.get()));
         storageMetadata.setModelId(dataframe.getId());
-
         return storageMetadata;
     }
 

@@ -53,7 +53,7 @@ abstract class ServiceMetadataEndpointBaseTest {
         saveDataframe(dataframe, MODEL_ID);
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl)
+                .when().get(metadataUrl + "/values")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -80,7 +80,7 @@ abstract class ServiceMetadataEndpointBaseTest {
         saveDataframe(dataframe, MODEL_ID);
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl)
+                .when().get(metadataUrl + "/values")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -105,7 +105,7 @@ abstract class ServiceMetadataEndpointBaseTest {
         saveDataframe(dataframe, MODEL_ID);
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl)
+                .when().get(metadataUrl + "/values")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -177,6 +177,31 @@ abstract class ServiceMetadataEndpointBaseTest {
 
         for (String value : serviceMetadata.get(0).getData().getOutputSchema().getNameMapping().values()) {
             assertTrue(value.contains("Mapped"));
+        }
+
+        // clear mapping
+        given()
+                .contentType(ContentType.JSON)
+                .body(MODEL_ID)
+                .when().delete(metadataUrl + "/names")
+                .then()
+                .statusCode(200)
+                .body(is("Feature and output name mapping successfully cleared."));
+
+        final List<ServiceMetadata> serviceMetadataPostClear = given()
+                .when().get(metadataUrl)
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .extract()
+                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                });
+
+        for (String value : serviceMetadataPostClear.get(0).getData().getInputSchema().getNameMapping().values()) {
+            assertFalse(value.contains("Mapped"));
+        }
+
+        for (String value : serviceMetadataPostClear.get(0).getData().getOutputSchema().getNameMapping().values()) {
+            assertFalse(value.contains("Mapped"));
         }
     }
 
@@ -315,7 +340,7 @@ abstract class ServiceMetadataEndpointBaseTest {
         });
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl)
+                .when().get(metadataUrl + "/values")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -394,7 +419,7 @@ abstract class ServiceMetadataEndpointBaseTest {
         });
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl)
+                .when().get(metadataUrl + "/values")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -402,7 +427,7 @@ abstract class ServiceMetadataEndpointBaseTest {
                 });
 
         final String info = given()
-                .when().get("/info")
+                .when().get("/info/values")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -440,7 +465,7 @@ abstract class ServiceMetadataEndpointBaseTest {
         saveDataframe(dataframeB, MODEL_B);
 
         final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl)
+                .when().get(metadataUrl + "/values")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -448,7 +473,7 @@ abstract class ServiceMetadataEndpointBaseTest {
                 });
 
         final String info = given()
-                .when().get("/info")
+                .when().get("/info/")
                 .then()
                 .statusCode(200)
                 .extract()

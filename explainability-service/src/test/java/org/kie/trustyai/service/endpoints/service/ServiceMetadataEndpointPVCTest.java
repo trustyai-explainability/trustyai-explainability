@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.endpoints.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
@@ -28,6 +29,7 @@ class ServiceMetadataEndpointPVCTest extends ServiceMetadataEndpointBaseTest {
     Instance<MockPrometheusScheduler> scheduler;
 
     @BeforeEach
+    @AfterEach
     void clearStorage() throws JsonProcessingException {
         for (String modelId : datasource.get().getKnownModels()) {
             storage.get().emptyStorage("/tmp/" + modelId + "-data.csv");

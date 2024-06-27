@@ -11,14 +11,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.Mock;
 
-import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 
 @Mock
 @Alternative
 @ApplicationScoped
-@Priority(1)
 public class MockHibernateDatasource extends HibernateDataSource {
 
     private static final String MODEL_ID = "example1";
@@ -39,6 +37,7 @@ public class MockHibernateDatasource extends HibernateDataSource {
 
     public void reset() throws JsonProcessingException {
         this.knownModels.clear();
+
     }
 
     public void populate() {

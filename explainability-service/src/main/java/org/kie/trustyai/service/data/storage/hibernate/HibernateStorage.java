@@ -1,7 +1,10 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +41,6 @@ import org.kie.trustyai.service.payloads.service.SchemaItem;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -82,17 +84,17 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     }
 
     // MIGRATIONS ======================================================================================================
-    @PostConstruct
     @Transactional
-    protected void migrate() {
+    public List<String> migrate() {
+        List<String> modelIds = new ArrayList<>();
         if (migrationConfig.isPresent()) {
-            MigrationConfig mc = migrationConfig.get();
+            MigrationConfig mc = migrationConfig.get();explainability-service/src/main/java/org/kie/trustyai/service/
             String fromFolder = mc.getFromFolder();
             String fromFile = mc.getFromFilename();
 
             if (!Paths.get(fromFolder).toFile().isDirectory()) {
                 LOG.warn("A storage folder \"" + fromFolder + "\" was provided in the service configuration, but no such directory exists. Migration will be skipped.");
-                return;
+                return modelIds;
             }
 
             CustomStorageConfig customStorageConfig = new CustomStorageConfig(fromFile, fromFolder);
@@ -101,7 +103,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             CSVDataSource oldDataSource = new CSVDataSource();
             oldDataSource.setParser(new CSVParser());
             oldDataSource.setStorageOverride(pvcStorage);
-            List<String> modelIds = pvcStorage.listAllModelIds();
+            modelIds = pvcStorage.listAllModelIds();
 
             if (!modelIds.isEmpty()) {
                 LOG.info("Starting migration, found " + modelIds.size() + " models.");
@@ -127,6 +129,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             migrationConfig = Optional.empty();
             setDataDirty();
         }
+        return modelIds;
     }
 
     // DATAFRAME READS =================================================================================================
@@ -337,16 +340,42 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
+    public List<Value> getUniqueColumnValues(String modelId, String columnName, int max) {
+        if (dataExists(modelId)) {
+            List<String> colNames = em.find(DataframeMetadata.class, modelId).getRawNames();
+            if (colNames.contains(columnName)) {
+                Integer targetColIdx = colNames.indexOf(columnName);
+                refreshIfDirty();
+                return em.createQuery(
+                        "select DISTINCT dr.row from DataframeRow dr " +
+                                "where dr.modelId = ?1 AND " +
+                                "index(dr.row) = ?2 ",
+                        Value.class)
+                        .setParameter(1, modelId)
+                        .setParameter(2, targetColIdx)
+                        .setMaxResults(max)
+                        .getResultList();
+            } else {
+                throw new StorageReadException(String.format(
+                        "Error reading column values for model=%s, column=%s. Column %s not within available model columns=%s",
+                        modelId, columnName, columnName, colNames.toString()));
+            }
+        } else {
+            throw new StorageReadException("Error reading column values for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
+    }
+
     private void setSchemaEnumeration(String modelId, Schema schema) {
         for (Map.Entry<String, SchemaItem> entry : schema.getItems().entrySet()) {
-            Set<UnderlyingObject> columnValues = getColumnValues(modelId, entry.getKey())
+            List<UnderlyingObject> columnValues = getUniqueColumnValues(modelId, entry.getKey(), MetadataUtils.MAX_VALUE_ENUMERATION + 1)
                     .stream()
                     .map(Value::getUnderlyingObjectContainer)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
+
             if (columnValues.size() > MetadataUtils.MAX_VALUE_ENUMERATION) {
                 entry.getValue().setColumnValues(null);
             } else {
-                entry.getValue().setColumnValues(columnValues);
+                entry.getValue().setColumnValues(new HashSet<>(columnValues));
             }
         }
     }
@@ -507,6 +536,20 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         outputSchema.setNameMapping(nameMapping.getOutputMapping());
 
         DataframeMetadata dm = em.find(DataframeMetadata.class, nameMapping.getModelId());
+        dm.setNameAliases(storageMetadata.getJointNameAliases());
+        dataDirty = true;
+    }
+
+    @Transactional
+    public void clearNameMapping(String modelId) {
+        setDataDirty();
+        final StorageMetadata storageMetadata = readMetaOrInternalData(modelId);
+        Schema inputSchema = storageMetadata.getInputSchema();
+        Schema outputSchema = storageMetadata.getOutputSchema();
+        inputSchema.setNameMapping(new HashMap<>());
+        outputSchema.setNameMapping(new HashMap<>());
+
+        DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
         dm.setNameAliases(storageMetadata.getJointNameAliases());
         dataDirty = true;
     }

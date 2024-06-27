@@ -15,6 +15,7 @@ import org.kie.trustyai.service.payloads.service.NameMapping;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -24,6 +25,18 @@ import jakarta.inject.Singleton;
 public class HibernateDataSource extends DataSource {
     @Inject
     Instance<HibernateStorage> storage;
+
+    @PostConstruct
+    public void migrate() {
+        // PVC migration
+        List<String> migratedModels = storage.get().migrate();
+        migratedModels.forEach(this::addModelToKnown);
+
+        // old DB migration
+
+    }
+
+    //todo : old DB migration
 
     private HibernateStorage getStorage() {
         return storage.get();
@@ -143,6 +156,7 @@ public class HibernateDataSource extends DataSource {
         StorageMetadata sm = hibernateStorage.readMetaOrInternalData(modelId);
 
         // only grab column enumerations from DB if explicitly requested, to save time
+        long startt = System.currentTimeMillis();
         if (loadColumnValues) {
             hibernateStorage.loadColumnValues(modelId, sm);
         }
@@ -211,6 +225,15 @@ public class HibernateDataSource extends DataSource {
     // name aliasing handler
     public void applyNameMapping(NameMapping nameMapping) {
         getStorage().applyNameMapping(nameMapping);
+    }
+
+    /**
+     * Clear a name mapping from a dataframe
+     *
+     * @param modelId the model for which to clear the name mappings
+     */
+    public void clearNameMapping(String modelId) {
+        getStorage().clearNameMapping(modelId);
     }
 
 }

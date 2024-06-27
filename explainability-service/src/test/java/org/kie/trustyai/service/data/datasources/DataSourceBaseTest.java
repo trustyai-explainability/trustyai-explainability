@@ -15,7 +15,6 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
-import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import jakarta.enterprise.inject.Instance;
@@ -234,7 +233,7 @@ abstract class DataSourceBaseTest {
         Dataframe df = DataframeGenerators.generateRandomDataframe(50);
         datasource.get().saveDataframe(df, MODEL_ID);
 
-        assertThrows(StorageReadException.class, ()->datasource.get().getTags("nonexistant"));
+        assertThrows(StorageReadException.class, () -> datasource.get().getTags("nonexistant"));
 
     }
 

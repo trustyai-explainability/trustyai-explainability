@@ -2,6 +2,7 @@ package org.kie.trustyai.service.data.datasources;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -383,5 +384,20 @@ public class CSVDataSource extends DataSource {
         inputSchema.setNameMapping(nameMapping.getInputMapping());
         outputSchema.setNameMapping(nameMapping.getOutputMapping());
         saveMetadata(storageMetadata, nameMapping.getModelId());
+    }
+
+    /**
+     * Clear a name mapping from a dataframe
+     *
+     * @param modelId the model for which to clear the name mappings
+     */
+    public void clearNameMapping(String modelId) {
+        final StorageMetadata storageMetadata = getMetadata(modelId);
+        Schema inputSchema = storageMetadata.getInputSchema();
+        Schema outputSchema = storageMetadata.getOutputSchema();
+
+        inputSchema.setNameMapping(new HashMap<>());
+        outputSchema.setNameMapping(new HashMap<>());
+        saveMetadata(storageMetadata, modelId);
     }
 }
