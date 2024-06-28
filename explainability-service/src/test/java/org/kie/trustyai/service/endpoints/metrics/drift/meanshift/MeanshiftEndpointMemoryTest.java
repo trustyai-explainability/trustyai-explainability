@@ -1,9 +1,10 @@
-package org.kie.trustyai.service.endpoints.metrics.drift;
+package org.kie.trustyai.service.endpoints.metrics.drift.meanshift;
 
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.endpoints.metrics.drift.MeanshiftEndpoint;
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
-import org.kie.trustyai.service.mocks.flatfile.MockPVCStorage;
-import org.kie.trustyai.service.profiles.flatfile.PVCTestProfile;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -13,17 +14,15 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-@TestProfile(PVCTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(MeanshiftEndpoint.class)
-class MeanshiftEndpointPVCTest extends MeanshiftEndpointBaseTest {
+class MeanshiftEndpointMemoryTest extends MeanshiftEndpointBaseTest {
     @Inject
-    Instance<MockPVCStorage> storage;
+    Instance<MockMemoryStorage> storage;
 
     @Override
     void clearData() {
-        storage.get().emptyStorage("/tmp/" + MODEL_ID + "-data.csv");
-        storage.get().emptyStorage("/tmp/" + MODEL_ID + "-internal_data.csv");
-        storage.get().emptyStorage("/tmp/" + MODEL_ID + "-metadata.json");
+        storage.get().emptyStorage();
     }
 
     @Override

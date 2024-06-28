@@ -75,14 +75,14 @@ public class CSVDataSource extends DataSource {
         try {
             dataByteBuffer = ffst.readDataframe(modelId);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getDataframeReadError(modelId, e.getMessage());
         }
 
         final ByteBuffer internalDataByteBuffer;
         try {
             internalDataByteBuffer = ffst.readMetaOrInternalData(modelId + "-" + INTERNAL_DATA_FILENAME);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getInternalDataReadError(modelId, e.getMessage());
         }
 
         // Fetch metadata, if not yet read
@@ -90,7 +90,7 @@ public class CSVDataSource extends DataSource {
         try {
             storageMetadata = getMetadata(modelId);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getMetadataReadError(modelId, e.getMessage());
         }
 
         Dataframe df = parser.toDataframe(dataByteBuffer, internalDataByteBuffer, storageMetadata);
@@ -115,14 +115,14 @@ public class CSVDataSource extends DataSource {
         try {
             byteBuffer = ffst.readDataframe(modelId, batchSize);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getDataframeReadError(modelId, e.getMessage());
         }
 
         final ByteBuffer internalDataByteBuffer;
         try {
             internalDataByteBuffer = ffst.readMetaOrInternalData(modelId + "-" + INTERNAL_DATA_FILENAME, batchSize);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getInternalDataReadError(modelId, e.getMessage());
         }
 
         // Fetch metadata, if not yet read
@@ -130,7 +130,7 @@ public class CSVDataSource extends DataSource {
         try {
             storageMetadata = getMetadata(modelId);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getMetadataReadError(modelId, e.getMessage());
         }
 
         Dataframe df = parser.toDataframe(byteBuffer, internalDataByteBuffer, storageMetadata);
@@ -152,7 +152,7 @@ public class CSVDataSource extends DataSource {
      */
     public Dataframe getDataframe(final String modelId, int startPos, int endPos) throws DataframeCreateException {
         if (endPos <= startPos) {
-            throw new IllegalArgumentException("DataSource.getDataframe endPos must be greater than startPos. Got startPos=" + startPos + ", endPos=" + endPos);
+            throw DataSourceErrors.DataframeLoad.getBadSliceSortingError(modelId, startPos, endPos);
         }
 
         FlatFileStorage ffst = getStorage();
@@ -160,14 +160,14 @@ public class CSVDataSource extends DataSource {
         try {
             byteBuffer = ffst.readDataframe(modelId, startPos, endPos);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getDataframeReadError(modelId, e.getMessage());
         }
 
         final ByteBuffer internalDataByteBuffer;
         try {
             internalDataByteBuffer = ffst.readMetaOrInternalData(modelId + "-" + INTERNAL_DATA_FILENAME, startPos, endPos);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getInternalDataReadError(modelId, e.getMessage());
         }
 
         // Fetch metadata, if not yet read
@@ -175,7 +175,7 @@ public class CSVDataSource extends DataSource {
         try {
             storageMetadata = getMetadata(modelId);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getMetadataReadError(modelId, e.getMessage());
         }
 
         Dataframe df = parser.toDataframe(byteBuffer, internalDataByteBuffer, storageMetadata);
@@ -186,30 +186,13 @@ public class CSVDataSource extends DataSource {
 
     }
 
-    /**
-     * Get a dataframe with the organic (non-synthetic) data and metadata for a given model
-     *
-     * @param modelId the model id
-     * @param batchSize the batch size
-     * @return a dataframe with the organic data and metadata for a given model
-     * @throws DataframeCreateException if the dataframe cannot be created
-     */
-    public Dataframe getOrganicDataframe(final String modelId, int batchSize) throws DataframeCreateException {
-
-        FlatFileStorage ffst = getStorage();
-        final Pair<ByteBuffer, ByteBuffer> pair;
-        try {
-            pair = ffst.readDataframeAndMetadataWithTags(modelId, batchSize, Set.of(Dataframe.InternalTags.UNLABELED.get()));
-        } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
-        }
-
+    private Dataframe finalizeTagFiltering(String modelId, final Pair<ByteBuffer, ByteBuffer> pair) {
         // Fetch metadata, if not yet read
         final StorageMetadata metadata;
         try {
             metadata = getMetadata(modelId);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getInternalDataReadError(modelId, e.getMessage());
         }
 
         Dataframe df;
@@ -217,7 +200,7 @@ public class CSVDataSource extends DataSource {
             df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
         } catch (IllegalArgumentException e) {
             LOG.error(e.getMessage());
-            throw new DataframeCreateException("Could not parse create dataframe: " + e.getMessage());
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
         }
 
         df.setColumnAliases(metadata.getJointNameAliases());
@@ -227,42 +210,96 @@ public class CSVDataSource extends DataSource {
     }
 
     /**
-     * Get a dataframe with the organic (non-synthetic) data and metadata for a given model.
-     * No batch size is given, so the default batch size is used.
+     * Get a dataframe with matching tags data and metadata for a given model.
      *
      * @param modelId the model id
-     * @return a dataframe with the organic data and metadata for a given model
+     * @param batchSize the batch size
+     * @param tags the set of tags to include
+     * @return a dataframe with matching tags
      * @throws DataframeCreateException if the dataframe cannot be created
      */
-    public Dataframe getOrganicDataframe(final String modelId) throws DataframeCreateException {
+    public Dataframe getDataframeFilteredByTags(final String modelId, int batchSize, Set<String> tags) throws DataframeCreateException {
+
         FlatFileStorage ffst = getStorage();
         final Pair<ByteBuffer, ByteBuffer> pair;
         try {
-            pair = ffst.readDataframeAndMetadataWithTags(modelId, Set.of(Dataframe.InternalTags.UNLABELED.get()));
+            pair = ffst.readDataframeAndMetadataWithTags(modelId, batchSize, tags);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException(e.getMessage());
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
         }
+        return finalizeTagFiltering(modelId, pair);
+    }
 
-        // Fetch metadata, if not yet read
-        final StorageMetadata metadata;
+    /**
+     * Get a dataframe with matching tags data and metadata for a given model.
+     * No batch size is given, so the default bxatch size is used.
+     *
+     * @param modelId the model id
+     * @param tags the set of tags to include
+     * @return a dataframe with matching tags
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public Dataframe getDataframeFilteredByTags(final String modelId, Set<String> tags) throws DataframeCreateException {
+        FlatFileStorage ffst = getStorage();
+        final Pair<ByteBuffer, ByteBuffer> pair;
         try {
-            metadata = getMetadata(modelId);
+            pair = ffst.readDataframeAndMetadataWithTags(modelId, tags);
         } catch (StorageReadException e) {
-            throw new DataframeCreateException("Could not parse metadata: " + e.getMessage());
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
         }
 
-        Dataframe df;
+        return finalizeTagFiltering(modelId, pair);
+    }
+
+    /**
+     * Get a dataframe with non-matching tags and metadata for a given model.
+     *
+     * @param modelId the model id
+     * @param tags the set of tags to include
+     * @return a dataframe with matching tags
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public Dataframe getDataframeFilteredByNotTags(final String modelId, Set<String> tags) throws DataframeCreateException {
+
+        FlatFileStorage ffst = getStorage();
+        final Pair<ByteBuffer, ByteBuffer> pair;
         try {
-            df = parser.toDataframe(pair.getLeft(), pair.getRight(), metadata);
-        } catch (IllegalArgumentException e) {
-            LOG.error(e.getMessage());
-            throw new DataframeCreateException("Could not parse create dataframe: " + e.getMessage());
+            pair = ffst.readDataframeAndMetadataWithoutTags(modelId, tags);
+        } catch (StorageReadException e) {
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
         }
 
-        df.setColumnAliases(metadata.getJointNameAliases());
-        df.setInputTensorName(metadata.getInputTensorName());
-        df.setOutputTensorName(metadata.getOutputTensorName());
-        return df;
+        return finalizeTagFiltering(modelId, pair);
+    }
+
+    /**
+     * Get a dataframe with non-matching tags and metadata for a given model.
+     *
+     * @param modelId the model id
+     * @param batchSize the batch size
+     * @param tags the set of tags to include
+     * @return a dataframe with matching tags
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public Dataframe getDataframeFilteredByNotTags(final String modelId, int batchSize, Set<String> tags) throws DataframeCreateException {
+
+        FlatFileStorage ffst = getStorage();
+        final Pair<ByteBuffer, ByteBuffer> pair;
+        try {
+            pair = ffst.readDataframeAndMetadataWithoutTags(modelId, batchSize, tags);
+        } catch (StorageReadException e) {
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
+        }
+
+        return finalizeTagFiltering(modelId, pair);
     }
 
     // DATAFRAME WRITES ================================================================================================
@@ -295,8 +332,9 @@ public class CSVDataSource extends DataSource {
             StorageMetadata res = mapper.readValue(new String(metadataBytes.array(), StandardCharsets.UTF_8), StorageMetadata.class);
             return res;
         } catch (JsonProcessingException e) {
-            LOG.error("Could not parse metadata: " + e.getMessage());
-            throw new StorageReadException(e.getMessage());
+            StorageReadException se = DataSourceErrors.getMetadataReadError(modelId, e.getMessage());
+            LOG.error(se.getMessage());
+            throw se;
         }
     }
 
@@ -325,7 +363,7 @@ public class CSVDataSource extends DataSource {
         try {
             byteBuffer = ByteBuffer.wrap(mapper.writeValueAsString(storageMetadata).getBytes());
         } catch (JsonProcessingException e) {
-            throw new StorageWriteException("Could not save metadata: " + e.getMessage());
+            throw DataSourceErrors.getMetadataSaveError(modelId, e.getMessage());
         }
 
         getStorage().saveDataframe(byteBuffer, modelId + "-" + METADATA_FILENAME);

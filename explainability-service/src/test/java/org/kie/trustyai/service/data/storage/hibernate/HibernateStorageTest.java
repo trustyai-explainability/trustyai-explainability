@@ -245,5 +245,4 @@ class HibernateStorageTest {
 
         assertEquals(original.getTags(), loaded.getTags());
     }
-
 }

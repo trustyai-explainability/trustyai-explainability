@@ -1,10 +1,12 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
 import java.util.Objects;
+import java.util.Set;
 
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
+import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
@@ -88,11 +90,22 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
                 request.setThresholdDelta(defaultUpperThresh);
             }
 
-            // grab the slice of the requested data according to the provided batch size
-            dataframe = super.dataSource.get().getOrganicDataframe(request.getModelId(), request.getBatchSize());
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
+            // get the entirety of the reference tag
+            int totalRows = (int) dataSource.get().getNumObservations(request.getModelId());
+
+            // get the last $batchSize references
+
+            dataframe = dataSource.get().getDataframeFilteredByTags(request.getModelId(), totalRows, Set.of(request.getReferenceTag()));
+
+            try {
+                dataframe.addPredictions(
+                        dataSource.get().getDataframeFilteredByTags(request.getModelId(), request.getBatchSize(), Set.of(Dataframe.InternalTags.UNLABELED.get())).asPredictions());
+            } catch (DataframeCreateException e) {
+                // pass: no inference data, which should return a 'null' drift response, i.e., because we are checking if the training data has drifted from itself
+            }
+        } catch (DataframeCreateException | StorageReadException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
         // use the calculate function to compute the metric value(s)
@@ -100,7 +113,7 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
         try {
             metricValue = this.calculate(dataframe, request);
         } catch (MetricCalculationException e) {
-            LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
+            LOG.error("Error calculating metric for model=" + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error calculating metric").build();
         }
 

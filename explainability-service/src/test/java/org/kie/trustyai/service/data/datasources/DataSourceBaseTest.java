@@ -15,6 +15,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
+import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import jakarta.enterprise.inject.Instance;
@@ -234,7 +235,58 @@ abstract class DataSourceBaseTest {
         datasource.get().saveDataframe(df, MODEL_ID);
 
         assertThrows(StorageReadException.class, () -> datasource.get().getTags("nonexistant"));
+    }
 
+    @Test
+    void testReadingOrganicNoData() throws InterruptedException {
+        int nrows = 100;
+        int ncols = 100;
+
+        Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
+        HashMap<String, List<List<Integer>>> tagMap = new HashMap<>();
+        tagMap.put("TRAINING", List.of(List.of(0, nrows)));
+        DataTagging dataTagging = new DataTagging(MODEL_ID, tagMap);
+        datasource.get().saveDataframe(original, MODEL_ID);
+        datasource.get().tagDataframeRows(dataTagging);
+        assertThrows(DataframeCreateException.class, () -> datasource.get().getOrganicDataframe(MODEL_ID));
+    }
+
+    @Test
+    void testReadingTagFiltering() {
+        int nrows = 100;
+        int ncols = 10;
+
+        Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
+        HashMap<String, List<List<Integer>>> tagMap = new HashMap<>();
+        tagMap.put("A", List.of(List.of(0, 10)));
+        tagMap.put("B", List.of(List.of(20, 30)));
+        tagMap.put("C", List.of(List.of(40, 50)));
+
+        DataTagging dataTagging = new DataTagging(MODEL_ID, tagMap);
+        datasource.get().saveDataframe(original, MODEL_ID);
+        datasource.get().tagDataframeRows(dataTagging);
+
+        // not tags
+        Dataframe df = datasource.get().getDataframeFilteredByNotTags(MODEL_ID, Set.of("A", "B"));
+        assertEquals(80, df.getRowDimension());
+        Set<String> tagSet = Set.of("A", "B");
+        assertTrue(df.getTags().stream().noneMatch(tagSet::contains));
+
+        df = datasource.get().getDataframeFilteredByNotTags(MODEL_ID, Set.of("A"));
+        assertEquals(90, df.getRowDimension());
+        tagSet = Set.of("A");
+        assertTrue(df.getTags().stream().noneMatch(tagSet::contains));
+
+        // yes tags
+        df = datasource.get().getDataframeFilteredByTags(MODEL_ID, Set.of("A", "B", "C"));
+        assertEquals(30, df.getRowDimension());
+        tagSet = Set.of("A", "B", "C");
+        assertTrue(df.getTags().stream().allMatch(tagSet::contains));
+
+        df = datasource.get().getDataframeFilteredByTags(MODEL_ID, Set.of("C"));
+        assertEquals(10, df.getRowDimension());
+        tagSet = Set.of("C");
+        assertTrue(df.getTags().stream().allMatch(tagSet::contains));
     }
 
 }

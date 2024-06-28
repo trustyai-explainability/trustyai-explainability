@@ -26,6 +26,7 @@ import org.kie.trustyai.service.config.storage.CustomStorageConfig;
 import org.kie.trustyai.service.config.storage.MigrationConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.datasources.CSVDataSource;
+import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
@@ -41,13 +42,13 @@ import org.kie.trustyai.service.payloads.service.SchemaItem;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @LookupIfProperty(name = "service.storage.format", stringValue = "DATABASE")
-@ApplicationScoped
+@Singleton
 public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     @PersistenceContext
     EntityManager em;
@@ -85,10 +86,10 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     // MIGRATIONS ======================================================================================================
     @Transactional
-    public List<String> migrate() {
+    public synchronized List<String> migrate() {
         List<String> modelIds = new ArrayList<>();
         if (migrationConfig.isPresent()) {
-            MigrationConfig mc = migrationConfig.get();explainability-service/src/main/java/org/kie/trustyai/service/
+            MigrationConfig mc = migrationConfig.get();
             String fromFolder = mc.getFromFolder();
             String fromFile = mc.getFromFilename();
 
@@ -425,26 +426,31 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     }
 
     // JOINT DATAFRAME AND METADATA READS ==============================================================================
-    @Override
-    @Transactional
-    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataTagFiltering(String modelId, int batchSize, Set<String> tags, boolean invertFilter) throws StorageReadException {
         if (dataExists(modelId)) {
+            Dataframe df;
             try {
-                LOG.debug("Reading dataframe " + modelId + " from Hibernate (batched and tagged)");
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate (tagged)");
                 refreshIfDirty();
                 List<DataframeRow> rows = em.createQuery("" +
                         "select dr from DataframeRow dr" +
-                        " where dr.modelId = ?1 AND dr.tag in (?2)" +
+                        " where dr.modelId = ?1 AND dr.tag " +
+                        (invertFilter ? "not in " : "in ") +
+                        "(?2)" +
                         "order by dr.dbId DESC ", DataframeRow.class)
                         .setParameter(1, modelId)
                         .setParameter(2, tags)
                         .setMaxResults(batchSize).getResultList();
                 Collections.reverse(rows);
                 DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
-                Dataframe df = Dataframe.untranspose(rows, dm);
-                return Pair.of(df, readMetaOrInternalData(modelId));
+                df = Dataframe.untranspose(rows, dm);
             } catch (Exception e) {
-                LOG.error("Error reading dataframe for model=" + modelId);
+                throw new DataframeCreateException(e.getMessage());
+            }
+            try {
+                return Pair.of(df, readMetaOrInternalData(modelId));
+            } catch (StorageReadException e) {
+                LOG.error(e.getMessage());
                 throw new StorageReadException(e.getMessage());
             }
         } else {
@@ -454,29 +460,26 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     @Override
     @Transactional
-    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException {
-        if (dataExists(modelId)) {
-            try {
-                LOG.debug("Reading dataframe " + modelId + " from Hibernate (tagged)");
-                refreshIfDirty();
-                List<DataframeRow> rows = em.createQuery("" +
-                        "select dr from DataframeRow dr" +
-                        " where dr.modelId = ?1 AND dr.tag in (?2)" +
-                        "order by dr.dbId DESC ", DataframeRow.class)
-                        .setParameter(1, modelId)
-                        .setParameter(2, tags)
-                        .getResultList();
-                DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
-                Dataframe df = Dataframe.untranspose(rows, dm);
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        return readDataframeAndMetadataTagFiltering(modelId, batchSize, tags, false);
+    }
 
-                return Pair.of(df, readMetaOrInternalData(modelId));
-            } catch (Exception e) {
-                LOG.error("Error reading dataframe for model=" + modelId);
-                throw new StorageReadException(e.getMessage());
-            }
-        } else {
-            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
-        }
+    @Override
+    @Transactional
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException {
+        return readDataframeAndMetadataTagFiltering(modelId, this.batchSize, tags, false);
+    }
+
+    @Override
+    @Transactional
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithoutTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        return readDataframeAndMetadataTagFiltering(modelId, batchSize, tags, true);
+    }
+
+    @Override
+    @Transactional
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException {
+        return readDataframeAndMetadataTagFiltering(modelId, this.batchSize, tags, true);
     }
 
     // TAG MANIPULATION ================================================================================================
@@ -558,12 +561,11 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     @Override
     @Transactional
     public boolean dataExists(String modelId) {
-        Long rows = em.createQuery("" +
-                "select count(dm) from DataframeMetadata dm" +
-                " where dm.id = ?1", Long.class)
+        return em.createQuery("" +
+                "select COUNT(dm.id)>0 from DataframeMetadata dm" +
+                " where dm.id = ?1", Boolean.class)
                 .setParameter(1, modelId)
                 .getSingleResult();
-        return rows > 0;
     }
 
     @Transactional

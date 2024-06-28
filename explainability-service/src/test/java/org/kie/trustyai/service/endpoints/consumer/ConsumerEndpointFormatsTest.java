@@ -556,7 +556,7 @@ class ConsumerEndpointFormatsTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -576,7 +576,7 @@ class ConsumerEndpointFormatsTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -693,10 +693,10 @@ class ConsumerEndpointFormatsTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(partialResponsePayloadBWrongSchema)
-                .when().post()
+                .when().post().peek()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
+                .body(is("Error when reconciling payload for response id='" + newId + "': Payload schema does not match stored schema for model=" + MODEL_A_ID));
     }
 
 }

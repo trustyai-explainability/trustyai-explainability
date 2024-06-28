@@ -58,7 +58,8 @@ public class BatchReader {
         return new ArrayList<>(queue);
     }
 
-    public static Pair<List<String>, List<String>> readEntriesWithTags(InputStream dataStream, InputStream metadataStream, int batchSize, Set<String> tags) throws IOException {
+    public static Pair<List<String>, List<String>> readEntriesWithTags(InputStream dataStream, InputStream metadataStream, int batchSize, Set<String> tags, boolean invertTagFilter)
+            throws IOException {
         final CircularFifoQueue<String> dataQueue = new CircularFifoQueue<>(batchSize);
         final CircularFifoQueue<String> metadataQueue = new CircularFifoQueue<>(batchSize);
 
@@ -73,7 +74,11 @@ public class BatchReader {
                     String metadataLine = CSVUtils.recordToString(metadataRecord);
                     String metadataTag = metadataRecord.get(0); // Tag is the first column
 
-                    if (tags.contains(metadataTag)) {
+                    boolean containsTag = tags.contains(metadataTag);
+                    if (invertTagFilter) {
+                        containsTag = !containsTag;
+                    }
+                    if (containsTag) {
                         dataQueue.add(dataLine);
                         metadataQueue.add(metadataLine);
                     }

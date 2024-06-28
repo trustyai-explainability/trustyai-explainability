@@ -136,8 +136,16 @@ public class MinioStorage extends FlatFileStorage {
         throw new StorageReadException("Storage type not supported");
     }
 
-    @Override
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException {
         throw new StorageReadException("Storage type not supported");
     }
 

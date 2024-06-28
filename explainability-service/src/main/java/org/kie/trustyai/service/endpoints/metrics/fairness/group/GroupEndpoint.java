@@ -8,6 +8,7 @@ import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
+import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.payloads.PayloadConverter;
@@ -70,9 +71,9 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
             dataframe = super.dataSource.get().getOrganicDataframe(request.getModelId(), request.getBatchSize());
             storageMetadata = dataSource.get().getMetadata(request.getModelId());
 
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
+        } catch (DataframeCreateException | StorageReadException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
         RequestReconciler.reconcile(request, storageMetadata);
@@ -110,9 +111,9 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     public Response getSpecificDefinition(GroupDefinitionRequest request) {
         try {
             RequestReconciler.reconcile(request, dataSource);
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available: " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
+        } catch (DataframeCreateException | StorageReadException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
         return Response.ok(this.getSpecificDefinition(new MetricValueCarrier(request.getMetricValue()), request)).build();

@@ -1326,20 +1326,24 @@ public class Dataframe {
         DataframeInternalData dataframeInternalData = new DataframeInternalData();
         List<List<Value>> data = new ArrayList<>();
 
-        int colSize = rows.get(0).getRow().size();
-        for (int c = 0; c < colSize; c++) {
-            List<Value> colData = new ArrayList<>();
-            for (int r = 0; r < rows.size(); r++) {
-                DataframeRow row = rows.get(r);
-                colData.add(row.getRow().get(c));
+        if (!rows.isEmpty()) {
+            int colSize = rows.get(0).getRow().size();
+            for (int c = 0; c < colSize; c++) {
+                List<Value> colData = new ArrayList<>();
+                for (int r = 0; r < rows.size(); r++) {
+                    DataframeRow row = rows.get(r);
+                    colData.add(row.getRow().get(c));
 
-                if (c == 0) {
-                    dataframeInternalData.addDatapointTag(row.getTag());
-                    dataframeInternalData.addId(row.getRowId());
-                    dataframeInternalData.addTimestamp(row.getTimestamp());
+                    if (c == 0) {
+                        dataframeInternalData.addDatapointTag(row.getTag());
+                        dataframeInternalData.addId(row.getRowId());
+                        dataframeInternalData.addTimestamp(row.getTimestamp());
+                    }
                 }
+                data.add(colData);
             }
-            data.add(colData);
+        } else {
+            throw new IllegalArgumentException("Cannot create a dataframe from an empty list of predictions.");
         }
         return new Dataframe(data, metadata, dataframeInternalData);
     }

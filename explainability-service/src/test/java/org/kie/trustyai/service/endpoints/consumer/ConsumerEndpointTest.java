@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
+import org.kie.trustyai.service.data.reconcilers.ModelMeshInferencePayloadReconciler;
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
@@ -45,6 +46,9 @@ class ConsumerEndpointTest {
     @Inject
     Instance<MockMemoryStorage> storage;
 
+    @Inject
+    ModelMeshInferencePayloadReconciler reconciler;
+
     /**
      * Empty the storage before each test.
      */
@@ -52,6 +56,8 @@ class ConsumerEndpointTest {
     void emptyStorage() throws JsonProcessingException {
         datasource.get().reset();
         storage.get().emptyStorage();
+        reconciler.clear();
+
     }
 
     @Test
@@ -70,7 +76,7 @@ class ConsumerEndpointTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -90,7 +96,7 @@ class ConsumerEndpointTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -154,10 +160,13 @@ class ConsumerEndpointTest {
 
     @Test
     void consumeDifferentSchemas() {
+
+        System.out.println(" ==== DIFFERENT SCHEMA ====");
         final InferencePayload payloadModelA = PayloadProducer.getInferencePayloadA(0);
         final InferencePayload payloadModelB = PayloadProducer.getInferencePayloadB(0);
 
         // Generate two partial payloads with consistent metadata (from the same model)
+        System.out.println(" ==== 1");
         final String id = "This schema is OK";
         final InferencePartialPayload partialRequestPayloadA = new InferencePartialPayload();
         partialRequestPayloadA.setId(id);
@@ -171,6 +180,8 @@ class ConsumerEndpointTest {
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .body(is(""));
+
+        System.out.println(" ==== 2");
         final InferencePartialPayload partialResponsePayloadA = new InferencePartialPayload();
         partialResponsePayloadA.setId(id);
         partialResponsePayloadA.setData(payloadModelA.getOutput());
@@ -184,6 +195,7 @@ class ConsumerEndpointTest {
                 .statusCode(RestResponse.StatusCode.OK)
                 .body(is(""));
 
+        System.out.println(" ==== 3");
         // Generate two partial payloads with inconsistent metadata (from different models)
         final String newId = "This schema is NOT OK";
         final InferencePartialPayload partialRequestPayloadAWrongSchema = new InferencePartialPayload();
@@ -196,9 +208,9 @@ class ConsumerEndpointTest {
                 .body(partialRequestPayloadAWrongSchema)
                 .when().post()
                 .then()
-                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload request id=" + newId + ", Payload schema and stored schema are not the same"));
+                .statu explainability-service/src/test/java/org/kie/trustyai/service/sCode(RestResponse.StatusCode.OK);
 
+        System.out.println(" ==== 4");
         final InferencePartialPayload partialResponsePayloadBWrongSchema = new InferencePartialPayload();
         partialResponsePayloadBWrongSchema.setId(newId);
         partialResponsePayloadBWrongSchema.setData(PayloadProducer.getInferencePayloadB(0).getOutput());
@@ -210,6 +222,6 @@ class ConsumerEndpointTest {
                 .when().post()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
+                .body(is("Error when reconciling payload for response id='" + newId + "': Payload schema does not match stored schema for model=" + MODEL_A_ID));
     }
 }

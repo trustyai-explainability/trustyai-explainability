@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.metrics.drift;
+package org.kie.trustyai.service.endpoints.metrics.drift.fouriermmd;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,10 +23,9 @@ import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMD;
 import org.kie.trustyai.metrics.drift.fouriermmd.FourierMMDFitting;
-import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
+import org.kie.trustyai.service.data.datasources.DataSource;
+import org.kie.trustyai.service.endpoints.metrics.drift.FourierMMDEndpoint;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
-import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
-import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.fouriermmd.FourierMMDParameters;
@@ -35,7 +34,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
 import jakarta.enterprise.inject.Instance;
@@ -46,26 +44,29 @@ import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
-@TestProfile(MetricsEndpointTestProfile.class)
 @TestHTTPEndpoint(FourierMMDEndpoint.class)
-class FourierMMDEndpointTest {
+abstract class FourierMMDEndpointBaseTest {
 
-    private static final String MODEL_ID = "example1";
+    protected static final String MODEL_ID = "example1";
     private static final String TRAINING_TAG = "TRAINING";
     private static final int N_SAMPLES = 1000;
+    private static final int TOTAL_TRAIN_POINTS = 4321;
+    private static final String trainDataSetFileName = "train_ts_x.csv";
+    private static final String validDataSetFileName = "valid_ts_x.csv";
+    public static final String testDataSetFileName = "test_ts_x.csv";
+
     @Inject
-    Instance<MockCSVDatasource> datasource;
-    @Inject
-    Instance<MockMemoryStorage> storage;
+    Instance<DataSource> datasource;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
-    final public static String trainDataSetFileName = "train_ts_x.csv";
-    final public static String validDataSetFileName = "valid_ts_x.csv";
-    final public static String testDataSetFileName = "test_ts_x.csv";
+    abstract void clearData();
 
-    public Dataframe readCSV(String fileName) {
+    abstract void saveDF(Dataframe dataframe);
+
+    // TEST HELPERS ========
+    Dataframe readCSV(String fileName) {
 
         BufferedReader br = null;
         List<Prediction> predictions = null;
@@ -123,26 +124,32 @@ class FourierMMDEndpointTest {
         return Dataframe.createFrom(predictions);
     }
 
-    @BeforeEach
-    void populateStorage() throws JsonProcessingException {
-        storage.get().emptyStorage();
-        // Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+    void saveTrainingData(int nPointsToTag) {
         Dataframe dataframe = readCSV(trainDataSetFileName);
-
         HashMap<String, List<List<Integer>>> tagging = new HashMap<>();
-        tagging.put(TRAINING_TAG, List.of(List.of(0, N_SAMPLES)));
+        tagging.put(TRAINING_TAG, List.of(List.of(0, nPointsToTag)));
         dataframe.tagDataPoints(tagging);
+        saveDF(dataframe);
+    }
+
+    void saveValidationData() {
         Dataframe validDF = readCSV(validDataSetFileName);
-        dataframe.addPredictions(validDF.asPredictions());
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        datasource.get().saveDataframe(validDF, MODEL_ID);
+    }
+
+    @BeforeEach
+    void populateStorage() {
+        clearData();
+        saveTrainingData(N_SAMPLES);
+        saveValidationData();
     }
 
     @AfterEach
-    void clearRequests() {
+    void clearRequests() throws JsonProcessingException {
         scheduler.get().getAllRequests().clear();
     }
 
+    // TESTS ========
     @Test
     void fourierMMDNonPreFit() {
         FourierMMDMetricRequest payload = new FourierMMDMetricRequest();
@@ -209,6 +216,23 @@ class FourierMMDEndpointTest {
                 .contentType(ContentType.JSON)
                 .body(payload)
                 .when().post("/request")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode());
+    }
+
+    @Test
+    void fourierMMDNoInferenceDataRequest() {
+        clearData();
+        saveTrainingData(TOTAL_TRAIN_POINTS);
+
+        FourierMMDMetricRequest payload = new FourierMMDMetricRequest();
+        payload.setReferenceTag(TRAINING_TAG);
+        payload.setModelId(MODEL_ID);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post().peek()
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode());
     }

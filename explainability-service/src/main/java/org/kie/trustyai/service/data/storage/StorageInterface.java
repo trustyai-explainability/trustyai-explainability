@@ -65,4 +65,27 @@ public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
 
     Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException;
 
+    /**
+     * Read data and metadata without the specified tags and batch size.
+     *
+     * @param modelId The model ID
+     * @param batchSize The batch size
+     * @param tags The tags that the returned rows should not contain
+     * @return A pair of {@link ByteBuffer} containing the data and metadata
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithoutTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException;
+
+    /**
+     * Read data and metadata without the specified tags and batch size.
+     * Since no batch size is specified, the default batch size is used.
+     *
+     * @param modelId The model ID
+     * @param tags The tags that the returned rows should not contain
+     * @return A pair of {@link ByteBuffer} containing the data and metadata
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+
+    Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException;
+
 }

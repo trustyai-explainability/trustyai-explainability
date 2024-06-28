@@ -47,4 +47,9 @@ public abstract class InferencePayloadReconciler<T extends PartialPayload, U ext
     abstract protected void save(String id, String modelId) throws InvalidSchemaException, DataframeCreateException;
 
     abstract public Dataframe payloadToDataframe(T inputPayload, U outputPayload, String id, Map<String, String> metadata) throws DataframeCreateException;
+
+    public void clear() {
+        unreconciledInputs.clear();
+        unreconciledOutputs.clear();
+    }
 }

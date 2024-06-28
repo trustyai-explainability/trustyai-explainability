@@ -76,11 +76,22 @@ public class MemoryStorage extends FlatFileStorage {
     }
 
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException {
-        return readDataframeAndMetadataWithTags(modelId, this.batchSize, tags);
+        return readDataframeAndMetadataTagFiltered(modelId, this.batchSize, tags, false);
     }
 
-    @Override
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        return readDataframeAndMetadataTagFiltered(modelId, batchSize, tags, false);
+    }
+
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException {
+        return readDataframeAndMetadataTagFiltered(modelId, this.batchSize, tags, true);
+    }
+
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        return readDataframeAndMetadataTagFiltered(modelId, batchSize, tags, true);
+    }
+
+    private Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataTagFiltered(String modelId, int batchSize, Set<String> tags, boolean invertTagFilter) throws StorageReadException {
         final List<String> dataLines = new ArrayList<>();
         final List<String> metadataLines = new ArrayList<>();
 
@@ -100,7 +111,11 @@ public class MemoryStorage extends FlatFileStorage {
                         break;
                     }
                     String metadataLine = record.get(0); // Assuming the tag is in the first column
-                    if (tags.contains(metadataLine)) {
+                    boolean containsTags = tags.contains(metadataLine);
+                    if (invertTagFilter) {
+                        containsTags = !containsTags;
+                    }
+                    if (containsTags) {
                         metadataLines.add(String.join(",", record));
                         dataLines.add(dataContentLines[index]);
                     }

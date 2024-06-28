@@ -5,6 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.profiles.hibernate.HibernateTestProfile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
@@ -20,10 +22,9 @@ public class DataSourceHibernateTest extends DataSourceBaseTest {
 
     @AfterEach
     @BeforeEach
-    void reset() {
+    void reset() throws JsonProcessingException {
         for (String modelId : datasource.get().getKnownModels()) {
             storage.get().clearData(modelId);
         }
     }
-
 }

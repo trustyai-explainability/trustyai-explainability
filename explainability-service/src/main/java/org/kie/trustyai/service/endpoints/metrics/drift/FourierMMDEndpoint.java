@@ -25,8 +25,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
-@Tag(name = "FourierMMD Drift Endpoint", description = "Meanshift measures the distance between distributions as " +
-        "distance between mean embeddings of features from the test dataframe and the training dataframe.")
+@Tag(name = "FourierMMD Drift Endpoint", description = "FourierMMD identifies drift in input data using a random Fourier " +
+        "approximation")
 @EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
 @Path("/metrics/drift/fouriermmd")
 public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
@@ -48,7 +48,7 @@ public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
     // this function should provide a general definition for this class of metric
     @Override
     public String getGeneralDefinition() {
-        return "FourierMMD gives probability that the data values seen in a test dataset come from the same distribution of a training dataset, under the assumption that the computed mmd values are normally distributed.";
+        return "FourierMMD gives probability that the data values seen in a test dataset have drifted from the training dataset distribution, under the assumption that the computed MMD values are normally distributed.";
     }
 
     // this function should provide a specific definition/interpretation of what
@@ -60,10 +60,10 @@ public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
         out.append(System.getProperty("line.separator"));
 
         double pValue = metricValues.getValue();
-        boolean isDrifted = pValue <= request.getThresholdDelta();
+        boolean isDrifted = pValue > request.getThresholdDelta();
         out.append(
                 String.format(
-                        "  - Test data has p=%f probability of being drifted from the training distribution.",
+                        "  - Test data has p=%f probability of having drifted from the training distribution.",
                         pValue));
         if (isDrifted) {
             out.append(String.format(" p > %f -> [SIGNIFICANT DRIFT]", request.getThresholdDelta()));
@@ -106,7 +106,7 @@ public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
 
             request.setFitting(fmf);
         } else {
-            LOG.debug("Using previously found fouriermmd fitting in request for model=" + request.getModelId());
+            LOG.debug("Using previously found FourierMMD fitting in request for model=" + request.getModelId());
             fmf = request.getFitting();
         }
         FourierMMD fmmd = new FourierMMD(fmf);
@@ -114,7 +114,14 @@ public class FourierMMDEndpoint extends DriftEndpoint<FourierMMDMetricRequest> {
 
         // get data that does _not_ have the provided reference tag: test data
         Dataframe filtered = dataframe.filterRowsByTagNotEquals(request.getReferenceTag());
-        HypothesisTestResult result = fmmd.calculate(filtered, request.getThresholdDelta(), request.getGamma());
+
+        HypothesisTestResult result;
+        if (filtered.getRowDimension() > 0) {
+            result = fmmd.calculate(filtered, request.getThresholdDelta(), request.getGamma());
+        } else {
+            LOG.warn("Test data has no observations; FourierMMD results will not be numerically reliable.");
+            result = new HypothesisTestResult(0.0, 0.0, false);
+        }
         return new MetricValueCarrier(result.getpValue());
     }
 

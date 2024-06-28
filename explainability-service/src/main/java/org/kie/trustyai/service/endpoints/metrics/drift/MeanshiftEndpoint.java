@@ -107,7 +107,7 @@ public class MeanshiftEndpoint extends DriftEndpoint<MeanshiftMetricRequest> {
         // get data that does _not_ have the provided reference tag: test data
         Dataframe filtered = dataframe.filterRowsByTagNotEquals(((DriftMetricRequest) request).getReferenceTag());
 
-        if (dataframe.getRowDimension() < 2) {
+        if (filtered.getRowDimension() < 2) {
             LOG.warn("Test data has less than two observations; Meanshift results will not be numerically reliable.");
         }
         Map<String, MeanshiftResult> result = ms.calculate(filtered, request.getThresholdDelta());

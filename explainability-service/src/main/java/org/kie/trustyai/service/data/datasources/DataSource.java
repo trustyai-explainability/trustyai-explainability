@@ -54,6 +54,7 @@ public abstract class DataSource {
     }
 
     // DATAFRAME READS =================================================================================================
+
     /**
      * Using the default batch size, get a dataframe consisting of the last $defaultBatchSize rows of data from
      * the corresponding model.
@@ -80,7 +81,6 @@ public abstract class DataSource {
      * @param modelId the model id
      * @param startPos the beginning index to return in the dataframe slice, inclusive
      * @param endPos the ending index to return in the dataframe slice, exclusive
-     *
      * @return a dataframe with rows of data between $startPos (inclusive) and $endPos (exclusive).
      * @throws DataframeCreateException if the dataframe cannot be created
      */
@@ -94,7 +94,9 @@ public abstract class DataSource {
      * @return a dataframe with the organic data and metadata for a given model
      * @throws DataframeCreateException if the dataframe cannot be created
      */
-    public abstract Dataframe getOrganicDataframe(final String modelId, int batchSize) throws DataframeCreateException;
+    public Dataframe getOrganicDataframe(final String modelId, int batchSize) throws DataframeCreateException {
+        return getDataframeFilteredByTags(modelId, batchSize, Set.of(Dataframe.InternalTags.UNLABELED.get()));
+    }
 
     /**
      * Get a dataframe with the organic (non-synthetic) data and metadata for a given model.
@@ -104,7 +106,53 @@ public abstract class DataSource {
      * @return a dataframe with the organic data and metadata for a given model
      * @throws DataframeCreateException if the dataframe cannot be created
      */
-    public abstract Dataframe getOrganicDataframe(final String modelId) throws DataframeCreateException;
+    public Dataframe getOrganicDataframe(final String modelId) throws DataframeCreateException {
+        return getDataframeFilteredByTags(modelId, Set.of(Dataframe.InternalTags.UNLABELED.get()));
+    }
+
+    /**
+     * Get a dataframe with matching tags data and metadata for a given model.
+     *
+     * @param modelId the model id
+     * @param batchSize the batch size
+     * @param tags the set of tags to include
+     * @return a dataframe with matching tags
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public abstract Dataframe getDataframeFilteredByTags(final String modelId, int batchSize, Set<String> tags) throws DataframeCreateException;
+
+    /**
+     * Get a dataframe with matching tags data and metadata for a given model.
+     * No batch size is given, so the default batch size is used.
+     *
+     * @param modelId the model id
+     * @param tags the set of tags to include
+     * @return a dataframe with matching tags
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public abstract Dataframe getDataframeFilteredByTags(final String modelId, Set<String> tags) throws DataframeCreateException;
+
+    /**
+     * Get a dataframe with non-matching tags data and metadata for a given model.
+     *
+     * @param modelId the model id
+     * @param batchSize the batch size
+     * @param tags the set of tags to include
+     * @return a dataframe with matching tags
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public abstract Dataframe getDataframeFilteredByNotTags(final String modelId, int batchSize, Set<String> tags) throws DataframeCreateException;
+
+    /**
+     * Get a dataframe with non-matching tags data and metadata for a given model.
+     * No batch size is given, so the default batch size is used.
+     *
+     * @param modelId the model id
+     * @param tags the set of tags to include
+     * @return a dataframe with matching tags
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public abstract Dataframe getDataframeFilteredByNotTags(final String modelId, Set<String> tags) throws DataframeCreateException;
 
     // DATAFRAME WRITES ================================================================================================
     public void saveDataframe(final Dataframe dataframe, final String modelId) throws InvalidSchemaException {
@@ -147,10 +195,13 @@ public abstract class DataSource {
             storageMetadata.setRecordedInferences(dataframe.getTags().contains(Dataframe.InternalTags.UNLABELED.get()));
             storageMetadata.setInputTensorName(dataframe.getInputTensorName());
             storageMetadata.setOutputTensorName(dataframe.getOutputTensorName());
+
+            System.out.println("schema exists");
+
             try {
                 saveMetadata(storageMetadata, modelId);
             } catch (StorageWriteException e) {
-                throw new DataframeCreateException(e.getMessage());
+                throw DataSourceErrors.getMetadataSaveError(modelId, e.getMessage());
             }
         } else {
             // If metadata is present, just increment number of observations
@@ -174,9 +225,9 @@ public abstract class DataSource {
                     throw new DataframeCreateException(e.getMessage());
                 }
             } else {
-                final String message = "Payload schema and stored schema are not the same";
-                LOG.error(message);
-                throw new InvalidSchemaException(message);
+                StorageWriteException swe = DataSourceErrors.getSchemaMismatchError(modelId);
+                LOG.error(swe.getMessage());
+                throw swe;
             }
         }
     }

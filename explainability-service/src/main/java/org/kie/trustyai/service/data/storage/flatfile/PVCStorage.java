@@ -113,12 +113,12 @@ public class PVCStorage extends FlatFileStorage {
         }
     }
 
-    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataTagFilter(String modelId, int batchSize, Set<String> tags, boolean invertTagFilter) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);
         try {
             final InputStream dataStream = BatchReader.getFileInputStream(buildDataPath(modelId).toString());
             final InputStream internalDataStream = BatchReader.getFileInputStream(buildInternalDataPath(modelId).toString());
-            final Pair<List<String>, List<String>> pair = BatchReader.readEntriesWithTags(dataStream, internalDataStream, batchSize, tags);
+            final Pair<List<String>, List<String>> pair = BatchReader.readEntriesWithTags(dataStream, internalDataStream, batchSize, tags, invertTagFilter);
             return Pair.of(ByteBuffer.wrap(BatchReader.linesToBytes(pair.getLeft())), ByteBuffer.wrap(BatchReader.linesToBytes(pair.getRight())));
         } catch (IOException e) {
             LOG.error("Error reading input file for model " + modelId);
@@ -126,9 +126,20 @@ public class PVCStorage extends FlatFileStorage {
         }
     }
 
-    @Override
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException {
-        return readDataframeAndMetadataWithTags(modelId, this.batchSize, tags);
+        return readDataframeAndMetadataTagFilter(modelId, this.batchSize, tags, false);
+    }
+
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        return readDataframeAndMetadataTagFilter(modelId, batchSize, tags, false);
+    }
+
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException {
+        return readDataframeAndMetadataTagFilter(modelId, this.batchSize, tags, true);
+    }
+
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        return readDataframeAndMetadataTagFilter(modelId, batchSize, tags, true);
     }
 
     private boolean pathExists(Path path) {

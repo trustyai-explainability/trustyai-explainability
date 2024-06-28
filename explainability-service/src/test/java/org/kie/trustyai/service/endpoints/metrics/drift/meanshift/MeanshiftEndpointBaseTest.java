@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.metrics.drift;
+package org.kie.trustyai.service.endpoints.metrics.drift.meanshift;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +10,7 @@ import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
 import org.kie.trustyai.metrics.utils.PerColumnStatistics;
 import org.kie.trustyai.service.data.datasources.DataSource;
+import org.kie.trustyai.service.endpoints.metrics.drift.MeanshiftEndpoint;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;

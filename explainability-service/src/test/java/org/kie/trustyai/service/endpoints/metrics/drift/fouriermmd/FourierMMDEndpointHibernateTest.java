@@ -1,6 +1,7 @@
-package org.kie.trustyai.service.endpoints.metrics.drift;
+package org.kie.trustyai.service.endpoints.metrics.drift.fouriermmd;
 
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.endpoints.metrics.drift.FourierMMDEndpoint;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateStorage;
 import org.kie.trustyai.service.profiles.hibernate.HibernateTestProfile;
 
@@ -13,8 +14,8 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(HibernateTestProfile.class)
-@TestHTTPEndpoint(MeanshiftEndpoint.class)
-class MeanshiftEndpointHibernateTest extends MeanshiftEndpointBaseTest {
+@TestHTTPEndpoint(FourierMMDEndpoint.class)
+class FourierMMDEndpointHibernateTest extends FourierMMDEndpointBaseTest {
     @Inject
     Instance<MockHibernateStorage> storage;
 
