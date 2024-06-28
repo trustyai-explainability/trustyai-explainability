@@ -208,7 +208,7 @@ class ConsumerEndpointTest {
                 .body(partialRequestPayloadAWrongSchema)
                 .when().post()
                 .then()
-                .statu explainability-service/src/test/java/org/kie/trustyai/service/sCode(RestResponse.StatusCode.OK);
+                .statusCode(RestResponse.StatusCode.OK);
 
         System.out.println(" ==== 4");
         final InferencePartialPayload partialResponsePayloadBWrongSchema = new InferencePartialPayload();
