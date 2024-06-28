@@ -43,9 +43,9 @@ public class KServeV2HTTPPredictionProvider extends AbstractKServePredictionProv
     public CompletableFuture<List<PredictionOutput>> predictAsync(List<PredictionInput> inputs) {
         final ObjectMapper mapper = new ObjectMapper();
 
-        final List<List<Double>> instances = inputs.stream()
+        final List<List<Object>> instances = inputs.stream()
                 .map(input -> input.getFeatures().stream()
-                        .map(Feature::getValue).map(Value::asNumber)
+                        .map(Feature::getValue).map(Value::getUnderlyingObject)
                         .collect(Collectors.toList()))
                 .collect(Collectors.toList());
 

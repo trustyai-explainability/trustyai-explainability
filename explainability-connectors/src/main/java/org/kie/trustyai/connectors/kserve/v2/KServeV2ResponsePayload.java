@@ -37,7 +37,7 @@ public class KServeV2ResponsePayload {
         public String name;
         public List<Integer> shape;
         public KServeDatatype datatype;
-        public List<Double> data;
+        public List<Object> data;
 
         @Override
         public String toString() {

@@ -26,7 +26,7 @@ class KServeV2HTTPPayloadParserTest {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static String toJson(List<Double> predictions, Optional<Integer> shape) {
+    public static String toJson(List<Object> predictions, Optional<Integer> shape) {
         try {
             KServeV2ResponsePayload payload = new KServeV2ResponsePayload();
             final KServeV2ResponsePayload.Outputs outputs = new KServeV2ResponsePayload.Outputs();
@@ -76,7 +76,7 @@ class KServeV2HTTPPayloadParserTest {
     void modelResponseToPredictionOutputMulti() throws JsonProcessingException {
 
         final Random random = new Random(0);
-        final List<Double> values = random.doubles(3).boxed().collect(Collectors.toList());
+        final List<Object> values = random.doubles(3).boxed().collect(Collectors.toList());
 
         final String json = toJson(values, Optional.of(1));
 
@@ -111,7 +111,7 @@ class KServeV2HTTPPayloadParserTest {
     void modelResponseToPredictionOutputFp64() throws JsonProcessingException {
 
         final Random random = new Random(0);
-        final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
+        final List<Object> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
         final String json = toJson(values, Optional.of(1));
 
         final List<PredictionOutput> predictionOutput = KServeV2HTTPPayloadParser.getInstance().parseResponse(json);
@@ -169,7 +169,7 @@ class KServeV2HTTPPayloadParserTest {
 
         final Random random = new Random(0);
         final int OUTPUT_SHAPE = 6;
-        final List<Double> values = random.doubles(OUTPUT_SHAPE).boxed().collect(Collectors.toList());
+        final List<Object> values = random.doubles(OUTPUT_SHAPE).boxed().collect(Collectors.toList());
 
         final String json = toJson(values, Optional.empty());
 
@@ -188,7 +188,7 @@ class KServeV2HTTPPayloadParserTest {
 
         final Random random = new Random(0);
         final int OUTPUT_SHAPE = 6;
-        final List<Double> values = random.doubles(OUTPUT_SHAPE).boxed().collect(Collectors.toList());
+        final List<Object> values = random.doubles(OUTPUT_SHAPE).boxed().collect(Collectors.toList());
 
         final String json = toJson(values, Optional.of(2));
 

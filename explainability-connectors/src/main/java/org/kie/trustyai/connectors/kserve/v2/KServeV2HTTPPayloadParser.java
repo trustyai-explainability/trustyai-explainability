@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kie.trustyai.connectors.kserve.KServeDatatype;
 import org.kie.trustyai.connectors.kserve.PayloadParser;
 import org.kie.trustyai.explainability.model.*;
 import org.slf4j.Logger;
@@ -33,11 +34,13 @@ public class KServeV2HTTPPayloadParser extends PayloadParser<String> {
         final KServeV2RequestPayload payload = mapper.readValue(json, KServeV2RequestPayload.class);
         final List<PredictionInput> predictionInputs = new ArrayList<>();
 
+        final KServeV2RequestPayload.Inputs singleInput = payload.inputs.get(0);
         // Process each list of instances as a separate PredictionInput
-        for (List<Double> featureValues : payload.inputs.get(0).data) {
+        for (List<Object> featureValues : singleInput.data) {
             final List<Feature> features = new ArrayList<>();
+            final KServeDatatype datatype = singleInput.datatype;
             for (int i = 0; i < featureValues.size(); i++) {
-                features.add(new Feature(DEFAULT_INPUT_PREFIX + "-" + i, Type.NUMBER, new Value(featureValues.get(i))));
+                features.add(getFeature(datatype, i, featureValues.get(i)));
             }
             predictionInputs.add(new PredictionInput(features));
         }
@@ -56,6 +59,7 @@ public class KServeV2HTTPPayloadParser extends PayloadParser<String> {
         final List<?> predictions = koutput.data;
         final int shape = koutput.shape.get(1);
         final int numPredictions = predictions.size();
+        final KServeDatatype datatype = koutput.datatype;
 
         for (int i = 0; i < numPredictions; i += shape) {
             final List<Output> outputs = new ArrayList<>();
@@ -63,17 +67,38 @@ public class KServeV2HTTPPayloadParser extends PayloadParser<String> {
             for (int j = 0; j < outputShape && i + j < numPredictions; j++) {
                 final Object value = predictions.get(i + j);
 
-                if (value instanceof Integer) {
-                    outputs.add(new Output(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.NUMBER, new Value(value), 1.0));
-                } else {
-                    outputs.add(new Output(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.NUMBER, new Value(value), 1.0));
-                }
+                final Output output = getOutput(datatype, j, value);
+                outputs.add(output);
             }
 
             predictionOutputs.add(new PredictionOutput(outputs));
         }
 
         return predictionOutputs;
+    }
+
+    public static Output getOutput(KServeDatatype datatype, int j, Object value) {
+        Output output;
+        if (datatype == KServeDatatype.FP32 || datatype == KServeDatatype.FP64 || datatype == KServeDatatype.INT8 || datatype == KServeDatatype.INT16 || datatype == KServeDatatype.INT32 || datatype == KServeDatatype.INT64) {
+            output = new Output(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.NUMBER, new Value(value), 1.0);
+        } else if (datatype == KServeDatatype.BOOL) {
+            output = new Output(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.BOOLEAN, new Value(value), 1.0);
+        } else  {
+            output = new Output(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.CATEGORICAL, new Value(value), 1.0);
+        }
+        return output;
+    }
+
+    public static Feature getFeature(KServeDatatype datatype, int j, Object value) {
+        Feature feature;
+        if (datatype == KServeDatatype.FP32 || datatype == KServeDatatype.FP64 || datatype == KServeDatatype.INT8 || datatype == KServeDatatype.INT16 || datatype == KServeDatatype.INT32 || datatype == KServeDatatype.INT64) {
+            feature = new Feature(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.NUMBER, new Value(value));
+        } else if (datatype == KServeDatatype.BOOL) {
+            feature = new Feature(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.BOOLEAN, new Value(value));
+        } else  {
+            feature = new Feature(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.CATEGORICAL, new Value(value));
+        }
+        return feature;
     }
 
 }

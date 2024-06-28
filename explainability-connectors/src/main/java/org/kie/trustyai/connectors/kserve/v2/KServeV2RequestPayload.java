@@ -28,10 +28,10 @@ public class KServeV2RequestPayload {
 
         final List<PredictionInput> predictionInputs = new ArrayList<>();
         final Inputs inputs = this.inputs.get(0);
-        for (List<Double> values : inputs.data) {
+        for (List<Object> values : inputs.data) {
             final int size = values.size();
             final List<Feature> features = IntStream.range(0, size)
-                    .mapToObj(i -> FeatureFactory.newNumericalFeature(DEFAULT_INPUT_PREFIX + "-" + i, values.get(i)))
+                    .mapToObj(i -> KServeV2HTTPPayloadParser.getFeature(inputs.datatype, i, values.get(i)))
                     .collect(Collectors.toUnmodifiableList());
             predictionInputs.add(new PredictionInput(features));
         }
@@ -47,7 +47,7 @@ public class KServeV2RequestPayload {
 
     public static class Inputs {
         public String name;
-        public List<List<Double>> data;
+        public List<List<Object>> data;
         public KServeDatatype datatype;
         public List<Integer> shape;
     }
