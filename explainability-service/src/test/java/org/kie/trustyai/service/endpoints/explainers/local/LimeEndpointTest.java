@@ -2,12 +2,12 @@ package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.kie.trustyai.connectors.kserve.v2.KServeConfig;
+import org.kie.trustyai.connectors.kserve.v2.KServeV2GRPCPredictionProvider;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 import org.kie.trustyai.service.data.metadata.Metadata;
@@ -15,9 +15,9 @@ import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfi
 import org.kie.trustyai.service.endpoints.explainers.GrpcMockServer;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
-import org.kie.trustyai.service.payloads.explainers.ModelConfig;
 import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.lime.LimeExplanationRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -78,8 +78,8 @@ class LimeEndpointTest {
         Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
-        final LocalExplanationRequest payload = new LocalExplanationRequest();
-        payload.setModelConfig(new ModelConfig("", MODEL_ID, ""));
+        final LimeExplanationRequest payload = new LimeExplanationRequest();
+        payload.getExplanationConfig().setModelConfig(new ModelConfig("", MODEL_ID, ""));
         payload.setPredictionId(id);
 
         given().contentType(ContentType.JSON).body(payload)
@@ -96,8 +96,8 @@ class LimeEndpointTest {
         final Random random = new Random();
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
-        final LocalExplanationRequest payload = new LocalExplanationRequest();
-        payload.setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        final LimeExplanationRequest payload = new LimeExplanationRequest();
+        payload.getExplanationConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
         payload.setPredictionId(id);
 
         final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
@@ -142,8 +142,8 @@ class LimeEndpointTest {
         final Random random = new Random();
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
-        final LocalExplanationRequest payload = new LocalExplanationRequest();
-        payload.setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        final LimeExplanationRequest payload = new LimeExplanationRequest();
+        payload.getExplanationConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
         payload.setPredictionId(id);
 
         final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
@@ -182,8 +182,8 @@ class LimeEndpointTest {
         final Random random = new Random();
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
-        final LocalExplanationRequest payload = new LocalExplanationRequest();
-        payload.setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        final LimeExplanationRequest payload = new LimeExplanationRequest();
+        payload.getExplanationConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
         payload.setPredictionId(id);
 
         final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
@@ -197,6 +197,60 @@ class LimeEndpointTest {
         final Dataframe storedDataframe = datasource.get().getDataframe(MODEL_ID);
 
         assertEquals(initialSize, storedDataframe.getRowDimension());
+
+    }
+
+    public static Dataframe generateExplainerTestADataframe(int observations) throws ExecutionException, InterruptedException {
+        final KServeConfig config = KServeConfig.create("localhost:8081", "explainer-test-a", "v0.1.0");
+        final KServeV2GRPCPredictionProvider provider = KServeV2GRPCPredictionProvider.forTarget(config, "inputs", null, null);
+        final List<Prediction> predictions = new ArrayList<>();
+        final Random random = new Random(0);
+        for (int i = 0; i < observations; i++) {
+            final List<Feature> featureList = List.of(
+                    // guarantee feature diversity for age is min(observations, featureDiversity)
+                    FeatureFactory.newNumericalFeature("X1", random.nextDouble() * 20),
+                    FeatureFactory.newNumericalFeature("X2", random.nextDouble() * 20));
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+
+            final List<PredictionOutput> output = provider.predictAsync(List.of(predictionInput)).get();
+            System.out.println(output);
+            final List<Output> outputList = List.of(
+                    new Output("income", Type.NUMBER, new Value(random.nextBoolean() ? 1 : 0), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
+    }
+
+    @Test
+    @Disabled()
+    @DisplayName("Test with model explainer-test-a")
+    void testExplainerTestA() throws JsonProcessingException, ExecutionException, InterruptedException {
+        datasource.get().reset();
+        storage.get().emptyStorage();
+        final Dataframe _dataframe2 = generateExplainerTestADataframe(10);
+        final Dataframe _dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        final Metadata _metadata = datasource.get().createMetadata(_dataframe);
+        final String INPUT_NAME = "custom-input-a";
+        final String OUTPUT_NAME = "custom-output-a";
+        _metadata.setInputTensorName(INPUT_NAME);
+        _metadata.setOutputTensorName(OUTPUT_NAME);
+        datasource.get().saveDataframe(_dataframe, MODEL_ID);
+        datasource.get().saveMetadata(_metadata, MODEL_ID);
+
+        //        final Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
+        //        final Random random = new Random();
+        //        int randomIndex = random.nextInt(dataframe.getIds().size());
+        //        final String id = dataframe.getIds().get(randomIndex);
+        //        final LocalExplanationRequest payload = new LocalExplanationRequest();
+        //        payload.setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        //        payload.setPredictionId(id);
+        //
+        //        final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
+        //                .when().post()
+        //                .then()
+        //                .statusCode(Response.Status.OK.getStatusCode())
+        //                .extract().body().as(SaliencyExplanationResponse.class);
 
     }
 

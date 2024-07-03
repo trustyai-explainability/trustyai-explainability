@@ -18,18 +18,18 @@ package org.kie.trustyai.service.endpoints.explainers.local;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.local.shap.ShapConfig;
 import org.kie.trustyai.explainability.local.shap.ShapKernelExplainer;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.shap.SHAPExplanationRequest;
 
 import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
@@ -42,10 +42,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Tag(name = "SHAP Explainer Endpoint")
+@Tag(name = "Local explainers")
 @EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
 @Path("/explainers/local/shap")
-public class SHAPEndpoint extends LocalExplainerEndpoint {
+public class SHAPEndpoint extends ExplainerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(SHAPEndpoint.class);
 
@@ -58,23 +58,50 @@ public class SHAPEndpoint extends LocalExplainerEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response explain(LocalExplanationRequest request) {
-        return processRequest(request, dataSource.get(), serviceConfig);
+    @Operation(summary = "Generate a SHAP explanation", description = "Generate a SHAP explanation for a given model and inference id")
+    public Response explain(SHAPExplanationRequest request) {
+        final String modelId = request.getExplanationConfig().getModelConfig().getName();
+        final String inferenceId = request.getPredictionId();
+        try {
+
+            final Dataframe dataframe = dataSource.get().getOrganicDataframe(modelId);
+            final PredictionProvider model = getModel(request.getExplanationConfig().getModelConfig(), dataframe.getInputTensorName(),
+                    dataframe.getOutputTensorName());
+
+            final List<Prediction> predictions = dataSource.get().getDataframe(modelId).filterRowsById(inferenceId).asPredictions();
+            if (predictions.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).entity("No prediction found with id="
+                        + inferenceId).build();
+            } else if (predictions.size() == 1) {
+                final Prediction predictionToExplain = predictions.get(0);
+                final List<PredictionInput> testDataDistribution = dataframe.filterRowsById(inferenceId, true,
+                        serviceConfig.batchSize().orElse(100)).asPredictionInputs();
+                final BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution, request);
+                return Response.ok(entity).build();
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Found " + predictions.size()
+                        + " predictions with id=" + inferenceId).build();
+            }
+        } catch (Exception e) {
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
     }
 
-    @Override
-    public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain, List<PredictionInput> inputs) {
-        ShapKernelExplainer shapKernelExplainer = new ShapKernelExplainer(ShapConfig.builder().withBackground(inputs).build());
+    public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain, List<PredictionInput> inputs, SHAPExplanationRequest request) {
+        final ShapConfig config = ShapConfig.builder()
+                .withBackground(inputs)
+                .withNSamples(request.getExplanationConfig().getExplainerConfig().getnSamples())
+                .withLink(ShapConfig.LinkType.IDENTITY)
+                .withTrackCounterfactuals(false)
+                .build();
+        final ShapKernelExplainer shapKernelExplainer = new ShapKernelExplainer(config);
         try {
-            return SaliencyExplanationResponse.fromSaliencyResults(shapKernelExplainer.explainAsync(predictionToExplain, model).get());
+            final SaliencyResults explanation = shapKernelExplainer.explainAsync(predictionToExplain, model).get();
+            return SaliencyExplanationResponse.fromSaliencyResults(explanation);
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Failed to explain {} ", predictionToExplain, e);
             return SaliencyExplanationResponse.empty();
         }
     }
 
-    @Override
-    protected Prediction prepare(Prediction prediction, LocalExplanationRequest request, List<PredictionInput> testData) {
-        return prediction;
-    }
 }

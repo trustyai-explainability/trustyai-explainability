@@ -1,9 +1,9 @@
 package org.kie.trustyai.service.payloads.service;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InferenceId {
     @JsonProperty("id")

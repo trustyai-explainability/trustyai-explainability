@@ -1,12 +1,11 @@
 package org.kie.trustyai.service.endpoints.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.jboss.logging.Logger;
@@ -22,11 +21,14 @@ import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 import org.kie.trustyai.service.validators.serviceRequests.ValidNameMappingRequest;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 @Path("/info")
@@ -149,7 +151,7 @@ public class ServiceMetadataEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Get model's inference ids", description = "Get all the inference ids for a given model")
     public Response inferenceIdsByModel(@Parameter(description = "The model to get inference ids from", required = true) @PathParam("model") String model,
-                                        @Parameter(description = "The type of inferences to retrieve", required = false) @QueryParam("type") @DefaultValue("all") String type) {
+            @Parameter(description = "The type of inferences to retrieve", required = false) @QueryParam("type") @DefaultValue("all") String type) {
         try {
 
             final Dataframe df;
@@ -164,7 +166,7 @@ public class ServiceMetadataEndpoint {
                         .build();
             }
             final List<LocalDateTime> timestamps = df.getTimestamps();
-            final List<String>  ids = df.getIds();
+            final List<String> ids = df.getIds();
 
             return Response.ok().entity(IntStream.range(0, df.getRowDimension())
                     .mapToObj(row -> new InferenceId(ids.get(row), timestamps.get(row)))

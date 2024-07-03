@@ -3,6 +3,8 @@ package org.kie.trustyai.service.payloads.explainers;
 import java.util.List;
 import java.util.Map;
 
+import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
