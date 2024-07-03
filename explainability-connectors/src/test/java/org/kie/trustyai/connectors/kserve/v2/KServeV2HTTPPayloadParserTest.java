@@ -90,22 +90,22 @@ class KServeV2HTTPPayloadParserTest {
         }
     }
 
-//    @Test
-//    void modelResponseToPredictionOutputFp32() throws JsonProcessingException {
-//
-//        final Random random = new Random(0);
-//        final List<Float> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
-//        final String json = toJson(values);
-//
-//        final List<PredictionOutput> predictionOutput = KServeV1HTTPPayloadParser.getInstance().parseResponse(json);
-//
-//        assertEquals(3, predictionOutput.size());
-//        assertEquals(1, predictionOutput.get(0).getOutputs().size());
-//        for (int i = 0; i < 3; i++) {
-//            assertEquals(values.get(i), Double.valueOf(predictionOutput.get(i).getOutputs().get(0).getValue().asNumber()).floatValue());
-//            assertEquals(DEFAULT_OUTPUT_PREFIX + "-0", predictionOutput.get(i).getOutputs().get(0).getName());
-//        }
-//    }
+    @Test
+    void modelResponseToPredictionOutputFp32() throws JsonProcessingException {
+
+        final Random random = new Random(0);
+        final List<Object> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
+        final String json = toJson(values, Optional.of(1));
+
+        final List<PredictionOutput> predictionOutput = KServeV2HTTPPayloadParser.getInstance().parseResponse(json);
+
+        assertEquals(3, predictionOutput.size());
+        assertEquals(1, predictionOutput.get(0).getOutputs().size());
+        for (int i = 0; i < 3; i++) {
+            assertEquals(values.get(i), Double.valueOf(predictionOutput.get(i).getOutputs().get(0).getValue().asNumber()).floatValue());
+            assertEquals(DEFAULT_OUTPUT_PREFIX + "-0", predictionOutput.get(i).getOutputs().get(0).getName());
+        }
+    }
 
     @Test
     void modelResponseToPredictionOutputFp64() throws JsonProcessingException {

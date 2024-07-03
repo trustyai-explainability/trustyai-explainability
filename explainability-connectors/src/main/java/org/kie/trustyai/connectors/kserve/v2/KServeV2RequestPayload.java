@@ -7,10 +7,7 @@ import java.util.stream.IntStream;
 
 import org.kie.trustyai.connectors.kserve.KServeDatatype;
 import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureFactory;
 import org.kie.trustyai.explainability.model.PredictionInput;
-
-import static org.kie.trustyai.connectors.kserve.PayloadParser.DEFAULT_INPUT_PREFIX;
 
 public class KServeV2RequestPayload {
 
