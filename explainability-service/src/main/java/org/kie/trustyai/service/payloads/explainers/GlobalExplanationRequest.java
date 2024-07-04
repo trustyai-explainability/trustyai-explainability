@@ -15,6 +15,8 @@
  */
 package org.kie.trustyai.service.payloads.explainers;
 
+import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
+
 public class GlobalExplanationRequest {
 
     private ModelConfig modelConfig;

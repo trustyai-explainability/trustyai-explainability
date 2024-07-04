@@ -1,11 +1,7 @@
 package org.kie.trustyai.service.endpoints.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.common.mapper.TypeRef;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
+import java.util.List;
+
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +10,14 @@ import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.payloads.service.InferenceId;
 import org.kie.trustyai.service.profiles.MemoryTestProfile;
 
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.common.mapper.TypeRef;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
@@ -32,9 +35,11 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     private static String getEndpoint(String model) {
         return "/info/inference/ids/" + model;
     }
+
     private static String getEndpointAll(String model) {
         return "/info/inference/ids/" + model + "?type=all";
     }
+
     private static String getEndpointOrganic(String model) {
         return "/info/inference/ids/" + model + "?type=organic";
     }
@@ -44,12 +49,12 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     void getNoObservationsAtAll() throws JsonProcessingException {
         datasource.get().reset();
         List.of(getEndpoint(MODEL_ID), getEndpointAll(MODEL_ID), getEndpointOrganic(MODEL_ID)).forEach(endpoint -> {
-                    given()
-                            .when().get(endpoint)
-                            .then()
-                            .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                            .body(is("Model ID " + MODEL_ID + " does not exist in TrustyAI metadata."));
-                });
+            given()
+                    .when().get(endpoint)
+                    .then()
+                    .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                    .body(is("Model ID " + MODEL_ID + " does not exist in TrustyAI metadata."));
+        });
     }
 
     @Test
@@ -184,7 +189,6 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
                 });
 
         assertEquals(N * 2, inferenceIds.size());
-
 
     }
 

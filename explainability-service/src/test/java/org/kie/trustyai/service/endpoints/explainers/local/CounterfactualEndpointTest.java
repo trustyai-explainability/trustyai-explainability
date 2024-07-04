@@ -11,8 +11,8 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.explainers.CounterfactualExplanationRequest;
-import org.kie.trustyai.service.payloads.explainers.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.counterfactuals.CounterfactualExplanationRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -64,7 +64,7 @@ class CounterfactualEndpointTest {
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
         final CounterfactualExplanationRequest payload = new CounterfactualExplanationRequest();
-        payload.setModelConfig(new ModelConfig("", MODEL_ID, ""));
+        payload.getExplanationConfig().setModelConfig(new ModelConfig("", MODEL_ID, ""));
         payload.setPredictionId(id);
         Map<String, String> map = new HashMap<>();
         map.put("income", "2");

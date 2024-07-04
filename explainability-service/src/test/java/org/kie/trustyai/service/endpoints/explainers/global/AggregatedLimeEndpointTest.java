@@ -7,7 +7,7 @@ import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfi
 import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.explainers.GlobalExplanationRequest;
-import org.kie.trustyai.service.payloads.explainers.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

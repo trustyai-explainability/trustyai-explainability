@@ -17,7 +17,7 @@ import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.TimeseriesUtils;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
-import org.kie.trustyai.service.payloads.explainers.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
 import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyParameters;
 import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyRequest;
 
@@ -37,7 +37,7 @@ import jakarta.ws.rs.core.Response;
 public class TSSaliencyEndpoint extends ExplainerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(TSSaliencyEndpoint.class);
-    private static double[] DEFAULT_BASE_VALUE = new double[0];
+    private static final double[] DEFAULT_BASE_VALUE = new double[0];
     @Inject
     ServiceConfig serviceConfig;
 
