@@ -51,8 +51,8 @@ class DataSourceErrors {
         return new StorageWriteException(String.format("Error saving dataframe for model=%s: %s", modelId, errorMsg));
     }
 
-    static StorageWriteException getSchemaMismatchError(String modelId) {
-        return new StorageWriteException(String.format("Payload schema does not match stored schema for model=%s", modelId));
+    static StorageWriteException getSchemaMismatchError(String modelId, String errorMsg) {
+        return new StorageWriteException(String.format("Payload schema does not match stored schema for model=%s: %s", modelId, errorMsg));
     }
 
     static StorageReadException getGenericReadError(String modelId, String errorMsg, String operation) {

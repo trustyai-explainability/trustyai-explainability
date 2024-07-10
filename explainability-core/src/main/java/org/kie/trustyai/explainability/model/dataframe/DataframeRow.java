@@ -6,9 +6,11 @@ import java.util.List;
 
 import org.kie.trustyai.explainability.model.Value;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OrderColumn;
 
@@ -17,12 +19,13 @@ public class DataframeRow {
 
     @ElementCollection
     @OrderColumn(name = "order_column")
+    @CollectionTable(name = "DataframeRow_Values")
     private List<Value> row;
     private LocalDateTime timestamp;
     private String rowId;
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long dbId;
 
     private String tag;

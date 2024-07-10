@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.profiles.hibernate;
+package org.kie.trustyai.service.profiles.hibernate.migration.scenarios;
 
 import java.util.Map;
 import java.util.Set;
@@ -6,6 +6,7 @@ import java.util.Set;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.mocks.hibernate.MockHibernateDatasource;
 import org.kie.trustyai.service.mocks.hibernate.MockMigratingHibernateStorage;
+import org.kie.trustyai.service.profiles.hibernate.HibernateTestProfile;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.h2.H2DatabaseTestResource;

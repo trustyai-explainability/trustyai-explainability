@@ -160,13 +160,10 @@ class ConsumerEndpointTest {
 
     @Test
     void consumeDifferentSchemas() {
-
-        System.out.println(" ==== DIFFERENT SCHEMA ====");
         final InferencePayload payloadModelA = PayloadProducer.getInferencePayloadA(0);
         final InferencePayload payloadModelB = PayloadProducer.getInferencePayloadB(0);
 
         // Generate two partial payloads with consistent metadata (from the same model)
-        System.out.println(" ==== 1");
         final String id = "This schema is OK";
         final InferencePartialPayload partialRequestPayloadA = new InferencePartialPayload();
         partialRequestPayloadA.setId(id);
@@ -181,7 +178,6 @@ class ConsumerEndpointTest {
                 .statusCode(RestResponse.StatusCode.OK)
                 .body(is(""));
 
-        System.out.println(" ==== 2");
         final InferencePartialPayload partialResponsePayloadA = new InferencePartialPayload();
         partialResponsePayloadA.setId(id);
         partialResponsePayloadA.setData(payloadModelA.getOutput());
@@ -195,7 +191,6 @@ class ConsumerEndpointTest {
                 .statusCode(RestResponse.StatusCode.OK)
                 .body(is(""));
 
-        System.out.println(" ==== 3");
         // Generate two partial payloads with inconsistent metadata (from different models)
         final String newId = "This schema is NOT OK";
         final InferencePartialPayload partialRequestPayloadAWrongSchema = new InferencePartialPayload();
@@ -210,7 +205,6 @@ class ConsumerEndpointTest {
                 .then()
                 .statusCode(RestResponse.StatusCode.OK);
 
-        System.out.println(" ==== 4");
         final InferencePartialPayload partialResponsePayloadBWrongSchema = new InferencePartialPayload();
         partialResponsePayloadBWrongSchema.setId(newId);
         partialResponsePayloadBWrongSchema.setData(PayloadProducer.getInferencePayloadB(0).getOutput());
@@ -219,9 +213,11 @@ class ConsumerEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(partialResponsePayloadBWrongSchema)
-                .when().post()
+                .when().post().peek()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Error when reconciling payload for response id='" + newId + "': Payload schema does not match stored schema for model=" + MODEL_A_ID));
+                .body(is("Error when reconciling payload for response id='" + newId + "': Payload schema does not match stored schema for model=" + MODEL_A_ID + ": See mismatch description below:\n" +
+                        "Output Schema mismatch:\n" +
+                        "\tSchema column names do not match. Existing schema columns=[input-0], comparison schema columns=[output-0, output-1]"));
     }
 }

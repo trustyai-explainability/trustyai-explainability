@@ -696,7 +696,9 @@ class ConsumerEndpointFormatsTest {
                 .when().post().peek()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Error when reconciling payload for response id='" + newId + "': Payload schema does not match stored schema for model=" + MODEL_A_ID));
+                .body(is("Error when reconciling payload for response id='" + newId + "': Payload schema does not match stored schema for model=" + MODEL_A_ID + ": See mismatch description below:\n" +
+                        "Output Schema mismatch:\n" +
+                        "\tSchema column names do not match. Existing schema columns=[input-0], comparison schema columns=[output-0, output-1]"));
     }
 
 }

@@ -3,7 +3,7 @@ package org.kie.trustyai.service.data.storage.hibernate.migration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.profiles.hibernate.InvalidMigrationTestProfile;
+import org.kie.trustyai.service.profiles.hibernate.migration.scenarios.InvalidMigrationTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import io.quarkus.test.common.QuarkusTestResource;
@@ -20,10 +20,6 @@ class NoDataMigrationTest extends BaseMigrationTest {
     void setup() {
         clearOriginal();
         // do not populate old storage
-    }
-
-    @Override
-    void triggerMigration() {
     }
 
     // verify that pointing the migration config at a non-existant directory does not cause issues

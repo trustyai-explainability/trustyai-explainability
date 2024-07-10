@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.data.datasources;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -196,8 +197,6 @@ public abstract class DataSource {
             storageMetadata.setInputTensorName(dataframe.getInputTensorName());
             storageMetadata.setOutputTensorName(dataframe.getOutputTensorName());
 
-            System.out.println("schema exists");
-
             try {
                 saveMetadata(storageMetadata, modelId);
             } catch (StorageWriteException e) {
@@ -225,7 +224,18 @@ public abstract class DataSource {
                     throw new DataframeCreateException(e.getMessage());
                 }
             } else {
-                StorageWriteException swe = DataSourceErrors.getSchemaMismatchError(modelId);
+                Optional<String> inputMismatchDescription = storageMetadata.getInputSchema().equalsVerbose(newInputSchema);
+                Optional<String> outputMismatchDescription = storageMetadata.getOutputSchema().equalsVerbose(newOutputSchema);
+
+                String errorMsg = "See mismatch description below:";
+                if (inputMismatchDescription.isPresent()) {
+                    errorMsg += String.format("%nInput Schema mismatch:%n\t%s", inputMismatchDescription.get());
+                }
+                if (outputMismatchDescription.isPresent()) {
+                    errorMsg += String.format("%nOutput Schema mismatch:%n\t%s", outputMismatchDescription.get());
+                }
+
+                StorageWriteException swe = DataSourceErrors.getSchemaMismatchError(modelId, errorMsg);
                 LOG.error(swe.getMessage());
                 throw swe;
             }

@@ -1,14 +1,11 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,20 +17,15 @@ import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.explainability.model.dataframe.DataframeRow;
-import org.kie.trustyai.service.config.CustomServiceConfig;
 import org.kie.trustyai.service.config.ServiceConfig;
-import org.kie.trustyai.service.config.storage.CustomStorageConfig;
 import org.kie.trustyai.service.config.storage.MigrationConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
-import org.kie.trustyai.service.data.datasources.CSVDataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
-import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
-import org.kie.trustyai.service.data.storage.flatfile.PVCStorage;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
@@ -73,10 +65,6 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             LOG.error(message);
             throw new IllegalArgumentException(message);
         }
-
-        if (storageConfig.dataFilename().isPresent() && storageConfig.dataFolder().isPresent()) {
-            migrationConfig = Optional.of(new MigrationConfig(storageConfig.dataFolder().get(), storageConfig.dataFilename().get()));
-        }
     }
 
     @Override
@@ -85,53 +73,6 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     }
 
     // MIGRATIONS ======================================================================================================
-    @Transactional
-    public synchronized List<String> migrate() {
-        List<String> modelIds = new ArrayList<>();
-        if (migrationConfig.isPresent()) {
-            MigrationConfig mc = migrationConfig.get();
-            String fromFolder = mc.getFromFolder();
-            String fromFile = mc.getFromFilename();
-
-            if (!Paths.get(fromFolder).toFile().isDirectory()) {
-                LOG.warn("A storage folder \"" + fromFolder + "\" was provided in the service configuration, but no such directory exists. Migration will be skipped.");
-                return modelIds;
-            }
-
-            CustomStorageConfig customStorageConfig = new CustomStorageConfig(fromFile, fromFolder);
-            CustomServiceConfig customServiceConfig = new CustomServiceConfig(OptionalInt.of(batchSize), null, null);
-            PVCStorage pvcStorage = new PVCStorage(customServiceConfig, customStorageConfig);
-            CSVDataSource oldDataSource = new CSVDataSource();
-            oldDataSource.setParser(new CSVParser());
-            oldDataSource.setStorageOverride(pvcStorage);
-            modelIds = pvcStorage.listAllModelIds();
-
-            if (!modelIds.isEmpty()) {
-                LOG.info("Starting migration, found " + modelIds.size() + " models.");
-                for (String modelId : modelIds) {
-                    LOG.info("Migrating " + modelId + " metadata");
-                    StorageMetadata sm = oldDataSource.getMetadata(modelId);
-                    saveMetaOrInternalData(sm, modelId);
-
-                    // batch save the df
-                    int nObs = sm.getObservations();
-                    int startIdx = 0;
-                    while (startIdx < nObs) {
-                        int endIdx = Math.min(startIdx + batchSize, nObs);
-                        LOG.info("Migrating " + modelId + " data, rows " + startIdx + "-" + endIdx + " of " + nObs);
-                        Dataframe df = oldDataSource.getDataframe(modelId, startIdx, endIdx);
-                        saveDataframe(df, modelId);
-                        startIdx += batchSize;
-                    }
-                    LOG.info("Migration of " + modelId + " is complete, " + rowCount(modelId) + " total rows migrated.");
-                }
-            }
-            LOG.info("Migration complete, the PVC is now safe to remove.");
-            migrationConfig = Optional.empty();
-            setDataDirty();
-        }
-        return modelIds;
-    }
 
     // DATAFRAME READS =================================================================================================
     @Override
@@ -562,10 +503,11 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     @Transactional
     public boolean dataExists(String modelId) {
         return em.createQuery("" +
-                "select COUNT(dm.id)>0 from DataframeMetadata dm" +
-                " where dm.id = ?1", Boolean.class)
+                "select 1 from DataframeMetadata dm" +
+                " where dm.id = ?1" +
+                " order by dm.id limit 1", Boolean.class)
                 .setParameter(1, modelId)
-                .getSingleResult();
+                .getResultList().size() > 0;
     }
 
     @Transactional
@@ -605,6 +547,13 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
             em.clear();
             dataDirty = false;
         }
+    }
+
+    // FIND EXISTING DATA ==============================================================================================
+    @Transactional
+    public List<String> getAllTrackedDataframes() {
+        return em.createQuery("" +
+                "select sm.modelId from StorageMetadata sm", String.class).getResultList();
     }
 
     // TESTING OPERATIONS ==============================================================================================

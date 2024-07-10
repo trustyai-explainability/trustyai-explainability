@@ -20,8 +20,6 @@ import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.profiles.hibernate.HibernateTestProfile;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
-import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.h2.H2DatabaseTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
@@ -35,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestProfile(HibernateTestProfile.class)
-@QuarkusTestResource(H2DatabaseTestResource.class)
 class HibernateStorageTest {
 
     @Inject
@@ -50,7 +47,7 @@ class HibernateStorageTest {
 
     @Test
     void testWrite() {
-        Dataframe df = DataframeGenerators.generateRandomNColumnDataframe(100, 10);
+        Dataframe df = DataframeGenerators.generateRandomNColumnDataframe(100, 5);
         storage.get().saveDataframe(df, MODEL_ID);
         assertTrue(storage.get().dataExists(MODEL_ID));
     }

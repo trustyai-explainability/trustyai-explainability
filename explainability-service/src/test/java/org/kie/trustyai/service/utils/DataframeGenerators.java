@@ -128,6 +128,23 @@ public class DataframeGenerators {
         return Dataframe.createFrom(predictions);
     }
 
+    public static Dataframe generateRandomNColumnDataframeMatchingKservePayloads(int observations, int columns) {
+        final List<Prediction> predictions = new ArrayList<>();
+        final Random random = new Random(0);
+        for (int i = 0; i < observations; i++) {
+            final List<Feature> featureList = IntStream.range(0, columns)
+                    .mapToObj(idx -> FeatureFactory.newNumericalFeature("input-" + idx, idx))
+                    .collect(Collectors.toList());
+            final PredictionInput predictionInput = new PredictionInput(featureList);
+
+            final List<Output> outputList = List.of(
+                    new Output("output-0-0", Type.NUMBER, new Value(random.nextBoolean() ? 1 : 0), 1.0));
+            final PredictionOutput predictionOutput = new PredictionOutput(outputList);
+            predictions.add(new SimplePrediction(predictionInput, predictionOutput));
+        }
+        return Dataframe.createFrom(predictions);
+    }
+
     public static Dataframe generatePositionalHintedDataframe(int rows, int columns) {
         final List<Prediction> predictions = new ArrayList<>();
         for (int i = 0; i < rows; i++) {

@@ -25,10 +25,15 @@ public class HibernateTestProfile implements QuarkusTestProfile {
         overrides.put("service.batch-size", "5000");
 
         overrides.put("quarkus.datasource.db-kind", "h2");
-
-        // hibernate args
-        overrides.put("quarkus.datasource.jdbc.url", "jdbc:h2:tcp://localhost:9092/~/trustyai_test_H2_DB");
+        overrides.put("quarkus.datasource.jdbc.url", "jdbc:h2:./trustyai_test_H2_DB;AUTO_RECONNECT=TRUE");
         overrides.put("quarkus.hibernate-orm.database.generation", "drop-and-create");
+
+        // these settings are useful for testing against a real Maria instance on a remote cluster, and are therefore kept
+        //        overrides.put("quarkus.datasource.db-kind", "mariadb");
+        //        overrides.put("quarkus.datasource.username", "quarkus");
+        //        overrides.put("quarkus.datasource.password", "qBfi86/5>TtlC0Iw");
+        //        overrides.put("quarkus.datasource.jdbc.url", "jdbc:mariadb://mariadb:3306/trustyai_database");//?rewriteBatchedStatements=TRUE");
+        //        overrides.put("quarkus.hibernate-orm.database.generation", "drop-and-create");
 
         return overrides;
     }

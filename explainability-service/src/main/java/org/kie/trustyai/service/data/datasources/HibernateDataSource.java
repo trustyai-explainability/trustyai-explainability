@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.data.datasources;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -10,12 +11,15 @@ import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.storage.hibernate.HibernateStorage;
+import org.kie.trustyai.service.data.storage.hibernate.migration.MigrationEvent;
 import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -26,17 +30,53 @@ public class HibernateDataSource extends DataSource {
     @Inject
     Instance<HibernateStorage> storage;
 
+    @Inject
+    Event<MigrationEvent.MigrationTriggerEvent> migrationTriggerEvent;
+
+    // mitigates https://github.com/quarkusio/quarkus/issues/2673
+    private static volatile boolean migrationInProgress = false;
+    private static volatile boolean migratedFromPreviousDB = false;
+
     @PostConstruct
     public void migrate() {
+        // migrate any existing DFs in the DB
+        List<String> previousModels = storage.get().getAllTrackedDataframes();
+        if (!previousModels.isEmpty()) {
+            List<String> msg = new ArrayList<>();
+            msg.add("Inference data for the following models has been found in the database:");
+            for (String model : previousModels) {
+                addModelToKnown(model);
+                msg.add(String.format("\t%s: %d rows", model, getNumObservations(model)));
+            }
+            msg.add("These models have been registered with TrustyAI.");
+            migratedFromPreviousDB = true;
+            LOG.info(String.join("\n", msg));
+        }
+
         // PVC migration
-        List<String> migratedModels = storage.get().migrate();
-        migratedModels.forEach(this::addModelToKnown);
-
-        // old DB migration
-
+        synchronized (this) {
+            if (!migrationInProgress) {
+                migrationInProgress = true;
+                migrationTriggerEvent.fireAsync(MigrationEvent.getMigrationTriggerEvent());
+            }
+        }
     }
 
-    //todo : old DB migration
+    void acknowledgeSingleDataframeMigration(@Observes MigrationEvent.MigrationSingleDataframeFinishEvent event) {
+        addModelToKnown(event.getMigratedModel());
+    }
+
+    static void acknowledgeMigration(@Observes MigrationEvent.MigrationFinishEvent event) {
+        migrationInProgress = false;
+    }
+
+    public boolean isMigrationInProgress() {
+        return migrationInProgress;
+    }
+
+    public boolean isMigratedFromPreviousDB() {
+        return migratedFromPreviousDB;
+    }
 
     private HibernateStorage getStorage() {
         return storage.get();
