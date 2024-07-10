@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.service;
+package org.kie.trustyai.service.endpoints.service.metadata;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

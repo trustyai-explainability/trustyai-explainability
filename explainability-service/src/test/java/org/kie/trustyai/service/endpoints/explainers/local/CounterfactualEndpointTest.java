@@ -11,11 +11,9 @@ import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
-import org.kie.trustyai.service.utils.DataframeGenerators;
-
-
 import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
 import org.kie.trustyai.service.payloads.explainers.counterfactuals.CounterfactualExplanationRequest;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

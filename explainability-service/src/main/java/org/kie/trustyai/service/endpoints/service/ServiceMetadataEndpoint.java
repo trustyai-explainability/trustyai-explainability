@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.jboss.logging.Logger;
@@ -17,10 +16,10 @@ import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.service.*;
 import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
-import org.kie.trustyai.service.payloads.service.*;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 import org.kie.trustyai.service.validators.serviceRequests.ValidNameMappingRequest;
@@ -187,32 +186,38 @@ public class ServiceMetadataEndpoint {
     @Operation(summary = "Get model's inference ids", description = "Get all the inference ids for a given model")
     public Response inferenceIdsByModel(@Parameter(description = "The model to get inference ids from", required = true) @PathParam("model") String model,
             @Parameter(description = "The type of inferences to retrieve", required = false) @QueryParam("type") @DefaultValue("all") String type) {
-        try {
+        final Dataframe df;
 
-            final Dataframe df;
-            if ("organic".equalsIgnoreCase(type)) {
-                df = dataSource.get().getOrganicDataframe(model);
-
-            } else if ("all".equalsIgnoreCase(type)) {
-                df = dataSource.get().getDataframe(model);
-            } else {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("Invalid type parameter. Valid values must be in ['organic', 'all'].")
-                        .build();
-            }
-            final List<LocalDateTime> timestamps = df.getTimestamps();
-            final List<String> ids = df.getIds();
-
-            return Response.ok().entity(IntStream.range(0, df.getRowDimension())
-                    .mapToObj(row -> new InferenceId(ids.get(row), timestamps.get(row)))
-                    .collect(Collectors.toUnmodifiableList())).build();
-        } catch (DataframeCreateException e) {
+        if (!dataSource.get().getKnownModels().contains(model)) {
             return Response.serverError()
                     .status(Response.Status.BAD_REQUEST)
-                    .entity("Model ID " + model + " does not exist in TrustyAI metadata.")
+                    .entity("No metadata found for model=" + model + ". This can happen if TrustyAI has not yet logged any inferences from this model.")
                     .build();
-
         }
+
+        if ("organic".equalsIgnoreCase(type)) {
+            try {
+                df = dataSource.get().getOrganicDataframe(model);
+            } catch (DataframeCreateException e) {
+                return Response.serverError()
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity("No organic inferences found for model=" + model)
+                        .build();
+            }
+        } else if ("all".equalsIgnoreCase(type)) {
+            df = dataSource.get().getDataframe(model);
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Invalid type parameter. Valid values must be in ['organic', 'all'].")
+                    .build();
+        }
+        final List<LocalDateTime> timestamps = df.getTimestamps();
+        final List<String> ids = df.getIds();
+
+        return Response.ok().entity(IntStream.range(0, df.getRowDimension())
+                .mapToObj(row -> new InferenceId(ids.get(row), timestamps.get(row)))
+                .collect(Collectors.toUnmodifiableList())).build();
+
     }
 
 }

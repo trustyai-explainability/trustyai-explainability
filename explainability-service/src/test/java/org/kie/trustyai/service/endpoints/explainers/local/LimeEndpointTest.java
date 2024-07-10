@@ -5,31 +5,27 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
-
-import org.junit.jupiter.api.*;
 import org.kie.trustyai.connectors.kserve.v2.KServeConfig;
 import org.kie.trustyai.connectors.kserve.v2.KServeV2GRPCPredictionProvider;
 import org.kie.trustyai.explainability.model.*;
-
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.explainers.GrpcMockServer;
-
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
-import org.kie.trustyai.service.utils.DataframeGenerators;
-
 import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
 import org.kie.trustyai.service.payloads.explainers.lime.LimeExplanationRequest;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 

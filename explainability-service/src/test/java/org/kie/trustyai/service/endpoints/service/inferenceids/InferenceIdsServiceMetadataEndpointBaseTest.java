@@ -1,14 +1,16 @@
-package org.kie.trustyai.service.endpoints.service;
+package org.kie.trustyai.service.endpoints.service.inferenceids;
 
 import java.util.List;
 
 import org.jboss.resteasy.reactive.RestResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.mocks.MockDatasource;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.payloads.service.InferenceId;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -30,7 +32,12 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     public static final String MODEL_ID = "example1";
 
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<DataSource> datasource;
+
+    @AfterEach
+    public abstract void resetDatasource() throws JsonProcessingException;
+
+    public abstract void saveDataframe(Dataframe dataframe, String modelId);
 
     private static String getEndpoint(String model) {
         return "/info/inference/ids/" + model;
@@ -47,20 +54,25 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Test
     @DisplayName("When no data is present in storage")
     void getNoObservationsAtAll() throws JsonProcessingException {
-        datasource.get().reset();
+        resetDatasource();
         List.of(getEndpoint(MODEL_ID), getEndpointAll(MODEL_ID), getEndpointOrganic(MODEL_ID)).forEach(endpoint -> {
             given()
                     .when().get(endpoint)
                     .then()
                     .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                    .body(is("Model ID " + MODEL_ID + " does not exist in TrustyAI metadata."));
+                    .body(is("No metadata found for model=" + MODEL_ID + ". This can happen if TrustyAI has not yet logged any inferences from this model."));
         });
     }
 
     @Test
     @DisplayName("When there's a wrong type requests")
     void getNoObservationsWrongType() throws JsonProcessingException {
-        datasource.get().reset();
+        resetDatasource();
+        final int N = 1000;
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N, 10, false);
+
+        saveDataframe(dataframe, MODEL_ID);
+
         List.of("/info/inference/ids/" + MODEL_ID + "?type=foo", "/info/inference/ids/" + MODEL_ID + "?type=bar").forEach(endpoint -> {
             given()
                     .when().get(endpoint)
@@ -73,30 +85,29 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Test
     @DisplayName("When data is present, but not for the requested model")
     void getNoObservationsModel() throws JsonProcessingException {
-        datasource.get().reset();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000, 10, false);
+        resetDatasource();
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 10, false);
 
-        datasource.get().saveDataframe(dataframe, MODEL_ID + "_other");
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID + "_other");
+        saveDataframe(dataframe, MODEL_ID + "_other");
 
         List.of(getEndpoint(MODEL_ID), getEndpointAll(MODEL_ID), getEndpointOrganic(MODEL_ID)).forEach(endpoint -> {
             given()
                     .when().get(endpoint)
                     .then()
                     .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                    .body(is("Model ID " + MODEL_ID + " does not exist in TrustyAI metadata."));
+                    .body(is("No metadata found for model=" + MODEL_ID + ". This can happen if TrustyAI has not yet logged any inferences from this model."));
         });
+        resetDatasource();
     }
 
     @Test
     @DisplayName("When data is present for the requested model")
     void getOrganicObservations() throws JsonProcessingException {
-        datasource.get().reset();
+        resetDatasource();
         final int N = 1000;
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(N, 10, false);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N, 10, false);
 
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        saveDataframe(dataframe, MODEL_ID);
 
         List.of(getEndpoint(MODEL_ID), getEndpointAll(MODEL_ID), getEndpointOrganic(MODEL_ID)).forEach(endpoint -> {
             final List<InferenceId> inferenceIds = given()
@@ -114,18 +125,17 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Test
     @DisplayName("When only synthetic data is present for the requested model")
     void getSyntheticObservations() throws JsonProcessingException {
-        datasource.get().reset();
+        resetDatasource();
         final int N = 1000;
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(N, 10, true);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N, 10, true);
 
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        saveDataframe(dataframe, MODEL_ID);
 
         given()
                 .when().get(getEndpointOrganic(MODEL_ID))
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Model ID " + MODEL_ID + " does not exist in TrustyAI metadata."));
+                .body(is("No organic inferences found for model=" + MODEL_ID));
         List<InferenceId> inferenceIds = given()
                 .when().get(getEndpoint(MODEL_ID))
                 .then()
@@ -151,14 +161,13 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Test
     @DisplayName("When there's synthetic and organic data")
     void getSyntheticAndOrganicObservations() throws JsonProcessingException {
-        datasource.get().reset();
+        resetDatasource();
         final int N = 1000;
-        final Dataframe syntheticDataframe = datasource.get().generateRandomDataframe(N, 10, true);
-        datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(syntheticDataframe), MODEL_ID);
-        final Dataframe organicDataframe = datasource.get().generateRandomDataframe(N * 2, 10, false);
-        datasource.get().saveDataframe(organicDataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(organicDataframe), MODEL_ID);
+        final Dataframe syntheticDataframe = DataframeGenerators.generateRandomDataframe(N, 10, true);
+        saveDataframe(syntheticDataframe, MODEL_ID);
+
+        final Dataframe organicDataframe = DataframeGenerators.generateRandomDataframe(N * 2, 10, false);
+        saveDataframe(organicDataframe, MODEL_ID);
 
         List<InferenceId> inferenceIds = given()
                 .when().get(getEndpoint(MODEL_ID))

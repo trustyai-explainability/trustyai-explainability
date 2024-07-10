@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.service;
+package org.kie.trustyai.service.endpoints.service.inferenceids;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(HibernateTestProfile.class)
-class ServiceMetadataEndpointHibernateTest extends ServiceMetadataEndpointBaseTest {
+class InferenceIdsServiceMetadataEndpointHibernateTest extends InferenceIdsServiceMetadataEndpointBaseTest {
 
     @Inject
     Instance<MockHibernateDatasource> datasource;

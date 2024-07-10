@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.service;
+package org.kie.trustyai.service.endpoints.service.metadata;
 
 import java.util.HashMap;
 import java.util.HashSet;

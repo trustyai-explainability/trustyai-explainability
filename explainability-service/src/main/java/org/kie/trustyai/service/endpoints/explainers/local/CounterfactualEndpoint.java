@@ -25,6 +25,7 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualExplainer;
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualResult;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.service.config.ServiceConfig;
