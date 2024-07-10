@@ -1,12 +1,17 @@
-package org.kie.trustyai.connectors.kserve.v1;
+package org.kie.trustyai.connectors.kserve.v2;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.connectors.kserve.KServeDatatype;
+import org.kie.trustyai.connectors.kserve.v1.KServeV1HTTPPayloadParser;
+import org.kie.trustyai.connectors.kserve.v1.KServeV1RequestPayload;
+import org.kie.trustyai.connectors.kserve.v1.KServeV1ResponsePayload;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 
@@ -17,14 +22,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.kie.trustyai.connectors.kserve.PayloadParser.DEFAULT_INPUT_PREFIX;
 import static org.kie.trustyai.connectors.kserve.PayloadParser.DEFAULT_OUTPUT_PREFIX;
 
-class KServeV1HTTPPayloadParserTest {
+class KServeV2HTTPPayloadParserTest {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static String toJson(List<Object> predictions) {
+    public static String toJson(List<Object> predictions, Optional<Integer> shape) {
         try {
-            KServeV1ResponsePayload payload = new KServeV1ResponsePayload();
-            payload.setPredictions(predictions);
+            KServeV2ResponsePayload payload = new KServeV2ResponsePayload();
+            final KServeV2ResponsePayload.Outputs outputs = new KServeV2ResponsePayload.Outputs();
+            outputs.data = predictions;
+            outputs.name = "outputs";
+            outputs.shape = shape.map(integer -> List.of(1, integer)).orElseGet(() -> List.of(1, predictions.size()));
+            outputs.datatype = KServeDatatype.FP64;
+            payload.setOutputs(List.of(outputs));
             return objectMapper.writeValueAsString(payload);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize predictions to JSON", e);
@@ -53,9 +63,9 @@ class KServeV1HTTPPayloadParserTest {
         final Random random = new Random(0);
         final double value = random.nextDouble();
 
-        final String json = toJson(List.of(value));
+        final String json = toJson(List.of(value), Optional.empty());
 
-        final List<PredictionOutput> predictionOutput = KServeV1HTTPPayloadParser.getInstance().parseResponse(json);
+        final List<PredictionOutput> predictionOutput = KServeV2HTTPPayloadParser.getInstance().parseResponse(json);
 
         assertEquals(1, predictionOutput.size());
         assertEquals(1, predictionOutput.get(0).getOutputs().size());
@@ -68,9 +78,9 @@ class KServeV1HTTPPayloadParserTest {
         final Random random = new Random(0);
         final List<Object> values = random.doubles(3).boxed().collect(Collectors.toList());
 
-        final String json = toJson(values);
+        final String json = toJson(values, Optional.of(1));
 
-        final List<PredictionOutput> predictionOutput = KServeV1HTTPPayloadParser.getInstance().parseResponse(json);
+        final List<PredictionOutput> predictionOutput = KServeV2HTTPPayloadParser.getInstance().parseResponse(json);
 
         assertEquals(3, predictionOutput.size());
         assertEquals(1, predictionOutput.get(0).getOutputs().size());
@@ -85,9 +95,9 @@ class KServeV1HTTPPayloadParserTest {
 
         final Random random = new Random(0);
         final List<Object> values = List.of(random.nextFloat(), random.nextFloat(), random.nextFloat());
-        final String json = toJson(values);
+        final String json = toJson(values, Optional.of(1));
 
-        final List<PredictionOutput> predictionOutput = KServeV1HTTPPayloadParser.getInstance().parseResponse(json);
+        final List<PredictionOutput> predictionOutput = KServeV2HTTPPayloadParser.getInstance().parseResponse(json);
 
         assertEquals(3, predictionOutput.size());
         assertEquals(1, predictionOutput.get(0).getOutputs().size());
@@ -102,9 +112,9 @@ class KServeV1HTTPPayloadParserTest {
 
         final Random random = new Random(0);
         final List<Object> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
-        final String json = toJson(values);
+        final String json = toJson(values, Optional.of(1));
 
-        final List<PredictionOutput> predictionOutput = KServeV1HTTPPayloadParser.getInstance().parseResponse(json);
+        final List<PredictionOutput> predictionOutput = KServeV2HTTPPayloadParser.getInstance().parseResponse(json);
 
         assertEquals(3, predictionOutput.size());
         assertEquals(1, predictionOutput.get(0).getOutputs().size());
@@ -161,9 +171,9 @@ class KServeV1HTTPPayloadParserTest {
         final int OUTPUT_SHAPE = 6;
         final List<Object> values = random.doubles(OUTPUT_SHAPE).boxed().collect(Collectors.toList());
 
-        final String json = toJson(values);
+        final String json = toJson(values, Optional.empty());
 
-        final List<PredictionOutput> predictionOutput = KServeV1HTTPPayloadParser.getInstance().parseResponse(json, OUTPUT_SHAPE);
+        final List<PredictionOutput> predictionOutput = KServeV2HTTPPayloadParser.getInstance().parseResponse(json, OUTPUT_SHAPE);
 
         assertEquals(1, predictionOutput.size());
         assertEquals(OUTPUT_SHAPE, predictionOutput.get(0).getOutputs().size());
@@ -180,9 +190,9 @@ class KServeV1HTTPPayloadParserTest {
         final int OUTPUT_SHAPE = 6;
         final List<Object> values = random.doubles(OUTPUT_SHAPE).boxed().collect(Collectors.toList());
 
-        final String json = toJson(values);
+        final String json = toJson(values, Optional.of(2));
 
-        final List<PredictionOutput> predictionOutput = KServeV1HTTPPayloadParser.getInstance().parseResponse(json, 2);
+        final List<PredictionOutput> predictionOutput = KServeV2HTTPPayloadParser.getInstance().parseResponse(json, 2);
 
         assertEquals(3, predictionOutput.size());
         assertEquals(2, predictionOutput.get(0).getOutputs().size());

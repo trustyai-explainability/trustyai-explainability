@@ -24,6 +24,8 @@ public class ExplainersEndpointTestProfile implements QuarkusTestProfile {
         overrides.put("service.batch-size", "5000");
         overrides.put("storage.data-filename", "data.csv");
         overrides.put("storage.data-folder", "/inputs");
+        overrides.put("quarkus.http.ssl.certificate.files", "");
+        overrides.put("quarkus.http.ssl.certificate.key-files", "");
         return overrides;
     }
 

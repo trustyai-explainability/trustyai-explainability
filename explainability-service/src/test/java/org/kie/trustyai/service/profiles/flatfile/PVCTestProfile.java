@@ -21,6 +21,8 @@ public class PVCTestProfile implements QuarkusTestProfile {
         overrides.put("storage.data-filename", "data.csv");
         overrides.put("storage.data-folder", "/tmp");
         overrides.put("service.batch-size", "5000");
+        overrides.put("quarkus.http.ssl.certificate.files", "");
+        overrides.put("quarkus.http.ssl.certificate.key-files", "");
         return overrides;
     }
 

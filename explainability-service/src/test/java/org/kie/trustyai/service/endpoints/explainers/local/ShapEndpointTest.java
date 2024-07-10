@@ -7,11 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
+
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
-import org.kie.trustyai.service.payloads.explainers.ModelConfig;
 import org.kie.trustyai.service.utils.DataframeGenerators;
+
+import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.shap.SHAPExplanationRequest;
+
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -62,8 +65,8 @@ class ShapEndpointTest {
         Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
-        final LocalExplanationRequest payload = new LocalExplanationRequest();
-        payload.setModelConfig(new ModelConfig("", MODEL_ID, ""));
+        final SHAPExplanationRequest payload = new SHAPExplanationRequest();
+        payload.getExplanationConfig().setModelConfig(new ModelConfig("", MODEL_ID, ""));
         payload.setPredictionId(id);
 
         given().contentType(ContentType.JSON).body(payload)

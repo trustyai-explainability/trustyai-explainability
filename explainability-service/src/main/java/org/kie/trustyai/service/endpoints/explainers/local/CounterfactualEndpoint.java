@@ -24,25 +24,16 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualExplainer;
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualResult;
-import org.kie.trustyai.explainability.model.CounterfactualPrediction;
-import org.kie.trustyai.explainability.model.Feature;
-import org.kie.trustyai.explainability.model.FeatureDistribution;
-import org.kie.trustyai.explainability.model.Output;
-import org.kie.trustyai.explainability.model.Prediction;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
-import org.kie.trustyai.explainability.model.PredictionOutput;
-import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
+import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
-import org.kie.trustyai.service.payloads.explainers.CounterfactualExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.CounterfactualExplanationResponse;
-import org.kie.trustyai.service.payloads.explainers.LocalExplanationRequest;
+import org.kie.trustyai.service.payloads.explainers.counterfactuals.CounterfactualExplanationRequest;
 
 import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
@@ -58,7 +49,7 @@ import jakarta.ws.rs.core.Response;
 @Tag(name = "Counterfactual Explainer Endpoint")
 @EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
 @Path("/explainers/local/cf")
-public class CounterfactualEndpoint extends LocalExplainerEndpoint {
+public class CounterfactualEndpoint extends ExplainerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(CounterfactualEndpoint.class);
 
@@ -72,10 +63,34 @@ public class CounterfactualEndpoint extends LocalExplainerEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response explain(CounterfactualExplanationRequest request) throws DataframeCreateException {
-        return processRequest(request, dataSource.get(), serviceConfig);
+        try {
+
+            final String modelId = request.getExplanationConfig().getModelConfig().getName();
+            final Dataframe dataframe = dataSource.get().getOrganicDataframe(modelId);
+            final PredictionProvider model = getModel(request.getExplanationConfig().getModelConfig(), dataframe.getInputTensorName());
+
+            Prediction predictionToExplain;
+            final List<Prediction> predictions = dataSource.get().getDataframe(modelId)
+                    .filterRowsById(request.getPredictionId()).asPredictions();
+            if (predictions.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).entity("No prediction found with id="
+                        + request.getPredictionId()).build();
+            } else if (predictions.size() == 1) {
+                predictionToExplain = predictions.get(0);
+                final List<PredictionInput> testDataDistribution = dataframe.filterRowsById(request.getPredictionId(), true,
+                        serviceConfig.batchSize().orElse(100)).asPredictionInputs();
+                predictionToExplain = prepare(predictionToExplain, request, testDataDistribution);
+                final BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution);
+                return Response.ok(entity).build();
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Found " + predictions.size()
+                        + " predictions with id=" + request.getPredictionId()).build();
+            }
+        } catch (Exception e) {
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
     }
 
-    @Override
     public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain, List<PredictionInput> inputs) {
         CounterfactualExplainer counterfactualExplainer = new CounterfactualExplainer();
         try {
@@ -87,8 +102,7 @@ public class CounterfactualEndpoint extends LocalExplainerEndpoint {
         }
     }
 
-    @Override
-    protected Prediction prepare(Prediction prediction, LocalExplanationRequest request, List<PredictionInput> testData) {
+    protected Prediction prepare(Prediction prediction, CounterfactualExplanationRequest request, List<PredictionInput> testData) {
         PredictionInput input = prediction.getInput();
 
         List<Feature> cfInputFeatures = new ArrayList<>();
@@ -106,7 +120,7 @@ public class CounterfactualEndpoint extends LocalExplainerEndpoint {
         }
 
         List<Output> goals = new ArrayList<>();
-        CounterfactualExplanationRequest counterfactualExplanationRequest = (CounterfactualExplanationRequest) request;
+        CounterfactualExplanationRequest counterfactualExplanationRequest = request;
         Map<String, String> targetGoals = counterfactualExplanationRequest.getGoals();
         for (Output output : prediction.getOutput().getOutputs()) {
             String newGoalValue = targetGoals.get(output.getName());

@@ -7,8 +7,12 @@ import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfi
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.explainers.GlobalExplanationRequest;
+<<<<<<< HEAD
 import org.kie.trustyai.service.payloads.explainers.ModelConfig;
 import org.kie.trustyai.service.utils.DataframeGenerators;
+=======
+import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
+>>>>>>> d085ff494a441059ce7f497f0230dcd5148052bb
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
