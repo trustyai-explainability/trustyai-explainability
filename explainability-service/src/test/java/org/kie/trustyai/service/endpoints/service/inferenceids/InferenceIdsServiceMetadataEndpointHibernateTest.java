@@ -41,8 +41,8 @@ class InferenceIdsServiceMetadataEndpointHibernateTest extends InferenceIdsServi
     @BeforeEach
     @AfterEach
     public void resetDatasource() throws JsonProcessingException {
-        datasource.get().reset();
         clearStorage();
+        datasource.get().reset();
     }
 
     @Override
