@@ -31,7 +31,7 @@ public class HibernateTestProfile implements QuarkusTestProfile {
         // these settings are useful for testing against a real Maria instance on a remote cluster, and are therefore kept
         //        overrides.put("quarkus.datasource.db-kind", "mariadb");
         //        overrides.put("quarkus.datasource.username", "quarkus");
-        //        overrides.put("quarkus.datasource.password", "qBfi86/5>TtlC0Iw");
+        //        overrides.put("quarkus.datasource.password", "");
         //        overrides.put("quarkus.datasource.jdbc.url", "jdbc:mariadb://mariadb:3306/trustyai_database");//?rewriteBatchedStatements=TRUE");
         //        overrides.put("quarkus.hibernate-orm.database.generation", "drop-and-create");
 
