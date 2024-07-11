@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.endpoints.service.inferenceids;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -26,17 +27,17 @@ public class InferenceIdsServiceMetadataEndpointPVCTest extends InferenceIdsServ
     @Inject
     Instance<MockCSVDatasource> datasource;
 
-    @BeforeEach
-    void reset() throws IOException {
-        for (String model : datasource.get().getKnownModels()) {
-            storage.get().emptyStorage("/tmp/" + model + "-data.csv");
-            storage.get().emptyStorage("/tmp/" + model + "-internal_data.csv");
-            storage.get().emptyStorage("/tmp/" + model + "-metadata.json");
-        }
+    void reset(String modelId)  {
+        storage.get().emptyStorage("/tmp/" + modelId + "-data.csv");
+        storage.get().emptyStorage("/tmp/" + modelId + "-internal_data.csv");
+        storage.get().emptyStorage("/tmp/" + modelId + "-metadata.json");
     }
+
 
     @Override
     public void resetDatasource() throws JsonProcessingException {
+        reset(MODEL_ID);
+        reset(MODEL_ID+"_other");
         datasource.get().reset();
     }
 

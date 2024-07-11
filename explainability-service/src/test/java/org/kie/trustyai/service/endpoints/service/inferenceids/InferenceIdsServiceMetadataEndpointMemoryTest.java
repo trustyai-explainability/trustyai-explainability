@@ -38,5 +38,6 @@ public class InferenceIdsServiceMetadataEndpointMemoryTest extends InferenceIdsS
     @Override
     public void resetDatasource() throws JsonProcessingException {
         datasource.get().reset();
+        reset();
     }
 }

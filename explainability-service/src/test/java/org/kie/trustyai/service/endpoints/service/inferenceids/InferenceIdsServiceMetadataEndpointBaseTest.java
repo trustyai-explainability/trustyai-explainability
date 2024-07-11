@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -34,6 +35,7 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Inject
     Instance<DataSource> datasource;
 
+    @BeforeEach
     @AfterEach
     public abstract void resetDatasource() throws JsonProcessingException;
 
@@ -54,7 +56,6 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Test
     @DisplayName("When no data is present in storage")
     void getNoObservationsAtAll() throws JsonProcessingException {
-        resetDatasource();
         List.of(getEndpoint(MODEL_ID), getEndpointAll(MODEL_ID), getEndpointOrganic(MODEL_ID)).forEach(endpoint -> {
             given()
                     .when().get(endpoint)
@@ -67,7 +68,6 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Test
     @DisplayName("When there's a wrong type requests")
     void getNoObservationsWrongType() throws JsonProcessingException {
-        resetDatasource();
         final int N = 1000;
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N, 10, false);
 
@@ -85,7 +85,6 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Test
     @DisplayName("When data is present, but not for the requested model")
     void getNoObservationsModel() throws JsonProcessingException {
-        resetDatasource();
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 10, false);
 
         saveDataframe(dataframe, MODEL_ID + "_other");
@@ -103,7 +102,6 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Test
     @DisplayName("When data is present for the requested model")
     void getOrganicObservations() throws JsonProcessingException {
-        resetDatasource();
         final int N = 1000;
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N, 10, false);
 
@@ -125,7 +123,6 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Test
     @DisplayName("When only synthetic data is present for the requested model")
     void getSyntheticObservations() throws JsonProcessingException {
-        resetDatasource();
         final int N = 1000;
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N, 10, true);
 
@@ -161,7 +158,6 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
     @Test
     @DisplayName("When there's synthetic and organic data")
     void getSyntheticAndOrganicObservations() throws JsonProcessingException {
-        resetDatasource();
         final int N = 1000;
         final Dataframe syntheticDataframe = DataframeGenerators.generateRandomDataframe(N, 10, true);
         saveDataframe(syntheticDataframe, MODEL_ID);
