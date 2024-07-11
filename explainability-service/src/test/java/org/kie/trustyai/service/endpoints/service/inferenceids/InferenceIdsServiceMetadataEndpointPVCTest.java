@@ -28,9 +28,11 @@ public class InferenceIdsServiceMetadataEndpointPVCTest extends InferenceIdsServ
 
     @BeforeEach
     void reset() throws IOException {
-        storage.get().emptyStorage("/tmp/" + MODEL_ID + "-data.csv");
-        storage.get().emptyStorage("/tmp/" + MODEL_ID + "-internal_data.csv");
-        storage.get().emptyStorage("/tmp/" + MODEL_ID + "-metadata.json");
+        for (String model : datasource.get().getKnownModels()) {
+            storage.get().emptyStorage("/tmp/" + model + "-data.csv");
+            storage.get().emptyStorage("/tmp/" + model + "-internal_data.csv");
+            storage.get().emptyStorage("/tmp/" + model + "-metadata.json");
+        }
     }
 
     @Override
@@ -43,5 +45,4 @@ public class InferenceIdsServiceMetadataEndpointPVCTest extends InferenceIdsServ
         datasource.get().saveDataframe(dataframe, modelId);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), modelId);
     }
-
 }
