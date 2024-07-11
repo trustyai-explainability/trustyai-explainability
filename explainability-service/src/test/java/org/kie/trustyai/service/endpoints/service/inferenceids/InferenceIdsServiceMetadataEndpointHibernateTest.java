@@ -29,8 +29,6 @@ class InferenceIdsServiceMetadataEndpointHibernateTest extends InferenceIdsServi
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
-    @BeforeEach
-    @AfterEach
     void clearStorage() throws JsonProcessingException {
         for (String modelId : datasource.get().getKnownModels()) {
             storage.get().clearData(modelId);
@@ -40,8 +38,11 @@ class InferenceIdsServiceMetadataEndpointHibernateTest extends InferenceIdsServi
     }
 
     @Override
+    @BeforeEach
+    @AfterEach
     public void resetDatasource() throws JsonProcessingException {
         datasource.get().reset();
+        clearStorage();
     }
 
     @Override

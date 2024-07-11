@@ -3,6 +3,7 @@ package org.kie.trustyai.service.endpoints.service.inferenceids;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
@@ -35,6 +36,8 @@ public class InferenceIdsServiceMetadataEndpointPVCTest extends InferenceIdsServ
 
 
     @Override
+    @BeforeEach
+    @AfterEach
     public void resetDatasource() throws JsonProcessingException {
         reset(MODEL_ID);
         reset(MODEL_ID+"_other");
