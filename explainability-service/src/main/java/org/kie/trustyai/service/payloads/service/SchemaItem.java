@@ -2,24 +2,43 @@ package org.kie.trustyai.service.payloads.service;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.kie.trustyai.explainability.model.UnderlyingObject;
 import org.kie.trustyai.service.payloads.values.DataType;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
+
+@Entity
 public class SchemaItem {
     private DataType type;
     private String name;
-    private Set<Object> values;
-    private int index;
+
+    @Transient
+    // marking this transient to avoid double-saving dataframe values in DB
+    private Set<UnderlyingObject> columnValues;
+
+    @JsonAlias({ "index" })
+    private int columnIndex;
+
+    @Id
+    @GeneratedValue
+    long id;
 
     public SchemaItem() {
-
     }
 
-    public SchemaItem(DataType type, String name, Set<Object> values, int index) {
+    public SchemaItem(DataType type, String name, Set<UnderlyingObject> columnValues, int columnIndex) {
         this.type = type;
         this.name = name;
-        this.values = values;
-        this.index = index;
+        this.columnValues = columnValues;
+        this.columnIndex = columnIndex;
     }
 
     public DataType getType() {
@@ -38,20 +57,28 @@ public class SchemaItem {
         this.name = name;
     }
 
-    public Set<Object> getValues() {
-        return values;
+    public Set<UnderlyingObject> getColumnValues() {
+        return columnValues;
     }
 
-    public void setValues(Set<Object> values) {
-        this.values = values;
+    // for compatibility with legacy metadata
+    @JsonProperty("values")
+    public void setColumnValuesFromLegacy(Set<Object> values) {
+        this.columnValues =
+                values.stream().map(v -> v instanceof UnderlyingObject ? (UnderlyingObject) v : new UnderlyingObject(v))
+                        .collect(Collectors.toSet());
     }
 
-    public int getIndex() {
-        return index;
+    public void setColumnValues(Set<UnderlyingObject> values) {
+        this.columnValues = values;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
+    public int getColumnIndex() {
+        return columnIndex;
+    }
+
+    public void setColumnIndex(int index) {
+        this.columnIndex = index;
     }
 
     @Override
@@ -61,12 +88,12 @@ public class SchemaItem {
         if (o == null || getClass() != o.getClass())
             return false;
         SchemaItem that = (SchemaItem) o;
-        return index == that.index && type == that.type && Objects.equals(name, that.name);
+        return columnIndex == that.columnIndex && type == that.type && Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, name, index);
+        return Objects.hash(type, name, columnIndex);
     }
 
     @Override
@@ -74,8 +101,8 @@ public class SchemaItem {
         return "SchemaItem{" +
                 "type=" + type +
                 ", name='" + name + '\'' +
-                ", values=" + values +
-                ", index=" + index +
+                ", values=" + columnValues +
+                ", index=" + columnIndex +
                 '}';
     }
 }

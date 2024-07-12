@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
 
@@ -30,7 +30,7 @@ public class MetricsEndpointTestProfile implements QuarkusTestProfile {
 
     @Override
     public Set<Class<?>> getEnabledAlternatives() {
-        return Set.of(MockDatasource.class, MockMemoryStorage.class, MockPrometheusScheduler.class);
+        return Set.of(MockCSVDatasource.class, MockMemoryStorage.class, MockPrometheusScheduler.class);
 
     }
 

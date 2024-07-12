@@ -166,7 +166,6 @@
                 <artifactId>opennlp-tools</artifactId>
                 <version>${version.org.apache.opennlp}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -282,6 +281,11 @@
             <plugin>
                 <groupId>net.revelc.code</groupId>
                 <artifactId>impsort-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
             </plugin>
         </plugins>
     </build>

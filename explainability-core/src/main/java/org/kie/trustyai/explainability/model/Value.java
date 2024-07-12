@@ -28,44 +28,54 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
+
 /**
  * Wrapper class for any kind of value part of a prediction input or output.
  *
  */
+@Embeddable
 public class Value {
-
-    private final Object underlyingObject;
+    @Access(AccessType.FIELD)
+    private final UnderlyingObject wrappedUnderlyingObject;
 
     public Value(Object underlyingObject) {
-        this.underlyingObject = underlyingObject;
+        this.wrappedUnderlyingObject = new UnderlyingObject(underlyingObject);
+    }
+
+    public Value() {
+        this.wrappedUnderlyingObject = new UnderlyingObject(null);
     }
 
     public String asString() {
-        if (underlyingObject instanceof List) {
+        if (getUnderlyingObject() instanceof List) {
             try {
                 @SuppressWarnings("unchecked")
-                List<Feature> composite = (List<Feature>) underlyingObject;
+                List<Feature> composite = (List<Feature>) getUnderlyingObject();
                 return composite.stream().map(f -> f.getValue().asString()).collect(Collectors.joining(" "));
             } catch (ClassCastException ignored) {
                 // ignored
             }
         }
-        if (underlyingObject instanceof ByteBuffer) {
-            ByteBuffer byteBuffer = (ByteBuffer) this.underlyingObject;
+        if (getUnderlyingObject() instanceof ByteBuffer) {
+            ByteBuffer byteBuffer = (ByteBuffer) getUnderlyingObject();
             return new String(byteBuffer.array());
         }
-        return ArrayUtils.toString(underlyingObject);
+        return ArrayUtils.toString(getUnderlyingObject());
     }
 
     public double asNumber() {
-        if (underlyingObject != null) {
+        if (getUnderlyingObject() != null) {
             try {
-                if (underlyingObject instanceof Double) {
-                    return (double) underlyingObject;
-                } else if (underlyingObject instanceof Number) {
-                    return ((Number) underlyingObject).doubleValue();
-                } else if (underlyingObject instanceof Boolean) {
-                    return (boolean) underlyingObject ? 1d : 0d;
+                if (getUnderlyingObject() instanceof Double) {
+                    return (double) getUnderlyingObject();
+                } else if (getUnderlyingObject() instanceof Number) {
+                    return ((Number) getUnderlyingObject()).doubleValue();
+                } else if (getUnderlyingObject() instanceof Boolean) {
+                    return (boolean) getUnderlyingObject() ? 1d : 0d;
                 } else {
                     return Double.parseDouble(asString());
                 }
@@ -77,25 +87,30 @@ public class Value {
         }
     }
 
+    @Transient
     public Object getUnderlyingObject() {
-        return underlyingObject;
+        return wrappedUnderlyingObject.getObject();
+    }
+
+    public UnderlyingObject getUnderlyingObjectContainer() {
+        return wrappedUnderlyingObject;
     }
 
     @Override
     public String toString() {
-        return Objects.toString(underlyingObject);
+        return Objects.toString(getUnderlyingObject());
     }
 
     public double[] asVector() {
         double[] doubles;
-        if (underlyingObject instanceof double[]) {
-            doubles = (double[]) underlyingObject;
+        if (getUnderlyingObject() instanceof double[]) {
+            doubles = (double[]) getUnderlyingObject();
         } else {
-            if (underlyingObject instanceof String) {
-                String string = (String) this.underlyingObject;
+            if (getUnderlyingObject() instanceof String) {
+                String string = (String) getUnderlyingObject();
                 doubles = parseVectorString(string);
-            } else if (underlyingObject instanceof ByteBuffer) {
-                ByteBuffer byteBuffer = (ByteBuffer) underlyingObject;
+            } else if (getUnderlyingObject() instanceof ByteBuffer) {
+                ByteBuffer byteBuffer = (ByteBuffer) getUnderlyingObject();
                 String string = StandardCharsets.UTF_8.decode(byteBuffer).toString();
                 doubles = parseVectorString(string);
             } else {
@@ -138,11 +153,11 @@ public class Value {
             return false;
         }
         Value value = (Value) o;
-        return Objects.equals(underlyingObject, value.underlyingObject);
+        return Objects.equals(getUnderlyingObject(), value.getUnderlyingObject());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(underlyingObject);
+        return Objects.hash(getUnderlyingObject());
     }
 }

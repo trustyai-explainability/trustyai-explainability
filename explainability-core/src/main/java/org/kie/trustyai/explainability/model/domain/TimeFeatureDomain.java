@@ -19,10 +19,20 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
+
+@Entity
 public class TimeFeatureDomain extends NumericalFeatureDomain {
 
     private TimeFeatureDomain(double lowerBound, double upperBound) {
         super(lowerBound, upperBound);
+    }
+
+    public TimeFeatureDomain() {
+        super(Double.MIN_VALUE, Double.MAX_VALUE);
     }
 
     /**
@@ -32,29 +42,33 @@ public class TimeFeatureDomain extends NumericalFeatureDomain {
      * @param upperBound The end point of the search space
      * @return A {@link FeatureDomain}
      */
-    public static FeatureDomain<LocalTime> create(LocalTime lowerBound, LocalTime upperBound) {
+    public static TimeFeatureDomain create(LocalTime lowerBound, LocalTime upperBound) {
         final double minimum = LocalTime.MIN.until(lowerBound, ChronoUnit.SECONDS);
         final double maximum = LocalTime.MIN.until(upperBound, ChronoUnit.SECONDS);
         return new TimeFeatureDomain(minimum, maximum);
     }
 
     @Override
+    @Transient
     public boolean isEmpty() {
         return false;
     }
 
     @Override
+    @Access(AccessType.FIELD)
     public Double getLowerBound() {
         return this.lowerBound;
     }
 
     @Override
+    @Access(AccessType.FIELD)
     public Double getUpperBound() {
         return this.upperBound;
     }
 
     @Override
-    public Set<LocalTime> getCategories() {
+    @Transient
+    public Set<Double> getCategories() {
         return null;
     }
 

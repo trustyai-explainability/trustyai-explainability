@@ -11,10 +11,12 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.service.data.metadata.Metadata;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,11 +36,11 @@ public class LegacyMetadataTest {
     Instance<MockMemoryStorage> storage;
 
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     private static final String MODEL_ID = "demo-loan-nn-onnx-beta";
 
-    private static Metadata readMetadataFile(String filename) throws IOException {
+    private static StorageMetadata readMetadataFile(String filename) throws IOException {
 
         final String resourcePath = "storage/data/v1/" + filename;
 
@@ -50,7 +52,7 @@ public class LegacyMetadataTest {
                 throw new IllegalArgumentException("file not found! " + resourcePath);
             }
 
-            return objectMapper.readValue(is, Metadata.class);
+            return objectMapper.readValue(is, StorageMetadata.class);
         }
 
     }
@@ -76,8 +78,8 @@ public class LegacyMetadataTest {
     @BeforeEach
     void emptyStorage() throws IOException {
         storage.get().emptyStorage();
-        storage.get().save(readFile("demo-loan-nn-onnx-beta-data.csv"), "demo-loan-nn-onnx-beta-data.csv");
-        storage.get().save(readFile("demo-loan-nn-onnx-beta-internal_data.csv"), "demo-loan-nn-onnx-beta-internal_data.csv");
+        storage.get().saveDataframe(readFile("demo-loan-nn-onnx-beta-data.csv"), "demo-loan-nn-onnx-beta-data.csv");
+        storage.get().saveDataframe(readFile("demo-loan-nn-onnx-beta-internal_data.csv"), "demo-loan-nn-onnx-beta-internal_data.csv");
         datasource.get().saveMetadata(readMetadataFile("demo-loan-nn-onnx-beta-metadata.json"), "demo-loan-nn-onnx-beta");
     }
 

@@ -2,7 +2,7 @@ package org.kie.trustyai.service.scenarios.batching;
 
 import java.util.Map;
 
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 public class BatchingTestProfile extends MemoryTestProfile {
     @Override

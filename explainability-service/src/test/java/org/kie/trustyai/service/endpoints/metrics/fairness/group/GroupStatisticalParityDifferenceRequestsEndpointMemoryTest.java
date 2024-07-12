@@ -1,9 +1,11 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -26,9 +28,9 @@ class GroupStatisticalParityDifferenceRequestsEndpointMemoryTest extends GroupSt
         storage.get().emptyStorage();
         // Clear any requests between tests
         scheduler.get().getAllRequestsFlat().clear();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        datasource.get().saveMetadata(MockCSVDatasource.createMetadata(dataframe), MODEL_ID);
     }
 
 }

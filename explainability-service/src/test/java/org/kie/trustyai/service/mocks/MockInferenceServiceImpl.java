@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.*;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 
 import io.grpc.stub.StreamObserver;

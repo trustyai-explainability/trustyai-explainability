@@ -1,19 +1,26 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionMetadata;
+import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.payloads.service.NameMapping;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -33,16 +40,12 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
     protected static final String MODEL_ID = "example1";
     protected static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<DataSource> datasource;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
-    void populate() {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-    }
+    abstract void populate();
 
     @Test
     void get() {
@@ -370,7 +373,14 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         Double value = response.getValue();
         assertFalse(Double.isNaN(value));
 
-        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
+        Prediction prediction = dataframe.asPredictions().get(0);
+        PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), Dataframe.InternalTags.SYNTHETIC.get());
+        Prediction newPrediction = new SimplePrediction(prediction.getInput(), prediction.getOutput(), predictionMetadata);
+        Dataframe newDataframe = Dataframe.createFrom(newPrediction);
+
+        datasource.get().saveDataframe(newDataframe, MODEL_ID);
+        final Dataframe syntheticDataframe = DataframeGenerators.generateRandomSyntheticDataframe(N_SAMPLES);
         datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
 
         final BaseMetricResponse responseSecond = given()
@@ -399,7 +409,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 
-        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        final Dataframe syntheticDataframe = DataframeGenerators.generateRandomSyntheticDataframe(N_SAMPLES);
         datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
 
         given()
@@ -422,7 +432,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
                 .then()
                 .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
 
-        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        final Dataframe syntheticDataframe = DataframeGenerators.generateRandomSyntheticDataframe(N_SAMPLES);
         datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
 
         given()
@@ -432,7 +442,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
                 .then()
                 .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
 
-        final Dataframe organicDataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        final Dataframe organicDataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(organicDataframe, MODEL_ID);
 
         final BaseMetricResponse responseSecond = given()
@@ -448,4 +458,73 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         assertEquals("SPD", responseSecond.getName());
         assertFalse(Double.isNaN(responseSecond.getValue()));
     }
+
+    @Test
+    void postCorrectNameMapped() throws InterruptedException {
+        populate();
+
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        payload.setProtectedAttribute("Gender Mapped");
+
+        HashMap<String, String> inputMapping = new HashMap<>();
+        HashMap<String, String> outputMapping = new HashMap<>();
+        inputMapping.put("age", "Age Mapped");
+        inputMapping.put("gender", "Gender Mapped");
+        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(nameMapping)
+                .basePath("/info")
+                .when().post("/names").peek()
+                .then()
+                .statusCode(200)
+                .body(is("Feature and output name mapping successfully applied."));
+
+        final BaseMetricResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post()
+                .then()
+                .statusCode(200)
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("SPD", response.getName());
+        assertFalse(Double.isNaN(response.getValue()));
+    }
+
+    @Test
+    void postCorrectNameMappedRequest() throws InterruptedException {
+        populate();
+
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        payload.setProtectedAttribute("Gender Mapped");
+
+        HashMap<String, String> inputMapping = new HashMap<>();
+        HashMap<String, String> outputMapping = new HashMap<>();
+        inputMapping.put("age", "Age Mapped");
+        inputMapping.put("gender", "Gender Mapped");
+        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(nameMapping)
+                .basePath("/info")
+                .when().post("/names").peek()
+                .then()
+                .statusCode(200)
+                .body(is("Feature and output name mapping successfully applied."));
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/request/")
+                .then()
+                .statusCode(200);
+
+        assertDoesNotThrow(() -> scheduler.get().calculateManual(true));
+    }
+
 }

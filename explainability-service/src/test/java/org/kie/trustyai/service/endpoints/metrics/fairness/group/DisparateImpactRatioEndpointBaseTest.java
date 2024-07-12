@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,15 +10,19 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionMetadata;
+import org.kie.trustyai.explainability.model.SimplePrediction;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -37,7 +42,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
     protected static final String MODEL_ID = "example1";
     protected static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
@@ -48,7 +53,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
     }
 
     private void populate() {
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }
@@ -573,7 +578,14 @@ abstract class DisparateImpactRatioEndpointBaseTest {
         assertEquals("DIR", response.getName());
         assertFalse(Double.isNaN(value));
 
-        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
+        Prediction prediction = dataframe.asPredictions().get(0);
+        PredictionMetadata predictionMetadata = new PredictionMetadata("123", LocalDateTime.now(), Dataframe.InternalTags.SYNTHETIC.get());
+        Prediction newPrediction = new SimplePrediction(prediction.getInput(), prediction.getOutput(), predictionMetadata);
+        Dataframe newDataframe = Dataframe.createFrom(newPrediction);
+
+        datasource.get().saveDataframe(newDataframe, MODEL_ID);
+        final Dataframe syntheticDataframe = DataframeGenerators.generateRandomSyntheticDataframe(N_SAMPLES);
         datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
 
         final BaseMetricResponse responseSecond = given()
@@ -594,7 +606,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
     @DisplayName("DIR request with no organic data")
     void postCorrectFilteringOnlySynthetic() throws JsonProcessingException {
 
-        final Dataframe syntheticDataframe = datasource.get().generateRandomSyntheticDataframe(N_SAMPLES);
+        final Dataframe syntheticDataframe = DataframeGenerators.generateRandomSyntheticDataframe(N_SAMPLES);
         datasource.get().saveDataframe(syntheticDataframe, MODEL_ID);
 
         final GroupMetricRequest payload = RequestPayloadGenerator.correct();
@@ -605,7 +617,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
                 .then()
                 .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
 
-        final Dataframe organicDataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        final Dataframe organicDataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(organicDataframe, MODEL_ID);
 
         final BaseMetricResponse responseSecond = given()

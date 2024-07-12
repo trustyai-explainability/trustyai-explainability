@@ -6,18 +6,26 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.v2.KServeConfig;
 import org.kie.trustyai.connectors.kserve.v2.KServeV2GRPCPredictionProvider;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.explainability.utils.models.TestModels;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.explainers.GrpcMockServer;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
 import org.kie.trustyai.service.payloads.explainers.lime.LimeExplanationRequest;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -43,7 +51,7 @@ class LimeEndpointTest {
     private static final String MODEL_ID = "example1";
     private static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
     @Inject
     Instance<MockMemoryStorage> storage;
     private GrpcMockServer mockServer;
@@ -51,7 +59,7 @@ class LimeEndpointTest {
     @BeforeEach
     void populateStorage() throws IOException {
         storage.get().emptyStorage();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
         mockServer = new GrpcMockServer(TestModels.getSumSkipModel(1));
@@ -108,7 +116,7 @@ class LimeEndpointTest {
 
         assertEquals(3, response.getSaliencies().get("income").size());
 
-        final Metadata metadata = datasource.get().getMetadata(MODEL_ID);
+        final StorageMetadata metadata = datasource.get().getMetadata(MODEL_ID);
         final Set<String> inputNames = Set.of("gender", "race", "age");
         final Set<String> outputNames = Set.of("income");
         assertEquals(inputNames, metadata.getInputSchema().getItems().keySet().stream().collect(Collectors.toUnmodifiableSet()));
@@ -129,8 +137,8 @@ class LimeEndpointTest {
     void testInputCustomTensorName() throws JsonProcessingException {
         datasource.get().reset();
         storage.get().emptyStorage();
-        final Dataframe _dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
-        final Metadata _metadata = datasource.get().createMetadata(_dataframe);
+        final Dataframe _dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
+        final StorageMetadata _metadata = datasource.get().createMetadata(_dataframe);
         final String INPUT_NAME = "custom-input-a";
         final String OUTPUT_NAME = "custom-output-a";
         _metadata.setInputTensorName(INPUT_NAME);
@@ -154,7 +162,7 @@ class LimeEndpointTest {
 
         assertEquals(3, response.getSaliencies().get("income").size());
 
-        final Metadata metadata = datasource.get().getMetadata(MODEL_ID);
+        final StorageMetadata metadata = datasource.get().getMetadata(MODEL_ID);
         final Set<String> inputNames = Set.of("gender", "race", "age");
         final Set<String> outputNames = Set.of("income");
         assertEquals(inputNames, metadata.getInputSchema().getItems().keySet().stream().collect(Collectors.toUnmodifiableSet()));
@@ -229,8 +237,8 @@ class LimeEndpointTest {
         datasource.get().reset();
         storage.get().emptyStorage();
         final Dataframe _dataframe2 = generateExplainerTestADataframe(10);
-        final Dataframe _dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
-        final Metadata _metadata = datasource.get().createMetadata(_dataframe);
+        final Dataframe _dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
+        final StorageMetadata _metadata = datasource.get().createMetadata(_dataframe);
         final String INPUT_NAME = "custom-input-a";
         final String OUTPUT_NAME = "custom-output-a";
         _metadata.setInputTensorName(INPUT_NAME);

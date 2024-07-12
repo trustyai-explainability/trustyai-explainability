@@ -11,14 +11,14 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockKServeInputPayload;
-import org.kie.trustyai.service.mocks.MockKServeOutputPayload;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.kserve.MockKServeInputPayload;
+import org.kie.trustyai.service.mocks.kserve.MockKServeOutputPayload;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -40,7 +40,7 @@ public class CloudEventConsumerTest {
     @Inject
     Instance<CloudEventConsumer> consumer;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
     @Inject
     Instance<MockMemoryStorage> storage;
 

@@ -10,17 +10,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -51,7 +52,7 @@ class IdentityEndpointTest {
     private static final String MODEL_ID = "example1";
     private static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
     @Inject
     Instance<MockMemoryStorage> storage;
 
@@ -61,7 +62,7 @@ class IdentityEndpointTest {
     @BeforeEach
     void populateStorage() throws JsonProcessingException {
         storage.get().emptyStorage();
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(N_SAMPLES);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
     }
@@ -161,7 +162,7 @@ class IdentityEndpointTest {
     void postIncorrectTypeManyColums() throws JsonProcessingException {
         datasource.get().reset();
         storage.get().emptyStorage();
-        final Dataframe dataframe = datasource.get().generateRandomNColumnDataframe(N_SAMPLES, 50);
+        final Dataframe dataframe = DataframeGenerators.generateRandomNColumnDataframe(N_SAMPLES, 50);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         final IdentityMetricRequest payload = RequestPayloadGenerator.incorrectIdentityInput();
 

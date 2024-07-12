@@ -12,14 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -49,7 +50,7 @@ class ConsumerEndpointFormatsTest {
 
     private static final int BATCH_SIZE = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     @Inject
     Instance<MockMemoryStorage> storage;
@@ -555,7 +556,7 @@ class ConsumerEndpointFormatsTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -575,7 +576,7 @@ class ConsumerEndpointFormatsTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -692,10 +693,12 @@ class ConsumerEndpointFormatsTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(partialResponsePayloadBWrongSchema)
-                .when().post()
+                .when().post().peek()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
+                .body(is("Error when reconciling payload for response id='" + newId + "': Payload schema does not match stored schema for model=" + MODEL_A_ID + ": See mismatch description below:\n" +
+                        "Output Schema mismatch:\n" +
+                        "\tSchema column names do not match. Existing schema columns=[input-0], comparison schema columns=[output-0, output-1]"));
     }
 
 }

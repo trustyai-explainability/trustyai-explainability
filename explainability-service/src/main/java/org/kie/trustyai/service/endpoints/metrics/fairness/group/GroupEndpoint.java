@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.exceptions.StorageReadException;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.definitions.GroupDefinitionRequest;
@@ -59,21 +60,23 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     public Response response(@ValidGroupMetricRequest GroupMetricRequest request) throws DataframeCreateException {
 
         final Dataframe dataframe;
-        final Metadata metadata;
+        final StorageMetadata storageMetadata;
         try {
             if (Objects.isNull(request.getBatchSize())) {
                 final int defaultBatchSize = serviceConfig.batchSize().getAsInt();
                 LOG.warn("Request batch size is empty. Using the default value of " + defaultBatchSize);
                 request.setBatchSize(defaultBatchSize);
             }
+
             dataframe = super.dataSource.get().getOrganicDataframe(request.getModelId(), request.getBatchSize());
-            metadata = dataSource.get().getMetadata(request.getModelId());
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
+            storageMetadata = dataSource.get().getMetadata(request.getModelId());
+
+        } catch (DataframeCreateException | StorageReadException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        RequestReconciler.reconcile(request, metadata);
+        RequestReconciler.reconcile(request, storageMetadata);
 
         final MetricValueCarrier metricValue;
         try {
@@ -108,9 +111,9 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     public Response getSpecificDefinition(GroupDefinitionRequest request) {
         try {
             RequestReconciler.reconcile(request, dataSource);
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available: " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
+        } catch (DataframeCreateException | StorageReadException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
         return Response.ok(this.getSpecificDefinition(new MetricValueCarrier(request.getMetricValue()), request)).build();

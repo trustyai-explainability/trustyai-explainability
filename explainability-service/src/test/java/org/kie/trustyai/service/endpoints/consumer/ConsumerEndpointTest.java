@@ -8,15 +8,16 @@ import java.util.stream.IntStream;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.data.reconcilers.ModelMeshInferencePayloadReconciler;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -40,10 +41,13 @@ import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 class ConsumerEndpointTest {
 
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     @Inject
     Instance<MockMemoryStorage> storage;
+
+    @Inject
+    ModelMeshInferencePayloadReconciler reconciler;
 
     /**
      * Empty the storage before each test.
@@ -52,6 +56,8 @@ class ConsumerEndpointTest {
     void emptyStorage() throws JsonProcessingException {
         datasource.get().reset();
         storage.get().emptyStorage();
+        reconciler.clear();
+
     }
 
     @Test
@@ -70,7 +76,7 @@ class ConsumerEndpointTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -90,7 +96,7 @@ class ConsumerEndpointTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -171,6 +177,7 @@ class ConsumerEndpointTest {
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .body(is(""));
+
         final InferencePartialPayload partialResponsePayloadA = new InferencePartialPayload();
         partialResponsePayloadA.setId(id);
         partialResponsePayloadA.setData(payloadModelA.getOutput());
@@ -196,8 +203,7 @@ class ConsumerEndpointTest {
                 .body(partialRequestPayloadAWrongSchema)
                 .when().post()
                 .then()
-                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload request id=" + newId + ", Payload schema and stored schema are not the same"));
+                .statusCode(RestResponse.StatusCode.OK);
 
         final InferencePartialPayload partialResponsePayloadBWrongSchema = new InferencePartialPayload();
         partialResponsePayloadBWrongSchema.setId(newId);
@@ -207,9 +213,11 @@ class ConsumerEndpointTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(partialResponsePayloadBWrongSchema)
-                .when().post()
+                .when().post().peek()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
+                .body(is("Error when reconciling payload for response id='" + newId + "': Payload schema does not match stored schema for model=" + MODEL_A_ID + ": See mismatch description below:\n" +
+                        "Output Schema mismatch:\n" +
+                        "\tSchema column names do not match. Existing schema columns=[input-0], comparison schema columns=[output-0, output-1]"));
     }
 }

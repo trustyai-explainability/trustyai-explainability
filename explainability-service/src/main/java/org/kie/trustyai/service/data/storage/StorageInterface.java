@@ -10,11 +10,37 @@ import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
 import io.quarkus.cache.CacheResult;
 
-public interface StorageInterface {
-    @CacheResult(cacheName = "dataframe", keyGenerator = DataCacheKeyGen.class)
-    ByteBuffer readData(String modelId) throws StorageReadException;
+public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
+    DataFormat getDataFormat();
 
-    ByteBuffer readData(String modelId, int batchSize) throws StorageReadException;
+    long getLastModified(String modelId);
+
+    // dataframes ======================================================================================================
+    @CacheResult(cacheName = "dataframe", keyGenerator = DataCacheKeyGen.class)
+    DATAFRAME_TYPE readDataframe(String modelId) throws StorageReadException;
+
+    DATAFRAME_TYPE readDataframe(String modelId, int batchSize) throws StorageReadException;
+
+    DATAFRAME_TYPE readDataframe(String modelId, int startPos, int endPos) throws StorageReadException;
+
+    void saveDataframe(DATAFRAME_TYPE dataframe, String modelId) throws StorageWriteException;
+
+    //    // filtered data reads
+    // pull these into the interface when corresponding methods for flatfiles are written
+    //    DATAFRAME_TYPE readNonSyntheticDataframe(String modelId) throws StorageReadException;
+    //
+    //    DATAFRAME_TYPE readNonSyntheticDataframe(String modelId, int batchSize) throws StorageReadException;
+
+    // dataframe appenders =============================================================================================
+    void append(DATAFRAME_TYPE dataframe, String location) throws StorageWriteException;
+
+    // metadata or internal data =======================================================================================
+    AUX_DATA_TYPE readMetaOrInternalData(String modelId) throws StorageReadException;
+
+    void saveMetaOrInternalData(AUX_DATA_TYPE auxData, String modelId) throws StorageWriteException;
+
+    // info queries ====================================================================================================
+    boolean dataExists(String modelId) throws StorageReadException;
 
     /**
      * Read data and metadata with the specified tags and batch size.
@@ -25,7 +51,7 @@ public interface StorageInterface {
      * @return A pair of {@link ByteBuffer} containing the data and metadata
      * @throws StorageReadException If an error occurs while reading the data
      */
-    Pair<ByteBuffer, ByteBuffer> readDataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException;
+    Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException;
 
     /**
      * Read data and metadata with the specified tags and batch size.
@@ -36,32 +62,30 @@ public interface StorageInterface {
      * @return A pair of {@link ByteBuffer} containing the data and metadata
      * @throws StorageReadException If an error occurs while reading the data
      */
-    Pair<ByteBuffer, ByteBuffer> readDataWithTags(String modelId, Set<String> tags) throws StorageReadException;
 
-    boolean dataExists(String modelId) throws StorageReadException;
-
-    void save(ByteBuffer data, String location) throws StorageWriteException;
-
-    void append(ByteBuffer data, String location) throws StorageWriteException;
-
-    void appendData(ByteBuffer data, String modelId) throws StorageWriteException;
-
-    ByteBuffer read(String location) throws StorageReadException;
+    Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithTags(String modelId, Set<String> tags) throws StorageReadException;
 
     /**
-     * Read {@link ByteBuffer} from the file system, for a given filename and batch size.
+     * Read data and metadata without the specified tags and batch size.
      *
-     * @param location The filename to read
+     * @param modelId The model ID
      * @param batchSize The batch size
-     * @return A {@link ByteBuffer} containing the data
+     * @param tags The tags that the returned rows should not contain
+     * @return A pair of {@link ByteBuffer} containing the data and metadata
      * @throws StorageReadException If an error occurs while reading the data
      */
-    ByteBuffer read(String location, int batchSize) throws StorageReadException;
+    Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithoutTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException;
 
-    void saveData(ByteBuffer data, String modelId) throws StorageWriteException;
+    /**
+     * Read data and metadata without the specified tags and batch size.
+     * Since no batch size is specified, the default batch size is used.
+     *
+     * @param modelId The model ID
+     * @param tags The tags that the returned rows should not contain
+     * @return A pair of {@link ByteBuffer} containing the data and metadata
+     * @throws StorageReadException If an error occurs while reading the data
+     */
 
-    boolean fileExists(String location) throws StorageReadException;
-
-    long getLastModified(String modelId);
+    Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException;
 
 }

@@ -7,8 +7,8 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.config.ServiceConfig;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
@@ -30,7 +30,7 @@ abstract class DisparateImpactRatioRequestsEndpointBaseTest {
     protected static final int N_SAMPLES = 100;
     protected static final String MODEL_ID = "example1";
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<DataSource> datasource;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;

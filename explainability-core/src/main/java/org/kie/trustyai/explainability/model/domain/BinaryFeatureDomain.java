@@ -21,10 +21,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
+
+@Entity
 public class BinaryFeatureDomain extends AbstractCategoricalFeatureDomain<ByteBuffer> {
 
     private BinaryFeatureDomain(Set<ByteBuffer> categories) {
         super(categories);
+    }
+
+    public BinaryFeatureDomain() {
+        super(new HashSet<>());
     }
 
     /**
@@ -43,5 +51,11 @@ public class BinaryFeatureDomain extends AbstractCategoricalFeatureDomain<ByteBu
 
     public static FeatureDomain<ByteBuffer> create(ByteBuffer... categories) {
         return new BinaryFeatureDomain(new HashSet<>(Arrays.asList(categories)));
+    }
+
+    @Transient
+    @Override
+    public Set<ByteBuffer> getCategories() {
+        return this.categories;
     }
 }

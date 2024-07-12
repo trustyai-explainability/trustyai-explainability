@@ -1,9 +1,11 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.mocks.MockPVCStorage;
-import org.kie.trustyai.service.profiles.PVCTestProfile;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockPVCStorage;
+import org.kie.trustyai.service.profiles.flatfile.PVCTestProfile;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -28,9 +30,9 @@ class DisparateImpactRatioRequestsEndpointPVCTest extends DisparateImpactRatioRe
         storage.get().emptyStorage("/tmp/" + MODEL_ID + "-internal_data.csv");
         storage.get().emptyStorage("/tmp/" + MODEL_ID + "-metadata.json");
 
-        final Dataframe dataframe = datasource.get().generateRandomDataframe(1000);
+        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        datasource.get().saveMetadata(MockCSVDatasource.createMetadata(dataframe), MODEL_ID);
     }
 
 }

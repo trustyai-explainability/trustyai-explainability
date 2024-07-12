@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.utils.DataUtils;
 
 // defines logic for calculating statistical summaries values for each column in a dataframe, to be used to analyze distributions, etc
@@ -29,7 +29,7 @@ public class PerColumnStatisticalAnalysis {
         for (int i = 0; i < dfTrain.getColumnDimension(); i++) {
             // check that average + std have semantic meaning
             if (types.get(i).equals(Type.NUMBER)) {
-                computedStats.put(dfTrain.getColumnNames().get(i), getColumnStats(dfTrain.getColumn(i)));
+                computedStats.put(dfTrain.getRawColumnNames().get(i), getColumnStats(dfTrain.getColumn(i)));
             }
         }
 

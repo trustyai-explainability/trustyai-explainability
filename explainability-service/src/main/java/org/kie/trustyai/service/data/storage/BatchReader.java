@@ -33,7 +33,33 @@ public class BatchReader {
         return new ArrayList<>(queue);
     }
 
-    public static Pair<List<String>, List<String>> readEntriesWithTags(InputStream dataStream, InputStream metadataStream, int batchSize, Set<String> tags) throws IOException {
+    public static List<String> readEntries(InputStream stream, int startPos, int endPos) throws IOException {
+
+        if (endPos <= startPos) {
+            throw new IllegalArgumentException("BatchReader endPos must be greater than startPos. Got startPos=" + startPos + ", endPos=" + endPos);
+        }
+
+        final CircularFifoQueue<String> queue = new CircularFifoQueue<>(endPos - startPos);
+
+        int readLines = 0;
+        try (Scanner sc = new Scanner(stream, StandardCharsets.UTF_8)) {
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                queue.add(line);
+                readLines += 1;
+                if (readLines >= endPos) {
+                    break;
+                }
+            }
+            if (sc.ioException() != null) {
+                throw sc.ioException();
+            }
+        }
+        return new ArrayList<>(queue);
+    }
+
+    public static Pair<List<String>, List<String>> readEntriesWithTags(InputStream dataStream, InputStream metadataStream, int batchSize, Set<String> tags, boolean invertTagFilter)
+            throws IOException {
         final CircularFifoQueue<String> dataQueue = new CircularFifoQueue<>(batchSize);
         final CircularFifoQueue<String> metadataQueue = new CircularFifoQueue<>(batchSize);
 
@@ -48,7 +74,11 @@ public class BatchReader {
                     String metadataLine = CSVUtils.recordToString(metadataRecord);
                     String metadataTag = metadataRecord.get(0); // Tag is the first column
 
-                    if (tags.contains(metadataTag)) {
+                    boolean containsTag = tags.contains(metadataTag);
+                    if (invertTagFilter) {
+                        containsTag = !containsTag;
+                    }
+                    if (containsTag) {
                         dataQueue.add(dataLine);
                         metadataQueue.add(metadataLine);
                     }
@@ -65,6 +95,7 @@ public class BatchReader {
 
     /**
      * Returns an InputStream for the given filename
+     *
      *
      * @param filename The filename to open
      * @return An {@link InputStream} for the given filename

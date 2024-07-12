@@ -18,7 +18,7 @@ public class MetricCalculationCacheKeyGen implements CacheKeyGenerator {
 
     private static final Logger LOG = Logger.getLogger(MetricCalculationCacheKeyGen.class);
     @Inject
-    Instance<Storage> storage;
+    Instance<Storage<?, ?>> storage;
 
     /**
      * Generates a cache key for metric calculations.

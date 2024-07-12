@@ -11,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.profiles.MemoryTestProfile;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -35,7 +35,7 @@ class StorageTest {
     @Inject
     Instance<MockMemoryStorage> storage;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     @BeforeEach
     void emptyStorage() throws JsonProcessingException {
@@ -46,7 +46,7 @@ class StorageTest {
     @Test
     void readData() {
         Exception exception = assertThrows(StorageReadException.class, () -> {
-            storage.get().readData(MODEL_ID);
+            storage.get().readDataframe(MODEL_ID);
         });
         assertEquals("Data file '" + MODEL_ID + "-data.csv' not found", exception.getMessage());
 
@@ -55,7 +55,7 @@ class StorageTest {
     @Test
     void dataExists() {
         assertFalse(storage.get().dataExists(MODEL_ID));
-        storage.get().saveData(ByteBuffer.wrap("data".getBytes()), MODEL_ID);
+        storage.get().saveMetaOrInternalData(ByteBuffer.wrap("data".getBytes()), MODEL_ID);
         assertTrue(storage.get().dataExists(MODEL_ID));
     }
 
@@ -66,7 +66,7 @@ class StorageTest {
         assertFalse(storage.get().fileExists(filename));
         final ByteBuffer byteBuffer = ByteBuffer.wrap("data".getBytes());
         // Save file
-        storage.get().save(byteBuffer, filename);
+        storage.get().saveDataframe(byteBuffer, filename);
         // Check file exists
         assertTrue(storage.get().fileExists(filename));
     }
@@ -81,13 +81,13 @@ class StorageTest {
         });
         assertEquals("Destination does not exist: " + filename, exception.getMessage());
         // Save file
-        storage.get().save(byteBuffer, filename);
+        storage.get().saveDataframe(byteBuffer, filename);
         // Append
         storage.get().append(ByteBuffer.wrap(" and more".getBytes()), filename);
         // Check file exists
         assertTrue(storage.get().fileExists(filename));
 
-        final ByteBuffer result = storage.get().read(filename);
+        final ByteBuffer result = storage.get().readMetaOrInternalData(filename);
         assertEquals("data and more", new String(result.array(), StandardCharsets.UTF_8));
     }
 
@@ -96,17 +96,17 @@ class StorageTest {
         final ByteBuffer byteBuffer = ByteBuffer.wrap("data".getBytes());
         // Append to yet non-existing data file
         Exception exception = assertThrows(StorageWriteException.class, () -> {
-            storage.get().appendData(byteBuffer, MODEL_ID);
+            storage.get().appendMetaOrInternalData(byteBuffer, MODEL_ID);
         });
         assertEquals("Destination does not exist: " + MODEL_ID + "-data.csv", exception.getMessage());
         // Save file
-        storage.get().saveData(byteBuffer, MODEL_ID);
+        storage.get().saveMetaOrInternalData(byteBuffer, MODEL_ID);
         // Append
-        storage.get().appendData(ByteBuffer.wrap(" and more".getBytes()), MODEL_ID);
+        storage.get().appendMetaOrInternalData(ByteBuffer.wrap(" and more".getBytes()), MODEL_ID);
         // Check file exists
         assertTrue(storage.get().dataExists(MODEL_ID));
 
-        final ByteBuffer result = storage.get().readData(MODEL_ID);
+        final ByteBuffer result = storage.get().readDataframe(MODEL_ID);
         assertEquals("data and more", new String(result.array(), StandardCharsets.UTF_8));
     }
 
@@ -115,11 +115,11 @@ class StorageTest {
         final String filename = "foobar";
         // Read from yet non-existing file
         Exception exception = assertThrows(StorageReadException.class, () -> {
-            storage.get().read(filename);
+            storage.get().readMetaOrInternalData(filename);
         });
         assertEquals("File not found: " + filename, exception.getMessage());
-        storage.get().save(ByteBuffer.wrap("data".getBytes()), filename);
-        final ByteBuffer result = storage.get().read(filename);
+        storage.get().saveDataframe(ByteBuffer.wrap("data".getBytes()), filename);
+        final ByteBuffer result = storage.get().readMetaOrInternalData(filename);
         assertEquals("data", new String(result.array(), StandardCharsets.UTF_8));
     }
 
@@ -129,7 +129,7 @@ class StorageTest {
         assertFalse(storage.get().dataExists(MODEL_ID));
         final ByteBuffer byteBuffer = ByteBuffer.wrap("data".getBytes());
         // Save data
-        storage.get().saveData(byteBuffer, MODEL_ID);
+        storage.get().saveMetaOrInternalData(byteBuffer, MODEL_ID);
         // Check data exists
         assertTrue(storage.get().dataExists(MODEL_ID));
     }
@@ -138,7 +138,7 @@ class StorageTest {
     void fileExists() {
         final String filename = "foobar";
         assertFalse(storage.get().fileExists(filename));
-        storage.get().save(ByteBuffer.wrap("data".getBytes()), filename);
+        storage.get().saveDataframe(ByteBuffer.wrap("data".getBytes()), filename);
         assertTrue(storage.get().fileExists(filename));
     }
 
@@ -148,7 +148,7 @@ class StorageTest {
         final int N = 1000;
         final String data = "123456789";
         // create file
-        storage.get().save(ByteBuffer.wrap((data + "\n").getBytes()), FILENAME);
+        storage.get().saveDataframe(ByteBuffer.wrap((data + "\n").getBytes()), FILENAME);
         assertTrue(storage.get().fileExists(FILENAME));
         ExecutorService service = Executors.newFixedThreadPool(threads);
         CountDownLatch latch = new CountDownLatch(threads);
@@ -161,7 +161,7 @@ class StorageTest {
             });
         }
         latch.await();
-        final String result = new String(storage.get().read(FILENAME).array());
+        final String result = new String(storage.get().readMetaOrInternalData(FILENAME).array());
         final String[] lines = result.split("\n");
 
         assertTrue(Arrays.stream(lines).allMatch(line -> line.equals(data)));

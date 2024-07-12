@@ -1,10 +1,11 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
-import org.kie.trustyai.service.data.utils.ModelMeshInferencePayloadReconciler;
+import org.kie.trustyai.service.data.exceptions.StorageWriteException;
+import org.kie.trustyai.service.data.reconcilers.ModelMeshInferencePayloadReconciler;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.PartialKind;
 
@@ -35,8 +36,8 @@ public class ConsumerEndpoint {
             LOG.info("Received partial input payload from model='" + request.getModelId() + "', id=" + request.getId());
             try {
                 reconciler.addUnreconciledInput(request);
-            } catch (InvalidSchemaException | DataframeCreateException e) {
-                final String message = "Invalid schema for payload request id=" + request.getId() + ", " + e.getMessage();
+            } catch (InvalidSchemaException | DataframeCreateException | StorageWriteException e) {
+                final String message = "Error when reconciling payload for request id='" + request.getId() + "': " + e.getMessage();
                 LOG.error(message);
                 return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
             }
@@ -44,8 +45,8 @@ public class ConsumerEndpoint {
             LOG.info("Received partial output payload from model='" + request.getModelId() + "', id=" + request.getId());
             try {
                 reconciler.addUnreconciledOutput(request);
-            } catch (InvalidSchemaException | DataframeCreateException e) {
-                final String message = "Invalid schema for payload response id=" + request.getId() + ", " + e.getMessage();
+            } catch (InvalidSchemaException | DataframeCreateException | StorageWriteException e) {
+                final String message = "Error when reconciling payload for response id='" + request.getId() + "': " + e.getMessage();
                 LOG.error(message);
                 return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
             }

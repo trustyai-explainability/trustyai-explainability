@@ -11,7 +11,7 @@ services:
       SERVICE_BATCH_SIZE: 5000
       STORAGE_DATA_FILENAME: "data.csv"
       STORAGE_DATA_FOLDER: "/inputs"
-      LOG_LEVEL: "DEBUG"
+      LOG_LEVEL: "INFO"
     volumes:
       - ~/volumes/pvc/inputs:/inputs
   prometheus:

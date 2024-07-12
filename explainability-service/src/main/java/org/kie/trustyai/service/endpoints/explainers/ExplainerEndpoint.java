@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.kie.trustyai.connectors.kserve.v2.KServeConfig;
 import org.kie.trustyai.connectors.kserve.v2.KServeV2GRPCPredictionProvider;
-import org.kie.trustyai.explainability.model.DataframeMetadata;
 import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
 import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
 
 public abstract class ExplainerEndpoint {

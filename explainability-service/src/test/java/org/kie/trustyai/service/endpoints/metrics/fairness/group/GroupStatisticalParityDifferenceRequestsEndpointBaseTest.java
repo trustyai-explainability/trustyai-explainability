@@ -4,15 +4,17 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.jboss.resteasy.reactive.RestResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.service.config.ServiceConfig;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
-import org.kie.trustyai.service.mocks.MockDatasource;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
 
 import io.restassured.http.ContentType;
@@ -23,6 +25,7 @@ import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
 abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
@@ -30,13 +33,18 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
     protected static final String MODEL_ID = "example1";
     protected static final int N_SAMPLES = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<DataSource> datasource;
 
     @Inject
     Instance<MockPrometheusScheduler> scheduler;
 
     @Inject
     Instance<ServiceConfig> serviceConfig;
+
+    @AfterEach
+    void clearRequests() {
+        scheduler.get().getAllRequests().clear();
+    }
 
     /**
      * When no batch size is specified in the request, the service's default batch size should be used
@@ -121,7 +129,7 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
         assertTrue(requests.isEmpty());
     }
 
-    @DisplayName("DIR request with custom batch size")
+    @DisplayName("SPD request with custom batch size")
     void requestCustomBatchSize() {
 
         // No schedule request made yet
@@ -171,4 +179,81 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
         assertEquals(2, scheduleList.requests.size());
     }
 
+    /**
+     * Deleting a request should work
+     */
+    @Test
+    void deleteRequest() {
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseScheduledResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/request")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseScheduledResponse.class);
+
+        final ScheduleId requestId = new ScheduleId();
+        requestId.requestId = response.getRequestId();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestId)
+                .when().delete("/request").peek()
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode());
+    }
+
+    /**
+     * Deleting a request when passing a null ID should return a sensible error message
+     */
+    @Test
+    void deleteRequestNullID() {
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseScheduledResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/request")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseScheduledResponse.class);
+
+        final ScheduleId requestId = new ScheduleId();
+        requestId.requestId = null;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestId)
+                .when().delete("/request")
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    /**
+     * Deleting a request when passing an invalid UUID should return a sensible error message
+     */
+    @Test
+    void deleteRequestInvalidID() {
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        final BaseScheduledResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/request")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseScheduledResponse.class);
+
+        final ScheduleId requestId = new ScheduleId();
+        requestId.requestId = null;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body("{\"id\": \"invalidUUID\"}")
+                .when().delete("/request")
+                .then()
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
 }

@@ -17,7 +17,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
@@ -30,10 +30,10 @@ public class CSVUtils {
 
     }
 
-    private static List<Output> getOutputs(List<String> outputNames, Metadata metadata, CSVRecord entry) {
+    private static List<Output> getOutputs(List<String> outputNames, StorageMetadata storageMetadata, CSVRecord entry) {
         return outputNames.stream().map(colName -> {
-            final SchemaItem schemaItem = metadata.getOutputSchema().getNameMappedItems().get(colName);
-            final int inputIndex = schemaItem.getIndex();
+            final SchemaItem schemaItem = storageMetadata.getOutputSchema().getNameMappedItems().get(colName);
+            final int inputIndex = schemaItem.getColumnIndex();
             final String name = schemaItem.getName();
             final DataType vtypes = schemaItem.getType();
             final String valueString = entry.get(inputIndex);
@@ -56,25 +56,25 @@ public class CSVUtils {
         }).collect(Collectors.toList());
     }
 
-    public static List<Prediction> parse(String in, Metadata metadata) throws IOException {
-        return parse(in, metadata, false, false);
+    public static List<Prediction> parse(String in, StorageMetadata storageMetadata) throws IOException {
+        return parse(in, storageMetadata, false, false);
     }
 
-    public static List<Prediction> parse(String in, Metadata metadata, boolean header) throws IOException {
-        return parse(in, metadata, header, false);
+    public static List<Prediction> parse(String in, StorageMetadata storageMetadata, boolean header) throws IOException {
+        return parse(in, storageMetadata, header, false);
     }
 
-    public static List<Prediction> parse(String in, Metadata metadata, boolean header, boolean internal) throws IOException {
+    public static List<Prediction> parse(String in, StorageMetadata storageMetadata, boolean header, boolean internal) throws IOException {
         CSVParser parser = CSVFormat.DEFAULT.parse(new StringReader(in));
 
-        final List<String> inputNames = metadata.getInputSchema().getNameMappedItems().entrySet()
+        final List<String> inputNames = storageMetadata.getInputSchema().getNameMappedItems().entrySet()
                 .stream()
-                .sorted(Comparator.comparingInt(e -> e.getValue().getIndex()))
+                .sorted(Comparator.comparingInt(e -> e.getValue().getColumnIndex()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-        final List<String> outputNames = metadata.getOutputSchema().getNameMappedItems().entrySet()
+        final List<String> outputNames = storageMetadata.getOutputSchema().getNameMappedItems().entrySet()
                 .stream()
-                .sorted(Comparator.comparingInt(e -> e.getValue().getIndex()))
+                .sorted(Comparator.comparingInt(e -> e.getValue().getColumnIndex()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
@@ -83,8 +83,8 @@ public class CSVUtils {
         parser.stream().forEach(entry -> {
             if (!header || idx.get() > 0) {
                 final List<Feature> inputFeatures = inputNames.stream().map(colName -> {
-                    final SchemaItem schemaItem = metadata.getInputSchema().getNameMappedItems().get(colName);
-                    final int inputIndex = schemaItem.getIndex();
+                    final SchemaItem schemaItem = storageMetadata.getInputSchema().getNameMappedItems().get(colName);
+                    final int inputIndex = schemaItem.getColumnIndex();
                     final String name = schemaItem.getName();
                     final String valueString = entry.get(inputIndex);
                     final DataType types = schemaItem.getType();
@@ -103,7 +103,7 @@ public class CSVUtils {
                     }
                 }).collect(Collectors.toList());
 
-                final List<Output> outputs = getOutputs(outputNames, metadata, entry);
+                final List<Output> outputs = getOutputs(outputNames, storageMetadata, entry);
 
                 final PredictionInput predictionInput = new PredictionInput(inputFeatures);
                 final PredictionOutput predictionOutput = new PredictionOutput(outputs);
