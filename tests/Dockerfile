@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8:8.10-1020
+FROM registry.access.redhat.com/ubi9:9.4-1123.1719560047
 ARG ORG=trustyai-explainability
 ARG BRANCH=main
 ARG ODS_CI_REPO=https://github.com/red-hat-data-services/ods-ci
