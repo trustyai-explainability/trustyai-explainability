@@ -33,6 +33,7 @@ COPY resources $HOME/peak/operator-tests/trustyai-explainability/resources
 COPY util $HOME/peak/operator-tests/trustyai-explainability
 COPY setup/odh-core-dsc.yaml setup/odh-core-dsci.yaml $HOME/kfdef/
 COPY basictests $HOME/peak/operator-tests/trustyai-explainability/basictests
+COPY scripts/setup.sh $HOME/peak/setup.sh
 
 RUN chmod -R 777 $HOME/kfdef && \
     mkdir -p $HOME/.kube && \
