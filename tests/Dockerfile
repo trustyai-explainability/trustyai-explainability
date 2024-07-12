@@ -1,11 +1,11 @@
-FROM registry.access.redhat.com/ubi9:9.4-1123.1719560047
+FROM registry.access.redhat.com/ubi8:8.10-1020
 ARG ORG=trustyai-explainability
 ARG BRANCH=main
 ARG ODS_CI_REPO=https://github.com/red-hat-data-services/ods-ci
 # This git reference should always reference a stable commit from ods-ci that supports ODH
 # This hash corresponds to a Jul 11th, 2024 commit
 ARG ODS_CI_GITREF=a8cf770b37caa4ef7ce6596acc8bdd6866cc7772
-ARG OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/latest/openshift-client-linux.tar.gz
+ARG OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/4.14.33/openshift-client-linux.tar.gz
 
 ENV HOME /root
 WORKDIR /root
