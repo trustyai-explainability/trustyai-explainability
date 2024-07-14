@@ -1,28 +1,7 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.logging.Logger;
-import org.kie.trustyai.connectors.kserve.v2.CodecParameter;
-import org.kie.trustyai.connectors.kserve.v2.KServeConfig;
-import org.kie.trustyai.connectors.kserve.v2.KServeV2GRPCPredictionProvider;
-import org.kie.trustyai.explainability.local.tssaliency.TSSaliencyExplainer;
-import org.kie.trustyai.explainability.local.tssaliency.TSSaliencyModelWrapper;
-import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.explainability.utils.TimeseriesUtils;
-import org.kie.trustyai.service.config.ServiceConfig;
-import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
-import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
-import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyParameters;
-import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyRequest;
-
 import io.quarkus.resteasy.reactive.server.EndpointDisabled;
-
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -30,89 +9,90 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.logging.Logger;
+import org.kie.trustyai.explainability.local.tssaliency.TSSaliencyExplainer;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.SaliencyResults;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.datasources.DataSource;
+import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
+import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyExplainerConfig;
+import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyExplanationRequest;
 
-@Tag(name = "TSSaliency Explainer Endpoint")
+import java.security.SecureRandom;
+import java.util.List;
+
+@Tag(name = "Local explainers")
 @EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
 @Path("/explainers/local/tssaliency")
 public class TSSaliencyEndpoint extends ExplainerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(TSSaliencyEndpoint.class);
-    private static final double[] DEFAULT_BASE_VALUE = new double[0];
     @Inject
-    ServiceConfig serviceConfig;
+    Instance<DataSource> dataSource;
+    @Inject
+    SecureRandom secureRandom;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response explain(TSSaliencyRequest request) {
+    public Response explain(TSSaliencyExplanationRequest request) {
 
-        // Instantiate the model from the request
-        final ModelConfig modelConfig = request.getModelConfig();
-        final KServeConfig kServeConfig = KServeConfig.create(modelConfig.getTarget(), modelConfig.getName(), modelConfig.getVersion(), CodecParameter.NP);
-        final Map<String, String> optionalParameters = new HashMap<>();
-        optionalParameters.put(BIAS_IGNORE_PARAM, "true");
-        final PredictionProvider originalModel = KServeV2GRPCPredictionProvider.forTarget(kServeConfig, null, new ArrayList<>(request.getData().keySet()), optionalParameters);
-        final PredictionProvider wrappedModel = new TSSaliencyModelWrapper(originalModel);
-
-        // Convert the request data to Prediction Inputs
-        final Map<String, List<Double>> data = request.getData();
-
-        final int size = data.values().iterator().next().size();
-        final List<List<Feature>> transposed = new ArrayList<>(size);
-
-        // Initialize list of lists
-        for (int i = 0; i < size; i++) {
-            transposed.add(new ArrayList<>());
-        }
-
-        for (List<Double> list : data.values()) {
-            for (int i = 0; i < size; i++) {
-                transposed.get(i).add(FeatureFactory.newNumericalFeature("t-" + i, list.get(i)));
-            }
-        }
-
-        List<PredictionInput> inputs = new ArrayList<>(size);
-        for (List<Feature> list : transposed) {
-            inputs.add(new PredictionInput(list));
-        }
-
-        final CompletableFuture<List<PredictionOutput>> result = originalModel.predictAsync(inputs);
-
-        List<PredictionOutput> results;
         try {
-            results = result.get(20L, TimeUnit.SECONDS);
-            for (PredictionOutput predictionOutput : results) {
-                LOG.info("Prediction output: " + predictionOutput.getOutputs());
+            final ModelConfig modelConfig = request.getConfig().getModelConfig();
+
+            // Get the inference ids
+            final List<String> inferenceIds = request.getPredictionIds();
+
+            final String modelId = modelConfig.getName();
+            final Dataframe dataframe = dataSource.get().getOrganicDataframe(modelId);
+
+            final List<Prediction> predictions = dataSource.get()
+                    .getDataframe(modelId)
+                    .filterByInternalColumnValue(Dataframe.InternalColumn.ID,
+                            value -> inferenceIds.contains(value.getUnderlyingObject().toString()))
+                    .asPredictions();
+
+            if (predictions.isEmpty()) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("No predictions found for the provided inference ids").build();
+
+            } else if (predictions.size() != inferenceIds.size()) {
+                return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Not all provided inference ids found").build();
+            } else {
+                final PredictionProvider model = getModel(modelConfig, dataframe.getInputTensorName());
+                final TSSaliencyExplainerConfig parameters = request.getConfig().getExplainerConfig();
+                final int nFeatures = predictions.size();
+                final double[] baseValues;
+                final double[] requestBaseValues = request.getConfig().getExplainerConfig().getBaseValues();
+
+                if (requestBaseValues.length == 0) {
+                    baseValues = new double[nFeatures];
+                } else {
+                    baseValues = requestBaseValues;
+                    if (requestBaseValues.length != nFeatures) {
+                        throw new IllegalArgumentException("Base values has " + baseValues.length
+                                + " elements. Must have the same number as features (" + nFeatures + ")");
+                    }
+
+                }
+                final TSSaliencyExplainer explainer = new TSSaliencyExplainer(
+                        baseValues,
+                        nFeatures + parameters.getnSamples(),
+                        nFeatures + parameters.getnAlpha(),
+                        secureRandom.nextInt(),
+                        parameters.getSigma(),
+                        parameters.getMu(), true);
+                final SaliencyResults explanations = explainer.explainAsync(predictions, model).get();
+                return Response.ok(explanations).build();
             }
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        } catch (TimeoutException e) {
-            return Response.serverError().status(Response.Status.REQUEST_TIMEOUT).entity(e.getMessage()).build();
         }
-
-        final List<Prediction> predictions = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            predictions.add(new SimplePrediction(TimeseriesUtils.featureListTofeatureVector(inputs.get(i)), results.get(i)));
-        }
-
-        final int randomSeed = new Random().nextInt();
-
-        final TSSaliencyParameters parameters = request.getParameters();
-        final TSSaliencyExplainer explainer = new TSSaliencyExplainer(DEFAULT_BASE_VALUE,
-                parameters.getnSamples(),
-                parameters.getnSteps(),
-                randomSeed,
-                parameters.getSigma(),
-                parameters.getMu());
-        final SaliencyResults explanation;
-        try {
-            explanation = explainer.explainAsync(predictions, wrappedModel).get();
-        } catch (InterruptedException | ExecutionException e) {
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
-        LOG.debug("Saliency results: " + explanation);
-        final Map<String, Saliency> saliencyMap = explanation.getSaliencies();
-        return Response.serverError().status(Response.Status.OK).entity(saliencyMap).build();
     }
 
 }

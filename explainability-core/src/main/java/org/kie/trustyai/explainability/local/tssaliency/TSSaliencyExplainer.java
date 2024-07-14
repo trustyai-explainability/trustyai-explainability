@@ -1,34 +1,54 @@
 package org.kie.trustyai.explainability.local.tssaliency;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.linear.*;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
 import org.kie.trustyai.explainability.local.TimeSeriesExplainer;
-import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.Feature;
+import org.kie.trustyai.explainability.model.FeatureImportance;
+import org.kie.trustyai.explainability.model.Output;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionOutput;
+import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.Saliency;
+import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.SaliencyResults.SourceExplainer;
+import org.kie.trustyai.explainability.model.Type;
+import org.kie.trustyai.explainability.model.Value;
 
 public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults> {
 
+    private RealVector baseValue; // Feature’s base values
+    final private int ng; // Number of samples for gradient estimation
     final public int nalpha; // Number of steps in convex path
+    final private RandomGenerator randomGenerator; // random number generatr
     final double sigma; // standard deviation
     final double mu; // Step size for gradient estimation
-    final private int ng; // Number of samples for gradient estimation
-    final private RandomGenerator randomGenerator; // random number generatr
-    private RealVector baseValue; // Feature’s base values
+    final boolean reshape; // Reshape the feature for OpenInference compatibility
 
-    public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed, double sigma, double mu) {
+    public TSSaliencyExplainer(double[] baseValue, int ng, int nalpha, int randomSeed, double sigma, double mu, boolean reshape) {
         this.baseValue = new ArrayRealVector(baseValue);
         this.ng = ng;
         this.nalpha = nalpha;
         this.randomGenerator = new Well19937c(randomSeed);
         this.sigma = sigma;
         this.mu = mu;
+        this.reshape = reshape;
     }
 
     @Override
@@ -51,7 +71,13 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
             final SaliencyResults saliencyResults = new SaliencyResults(saliencies, SourceExplainer.TSSALIENCY);
 
-            for (Prediction prediction : predictions) {
+            if (reshape) {
+                predictions = TimeSeriesUtils.toTSSaliencyTimeSeries(predictions);
+            }
+
+            for (int index = 0; index < predictions.size(); index++) {
+
+                final Prediction prediction = predictions.get(index);
 
                 final PredictionInput predictionInputs = prediction.getInput();
 
@@ -104,7 +130,8 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                     baseValueMatrix.setRowVector(rowIndex, baseValue);
                 }
 
-                final int numberCores = Runtime.getRuntime().availableProcessors();
+                // final int numberCores = Runtime.getRuntime().availableProcessors();
+                final int numberCores = 1;
 
                 final TSSaliencyThreadInfo[] threadInfo = new TSSaliencyThreadInfo[numberCores];
                 for (int t = 0; t < numberCores; t++) {
@@ -151,7 +178,8 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
                 featureImportances.add(featureImportance);
 
                 final Saliency saliency = new Saliency(output, featureImportances);
-                saliencies.put(output.getName(), saliency);
+                saliencies.put(output.getName() + "-" + index, saliency);
+                // saliencies.put(output.getName(), saliency);
             }
 
             final CompletableFuture<SaliencyResults> retval = new CompletableFuture<SaliencyResults>();
@@ -223,7 +251,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
         final double[] diff = new double[ng];
 
-        final List<PredictionInput> inputs = new LinkedList<PredictionInput>();
+        List<PredictionInput> inputs = new LinkedList<PredictionInput>();
 
         for (int n = 0; n < ng; n++) {
 
@@ -265,6 +293,10 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
         final PredictionInput input = new PredictionInput(features2);
         inputs.add(input);
 
+        if (reshape) {
+            inputs = TimeSeriesUtils.fromTSSaliencyTimeSeries(inputs);
+        }
+
         final CompletableFuture<List<PredictionOutput>> result = model.predictAsync(inputs);
         final List<PredictionOutput> results = result.get();
 
@@ -272,7 +304,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
         final PredictionOutput fxPredictionOutput = results.get(results.size() - 1);
         final List<Output> fxs = fxPredictionOutput.getOutputs();
         final Output[] fx = fxs.toArray(new Output[0]);
-        final double fxScore = fx[0].getScore();
+        final double fxScore = fx[0].getValue().asNumber();
 
         for (int i = 0; i < results.size() - 1; i++) {
             final PredictionOutput fxDeltaPredictionOutput = results.get(i);
@@ -281,7 +313,7 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
             final Output[] fxDelta = fxDeltas.toArray(new Output[0]);
 
-            final double fxDeltaScore = fxDelta[0].getScore();
+            final double fxDeltaScore = fxDelta[0].getValue().asNumber();
 
             diff[i] = fxDeltaScore - fxScore;
         }
