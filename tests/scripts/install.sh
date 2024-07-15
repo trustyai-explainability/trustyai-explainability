@@ -2,7 +2,6 @@
 echo "Installing DSC from test directory"
 DSC_FILENAME=odh-core-dsc.yaml
 
-
 set -x
 ## Install the opendatahub-operator
 pushd ~/peak
@@ -16,19 +15,33 @@ else
   echo "Installing operator from community marketplace"
 
   start_t=$(date +%s) 2>&1
-  marketplaceReady=false 2>&1
-  while ! $marketplaceReady; do
+  ready=false 2>&1
+  while ! $ready; do
     if [ ! -z "$oc get catalogsources -n openshift-marketplace | grep 'community-operators'" ]; then
-      marketplaceReady=true 2>&1
+      ready=true 2>&1
     else
       sleep 10
     fi
-
     if [ $(($(date +%s)-start_t)) -gt 300 ]; then
       echo "Marketplace pods never started"
       exit 1
     fi
+  done
+
+    start_t=$(date +%s) 2>&1
+    ready=false 2>&1
+    while ! $ready; do
+      if [ ! -z "$oc get packagemanifests -n openshift-marketplace | grep 'opendatahub'" ]; then
+        ready=true 2>&1
+      else
+        sleep 10
+      fi
+      if [ $(($(date +%s)-start_t)) -gt 600 ]; then
+        echo "Package manifests never downloaded"
+        exit 1
+      fi
     done
+
 
 
   while [[ $retry -gt 0 ]]; do
