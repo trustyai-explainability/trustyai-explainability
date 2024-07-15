@@ -18,6 +18,7 @@ else
   ready=false 2>&1
   while ! $ready; do
     if [ ! -z "$oc get catalogsources -n openshift-marketplace | grep 'community-operators'" ]; then
+      echo $(oc get catalogsources -n openshift-marketplace)
       ready=true 2>&1
     else
       sleep 10
@@ -32,6 +33,7 @@ else
     ready=false 2>&1
     while ! $ready; do
       if [ ! -z "$oc get packagemanifests -n openshift-marketplace | grep 'opendatahub'" ]; then
+        echo $(oc get packagemanifests -n openshift-marketplace | grep opendatahub)
         ready=true 2>&1
       else
         sleep 10
@@ -46,21 +48,6 @@ else
 
   while [[ $retry -gt 0 ]]; do
     ./setup.sh -o ~/peak/operatorsetup\
-
-
-    start_t=$(date +%s) 2>&1
-    ready=false 2>&1
-    while ! $ready; do
-      if [ ! -z "$oc get packagemanifests -n openshift-marketplace | grep 'opendatahub'" ]; then
-        ready=true 2>&1
-      else
-        sleep 10
-      fi
-      if [ $(($(date +%s)-start_t)) -gt 600 ]; then
-        echo "Package manifests never downloaded"
-        exit 1
-      fi
-    done
 
     # approve installplans
     if [ $? -eq 0 ]; then
@@ -77,6 +64,7 @@ else
     ready=false 2>&1
     while ! $ready; do
       if [ ! -z "$oc get installplan -n openshift-operators | grep $ODH_VERSION" ]; then
+        echo $(oc get installplan -n openshift-operators)
         ready=true 2>&1
       else
         sleep 10
