@@ -17,7 +17,7 @@ else
   start_t=$(date +%s) 2>&1
   ready=false 2>&1
   while ! $ready; do
-    if [ ! -z "$oc get catalogsources -n openshift-marketplace | grep 'community-operators'" ]; then
+    if [ ! -z "$oc get catalogsources -n openshift-marketplace 2> /dev/null | grep 'community-operators'" ]; then
       echo $(oc get catalogsources -n openshift-marketplace)
       ready=true 2>&1
     else
@@ -32,7 +32,7 @@ else
     start_t=$(date +%s) 2>&1
     ready=false 2>&1
     while ! $ready; do
-      if [ ! -z "$oc get packagemanifests -n openshift-marketplace | grep 'opendatahub'" ]; then
+      if [ ! -z "$oc get packagemanifests -n openshift-marketplace 2> /dev/null | grep 'opendatahub'" ]; then
         echo $(oc get packagemanifests -n openshift-marketplace | grep opendatahub)
         ready=true 2>&1
       else
@@ -63,7 +63,7 @@ else
     start_t=$(date +%s) 2>&1
     ready=false 2>&1
     while ! $ready; do
-      if [ ! -z "$oc get installplan -n openshift-operators | grep $ODH_VERSION" ]; then
+      if [ ! -z "$oc get installplan -n openshift-operators 2> /dev/null | grep $ODH_VERSION" ]; then
         echo $(oc get installplan -n openshift-operators)
         ready=true 2>&1
       else
@@ -85,7 +85,7 @@ else
     start_t=$(date +%s) 2>&1
     echo "Verifying installation of ODH operator"
     while ! $finished; do
-        if [ ! -z "$(oc get pods -n openshift-operators | grep 'opendatahub-operator-controller-manager' | grep '1/1')" ]; then
+        if [ ! -z "$(oc get pods -n openshift-operators  | grep 'opendatahub-operator-controller-manager' | grep '1/1')" ]; then
           finished=true 2>&1
         else
           sleep 10
