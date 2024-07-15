@@ -48,6 +48,20 @@ else
     ./setup.sh -o ~/peak/operatorsetup\
 
 
+    start_t=$(date +%s) 2>&1
+    ready=false 2>&1
+    while ! $ready; do
+      if [ ! -z "$oc get packagemanifests -n openshift-marketplace | grep 'opendatahub'" ]; then
+        ready=true 2>&1
+      else
+        sleep 10
+      fi
+      if [ $(($(date +%s)-start_t)) -gt 600 ]; then
+        echo "Package manifests never downloaded"
+        exit 1
+      fi
+    done
+
     # approve installplans
     if [ $? -eq 0 ]; then
       retry=-1
@@ -58,8 +72,22 @@ else
     fi  
     retry=$(( retry - 1))
 
-    # make sure we only approve the right install plan version, to avoid upgrading from our pinned ODH version
     ODH_VERSION=$(cat ~/peak/operatorsetup | grep opendatahub-operator | awk '{print $5}')
+    start_t=$(date +%s) 2>&1
+    ready=false 2>&1
+    while ! $ready; do
+      if [ ! -z "$oc get installplan -n openshift-operators | grep $ODH_VERSION" ]; then
+        ready=true 2>&1
+      else
+        sleep 10
+      fi
+      if [ $(($(date +%s)-start_t)) -gt 600 ]; then
+        echo "Install Plans never appeared"
+        exit 1
+      fi
+    done
+    # make sure we only approve the right install plan version, to avoid upgrading from our pinned ODH version
+
     sleep 15
     echo "Approving Install Plans"
     oc patch installplan $(oc get installplan -n openshift-operators | grep $ODH_VERSION | awk '{print $1}') -n openshift-operators --type merge --patch '{"spec":{"approved":true}}'
