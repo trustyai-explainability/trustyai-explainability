@@ -15,17 +15,26 @@ if ! [ -z "${SKIP_OPERATOR_INSTALL}" ]; then
 else
   echo "Installing operator from community marketplace"
 
+  start_t=$(date +%s) 2>&1
+  marketplaceReady=false 2>&1
+  while ! $marketplaceReady; do
+    if [ ! -z "$oc get catalogsources -n openshift-marketplace | grep 'community-operators'" ]; then
+      marketplaceReady=true 2>&1
+    else
+      sleep 10
+    fi
+
+    if [ $(($(date +%s)-start_t)) -gt 300 ]; then
+      echo "Marketplace pods never started"
+      exit 1
+    fi
+    done
+
 
   while [[ $retry -gt 0 ]]; do
-
-
     ./setup.sh -o ~/peak/operatorsetup\
 
     # approve installplans
-    oc patch $(oc get -n openshift-operators installplan -o name) -n openshift-operators --type merge --patch '{"spec":{"approved":true}}'
-
-
-
     if [ $? -eq 0 ]; then
       retry=-1
     else
@@ -34,6 +43,8 @@ else
       sleep 3m
     fi  
     retry=$(( retry - 1))
+
+    oc patch $(oc get -n openshift-operators installplan -o name) -n openshift-operators --type merge --patch '{"spec":{"approved":true}}'
 
     finished=false 2>&1
     start_t=$(date +%s) 2>&1
