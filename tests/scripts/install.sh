@@ -34,6 +34,7 @@ else
   while [[ $retry -gt 0 ]]; do
     ./setup.sh -o ~/peak/operatorsetup\
 
+
     # approve installplans
     if [ $? -eq 0 ]; then
       retry=-1
@@ -44,7 +45,12 @@ else
     fi  
     retry=$(( retry - 1))
 
-    oc patch $(oc get -n openshift-operators installplan -o name) -n openshift-operators --type merge --patch '{"spec":{"approved":true}}'
+    # make sure we only approve the right install plan version, to avoid upgrading from our pinned ODH version
+    ODH_VERSION=$(cat ~/peak/operatorsetup | grep opendatahub-operator | awk '{print $5}')
+    sleep 15
+    echo "Approving Install Plans"
+    oc patch installplan $(oc get installplan -n openshift-operators | grep $ODH_VERSION | awk '{print $1}') -n openshift-operators --type merge --patch '{"spec":{"approved":true}}'
+    oc patch installplan $(oc get installplan -n openshift-operators | grep authorino | awk '{print $1}') -n openshift-operators --type merge --patch '{"spec":{"approved":true}}'
 
     finished=false 2>&1
     start_t=$(date +%s) 2>&1
