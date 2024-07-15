@@ -116,6 +116,7 @@ function installop() {
 	  name: $1
 	  source: $csource
 	  sourceNamespace: $csourcens
+	  startingCSV: $4
 	EOF
     else
 	# make sure project exists since we can decouple project and operator creation
@@ -272,7 +273,7 @@ do
 
     # install operator if we're (re)creating
     if [ "$operators" == "true" -a "$delete" == "false" ]; then
-        installop ${vals[0]} ${vals[1]} ${vals[3]}
+        installop ${vals[0]} ${vals[1]} ${vals[3]} ${vals[4]}
     fi
 
     # clone a specific repository for tests if one is listed

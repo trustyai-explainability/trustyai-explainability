@@ -2,7 +2,6 @@
 echo "Installing DSC from test directory"
 DSC_FILENAME=odh-core-dsc.yaml
 
-
 set -x
 ## Install the opendatahub-operator
 pushd ~/peak
@@ -15,17 +14,42 @@ if ! [ -z "${SKIP_OPERATOR_INSTALL}" ]; then
 else
   echo "Installing operator from community marketplace"
 
+  start_t=$(date +%s) 2>&1
+  ready=false 2>&1
+  while ! $ready; do
+    if [ ! -z "$oc get catalogsources -n openshift-marketplace 2> /dev/null | grep 'community-operators'" ]; then
+      echo $(oc get catalogsources -n openshift-marketplace)
+      ready=true 2>&1
+    else
+      sleep 10
+    fi
+    if [ $(($(date +%s)-start_t)) -gt 300 ]; then
+      echo "Marketplace pods never started"
+      exit 1
+    fi
+  done
+
+    start_t=$(date +%s) 2>&1
+    ready=false 2>&1
+    while ! $ready; do
+      if [ ! -z "$oc get packagemanifests -n openshift-marketplace 2> /dev/null | grep 'opendatahub'" ]; then
+        echo $(oc get packagemanifests -n openshift-marketplace | grep opendatahub)
+        ready=true 2>&1
+      else
+        sleep 10
+      fi
+      if [ $(($(date +%s)-start_t)) -gt 600 ]; then
+        echo "Package manifests never downloaded"
+        exit 1
+      fi
+    done
+
+
 
   while [[ $retry -gt 0 ]]; do
-
-
     ./setup.sh -o ~/peak/operatorsetup\
 
     # approve installplans
-    oc patch $(oc get -n openshift-operators installplan -o name) -n openshift-operators --type merge --patch '{"spec":{"approved":true}}'
-
-
-
     if [ $? -eq 0 ]; then
       retry=-1
     else
@@ -35,11 +59,33 @@ else
     fi  
     retry=$(( retry - 1))
 
+    ODH_VERSION=$(cat ~/peak/operatorsetup | grep opendatahub-operator | awk '{print $5}')
+    start_t=$(date +%s) 2>&1
+    ready=false 2>&1
+    while ! $ready; do
+      if [ ! -z "$oc get installplan -n openshift-operators 2> /dev/null | grep $ODH_VERSION" ]; then
+        echo $(oc get installplan -n openshift-operators)
+        ready=true 2>&1
+      else
+        sleep 10
+      fi
+      if [ $(($(date +%s)-start_t)) -gt 600 ]; then
+        echo "Install Plans never appeared"
+        exit 1
+      fi
+    done
+    # make sure we only approve the right install plan version, to avoid upgrading from our pinned ODH version
+
+    sleep 15
+    echo "Approving Install Plans"
+    oc patch installplan $(oc get installplan -n openshift-operators | grep $ODH_VERSION | awk '{print $1}') -n openshift-operators --type merge --patch '{"spec":{"approved":true}}'
+    oc patch installplan $(oc get installplan -n openshift-operators | grep authorino | awk '{print $1}') -n openshift-operators --type merge --patch '{"spec":{"approved":true}}'
+
     finished=false 2>&1
     start_t=$(date +%s) 2>&1
     echo "Verifying installation of ODH operator"
     while ! $finished; do
-        if [ ! -z "$(oc get pods -n openshift-operators | grep 'opendatahub-operator-controller-manager' | grep '1/1')" ]; then
+        if [ ! -z "$(oc get pods -n openshift-operators  | grep 'opendatahub-operator-controller-manager' | grep '1/1')" ]; then
           finished=true 2>&1
         else
           sleep 10
