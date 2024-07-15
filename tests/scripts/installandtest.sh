@@ -26,6 +26,8 @@ export OPERATOR_IMAGE
 echo "OCP version info"
 echo `oc version`
 
+echo "== Catalog Sources =="
+echo `oc get catalogsources -n openshift-marketplace`
 
 INSTALL_FAILURE=false
 if [ -z "${SKIP_INSTALL}" ]; then
