@@ -41,7 +41,7 @@ else
       else
         sleep 10
       fi
-      if [ $(($(date +%s)-start_t)) -gt 600 ]; then
+      if [ $(($(date +%s)-start_t)) -gt 900 ]; then
         echo "Package manifests never downloaded"
         exit 1
       fi
