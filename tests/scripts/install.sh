@@ -17,8 +17,9 @@ else
   start_t=$(date +%s) 2>&1
   ready=false 2>&1
   while ! $ready; do
-    if [ ! -z "$oc get catalogsources -n openshift-marketplace 2> /dev/null | grep 'community-operators'" ]; then
-      echo $(oc get catalogsources -n openshift-marketplace)
+    CATALOG_SOURCES=$(oc get catalogsources -n openshift-marketplace 2> /dev/null | grep 'community-operators')
+    if [ ! -z "${CATALOG_SOURCES}" ]; then
+      echo $CATALOG_SOURCES
       ready=true 2>&1
     else
       sleep 10
@@ -34,8 +35,8 @@ else
     while ! $ready; do
       MANIFESTS=$(oc get packagemanifests -n openshift-marketplace 2> /dev/null | grep 'opendatahub')
       echo $MANIFESTS
-      if [ ! -z $MANIFESTS ]; then
-        echo $(oc get packagemanifests -n openshift-marketplace | grep opendatahub)
+      if [ ! -z "${MANIFESTS}" ]; then
+        echo $MANIFESTS
         ready=true 2>&1
       else
         sleep 10
@@ -65,8 +66,9 @@ else
     start_t=$(date +%s) 2>&1
     ready=false 2>&1
     while ! $ready; do
-      if [ ! -z "$oc get installplan -n openshift-operators 2> /dev/null | grep $ODH_VERSION" ]; then
-        echo $(oc get installplan -n openshift-operators)
+      INSTALL_PLAN=$(oc get installplan -n openshift-operators 2> /dev/null | grep $ODH_VERSION)
+      if [ ! -z "${INSTALLPLAN}" ]; then
+        echo $INSTALL_PLAN
         ready=true 2>&1
       else
         sleep 10
