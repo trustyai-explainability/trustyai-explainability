@@ -23,13 +23,17 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.local.shap.ShapConfig;
 import org.kie.trustyai.explainability.local.shap.ShapKernelExplainer;
-import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionProvider;
+import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.shap.SHAPExplainerConfig;
 import org.kie.trustyai.service.payloads.explainers.shap.SHAPExplanationRequest;
 
 import io.quarkus.resteasy.reactive.server.EndpointDisabled;
@@ -61,22 +65,23 @@ public class SHAPEndpoint extends ExplainerEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Generate a SHAP explanation", description = "Generate a SHAP explanation for a given model and inference id")
     public Response explain(SHAPExplanationRequest request) {
-        final String modelId = request.getExplanationConfig().getModelConfig().getName();
+        final String modelId = request.getConfig().getModelConfig().getName();
         final String inferenceId = request.getPredictionId();
         try {
 
-            final Dataframe dataframe = dataSource.get().getOrganicDataframe(modelId);
-            final PredictionProvider model = getModel(request.getExplanationConfig().getModelConfig(), dataframe.getInputTensorName(),
+            final Dataframe dataframe = dataSource.get().getDataframe(modelId);
+            final PredictionProvider model = getModel(request.getConfig().getModelConfig(), dataframe.getInputTensorName(),
                     dataframe.getOutputTensorName());
 
-            final List<Prediction> predictions = dataSource.get().getDataframe(modelId).filterRowsById(inferenceId).asPredictions();
+            final List<Prediction> predictions = dataframe.filterRowsById(inferenceId).asPredictions();
             if (predictions.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("No prediction found with id="
                         + inferenceId).build();
             } else if (predictions.size() == 1) {
                 final Prediction predictionToExplain = predictions.get(0);
+                final int backgroundSize = serviceConfig.batchSize().orElse(100);
                 final List<PredictionInput> testDataDistribution = dataframe.filterRowsById(inferenceId, true,
-                        serviceConfig.batchSize().orElse(100)).asPredictionInputs();
+                        backgroundSize).asPredictionInputs();
                 final BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution, request);
                 return Response.ok(entity).build();
             } else {
@@ -89,11 +94,14 @@ public class SHAPEndpoint extends ExplainerEndpoint {
     }
 
     public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain, List<PredictionInput> inputs, SHAPExplanationRequest request) {
+        final SHAPExplainerConfig requestConfig = request.getConfig().getExplainerConfig();
         final ShapConfig config = ShapConfig.builder()
+                .withNSamples(requestConfig.getnSamples())
+                .withLink(requestConfig.getLinkType())
+                .withRegularizer(requestConfig.getRegularizer())
+                .withConfidence(requestConfig.getConfidence())
+                .withTrackCounterfactuals(requestConfig.isTrackCounterfactuals())
                 .withBackground(inputs)
-                .withNSamples(request.getExplanationConfig().getExplainerConfig().getnSamples())
-                .withLink(ShapConfig.LinkType.IDENTITY)
-                .withTrackCounterfactuals(false)
                 .build();
         final ShapKernelExplainer shapKernelExplainer = new ShapKernelExplainer(config);
         try {

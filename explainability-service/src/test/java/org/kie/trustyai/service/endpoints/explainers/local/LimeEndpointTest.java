@@ -87,7 +87,7 @@ class LimeEndpointTest {
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
         final LimeExplanationRequest payload = new LimeExplanationRequest();
-        payload.getExplanationConfig().setModelConfig(new ModelConfig("", MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig("", MODEL_ID, ""));
         payload.setPredictionId(id);
 
         given().contentType(ContentType.JSON).body(payload)
@@ -105,7 +105,7 @@ class LimeEndpointTest {
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
         final LimeExplanationRequest payload = new LimeExplanationRequest();
-        payload.getExplanationConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
         payload.setPredictionId(id);
 
         final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
@@ -151,7 +151,7 @@ class LimeEndpointTest {
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
         final LimeExplanationRequest payload = new LimeExplanationRequest();
-        payload.getExplanationConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
         payload.setPredictionId(id);
 
         final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
@@ -191,7 +191,7 @@ class LimeEndpointTest {
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
         final LimeExplanationRequest payload = new LimeExplanationRequest();
-        payload.getExplanationConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
         payload.setPredictionId(id);
 
         final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)

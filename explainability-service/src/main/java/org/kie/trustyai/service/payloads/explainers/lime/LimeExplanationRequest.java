@@ -18,11 +18,11 @@ public class LimeExplanationRequest {
         this.predictionId = predictionId;
     }
 
-    public LimeExplanationConfig getExplanationConfig() {
+    public LimeExplanationConfig getConfig() {
         return this.config;
     }
 
-    public void setExplanationConfig(LimeExplanationConfig explanationConfig) {
+    public void setConfig(LimeExplanationConfig explanationConfig) {
         this.config = explanationConfig;
     }
 

@@ -113,9 +113,9 @@
     <plugins>
       <!-- The entity classes need to be indexed -->
       <plugin>
-        <groupId>org.jboss.jandex</groupId>
+        <groupId>io.smallrye</groupId>
         <artifactId>jandex-maven-plugin</artifactId>
-        <version>1.1.0</version>
+        <version>3.1.8</version>
         <executions>
           <execution>
             <id>make-index</id>

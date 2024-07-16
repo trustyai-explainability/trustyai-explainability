@@ -63,7 +63,7 @@ class ShapEndpointTest {
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
         final SHAPExplanationRequest payload = new SHAPExplanationRequest();
-        payload.getExplanationConfig().setModelConfig(new ModelConfig("", MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig("", MODEL_ID, ""));
         payload.setPredictionId(id);
 
         given().contentType(ContentType.JSON).body(payload)
