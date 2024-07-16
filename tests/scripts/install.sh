@@ -32,7 +32,7 @@ else
     start_t=$(date +%s) 2>&1
     ready=false 2>&1
     while ! $ready; do
-      MANIFESTS=$oc get packagemanifests -n openshift-marketplace 2> /dev/null | grep 'opendatahub'
+      MANIFESTS=$(oc get packagemanifests -n openshift-marketplace 2> /dev/null | grep 'opendatahub')
       echo $MANIFESTS
       if [ ! -z $MANIFESTS ]; then
         echo $(oc get packagemanifests -n openshift-marketplace | grep opendatahub)
