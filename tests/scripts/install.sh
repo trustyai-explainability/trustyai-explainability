@@ -67,7 +67,7 @@ else
     ready=false 2>&1
     while ! $ready; do
       INSTALL_PLAN=$(oc get installplan -n openshift-operators 2> /dev/null | grep $ODH_VERSION)
-      if [ ! -z "${INSTALLPLAN}" ]; then
+      if [ ! -z "${INSTALL_PLAN}" ]; then
         echo $INSTALL_PLAN
         ready=true 2>&1
       else
