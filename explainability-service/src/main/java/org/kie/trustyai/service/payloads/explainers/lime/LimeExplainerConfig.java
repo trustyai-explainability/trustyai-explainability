@@ -142,6 +142,10 @@ public class LimeExplainerConfig {
     }
 
     public void setRetries(int retries) {
+        if (retries <= 0) {
+            throw new IllegalArgumentException("Number of retries must be > 0");
+        }
+
         this.retries = retries;
     }
 
