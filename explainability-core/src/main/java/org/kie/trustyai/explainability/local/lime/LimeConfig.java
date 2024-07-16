@@ -29,25 +29,25 @@ import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
  */
 public class LimeConfig {
 
-    private static final int DEFAULT_NO_OF_SAMPLES = 300;
-    private static final double DEFAULT_SEPARABLE_DATASET_RATIO = 0.9;
+    public static final int DEFAULT_NO_OF_SAMPLES = 300;
+    public static final double DEFAULT_SEPARABLE_DATASET_RATIO = 0.9;
     public static final int DEFAULT_NO_OF_RETRIES = 3;
-    private static final boolean DEFAULT_ADAPT_DATASET_VARIANCE = true;
-    private static final boolean DEFAULT_PENALIZE_BALANCE_SPARSE = true;
-    private static final boolean DEFAULT_PROXIMITY_FILTER = true;
-    private static final double DEFAULT_PROXIMITY_THRESHOLD = 0.83;
-    private static final Number DEFAULT_PROXIMITY_FILTERED_DATASET_MIN = 10;
-    private static final double DEFAULT_PROXIMITY_KERNEL_WIDTH = 0.5;
-    private static final double DEFAULT_ENCODING_CLUSTER_THRESHOLD = 0.07;
-    private static final double DEFAULT_ENCODING_GAUSSIAN_FILTER_WIDTH = 0.07;
-    private static final boolean DEFAULT_NORMALIZE_WEIGHTS = false;
-    private static final boolean DEFAULT_HIGH_SCORE_ZONES = true;
-    private static final int DEFAULT_BOOSTRAP_INPUTS = 50;
-    private static final boolean DEFAULT_FEATURE_SELECTION = true;
-    private static final int DEFAULT_NO_OF_FEATURES = 6;
-    private static final boolean DEFAULT_TRACK_COUNTERFACTUALS = false;
-    private static final boolean DEFAULT_USE_WLR_LINEAR_MODEL = true;
-    private static final boolean DEFAULT_FILTER_INTERPRETABLE = false;
+    public static final boolean DEFAULT_ADAPT_DATASET_VARIANCE = true;
+    public static final boolean DEFAULT_PENALIZE_BALANCE_SPARSE = true;
+    public static final boolean DEFAULT_PROXIMITY_FILTER = true;
+    public static final double DEFAULT_PROXIMITY_THRESHOLD = 0.83;
+    public static final Number DEFAULT_PROXIMITY_FILTERED_DATASET_MIN = 10;
+    public static final double DEFAULT_PROXIMITY_KERNEL_WIDTH = 0.5;
+    public static final double DEFAULT_ENCODING_CLUSTER_THRESHOLD = 0.07;
+    public static final double DEFAULT_ENCODING_GAUSSIAN_FILTER_WIDTH = 0.07;
+    public static final boolean DEFAULT_NORMALIZE_WEIGHTS = false;
+    public static final boolean DEFAULT_HIGH_SCORE_ZONES = true;
+    public static final int DEFAULT_BOOSTRAP_INPUTS = 50;
+    public static final boolean DEFAULT_FEATURE_SELECTION = true;
+    public static final int DEFAULT_NO_OF_FEATURES = 6;
+    public static final boolean DEFAULT_TRACK_COUNTERFACTUALS = false;
+    public static final boolean DEFAULT_USE_WLR_LINEAR_MODEL = true;
+    public static final boolean DEFAULT_FILTER_INTERPRETABLE = false;
 
     private double separableDatasetRatio = DEFAULT_SEPARABLE_DATASET_RATIO;
 

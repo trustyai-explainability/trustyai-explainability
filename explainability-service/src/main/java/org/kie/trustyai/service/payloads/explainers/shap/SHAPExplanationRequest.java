@@ -18,11 +18,11 @@ public class SHAPExplanationRequest {
         this.predictionId = predictionId;
     }
 
-    public SHAPExplanationConfig getExplanationConfig() {
+    public SHAPExplanationConfig getConfig() {
         return this.config;
     }
 
-    public void setExplanationConfig(SHAPExplanationConfig explanationConfig) {
+    public void setConfig(SHAPExplanationConfig explanationConfig) {
         this.config = explanationConfig;
     }
 

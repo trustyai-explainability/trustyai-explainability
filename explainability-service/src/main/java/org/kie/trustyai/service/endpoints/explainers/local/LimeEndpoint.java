@@ -23,13 +23,17 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.local.lime.LimeExplainer;
-import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.Prediction;
+import org.kie.trustyai.explainability.model.PredictionInput;
+import org.kie.trustyai.explainability.model.PredictionInputsDataDistribution;
+import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
+import org.kie.trustyai.service.payloads.explainers.lime.LimeExplainerConfig;
 import org.kie.trustyai.service.payloads.explainers.lime.LimeExplanationRequest;
 
 import io.quarkus.resteasy.reactive.server.EndpointDisabled;
@@ -61,21 +65,24 @@ public class LimeEndpoint extends ExplainerEndpoint {
     @Operation(summary = "Generate a LIME explanation", description = "Generate a LIME explanation for a given model and inference id")
     public Response explain(LimeExplanationRequest request) {
         try {
-            final String modelId = request.getExplanationConfig().getModelConfig().getName();
+            final String modelId = request.getConfig().getModelConfig().getName();
             final Dataframe dataframe = dataSource.get().getDataframe(modelId);
-            final PredictionProvider model = getModel(request.getExplanationConfig().getModelConfig(), dataframe.getInputTensorName());
-
+            final PredictionProvider model = getModel(request.getConfig().getModelConfig(),
+                    dataframe.getInputTensorName());
+            final String inferenceId = request.getPredictionId();
             Prediction predictionToExplain;
             final List<Prediction> predictions = dataSource.get().getDataframe(modelId)
-                    .filterRowsById(request.getPredictionId()).asPredictions();
+                    .filterRowsById(inferenceId).asPredictions();
             if (predictions.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("No prediction found with id="
-                        + request.getPredictionId()).build();
+                        + inferenceId).build();
             } else if (predictions.size() == 1) {
                 predictionToExplain = predictions.get(0);
-                final List<PredictionInput> testDataDistribution = dataframe.filterRowsById(request.getPredictionId(), true,
-                        serviceConfig.batchSize().orElse(100)).asPredictionInputs();
-                final BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution, request);
+                final int backgroundSize = serviceConfig.batchSize().orElse(100);
+                final List<PredictionInput> testDataDistribution = dataframe.filterRowsById(inferenceId, true,
+                        backgroundSize).asPredictionInputs();
+                final BaseExplanationResponse entity = generateExplanation(model, predictionToExplain,
+                        testDataDistribution, request);
                 return Response.ok(entity).build();
             } else {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Found " + predictions.size()
@@ -86,13 +93,32 @@ public class LimeEndpoint extends ExplainerEndpoint {
         }
     }
 
-    public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain, List<PredictionInput> inputs, LimeExplanationRequest request) {
+    public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain,
+            List<PredictionInput> inputs, LimeExplanationRequest request) {
+        final LimeExplainerConfig requestConfig = request.getConfig().getExplainerConfig();
         final LimeConfig config = new LimeConfig()
-                .withDataDistribution(new PredictionInputsDataDistribution(inputs))
-                .withSamples(request.getExplanationConfig().getExplainerConfig().getnSamples());
-        final LimeExplainer limeExplainer = new LimeExplainer(config); //TODO: switch to RecordingLimeExplainer?
+                .withSamples(requestConfig.getnSamples())
+                .withSeparableDatasetRatio(requestConfig.getSeparableDatasetRation())
+                .withRetries(requestConfig.getRetries())
+                .withAdaptiveVariance(requestConfig.isAdaptiveVariance())
+                .withPenalizeBalanceSparse(requestConfig.isPenalizeBalanceSparse())
+                .withProximityFilter(requestConfig.isProximityFilter())
+                .withProximityThreshold(requestConfig.getProximityThreshold())
+                .withProximityKernelWidth(requestConfig.getProximityKernelWidth())
+                .withProximityThreshold(requestConfig.getEncodingClusterThreshold())
+                .withNormalizeWeights(requestConfig.isNormalizeWeights())
+                .withHighScoreFeatureZones(requestConfig.isHighScoreFeatureZones())
+                .withFeatureSelection(requestConfig.isFeatureSelection())
+                .withNoOfFeatures(requestConfig.getnFeatures())
+                .withTrackCounterfactuals(requestConfig.isTrackCounterfactuals())
+                .withUseWLRLinearModel(requestConfig.isUseWLRModel())
+                .withFilterInterpretable(requestConfig.isFilterInterpretable())
+                .withDataDistribution(new PredictionInputsDataDistribution(inputs));
+
+        final LimeExplainer limeExplainer = new LimeExplainer(config); // TODO: switch to RecordingLimeExplainer?
         try {
-            return SaliencyExplanationResponse.fromSaliencyResults(limeExplainer.explainAsync(predictionToExplain, model).get());
+            return SaliencyExplanationResponse
+                    .fromSaliencyResults(limeExplainer.explainAsync(predictionToExplain, model).get());
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Failed to explain {} ", predictionToExplain, e);
             return SaliencyExplanationResponse.empty();
