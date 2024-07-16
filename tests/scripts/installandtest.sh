@@ -26,6 +26,8 @@ export OPERATOR_IMAGE
 echo "OCP version info"
 echo `oc version`
 
+echo "== Catalog Sources =="
+echo `oc get catalogsources -n openshift-marketplace`
 
 INSTALL_FAILURE=false
 if [ -z "${SKIP_INSTALL}" ]; then
@@ -33,12 +35,15 @@ if [ -z "${SKIP_INSTALL}" ]; then
     oc new-project ${ODHPROJECT}
     oc project ${ODHPROJECT} # in case a new project is not created
     $HOME/peak/install.sh || INSTALL_FAILURE=true
-    if [ ${LOCAL:-false} = true ]; then
-      echo "Sleeping for 30s to let the DSC install settle"
-      sleep 30s
-    else
-      echo "Sleeping for 5 min to let the DSC install settle"
-      sleep 5m
+
+    if [ $INSTALL_FAILURE = false ]; then
+      if [ ${LOCAL:-false} = true ]; then
+        echo "Sleeping for 30s to let the DSC install settle"
+        sleep 30s
+      else
+        echo "Sleeping for 5 min to let the DSC install settle"
+        sleep 5m
+      fi
     fi
 
     # Save the list of events and pods that are running prior to the test run
