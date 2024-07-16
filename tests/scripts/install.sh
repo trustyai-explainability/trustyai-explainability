@@ -66,6 +66,7 @@ else
     start_t=$(date +%s) 2>&1
     ready=false 2>&1
     while ! $ready; do
+      echo $(oc get installplan -n openshift-operators)
       INSTALL_PLAN=$(oc get installplan -n openshift-operators 2> /dev/null | grep $ODH_VERSION)
       if [ ! -z "${INSTALL_PLAN}" ]; then
         echo $INSTALL_PLAN
