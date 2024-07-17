@@ -40,6 +40,21 @@ class ShapEndpointTest {
     @Inject
     Instance<MockMemoryStorage> storage;
 
+    private void testServiceUrl(String serviceUrl, int expectedStatusCode) throws JsonProcessingException {
+        datasource.get().reset();
+        Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
+        List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
+        String id = String.valueOf(predictionInputs.get(0).hashCode());
+        final SHAPExplanationRequest payload = new SHAPExplanationRequest();
+        payload.getConfig().setModelConfig(new ModelConfig(serviceUrl, MODEL_ID, ""));
+        payload.setPredictionId(id);
+
+        given().contentType(ContentType.JSON).body(payload)
+                .when().post()
+                .then()
+                .statusCode(expectedStatusCode);
+    }
+
     @BeforeEach
     void populateStorage() {
         storage.get().emptyStorage();
@@ -69,6 +84,22 @@ class ShapEndpointTest {
         given().contentType(ContentType.JSON).body(payload)
                 .when().post()
                 .then()
-                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+                .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }
+
+    @Test
+    void testWithValidServiceUrl() throws JsonProcessingException {
+        testServiceUrl("http://foo", Response.Status.NOT_FOUND.getStatusCode());
+        testServiceUrl("https://bar", Response.Status.NOT_FOUND.getStatusCode());
+        testServiceUrl("foo", Response.Status.NOT_FOUND.getStatusCode());
+        testServiceUrl("bar:8080", Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
+    void testWithInvalidServiceUrl() throws JsonProcessingException {
+        testServiceUrl("http://foo.namespace.svc.cluster.local", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        testServiceUrl("foo.namespace.svc.cluster.local", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        testServiceUrl("http://foo/some/path", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        testServiceUrl("foo/some/path", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 }

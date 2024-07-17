@@ -65,10 +65,9 @@ public class SHAPEndpoint extends ExplainerEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Generate a SHAP explanation", description = "Generate a SHAP explanation for a given model and inference id")
     public Response explain(SHAPExplanationRequest request) {
-        final String modelId = request.getConfig().getModelConfig().getName();
         final String inferenceId = request.getPredictionId();
         try {
-
+            final String modelId = request.getConfig().getModelConfig().getName();
             final Dataframe dataframe = dataSource.get().getDataframe(modelId);
             final PredictionProvider model = getModel(request.getConfig().getModelConfig(), dataframe.getInputTensorName(),
                     dataframe.getOutputTensorName());
