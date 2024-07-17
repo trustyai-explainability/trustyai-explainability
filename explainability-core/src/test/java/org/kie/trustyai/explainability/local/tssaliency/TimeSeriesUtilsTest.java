@@ -184,8 +184,6 @@ class TimeSeriesUtilsTest {
         assertEquals(4321, transformedPredictions.get(0).getInput().getFeatures().size());
         assertTrue(transformedPredictions.get(0).getInput().getFeatures().stream().map(Feature::getType).allMatch(type -> type == Type.VECTOR));
         assertTrue(transformedPredictions.get(0).getInput().getFeatures().stream().map(Feature::getValue).map(Value::asVector).mapToInt(a -> a.length).allMatch(size -> size == 11));
-
-        System.out.println(inputs);
     }
 
 }

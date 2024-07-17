@@ -235,12 +235,13 @@ public class TSSaliencyExplainerTest {
             final SaliencyResults saliencyResults = saliencyResultsCompletable.get();
 
             final Map<String, Saliency> saliencies = saliencyResults.getSaliencies();
+            final String outputName = "y0-0";
             assertEquals(1, saliencies.size());
-            assertEquals("y0", saliencies.keySet().iterator().next());
-            assertEquals("y0", saliencies.get("y0").getOutput().getName());
-            assertEquals(1, saliencies.get("y0").getPerFeatureImportance().size());
-            assertEquals("element1", saliencies.get("y0").getPerFeatureImportance().get(0).getFeature().getName());
-            assertEquals(1, saliencies.get("y0").getPerFeatureImportance().get(0).getFeature().getValue().asVector().length);
+            assertEquals(outputName, saliencies.keySet().iterator().next());
+            assertEquals("y0", saliencies.get(outputName).getOutput().getName());
+            assertEquals(1, saliencies.get(outputName).getPerFeatureImportance().size());
+            assertEquals("element1", saliencies.get(outputName).getPerFeatureImportance().get(0).getFeature().getName());
+            assertEquals(1, saliencies.get(outputName).getPerFeatureImportance().get(0).getFeature().getValue().asVector().length);
 
         } catch (Exception e) {
             e.printStackTrace();
