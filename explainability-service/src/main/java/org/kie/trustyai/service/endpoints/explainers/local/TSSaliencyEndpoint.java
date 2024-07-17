@@ -30,7 +30,6 @@ import java.util.List;
 @Path("/explainers/local/tssaliency")
 public class TSSaliencyEndpoint extends ExplainerEndpoint {
 
-    private static final Logger LOG = Logger.getLogger(TSSaliencyEndpoint.class);
     @Inject
     Instance<DataSource> dataSource;
     @Inject
@@ -86,7 +85,8 @@ public class TSSaliencyEndpoint extends ExplainerEndpoint {
                         nFeatures + parameters.getnAlpha(),
                         secureRandom.nextInt(),
                         parameters.getSigma(),
-                        parameters.getMu(), true);
+                        parameters.getMu(),
+                        true);
                 final SaliencyResults explanations = explainer.explainAsync(predictions, model).get();
                 return Response.ok(explanations).build();
             }
