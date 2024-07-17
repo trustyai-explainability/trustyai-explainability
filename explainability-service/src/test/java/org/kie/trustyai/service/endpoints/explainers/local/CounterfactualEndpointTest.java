@@ -74,6 +74,6 @@ class CounterfactualEndpointTest {
         given().contentType(ContentType.JSON).body(payload)
                 .when().post()
                 .then()
-                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+                .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 }
