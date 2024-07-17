@@ -156,7 +156,7 @@ public class TSSaliencyExplainerTest {
             List<Prediction> predictions = new ArrayList<Prediction>(1);
             predictions.add(prediction);
 
-            TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 1000, 50, 0, 10, 0.01);
+            TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 1000, 50, 0, 10, 0.01, false);
 
             for (int i = 0; i < 10; i++) {
                 CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(predictions,
@@ -228,7 +228,7 @@ public class TSSaliencyExplainerTest {
 
             final Prediction prediction = new SimplePrediction(predictionInput, predictionOutput, uuid);
 
-            final TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 50, 1000, 0, 10, 0.01);
+            final TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 50, 1000, 0, 10, 0.01, false);
 
             final CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(prediction, model,
                     null);
