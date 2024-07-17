@@ -179,7 +179,6 @@ public class TSSaliencyExplainer implements TimeSeriesExplainer<SaliencyResults>
 
                 final Saliency saliency = new Saliency(output, featureImportances);
                 saliencies.put(output.getName() + "-" + index, saliency);
-                // saliencies.put(output.getName(), saliency);
             }
 
             final CompletableFuture<SaliencyResults> retval = new CompletableFuture<SaliencyResults>();

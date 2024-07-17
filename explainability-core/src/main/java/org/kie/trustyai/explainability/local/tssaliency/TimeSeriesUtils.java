@@ -5,8 +5,19 @@ import java.util.List;
 
 import org.kie.trustyai.explainability.model.*;
 
+/**
+ * This class convert time-series from a column-oriented format to the TSSaliency format and vice versa.
+ * Column-oriented format represents each univariate series a single {@link PredictionInput} and each {@link Feature} as a time-point.
+ * TSSaliency format represent time-series data as a single {@link PredictionInput} with a univariate series as {@link Feature}
+ * of type vector.
+ */
 public class TimeSeriesUtils {
 
+    /**
+     * Convert time-series from TrustyAI format to TSSaliency format
+     * @param inputs List of {@link Prediction} in TrustyAI format
+     * @return Time-series as TSSaliency format
+     */
     public static List<Prediction> toTSSaliencyTimeSeries(List<Prediction> inputs) {
         final int nFeatures = inputs.size();
         final int timepoints = inputs.get(0).getInput().getFeatures().size();
@@ -33,6 +44,11 @@ public class TimeSeriesUtils {
         return List.of(new SimplePrediction(input, output));
     }
 
+    /**
+     * Convert time-series from TSSaliency format to TrustyAI format
+     * @param inputs {@link PredictionInput} containing time-series in TSSaliency format
+     * @return Time-series as TrustyAI format
+     */
     public static List<PredictionInput> fromTSSaliencyTimeSeries(List<PredictionInput> inputs) {
         final int nFeatures = inputs.get(0).getFeatures().get(0).getValue().asVector().length;
         final int timepoints = inputs.get(0).getFeatures().size();
