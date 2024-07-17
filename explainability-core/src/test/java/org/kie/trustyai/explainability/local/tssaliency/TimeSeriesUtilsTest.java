@@ -44,7 +44,6 @@ class TimeSeriesUtilsTest {
         }
 
         int columnCount = columns.size();
-        int featureCount = columns.get(0).size();
 
         List<PredictionInput> predictionInputs = new ArrayList<>();
         for (int c = 0; c < columnCount; c++) {
