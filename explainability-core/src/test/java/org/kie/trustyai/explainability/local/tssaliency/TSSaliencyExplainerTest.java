@@ -156,7 +156,7 @@ public class TSSaliencyExplainerTest {
             List<Prediction> predictions = new ArrayList<Prediction>(1);
             predictions.add(prediction);
 
-            TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 1000, 50, 0, 10, 0.01);
+            TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 1000, 50, 0, 10, 0.01, false);
 
             for (int i = 0; i < 10; i++) {
                 CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(predictions,
@@ -228,19 +228,20 @@ public class TSSaliencyExplainerTest {
 
             final Prediction prediction = new SimplePrediction(predictionInput, predictionOutput, uuid);
 
-            final TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 50, 1000, 0, 10, 0.01);
+            final TSSaliencyExplainer explainer = new TSSaliencyExplainer(new double[0], 50, 1000, 0, 10, 0.01, false);
 
             final CompletableFuture<SaliencyResults> saliencyResultsCompletable = explainer.explainAsync(prediction, model,
                     null);
             final SaliencyResults saliencyResults = saliencyResultsCompletable.get();
 
             final Map<String, Saliency> saliencies = saliencyResults.getSaliencies();
+            final String outputName = "y0-0";
             assertEquals(1, saliencies.size());
-            assertEquals("y0", saliencies.keySet().iterator().next());
-            assertEquals("y0", saliencies.get("y0").getOutput().getName());
-            assertEquals(1, saliencies.get("y0").getPerFeatureImportance().size());
-            assertEquals("element1", saliencies.get("y0").getPerFeatureImportance().get(0).getFeature().getName());
-            assertEquals(1, saliencies.get("y0").getPerFeatureImportance().get(0).getFeature().getValue().asVector().length);
+            assertEquals(outputName, saliencies.keySet().iterator().next());
+            assertEquals("y0", saliencies.get(outputName).getOutput().getName());
+            assertEquals(1, saliencies.get(outputName).getPerFeatureImportance().size());
+            assertEquals("element1", saliencies.get(outputName).getPerFeatureImportance().get(0).getFeature().getName());
+            assertEquals(1, saliencies.get(outputName).getPerFeatureImportance().get(0).getFeature().getValue().asVector().length);
 
         } catch (Exception e) {
             e.printStackTrace();
