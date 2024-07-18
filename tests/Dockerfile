@@ -1,18 +1,16 @@
-FROM registry.access.redhat.com/ubi8:8.10-901.1716497712
-
+ñFROM registry.access.redhat.com/ubi8:8.10-1020
 ARG ORG=trustyai-explainability
 ARG BRANCH=main
 ARG ODS_CI_REPO=https://github.com/red-hat-data-services/ods-ci
 # This git reference should always reference a stable commit from ods-ci that supports ODH
-# This hash corresponds to a March 24th, 2023 commit
-ARG ODS_CI_GITREF=867a617bc224726cf98fa3354293f8e50b4f5eb5
-ARG OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/latest/openshift-client-linux.tar.gz
+# This hash corresponds to a Jul 11th, 2024 commit
+ARG ODS_CI_GITREF=a8cf770b37caa4ef7ce6596acc8bdd6866cc7772
+ARG OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/4.14.33/openshift-client-linux.tar.gz
 
 ENV HOME /root
 WORKDIR /root
 
-RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm &&  \
-    dnf install -y jq bc git go-toolset python3.11 python3.11-devel python3.11-pip unzip && \
+RUN dnf install -y jq bc git go-toolset python3.11 python3.11-devel python3.11-pip unzip && \
     dnf clean all && \
     git clone https://github.com/opendatahub-io/peak $HOME/peak && \
     cd $HOME/peak && \
@@ -22,14 +20,6 @@ RUN dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.n
 RUN curl -L https://github.com/mikefarah/yq/releases/download/v4.25.1/yq_linux_amd64 -o /usr/bin/yq &&\
     chmod +x /usr/bin/yq
 
-RUN mkdir -p $HOME/src && \
-    cd $HOME/src && \
-    git clone --depth=1 --branch ${BRANCH} https://github.com/${ORG}/trustyai-explainability && \
-    # Clone ods-ci repo at specified git ref for the ODH Dashboard webUI tests
-    git clone --depth=1 ${ODS_CI_REPO} ods-ci && cd ods-ci && \
-    git fetch origin ${ODS_CI_GITREF} && git checkout FETCH_HEAD && \
-    chmod -R 777 $HOME/src
-
 # Use a specific destination file name in case the url dow download name changes
 ADD ${OC_CLI_URL} $HOME/peak/oc-cli.tar.gz
 RUN tar -C /usr/local/bin -xvf $HOME/peak/oc-cli.tar.gz && \
@@ -37,22 +27,18 @@ RUN tar -C /usr/local/bin -xvf $HOME/peak/oc-cli.tar.gz && \
 
 COPY Pipfile Pipfile.lock $HOME/peak/
 
-RUN pip3 install micropipenv &&\
-    ln -s `which pip3` /usr/bin/pip &&\
-    cd $HOME/peak &&\
-    micropipenv install
-
-# Install poetry to support the exeuction of ods-ci test framework
+# Install poetry to support the exeuction of trustyai-tests
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="${PATH}:$HOME/.local/bin"
-RUN cd $HOME/src/ods-ci && poetry install
-    
+RUN cd $HOME/peak && \
+    git clone https://github.com/trustyai-explainability/trustyai-tests.git && \
+    cd trustyai-tests && \
+    poetry install
 
 COPY setup/operatorsetup scripts/install.sh scripts/installandtest.sh $HOME/peak/
-COPY resources $HOME/peak/operator-tests/trustyai-explainability/resources
 COPY util $HOME/peak/operator-tests/trustyai-explainability
 COPY setup/odh-core-dsc.yaml setup/odh-core-dsci.yaml $HOME/kfdef/
-COPY basictests $HOME/peak/operator-tests/trustyai-explainability/basictests
+COPY scripts/setup.sh $HOME/peak/setup.sh
 
 RUN chmod -R 777 $HOME/kfdef && \
     mkdir -p $HOME/.kube && \
