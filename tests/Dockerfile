@@ -40,7 +40,7 @@ ENV PATH="${PATH}:$HOME/.local/bin"
 RUN cd $HOME/peak && \
     git clone https://github.com/trustyai-explainability/trustyai-tests.git && \
     cd trustyai-tests && \
-    poetry install --no-root
+    poetry install
 
 COPY setup/operatorsetup scripts/install.sh scripts/installandtest.sh $HOME/peak/
 COPY util $HOME/peak/operator-tests/trustyai-explainability
