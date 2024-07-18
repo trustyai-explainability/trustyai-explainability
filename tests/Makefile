@@ -7,7 +7,7 @@ ODHPROJECT=opendatahub
 # Specify the repo and git ref/branch to use for cloning ods-ci repo for the automation that works when running against an ODH deployment
 ODS_CI_REPO=https://github.com/red-hat-data-services/ods-ci
 ODS_CI_GITREF=master
-OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/latest/openshift-client-linux.tar.gz
+OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/4.14.33/openshift-client-linux.tar.gz
 # Authentication info for the OCP test user account that can be used in the test automation
 # For all tests, the expectation is that this is used for normal end-user access to the cluster
 OPENSHIFT_TESTUSER_NAME=
