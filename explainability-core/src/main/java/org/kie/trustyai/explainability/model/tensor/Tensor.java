@@ -137,7 +137,7 @@ public class Tensor<T> {
     }
 
     // == UTILITY ======================================================================================================
-    // get the product of allelements within a vector
+    // get the product of all elements within a vector
     private static int vectorProduct(int[] vector) {
         return vectorProduct(vector, 0);
     }
