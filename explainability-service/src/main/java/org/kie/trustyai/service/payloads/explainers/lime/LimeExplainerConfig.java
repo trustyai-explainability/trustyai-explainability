@@ -3,16 +3,13 @@ package org.kie.trustyai.service.payloads.explainers.lime;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
+import org.kie.trustyai.service.payloads.explainers.BaseExplainerConfig;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Schema(description = "Configuration for the LIME explainer")
 @Tag(name = "Payloads", description = "Payload definitions for the API")
-public class LimeExplainerConfig {
-
-    @Schema(required = false, description = "Number of samples to be generated for the local linear model training", defaultValue = "300", example = "300")
-    @JsonProperty(value = "n_samples")
-    private int nSamples = LimeConfig.DEFAULT_NO_OF_SAMPLES;
+public class LimeExplainerConfig extends BaseExplainerConfig {
 
     @Schema(required = false, description = "Separable dataset ration", defaultValue = "0.9", example = "0.9")
     @JsonProperty(value = "separable_dataset_ratio")
@@ -147,17 +144,6 @@ public class LimeExplainerConfig {
         }
 
         this.retries = retries;
-    }
-
-    public int getnSamples() {
-        return nSamples;
-    }
-
-    public void setnSamples(int nSamples) {
-        if (nSamples <= 0) {
-            throw new IllegalArgumentException("Number of samples must be > 0");
-        }
-        this.nSamples = nSamples;
     }
 
     public boolean isNormalizeWeights() {

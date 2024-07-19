@@ -17,6 +17,8 @@ package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -87,12 +89,15 @@ public class SHAPEndpoint extends ExplainerEndpoint {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Found " + predictions.size()
                         + " predictions with id=" + inferenceId).build();
             }
+        } catch (TimeoutException e) {
+            return Response.serverError().status(Response.Status.REQUEST_TIMEOUT).entity("The explanation request has timed out").build();
         } catch (Exception e) {
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 
-    public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain, List<PredictionInput> inputs, SHAPExplanationRequest request) {
+    public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain, List<PredictionInput> inputs, SHAPExplanationRequest request)
+            throws ExecutionException, InterruptedException, TimeoutException {
         final SHAPExplainerConfig requestConfig = request.getConfig().getExplainerConfig();
         final ShapConfig config = ShapConfig.builder()
                 .withNSamples(requestConfig.getnSamples())
@@ -103,13 +108,9 @@ public class SHAPEndpoint extends ExplainerEndpoint {
                 .withBackground(inputs)
                 .build();
         final ShapKernelExplainer shapKernelExplainer = new ShapKernelExplainer(config);
-        try {
-            final SaliencyResults explanation = shapKernelExplainer.explainAsync(predictionToExplain, model).get();
-            return SaliencyExplanationResponse.fromSaliencyResults(explanation);
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Failed to explain {} ", predictionToExplain, e);
-            return SaliencyExplanationResponse.empty();
-        }
+        final SaliencyResults explanation = shapKernelExplainer.explainAsync(predictionToExplain, model).get(requestConfig.getTimeout(), TimeUnit.SECONDS);
+        return SaliencyExplanationResponse.fromSaliencyResults(explanation);
+
     }
 
 }

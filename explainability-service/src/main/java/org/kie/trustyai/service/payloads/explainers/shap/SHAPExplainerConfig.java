@@ -3,16 +3,13 @@ package org.kie.trustyai.service.payloads.explainers.shap;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.explainability.local.shap.ShapConfig;
+import org.kie.trustyai.service.payloads.explainers.BaseExplainerConfig;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Schema(description = "Configuration for the LIME explainer")
 @Tag(name = "Payloads", description = "Payload definitions for the API")
-public class SHAPExplainerConfig {
-
-    @Schema(required = false, description = "Number of data samples to run when computing SHAP values", defaultValue = "100", example = "100")
-    @JsonProperty(value = "n_samples", required = false, defaultValue = "100")
-    private int nSamples = 100;
+public class SHAPExplainerConfig extends BaseExplainerConfig {
 
     @Schema(required = false, description = "Either LOGIT or IDENTITY. If you want the SHAP values to sum to the exact model output, use IDENTITY" +
             "If your model outputs probabilities and you want the SHAP values to" +
@@ -32,17 +29,6 @@ public class SHAPExplainerConfig {
     @Schema(required = false, description = "Whether to track byproduct counterfactuals generated during explanation", defaultValue = "false", example = "false")
     @JsonProperty(value = "track_counterfactuals", required = false, defaultValue = "false")
     private boolean trackCounterfactuals = false;
-
-    public int getnSamples() {
-        return nSamples;
-    }
-
-    public void setnSamples(int nSamples) {
-        if (nSamples <= 0) {
-            throw new IllegalArgumentException("Number of samples must be > 0");
-        }
-        this.nSamples = nSamples;
-    }
 
     public ShapConfig.LinkType getLinkType() {
         return linkType;
