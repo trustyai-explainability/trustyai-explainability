@@ -11,7 +11,7 @@ public class SHAPExplainerConfigTest {
     void testDefaultValues() {
         SHAPExplainerConfig config = new SHAPExplainerConfig();
 
-        assertEquals(100, config.getnSamples());
+        assertEquals(300, config.getnSamples());
         assertEquals(ShapConfig.LinkType.IDENTITY, config.getLinkType());
         assertEquals(ShapConfig.RegularizerType.AUTO, config.getRegularizer());
         assertEquals(0.95, config.getConfidence());
