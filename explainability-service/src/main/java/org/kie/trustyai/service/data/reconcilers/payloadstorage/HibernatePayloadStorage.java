@@ -1,67 +1,75 @@
 package org.kie.trustyai.service.data.reconcilers.payloadstorage;
 
-import io.quarkus.arc.lookup.LookupIfProperty;
+import org.kie.trustyai.service.payloads.consumer.partial.PartialPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.PartialPayloadId;
+
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import org.kie.trustyai.service.payloads.consumer.PartialPayload;
 
-@LookupIfProperty(name = "service.storage.format", stringValue = "DATABASE")
 public class HibernatePayloadStorage<T extends PartialPayload, U extends PartialPayload> extends PayloadStorage<T, U> {
     @Inject
-    EntityManager em;
+    protected EntityManager em;
 
     @Override
     @Transactional
     public void addUnreconciledInput(String id, PartialPayload inputPayload) {
-        em.persist(inputPayload);
+        if (hasUnreconciledInput(id)) {
+            em.merge(inputPayload);
+        } else {
+            em.persist(inputPayload);
+        }
     }
 
     @Override
     @Transactional
     public void addUnreconciledOutput(String id, PartialPayload outputPayload) {
-        em.persist(outputPayload);
+        if (hasUnreconciledOutput(id)) {
+            em.merge(outputPayload);
+        } else {
+            em.persist(outputPayload);
+        }
     }
 
     @Override
     @Transactional
     public boolean hasUnreconciledInput(String id) {
-        return em.find(T, id) != null;
+        return em.find(PartialPayload.class, PartialPayloadId.request(id)) != null;
     }
 
     @Override
     @Transactional
     public boolean hasUnreconciledOutput(String id) {
-        return false;
+        return em.find(PartialPayload.class, PartialPayloadId.response(id)) != null;
     }
 
     @Override
     @Transactional
-    public PartialPayload getUnreconciledInput(String id) {
-        return null;
+    public T getUnreconciledInput(String id) {
+        return (T) em.find(PartialPayload.class, PartialPayloadId.request(id));
     }
 
     @Override
     @Transactional
-    public  PartialPayload getUnreconciledOutput(String id) {
-        return null;
+    public U getUnreconciledOutput(String id) {
+        return (U) em.find(PartialPayload.class, PartialPayloadId.response(id));
     }
 
     @Override
     @Transactional
     public void removeUnreconciledInput(String id) {
-
+        em.remove(em.find(PartialPayload.class, PartialPayloadId.request(id)));
     }
 
     @Override
     @Transactional
     public void removeUnreconciledOutput(String id) {
-
+        em.remove(em.find(PartialPayload.class, PartialPayloadId.response(id)));
     }
 
     @Override
     @Transactional
     public void clear() {
-
+        em.createQuery("delete from PartialPayload").executeUpdate();
     }
 }

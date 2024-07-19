@@ -1,6 +1,6 @@
 package org.kie.trustyai.service.data.reconcilers.payloadstorage;
 
-import org.kie.trustyai.service.payloads.consumer.PartialPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.PartialPayload;
 
 public interface PayloadStorageInterface<T extends PartialPayload, U extends PartialPayload> {
     void addUnreconciledInput(String id, T inputPayload);

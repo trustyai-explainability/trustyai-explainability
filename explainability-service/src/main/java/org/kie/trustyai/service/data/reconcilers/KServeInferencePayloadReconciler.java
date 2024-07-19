@@ -11,10 +11,12 @@ import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
+import org.kie.trustyai.service.data.reconcilers.payloadstorage.kserve.KServePayloadStorage;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerGeneral;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerInput;
-import org.kie.trustyai.service.payloads.consumer.KServeInputPayload;
-import org.kie.trustyai.service.payloads.consumer.KServeOutputPayload;
+import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
+import org.kie.trustyai.service.payloads.consumer.partial.KServeInputPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.KServeOutputPayload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,18 +30,26 @@ import jakarta.inject.Inject;
  * Reconcile partial input and output inference payloads in the KServe v2 protobuf format.
  */
 @ApplicationScoped
-public class KServeInferencePayloadReconciler extends InferencePayloadReconciler<KServeInputPayload, KServeOutputPayload> {
+public class KServeInferencePayloadReconciler extends InferencePayloadReconciler<KServeInputPayload, KServeOutputPayload, KServePayloadStorage> {
     private static final Logger LOG = Logger.getLogger(KServeInferencePayloadReconciler.class);
 
     @Inject
     Instance<DataSource> datasource;
 
     @Inject
+    Instance<KServePayloadStorage> kservePayloadStorage;
+
+    @Inject
     ObjectMapper objectMapper;
 
+    @Override
+    KServePayloadStorage getPayloadStorage() {
+        return kservePayloadStorage.get();
+    }
+
     protected synchronized void save(String id, String modelId) throws InvalidSchemaException, DataframeCreateException {
-        final KServeOutputPayload output = payloadStorage.get().getUnreconciledOutput(id);
-        final KServeInputPayload input = payloadStorage.get().getUnreconciledInput(id);
+        final KServeOutputPayload output = kservePayloadStorage.get().getUnreconciledOutput(id);
+        final KServeInputPayload input = kservePayloadStorage.get().getUnreconciledInput(id);
         LOG.info("Reconciling partial input and output, id=" + id);
 
         // save
@@ -51,8 +61,8 @@ public class KServeInferencePayloadReconciler extends InferencePayloadReconciler
 
         datasource.get().saveDataframe(dataframe, modelId);
 
-        payloadStorage.get().removeUnreconciledInput(id);
-        payloadStorage.get().removeUnreconciledOutput(id);
+        kservePayloadStorage.get().removeUnreconciledInput(id);
+        kservePayloadStorage.get().removeUnreconciledOutput(id);
     }
 
     public Dataframe payloadToDataframe(KServeInputPayload inputs, KServeOutputPayload outputs, String id, Map<String, String> metadata) throws DataframeCreateException {
@@ -86,8 +96,9 @@ public class KServeInferencePayloadReconciler extends InferencePayloadReconciler
             return FeatureFactory.newNumericalFeature("feature-" + i, data.get(i));
         }).collect(Collectors.toList()));
 
-        final PredictionOutput predictionOutput = new PredictionOutput(IntStream.range(0, outputs.getData().getPredictions().size()).mapToObj(i -> {
-            return new Output("output-" + i, Type.NUMBER, new Value(outputs.getData().getPredictions().get(i)), 1.0);
+        InferenceLoggerOutput ilo = outputs.getData();
+        final PredictionOutput predictionOutput = new PredictionOutput(IntStream.range(0, ilo.getPredictions().size()).mapToObj(i -> {
+            return new Output("output-" + i, Type.NUMBER, new Value(ilo.getPredictions().get(i)), 1.0);
         }).collect(Collectors.toList()));
 
         final List<Prediction> predictions = List.of(new SimplePrediction(predictionInput, predictionOutput));

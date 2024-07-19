@@ -1,15 +1,11 @@
 package org.kie.trustyai.service.data.reconcilers.payloadstorage;
 
-import io.quarkus.arc.lookup.LookupUnlessProperty;
-import jakarta.ejb.ApplicationException;
-import org.kie.trustyai.service.payloads.consumer.PartialPayload;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@LookupUnlessProperty(name = "service.storage.format", stringValue = "DATABASE")
-@ApplicationException
-public class MemoryPayloadStorage<T extends PartialPayload, U extends PartialPayload> extends PayloadStorage<T , U > {
+import org.kie.trustyai.service.payloads.consumer.partial.PartialPayload;
+
+public abstract class MemoryPayloadStorage<T extends PartialPayload, U extends PartialPayload> extends PayloadStorage<T, U> {
 
     protected final Map<String, T> unreconciledInputs = new ConcurrentHashMap<>();
     protected final Map<String, U> unreconciledOutputs = new ConcurrentHashMap<>();
@@ -50,7 +46,7 @@ public class MemoryPayloadStorage<T extends PartialPayload, U extends PartialPay
     }
 
     @Override
-    public  void removeUnreconciledOutput(String id) {
+    public void removeUnreconciledOutput(String id) {
         unreconciledOutputs.remove(id);
 
     }
@@ -60,6 +56,5 @@ public class MemoryPayloadStorage<T extends PartialPayload, U extends PartialPay
         unreconciledInputs.clear();
         unreconciledOutputs.clear();
     }
-
 
 }

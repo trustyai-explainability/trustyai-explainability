@@ -2,20 +2,14 @@ package org.kie.trustyai.service.data.reconcilers;
 
 import java.util.Map;
 
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
-import org.kie.trustyai.service.data.reconcilers.payloadstorage.PayloadStorage;
-import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
-import org.kie.trustyai.service.payloads.consumer.PartialPayload;
+import org.kie.trustyai.service.data.reconcilers.payloadstorage.PayloadStorageInterface;
+import org.kie.trustyai.service.payloads.consumer.partial.InferencePartialPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.PartialPayload;
 
-public abstract class InferencePayloadReconciler<T extends PartialPayload, U extends PartialPayload> {
-
-    @Inject
-    Instance<PayloadStorage<T, U>> payloadStorage;
-
+public abstract class InferencePayloadReconciler<T extends PartialPayload, U extends PartialPayload, V extends PayloadStorageInterface<T, U>> {
     /**
      * Add a {@link InferencePartialPayload} input to the (yet) unreconciled mapping.
      * If there is a corresponding (based on unique id) output {@link InferencePartialPayload},
@@ -26,8 +20,8 @@ public abstract class InferencePayloadReconciler<T extends PartialPayload, U ext
     public synchronized void addUnreconciledInput(T input) throws InvalidSchemaException, DataframeCreateException {
         final String id = input.getId();
 
-        payloadStorage.get().addUnreconciledInput(id, input);
-        if (payloadStorage.get().hasUnreconciledOutput(id)) {
+        getPayloadStorage().addUnreconciledInput(id, input);
+        if (getPayloadStorage().hasUnreconciledOutput(id)) {
             save(id, input.getModelId());
         }
     }
@@ -41,17 +35,20 @@ public abstract class InferencePayloadReconciler<T extends PartialPayload, U ext
      */
     public synchronized void addUnreconciledOutput(U output) throws InvalidSchemaException, DataframeCreateException {
         final String id = output.getId();
-        payloadStorage.get().addUnreconciledOutput(id, output);
-        if (payloadStorage.get().hasUnreconciledInput(id)) {
+        getPayloadStorage().addUnreconciledOutput(id, output);
+        if (getPayloadStorage().hasUnreconciledInput(id)) {
             save(id, output.getModelId());
         }
     }
+
+    abstract V getPayloadStorage();
 
     abstract protected void save(String id, String modelId) throws InvalidSchemaException, DataframeCreateException;
 
     abstract public Dataframe payloadToDataframe(T inputPayload, U outputPayload, String id, Map<String, String> metadata) throws DataframeCreateException;
 
     public void clear() {
-        payloadStorage.get().clear();
+        getPayloadStorage().clear();
     }
+
 }
