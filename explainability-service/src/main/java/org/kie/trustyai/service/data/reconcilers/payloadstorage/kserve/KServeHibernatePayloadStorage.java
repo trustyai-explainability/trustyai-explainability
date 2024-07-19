@@ -10,5 +10,5 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 @LookupIfProperty(name = "service.storage-format", stringValue = "DATABASE")
 @ApplicationScoped
-public class KServeHibernatePayloadStorage extends HibernatePayloadStorage<KServeInputPayload, KServeOutputPayload> implements KServePayloadStorage {explainability-service/src/main/java/org/kie/trustyai/service/data/
+public class KServeHibernatePayloadStorage extends HibernatePayloadStorage<KServeInputPayload, KServeOutputPayload> implements KServePayloadStorage {
 }
