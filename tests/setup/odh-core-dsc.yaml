@@ -18,11 +18,6 @@ spec:
       managementState: Managed
     kserve:
       managementState: Removed
-      devFlags:
-        manifests:
-          - contextDir: config
-            sourcePath: ''
-            uri: 'https://github.com/opendatahub-io/odh-model-controller/tarball/release-0.12.0'
       serving:
         ingressGateway:
           certificate:
@@ -33,11 +28,6 @@ spec:
       managementState: Removed
     modelmeshserving:
       managementState: Managed
-      devFlags:
-        manifests:
-          - contextDir: config
-            sourcePath: ''
-            uri: 'https://github.com/opendatahub-io/odh-model-controller/tarball/release-0.12.0'
     modelregistry:
       managementState: Removed
     ray:
