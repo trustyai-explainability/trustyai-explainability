@@ -45,16 +45,16 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
     }
 
     protected synchronized void save(String id, String modelId) throws InvalidSchemaException, DataframeCreateException {
-        final InferencePartialPayload output = unreconciledOutputs.get(id);
-        final InferencePartialPayload input = unreconciledInputs.get(id);
+        final InferencePartialPayload output = payloadStorage.get().getUnreconciledOutput(id);
+        final InferencePartialPayload input = payloadStorage.get().getUnreconciledInput(id);
         LOG.debug("Reconciling partial input and output, id=" + id);
 
         // save
         final Dataframe dataframe = payloadToDataframe(input, output, id, input.getMetadata());
         datasource.get().saveDataframe(dataframe, standardizeModelId(modelId));
 
-        unreconciledInputs.remove(id);
-        unreconciledOutputs.remove(id);
+        payloadStorage.get().removeUnreconciledInput(id);
+        payloadStorage.get().removeUnreconciledOutput(id);
     }
 
     /**

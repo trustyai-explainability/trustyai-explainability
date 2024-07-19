@@ -38,8 +38,8 @@ public class KServeInferencePayloadReconciler extends InferencePayloadReconciler
     ObjectMapper objectMapper;
 
     protected synchronized void save(String id, String modelId) throws InvalidSchemaException, DataframeCreateException {
-        final KServeOutputPayload output = unreconciledOutputs.get(id);
-        final KServeInputPayload input = unreconciledInputs.get(id);
+        final KServeOutputPayload output = payloadStorage.get().getUnreconciledOutput(id);
+        final KServeInputPayload input = payloadStorage.get().getUnreconciledInput(id);
         LOG.info("Reconciling partial input and output, id=" + id);
 
         // save
@@ -51,8 +51,8 @@ public class KServeInferencePayloadReconciler extends InferencePayloadReconciler
 
         datasource.get().saveDataframe(dataframe, modelId);
 
-        unreconciledInputs.remove(id);
-        unreconciledOutputs.remove(id);
+        payloadStorage.get().removeUnreconciledInput(id);
+        payloadStorage.get().removeUnreconciledOutput(id);
     }
 
     public Dataframe payloadToDataframe(KServeInputPayload inputs, KServeOutputPayload outputs, String id, Map<String, String> metadata) throws DataframeCreateException {

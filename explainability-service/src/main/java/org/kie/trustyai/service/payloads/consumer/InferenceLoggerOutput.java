@@ -4,7 +4,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 
+@Embeddable
 public class InferenceLoggerOutput {
     // Match the old "predictions" format
     @JsonAlias({ "predictions" })
@@ -54,6 +57,7 @@ public class InferenceLoggerOutput {
         }
     }
 
+    @Transient
     public List<Double> getPredictions() {
         if (predictions != null) {
             return predictions;

@@ -1,9 +1,14 @@
 package org.kie.trustyai.service.payloads.consumer;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+
 import java.util.Map;
 
+@Entity
 public class KServeOutputPayload implements PartialPayload {
 
+    @Id
     private String id;
     private String modelId;
     private InferenceLoggerOutput data;

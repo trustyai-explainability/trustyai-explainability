@@ -1,9 +1,15 @@
 package org.kie.trustyai.service.payloads.consumer;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import org.hibernate.annotations.NaturalId;
+
 import java.util.Map;
 
+@Entity
 public class KServeInputPayload implements PartialPayload {
 
+    @Id
     private String id;
     private String modelId;
 

@@ -4,7 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
+@Entity
 public class InferencePartialPayload implements PartialPayload {
 
     @JsonProperty("modelid")
@@ -13,8 +17,10 @@ public class InferencePartialPayload implements PartialPayload {
 
     private PartialKind kind;
 
+    @Id
     private String id;
 
+    @ElementCollection
     private Map<String, String> metadata = new HashMap<>();
 
     public String getId() {

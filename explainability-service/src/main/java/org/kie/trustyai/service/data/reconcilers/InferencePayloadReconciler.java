@@ -1,18 +1,20 @@
 package org.kie.trustyai.service.data.reconcilers;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
+import org.kie.trustyai.service.data.reconcilers.payloadstorage.PayloadStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.PartialPayload;
 
 public abstract class InferencePayloadReconciler<T extends PartialPayload, U extends PartialPayload> {
 
-    protected final Map<String, T> unreconciledInputs = new ConcurrentHashMap<>();
-    protected final Map<String, U> unreconciledOutputs = new ConcurrentHashMap<>();
+    @Inject
+    Instance<PayloadStorage<T, U>> payloadStorage;
 
     /**
      * Add a {@link InferencePartialPayload} input to the (yet) unreconciled mapping.
@@ -23,8 +25,9 @@ public abstract class InferencePayloadReconciler<T extends PartialPayload, U ext
      */
     public synchronized void addUnreconciledInput(T input) throws InvalidSchemaException, DataframeCreateException {
         final String id = input.getId();
-        unreconciledInputs.put(id, input);
-        if (unreconciledOutputs.containsKey(id)) {
+
+        payloadStorage.get().addUnreconciledInput(id, input);
+        if (payloadStorage.get().hasUnreconciledOutput(id)) {
             save(id, input.getModelId());
         }
     }
@@ -38,8 +41,8 @@ public abstract class InferencePayloadReconciler<T extends PartialPayload, U ext
      */
     public synchronized void addUnreconciledOutput(U output) throws InvalidSchemaException, DataframeCreateException {
         final String id = output.getId();
-        unreconciledOutputs.put(id, output);
-        if (unreconciledInputs.containsKey(id)) {
+        payloadStorage.get().addUnreconciledOutput(id, output);
+        if (payloadStorage.get().hasUnreconciledInput(id)) {
             save(id, output.getModelId());
         }
     }
@@ -49,7 +52,6 @@ public abstract class InferencePayloadReconciler<T extends PartialPayload, U ext
     abstract public Dataframe payloadToDataframe(T inputPayload, U outputPayload, String id, Map<String, String> metadata) throws DataframeCreateException;
 
     public void clear() {
-        unreconciledInputs.clear();
-        unreconciledOutputs.clear();
+        payloadStorage.get().clear();
     }
 }
