@@ -17,6 +17,8 @@ package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -88,13 +90,15 @@ public class LimeEndpoint extends ExplainerEndpoint {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Found " + predictions.size()
                         + " predictions with id=" + request.getPredictionId()).build();
             }
+        } catch (TimeoutException e) {
+            return Response.serverError().status(Response.Status.REQUEST_TIMEOUT).entity("The explanation request has timed out").build();
         } catch (Exception e) {
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
 
     public BaseExplanationResponse generateExplanation(PredictionProvider model, Prediction predictionToExplain,
-            List<PredictionInput> inputs, LimeExplanationRequest request) {
+            List<PredictionInput> inputs, LimeExplanationRequest request) throws ExecutionException, InterruptedException, TimeoutException {
         final LimeExplainerConfig requestConfig = request.getConfig().getExplainerConfig();
         final LimeConfig config = new LimeConfig()
                 .withSamples(requestConfig.getnSamples())
@@ -116,13 +120,8 @@ public class LimeEndpoint extends ExplainerEndpoint {
                 .withDataDistribution(new PredictionInputsDataDistribution(inputs));
 
         final LimeExplainer limeExplainer = new LimeExplainer(config); // TODO: switch to RecordingLimeExplainer?
-        try {
-            return SaliencyExplanationResponse
-                    .fromSaliencyResults(limeExplainer.explainAsync(predictionToExplain, model).get());
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Failed to explain {} ", predictionToExplain, e);
-            return SaliencyExplanationResponse.empty();
-        }
+        return SaliencyExplanationResponse
+                .fromSaliencyResults(limeExplainer.explainAsync(predictionToExplain, model).get(requestConfig.getTimeout(), TimeUnit.SECONDS));
     }
 
 }

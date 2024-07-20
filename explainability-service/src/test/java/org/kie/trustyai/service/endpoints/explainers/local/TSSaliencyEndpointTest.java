@@ -1,28 +1,34 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Random;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.explainability.utils.models.TestModels;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
+import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
+import org.kie.trustyai.service.endpoints.explainers.GrpcMockServer;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
+import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyExplanationRequest;
+import org.kie.trustyai.service.utils.DataframeGenerators;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
+
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.PredictionInput;
-import org.kie.trustyai.explainability.model.dataframe.Dataframe;
-import org.kie.trustyai.service.data.metadata.StorageMetadata;
-import org.kie.trustyai.service.endpoints.explainers.ExplainersEndpointTestProfile;
-import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
-import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
-import org.kie.trustyai.service.payloads.explainers.shap.SHAPExplanationRequest;
-import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyExplanationRequest;
-import org.kie.trustyai.service.utils.DataframeGenerators;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
@@ -39,6 +45,7 @@ class TSSaliencyEndpointTest {
     Instance<MockCSVDatasource> datasource;
     @Inject
     Instance<MockMemoryStorage> storage;
+    private GrpcMockServer mockServer;
 
     private void testServiceUrl(String serviceUrl, int expectedStatusCode) throws JsonProcessingException {
         datasource.get().reset();
@@ -63,12 +70,21 @@ class TSSaliencyEndpointTest {
     }
 
     @BeforeEach
-    void populateStorage() {
+    void populateStorage() throws IOException {
         storage.get().emptyStorage();
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
+        mockServer = new GrpcMockServer(TestModels.getSumSkipModel(1));
+        mockServer.start();
+
     }
+
+    @AfterEach
+    void tearDown() {
+        mockServer.stop();
+    }
+
 
     @Test
     void get() {
@@ -77,7 +93,6 @@ class TSSaliencyEndpointTest {
                 .statusCode(Response.Status.METHOD_NOT_ALLOWED.getStatusCode())
                 .body(is(""));
     }
-
 
     @Test
     void testWithValidServiceUrl() throws JsonProcessingException {
@@ -95,4 +110,5 @@ class TSSaliencyEndpointTest {
         testServiceUrl("foo/some/path", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         testServiceUrl("", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
+
 }
