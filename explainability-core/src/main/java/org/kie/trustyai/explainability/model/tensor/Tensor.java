@@ -4,6 +4,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Tensor<T> {
@@ -289,5 +290,19 @@ public class Tensor<T> {
     public int getnEntries() {
         return nEntries;
 
+    }
+
+    // == EQUALS =======================================================================================================
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Tensor)) return false;
+        Tensor<?> tensor = (Tensor<?>) o;
+        return Objects.deepEquals(dimensions, tensor.dimensions) && Objects.deepEquals(data, tensor.data) && Objects.equals(datatype, tensor.datatype);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.hashCode(dimensions), Arrays.hashCode(data), dimension, nEntries, datatype);
     }
 }

@@ -177,4 +177,20 @@ class TensorTest {
                 "        [2,2,0]], dtype=java.lang.String)";
         assertEquals(expected, tensor.toString());
     }
+
+    @Test
+    @DisplayName("Tensor equality")
+    void testToEquals() {
+        int[] dimensions = { 5, 5, 5, 5 };
+        List<?> data = generate(dimensions);
+        Tensor<String> tensor1 = Tensor.fromList(data);
+        Tensor<String> tensor2 = Tensor.fromList(data);
+        assertEquals(tensor1, tensor2);
+
+        int[] dimensions1 = { 12, 14, 16, 3 };
+        data = generate(dimensions1);
+        tensor1 = Tensor.fromList(data);
+        tensor2 = Tensor.fromList(data);
+        assertEquals(tensor1, tensor2);
+    }
 }
