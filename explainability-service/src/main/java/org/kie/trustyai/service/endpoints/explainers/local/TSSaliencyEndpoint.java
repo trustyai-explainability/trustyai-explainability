@@ -1,16 +1,11 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
-import io.quarkus.resteasy.reactive.server.EndpointDisabled;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import java.security.SecureRandom;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.local.tssaliency.TSSaliencyExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
@@ -22,8 +17,16 @@ import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
 import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyExplainerConfig;
 import org.kie.trustyai.service.payloads.explainers.tssaliency.TSSaliencyExplanationRequest;
 
-import java.security.SecureRandom;
-import java.util.List;
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
+
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Tag(name = "Local explainers")
 @EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
@@ -87,9 +90,11 @@ public class TSSaliencyEndpoint extends ExplainerEndpoint {
                         parameters.getSigma(),
                         parameters.getMu(),
                         true);
-                final SaliencyResults explanations = explainer.explainAsync(predictions, model).get();
+                final SaliencyResults explanations = explainer.explainAsync(predictions, model).get(request.getConfig().getExplainerConfig().getTimeout(), TimeUnit.SECONDS);
                 return Response.ok(explanations).build();
             }
+        } catch (TimeoutException e) {
+            return Response.serverError().status(Response.Status.REQUEST_TIMEOUT).entity("The explanation request has timed out").build();
         } catch (Exception e) {
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }

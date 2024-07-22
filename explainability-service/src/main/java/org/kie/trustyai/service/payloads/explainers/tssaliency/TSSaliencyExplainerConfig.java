@@ -2,12 +2,13 @@ package org.kie.trustyai.service.payloads.explainers.tssaliency;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.kie.trustyai.service.payloads.explainers.BaseExplainerConfig;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Schema(description = "Configuration for the TSSaliency explainer")
 @Tag(name = "Payloads", description = "Payload definitions for the API")
-public class TSSaliencyExplainerConfig {
+public class TSSaliencyExplainerConfig extends BaseExplainerConfig {
 
     @Schema(required = false, description = "Step size for gradient estimation", defaultValue = "0.01", example = "0.01")
     @JsonProperty("mu")
@@ -40,14 +41,6 @@ public class TSSaliencyExplainerConfig {
 
     public void setBaseValues(double[] baseValues) {
         this.baseValues = baseValues;
-    }
-
-    public int getnSamples() {
-        return nSamples;
-    }
-
-    public void setnSamples(int nSamples) {
-        this.nSamples = nSamples;
     }
 
     public double getSigma() {

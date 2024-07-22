@@ -24,6 +24,7 @@ import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.explainers.SaliencyExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
+import org.kie.trustyai.service.payloads.explainers.lime.LimeExplainerConfig;
 import org.kie.trustyai.service.payloads.explainers.lime.LimeExplanationRequest;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
@@ -221,6 +222,29 @@ class LimeEndpointTest {
 
         assertEquals(initialSize, storedDataframe.getRowDimension());
 
+    }
+
+    @Test
+    @DisplayName("Test LIME request timeout")
+    void testTimeout() throws JsonProcessingException {
+        datasource.get().reset();
+
+        final Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
+
+        final Random random = new Random();
+        int randomIndex = random.nextInt(dataframe.getIds().size());
+        final String id = dataframe.getIds().get(randomIndex);
+        final LimeExplanationRequest payload = new LimeExplanationRequest();
+        payload.getConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        final LimeExplainerConfig explainerConfig = new LimeExplainerConfig();
+        explainerConfig.setTimeout(0);
+        payload.getConfig().setExplainerConfig(explainerConfig);
+        payload.setPredictionId(id);
+
+        given().contentType(ContentType.JSON).body(payload)
+                .when().post()
+                .then()
+                .statusCode(Response.Status.REQUEST_TIMEOUT.getStatusCode());
     }
 
     public static Dataframe generateExplainerTestADataframe(int observations) throws ExecutionException, InterruptedException {
