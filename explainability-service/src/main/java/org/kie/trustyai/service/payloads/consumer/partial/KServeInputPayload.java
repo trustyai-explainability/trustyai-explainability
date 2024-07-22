@@ -1,9 +1,11 @@
 package org.kie.trustyai.service.payloads.consumer.partial;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 
 @Entity
 public class KServeInputPayload extends PartialPayload {
+    @Lob
     private String data;
 
     private String modelId;

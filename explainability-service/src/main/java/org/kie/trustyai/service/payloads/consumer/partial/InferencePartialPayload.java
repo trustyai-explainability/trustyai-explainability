@@ -3,9 +3,11 @@ package org.kie.trustyai.service.payloads.consumer.partial;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 
 @Entity
 public class InferencePartialPayload extends PartialPayload {
+    @Lob
     private String data;
 
     @JsonProperty("modelid")
