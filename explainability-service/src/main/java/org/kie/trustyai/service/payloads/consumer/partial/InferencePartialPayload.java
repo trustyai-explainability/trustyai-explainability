@@ -2,12 +2,14 @@ package org.kie.trustyai.service.payloads.consumer.partial;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Lob;
+import org.hibernate.engine.jdbc.env.internal.LobTypes;
 
 @Entity
 public class InferencePartialPayload extends PartialPayload {
-    @Lob
+    @Column(columnDefinition="text")
     private String data;
 
     @JsonProperty("modelid")
