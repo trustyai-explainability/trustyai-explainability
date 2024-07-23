@@ -2,11 +2,10 @@ package org.kie.trustyai.service.payloads.consumer.partial;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Lob;
 
 @Entity
 public class KServeInputPayload extends PartialPayload {
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     private String data;
 
     private String modelId;

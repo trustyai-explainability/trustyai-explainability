@@ -15,4 +15,6 @@ public interface PartialPayloadInterface {
     Map<String, String> getMetadata();
 
     PartialKind getKind();
+
+    void setKind(PartialKind kind);
 }

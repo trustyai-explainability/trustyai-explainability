@@ -3,20 +3,31 @@ package org.kie.trustyai.service.payloads.consumer.partial;
 import java.io.Serializable;
 import java.util.Objects;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class PartialPayloadId implements Serializable {
-    private String id;
+    private String predictionId;
     private PartialKind kind;
 
     public PartialPayloadId() {
     }
 
-    public PartialPayloadId(String id, PartialKind kind) {
-        this.id = id;
+    public PartialPayloadId(String predictionId, PartialKind kind) {
+        this.predictionId = predictionId;
         this.kind = kind;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public PartialKind getKind() {
+        return kind;
+    }
+
+    public String getPredictionId() {
+        return predictionId;
+    }
+
+    public void setPredictionId(String id) {
+        this.predictionId = id;
     }
 
     public void setKind(PartialKind kind) {
@@ -30,12 +41,12 @@ public class PartialPayloadId implements Serializable {
         if (!(o instanceof PartialPayloadId))
             return false;
         PartialPayloadId that = (PartialPayloadId) o;
-        return Objects.equals(id, that.id) && kind == that.kind;
+        return Objects.equals(predictionId, that.predictionId) && kind == that.kind;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, kind);
+        return Objects.hash(predictionId, kind);
     }
 
     public static PartialPayloadId request(String id) {
