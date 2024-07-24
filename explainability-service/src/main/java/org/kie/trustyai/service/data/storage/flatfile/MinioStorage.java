@@ -27,7 +27,7 @@ import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
-@LookupIfProperty(name = "service.storage.format", stringValue = "MINIO")
+@LookupIfProperty(name = "service.storage-format", stringValue = "MINIO")
 @ApplicationScoped
 public class MinioStorage extends FlatFileStorage {
 

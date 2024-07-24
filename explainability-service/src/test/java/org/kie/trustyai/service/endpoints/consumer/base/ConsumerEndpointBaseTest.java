@@ -1,4 +1,4 @@
-package org.kie.trustyai.service.endpoints.consumer;
+package org.kie.trustyai.service.endpoints.consumer.base;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,20 +10,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.PayloadProducer;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.reconcilers.ModelMeshInferencePayloadReconciler;
-import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
-import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
+import org.kie.trustyai.service.endpoints.consumer.ConsumerEndpoint;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
-import org.kie.trustyai.service.payloads.consumer.PartialKind;
-import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
+import org.kie.trustyai.service.payloads.consumer.partial.InferencePartialPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.PartialKind;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 
 import jakarta.enterprise.inject.Instance;
@@ -36,26 +34,28 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 
 @QuarkusTest
-@TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
-class ConsumerEndpointTest {
+abstract class ConsumerEndpointBaseTest {
 
     @Inject
-    Instance<MockCSVDatasource> datasource;
-
-    @Inject
-    Instance<MockMemoryStorage> storage;
+    Instance<DataSource> datasource;
 
     @Inject
     ModelMeshInferencePayloadReconciler reconciler;
+
+    abstract void resetDatasource() throws JsonProcessingException;
+
+    abstract void clearStorage() throws JsonProcessingException;
+
+    abstract String missingDataMessage(String modelId);
 
     /**
      * Empty the storage before each test.
      */
     @BeforeEach
     void emptyStorage() throws JsonProcessingException {
-        datasource.get().reset();
-        storage.get().emptyStorage();
+        clearStorage();
+        resetDatasource();
         reconciler.clear();
 
     }
@@ -76,7 +76,7 @@ class ConsumerEndpointTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals(missingDataMessage(MODEL_A_ID), exception.getMessage());
 
     }
 
@@ -96,7 +96,7 @@ class ConsumerEndpointTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals(missingDataMessage(MODEL_A_ID), exception.getMessage());
 
     }
 

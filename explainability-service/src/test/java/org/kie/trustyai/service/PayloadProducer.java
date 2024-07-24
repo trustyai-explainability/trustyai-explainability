@@ -1,8 +1,8 @@
 package org.kie.trustyai.service;
 
-import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
-import org.kie.trustyai.service.payloads.consumer.PartialKind;
+import org.kie.trustyai.service.payloads.consumer.partial.InferencePartialPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.PartialKind;
 
 public class PayloadProducer {
 
