@@ -28,7 +28,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
-@LookupUnlessProperty(name = "service.storage.format", stringValue = "DATABASE")
+@LookupUnlessProperty(name = "service.storage-format", stringValue = "DATABASE")
 public class CSVDataSource extends DataSource {
     @Inject
     Instance<FlatFileStorage> storage;

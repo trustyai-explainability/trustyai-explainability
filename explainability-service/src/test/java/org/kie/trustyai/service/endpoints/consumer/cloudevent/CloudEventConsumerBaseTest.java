@@ -1,30 +1,29 @@
-package org.kie.trustyai.service.endpoints.consumer;
+package org.kie.trustyai.service.endpoints.consumer.cloudevent;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.eclipse.microprofile.context.ThreadContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
-import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
+import org.kie.trustyai.service.data.storage.Storage;
+import org.kie.trustyai.service.endpoints.consumer.CloudEventConsumer;
 import org.kie.trustyai.service.mocks.kserve.MockKServeInputPayload;
 import org.kie.trustyai.service.mocks.kserve.MockKServeOutputPayload;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
-import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.funqy.knative.events.CloudEvent;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -33,21 +32,25 @@ import static io.smallrye.common.constraint.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
-@TestProfile(MemoryTestProfile.class)
-public class CloudEventConsumerTest {
+abstract public class CloudEventConsumerBaseTest {
 
     final static String MODEL_NAME = "someModelId";
     @Inject
     Instance<CloudEventConsumer> consumer;
+
     @Inject
-    Instance<MockCSVDatasource> datasource;
-    @Inject
-    Instance<MockMemoryStorage> storage;
+    Instance<DataSource> datasource;
+
+    abstract void resetDatasource() throws JsonProcessingException;
+
+    abstract void clearStorage() throws JsonProcessingException;
+
+    abstract Storage getStorage();
 
     @BeforeEach
     void emptyStorage() throws JsonProcessingException {
-        datasource.get().reset();
-        storage.get().emptyStorage();
+        resetDatasource();
+        clearStorage();
     }
 
     private CloudEvent<byte[]> generateMockInput(String id) {
@@ -69,7 +72,7 @@ public class CloudEventConsumerTest {
 
         consumer.get().consumeKubeflowRequest(mockInput);
 
-        assertFalse(storage.get().dataExists(MODEL_NAME));
+        assertFalse(getStorage().dataExists(MODEL_NAME));
 
         InferenceLoggerOutput ilo = new InferenceLoggerOutput();
         ilo.setPredictions(List.of(1.0));
@@ -77,7 +80,7 @@ public class CloudEventConsumerTest {
         CloudEvent<InferenceLoggerOutput> mockOutput = MockKServeOutputPayload.create(id, ilo, MODEL_NAME);
         consumer.get().consumeKubeflowResponse(mockOutput);
 
-        assertTrue(storage.get().dataExists(MODEL_NAME));
+        assertTrue(getStorage().dataExists(MODEL_NAME));
 
         final Dataframe df = datasource.get().getDataframe(MODEL_NAME);
         assertEquals(5, df.getColumnDimension());
@@ -107,7 +110,7 @@ public class CloudEventConsumerTest {
     @DisplayName("Concurrent cloud events should be processed correctly")
     public void testConsumeKubeflowCloudEventsConcurrently() {
         final int NUM_EVENTS = 1000;
-        final ExecutorService executor = Executors.newFixedThreadPool(10);
+        ManagedExecutor executor = ManagedExecutor.builder().maxAsync(10).propagated(ThreadContext.CDI).build();
 
         IntStream.range(0, NUM_EVENTS).forEach(i -> {
             executor.submit(() -> {
@@ -136,7 +139,7 @@ public class CloudEventConsumerTest {
             fail("Test interrupted");
         }
 
-        assertTrue(storage.get().dataExists(MODEL_NAME));
+        assertTrue(getStorage().dataExists(MODEL_NAME));
         final Dataframe df = datasource.get().getDataframe(MODEL_NAME);
         assertEquals(5, df.getColumnDimension());
         assertEquals(4, df.getInputsCount());

@@ -1,8 +1,8 @@
-package org.kie.trustyai.service.payloads.consumer;
+package org.kie.trustyai.service.payloads.consumer.partial;
 
 import java.util.Map;
 
-public interface PartialPayload {
+public interface PartialPayloadInterface {
 
     String getId();
 
@@ -14,4 +14,7 @@ public interface PartialPayload {
 
     Map<String, String> getMetadata();
 
+    PartialKind getKind();
+
+    void setKind(PartialKind kind);
 }

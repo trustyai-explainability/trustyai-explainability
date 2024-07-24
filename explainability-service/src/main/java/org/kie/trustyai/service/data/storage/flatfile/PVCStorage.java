@@ -26,7 +26,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import static org.kie.trustyai.service.data.datasources.DataSource.INTERNAL_DATA_FILENAME;
 
-@LookupIfProperty(name = "service.storage.format", stringValue = "PVC")
+@LookupIfProperty(name = "service.storage-format", stringValue = "PVC")
 @ApplicationScoped
 public class PVCStorage extends FlatFileStorage {
 
