@@ -52,8 +52,8 @@ public class ServiceMetadataEndpoint {
 
     }
 
-    private List<ServiceMetadata> getServiceMetadata() {
-        final List<ServiceMetadata> serviceMetadataList = new ArrayList<>();
+    private Map<String, ServiceMetadata> getServiceMetadata() {
+        final Map<String, ServiceMetadata> serviceMetadataMap = new HashMap<>();
         for (String modelId : dataSource.get().getKnownModels()) {
             final ServiceMetadata serviceMetadata = new ServiceMetadata();
 
@@ -75,9 +75,9 @@ public class ServiceMetadataEndpoint {
                 LOG.warn("Problem creating dataframe: " + e.getMessage(), e);
             }
 
-            serviceMetadataList.add(serviceMetadata);
+            serviceMetadataMap.put(modelId, serviceMetadata);
         }
-        return serviceMetadataList;
+        return serviceMetadataMap;
     }
 
     @GET

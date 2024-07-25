@@ -1,5 +1,5 @@
-[
-    {
+{
+    "MODEL_2": {
         "metrics": {
             "scheduledMetadata": {
                 "metricCounts": {
@@ -46,8 +46,107 @@
             },
             "inputTensorName": "input",
             "outputTensorName": "output",
-            "observations": 1000,
-            "modelId": "example1"
+            "observations": 1000
+        }
+    },
+    "MODEL_1": {
+        "metrics": {
+            "scheduledMetadata": {
+                "metricCounts": {
+                    "SPD": 1
+                }
+            }
+        },
+        "data": {
+            "inputSchema": {
+                "items": {
+                    "Race Mapped": {
+                        "type": "INT32",
+                        "name": "race",
+                        "columnIndex": 0
+                    },
+                    "Age Mapped": {
+                        "type": "INT32",
+                        "name": "age",
+                        "columnIndex": 0
+                    },
+                    "Gender Mapped": {
+                        "type": "INT32",
+                        "name": "gender",
+                        "columnIndex": 0
+                    }
+                },
+                "nameMapping": {
+                    "gender": "Gender Mapped",
+                    "race": "Race Mapped",
+                    "age": "Age Mapped"
+                }
+            },
+            "outputSchema": {
+                "items": {
+                    "Income Mapped": {
+                        "type": "INT32",
+                        "name": "income",
+                        "columnIndex": 0
+                    }
+                },
+                "nameMapping": {
+                    "income": "Income Mapped"
+                }
+            },
+            "inputTensorName": "input",
+            "outputTensorName": "output",
+            "observations": 1000
+        }
+    },
+    "MODEL_0": {
+        "metrics": {
+            "scheduledMetadata": {
+                "metricCounts": {
+                    "SPD": 1
+                }
+            }
+        },
+        "data": {
+            "inputSchema": {
+                "items": {
+                    "Race Mapped": {
+                        "type": "INT32",
+                        "name": "race",
+                        "columnIndex": 0
+                    },
+                    "Age Mapped": {
+                        "type": "INT32",
+                        "name": "age",
+                        "columnIndex": 0
+                    },
+                    "Gender Mapped": {
+                        "type": "INT32",
+                        "name": "gender",
+                        "columnIndex": 0
+                    }
+                },
+                "nameMapping": {
+                    "gender": "Gender Mapped",
+                    "race": "Race Mapped",
+                    "age": "Age Mapped"
+                }
+            },
+            "outputSchema": {
+                "items": {
+                    "Income Mapped": {
+                        "type": "INT32",
+                        "name": "income",
+                        "columnIndex": 0
+                    }
+                },
+                "nameMapping": {
+                    "income": "Income Mapped"
+                }
+            },
+            "inputTensorName": "input",
+            "outputTensorName": "output",
+            "observations": 1000
         }
     }
-]
+}

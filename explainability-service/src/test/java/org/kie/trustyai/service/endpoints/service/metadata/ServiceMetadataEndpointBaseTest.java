@@ -137,42 +137,45 @@ abstract class ServiceMetadataEndpointBaseTest {
 
     @Test
     void checkMetadataOutput() throws IOException {
-        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 1000, false);
-        saveDataframe(dataframe, MODEL_ID);
+        String modelName = "MODEL_";
+        for (int modelIdx = 0; modelIdx < 3; modelIdx++) {
+            final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 1000, false);
+            saveDataframe(dataframe, modelName+modelIdx);
 
-        // apply name mapping
-        HashMap<String, String> inputMapping = new HashMap<>();
-        HashMap<String, String> outputMapping = new HashMap<>();
-        inputMapping.put("age", "Age Mapped");
-        inputMapping.put("gender", "Gender Mapped");
-        inputMapping.put("race", "Race Mapped");
+            // apply name mapping
+            HashMap<String, String> inputMapping = new HashMap<>();
+            HashMap<String, String> outputMapping = new HashMap<>();
+            inputMapping.put("age", "Age Mapped");
+            inputMapping.put("gender", "Gender Mapped");
+            inputMapping.put("race", "Race Mapped");
 
-        outputMapping.put("income", "Income Mapped");
-        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
+            outputMapping.put("income", "Income Mapped");
+            NameMapping nameMapping = new NameMapping(modelName+modelIdx, inputMapping, outputMapping);
 
-        given()
-                .contentType(ContentType.JSON)
-                .body(nameMapping)
-                .when().post(metadataUrl + "/names")
-                .then()
-                .statusCode(200)
-                .body(is("Feature and output name mapping successfully applied."));
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(nameMapping)
+                    .when().post(metadataUrl + "/names")
+                    .then()
+                    .statusCode(200)
+                    .body(is("Feature and output name mapping successfully applied."));
 
-        // set up metric request
-        GroupMetricRequest request = new GroupMetricRequest();
-        request.setProtectedAttribute("Gender Mapped");
-        request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(1)));
-        request.setOutcomeName("Income Mapped");
-        request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
-        request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
-        request.setModelId(MODEL_ID);
-        given()
-                .contentType(ContentType.JSON)
-                .body(request)
-                .when()
-                .post("/metrics/group/fairness/spd/request")
-                .then()
-                .statusCode(200);
+            // set up metric request
+            GroupMetricRequest request = new GroupMetricRequest();
+            request.setProtectedAttribute("Gender Mapped");
+            request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(1)));
+            request.setOutcomeName("Income Mapped");
+            request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+            request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
+            request.setModelId(modelName+modelIdx);
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(request)
+                    .when()
+                    .post("/metrics/group/fairness/spd/request")
+                    .then()
+                    .statusCode(200);
+        }
 
         final String serviceMetadata = given()
                 .when().get(metadataUrl)
@@ -180,11 +183,11 @@ abstract class ServiceMetadataEndpointBaseTest {
                 .statusCode(200)
                 .extract()
                 .asPrettyString();
-
+        
         // load expected metadata from resource file
         String expectedMetadata = ResourceReader.readFile("expected_metadata_output.txt");
         assertEquals(expectedMetadata, serviceMetadata);
-    } explainability-service/src/main/java/org/kie/trustyai/service/
+    }
 
     @Test
     void getNoObservations() throws JsonProcessingException {

@@ -8,7 +8,6 @@ public class ReadableStorageMetadata {
     private String inputTensorName;
     private String outputTensorName;
     private int observations;
-    private String modelId;
 
     private ReadableStorageMetadata() {}
 
@@ -32,10 +31,6 @@ public class ReadableStorageMetadata {
         return observations;
     }
 
-    public String getModelId() {
-        return modelId;
-    }
-
     public void setInputSchema(ReadableSchema inputSchema) {
         this.inputSchema = inputSchema;
     }
@@ -56,9 +51,6 @@ public class ReadableStorageMetadata {
         this.observations = observations;
     }
 
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
-    }
 
     public static ReadableStorageMetadata from(StorageMetadata sm) {
         ReadableStorageMetadata rsm = new ReadableStorageMetadata();
@@ -67,7 +59,6 @@ public class ReadableStorageMetadata {
         rsm.setInputTensorName(sm.getInputTensorName());
         rsm.setOutputTensorName(sm.getOutputTensorName());
         rsm.setObservations(sm.getObservations());
-        rsm.setModelId(sm.getModelId());
         return rsm;
     }
 }
