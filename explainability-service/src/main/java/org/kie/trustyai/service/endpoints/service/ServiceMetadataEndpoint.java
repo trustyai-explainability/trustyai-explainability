@@ -20,6 +20,7 @@ import org.kie.trustyai.service.payloads.service.*;
 import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
+import org.kie.trustyai.service.payloads.service.readable.ReadableStorageMetadata;
 import org.kie.trustyai.service.prometheus.PrometheusScheduler;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 import org.kie.trustyai.service.validators.serviceRequests.ValidNameMappingRequest;
@@ -51,7 +52,7 @@ public class ServiceMetadataEndpoint {
 
     }
 
-    private List<ServiceMetadata> getServiceMetadata(boolean loadColumnValues) {
+    private List<ServiceMetadata> getServiceMetadata() {
         final List<ServiceMetadata> serviceMetadataList = new ArrayList<>();
         for (String modelId : dataSource.get().getKnownModels()) {
             final ServiceMetadata serviceMetadata = new ServiceMetadata();
@@ -68,8 +69,8 @@ public class ServiceMetadataEndpoint {
             }
 
             try {
-                final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId, loadColumnValues);
-                serviceMetadata.setData(storageMetadata);
+                final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId);
+                serviceMetadata.setData(ReadableStorageMetadata.from(storageMetadata));
             } catch (DataframeCreateException | StorageReadException | NullPointerException e) {
                 LOG.warn("Problem creating dataframe: " + e.getMessage(), e);
             }
@@ -82,15 +83,9 @@ public class ServiceMetadataEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response serviceInfo() throws JsonProcessingException {
-        return Response.ok(getServiceMetadata(false)).build();
+        return Response.ok(getServiceMetadata()).build();
     }
 
-    @GET
-    @Path("/values")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response serviceInfoWithValues() throws JsonProcessingException {
-        return Response.ok(getServiceMetadata(true)).build();
-    }
 
     @GET
     @Path("/tags")

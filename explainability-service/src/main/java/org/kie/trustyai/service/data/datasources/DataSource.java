@@ -253,19 +253,13 @@ public abstract class DataSource {
     protected abstract void saveDataframeIntoStorage(final Dataframe dataframe, final String modelId, boolean overwrite);
 
     // METADATA READS ==================================================================================================
-    public StorageMetadata getMetadata(String modelId) throws StorageReadException {
-        return getMetadata(modelId, false);
-    }
-
     /**
      * Get metadata for this modelId, with optional loading of column enumerations
      *
      * @param modelId the model id
-     * @param loadColumnValues if true, add column enumerations to the metadata. This adds an additional storage read,
-     *        so use this only when necessary.
      * @throws StorageReadException if the metadata cannot be read
      */
-    public abstract StorageMetadata getMetadata(String modelId, boolean loadColumnValues) throws StorageReadException;
+    public abstract StorageMetadata getMetadata(String modelId) throws StorageReadException;
 
     /**
      * Check whether metadata exists for this modelId

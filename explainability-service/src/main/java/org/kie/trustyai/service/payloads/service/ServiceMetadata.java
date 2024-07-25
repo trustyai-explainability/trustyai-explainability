@@ -1,11 +1,12 @@
 package org.kie.trustyai.service.payloads.service;
 
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
+import org.kie.trustyai.service.payloads.service.readable.ReadableStorageMetadata;
 
 public class ServiceMetadata {
 
     private ServiceMetricsMetadata metrics = new ServiceMetricsMetadata();
-    private StorageMetadata data = new StorageMetadata();
+    private ReadableStorageMetadata data;
 
     public ServiceMetadata() {
         // empty constructor
@@ -19,11 +20,11 @@ public class ServiceMetadata {
         this.metrics = metrics;
     }
 
-    public StorageMetadata getData() {
+    public ReadableStorageMetadata getData() {
         return data;
     }
 
-    public void setData(StorageMetadata data) {
+    public void setData(ReadableStorageMetadata data) {
         this.data = data;
     }
 

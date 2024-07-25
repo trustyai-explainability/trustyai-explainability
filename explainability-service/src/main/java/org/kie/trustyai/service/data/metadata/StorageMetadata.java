@@ -74,14 +74,7 @@ public class StorageMetadata {
 
     public void mergeInputSchema(Schema otherSchema) {
         if (otherSchema.equals(this.getInputSchema())) {
-            for (String columnName : this.getInputSchema().getItems().keySet()) {
-                // propagate nulls: null values mean there too many unique values to enumerate, therefore null + x = x + null = null
-                if (this.getInputSchema().getItems().get(columnName).getColumnValues() == null || otherSchema.getItems().get(columnName).getColumnValues() == null) {
-                    this.getInputSchema().getItems().get(columnName).setColumnValues(null);
-                } else {
-                    this.getInputSchema().getItems().get(columnName).getColumnValues().addAll(otherSchema.getItems().get(columnName).getColumnValues());
-                }
-            }
+            // pass
         } else {
             final String message = "Original schema and schema-to-merge are not compatible";
             throw new InvalidSchemaException(message);
@@ -90,14 +83,7 @@ public class StorageMetadata {
 
     public void mergeOutputSchema(Schema otherSchema) {
         if (otherSchema.equals(this.getOutputSchema())) {
-            for (String columnName : this.getOutputSchema().getItems().keySet()) {
-                // propagate nulls: null values mean there too many unique values to enumerate, therefore null + x = x + null = null
-                if (this.getOutputSchema().getItems().get(columnName).getColumnValues() == null || otherSchema.getItems().get(columnName).getColumnValues() == null) {
-                    this.getOutputSchema().getItems().get(columnName).setColumnValues(null);
-                } else {
-                    this.getOutputSchema().getItems().get(columnName).getColumnValues().addAll(otherSchema.getItems().get(columnName).getColumnValues());
-                }
-            }
+            // pass
         } else {
             final String message = "Original schema and schema-to-merge are not compatible";
             throw new InvalidSchemaException(message);

@@ -20,10 +20,6 @@ public class SchemaItem {
     private DataType type;
     private String name;
 
-    @Transient
-    // marking this transient to avoid double-saving dataframe values in DB
-    private Set<UnderlyingObject> columnValues;
-
     @JsonAlias({ "index" })
     private int columnIndex;
 
@@ -34,10 +30,9 @@ public class SchemaItem {
     public SchemaItem() {
     }
 
-    public SchemaItem(DataType type, String name, Set<UnderlyingObject> columnValues, int columnIndex) {
+    public SchemaItem(DataType type, String name, int columnIndex) {
         this.type = type;
         this.name = name;
-        this.columnValues = columnValues;
         this.columnIndex = columnIndex;
     }
 
@@ -57,21 +52,6 @@ public class SchemaItem {
         this.name = name;
     }
 
-    public Set<UnderlyingObject> getColumnValues() {
-        return columnValues;
-    }
-
-    // for compatibility with legacy metadata
-    @JsonProperty("values")
-    public void setColumnValuesFromLegacy(Set<Object> values) {
-        this.columnValues =
-                values.stream().map(v -> v instanceof UnderlyingObject ? (UnderlyingObject) v : new UnderlyingObject(v))
-                        .collect(Collectors.toSet());
-    }
-
-    public void setColumnValues(Set<UnderlyingObject> values) {
-        this.columnValues = values;
-    }
 
     public int getColumnIndex() {
         return columnIndex;
@@ -101,7 +81,6 @@ public class SchemaItem {
         return "SchemaItem{" +
                 "type=" + type +
                 ", name='" + name + '\'' +
-                ", values=" + columnValues +
                 ", index=" + columnIndex +
                 '}';
     }

@@ -2,7 +2,6 @@ package org.kie.trustyai.service.data.storage.hibernate;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +25,6 @@ import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
-import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
@@ -307,26 +305,21 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
-    private void setSchemaEnumeration(String modelId, Schema schema) {
-        for (Map.Entry<String, SchemaItem> entry : schema.getItems().entrySet()) {
-            List<UnderlyingObject> columnValues = getUniqueColumnValues(modelId, entry.getKey(), MetadataUtils.MAX_VALUE_ENUMERATION + 1)
-                    .stream()
-                    .map(Value::getUnderlyingObjectContainer)
-                    .collect(Collectors.toList());
+//    private void setSchemaEnumeration(String modelId, Schema schema) {
+//        for (Map.Entry<String, SchemaItem> entry : schema.getItems().entrySet()) {
+//            Set<UnderlyingObject> columnValues = getUniqueColumnValues(modelId, entry.getKey(), ValueEnumerationUtils.MAX_VALUE_ENUMERATION + 1)
+//                    .stream()
+//                    .map(Value::getUnderlyingObjectContainer)
+//                    .collect(Collectors.toSet());
+//            entry.getValue().setValueEnumeration(ValueEnumerationUtils.fromEnforcedSubsetOfColumnValues(columnValues));
+//        }
+//    }
 
-            if (columnValues.size() > MetadataUtils.MAX_VALUE_ENUMERATION) {
-                entry.getValue().setColumnValues(null);
-            } else {
-                entry.getValue().setColumnValues(new HashSet<>(columnValues));
-            }
-        }
-    }
-
-    @Transactional
-    public void loadColumnValues(String modelId, StorageMetadata storageMetadata) {
-        setSchemaEnumeration(modelId, storageMetadata.getInputSchema());
-        setSchemaEnumeration(modelId, storageMetadata.getOutputSchema());
-    }
+//    @Transactional
+//    public void loadColumnValues(String modelId, StorageMetadata storageMetadata) {
+//        setSchemaEnumeration(modelId, storageMetadata.getInputSchema());
+//        setSchemaEnumeration(modelId, storageMetadata.getOutputSchema());
+//    }
 
     // METADATA READ + WRITES ==========================================================================================
     @Override

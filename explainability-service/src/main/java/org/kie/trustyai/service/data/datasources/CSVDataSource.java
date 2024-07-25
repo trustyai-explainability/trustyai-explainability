@@ -320,11 +320,9 @@ public class CSVDataSource extends DataSource {
      * Get metadata for this modelId, with optional loading of column enumerations
      *
      * @param modelId the model id
-     * @param loadColumnValues if true, add column enumerations to the metadata. This adds an additional storage read,
-     *        so use this only when necessary.
      * @throws StorageReadException if the metadata cannot be read
      */
-    public StorageMetadata getMetadata(String modelId, boolean loadColumnValues) throws StorageReadException {
+    public StorageMetadata getMetadata(String modelId) throws StorageReadException {
         final ObjectMapper mapper = new ObjectMapper();
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer metadataBytes = getStorage().readMetaOrInternalData(modelId + "-" + METADATA_FILENAME);
@@ -357,6 +355,7 @@ public class CSVDataSource extends DataSource {
      * @throws StorageWriteException if the metadata cannot be saved.
      */
     public void saveMetadata(StorageMetadata storageMetadata, String modelId) throws StorageWriteException {
+        storageMetadata.setModelId(modelId);
         final ObjectMapper mapper = new ObjectMapper();
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer byteBuffer;
