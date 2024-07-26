@@ -110,12 +110,12 @@ class ComplexMigrationTest extends BaseMigrationTest {
     @Order(3)
     void getMetadataTest() {
         // get metadata
-        final List<ServiceMetadata> serviceMetadata = given()
+        final Map<String, ServiceMetadata> serviceMetadata = given()
                 .when().get("/info")
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
     }
 

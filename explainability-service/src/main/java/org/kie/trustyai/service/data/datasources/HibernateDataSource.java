@@ -249,11 +249,9 @@ public class HibernateDataSource extends DataSource {
      * Get metadata for this modelId, with optional loading of column enumerations
      *
      * @param modelId the model id
-     * @param loadColumnValues if true, add column enumerations to the metadata. This adds an additional storage read,
-     *        so use this only when necessary.
      * @throws StorageReadException if the metadata cannot be read
      */
-    public StorageMetadata getMetadata(String modelId, boolean loadColumnValues) throws StorageReadException {
+    public StorageMetadata getMetadata(String modelId) throws StorageReadException {
         HibernateStorage hibernateStorage = getStorage();
 
         StorageMetadata sm;
@@ -262,12 +260,6 @@ public class HibernateDataSource extends DataSource {
         } catch (StorageReadException e) {
 
             throw DataSourceErrors.getMetadataReadError(modelId, e.getMessage());
-        }
-
-        // only grab column enumerations from DB if explicitly requested, to save time
-        long startt = System.currentTimeMillis();
-        if (loadColumnValues) {
-            hibernateStorage.loadColumnValues(modelId, sm);
         }
         return sm;
     }

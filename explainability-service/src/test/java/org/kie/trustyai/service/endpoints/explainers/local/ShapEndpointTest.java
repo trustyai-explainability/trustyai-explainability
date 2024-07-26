@@ -16,8 +16,6 @@ import org.kie.trustyai.service.endpoints.explainers.GrpcMockServer;
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
-import org.kie.trustyai.service.payloads.explainers.lime.LimeExplainerConfig;
-import org.kie.trustyai.service.payloads.explainers.lime.LimeExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.shap.SHAPExplainerConfig;
 import org.kie.trustyai.service.payloads.explainers.shap.SHAPExplanationRequest;
 import org.kie.trustyai.service.utils.DataframeGenerators;

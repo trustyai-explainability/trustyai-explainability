@@ -1,6 +1,6 @@
 package org.kie.trustyai.service.scenarios.nodata;
 
-import java.util.List;
+import java.util.Map;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,12 +43,12 @@ class ServiceMetadataEndpointTest {
     @Test
     void get() throws JsonProcessingException {
         datasource.get().reset();
-        final List<ServiceMetadata> serviceMetadata = given()
+        final Map<String, ServiceMetadata> serviceMetadata = given()
                 .when().get()
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
         assertEquals(0, serviceMetadata.size());
