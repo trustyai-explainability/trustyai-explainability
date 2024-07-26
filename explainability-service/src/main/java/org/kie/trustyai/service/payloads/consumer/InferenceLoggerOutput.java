@@ -5,13 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 @Entity
 public class InferenceLoggerOutput {
@@ -25,15 +19,27 @@ public class InferenceLoggerOutput {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<InferenceLoggerOutputObject> outputs;
 
+    @Column(name = "inference_id")
+    private String id;
+
     @Id
     @GeneratedValue
-    private Long id;
+    @Column(name = "id")
+    private Long dbId;
 
-    public void setId(Long id) {
+    public void setDbId(Long dbId) {
+        this.dbId = dbId;
+    }
+
+    public Long getDbId() {
+        return dbId;
+    }
+
+    public void setId(String id) {
         this.id = id;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
