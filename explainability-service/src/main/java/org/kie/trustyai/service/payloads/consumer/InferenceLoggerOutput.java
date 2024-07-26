@@ -19,9 +19,21 @@ public class InferenceLoggerOutput {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<InferenceLoggerOutputObject> outputs;
 
-    @Id
-    @Column(nullable = false)
+    @Column(name = "inference_id")
     private String id;
+
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private Long dbId;
+
+    public void setDbId(Long dbId) {
+        this.dbId = dbId;
+    }
+
+    public Long getDbId() {
+        return dbId;
+    }
 
     public void setId(String id) {
         this.id = id;
