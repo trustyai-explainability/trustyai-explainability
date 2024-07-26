@@ -25,7 +25,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
-@Tag(name = "FourierMMD Drift Endpoint", description = "FourierMMD identifies drift in input data using a random Fourier " +
+@Tag(name = "Drift Metrics: FourierMMD Drift", description = "FourierMMD identifies drift in input data using a random Fourier " +
         "approximation")
 @EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
 @Path("/metrics/drift/fouriermmd")

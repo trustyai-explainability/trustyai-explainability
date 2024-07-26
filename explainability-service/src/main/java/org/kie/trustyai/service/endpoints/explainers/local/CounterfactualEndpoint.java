@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualExplainer;
@@ -47,7 +48,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Tag(name = "Counterfactual Explainer Endpoint")
+@Tag(name = "Explainers: Local", description = "Local explainers provide explanation of model behavior over a single prediction.")
 @EndpointDisabled(name = "endpoints.explainers.local.counterfactual", stringValue = "disable")
 @Path("/explainers/local/cf")
 public class CounterfactualEndpoint extends ExplainerEndpoint {
@@ -61,6 +62,7 @@ public class CounterfactualEndpoint extends ExplainerEndpoint {
     ServiceConfig serviceConfig;
 
     @POST
+    @Operation(summary = "Compute a Counterfactual explanation.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response explain(CounterfactualExplanationRequest request) throws DataframeCreateException {

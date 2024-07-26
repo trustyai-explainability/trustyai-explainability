@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -63,6 +64,7 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
+    @Operation(summary = "Delete a recurring computation of this metric.")
     @Path("/request")
     public Response deleteRequest(ScheduleId request) {
         final UUID id = request.requestId;
@@ -82,6 +84,7 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
 
     @GET
     @Path("/requests")
+    @Operation(summary = "List the currently scheduled computations of this metric.")
     @Produces(MediaType.APPLICATION_JSON)
     public Response listRequests() {
         final ScheduleList scheduleList = new ScheduleList();
