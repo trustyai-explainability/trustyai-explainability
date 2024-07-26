@@ -50,7 +50,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Tag(name = "Local explainers")
-@EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
+@EndpointDisabled(name = "endpoints.explainers.local.shap", stringValue = "disable")
 @Path("/explainers/local/shap")
 public class SHAPEndpoint extends ExplainerEndpoint {
 
