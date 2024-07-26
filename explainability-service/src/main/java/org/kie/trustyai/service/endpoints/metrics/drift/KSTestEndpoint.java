@@ -24,7 +24,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
 
 @ApplicationScoped
-@Tag(name = "KSTest Drift Endpoint", description = "Kolmogorov-Smirnov Test measures the columns of the tested dataframe come " +
+@Tag(name = "Drift Metrics: KSTest", description = "Kolmogorov-Smirnov Test measures the columns of the tested dataframe come " +
         "from the same distribution as the training dataframe.")
 @EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
 @Path("/metrics/drift/kstest")

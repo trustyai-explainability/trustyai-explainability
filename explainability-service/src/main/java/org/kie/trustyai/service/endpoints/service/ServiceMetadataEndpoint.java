@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
@@ -35,6 +36,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
+@Tag(name = "Service Metadata", description = "The Service Metadata endpoint provides information about TrustyAI, such as details about" +
+        "the model inference data it has collected. This endpoint also provides various operations to label and rename the recorded inference data.")
 @Path("/info")
 public class ServiceMetadataEndpoint {
 
@@ -81,6 +84,7 @@ public class ServiceMetadataEndpoint {
     }
 
     @GET
+    @Operation(summary = "Get a comprehensive overview of the model inference datasets collected by TrustyAI and the metric computations that are scheduled over those datasets.")
     @Produces(MediaType.APPLICATION_JSON)
     public Response serviceInfo() throws JsonProcessingException {
         return Response.ok(getServiceMetadata()).build();
@@ -88,6 +92,7 @@ public class ServiceMetadataEndpoint {
 
     @GET
     @Path("/tags")
+    @Operation(summary = "Retrieve the tags that have been applied to a particular model dataset, as well as a count of that tag's frequency within the dataset.")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTagInformation() {
         Map<String, Map<String, Long>> perModelTagCounts = new HashMap<>();
@@ -101,6 +106,7 @@ public class ServiceMetadataEndpoint {
 
     @POST
     @Path("/tags")
+    @Operation(summary = "Apply per-row tags to a particular inference model dataset, to label certain rows as training or drift reference data, etc.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response labelSchema(DataTagging dataTagging) throws JsonProcessingException {
@@ -138,6 +144,7 @@ public class ServiceMetadataEndpoint {
 
     @POST
     @Path("/names")
+    @Operation(summary = "Apply a set of human-readable column names to a particular inference model dataset.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response applyNameMappings(@ValidNameMappingRequest NameMapping nameMapping) {
@@ -157,6 +164,7 @@ public class ServiceMetadataEndpoint {
 
     @DELETE
     @Path("/names")
+    @Operation(summary = "Remove any column names that have been applied to a particular inference model dataset.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response clearNameMappings(String modelId) {
@@ -177,7 +185,7 @@ public class ServiceMetadataEndpoint {
     @GET
     @Path("/inference/ids/{model}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get model's inference ids", description = "Get all the inference ids for a given model")
+    @Operation(summary = "Get a list of all inference ids within a particular model inference dataset.", description = "Get all the inference ids for a given model")
     public Response inferenceIdsByModel(@Parameter(description = "The model to get inference ids from", required = true) @PathParam("model") String model,
             @Parameter(description = "The type of inferences to retrieve", required = false) @QueryParam("type") @DefaultValue("all") String type) {
         final Dataframe df;

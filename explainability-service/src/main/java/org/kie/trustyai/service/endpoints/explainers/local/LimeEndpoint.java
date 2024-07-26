@@ -49,7 +49,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Tag(name = "Local explainers")
+@Tag(name = "Explainers: Local", description = "Local explainers provide explanation of model behavior over a single prediction.")
 @EndpointDisabled(name = "endpoints.explainers.local.lime", stringValue = "disable")
 @Path("/explainers/local/lime")
 public class LimeEndpoint extends ExplainerEndpoint {
@@ -64,7 +64,7 @@ public class LimeEndpoint extends ExplainerEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Generate a LIME explanation", description = "Generate a LIME explanation for a given model and inference id")
+    @Operation(summary = "Compute a LIME explanation.", description = "Generate a LIME explanation for a given model and inference id")
     public Response explain(LimeExplanationRequest request) {
         try {
             final String modelId = request.getConfig().getModelConfig().getName();

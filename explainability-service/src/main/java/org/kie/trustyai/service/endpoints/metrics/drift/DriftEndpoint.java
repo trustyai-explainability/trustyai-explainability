@@ -3,6 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics.drift;
 import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
@@ -50,6 +51,7 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
     @Override
     @GET
     @Path("/definition")
+    @Operation(summary = "Provide a general definition of this metric.")
     @Produces(MediaType.TEXT_PLAIN)
     public Response getDefinition() {
         return Response.ok(getGeneralDefinition()).build();
@@ -57,6 +59,7 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
 
     // defines the request scheduling mechanism
     @POST
+    @Operation(summary = "Schedule a recurring computation of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
@@ -71,6 +74,7 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
     // == GLOBAL FUNCTIONS ======
     // this function defines the default individual request/response flow, for a single metric calculation at this exact timestamp
     @POST
+    @Operation(summary = "Compute the current value of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response response(@ValidDriftMetricRequest T request) throws DataframeCreateException {

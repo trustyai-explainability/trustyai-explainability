@@ -27,7 +27,7 @@ import jakarta.ws.rs.Path;
 
 @ApplicationScoped
 @EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
-@Tag(name = "Meanshift Drift Endpoint", description = "Meanshift measures that the columns of the tested dataframe come " +
+@Tag(name = "Drift Metrics: Meanshift", description = "Meanshift measures that the columns of the tested dataframe come " +
         "from the same distribution as the training dataframe.")
 @Path("/metrics/drift/meanshift")
 public class MeanshiftEndpoint extends DriftEndpoint<MeanshiftMetricRequest> {

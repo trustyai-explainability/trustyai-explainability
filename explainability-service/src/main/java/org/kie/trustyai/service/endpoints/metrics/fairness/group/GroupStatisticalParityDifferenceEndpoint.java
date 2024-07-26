@@ -27,7 +27,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
 
 @ApplicationScoped
-@Tag(name = "Statistical Parity Difference Endpoint", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
+@Tag(name = "Fairness Metrics: Group: Statistical Parity Difference", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
         "difference between the proportion of the majority and protected classes getting a particular outcome.")
 @EndpointDisabled(name = "endpoints.fairness", stringValue = "disable")
 @Path("/metrics/group/fairness/spd")

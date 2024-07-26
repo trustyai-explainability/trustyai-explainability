@@ -25,7 +25,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
 
 @ApplicationScoped
-@Tag(name = "ApproxKSTest Drift Endpoint", description = "Approximate Kolmogorov-Smirnov Test measures that the columns of the tested dataframe come " +
+@Tag(name = "Drift Metrics: ApproxKSTest", description = "Approximate Kolmogorov-Smirnov Test measures that the columns of the tested dataframe come " +
         "from the same distribution as the training dataframe.")
 @EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
 @Path("/metrics/drift/approxkstest")

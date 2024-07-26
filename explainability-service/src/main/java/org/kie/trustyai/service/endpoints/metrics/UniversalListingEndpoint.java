@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
@@ -36,6 +37,7 @@ public class UniversalListingEndpoint {
 
     @GET
     @Path("/requests")
+    @Operation(summary = "Retrieve a list of all currently scheduled metric computations.")
     @Produces(MediaType.APPLICATION_JSON)
     public Response listRequests(@QueryParam("type") String type) {
         final ScheduleList scheduleList = new ScheduleList();

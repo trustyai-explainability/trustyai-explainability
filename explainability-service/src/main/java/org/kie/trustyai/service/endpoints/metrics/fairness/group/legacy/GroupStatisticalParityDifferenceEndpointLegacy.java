@@ -9,8 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
 
 @ApplicationScoped
-@Tag(name = "Statistical Parity Difference Endpoint (Legacy)", description = "Statistical Parity Difference (SPD) measures imbalances in classifications by calculating the " +
-        "difference between the proportion of the majority and protected classes getting a particular outcome. This endpoint will be moving to /metrics/group/fairness/spd in a later release.")
+@Tag(name = "{Legacy}: Statistical Parity Difference", description = "This endpoint has moved to /metrics/group/fairness/spd and will be removed in a later release.")
 @Path("/metrics/spd")
 @EndpointDisabled(name = "endpoints.fairness", stringValue = "disable")
 @Deprecated(forRemoval = true)
