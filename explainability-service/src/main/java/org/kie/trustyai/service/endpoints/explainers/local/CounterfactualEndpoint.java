@@ -48,7 +48,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Tag(name = "Counterfactual Explainer Endpoint")
-@EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
+@EndpointDisabled(name = "endpoints.explainers.local.counterfactual", stringValue = "disable")
 @Path("/explainers/local/cf")
 public class CounterfactualEndpoint extends ExplainerEndpoint {
 
