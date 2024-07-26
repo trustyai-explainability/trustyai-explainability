@@ -29,7 +29,6 @@ public class ReadableSchema {
         return nameMapping;
     }
 
-
     public void setItems(Map<String, ReadableSchemaItem> items) {
         this.items = items;
     }

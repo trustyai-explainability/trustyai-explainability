@@ -2,11 +2,9 @@ package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.utils.models.TestModels;
@@ -84,7 +82,6 @@ class TSSaliencyEndpointTest {
     void tearDown() {
         mockServer.stop();
     }
-
 
     @Test
     void get() {

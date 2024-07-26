@@ -13,7 +13,7 @@
                     "Race Mapped": {
                         "type": "INT32",
                         "name": "race",
-                        "columnIndex": 0
+                        "columnIndex": 2
                     },
                     "Age Mapped": {
                         "type": "INT32",
@@ -23,7 +23,7 @@
                     "Gender Mapped": {
                         "type": "INT32",
                         "name": "gender",
-                        "columnIndex": 0
+                        "columnIndex": 1
                     }
                 },
                 "nameMapping": {
@@ -37,7 +37,7 @@
                     "Income Mapped": {
                         "type": "INT32",
                         "name": "income",
-                        "columnIndex": 0
+                        "columnIndex": 3
                     }
                 },
                 "nameMapping": {
@@ -63,7 +63,7 @@
                     "Race Mapped": {
                         "type": "INT32",
                         "name": "race",
-                        "columnIndex": 0
+                        "columnIndex": 2
                     },
                     "Age Mapped": {
                         "type": "INT32",
@@ -73,7 +73,7 @@
                     "Gender Mapped": {
                         "type": "INT32",
                         "name": "gender",
-                        "columnIndex": 0
+                        "columnIndex": 1
                     }
                 },
                 "nameMapping": {
@@ -87,7 +87,7 @@
                     "Income Mapped": {
                         "type": "INT32",
                         "name": "income",
-                        "columnIndex": 0
+                        "columnIndex": 3
                     }
                 },
                 "nameMapping": {
@@ -113,7 +113,7 @@
                     "Race Mapped": {
                         "type": "INT32",
                         "name": "race",
-                        "columnIndex": 0
+                        "columnIndex": 2
                     },
                     "Age Mapped": {
                         "type": "INT32",
@@ -123,7 +123,7 @@
                     "Gender Mapped": {
                         "type": "INT32",
                         "name": "gender",
-                        "columnIndex": 0
+                        "columnIndex": 1
                     }
                 },
                 "nameMapping": {
@@ -137,7 +137,7 @@
                     "Income Mapped": {
                         "type": "INT32",
                         "name": "income",
-                        "columnIndex": 0
+                        "columnIndex": 3
                     }
                 },
                 "nameMapping": {

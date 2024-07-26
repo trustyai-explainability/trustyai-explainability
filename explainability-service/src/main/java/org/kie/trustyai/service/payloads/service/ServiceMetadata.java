@@ -1,6 +1,5 @@
 package org.kie.trustyai.service.payloads.service;
 
-import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.service.readable.ReadableStorageMetadata;
 
 public class ServiceMetadata {

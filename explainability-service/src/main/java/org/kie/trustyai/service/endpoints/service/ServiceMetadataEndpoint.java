@@ -86,7 +86,6 @@ public class ServiceMetadataEndpoint {
         return Response.ok(getServiceMetadata()).build();
     }
 
-
     @GET
     @Path("/tags")
     @Produces(MediaType.APPLICATION_JSON)

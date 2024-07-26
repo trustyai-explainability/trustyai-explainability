@@ -9,7 +9,8 @@ public class ReadableStorageMetadata {
     private String outputTensorName;
     private int observations;
 
-    private ReadableStorageMetadata() {}
+    private ReadableStorageMetadata() {
+    }
 
     public ReadableSchema getInputSchema() {
         return inputSchema;
@@ -50,7 +51,6 @@ public class ReadableStorageMetadata {
     public void setObservations(int observations) {
         this.observations = observations;
     }
-
 
     public static ReadableStorageMetadata from(StorageMetadata sm) {
         ReadableStorageMetadata rsm = new ReadableStorageMetadata();

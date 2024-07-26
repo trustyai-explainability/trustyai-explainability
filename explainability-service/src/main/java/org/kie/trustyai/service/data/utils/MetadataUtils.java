@@ -1,7 +1,6 @@
 package org.kie.trustyai.service.data.utils;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -38,6 +37,7 @@ public class MetadataUtils {
             schemaItem.setType(DataType.MAP);
         }
         schemaItem.setName(dataframe.getColumnNames().get(i));
+        schemaItem.setColumnIndex(i);
 
         // grab unique values
         return schemaItem;

@@ -1,21 +1,18 @@
 package org.kie.trustyai.service.payloads.service;
 
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.kie.trustyai.explainability.model.UnderlyingObject;
 import org.kie.trustyai.service.payloads.values.DataType;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
 
 @Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SchemaItem {
     private DataType type;
     private String name;
@@ -51,7 +48,6 @@ public class SchemaItem {
     public void setName(String name) {
         this.name = name;
     }
-
 
     public int getColumnIndex() {
         return columnIndex;
