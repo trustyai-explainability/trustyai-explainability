@@ -1,5 +1,7 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -19,6 +21,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Path("/consumer/kserve/v2")
+@Tag(name = "{Internal Only} Inference Consumer", description = "This endpoint consumes inference payloads produced by ModelMesh-served models. While it's possible to manually interact with this endpoint, it is not recommended.")
 public class ConsumerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(ConsumerEndpoint.class);
@@ -29,6 +32,7 @@ public class ConsumerEndpoint {
     ModelMeshInferencePayloadReconciler reconciler;
 
     @POST
+    @Operation(summary = "Send a single ModelMesh input or output payload to TrustyAI.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public Response consumeInput(InferencePartialPayload request) throws DataframeCreateException {

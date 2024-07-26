@@ -49,7 +49,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Tag(name = "Local explainers")
+@Tag(name = "Explainers: Local", description = "Local explainers provide explanation of model behavior over a single prediction.")
 @EndpointDisabled(name = "endpoints.explainers.local.shap", stringValue = "disable")
 @Path("/explainers/local/shap")
 public class SHAPEndpoint extends ExplainerEndpoint {
@@ -65,7 +65,7 @@ public class SHAPEndpoint extends ExplainerEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Generate a SHAP explanation", description = "Generate a SHAP explanation for a given model and inference id")
+    @Operation(summary = "Compute a SHAP explanation.", description = "Generate a SHAP explanation for a given model and inference id")
     public Response explain(SHAPExplanationRequest request) {
         final String inferenceId = request.getPredictionId();
         try {

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -55,6 +56,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     }
 
     @POST
+    @Operation(summary = "Compute the current value of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response response(@ValidGroupMetricRequest GroupMetricRequest request) throws DataframeCreateException {
@@ -98,6 +100,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
 
     @GET
     @Path("/definition")
+    @Operation(summary = "Provide a general definition of this metric.")
     @Produces(MediaType.TEXT_PLAIN)
     @Override
     public Response getDefinition() {
@@ -107,6 +110,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Provide a specific, plain-english interpretation of a specific value of this metric.")
     @Path("/definition")
     public Response getSpecificDefinition(GroupDefinitionRequest request) {
         try {
@@ -122,6 +126,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Schedule a recurring computation of this metric.")
     @Path("/request")
     public Response createRequest(@ValidGroupMetricRequest GroupMetricRequest request) {
         return super.createRequestGeneric(request);

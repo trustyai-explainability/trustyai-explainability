@@ -27,7 +27,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
 
 @ApplicationScoped
-@Tag(name = "Disparate Impact Ratio Endpoint", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
+@Tag(name = "Fairness Metrics: Group: Disparate Impact Ratio", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
         "classifications by calculating the ratio between the proportion of the majority and protected classes getting" +
         " a particular outcome.")
 @EndpointDisabled(name = "endpoints.fairness", stringValue = "disable")
