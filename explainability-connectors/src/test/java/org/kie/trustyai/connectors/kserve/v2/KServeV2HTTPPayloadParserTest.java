@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.KServeDatatype;
 import org.kie.trustyai.connectors.kserve.v1.KServeV1HTTPPayloadParser;
 import org.kie.trustyai.connectors.kserve.v1.KServeV1RequestPayload;
-import org.kie.trustyai.connectors.kserve.v1.KServeV1ResponsePayload;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 
