@@ -391,7 +391,7 @@ public class CSVDataSource extends DataSource {
 
     @Override
     public List<InferenceId> getAllInferenceIds(String modelId) {
-        FlatFileStorage ffst = getStorage();
+        final FlatFileStorage ffst = getStorage();
         final ByteBuffer allInferenceIdsBytes;
         final List<InferenceId> inferenceIds;
         try {

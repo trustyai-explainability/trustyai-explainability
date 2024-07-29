@@ -58,7 +58,11 @@ public class CSVParser implements DataParser {
             final List<InferenceId> inferenceIds = new ArrayList<>();
             if (values != null && !values.isEmpty()) {
                 for (List<Value> value : values) {
-                    if (value.size() == 3) {
+                    if (value.size() == 2) {
+                        final String id = value.get(0).asString();
+                        final LocalDateTime predictionTime = LocalDateTime.parse(value.get(1).asString());
+                        inferenceIds.add(new InferenceId(id, predictionTime));
+                    } else if (value.size() == 3) {
                         final String id = value.get(1).asString();
                         final LocalDateTime predictionTime = LocalDateTime.parse(value.get(2).asString());
                         inferenceIds.add(new InferenceId(id, predictionTime));
