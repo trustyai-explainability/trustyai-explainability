@@ -120,7 +120,7 @@ public class KServeV2GRPCPredictionProvider extends AbstractKServePredictionProv
             semaphore.acquire();
         } catch (InterruptedException e) {
             CompletableFuture<List<PredictionOutput>> future = new CompletableFuture<>();
-            future.completeExceptionally(new RuntimeException("Failed to acquire semaphore", e));
+            future.completeExceptionally(new RuntimeException("gRPC inference request failed while waiting for concurrent connection thread", e));
             return future;
         }
 
