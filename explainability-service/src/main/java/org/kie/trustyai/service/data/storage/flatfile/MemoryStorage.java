@@ -90,8 +90,7 @@ public class MemoryStorage extends FlatFileStorage {
         return readDataframeAndMetadataTagFiltered(modelId, this.batchSize, tags, true);
     }
 
-    public ByteBuffer readInferenceIds(String modelId, boolean onlyOrganic) throws StorageReadException {
-
+    public List<InferenceId> readInferenceIds(String modelId, boolean onlyOrganic) throws StorageReadException {
         final String metadataKey = getInternalDataFilename(modelId);
         if (data.containsKey(metadataKey)) {
             String metadataContent = data.get(metadataKey);
@@ -115,7 +114,7 @@ public class MemoryStorage extends FlatFileStorage {
             if (lines.length() > 0 && lines.charAt(lines.length() - 1) == '\n') {
                 lines.deleteCharAt(lines.length() - 1);
             }
-            return ByteBuffer.wrap(lines.toString().getBytes());
+            return parser.toInferenceIds(ByteBuffer.wrap(lines.toString().getBytes()));
 
         } else {
             throw new StorageReadException("Data or Metadata file not found for modelId: " + modelId);
@@ -123,12 +122,12 @@ public class MemoryStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer readAllInferenceIds(String modelId) throws StorageReadException {
+    public List<InferenceId> readAllInferenceIds(String modelId) throws StorageReadException {
         return readInferenceIds(modelId, false);
     }
 
     @Override
-    public ByteBuffer readAllOrganicInferenceIds(String modelId) throws StorageReadException {
+    public List<InferenceId> readAllOrganicInferenceIds(String modelId) throws StorageReadException {
         return readInferenceIds(modelId, true);
     }
 

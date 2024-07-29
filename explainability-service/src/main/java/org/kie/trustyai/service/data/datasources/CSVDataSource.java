@@ -395,9 +395,7 @@ public class CSVDataSource extends DataSource {
         final ByteBuffer allInferenceIdsBytes;
         final List<InferenceId> inferenceIds;
         try {
-            allInferenceIdsBytes = ffst.readAllInferenceIds(modelId);
-            inferenceIds = parser.toInferenceIds(allInferenceIdsBytes);
-
+            inferenceIds= ffst.readAllInferenceIds(modelId);
         } catch (StorageReadException e) {
             throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
         } catch (DataframeCreateException e) {
@@ -414,8 +412,7 @@ public class CSVDataSource extends DataSource {
         final ByteBuffer allOrganicInferenceIdsBytes;
         final List<InferenceId> inferenceIds;
         try {
-            allOrganicInferenceIdsBytes = ffst.readAllOrganicInferenceIds(modelId);
-            inferenceIds = parser.toInferenceIds(allOrganicInferenceIdsBytes);
+            inferenceIds = ffst.readAllOrganicInferenceIds(modelId);
         } catch (StorageReadException e) {
             throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
         } catch (DataframeCreateException e) {

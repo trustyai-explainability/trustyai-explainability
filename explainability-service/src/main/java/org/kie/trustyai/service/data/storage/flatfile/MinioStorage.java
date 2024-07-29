@@ -151,12 +151,12 @@ public class MinioStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer readAllInferenceIds(String modelId) throws StorageReadException {
+    public List<InferenceId> readAllInferenceIds(String modelId) throws StorageReadException {
         throw new StorageReadException("Storage type not supported");
     }
 
     @Override
-    public ByteBuffer readAllOrganicInferenceIds(String modelId) throws StorageReadException {
+    public List<InferenceId> readAllOrganicInferenceIds(String modelId) throws StorageReadException {
         throw new StorageReadException("Storage type not supported");
     }
 

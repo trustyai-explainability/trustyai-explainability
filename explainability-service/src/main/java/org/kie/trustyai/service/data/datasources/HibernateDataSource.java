@@ -323,12 +323,12 @@ public class HibernateDataSource extends DataSource {
 
     @Override
     public List<InferenceId> getAllInferenceIds(String modelId) {
-        return List.of();
+        return storage.get().readAllInferenceIds(modelId);
     }
 
     @Override
     public List<InferenceId> getOrganicInferenceIds(String modelId) {
-        return List.of();
+        return storage.get().readAllOrganicInferenceIds(modelId);
     }
 
     // TAG OPERATIONS ==================================================================================================

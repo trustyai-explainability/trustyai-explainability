@@ -140,7 +140,7 @@ public class PVCStorage extends FlatFileStorage {
         return readDataframeAndMetadataTagFilter(modelId, this.batchSize, tags, true);
     }
 
-    public ByteBuffer readInferenceIds(String modelId, boolean onlyOrganic, boolean invertTagFilter) throws StorageReadException {
+    public List<InferenceId> readInferenceIds(String modelId, boolean onlyOrganic, boolean invertTagFilter) throws StorageReadException {
         LOG.debug("Cache miss. Reading data for " + modelId);
         Set<String> tags;
         if (onlyOrganic) {
@@ -151,7 +151,7 @@ public class PVCStorage extends FlatFileStorage {
         try {
             final InputStream internalDataStream = BatchReader.getFileInputStream(buildInternalDataPath(modelId).toString());
             final List<String> pair = BatchReader.readAllMetadataWithTags(internalDataStream, tags, invertTagFilter);
-            return ByteBuffer.wrap(BatchReader.linesToBytes(pair));
+            return parser.toInferenceIds(ByteBuffer.wrap(BatchReader.linesToBytes(pair)));
         } catch (IOException e) {
             LOG.error("Error reading input file for model " + modelId);
             throw new StorageReadException(e.getMessage());
@@ -159,12 +159,12 @@ public class PVCStorage extends FlatFileStorage {
     }
 
     @Override
-    public ByteBuffer readAllInferenceIds(String modelId) throws StorageReadException {
+    public List<InferenceId> readAllInferenceIds(String modelId) throws StorageReadException {
         return readInferenceIds(modelId, false, false);
     }
 
     @Override
-    public ByteBuffer readAllOrganicInferenceIds(String modelId) throws StorageReadException {
+    public List<InferenceId>readAllOrganicInferenceIds(String modelId) throws StorageReadException {
         return readInferenceIds(modelId, true, false);
     }
 
