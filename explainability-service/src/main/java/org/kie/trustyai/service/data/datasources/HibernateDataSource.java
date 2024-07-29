@@ -13,6 +13,7 @@ import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.storage.hibernate.HibernateStorage;
 import org.kie.trustyai.service.data.storage.hibernate.migration.MigrationEvent;
 import org.kie.trustyai.service.payloads.service.DataTagging;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -318,6 +319,16 @@ public class HibernateDataSource extends DataSource {
         } catch (Exception e) {
             throw DataSourceErrors.getGenericReadError(modelId, e.getMessage(), "checking for recorded inferences");
         }
+    }
+
+    @Override
+    public List<InferenceId> getAllInferenceIds(String modelId) {
+        return List.of();
+    }
+
+    @Override
+    public List<InferenceId> getOrganicInferenceIds(String modelId) {
+        return List.of();
     }
 
     // TAG OPERATIONS ==================================================================================================

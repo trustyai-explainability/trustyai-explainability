@@ -23,6 +23,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -131,8 +132,8 @@ abstract public class InferenceIdsServiceMetadataEndpointBaseTest {
         given()
                 .when().get(getEndpointOrganic(MODEL_ID))
                 .then()
-                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("No organic inferences found for model=" + MODEL_ID));
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is("[]"));
         List<InferenceId> inferenceIds = given()
                 .when().get(getEndpoint(MODEL_ID))
                 .then()

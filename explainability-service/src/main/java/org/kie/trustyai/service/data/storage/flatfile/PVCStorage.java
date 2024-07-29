@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.datasources.DataSource;
@@ -23,6 +24,7 @@ import org.kie.trustyai.service.data.storage.DataFormat;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 import static org.kie.trustyai.service.data.datasources.DataSource.INTERNAL_DATA_FILENAME;
 
@@ -136,6 +138,34 @@ public class PVCStorage extends FlatFileStorage {
 
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException {
         return readDataframeAndMetadataTagFilter(modelId, this.batchSize, tags, true);
+    }
+
+    public ByteBuffer readInferenceIds(String modelId, boolean onlyOrganic, boolean invertTagFilter) throws StorageReadException {
+        LOG.debug("Cache miss. Reading data for " + modelId);
+        Set<String> tags;
+        if (onlyOrganic) {
+            tags = Set.of(Dataframe.InternalTags.UNLABELED.get());
+        } else {
+            tags = Set.of(Dataframe.InternalTags.UNLABELED.get(), Dataframe.InternalTags.SYNTHETIC.get());
+        }
+        try {
+            final InputStream internalDataStream = BatchReader.getFileInputStream(buildInternalDataPath(modelId).toString());
+            final List<String> pair = BatchReader.readAllMetadataWithTags(internalDataStream, tags, invertTagFilter);
+            return ByteBuffer.wrap(BatchReader.linesToBytes(pair));
+        } catch (IOException e) {
+            LOG.error("Error reading input file for model " + modelId);
+            throw new StorageReadException(e.getMessage());
+        }
+    }
+
+    @Override
+    public ByteBuffer readAllInferenceIds(String modelId) throws StorageReadException {
+        return readInferenceIds(modelId, false, false);
+    }
+
+    @Override
+    public ByteBuffer readAllOrganicInferenceIds(String modelId) throws StorageReadException {
+        return readInferenceIds(modelId, true, false);
     }
 
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {

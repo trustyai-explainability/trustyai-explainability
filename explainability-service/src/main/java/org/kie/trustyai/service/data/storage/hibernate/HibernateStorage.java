@@ -413,6 +413,16 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         return readDataframeAndMetadataTagFiltering(modelId, this.batchSize, tags, true);
     }
 
+    @Override
+    public StorageMetadata readAllInferenceIds(String modelId) throws StorageReadException {
+        return null;
+    }
+
+    @Override
+    public StorageMetadata readAllOrganicInferenceIds(String modelId) throws StorageReadException {
+        return null;
+    }
+
     // TAG MANIPULATION ================================================================================================
     @Transactional
     public void setTags(DataTagging dataTagging) {

@@ -93,6 +93,31 @@ public class BatchReader {
         return Pair.of(new ArrayList<>(dataQueue), new ArrayList<>(metadataQueue));
     }
 
+    public static List<String> readAllMetadataWithTags(InputStream metadataStream, Set<String> tags, boolean invertTagFilter)
+            throws IOException {
+        final List<String> metadataQueue = new ArrayList<>();
+
+        try (BufferedReader metadataReader = new BufferedReader(new InputStreamReader(metadataStream, StandardCharsets.UTF_8))) {
+
+            final CSVParser parser = new CSVParser(metadataReader, CSVFormat.DEFAULT.withSkipHeaderRecord());
+
+            for (CSVRecord metadataRecord : parser) {
+                    String metadataLine = CSVUtils.recordToString(metadataRecord);
+                    String metadataTag = metadataRecord.get(0); // Tag is the first column
+
+                    boolean containsTag = tags.contains(metadataTag);
+                    if (invertTagFilter) {
+                        containsTag = !containsTag;
+                    }
+                    if (containsTag) {
+                        metadataQueue.add(metadataLine);
+                    }
+            }
+        }
+        return metadataQueue;
+    }
+
+
     /**
      * Returns an InputStream for the given filename
      *
