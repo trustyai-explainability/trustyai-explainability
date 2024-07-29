@@ -1,6 +1,8 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
@@ -18,6 +20,7 @@ import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.payloads.service.DataTagging;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
 
@@ -407,18 +410,44 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         return readDataframeAndMetadataTagFiltering(modelId, this.batchSize, tags, true);
     }
 
-    public StorageMetadata readInferencesIds(String modelId, Set<String> tags, boolean invertFilter) throws StorageReadException {
-        // TODO
+
+    // INFERENCE IDS ===================================================================================================
+    public List<InferenceId> readInferencesIds(String modelId, Set<String> tags, boolean invertFilter) throws StorageReadException {
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate (tagged)");
+                refreshIfDirty();
+
+                // grab just the id and timestamp as a list of 2 element object arrays
+                List<Object[]> objects = em.createQuery("" +
+                                "select dr.id, dr.timestamp from DataframeRow dr" +
+                                " where dr.modelId = ?1 AND dr.tag " +
+                                (invertFilter ? "not in " : "in ") +
+                                "(?2)" +
+                                "order by dr.dbId DESC ")
+                        .setParameter(1, modelId)
+                        .setParameter(2, tags)
+                        .setMaxResults(batchSize).getResultList();
+
+                // unpack tuples returned from db query
+                return objects.stream().map(o -> new InferenceId((String) o[0], (LocalDateTime) o[1])).collect(Collectors.toList());
+            } catch (StorageReadException e) {
+                LOG.error(e.getMessage());
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
     }
 
     @Override
-    public StorageMetadata readAllInferenceIds(String modelId) throws StorageReadException {
-        final Set<String> tags = Set.of(Dataframe.InternalTags.UNLABELED.get(), Dataframe.InternalTags.SYNTHETIC.get())
-        return readInferencesIds(modelId, tags, false);
+    public List<InferenceId> readAllInferenceIds(String modelId) throws StorageReadException {
+        final Set<String> tags = Set.of();
+        return readInferencesIds(modelId, tags, true);
     }
 
     @Override
-    public StorageMetadata readAllOrganicInferenceIds(String modelId) throws StorageReadException {
+    public List<InferenceId> readAllOrganicInferenceIds(String modelId) throws StorageReadException {
         final Set<String> tags = Set.of(Dataframe.InternalTags.UNLABELED.get());
         return readInferencesIds(modelId, tags, false);
 

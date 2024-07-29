@@ -97,7 +97,7 @@ public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
      * @return A list of {@link org.kie.trustyai.service.payloads.service.InferenceId} containing the data and metadata
      * @throws StorageReadException If an error occurs while reading the data
      */
-    AUX_DATA_TYPE readAllInferenceIds(String modelId) throws StorageReadException;
+    List<InferenceId> readAllInferenceIds(String modelId) throws StorageReadException;
 
     /**
      * Read all organic inference ids without batch size.
@@ -106,6 +106,6 @@ public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
      * @return A list of {@link org.kie.trustyai.service.payloads.service.InferenceId} containing the data and metadata
      * @throws StorageReadException If an error occurs while reading the data
      */
-    AUX_DATA_TYPE readAllOrganicInferenceIds(String modelId) throws StorageReadException;
+    List<InferenceId>  readAllOrganicInferenceIds(String modelId) throws StorageReadException;
 
 }
