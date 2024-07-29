@@ -21,7 +21,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Path("/consumer/kserve/v2")
-@Tag(name = "{Internal Only} Inference Consumer", description = "This endpoint consumes inference payloads produced by ModelMesh-served models. While it's possible to manually interact with this endpoint, it is not recommended.")
+@Tag(name = "{Internal Only} Inference Consumer",
+        description = "This endpoint consumes inference payloads produced by ModelMesh-served models. While it's possible to manually interact with this endpoint, it is not recommended.")
 public class ConsumerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(ConsumerEndpoint.class);

@@ -29,7 +29,12 @@ public abstract class ExplainerEndpoint {
         if (!LocalServiceURLValidator.isValidUrl(target)) {
             throw new IllegalArgumentException("Invalid target URL: " + modelConfig.getTarget());
         }
-        final KServeConfig kServeConfig = KServeConfig.create(target, modelConfig.getName(), modelConfig.getVersion());
+        final KServeConfig kServeConfig = KServeConfig.create(
+                target,
+                modelConfig.getName(),
+                modelConfig.getVersion(),
+                KServeConfig.DEFAULT_CODEC,
+                1);
         return KServeV2GRPCPredictionProvider.forTarget(kServeConfig, inputTensorName, null, map);
     }
 
