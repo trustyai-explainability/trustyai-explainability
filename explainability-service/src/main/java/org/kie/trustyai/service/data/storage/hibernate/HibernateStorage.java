@@ -1,12 +1,6 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
@@ -413,14 +407,21 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         return readDataframeAndMetadataTagFiltering(modelId, this.batchSize, tags, true);
     }
 
+    public StorageMetadata readInferencesIds(String modelId, Set<String> tags, boolean invertFilter) throws StorageReadException {
+        // TODO
+    }
+
     @Override
     public StorageMetadata readAllInferenceIds(String modelId) throws StorageReadException {
-        return null;
+        final Set<String> tags = Set.of(Dataframe.InternalTags.UNLABELED.get(), Dataframe.InternalTags.SYNTHETIC.get())
+        return readInferencesIds(modelId, tags, false);
     }
 
     @Override
     public StorageMetadata readAllOrganicInferenceIds(String modelId) throws StorageReadException {
-        return null;
+        final Set<String> tags = Set.of(Dataframe.InternalTags.UNLABELED.get());
+        return readInferencesIds(modelId, tags, false);
+
     }
 
     // TAG MANIPULATION ================================================================================================
