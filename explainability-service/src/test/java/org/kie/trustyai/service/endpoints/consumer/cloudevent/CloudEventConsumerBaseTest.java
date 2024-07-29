@@ -76,7 +76,6 @@ abstract public class CloudEventConsumerBaseTest {
 
         InferenceLoggerOutput ilo = new InferenceLoggerOutput();
         ilo.setPredictions(List.of(1.0));
-
         CloudEvent<InferenceLoggerOutput> mockOutput = MockKServeOutputPayload.create(id, ilo, MODEL_NAME);
         consumer.get().consumeKubeflowResponse(mockOutput);
 
