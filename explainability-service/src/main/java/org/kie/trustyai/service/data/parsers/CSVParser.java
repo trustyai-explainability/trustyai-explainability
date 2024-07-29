@@ -21,11 +21,11 @@ import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.CSVUtils;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import org.kie.trustyai.service.payloads.service.InferenceId;
 
 @LookupIfProperty(name = "service.data.format", stringValue = "CSV")
 @ApplicationScoped

@@ -20,13 +20,13 @@ import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.storage.DataFormat;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 import io.minio.*;
 import io.minio.errors.*;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import org.kie.trustyai.service.payloads.service.InferenceId;
 
 @LookupIfProperty(name = "service.storage-format", stringValue = "MINIO")
 @ApplicationScoped
@@ -134,6 +134,16 @@ public class MinioStorage extends FlatFileStorage {
     }
 
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithIds(String modelId, Set<String> ids) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutIds(String modelId, Set<String> ids) throws StorageReadException {
         throw new StorageReadException("Storage type not supported");
     }
 

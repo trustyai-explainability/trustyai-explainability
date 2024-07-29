@@ -23,7 +23,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

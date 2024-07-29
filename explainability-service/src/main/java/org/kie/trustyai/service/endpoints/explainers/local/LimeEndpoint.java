@@ -16,6 +16,7 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -66,12 +67,13 @@ public class LimeEndpoint extends ExplainerEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Compute a LIME explanation.", description = "Generate a LIME explanation for a given model and inference id")
     public Response explain(LimeExplanationRequest request) {
+        final String inferenceId = request.getPredictionId();
+        final String modelId = request.getConfig().getModelConfig().getName();
         try {
-            final String modelId = request.getConfig().getModelConfig().getName();
-            final Dataframe dataframe = dataSource.get().getDataframe(modelId);
+            final Dataframe dataframe = dataSource.get().getDataframeFilteredByIds(modelId, Set.of(inferenceId));
             final PredictionProvider model = getModel(request.getConfig().getModelConfig(),
                     dataframe.getInputTensorName());
-            final String inferenceId = request.getPredictionId();
+
             Prediction predictionToExplain;
             final List<Prediction> predictions = dataSource.get().getDataframe(modelId)
                     .filterRowsById(inferenceId).asPredictions();

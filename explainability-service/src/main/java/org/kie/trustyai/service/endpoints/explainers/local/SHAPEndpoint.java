@@ -16,6 +16,7 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -68,9 +69,9 @@ public class SHAPEndpoint extends ExplainerEndpoint {
     @Operation(summary = "Compute a SHAP explanation.", description = "Generate a SHAP explanation for a given model and inference id")
     public Response explain(SHAPExplanationRequest request) {
         final String inferenceId = request.getPredictionId();
+        final String modelId = request.getConfig().getModelConfig().getName();
         try {
-            final String modelId = request.getConfig().getModelConfig().getName();
-            final Dataframe dataframe = dataSource.get().getDataframe(modelId);
+            final Dataframe dataframe = dataSource.get().getDataframeFilteredByIds(modelId, Set.of(inferenceId));
             final PredictionProvider model = getModel(request.getConfig().getModelConfig(), dataframe.getInputTensorName(),
                     dataframe.getOutputTensorName());
 

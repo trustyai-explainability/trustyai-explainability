@@ -1,16 +1,13 @@
 package org.kie.trustyai.service.endpoints.service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
