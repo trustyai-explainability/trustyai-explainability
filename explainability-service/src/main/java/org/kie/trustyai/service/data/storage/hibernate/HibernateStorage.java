@@ -426,7 +426,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
                                 "order by dr.dbId DESC ")
                         .setParameter(1, modelId)
                         .setParameter(2, tags)
-                        .setMaxResults(batchSize).getResultList();
+                        .getResultList();
 
 
                 // unpack tuples returned from db query
