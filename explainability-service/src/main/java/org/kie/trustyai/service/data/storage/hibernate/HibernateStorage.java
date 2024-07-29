@@ -415,19 +415,19 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     public List<InferenceId> readInferencesIds(String modelId, Set<String> tags, boolean invertFilter) throws StorageReadException {
         if (dataExists(modelId)) {
             try {
-                LOG.debug("Reading dataframe " + modelId + " from Hibernate (tagged)");
+                LOG.debug("Reading inference ids from " + modelId + " from Hibernate (tagged)");
                 refreshIfDirty();
 
                 // grab just the id and timestamp as a list of 2 element object arrays
                 List<Object[]> objects = em.createQuery("" +
-                                "select dr.id, dr.timestamp from DataframeRow dr" +
+                                "select dr.rowId, dr.timestamp from DataframeRow dr" +
                                 " where dr.modelId = ?1 AND dr.tag " +
-                                (invertFilter ? "not in " : "in ") +
-                                "(?2)" +
+                                (invertFilter ? "not in " : "in ") + "(?2)" +
                                 "order by dr.dbId DESC ")
                         .setParameter(1, modelId)
                         .setParameter(2, tags)
                         .setMaxResults(batchSize).getResultList();
+
 
                 // unpack tuples returned from db query
                 return objects.stream().map(o -> new InferenceId((String) o[0], (LocalDateTime) o[1])).collect(Collectors.toList());
@@ -442,8 +442,28 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
     @Override
     public List<InferenceId> readAllInferenceIds(String modelId) throws StorageReadException {
-        final Set<String> tags = Set.of();
-        return readInferencesIds(modelId, tags, true);
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Reading all inference IDs " + modelId + " from Hibernate ");
+                refreshIfDirty();
+
+                // grab just the id and timestamp as a list of 2 element object arrays
+                List<Object[]> objects = em.createQuery("" +
+                                "select dr.rowId, dr.timestamp from DataframeRow dr" +
+                                " where dr.modelId = ?1 " +
+                                "order by dr.dbId DESC ")
+                        .setParameter(1, modelId)
+                        .setMaxResults(batchSize).getResultList();
+
+                // unpack tuples returned from db query
+                return objects.stream().map(o -> new InferenceId((String) o[0], (LocalDateTime) o[1])).collect(Collectors.toList());
+            } catch (StorageReadException e) {
+                LOG.error(e.getMessage());
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
     }
 
     @Override
