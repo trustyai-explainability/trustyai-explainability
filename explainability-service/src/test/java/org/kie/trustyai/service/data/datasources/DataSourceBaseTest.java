@@ -289,4 +289,20 @@ abstract class DataSourceBaseTest {
         assertTrue(df.getTags().stream().allMatch(tagSet::contains));
     }
 
+    @Test
+    void testReadingIdFilteringLargerThanBatch() {
+        final int nrows = 10000;
+        final int ncols = 10;
+        final Random random = new Random();
+        final Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
+        final Set<String> idSet = Set.of(original.getIds().get(random.nextInt(100)));
+        datasource.get().saveDataframe(original, MODEL_ID);
+
+        // tags
+        final Dataframe df = datasource.get().getDataframeFilteredByIds(MODEL_ID, idSet);
+        assertEquals(1, df.getRowDimension());
+        assertTrue(idSet.containsAll(df.getIds()));
+
+    }
+
 }

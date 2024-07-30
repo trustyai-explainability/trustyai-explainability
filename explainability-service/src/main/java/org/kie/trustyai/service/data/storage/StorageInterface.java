@@ -8,9 +8,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.service.data.cache.DataCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 import io.quarkus.cache.CacheResult;
-import org.kie.trustyai.service.payloads.service.InferenceId;
 
 public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
     DataFormat getDataFormat();
@@ -54,6 +54,26 @@ public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
      * @throws StorageReadException If an error occurs while reading the data
      */
     Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException;
+
+    /**
+     * Read data and metadata with the specified ids.
+     *
+     * @param modelId The model ID
+     * @param ids The ids
+     * @return A pair of {@link ByteBuffer} containing the data and metadata
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithIds(String modelId, Set<String> ids) throws StorageReadException;
+
+    /**
+     * Read data and metadata without the specified ids.
+     *
+     * @param modelId The model ID
+     * @param ids The ids
+     * @return A pair of {@link ByteBuffer} containing the data and metadata without the ids
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithoutIds(String modelId, Set<String> ids) throws StorageReadException;
 
     /**
      * Read data and metadata with the specified tags and batch size.
@@ -106,6 +126,6 @@ public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
      * @return A list of {@link org.kie.trustyai.service.payloads.service.InferenceId} containing the data and metadata
      * @throws StorageReadException If an error occurs while reading the data
      */
-    List<InferenceId>  readAllOrganicInferenceIds(String modelId) throws StorageReadException;
+    List<InferenceId> readAllOrganicInferenceIds(String modelId) throws StorageReadException;
 
 }

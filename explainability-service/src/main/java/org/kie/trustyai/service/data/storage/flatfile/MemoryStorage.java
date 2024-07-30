@@ -23,6 +23,7 @@ import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
@@ -84,6 +85,16 @@ public class MemoryStorage extends FlatFileStorage {
 
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
         return readDataframeAndMetadataTagFiltered(modelId, batchSize, tags, false);
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithIds(String modelId, Set<String> ids) throws StorageReadException {
+        return readDataframeAndMetadataIdFiltered(modelId, ids, false);
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutIds(String modelId, Set<String> ids) throws StorageReadException {
+        return readDataframeAndMetadataIdFiltered(modelId, ids, true);
     }
 
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException {
@@ -180,6 +191,49 @@ public class MemoryStorage extends FlatFileStorage {
 
                 return Pair.of(ByteBuffer.wrap(dataLinesString.getBytes()), ByteBuffer.wrap(metadataLinesString.getBytes()));
             }
+        } else {
+            throw new StorageReadException("Data or Metadata file not found for modelId: " + modelId);
+        }
+    }
+
+    private Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataIdFiltered(String modelId, Set<String> ids, boolean invertTagFilter) throws StorageReadException {
+        final List<String> dataLines = new ArrayList<>();
+        final List<String> metadataLines = new ArrayList<>();
+
+        final String dataKey = getDataFilename(modelId);
+        final String metadataKey = getInternalDataFilename(modelId);
+
+        if (data.containsKey(dataKey) && data.containsKey(metadataKey)) {
+            String dataContent = data.get(dataKey);
+            String metadataContent = data.get(metadataKey);
+            String[] dataContentLines = dataContent.split("\n");
+
+            try (CSVParser parser = CSVParser.parse(metadataContent, CSVFormat.DEFAULT.withTrim())) {
+                int index = 0;
+                for (CSVRecord record : parser) {
+                    if (index >= dataContentLines.length) {
+                        // Ensuring we do not go out of bounds if metadata lines are more than data lines
+                        break;
+                    }
+                    String metadataLine = record.get(1); // Assuming the id is in the second column
+                    boolean containsTags = ids.contains(metadataLine);
+                    if (invertTagFilter) {
+                        containsTags = !containsTags;
+                    }
+                    if (containsTags) {
+                        metadataLines.add(String.join(",", record));
+                        dataLines.add(dataContentLines[index]);
+                    }
+                    index++;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            final String dataLinesString = String.join("\n", dataLines);
+            final String metadataLinesString = String.join("\n", metadataLines);
+
+            return Pair.of(ByteBuffer.wrap(dataLinesString.getBytes()), ByteBuffer.wrap(metadataLinesString.getBytes()));
         } else {
             throw new StorageReadException("Data or Metadata file not found for modelId: " + modelId);
         }

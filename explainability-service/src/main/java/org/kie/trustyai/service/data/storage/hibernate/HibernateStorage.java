@@ -386,10 +386,53 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataIdFiltering(String modelId, Set<String> ids, boolean invertFilter) throws StorageReadException {
+        if (dataExists(modelId)) {
+            Dataframe df;
+            try {
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate (tagged)");
+                refreshIfDirty();
+                List<DataframeRow> rows = em.createQuery(
+                        "select dr from DataframeRow dr" +
+                                " where dr.modelId = ?1 AND dr.rowId " +
+                                (invertFilter ? "not in " : "in ") +
+                                "(?2)" +
+                                "order by dr.dbId DESC ",
+                        DataframeRow.class)
+                        .setParameter(1, modelId)
+                        .setParameter(2, ids)
+                        .getResultList();
+                Collections.reverse(rows);
+                DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+                df = Dataframe.untranspose(rows, dm);
+            } catch (Exception e) {
+                throw new DataframeCreateException(e.getMessage());
+            }
+            try {
+                return Pair.of(df, readMetaOrInternalData(modelId));
+            } catch (StorageReadException e) {
+                LOG.error(e.getMessage());
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
+    }
+
     @Override
     @Transactional
     public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
         return readDataframeAndMetadataTagFiltering(modelId, batchSize, tags, false);
+    }
+
+    @Override
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithIds(String modelId, Set<String> ids) throws StorageReadException {
+        return readDataframeAndMetadataIdFiltering(modelId, ids, false);
+    }
+
+    @Override
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithoutIds(String modelId, Set<String> ids) throws StorageReadException {
+        return readDataframeAndMetadataIdFiltering(modelId, ids, true);
     }
 
     @Override
@@ -410,7 +453,6 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         return readDataframeAndMetadataTagFiltering(modelId, this.batchSize, tags, true);
     }
 
-
     // INFERENCE IDS ===================================================================================================
     public List<InferenceId> readInferencesIds(String modelId, Set<String> tags, boolean invertFilter) throws StorageReadException {
         if (dataExists(modelId)) {
@@ -420,14 +462,13 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
                 // grab just the id and timestamp as a list of 2 element object arrays
                 List<Object[]> objects = em.createQuery("" +
-                                "select dr.rowId, dr.timestamp from DataframeRow dr" +
-                                " where dr.modelId = ?1 AND dr.tag " +
-                                (invertFilter ? "not in " : "in ") + "(?2)" +
-                                "order by dr.dbId DESC ")
+                        "select dr.rowId, dr.timestamp from DataframeRow dr" +
+                        " where dr.modelId = ?1 AND dr.tag " +
+                        (invertFilter ? "not in " : "in ") + "(?2)" +
+                        "order by dr.dbId DESC ")
                         .setParameter(1, modelId)
                         .setParameter(2, tags)
                         .getResultList();
-
 
                 // unpack tuples returned from db query
                 return objects.stream().map(o -> new InferenceId((String) o[0], (LocalDateTime) o[1])).collect(Collectors.toList());
@@ -449,9 +490,9 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
 
                 // grab just the id and timestamp as a list of 2 element object arrays
                 List<Object[]> objects = em.createQuery("" +
-                                "select dr.rowId, dr.timestamp from DataframeRow dr" +
-                                " where dr.modelId = ?1 " +
-                                "order by dr.dbId DESC ")
+                        "select dr.rowId, dr.timestamp from DataframeRow dr" +
+                        " where dr.modelId = ?1 " +
+                        "order by dr.dbId DESC ")
                         .setParameter(1, modelId)
                         .setMaxResults(batchSize).getResultList();
 
