@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.Arrays;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.storage.StorageConfig;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
@@ -25,6 +27,7 @@ import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 import static org.kie.trustyai.service.data.datasources.DataSource.INTERNAL_DATA_FILENAME;
 
@@ -85,6 +88,47 @@ public class MemoryStorage extends FlatFileStorage {
 
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException {
         return readDataframeAndMetadataTagFiltered(modelId, this.batchSize, tags, true);
+    }
+
+    public List<InferenceId> readInferenceIds(String modelId, boolean onlyOrganic) throws StorageReadException {
+        final String metadataKey = getInternalDataFilename(modelId);
+        if (data.containsKey(metadataKey)) {
+            String metadataContent = data.get(metadataKey);
+            StringBuilder lines = new StringBuilder();
+            try (CSVParser parser = CSVParser.parse(metadataContent, CSVFormat.DEFAULT.withTrim())) {
+                for (CSVRecord record : parser) {
+                    String metadataLine = record.get(0); // Assuming the tag is in the first column
+                    boolean containsTags;
+                    if (onlyOrganic) {
+                        containsTags = !metadataLine.contains(Dataframe.InternalTags.SYNTHETIC.get());
+                    } else {
+                        containsTags = true;
+                    }
+                    if (containsTags) {
+                        lines.append(record.get(1)).append(",").append(record.get(2)).append("\n");
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            if (lines.length() > 0 && lines.charAt(lines.length() - 1) == '\n') {
+                lines.deleteCharAt(lines.length() - 1);
+            }
+            return parser.toInferenceIds(ByteBuffer.wrap(lines.toString().getBytes()));
+
+        } else {
+            throw new StorageReadException("Data or Metadata file not found for modelId: " + modelId);
+        }
+    }
+
+    @Override
+    public List<InferenceId> readAllInferenceIds(String modelId) throws StorageReadException {
+        return readInferenceIds(modelId, false);
+    }
+
+    @Override
+    public List<InferenceId> readAllOrganicInferenceIds(String modelId) throws StorageReadException {
+        return readInferenceIds(modelId, true);
     }
 
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {

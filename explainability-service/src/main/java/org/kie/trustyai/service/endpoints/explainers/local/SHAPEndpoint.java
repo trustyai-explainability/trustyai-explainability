@@ -81,7 +81,8 @@ public class SHAPEndpoint extends ExplainerEndpoint {
             } else if (predictions.size() == 1) {
                 final Prediction predictionToExplain = predictions.get(0);
                 final int backgroundSize = serviceConfig.batchSize().orElse(100);
-                final List<PredictionInput> testDataDistribution = dataframe.filterRowsById(inferenceId, true,
+                final Dataframe organicDataframe = dataSource.get().getOrganicDataframe(modelId);
+                final List<PredictionInput> testDataDistribution = organicDataframe.filterRowsById(inferenceId, true,
                         backgroundSize).asPredictionInputs();
                 final BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution, request);
                 return Response.ok(entity).build();

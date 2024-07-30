@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.data.storage;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -9,6 +10,7 @@ import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 
 import io.quarkus.cache.CacheResult;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
     DataFormat getDataFormat();
@@ -87,5 +89,23 @@ public interface StorageInterface<DATAFRAME_TYPE, AUX_DATA_TYPE> {
      */
 
     Pair<DATAFRAME_TYPE, AUX_DATA_TYPE> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException;
+
+    /**
+     * Read all inference ids without batch size.
+     *
+     * @param modelId The model ID
+     * @return A list of {@link org.kie.trustyai.service.payloads.service.InferenceId} containing the data and metadata
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    List<InferenceId> readAllInferenceIds(String modelId) throws StorageReadException;
+
+    /**
+     * Read all organic inference ids without batch size.
+     *
+     * @param modelId The model ID
+     * @return A list of {@link org.kie.trustyai.service.payloads.service.InferenceId} containing the data and metadata
+     * @throws StorageReadException If an error occurs while reading the data
+     */
+    List<InferenceId>  readAllOrganicInferenceIds(String modelId) throws StorageReadException;
 
 }

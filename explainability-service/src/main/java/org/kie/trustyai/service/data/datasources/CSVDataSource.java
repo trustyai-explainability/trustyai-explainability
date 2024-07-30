@@ -2,10 +2,7 @@ package org.kie.trustyai.service.data.datasources;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -13,8 +10,11 @@ import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
+import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.storage.flatfile.FlatFileStorage;
+import org.kie.trustyai.service.data.utils.CSVUtils;
 import org.kie.trustyai.service.payloads.service.DataTagging;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
 
@@ -387,6 +387,40 @@ public class CSVDataSource extends DataSource {
      */
     public boolean hasRecordedInferences(String modelId) {
         return getMetadata(modelId).isRecordedInferences();
+    }
+
+    @Override
+    public List<InferenceId> getAllInferenceIds(String modelId) {
+        final FlatFileStorage ffst = getStorage();
+        final ByteBuffer allInferenceIdsBytes;
+        final List<InferenceId> inferenceIds;
+        try {
+            inferenceIds= ffst.readAllInferenceIds(modelId);
+        } catch (StorageReadException e) {
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
+        }
+
+        return inferenceIds;
+
+    }
+
+    @Override
+    public List<InferenceId> getOrganicInferenceIds(String modelId) {
+        FlatFileStorage ffst = getStorage();
+        final ByteBuffer allOrganicInferenceIdsBytes;
+        final List<InferenceId> inferenceIds;
+        try {
+            inferenceIds = ffst.readAllOrganicInferenceIds(modelId);
+        } catch (StorageReadException e) {
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
+        }
+
+        return inferenceIds;
+
     }
 
     // TAG OPERATIONS ==================================================================================================

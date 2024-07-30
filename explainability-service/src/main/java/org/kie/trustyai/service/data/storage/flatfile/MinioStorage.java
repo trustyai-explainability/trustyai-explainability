@@ -26,6 +26,7 @@ import io.minio.errors.*;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 @LookupIfProperty(name = "service.storage-format", stringValue = "MINIO")
 @ApplicationScoped
@@ -146,6 +147,16 @@ public class MinioStorage extends FlatFileStorage {
 
     @Override
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    @Override
+    public List<InferenceId> readAllInferenceIds(String modelId) throws StorageReadException {
+        throw new StorageReadException("Storage type not supported");
+    }
+
+    @Override
+    public List<InferenceId> readAllOrganicInferenceIds(String modelId) throws StorageReadException {
         throw new StorageReadException("Storage type not supported");
     }
 

@@ -188,7 +188,7 @@ public class ServiceMetadataEndpoint {
     @Operation(summary = "Get a list of all inference ids within a particular model inference dataset.", description = "Get all the inference ids for a given model")
     public Response inferenceIdsByModel(@Parameter(description = "The model to get inference ids from", required = true) @PathParam("model") String model,
             @Parameter(description = "The type of inferences to retrieve", required = false) @QueryParam("type") @DefaultValue("all") String type) {
-        final Dataframe df;
+        final List<InferenceId> ids;
 
         if (!dataSource.get().getKnownModels().contains(model)) {
             return Response.serverError()
@@ -199,26 +199,21 @@ public class ServiceMetadataEndpoint {
 
         if ("organic".equalsIgnoreCase(type)) {
             try {
-                df = dataSource.get().getOrganicDataframe(model);
-            } catch (DataframeCreateException e) {
+                ids = dataSource.get().getOrganicInferenceIds(model);
+            } catch (Exception e) {
                 return Response.serverError()
                         .status(Response.Status.BAD_REQUEST)
-                        .entity("No organic inferences found for model=" + model)
+                        .entity("Error retrieving organic inferences for model=" + model)
                         .build();
             }
         } else if ("all".equalsIgnoreCase(type)) {
-            df = dataSource.get().getDataframe(model);
+            ids = dataSource.get().getAllInferenceIds(model);
         } else {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Invalid type parameter. Valid values must be in ['organic', 'all'].")
                     .build();
         }
-        final List<LocalDateTime> timestamps = df.getTimestamps();
-        final List<String> ids = df.getIds();
-
-        return Response.ok().entity(IntStream.range(0, df.getRowDimension())
-                .mapToObj(row -> new InferenceId(ids.get(row), timestamps.get(row)))
-                .collect(Collectors.toUnmodifiableList())).build();
+        return Response.ok().entity(ids).build();
 
     }
 
