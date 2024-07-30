@@ -17,6 +17,7 @@ import org.kie.trustyai.service.data.parsers.DataParser;
 import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.payloads.service.DataTagging;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
 
@@ -314,6 +315,16 @@ public abstract class DataSource {
     public List<String> getVerifiedModels() {
         return knownModels.stream().filter(this::hasMetadata).collect(Collectors.toList());
     }
+
+    /**
+     * @return the list of all inference ids in storage.
+     */
+    public abstract List<InferenceId> getAllInferenceIds(String modelId);
+
+    /**
+     * @return the list of organic inference ids in storage.
+     */
+    public abstract List<InferenceId> getOrganicInferenceIds(String modelId);
 
     // GROUND TRUTH OPERATIONS =========================================================================================
     /**

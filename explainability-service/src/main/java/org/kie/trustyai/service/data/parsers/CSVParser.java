@@ -25,6 +25,7 @@ import org.kie.trustyai.service.data.utils.CSVUtils;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 @LookupIfProperty(name = "service.data.format", stringValue = "CSV")
 @ApplicationScoped
@@ -47,6 +48,32 @@ public class CSVParser implements DataParser {
 
         LOG.info("Creating dataframe from CSV data");
         return Dataframe.createFrom(predictions);
+    }
+
+    @Override
+    public List<InferenceId> toInferenceIds(ByteBuffer byteBuffer) {
+        final String data = UTF8.decode(byteBuffer).toString();
+        try {
+            final List<List<Value>> values = CSVUtils.parseRaw(data);
+            final List<InferenceId> inferenceIds = new ArrayList<>();
+            if (values != null && !values.isEmpty()) {
+                for (List<Value> value : values) {
+                    if (value.size() == 2) {
+                        final String id = value.get(0).asString();
+                        final LocalDateTime predictionTime = LocalDateTime.parse(value.get(1).asString());
+                        inferenceIds.add(new InferenceId(id, predictionTime));
+                    } else if (value.size() == 3) {
+                        final String id = value.get(1).asString();
+                        final LocalDateTime predictionTime = LocalDateTime.parse(value.get(2).asString());
+                        inferenceIds.add(new InferenceId(id, predictionTime));
+                    }
+                }
+            }
+            return inferenceIds;
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
