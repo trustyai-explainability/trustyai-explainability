@@ -20,11 +20,11 @@ import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.storage.BatchReader;
 import org.kie.trustyai.service.data.storage.DataFormat;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import org.kie.trustyai.service.payloads.service.InferenceId;
 
 import static org.kie.trustyai.service.data.datasources.DataSource.INTERNAL_DATA_FILENAME;
 
@@ -134,6 +134,29 @@ public class PVCStorage extends FlatFileStorage {
 
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
         return readDataframeAndMetadataTagFilter(modelId, batchSize, tags, false);
+    }
+
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataIdFilter(String modelId, Set<String> ids, boolean invertTagFilter) throws StorageReadException {
+        LOG.debug("Cache miss. Reading data for " + modelId);
+        try {
+            final InputStream dataStream = BatchReader.getFileInputStream(buildDataPath(modelId).toString());
+            final InputStream internalDataStream = BatchReader.getFileInputStream(buildInternalDataPath(modelId).toString());
+            final Pair<List<String>, List<String>> pair = BatchReader.readEntriesWithIds(dataStream, internalDataStream, ids, invertTagFilter);
+            return Pair.of(ByteBuffer.wrap(BatchReader.linesToBytes(pair.getLeft())), ByteBuffer.wrap(BatchReader.linesToBytes(pair.getRight())));
+        } catch (IOException e) {
+            LOG.error("Error reading input file for model " + modelId);
+            throw new StorageReadException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithIds(String modelId, Set<String> ids) throws StorageReadException {
+        return readDataframeAndMetadataIdFilter(modelId, ids, false);
+    }
+
+    @Override
+    public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutIds(String modelId, Set<String> ids) throws StorageReadException {
+        return readDataframeAndMetadataIdFilter(modelId, ids, true);
     }
 
     public Pair<ByteBuffer, ByteBuffer> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException {

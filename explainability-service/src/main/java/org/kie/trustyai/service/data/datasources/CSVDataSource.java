@@ -232,6 +232,20 @@ public class CSVDataSource extends DataSource {
         return finalizeTagFiltering(modelId, pair);
     }
 
+    @Override
+    public Dataframe getDataframeFilteredByIds(String modelId, Set<String> ids) throws DataframeCreateException {
+        FlatFileStorage ffst = getStorage();
+        final Pair<ByteBuffer, ByteBuffer> pair;
+        try {
+            pair = ffst.readDataframeAndMetadataWithIds(modelId, ids);
+        } catch (StorageReadException e) {
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
+        }
+        return finalizeTagFiltering(modelId, pair);
+    }
+
     /**
      * Get a dataframe with matching tags data and metadata for a given model.
      * No batch size is given, so the default bxatch size is used.
@@ -395,7 +409,7 @@ public class CSVDataSource extends DataSource {
         final ByteBuffer allInferenceIdsBytes;
         final List<InferenceId> inferenceIds;
         try {
-            inferenceIds= ffst.readAllInferenceIds(modelId);
+            inferenceIds = ffst.readAllInferenceIds(modelId);
         } catch (StorageReadException e) {
             throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
         } catch (DataframeCreateException e) {

@@ -124,6 +124,16 @@ public abstract class DataSource {
     public abstract Dataframe getDataframeFilteredByTags(final String modelId, int batchSize, Set<String> tags) throws DataframeCreateException;
 
     /**
+     * Get a dataframe with matching id data and metadata for a given model.
+     *
+     * @param modelId the model id
+     * @param ids the set of tags to include
+     * @return a dataframe with matching ids
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public abstract Dataframe getDataframeFilteredByIds(final String modelId, Set<String> ids) throws DataframeCreateException;
+
+    /**
      * Get a dataframe with matching tags data and metadata for a given model.
      * No batch size is given, so the default batch size is used.
      *

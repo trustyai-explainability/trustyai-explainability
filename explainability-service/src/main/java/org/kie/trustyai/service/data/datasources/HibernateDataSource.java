@@ -165,6 +165,18 @@ public class HibernateDataSource extends DataSource {
         }
     }
 
+    @Override
+    public Dataframe getDataframeFilteredByIds(String modelId, Set<String> ids) throws DataframeCreateException {
+        try {
+            HibernateStorage hst = getStorage();
+            return hst.readDataframeAndMetadataWithIds(modelId, ids).getLeft();
+        } catch (StorageReadException e) {
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
+        }
+    }
+
     /**
      * Get a dataframe with matching tags data and metadata for a given model.
      * No batch size is given, so the default batch size is used.
