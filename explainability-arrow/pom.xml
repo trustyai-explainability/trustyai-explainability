@@ -15,7 +15,7 @@
     <properties>
         <version.org.apache.arrow>15.0.2</version.org.apache.arrow>
         <version.com.google.flatbuffers>2.0.3</version.com.google.flatbuffers>
-        <version.com.fasterxml.jackson.core>2.13.4</version.com.fasterxml.jackson.core> <!-- sync this with the databind version -->
+        <version.com.fasterxml.jackson.core>2.15.0</version.com.fasterxml.jackson.core> <!-- sync this with the databind version -->
     </properties>
 
     <dependencyManagement>

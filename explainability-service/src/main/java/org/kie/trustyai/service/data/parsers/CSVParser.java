@@ -26,6 +26,7 @@ import org.kie.trustyai.service.payloads.service.InferenceId;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 @LookupIfProperty(name = "service.data.format", stringValue = "CSV")
 @ApplicationScoped
