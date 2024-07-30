@@ -11,7 +11,7 @@ public class InferenceLoggerInputV2 {
     private String datatype;
 
     @JsonProperty("data")
-    private List<List<Double>> inputData;
+    private List<List<Object>> inputData;
 
     public String getName() {
         return name;
@@ -37,11 +37,11 @@ public class InferenceLoggerInputV2 {
         this.datatype = datatype;
     }
 
-    public List<List<Double>> getInputData() {
+    public List<List<Object>> getInputData() {
         return inputData;
     }
 
-    public void setInputData(List<List<Double>> inputData) {
+    public void setInputData(List<List<Object>> inputData) {
         this.inputData = inputData;
     }
 }
