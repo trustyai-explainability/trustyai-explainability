@@ -6,20 +6,25 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.jboss.logging.Logger;
+import org.kie.trustyai.connectors.kserve.v1.KServeV1HTTPPayloadParser;
+import org.kie.trustyai.connectors.kserve.v2.KServeV2HTTPPayloadParser;
+import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
+import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
+import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
 import org.kie.trustyai.service.data.reconcilers.payloadstorage.kserve.KServePayloadStorage;
-import org.kie.trustyai.service.payloads.consumer.InferenceLoggerGeneral;
-import org.kie.trustyai.service.payloads.consumer.InferenceLoggerInput;
-import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
+import org.kie.trustyai.service.data.utils.KServePayloadConverters;
+import org.kie.trustyai.service.data.utils.UploadUtils;
 import org.kie.trustyai.service.payloads.consumer.partial.KServeInputPayload;
 import org.kie.trustyai.service.payloads.consumer.partial.KServeOutputPayload;
+import org.kie.trustyai.service.payloads.data.upload.ModelInferRequestPayload;
+import org.kie.trustyai.service.payloads.data.upload.ModelInferResponsePayload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -42,6 +47,9 @@ public class KServeInferencePayloadReconciler extends InferencePayloadReconciler
     @Inject
     ObjectMapper objectMapper;
 
+    KServeV1HTTPPayloadParser v1PayloadParser = KServeV1HTTPPayloadParser.getInstance();
+    KServeV2HTTPPayloadParser v2PayloadParser = KServeV2HTTPPayloadParser.getInstance();
+
     @Override
     KServePayloadStorage getPayloadStorage() {
         return kservePayloadStorage.get();
@@ -57,7 +65,7 @@ public class KServeInferencePayloadReconciler extends InferencePayloadReconciler
 
         // Parse input
         // TODO: Add metadata support to KServe payloads and interface
-        final Dataframe dataframe = payloadToDataframe(input, output, id, null);
+        final Dataframe dataframe = payloadToDataframe(input, output, id, modelId, null);
 
         datasource.get().saveDataframe(dataframe, modelId);
 
@@ -65,44 +73,35 @@ public class KServeInferencePayloadReconciler extends InferencePayloadReconciler
         kservePayloadStorage.get().removeUnreconciledOutput(id);
     }
 
-    public Dataframe payloadToDataframe(KServeInputPayload inputs, KServeOutputPayload outputs, String id, Map<String, String> metadata) throws DataframeCreateException {
-
+    public Dataframe payloadToDataframe(KServeInputPayload inputs, KServeOutputPayload outputs, String id, String modelId, Map<String, String> metadata) throws DataframeCreateException {
         final ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode;
-        List<Double> instanceData = null;
-
+        List<PredictionInput> predictionInputs;
+        List<PredictionOutput> predictionOutputs;
         try {
-            rootNode = objectMapper.readTree(inputs.getData());
+            // inputs
+            ModelInferRequestPayload modelInferRequestPayload = KServePayloadConverters.toRequestPayload(inputs);
+            ModelInferRequest.Builder inferRequestBuilder = ModelInferRequest.newBuilder();
+            inferRequestBuilder.setModelName(modelId);
+            UploadUtils.populateRequestBuilder(inferRequestBuilder, modelInferRequestPayload);
+            predictionInputs = TensorConverter.parseKserveModelInferRequest(inferRequestBuilder.build());
 
-            if (rootNode.has("instances")) {
-                // Handle the instances format
-                InferenceLoggerInput originalFormat = objectMapper.treeToValue(rootNode, InferenceLoggerInput.class);
-                instanceData = originalFormat.getInstances().get(0);
-            } else if (rootNode.has("inputs")) {
-                // Handle the inputs format
-                InferenceLoggerGeneral newFormat = objectMapper.treeToValue(rootNode, InferenceLoggerGeneral.class);
-                instanceData = newFormat.getInputs().get(0).getInputData().get(0);
-            } else {
-                throw new DataframeCreateException("Unknown input format");
-            }
+            // outputs
+            ModelInferResponsePayload modelInferResponsePayload = KServePayloadConverters.toResponsePayload(outputs);
+            ModelInferResponse.Builder inferResponseBuilder = ModelInferResponse.newBuilder();
+            inferResponseBuilder.setModelName(modelId);
+            UploadUtils.populateResponseBuilder(inferResponseBuilder, modelInferResponsePayload);
+            predictionOutputs = TensorConverter.parseKserveModelInferResponse(
+                    inferResponseBuilder.build(),
+                    predictionInputs.size());
         } catch (JsonProcessingException e) {
             final String message = "Could not parse input data: " + e.getMessage();
             LOG.error(message);
             throw new DataframeCreateException(message);
         }
 
-        final List<Double> data = instanceData;
-        final PredictionInput predictionInput = new PredictionInput(IntStream.range(0, instanceData.size()).mapToObj(i -> {
-            return FeatureFactory.newNumericalFeature("feature-" + i, data.get(i));
-        }).collect(Collectors.toList()));
-
-        InferenceLoggerOutput ilo = outputs.getData();
-        final PredictionOutput predictionOutput = new PredictionOutput(IntStream.range(0, ilo.getPredictions().size()).mapToObj(i -> {
-            return new Output("output-" + i, Type.NUMBER, new Value(ilo.getPredictions().get(i)), 1.0);
-        }).collect(Collectors.toList()));
-
-        final List<Prediction> predictions = List.of(new SimplePrediction(predictionInput, predictionOutput));
-
+        List<Prediction> predictions = IntStream.range(0, predictionInputs.size())
+                .mapToObj(i -> new SimplePrediction(predictionInputs.get(i), predictionOutputs.get(i)))
+                .collect(Collectors.toList());
         return Dataframe.createFrom(predictions);
     }
 

@@ -60,7 +60,6 @@ public class UploadEndpoint {
 
         int nOutputs = inferenceDataframe.getOutputsCount();
         List<String> rowMismatchErrors = new ArrayList<>();
-        ;
 
         // check that uploaded inputs match recorded inputs and correlate ground truths if they do
         List<Prediction> groundTruthsToSave = new ArrayList<>();

@@ -59,7 +59,7 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
         LOG.debug("Reconciling partial input and output, id=" + id);
 
         // save
-        final Dataframe dataframe = payloadToDataframe(input, output, id, input.getMetadata());
+        final Dataframe dataframe = payloadToDataframe(input, output, id, modelId, input.getMetadata());
         datasource.get().saveDataframe(dataframe, standardizeModelId(modelId));
 
         mmPayloadStorage.get().removeUnreconciledInput(id);
@@ -77,7 +77,8 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
      * @return A {@link Prediction}
      * @throws DataframeCreateException
      */
-    public Dataframe payloadToDataframe(InferencePartialPayload inputPayload, InferencePartialPayload outputPayload, String id, Map<String, String> metadata) throws DataframeCreateException {
+    public Dataframe payloadToDataframe(InferencePartialPayload inputPayload, InferencePartialPayload outputPayload, String id, String modelId, Map<String, String> metadata)
+            throws DataframeCreateException {
         final byte[] inputBytes = Base64.getDecoder().decode(inputPayload.getData().getBytes());
         final byte[] outputBytes = Base64.getDecoder().decode(outputPayload.getData().getBytes());
 

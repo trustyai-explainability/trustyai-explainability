@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.explainability.model.UnderlyingObject;
+import org.kie.trustyai.explainability.model.SerializableObject;
 
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
@@ -30,9 +30,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 
 @Entity
-public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<UnderlyingObject> {
+public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<SerializableObject> {
 
-    private ObjectFeatureDomain(Set<UnderlyingObject> categories) {
+    private ObjectFeatureDomain(Set<SerializableObject> categories) {
         super(categories);
     }
 
@@ -47,26 +47,26 @@ public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<Underl
      * @return A {@link FeatureDomain}
      */
     public static ObjectFeatureDomain create(Set<Object> categories) {
-        return new ObjectFeatureDomain(categories.stream().map(UnderlyingObject::new).collect(Collectors.toSet()));
+        return new ObjectFeatureDomain(categories.stream().map(SerializableObject::new).collect(Collectors.toSet()));
     }
 
     public static ObjectFeatureDomain create(List<Object> categories) {
-        return new ObjectFeatureDomain(categories.stream().map(UnderlyingObject::new).collect(Collectors.toSet()));
+        return new ObjectFeatureDomain(categories.stream().map(SerializableObject::new).collect(Collectors.toSet()));
     }
 
     public static ObjectFeatureDomain create(Object... categories) {
-        return new ObjectFeatureDomain(Arrays.stream(categories).map(UnderlyingObject::new).collect(Collectors.toSet()));
+        return new ObjectFeatureDomain(Arrays.stream(categories).map(SerializableObject::new).collect(Collectors.toSet()));
     }
 
     @ElementCollection
     @Access(AccessType.FIELD)
     @Override
-    public Set<UnderlyingObject> getCategories() {
+    public Set<SerializableObject> getCategories() {
         return this.categories;
     }
 
     @Transient
     public Set<Object> getRawCategories() {
-        return this.categories.stream().map(UnderlyingObject::getObject).collect(Collectors.toSet());
+        return this.categories.stream().map(SerializableObject::getObject).collect(Collectors.toSet());
     }
 }
