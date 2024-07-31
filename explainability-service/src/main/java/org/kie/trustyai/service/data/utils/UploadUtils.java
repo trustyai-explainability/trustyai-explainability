@@ -17,7 +17,11 @@ import com.google.protobuf.ByteString;
 public class UploadUtils {
     private static final Logger LOG = Logger.getLogger(UploadUtils.class);
 
-    private static boolean shapeReversalCheck(List<Long> shape) {
+    public static boolean shapeReversalCheckLong(List<Long> shape) {
+        return shape.get(0) != 1 && shape.get(shape.size() - 1) != 1;
+    }
+
+    public static boolean shapeReversalCheckInt(List<Integer> shape) {
         return shape.get(0) != 1 && shape.get(shape.size() - 1) != 1;
     }
 
@@ -96,7 +100,7 @@ public class UploadUtils {
 
         // the shapes are parsed in different directions in the kserve parser depending on codec
         List<Long> shape = Arrays.stream(input.getShape()).mapToLong(Number::longValue).boxed().collect(Collectors.toList());
-        if (shapeReversalCheck(shape)) {
+        if (UploadUtils.shapeReversalCheckLong(shape)) {
             Collections.reverse(shape);
         }
         inputBuilder.addAllShape(shape);
@@ -139,7 +143,7 @@ public class UploadUtils {
 
         // the shapes are parsed in different directions in the kserve parser depending on codec
         List<Long> shape = Arrays.stream(output.getShape()).mapToLong(Number::longValue).boxed().collect(Collectors.toList());
-        if (shapeReversalCheck(shape)) {
+        if (UploadUtils.shapeReversalCheckLong(shape)) {
             Collections.reverse(shape);
         }
         outputBuilder.addAllShape(shape);

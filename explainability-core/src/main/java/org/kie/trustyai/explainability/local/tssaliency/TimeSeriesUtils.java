@@ -15,6 +15,7 @@ public class TimeSeriesUtils {
 
     /**
      * Convert time-series from TrustyAI format to TSSaliency format
+     * 
      * @param inputs List of {@link Prediction} in TrustyAI format
      * @return Time-series as TSSaliency format
      */
@@ -46,6 +47,7 @@ public class TimeSeriesUtils {
 
     /**
      * Convert time-series from TSSaliency format to TrustyAI format
+     * 
      * @param inputs {@link PredictionInput} containing time-series in TSSaliency format
      * @return Time-series as TrustyAI format
      */
