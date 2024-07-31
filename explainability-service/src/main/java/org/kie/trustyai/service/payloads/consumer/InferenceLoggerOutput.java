@@ -3,7 +3,7 @@ package org.kie.trustyai.service.payloads.consumer;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.explainability.model.UnderlyingObject;
+import org.kie.trustyai.explainability.model.SerializableObject;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,7 +15,7 @@ public class InferenceLoggerOutput {
     // Match the old "predictions" format
     @JsonAlias({ "predictions" })
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<UnderlyingObject> predictions;
+    private List<SerializableObject> predictions;
 
     // Match the "outputs" format
     @JsonProperty("outputs")
@@ -46,7 +46,7 @@ public class InferenceLoggerOutput {
         return id;
     }
 
-    public List<UnderlyingObject> getPredictions() {
+    public List<SerializableObject> getPredictions() {
         if (predictions != null) {
             return predictions;
         } else if (outputs != null && !outputs.isEmpty()) {
@@ -63,16 +63,16 @@ public class InferenceLoggerOutput {
         this.outputs = outputs;
     }
 
-    public List<UnderlyingObject> getRawPredictions() {
+    public List<SerializableObject> getRawPredictions() {
         return this.predictions;
     }
 
-    public void setPredictions(List<UnderlyingObject> predictions) {
+    public void setPredictions(List<SerializableObject> predictions) {
         this.predictions = predictions;
     }
 
     public void setPredictionsDouble(List<Double> predictions) {
-        this.predictions = predictions.stream().map(UnderlyingObject::new).collect(Collectors.toList());
+        this.predictions = predictions.stream().map(SerializableObject::new).collect(Collectors.toList());
     }
 
 }

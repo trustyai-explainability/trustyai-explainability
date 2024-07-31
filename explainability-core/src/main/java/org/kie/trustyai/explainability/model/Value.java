@@ -40,14 +40,14 @@ import jakarta.persistence.Transient;
 @Embeddable
 public class Value {
     @Access(AccessType.FIELD)
-    private final UnderlyingObject wrappedUnderlyingObject;
+    private final SerializableObject serializableObject;
 
     public Value(Object underlyingObject) {
-        this.wrappedUnderlyingObject = new UnderlyingObject(underlyingObject);
+        this.serializableObject = new SerializableObject(underlyingObject);
     }
 
     public Value() {
-        this.wrappedUnderlyingObject = new UnderlyingObject(null);
+        this.serializableObject = new SerializableObject();
     }
 
     public String asString() {
@@ -89,11 +89,11 @@ public class Value {
 
     @Transient
     public Object getUnderlyingObject() {
-        return wrappedUnderlyingObject.getObject();
+        return serializableObject.getObject();
     }
 
-    public UnderlyingObject getUnderlyingObjectContainer() {
-        return wrappedUnderlyingObject;
+    public SerializableObject getUnderlyingObjectContainer() {
+        return serializableObject;
     }
 
     @Override

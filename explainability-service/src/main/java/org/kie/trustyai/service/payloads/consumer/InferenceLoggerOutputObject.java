@@ -2,7 +2,7 @@ package org.kie.trustyai.service.payloads.consumer;
 
 import java.util.List;
 
-import org.kie.trustyai.explainability.model.UnderlyingObject;
+import org.kie.trustyai.explainability.model.SerializableObject;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -35,11 +35,11 @@ public class InferenceLoggerOutputObject {
         this.datatype = datatype;
     }
 
-    public List<UnderlyingObject> getData() {
+    public List<SerializableObject> getData() {
         return data;
     }
 
-    public void setData(List<UnderlyingObject> data) {
+    public void setData(List<SerializableObject> data) {
         this.data = data;
     }
 
@@ -47,7 +47,7 @@ public class InferenceLoggerOutputObject {
     private String datatype;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private List<UnderlyingObject> data;
+    private List<SerializableObject> data;
 
     public String getName() {
         return name;

@@ -13,7 +13,7 @@ import org.eclipse.microprofile.context.ThreadContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.UnderlyingObject;
+import org.kie.trustyai.explainability.model.SerializableObject;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
@@ -139,7 +139,7 @@ abstract public class CloudEventConsumerBaseTest {
                 85.33306501426134,
                 77.90240870728456,
                 61.71289055261055,
-                43.69211054137737).map(UnderlyingObject::new).collect(Collectors.toList()));
+                43.69211054137737).map(SerializableObject::new).collect(Collectors.toList()));
         iloo.setDatatype("FP64");
         iloo.setName("predict");
         iloo.setShape(List.of(5, 1));
@@ -158,7 +158,7 @@ abstract public class CloudEventConsumerBaseTest {
         assertFalse(getStorage().dataExists(MODEL_NAME));
 
         InferenceLoggerOutput ilo = new InferenceLoggerOutput();
-        ilo.setPredictions(List.of(new UnderlyingObject(1.0)));
+        ilo.setPredictions(List.of(new SerializableObject(1.0)));
         CloudEvent<InferenceLoggerOutput> mockOutput = MockKServeOutputPayload.create(id, ilo, MODEL_NAME);
         consumer.get().consumeKubeflowResponse(mockOutput);
 
@@ -196,7 +196,7 @@ abstract public class CloudEventConsumerBaseTest {
         CloudEvent<byte[]> mockEvent = MockKServeInputPayload.create(id, "foo".getBytes(StandardCharsets.UTF_8), MODEL_NAME);
         consumer.get().consumeKubeflowRequest(mockEvent);
         InferenceLoggerOutput ilo = new InferenceLoggerOutput();
-        ilo.setPredictions(List.of(new UnderlyingObject(1.0)));
+        ilo.setPredictions(List.of(new SerializableObject(1.0)));
         CloudEvent<InferenceLoggerOutput> mockOutput = MockKServeOutputPayload.create(id, ilo, MODEL_NAME);
 
         final DataframeCreateException exception = assertThrows(DataframeCreateException.class, () -> {

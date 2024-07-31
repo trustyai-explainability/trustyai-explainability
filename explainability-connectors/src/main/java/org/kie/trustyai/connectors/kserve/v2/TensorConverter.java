@@ -22,7 +22,7 @@ public class TensorConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(TensorConverter.class);
 
-    public static KServeDatatype inferKServeType(Object object){
+    public static KServeDatatype inferKServeType(Object object) {
         if (object instanceof Integer) {
             return KServeDatatype.INT32;
         } else if (object instanceof Long) {
@@ -31,9 +31,9 @@ public class TensorConverter {
             return KServeDatatype.FP32;
         } else if (object instanceof Double) {
             return KServeDatatype.FP64;
-        } else if (object instanceof Boolean){
+        } else if (object instanceof Boolean) {
             return KServeDatatype.BOOL;
-        } else if (object instanceof String){
+        } else if (object instanceof String | object instanceof Byte) {
             return KServeDatatype.BYTES;
         } else {
             throw new IllegalArgumentException("Cannot infer KServe type of " + object);
