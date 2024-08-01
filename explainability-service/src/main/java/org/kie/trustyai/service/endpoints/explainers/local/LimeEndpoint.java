@@ -75,8 +75,7 @@ public class LimeEndpoint extends ExplainerEndpoint {
                     dataframe.getInputTensorName());
 
             Prediction predictionToExplain;
-            final List<Prediction> predictions = dataSource.get().getDataframe(modelId)
-                    .filterRowsById(inferenceId).asPredictions();
+            final List<Prediction> predictions = dataframe.filterRowsById(inferenceId).asPredictions();
             if (predictions.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("No prediction found with id="
                         + inferenceId).build();
