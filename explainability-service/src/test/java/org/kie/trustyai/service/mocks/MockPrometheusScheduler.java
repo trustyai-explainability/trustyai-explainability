@@ -8,10 +8,8 @@ import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 
-@Mock
 @Alternative
 @ApplicationScoped
-@Priority(1)
 public class MockPrometheusScheduler extends PrometheusScheduler {
 
     public void empty() {
