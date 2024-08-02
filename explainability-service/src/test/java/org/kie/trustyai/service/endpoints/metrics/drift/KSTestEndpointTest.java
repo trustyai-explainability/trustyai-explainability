@@ -96,6 +96,18 @@ class KSTestEndpointTest {
                 .when().post("/request")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode());
+
+        String response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().get("/requests")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract().body().asString();
+
+        assertTrue(response.contains("\"modelId\":\"example1\""));
+        assertFalse(response.contains("sketchFitting"));
+
     }
 
 }

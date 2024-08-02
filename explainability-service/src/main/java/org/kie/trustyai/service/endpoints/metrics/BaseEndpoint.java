@@ -47,7 +47,7 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     @Inject
     protected ServiceConfig serviceConfig;
 
-    private final String name;
+    protected final String name;
 
     protected BaseEndpoint() {
         this.name = "GenericBaseEndpoint";
