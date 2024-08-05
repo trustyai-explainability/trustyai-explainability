@@ -56,7 +56,7 @@ success=1
 
 if [ $INSTALL_FAILURE = false ]; then
   cd peak/trustyai-tests
-  poetry run pytest -s --log-cli-level=DEBUG
+  poetry run pytest -s --log-cli-level=DEBUG -m openshift
 else
   echo -e "Skipping tests due to ODH Operator/DSC installation failure, marking suite as failed."
   success=0
