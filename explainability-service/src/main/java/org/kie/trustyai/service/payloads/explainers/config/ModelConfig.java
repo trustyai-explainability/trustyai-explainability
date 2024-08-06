@@ -31,7 +31,6 @@ public class ModelConfig {
         // NO OP
     }
 
-
     public String getName() {
         return name;
     }

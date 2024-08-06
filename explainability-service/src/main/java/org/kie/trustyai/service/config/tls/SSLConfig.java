@@ -1,26 +1,27 @@
 package org.kie.trustyai.service.config.tls;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import java.util.List;
-
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class SSLConfig {
 
     @ConfigProperty(name = "quarkus.http.ssl.certificate.files")
-    List<String> certificateFile;
+    Optional<List<Path>> certificateFile;
 
     @ConfigProperty(name = "quarkus.http.ssl.certificate.key-files")
-    List<String> keyFile;
+    Optional<List<Path>> keyFile;
 
-    public List<String> getCertificateFile() {
+    public Optional<List<Path>> getCertificateFile() {
         return certificateFile;
     }
 
-    public List<String> getKeyFile() {
+    public Optional<List<Path>> getKeyFile() {
         return keyFile;
     }
 }
-

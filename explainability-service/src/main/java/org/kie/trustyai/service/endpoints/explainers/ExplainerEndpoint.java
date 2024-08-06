@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.connectors.kserve.v2.KServeConfig;
 import org.kie.trustyai.connectors.kserve.v2.KServeV2GRPCPredictionProvider;
 import org.kie.trustyai.connectors.utils.TLSCredentials;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
+import org.kie.trustyai.service.config.KubernetesConfig;
 import org.kie.trustyai.service.config.tls.SSLConfig;
 import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
 
@@ -22,11 +22,10 @@ public abstract class ExplainerEndpoint {
     private static final Logger LOG = Logger.getLogger(ExplainerEndpoint.class);
 
     @Inject
-    @ConfigProperty(name = "explainers.target")
-    String target;
+    SSLConfig sslConfig;
 
     @Inject
-    SSLConfig sslConfig;
+    KubernetesConfig kubernetesConfig;
 
     public static final String BIAS_IGNORE_PARAM = "bias-ignore";
 
@@ -41,23 +40,33 @@ public abstract class ExplainerEndpoint {
     protected PredictionProvider getModel(ModelConfig modelConfig, String inputTensorName, String outputTensorName) throws IllegalArgumentException {
         final Map<String, String> map = new HashMap<>();
         map.put(BIAS_IGNORE_PARAM, "true");
-        LOG.info("Using model endpoint " + target);
+        //        final String target = getTarget(namespace);
+        final String target = "modelmesh-serving." + kubernetesConfig.namespace() + ":8033";
         final KServeConfig kServeConfig = KServeConfig.create(
                 target,
                 modelConfig.getName(),
                 modelConfig.getVersion(),
                 KServeConfig.DEFAULT_CODEC,
                 1);
-        final TLSCredentials tlsCredentials = new TLSCredentials(
-                new File(sslConfig.getCertificateFile().get(0)),
-                new File(sslConfig.getKeyFile().get(0)),
-                Optional.of(new File(sslConfig.getCertificateFile().get(0))));
+        final Optional<TLSCredentials> tlsCredentials;
+        if (sslConfig.getCertificateFile().isPresent() && sslConfig.getKeyFile().isPresent()) {
+            final File keyfile = sslConfig.getKeyFile().get().get(0).toFile();
+            final File certfile = sslConfig.getCertificateFile().get().get(0).toFile();
+            tlsCredentials = Optional.of(new TLSCredentials(
+                    certfile,
+                    keyfile,
+                    Optional.of(certfile)));
+            LOG.info("Using TLS credentials for gRPC");
+        } else {
+            tlsCredentials = Optional.empty();
+            LOG.info("Using plain text for gRPC");
+        }
         return KServeV2GRPCPredictionProvider.forTarget(
                 kServeConfig,
                 inputTensorName,
                 null,
                 map,
-                Optional.of(tlsCredentials));
+                tlsCredentials);
     }
 
 }
