@@ -6,6 +6,7 @@ import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
+import org.kie.trustyai.service.data.exceptions.PayloadWriteException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.reconcilers.ModelMeshInferencePayloadReconciler;
 import org.kie.trustyai.service.payloads.consumer.partial.InferencePartialPayload;
@@ -45,6 +46,10 @@ public class ConsumerEndpoint {
                 final String message = "Error when reconciling payload for request id='" + request.getId() + "': " + e.getMessage();
                 LOG.error(message);
                 return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
+            } catch (PayloadWriteException e) {
+                final String message = e.getMessage();
+                LOG.error(message);
+                return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
             }
         } else if (request.getKind().equals(PartialKind.response)) {
             LOG.info("Received partial output payload from model='" + request.getModelId() + "', id=" + request.getId());
@@ -52,6 +57,10 @@ public class ConsumerEndpoint {
                 reconciler.addUnreconciledOutput(request);
             } catch (InvalidSchemaException | DataframeCreateException | StorageWriteException e) {
                 final String message = "Error when reconciling payload for response id='" + request.getId() + "': " + e.getMessage();
+                LOG.error(message);
+                return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
+            } catch (PayloadWriteException e) {
+                final String message = e.getMessage();
                 LOG.error(message);
                 return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
             }

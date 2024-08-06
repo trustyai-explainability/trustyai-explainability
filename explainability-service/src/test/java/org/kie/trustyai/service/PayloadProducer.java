@@ -66,6 +66,15 @@ public class PayloadProducer {
         return payload;
     }
 
+    public static InferencePartialPayload getInferencePartialPayloadInput(String id, int number, int repeats) {
+        final InferencePartialPayload payload = new InferencePartialPayload();
+        payload.setData(encondedInputPayloadsA[number].repeat(repeats));
+        payload.setId(id);
+        payload.setKind(PartialKind.request);
+        payload.setModelId(MODEL_A_ID);
+        return payload;
+    }
+
     public static InferencePartialPayload getInferencePartialPayloadOutput(String id, int number) {
         final InferencePartialPayload payload = new InferencePartialPayload();
         payload.setData(encondedOutputPayloadsA[number]);

@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 
 @Entity
 public class InferencePartialPayload extends PartialPayload {
-    @Column(columnDefinition = "text")
+    // mariadb specific?
+    @Lob
+    @Column(length = 1_000_000)
     private String data;
 
     @JsonProperty("modelid")
