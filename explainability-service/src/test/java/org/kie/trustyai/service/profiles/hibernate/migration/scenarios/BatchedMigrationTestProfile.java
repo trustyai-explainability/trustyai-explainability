@@ -17,6 +17,8 @@ public class BatchedMigrationTestProfile extends MigrationTestProfile {
     public Map<String, String> getConfigOverrides() {
         final Map<String, String> overrides = super.getConfigOverrides();
         overrides.put("service.batch-size", "50");
+        overrides.put("quarkus.http.ssl.certificate.files", "src/test/resources/credentials/server.crt");
+        overrides.put("quarkus.http.ssl.certificate.key-files", "src/test/resources/credentials/server.key");
         return overrides;
     }
 

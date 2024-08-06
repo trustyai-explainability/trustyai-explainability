@@ -79,11 +79,12 @@ public class KServeV2HTTPPayloadParser extends PayloadParser<String> {
 
     public static Output getOutput(KServeDatatype datatype, int j, Object value) {
         Output output;
-        if (datatype == KServeDatatype.FP32 || datatype == KServeDatatype.FP64 || datatype == KServeDatatype.INT8 || datatype == KServeDatatype.INT16 || datatype == KServeDatatype.INT32 || datatype == KServeDatatype.INT64) {
+        if (datatype == KServeDatatype.FP32 || datatype == KServeDatatype.FP64 || datatype == KServeDatatype.INT8 || datatype == KServeDatatype.INT16 || datatype == KServeDatatype.INT32
+                || datatype == KServeDatatype.INT64) {
             output = new Output(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.NUMBER, new Value(value), 1.0);
         } else if (datatype == KServeDatatype.BOOL) {
             output = new Output(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.BOOLEAN, new Value(value), 1.0);
-        } else  {
+        } else {
             output = new Output(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.CATEGORICAL, new Value(value), 1.0);
         }
         return output;
@@ -91,11 +92,12 @@ public class KServeV2HTTPPayloadParser extends PayloadParser<String> {
 
     public static Feature getFeature(KServeDatatype datatype, int j, Object value) {
         Feature feature;
-        if (datatype == KServeDatatype.FP32 || datatype == KServeDatatype.FP64 || datatype == KServeDatatype.INT8 || datatype == KServeDatatype.INT16 || datatype == KServeDatatype.INT32 || datatype == KServeDatatype.INT64) {
+        if (datatype == KServeDatatype.FP32 || datatype == KServeDatatype.FP64 || datatype == KServeDatatype.INT8 || datatype == KServeDatatype.INT16 || datatype == KServeDatatype.INT32
+                || datatype == KServeDatatype.INT64) {
             feature = new Feature(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.NUMBER, new Value(value));
         } else if (datatype == KServeDatatype.BOOL) {
             feature = new Feature(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.BOOLEAN, new Value(value));
-        } else  {
+        } else {
             feature = new Feature(DEFAULT_OUTPUT_PREFIX + "-" + j, Type.CATEGORICAL, new Value(value));
         }
         return feature;

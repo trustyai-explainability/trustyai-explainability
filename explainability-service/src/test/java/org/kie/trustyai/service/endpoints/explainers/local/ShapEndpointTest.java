@@ -2,6 +2,7 @@ package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -54,7 +55,7 @@ class ShapEndpointTest {
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
         final SHAPExplanationRequest payload = new SHAPExplanationRequest();
-        payload.getConfig().setModelConfig(new ModelConfig(serviceUrl, MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig(MODEL_ID, ""));
         payload.setPredictionId(id);
 
         given().contentType(ContentType.JSON).body(payload)
@@ -69,7 +70,7 @@ class ShapEndpointTest {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-        mockServer = new GrpcMockServer(TestModels.getSumSkipModel(1));
+        mockServer = new GrpcMockServer(TestModels.getSumSkipModel(1), Optional.of(GrpcMockServer.getCredentials()));
         mockServer.start();
     }
 
@@ -95,7 +96,7 @@ class ShapEndpointTest {
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
         final SHAPExplanationRequest payload = new SHAPExplanationRequest();
-        payload.getConfig().setModelConfig(new ModelConfig("", MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig(MODEL_ID, ""));
         payload.setPredictionId(id);
 
         given().contentType(ContentType.JSON).body(payload)
@@ -133,7 +134,7 @@ class ShapEndpointTest {
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
         final SHAPExplanationRequest payload = new SHAPExplanationRequest();
-        payload.getConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig(MODEL_ID, "v1"));
         final SHAPExplainerConfig explainerConfig = new SHAPExplainerConfig();
         explainerConfig.setTimeout(0);
         payload.getConfig().setExplainerConfig(explainerConfig);

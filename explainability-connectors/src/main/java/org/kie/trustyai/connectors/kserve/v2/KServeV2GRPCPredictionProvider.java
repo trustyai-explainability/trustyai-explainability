@@ -1,16 +1,14 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Semaphore;
 
 import org.kie.trustyai.connectors.kserve.AbstractKServePredictionProvider;
-import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
-import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
-import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
-import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
+import org.kie.trustyai.connectors.kserve.v2.grpc.*;
 import org.kie.trustyai.connectors.utils.ListenableFutureUtils;
+import org.kie.trustyai.connectors.utils.TLSCredentials;
 import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
@@ -19,8 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.*;
 
 /**
  * Wraps a KServe v2-compatible gRPC model server as a TrustyAI {@link PredictionProvider}
@@ -32,13 +29,20 @@ public class KServeV2GRPCPredictionProvider extends AbstractKServePredictionProv
     private final KServeConfig kServeConfig;
     private final Map<String, String> optionalParameters;
     private final Semaphore semaphore;
+    private final Optional<TLSCredentials> credentials;
+    private final String BALANCING_POLICY_ROUND_ROBIN = "round_robin";
 
-    private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, String inputName, List<String> outputNames, Map<String, String> optionalParameters) {
+    private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig,
+            String inputName,
+            List<String> outputNames,
+            Map<String, String> optionalParameters,
+            Optional<TLSCredentials> credentials) {
 
         super(outputNames, inputName);
         this.kServeConfig = kServeConfig;
         this.optionalParameters = optionalParameters;
         this.semaphore = new Semaphore(kServeConfig.getMaximumConcurrentRequests());
+        this.credentials = credentials;
     }
 
     /**
@@ -62,7 +66,15 @@ public class KServeV2GRPCPredictionProvider extends AbstractKServePredictionProv
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, String inputName, List<String> outputNames, Map<String, String> optionalParameters) {
-        return new KServeV2GRPCPredictionProvider(kServeConfig, inputName, outputNames, optionalParameters);
+        return new KServeV2GRPCPredictionProvider(kServeConfig, inputName, outputNames, optionalParameters, Optional.empty());
+    }
+
+    public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig,
+            String inputName,
+            List<String> outputNames,
+            Map<String, String> optionalParameters,
+            Optional<TLSCredentials> credentials) {
+        return new KServeV2GRPCPredictionProvider(kServeConfig, inputName, outputNames, optionalParameters, credentials);
     }
 
     /**
@@ -74,7 +86,7 @@ public class KServeV2GRPCPredictionProvider extends AbstractKServePredictionProv
      * @return A {@link PredictionProvider}
      */
     public static KServeV2GRPCPredictionProvider forTarget(KServeConfig kServeConfig, Map<String, String> parameters) {
-        return new KServeV2GRPCPredictionProvider(kServeConfig, null, null, parameters);
+        return new KServeV2GRPCPredictionProvider(kServeConfig, null, null, parameters, Optional.empty());
     }
 
     private ModelInferRequest.InferInputTensor.Builder buildTensor(InferTensorContents.Builder contents, int nSamples, int nFeatures) {
@@ -124,10 +136,38 @@ public class KServeV2GRPCPredictionProvider extends AbstractKServePredictionProv
             return future;
         }
 
-        // Create a new channel for each prediction request
-        final ManagedChannel localChannel = ManagedChannelBuilder.forTarget(kServeConfig.getTarget())
-                .usePlaintext()
-                .build();
+        final String[] parts = kServeConfig.getTarget().split(":");
+        final String hostname = parts[0];
+        final int port = Integer.parseInt(parts[1]);
+
+        final ManagedChannel localChannel;
+        if (this.credentials.isPresent()) {
+            final TlsChannelCredentials.Builder tlsBuilder = TlsChannelCredentials.newBuilder();
+            try {
+                tlsBuilder.keyManager(this.credentials.get().getCertificate(),
+                        this.credentials.get().getKey());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            if (this.credentials.get().getRoot().isPresent()) {
+                try {
+                    tlsBuilder.trustManager(this.credentials.get().getRoot().get());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            localChannel = Grpc.newChannelBuilderForAddress(hostname, port, tlsBuilder.build())
+                    .defaultLoadBalancingPolicy(BALANCING_POLICY_ROUND_ROBIN)
+                    .build();
+
+        } else {
+            localChannel = ManagedChannelBuilder.forTarget(kServeConfig.getTarget())
+                    .usePlaintext()
+                    .defaultLoadBalancingPolicy(BALANCING_POLICY_ROUND_ROBIN)
+                    .build();
+
+        }
 
         try {
             final InferTensorContents.Builder contents = PayloadParser.predictionInputToTensorContents(inputs);

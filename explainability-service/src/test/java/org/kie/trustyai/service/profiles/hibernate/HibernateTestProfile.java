@@ -27,6 +27,8 @@ public class HibernateTestProfile implements QuarkusTestProfile {
         overrides.put("quarkus.datasource.db-kind", "h2");
         overrides.put("quarkus.datasource.jdbc.url", "jdbc:h2:./trustyai_test_H2_DB;AUTO_RECONNECT=TRUE");
         overrides.put("quarkus.hibernate-orm.database.generation", "drop-and-create");
+        overrides.put("quarkus.http.ssl.certificate.files", "src/test/resources/credentials/server.crt");
+        overrides.put("quarkus.http.ssl.certificate.key-files", "src/test/resources/credentials/server.key");
 
         // these settings are useful for testing against a real Maria instance on a remote cluster, and are therefore kept
         //        overrides.put("quarkus.datasource.db-kind", "mariadb");

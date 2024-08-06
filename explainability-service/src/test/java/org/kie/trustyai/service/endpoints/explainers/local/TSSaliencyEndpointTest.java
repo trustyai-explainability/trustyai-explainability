@@ -58,7 +58,7 @@ class TSSaliencyEndpointTest {
         final Dataframe dataframe = datasource.get().getDataframe(MODEL_ID);
         final List<String> ids = dataframe.getIds().subList(0, 10);
         final TSSaliencyExplanationRequest payload = new TSSaliencyExplanationRequest();
-        payload.getConfig().setModelConfig(new ModelConfig(serviceUrl, MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig(MODEL_ID, ""));
         payload.setPredictionIds(ids);
 
         given().contentType(ContentType.JSON).body(payload)
@@ -97,15 +97,6 @@ class TSSaliencyEndpointTest {
         testServiceUrl("https://bar", Response.Status.OK.getStatusCode());
         testServiceUrl("foo", Response.Status.OK.getStatusCode());
         testServiceUrl("bar:8080", Response.Status.OK.getStatusCode());
-    }
-
-    @Test
-    void testWithInvalidServiceUrl() throws JsonProcessingException {
-        testServiceUrl("http://foo.namespace.svc.cluster.local", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        testServiceUrl("foo.namespace.svc.cluster.local", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        testServiceUrl("http://foo/some/path", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        testServiceUrl("foo/some/path", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        testServiceUrl("", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
 }
