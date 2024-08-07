@@ -33,6 +33,10 @@ function setup_monitoring() {
 
 
 function deploy_model() {
+    oc project $ODHPROJECT
+    oc apply -f ${RESOURCEDIR}/modelmesh/model-serving-config.yaml
+
+
     header "Deploying models into ModelMesh"
     oc new-project $MM_NAMESPACE || true
     os::cmd::expect_success "oc project $MM_NAMESPACE"
