@@ -7,6 +7,7 @@ import java.util.stream.IntStream;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.PayloadProducer;
@@ -28,6 +29,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -156,6 +158,21 @@ abstract class ConsumerEndpointBaseTest {
         final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         assertEquals(5, dataframe.getRowDimension());
 
+    }
+
+    @Test
+    @Disabled("This failure case is only relevant for MariaDB testing")
+    void consumePartialPostHuge() {
+
+        // this should fail
+        final InferencePartialPayload payload2 = PayloadProducer.getInferencePartialPayloadInput(UUID.randomUUID().toString(), 0, 25_000);
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload2)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("This can happen if the payload is too large, try reducing inference batch size."));
     }
 
     @Test
