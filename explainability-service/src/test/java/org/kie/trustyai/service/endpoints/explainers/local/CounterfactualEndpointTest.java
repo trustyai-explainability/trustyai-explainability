@@ -33,6 +33,7 @@ import static org.hamcrest.Matchers.is;
 @QuarkusTest
 @TestProfile(ExplainersEndpointTestProfile.class)
 @TestHTTPEndpoint(CounterfactualEndpoint.class)
+//@Disabled
 class CounterfactualEndpointTest {
 
     private static final String MODEL_ID = "example1";
@@ -65,7 +66,7 @@ class CounterfactualEndpointTest {
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
         final CounterfactualExplanationRequest payload = new CounterfactualExplanationRequest();
-        payload.getExplanationConfig().setModelConfig(new ModelConfig("", MODEL_ID, ""));
+        payload.getExplanationConfig().setModelConfig(new ModelConfig(MODEL_ID, ""));
         payload.setPredictionId(id);
         Map<String, String> map = new HashMap<>();
         map.put("income", "2");
@@ -74,6 +75,6 @@ class CounterfactualEndpointTest {
         given().contentType(ContentType.JSON).body(payload)
                 .when().post()
                 .then()
-                .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+                .statusCode(Response.Status.NOT_FOUND.getStatusCode());
     }
 }

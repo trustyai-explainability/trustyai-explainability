@@ -12,6 +12,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.model.SaliencyResults;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.config.KubernetesConfig;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
 import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
@@ -38,6 +39,9 @@ public class TSSaliencyEndpoint extends ExplainerEndpoint {
     Instance<DataSource> dataSource;
     @Inject
     SecureRandom secureRandom;
+
+    @Inject
+    KubernetesConfig kubernetesConfig;
 
     @POST
     @Operation(summary = "Compute a TSSaliency explanation.")

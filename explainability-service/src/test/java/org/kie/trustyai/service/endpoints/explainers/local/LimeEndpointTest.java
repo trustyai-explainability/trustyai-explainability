@@ -63,7 +63,7 @@ class LimeEndpointTest {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
         datasource.get().saveDataframe(dataframe, MODEL_ID);
         datasource.get().saveMetadata(datasource.get().createMetadata(dataframe), MODEL_ID);
-        mockServer = new GrpcMockServer(TestModels.getSumSkipModel(1));
+        mockServer = new GrpcMockServer(TestModels.getSumSkipModel(1), Optional.of(GrpcMockServer.getCredentials()));
         mockServer.start();
     }
 
@@ -73,7 +73,7 @@ class LimeEndpointTest {
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
         final LimeExplanationRequest payload = new LimeExplanationRequest();
-        payload.getConfig().setModelConfig(new ModelConfig(serviceUrl, MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig(MODEL_ID, ""));
         payload.setPredictionId(id);
 
         given().contentType(ContentType.JSON).body(payload)
@@ -103,7 +103,7 @@ class LimeEndpointTest {
         List<PredictionInput> predictionInputs = dataframe.asPredictionInputs();
         String id = String.valueOf(predictionInputs.get(0).hashCode());
         final LimeExplanationRequest payload = new LimeExplanationRequest();
-        payload.getConfig().setModelConfig(new ModelConfig("", MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig(MODEL_ID, ""));
         payload.setPredictionId(id);
 
         given().contentType(ContentType.JSON).body(payload)
@@ -121,7 +121,7 @@ class LimeEndpointTest {
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
         final LimeExplanationRequest payload = new LimeExplanationRequest();
-        payload.getConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig(MODEL_ID, ""));
         payload.setPredictionId(id);
 
         final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
@@ -167,7 +167,7 @@ class LimeEndpointTest {
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
         final LimeExplanationRequest payload = new LimeExplanationRequest();
-        payload.getConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig(MODEL_ID, ""));
         payload.setPredictionId(id);
 
         final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
@@ -207,7 +207,7 @@ class LimeEndpointTest {
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
         final LimeExplanationRequest payload = new LimeExplanationRequest();
-        payload.getConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig(MODEL_ID, ""));
         payload.setPredictionId(id);
 
         final SaliencyExplanationResponse response = given().contentType(ContentType.JSON).body(payload)
@@ -235,7 +235,7 @@ class LimeEndpointTest {
         int randomIndex = random.nextInt(dataframe.getIds().size());
         final String id = dataframe.getIds().get(randomIndex);
         final LimeExplanationRequest payload = new LimeExplanationRequest();
-        payload.getConfig().setModelConfig(new ModelConfig("localhost:" + mockServer.getPort(), MODEL_ID, ""));
+        payload.getConfig().setModelConfig(new ModelConfig(MODEL_ID, ""));
         final LimeExplainerConfig explainerConfig = new LimeExplainerConfig();
         explainerConfig.setTimeout(0);
         payload.getConfig().setExplainerConfig(explainerConfig);

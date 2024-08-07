@@ -9,9 +9,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Schema(description = "Model configuration parameters")
 public class ModelConfig {
-    @Schema(required = true, description = "Location of the model, for instance a Kubernetes service name and optionally port", example = "modelmesh-serving:8008")
-    @JsonProperty("target")
-    private String target;
     @Schema(required = true, description = "Model's name", example = "example-isvc")
     @JsonProperty("name")
     private String name;
@@ -22,22 +19,16 @@ public class ModelConfig {
     /**
      * Constructor to be used to instantiate the class.
      *
-     * @param target The KServe/gRPC-enabled model target in the format "host:port", e.g. "my-model.com:8080" or "0.0.0.0:8080"
      * @param name The name of the model to be used for the explanation
      * @param version The version of the model to be used for the explanation
      */
-    public ModelConfig(String target, String name, String version) {
-        this.target = target;
+    public ModelConfig(String name, String version) {
         this.name = name;
         this.version = version;
     }
 
     public ModelConfig() {
         // NO OP
-    }
-
-    public String getTarget() {
-        return target;
     }
 
     public String getName() {

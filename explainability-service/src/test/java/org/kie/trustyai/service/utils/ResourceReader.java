@@ -1,9 +1,8 @@
 package org.kie.trustyai.service.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Collectors;
 
 public class ResourceReader {
@@ -17,5 +16,20 @@ public class ResourceReader {
                 return reader.lines().collect(Collectors.joining(System.lineSeparator()));
             }
         }
+    }
+
+    public static File resourceAsFile(String filename) throws IOException {
+        final InputStream resourceStream = ResourceReader.class.getClassLoader().getResourceAsStream(filename);
+        if (resourceStream == null) {
+            throw new IllegalArgumentException("Resource not found: " + filename);
+        }
+
+        final Path tempFile = Files.createTempFile("temp-", filename.replaceAll("/", "_"));
+
+        Files.copy(resourceStream, tempFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+        resourceStream.close();
+
+        return tempFile.toFile();
     }
 }

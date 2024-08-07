@@ -3,10 +3,11 @@ package org.kie.trustyai.service.data.storage.flatfile;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 
-import jakarta.inject.Inject;
 import org.kie.trustyai.service.data.parsers.DataParser;
 import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
+
+import jakarta.inject.Inject;
 
 public abstract class FlatFileStorage extends Storage<ByteBuffer, ByteBuffer> implements FlatFileStorageInterface {
     @Inject
