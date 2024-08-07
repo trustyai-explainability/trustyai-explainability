@@ -10,7 +10,7 @@ import jakarta.persistence.Lob;
 public class InferencePartialPayload extends PartialPayload {
     // mariadb specific?
     @Lob
-    @Column(length = 1_000_000)
+    @Column(length = 32_000_000)
     private String data;
 
     @JsonProperty("modelid")
