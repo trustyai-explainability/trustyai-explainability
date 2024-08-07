@@ -295,8 +295,10 @@ public class Tensor<T> {
     // == EQUALS =======================================================================================================
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Tensor)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Tensor))
+            return false;
         Tensor<?> tensor = (Tensor<?>) o;
         return Objects.deepEquals(dimensions, tensor.dimensions) && Objects.deepEquals(data, tensor.data) && Objects.equals(datatype, tensor.datatype);
     }

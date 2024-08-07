@@ -5,8 +5,8 @@ import java.nio.charset.StandardCharsets;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.reconcilers.KServeInferencePayloadReconciler;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
-import org.kie.trustyai.service.payloads.consumer.KServeInputPayload;
-import org.kie.trustyai.service.payloads.consumer.KServeOutputPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.KServeInputPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.KServeOutputPayload;
 
 import io.quarkus.funqy.Funq;
 import io.quarkus.funqy.knative.events.CloudEvent;

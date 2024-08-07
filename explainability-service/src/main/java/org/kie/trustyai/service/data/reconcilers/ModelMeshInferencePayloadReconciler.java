@@ -16,8 +16,9 @@ import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
+import org.kie.trustyai.service.data.reconcilers.payloadstorage.modelmesh.ModelMeshPayloadStorage;
 import org.kie.trustyai.service.endpoints.explainers.ExplainerEndpoint;
-import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.InferencePartialPayload;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -29,11 +30,14 @@ import jakarta.inject.Singleton;
  * Reconcile partial input and output inference payloads in the KServe v2 protobuf format.
  */
 @Singleton
-public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconciler<InferencePartialPayload, InferencePartialPayload> {
+public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconciler<InferencePartialPayload, InferencePartialPayload, ModelMeshPayloadStorage> {
     protected static final String MM_MODEL_SUFFIX = "__isvc";
     private static final Logger LOG = Logger.getLogger(ModelMeshInferencePayloadReconciler.class);
     @Inject
     Instance<DataSource> datasource;
+
+    @Inject
+    Instance<ModelMeshPayloadStorage> mmPayloadStorage;
 
     protected static String standardizeModelId(String inboundModelId) {
         if (inboundModelId != null && inboundModelId.contains(MM_MODEL_SUFFIX)) {
@@ -44,17 +48,22 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
         }
     }
 
+    @Override
+    ModelMeshPayloadStorage getPayloadStorage() {
+        return mmPayloadStorage.get();
+    }
+
     protected synchronized void save(String id, String modelId) throws InvalidSchemaException, DataframeCreateException {
-        final InferencePartialPayload output = unreconciledOutputs.get(id);
-        final InferencePartialPayload input = unreconciledInputs.get(id);
+        final InferencePartialPayload output = mmPayloadStorage.get().getUnreconciledOutput(id);
+        final InferencePartialPayload input = mmPayloadStorage.get().getUnreconciledInput(id);
         LOG.debug("Reconciling partial input and output, id=" + id);
 
         // save
-        final Dataframe dataframe = payloadToDataframe(input, output, id, input.getMetadata());
+        final Dataframe dataframe = payloadToDataframe(input, output, id, modelId, input.getMetadata());
         datasource.get().saveDataframe(dataframe, standardizeModelId(modelId));
 
-        unreconciledInputs.remove(id);
-        unreconciledOutputs.remove(id);
+        mmPayloadStorage.get().removeUnreconciledInput(id);
+        mmPayloadStorage.get().removeUnreconciledOutput(id);
     }
 
     /**
@@ -68,7 +77,8 @@ public class ModelMeshInferencePayloadReconciler extends InferencePayloadReconci
      * @return A {@link Prediction}
      * @throws DataframeCreateException
      */
-    public Dataframe payloadToDataframe(InferencePartialPayload inputPayload, InferencePartialPayload outputPayload, String id, Map<String, String> metadata) throws DataframeCreateException {
+    public Dataframe payloadToDataframe(InferencePartialPayload inputPayload, InferencePartialPayload outputPayload, String id, String modelId, Map<String, String> metadata)
+            throws DataframeCreateException {
         final byte[] inputBytes = Base64.getDecoder().decode(inputPayload.getData().getBytes());
         final byte[] outputBytes = Base64.getDecoder().decode(outputPayload.getData().getBytes());
 

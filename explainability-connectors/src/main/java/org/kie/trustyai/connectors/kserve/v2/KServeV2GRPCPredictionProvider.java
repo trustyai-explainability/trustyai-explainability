@@ -2,6 +2,7 @@ package org.kie.trustyai.connectors.kserve.v2;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Semaphore;
 
 import org.kie.trustyai.connectors.kserve.AbstractKServePredictionProvider;
 import org.kie.trustyai.connectors.kserve.v2.grpc.GRPCInferenceServiceGrpc;
@@ -30,12 +31,14 @@ public class KServeV2GRPCPredictionProvider extends AbstractKServePredictionProv
 
     private final KServeConfig kServeConfig;
     private final Map<String, String> optionalParameters;
+    private final Semaphore semaphore;
 
     private KServeV2GRPCPredictionProvider(KServeConfig kServeConfig, String inputName, List<String> outputNames, Map<String, String> optionalParameters) {
 
         super(outputNames, inputName);
         this.kServeConfig = kServeConfig;
         this.optionalParameters = optionalParameters;
+        this.semaphore = new Semaphore(kServeConfig.getMaximumConcurrentRequests());
     }
 
     /**
@@ -113,6 +116,14 @@ public class KServeV2GRPCPredictionProvider extends AbstractKServePredictionProv
             throw new IllegalArgumentException("Prediction inputs must have at least one feature.");
         }
 
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            CompletableFuture<List<PredictionOutput>> future = new CompletableFuture<>();
+            future.completeExceptionally(new RuntimeException("gRPC inference request failed while waiting for concurrent connection thread", e));
+            return future;
+        }
+
         // Create a new channel for each prediction request
         final ManagedChannel localChannel = ManagedChannelBuilder.forTarget(kServeConfig.getTarget())
                 .usePlaintext()
@@ -132,16 +143,18 @@ public class KServeV2GRPCPredictionProvider extends AbstractKServePredictionProv
                     .thenApply(response -> TensorConverter.parseKserveModelInferResponse(response, inputs.size(), Objects.isNull(this.outputNames) ? Optional.empty() : Optional.of(this.outputNames)))
                     .exceptionally(ex -> {
                         logger.error("Error during model inference: " + ex.getMessage());
-                        // Shutdown the channel
-                        localChannel.shutdown();
                         throw new RuntimeException("Failed to get inference", ex);
                     })
                     .whenComplete((response, throwable) -> {
+                        // Release the semaphore permit after request is complete
+                        semaphore.release();
                         if (!localChannel.isShutdown()) { // In case channel already closed in .exceptionally()
                             localChannel.shutdown();
                         }
                     });
         } catch (Exception e) {
+            // Release the semaphore permit if an exception occurs
+            semaphore.release();
             if (!localChannel.isShutdown()) { // In case channel already closed in .exceptionally()
                 localChannel.shutdown();
             }

@@ -16,8 +16,6 @@ import org.kie.trustyai.service.endpoints.explainers.GrpcMockServer;
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.explainers.config.ModelConfig;
-import org.kie.trustyai.service.payloads.explainers.lime.LimeExplainerConfig;
-import org.kie.trustyai.service.payloads.explainers.lime.LimeExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.shap.SHAPExplainerConfig;
 import org.kie.trustyai.service.payloads.explainers.shap.SHAPExplanationRequest;
 import org.kie.trustyai.service.utils.DataframeGenerators;
@@ -109,10 +107,10 @@ class ShapEndpointTest {
     @Test
     void testWithValidServiceUrl() throws JsonProcessingException {
         mockServer.stop();
-        testServiceUrl("http://foo", Response.Status.NOT_FOUND.getStatusCode());
-        testServiceUrl("https://bar", Response.Status.NOT_FOUND.getStatusCode());
-        testServiceUrl("foo", Response.Status.NOT_FOUND.getStatusCode());
-        testServiceUrl("bar:8080", Response.Status.NOT_FOUND.getStatusCode());
+        testServiceUrl("http://foo", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        testServiceUrl("https://bar", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        testServiceUrl("foo", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        testServiceUrl("bar:8080", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     @Test

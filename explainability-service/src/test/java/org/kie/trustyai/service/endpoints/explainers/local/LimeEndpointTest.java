@@ -303,10 +303,10 @@ class LimeEndpointTest {
 
     @Test
     void testWithValidServiceUrl() throws JsonProcessingException {
-        testServiceUrl("http://foo", Response.Status.NOT_FOUND.getStatusCode());
-        testServiceUrl("https://bar", Response.Status.NOT_FOUND.getStatusCode());
-        testServiceUrl("foo", Response.Status.NOT_FOUND.getStatusCode());
-        testServiceUrl("bar:8080", Response.Status.NOT_FOUND.getStatusCode());
+        testServiceUrl("http://foo", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        testServiceUrl("https://bar", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        testServiceUrl("foo", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        testServiceUrl("bar:8080", Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     @Test

@@ -1,18 +1,11 @@
 package org.kie.trustyai.service.data.storage.hibernate;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.UnderlyingObject;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.explainability.model.dataframe.DataframeMetadata;
@@ -26,11 +19,10 @@ import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.storage.DataFormat;
 import org.kie.trustyai.service.data.storage.Storage;
-import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.payloads.service.DataTagging;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
-import org.kie.trustyai.service.payloads.service.SchemaItem;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
@@ -307,26 +299,21 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
-    private void setSchemaEnumeration(String modelId, Schema schema) {
-        for (Map.Entry<String, SchemaItem> entry : schema.getItems().entrySet()) {
-            List<UnderlyingObject> columnValues = getUniqueColumnValues(modelId, entry.getKey(), MetadataUtils.MAX_VALUE_ENUMERATION + 1)
-                    .stream()
-                    .map(Value::getUnderlyingObjectContainer)
-                    .collect(Collectors.toList());
+    //    private void setSchemaEnumeration(String modelId, Schema schema) {
+    //        for (Map.Entry<String, SchemaItem> entry : schema.getItems().entrySet()) {
+    //            Set<UnderlyingObject> columnValues = getUniqueColumnValues(modelId, entry.getKey(), ValueEnumerationUtils.MAX_VALUE_ENUMERATION + 1)
+    //                    .stream()
+    //                    .map(Value::getUnderlyingObjectContainer)
+    //                    .collect(Collectors.toSet());
+    //            entry.getValue().setValueEnumeration(ValueEnumerationUtils.fromEnforcedSubsetOfColumnValues(columnValues));
+    //        }
+    //    }
 
-            if (columnValues.size() > MetadataUtils.MAX_VALUE_ENUMERATION) {
-                entry.getValue().setColumnValues(null);
-            } else {
-                entry.getValue().setColumnValues(new HashSet<>(columnValues));
-            }
-        }
-    }
-
-    @Transactional
-    public void loadColumnValues(String modelId, StorageMetadata storageMetadata) {
-        setSchemaEnumeration(modelId, storageMetadata.getInputSchema());
-        setSchemaEnumeration(modelId, storageMetadata.getOutputSchema());
-    }
+    //    @Transactional
+    //    public void loadColumnValues(String modelId, StorageMetadata storageMetadata) {
+    //        setSchemaEnumeration(modelId, storageMetadata.getInputSchema());
+    //        setSchemaEnumeration(modelId, storageMetadata.getOutputSchema());
+    //    }
 
     // METADATA READ + WRITES ==========================================================================================
     @Override
@@ -399,10 +386,53 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataIdFiltering(String modelId, Set<String> ids, boolean invertFilter) throws StorageReadException {
+        if (dataExists(modelId)) {
+            Dataframe df;
+            try {
+                LOG.debug("Reading dataframe " + modelId + " from Hibernate (tagged)");
+                refreshIfDirty();
+                List<DataframeRow> rows = em.createQuery(
+                        "select dr from DataframeRow dr" +
+                                " where dr.modelId = ?1 AND dr.rowId " +
+                                (invertFilter ? "not in " : "in ") +
+                                "(?2)" +
+                                "order by dr.dbId DESC ",
+                        DataframeRow.class)
+                        .setParameter(1, modelId)
+                        .setParameter(2, ids)
+                        .getResultList();
+                Collections.reverse(rows);
+                DataframeMetadata dm = em.find(DataframeMetadata.class, modelId);
+                df = Dataframe.untranspose(rows, dm);
+            } catch (Exception e) {
+                throw new DataframeCreateException(e.getMessage());
+            }
+            try {
+                return Pair.of(df, readMetaOrInternalData(modelId));
+            } catch (StorageReadException e) {
+                LOG.error(e.getMessage());
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
+    }
+
     @Override
     @Transactional
     public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithTags(String modelId, int batchSize, Set<String> tags) throws StorageReadException {
         return readDataframeAndMetadataTagFiltering(modelId, batchSize, tags, false);
+    }
+
+    @Override
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithIds(String modelId, Set<String> ids) throws StorageReadException {
+        return readDataframeAndMetadataIdFiltering(modelId, ids, false);
+    }
+
+    @Override
+    public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithoutIds(String modelId, Set<String> ids) throws StorageReadException {
+        return readDataframeAndMetadataIdFiltering(modelId, ids, true);
     }
 
     @Override
@@ -421,6 +451,67 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
     @Transactional
     public Pair<Dataframe, StorageMetadata> readDataframeAndMetadataWithoutTags(String modelId, Set<String> tags) throws StorageReadException {
         return readDataframeAndMetadataTagFiltering(modelId, this.batchSize, tags, true);
+    }
+
+    // INFERENCE IDS ===================================================================================================
+    public List<InferenceId> readInferencesIds(String modelId, Set<String> tags, boolean invertFilter) throws StorageReadException {
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Reading inference ids from " + modelId + " from Hibernate (tagged)");
+                refreshIfDirty();
+
+                // grab just the id and timestamp as a list of 2 element object arrays
+                List<Object[]> objects = em.createQuery("" +
+                        "select dr.rowId, dr.timestamp from DataframeRow dr" +
+                        " where dr.modelId = ?1 AND dr.tag " +
+                        (invertFilter ? "not in " : "in ") + "(?2)" +
+                        "order by dr.dbId DESC ")
+                        .setParameter(1, modelId)
+                        .setParameter(2, tags)
+                        .getResultList();
+
+                // unpack tuples returned from db query
+                return objects.stream().map(o -> new InferenceId((String) o[0], (LocalDateTime) o[1])).collect(Collectors.toList());
+            } catch (StorageReadException e) {
+                LOG.error(e.getMessage());
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
+    }
+
+    @Override
+    public List<InferenceId> readAllInferenceIds(String modelId) throws StorageReadException {
+        if (dataExists(modelId)) {
+            try {
+                LOG.debug("Reading all inference IDs " + modelId + " from Hibernate ");
+                refreshIfDirty();
+
+                // grab just the id and timestamp as a list of 2 element object arrays
+                List<Object[]> objects = em.createQuery("" +
+                        "select dr.rowId, dr.timestamp from DataframeRow dr" +
+                        " where dr.modelId = ?1 " +
+                        "order by dr.dbId DESC ")
+                        .setParameter(1, modelId)
+                        .setMaxResults(batchSize).getResultList();
+
+                // unpack tuples returned from db query
+                return objects.stream().map(o -> new InferenceId((String) o[0], (LocalDateTime) o[1])).collect(Collectors.toList());
+            } catch (StorageReadException e) {
+                LOG.error(e.getMessage());
+                throw new StorageReadException(e.getMessage());
+            }
+        } else {
+            throw new StorageReadException("Error reading dataframe for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
+    }
+
+    @Override
+    public List<InferenceId> readAllOrganicInferenceIds(String modelId) throws StorageReadException {
+        final Set<String> tags = Set.of(Dataframe.InternalTags.UNLABELED.get());
+        return readInferencesIds(modelId, tags, false);
+
     }
 
     // TAG MANIPULATION ================================================================================================

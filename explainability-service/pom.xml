@@ -107,6 +107,10 @@
       <artifactId>quarkus-smallrye-openapi</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-context-propagation</artifactId>
+    </dependency>
+    <dependency>
       <groupId>${quarkus.platform.group-id}</groupId>
       <artifactId>quarkus-container-image-docker</artifactId>
     </dependency>

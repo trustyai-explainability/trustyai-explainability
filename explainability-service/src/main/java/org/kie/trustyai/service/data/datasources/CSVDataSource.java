@@ -2,10 +2,7 @@ package org.kie.trustyai.service.data.datasources;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -13,8 +10,11 @@ import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
+import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.storage.flatfile.FlatFileStorage;
+import org.kie.trustyai.service.data.utils.CSVUtils;
 import org.kie.trustyai.service.payloads.service.DataTagging;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
 
@@ -28,7 +28,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
-@LookupUnlessProperty(name = "service.storage.format", stringValue = "DATABASE")
+@LookupUnlessProperty(name = "service.storage-format", stringValue = "DATABASE")
 public class CSVDataSource extends DataSource {
     @Inject
     Instance<FlatFileStorage> storage;
@@ -232,6 +232,20 @@ public class CSVDataSource extends DataSource {
         return finalizeTagFiltering(modelId, pair);
     }
 
+    @Override
+    public Dataframe getDataframeFilteredByIds(String modelId, Set<String> ids) throws DataframeCreateException {
+        FlatFileStorage ffst = getStorage();
+        final Pair<ByteBuffer, ByteBuffer> pair;
+        try {
+            pair = ffst.readDataframeAndMetadataWithIds(modelId, ids);
+        } catch (StorageReadException e) {
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
+        }
+        return finalizeTagFiltering(modelId, pair);
+    }
+
     /**
      * Get a dataframe with matching tags data and metadata for a given model.
      * No batch size is given, so the default bxatch size is used.
@@ -320,11 +334,9 @@ public class CSVDataSource extends DataSource {
      * Get metadata for this modelId, with optional loading of column enumerations
      *
      * @param modelId the model id
-     * @param loadColumnValues if true, add column enumerations to the metadata. This adds an additional storage read,
-     *        so use this only when necessary.
      * @throws StorageReadException if the metadata cannot be read
      */
-    public StorageMetadata getMetadata(String modelId, boolean loadColumnValues) throws StorageReadException {
+    public StorageMetadata getMetadata(String modelId) throws StorageReadException {
         final ObjectMapper mapper = new ObjectMapper();
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer metadataBytes = getStorage().readMetaOrInternalData(modelId + "-" + METADATA_FILENAME);
@@ -357,6 +369,7 @@ public class CSVDataSource extends DataSource {
      * @throws StorageWriteException if the metadata cannot be saved.
      */
     public void saveMetadata(StorageMetadata storageMetadata, String modelId) throws StorageWriteException {
+        storageMetadata.setModelId(modelId);
         final ObjectMapper mapper = new ObjectMapper();
         mapper.activateDefaultTyping(mapper.getPolymorphicTypeValidator(), ObjectMapper.DefaultTyping.JAVA_LANG_OBJECT);
         final ByteBuffer byteBuffer;
@@ -388,6 +401,40 @@ public class CSVDataSource extends DataSource {
      */
     public boolean hasRecordedInferences(String modelId) {
         return getMetadata(modelId).isRecordedInferences();
+    }
+
+    @Override
+    public List<InferenceId> getAllInferenceIds(String modelId) {
+        final FlatFileStorage ffst = getStorage();
+        final ByteBuffer allInferenceIdsBytes;
+        final List<InferenceId> inferenceIds;
+        try {
+            inferenceIds = ffst.readAllInferenceIds(modelId);
+        } catch (StorageReadException e) {
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
+        }
+
+        return inferenceIds;
+
+    }
+
+    @Override
+    public List<InferenceId> getOrganicInferenceIds(String modelId) {
+        FlatFileStorage ffst = getStorage();
+        final ByteBuffer allOrganicInferenceIdsBytes;
+        final List<InferenceId> inferenceIds;
+        try {
+            inferenceIds = ffst.readAllOrganicInferenceIds(modelId);
+        } catch (StorageReadException e) {
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
+        }
+
+        return inferenceIds;
+
     }
 
     // TAG OPERATIONS ==================================================================================================

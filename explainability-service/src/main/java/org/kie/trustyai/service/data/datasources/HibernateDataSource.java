@@ -13,6 +13,7 @@ import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.storage.hibernate.HibernateStorage;
 import org.kie.trustyai.service.data.storage.hibernate.migration.MigrationEvent;
 import org.kie.trustyai.service.payloads.service.DataTagging;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -25,7 +26,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
-@LookupIfProperty(name = "service.storage.format", stringValue = "DATABASE")
+@LookupIfProperty(name = "service.storage-format", stringValue = "DATABASE")
 public class HibernateDataSource extends DataSource {
     @Inject
     Instance<HibernateStorage> storage;
@@ -164,6 +165,18 @@ public class HibernateDataSource extends DataSource {
         }
     }
 
+    @Override
+    public Dataframe getDataframeFilteredByIds(String modelId, Set<String> ids) throws DataframeCreateException {
+        try {
+            HibernateStorage hst = getStorage();
+            return hst.readDataframeAndMetadataWithIds(modelId, ids).getLeft();
+        } catch (StorageReadException e) {
+            throw DataSourceErrors.getDataframeAndMetadataReadError(modelId, e.getMessage());
+        } catch (DataframeCreateException e) {
+            throw DataSourceErrors.DataframeLoad.getDataframeCreateError(modelId, e.getMessage());
+        }
+    }
+
     /**
      * Get a dataframe with matching tags data and metadata for a given model.
      * No batch size is given, so the default batch size is used.
@@ -249,11 +262,9 @@ public class HibernateDataSource extends DataSource {
      * Get metadata for this modelId, with optional loading of column enumerations
      *
      * @param modelId the model id
-     * @param loadColumnValues if true, add column enumerations to the metadata. This adds an additional storage read,
-     *        so use this only when necessary.
      * @throws StorageReadException if the metadata cannot be read
      */
-    public StorageMetadata getMetadata(String modelId, boolean loadColumnValues) throws StorageReadException {
+    public StorageMetadata getMetadata(String modelId) throws StorageReadException {
         HibernateStorage hibernateStorage = getStorage();
 
         StorageMetadata sm;
@@ -262,12 +273,6 @@ public class HibernateDataSource extends DataSource {
         } catch (StorageReadException e) {
 
             throw DataSourceErrors.getMetadataReadError(modelId, e.getMessage());
-        }
-
-        // only grab column enumerations from DB if explicitly requested, to save time
-        long startt = System.currentTimeMillis();
-        if (loadColumnValues) {
-            hibernateStorage.loadColumnValues(modelId, sm);
         }
         return sm;
     }
@@ -326,6 +331,16 @@ public class HibernateDataSource extends DataSource {
         } catch (Exception e) {
             throw DataSourceErrors.getGenericReadError(modelId, e.getMessage(), "checking for recorded inferences");
         }
+    }
+
+    @Override
+    public List<InferenceId> getAllInferenceIds(String modelId) {
+        return storage.get().readAllInferenceIds(modelId);
+    }
+
+    @Override
+    public List<InferenceId> getOrganicInferenceIds(String modelId) {
+        return storage.get().readAllOrganicInferenceIds(modelId);
     }
 
     // TAG OPERATIONS ==================================================================================================

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.kie.trustyai.explainability.local.tssaliency.TSSaliencyExplainer;
 import org.kie.trustyai.explainability.model.Prediction;
@@ -28,8 +29,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Tag(name = "Local explainers")
-@EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
+@Tag(name = "Explainers: Local", description = "Local explainers provide explanation of model behavior over a single prediction.")
+@EndpointDisabled(name = "endpoints.explainers.local.tssaliency", stringValue = "disable")
 @Path("/explainers/local/tssaliency")
 public class TSSaliencyEndpoint extends ExplainerEndpoint {
 
@@ -39,6 +40,7 @@ public class TSSaliencyEndpoint extends ExplainerEndpoint {
     SecureRandom secureRandom;
 
     @POST
+    @Operation(summary = "Compute a TSSaliency explanation.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response explain(TSSaliencyExplanationRequest request) {

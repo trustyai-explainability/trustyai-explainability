@@ -18,6 +18,7 @@ package org.kie.trustyai.service.endpoints.explainers.global;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.global.lime.AggregatedLimeExplainer;
@@ -39,7 +40,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Tag(name = "Aggregated LIME Explainer Endpoint")
+@Tag(name = "Explainers: Global", description = "Global explainers provide explanations of model behavior over broad sets of predictions.")
 @EndpointDisabled(name = "endpoints.explainers.global", stringValue = "disable")
 @Path("/explainers/global/lime")
 public class AggregatedLimeEndpoint extends GlobalExplainerEndpoint {
@@ -49,6 +50,7 @@ public class AggregatedLimeEndpoint extends GlobalExplainerEndpoint {
     Instance<DataSource> dataSource;
 
     @POST
+    @Operation(summary = "Compute a global LIME explanation.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response explain(GlobalExplanationRequest request) {

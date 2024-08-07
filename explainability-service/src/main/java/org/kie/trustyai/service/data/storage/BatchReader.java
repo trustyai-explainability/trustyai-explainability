@@ -58,6 +58,41 @@ public class BatchReader {
         return new ArrayList<>(queue);
     }
 
+    public static Pair<List<String>, List<String>> readEntriesWithIds(InputStream dataStream, InputStream internalDataStream, Set<String> ids, boolean invertTagFilter) throws IOException {
+        final List<String> dataQueue = new ArrayList<>();
+        final List<String> metadataQueue = new ArrayList<>();
+
+        try (Scanner dataScanner = new Scanner(dataStream, StandardCharsets.UTF_8);
+                BufferedReader metadataReader = new BufferedReader(new InputStreamReader(internalDataStream, StandardCharsets.UTF_8))) {
+
+            final CSVParser parser = new CSVParser(metadataReader, CSVFormat.DEFAULT.withSkipHeaderRecord());
+
+            for (CSVRecord metadataRecord : parser) {
+                if (dataScanner.hasNextLine()) {
+                    final String dataLine = dataScanner.nextLine();
+                    String metadataLine = CSVUtils.recordToString(metadataRecord);
+                    String metadataId = metadataRecord.get(1); // Id is the second column
+
+                    boolean containsTag = ids.contains(metadataId);
+                    if (invertTagFilter) {
+                        containsTag = !containsTag;
+                    }
+                    if (containsTag) {
+                        dataQueue.add(dataLine);
+                        metadataQueue.add(metadataLine);
+                    }
+                } else {
+                    break; // No corresponding data line
+                }
+            }
+            if (dataScanner.ioException() != null) {
+                throw dataScanner.ioException();
+            }
+        }
+        return Pair.of(dataQueue, metadataQueue);
+
+    }
+
     public static Pair<List<String>, List<String>> readEntriesWithTags(InputStream dataStream, InputStream metadataStream, int batchSize, Set<String> tags, boolean invertTagFilter)
             throws IOException {
         final CircularFifoQueue<String> dataQueue = new CircularFifoQueue<>(batchSize);
@@ -91,6 +126,30 @@ public class BatchReader {
             }
         }
         return Pair.of(new ArrayList<>(dataQueue), new ArrayList<>(metadataQueue));
+    }
+
+    public static List<String> readAllMetadataWithTags(InputStream metadataStream, Set<String> tags, boolean invertTagFilter)
+            throws IOException {
+        final List<String> metadataQueue = new ArrayList<>();
+
+        try (BufferedReader metadataReader = new BufferedReader(new InputStreamReader(metadataStream, StandardCharsets.UTF_8))) {
+
+            final CSVParser parser = new CSVParser(metadataReader, CSVFormat.DEFAULT.withSkipHeaderRecord());
+
+            for (CSVRecord metadataRecord : parser) {
+                String metadataLine = CSVUtils.recordToString(metadataRecord);
+                String metadataTag = metadataRecord.get(0); // Tag is the first column
+
+                boolean containsTag = tags.contains(metadataTag);
+                if (invertTagFilter) {
+                    containsTag = !containsTag;
+                }
+                if (containsTag) {
+                    metadataQueue.add(metadataLine);
+                }
+            }
+        }
+        return metadataQueue;
     }
 
     /**

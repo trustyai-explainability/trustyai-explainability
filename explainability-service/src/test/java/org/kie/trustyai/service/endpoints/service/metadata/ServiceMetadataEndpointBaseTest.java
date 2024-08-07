@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.endpoints.service.metadata;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,10 +11,12 @@ import java.util.stream.IntStream;
 
 import org.hamcrest.Matchers;
 import org.jboss.resteasy.reactive.RestResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.datasources.DataSource;
+import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.service.DataTagging;
 import org.kie.trustyai.service.payloads.service.NameMapping;
@@ -21,6 +24,7 @@ import org.kie.trustyai.service.payloads.service.ServiceMetadata;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
 import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 import org.kie.trustyai.service.utils.DataframeGenerators;
+import org.kie.trustyai.service.utils.ResourceReader;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.IntNode;
@@ -43,35 +47,42 @@ abstract class ServiceMetadataEndpointBaseTest {
     @Inject
     Instance<DataSource> datasource;
 
+    @Inject
+    Instance<MockPrometheusScheduler> scheduler;
+
     public abstract void resetDatasource() throws JsonProcessingException;
 
     public abstract void saveDataframe(Dataframe dataframe, String modelId);
+
+    @AfterEach
+    void clearRequests() {
+        scheduler.get().getAllRequests().clear();
+    }
 
     @Test
     void getTwoObservations() throws JsonProcessingException {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(2);
         saveDataframe(dataframe, MODEL_ID);
 
-        final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl + "/values")
+        final Map<String, ServiceMetadata> serviceMetadata = given()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(200)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
         assertEquals(1, serviceMetadata.size());
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
-        assertEquals(2, serviceMetadata.get(0).getData().getObservations());
-        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues().size());
-        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
-        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
+        assertEquals(0, serviceMetadata.get(MODEL_ID).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(2, serviceMetadata.get(MODEL_ID).getData().getObservations());
+        assertEquals(0, serviceMetadata.get(MODEL_ID).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertFalse(serviceMetadata.get(MODEL_ID).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(MODEL_ID).getData().getInputSchema().getItems().isEmpty());
         assertEquals(new HashSet<>(dataframe.getInputNames()),
-                serviceMetadata.get(0).getData().getInputSchema().getItems().keySet());
+                serviceMetadata.get(MODEL_ID).getData().getInputSchema().getItems().keySet());
         assertEquals(
                 new HashSet<>(dataframe.getOutputNames()),
-                serviceMetadata.get(0).getData().getOutputSchema().getItems().keySet());
+                serviceMetadata.get(MODEL_ID).getData().getOutputSchema().getItems().keySet());
     }
 
     @Test
@@ -79,24 +90,22 @@ abstract class ServiceMetadataEndpointBaseTest {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 50, false);
         saveDataframe(dataframe, MODEL_ID);
 
-        final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl + "/values")
+        final Map<String, ServiceMetadata> serviceMetadata = given()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(200)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
         assertEquals(1, serviceMetadata.size());
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
-        assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
+        assertEquals(0, serviceMetadata.get(MODEL_ID).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(0, serviceMetadata.get(MODEL_ID).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(1000, serviceMetadata.get(MODEL_ID).getData().getObservations());
 
-        // check column values
-        assertEquals(50, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues().size());
-        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("race").getColumnValues().size());
-        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
-        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
+        // check column values;
+        assertFalse(serviceMetadata.get(MODEL_ID).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(MODEL_ID).getData().getInputSchema().getItems().isEmpty());
     }
 
     @Test
@@ -104,38 +113,87 @@ abstract class ServiceMetadataEndpointBaseTest {
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 1000, false);
         saveDataframe(dataframe, MODEL_ID);
 
-        final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl + "/values")
+        // deliberately peek this one for metadata verification
+        final Map<String, ServiceMetadata> serviceMetadata = given()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(200)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
         assertEquals(1, serviceMetadata.size());
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
-        assertEquals(1000, serviceMetadata.get(0).getData().getObservations());
+        assertEquals(0, serviceMetadata.get(MODEL_ID).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(0, serviceMetadata.get(MODEL_ID).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(1000, serviceMetadata.get(MODEL_ID).getData().getObservations());
 
-        // check column values
+        assertFalse(serviceMetadata.get(MODEL_ID).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(MODEL_ID).getData().getInputSchema().getItems().isEmpty());
+    }
 
-        assertEquals(null, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues());
-        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("race").getColumnValues().size());
-        assertNull(serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues());
-        assertEquals(2, serviceMetadata.get(0).getData().getInputSchema().getItems().get("race").getColumnValues().size());
-        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
-        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
+    @Test
+    void checkMetadataOutput() throws IOException {
+        String modelName = "MODEL_";
+        for (int modelIdx = 0; modelIdx < 3; modelIdx++) {
+            final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000, 1000, false);
+            saveDataframe(dataframe, modelName + modelIdx);
+
+            // apply name mapping
+            HashMap<String, String> inputMapping = new HashMap<>();
+            HashMap<String, String> outputMapping = new HashMap<>();
+            inputMapping.put("age", "Age Mapped");
+            inputMapping.put("gender", "Gender Mapped");
+            inputMapping.put("race", "Race Mapped");
+
+            outputMapping.put("income", "Income Mapped");
+            NameMapping nameMapping = new NameMapping(modelName + modelIdx, inputMapping, outputMapping);
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(nameMapping)
+                    .when().post(metadataUrl + "/names")
+                    .then()
+                    .statusCode(200)
+                    .body(is("Feature and output name mapping successfully applied."));
+
+            // set up metric request
+            GroupMetricRequest request = new GroupMetricRequest();
+            request.setProtectedAttribute("Gender Mapped");
+            request.setFavorableOutcome(new ReconcilableOutput(IntNode.valueOf(1)));
+            request.setOutcomeName("Income Mapped");
+            request.setPrivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(1)));
+            request.setUnprivilegedAttribute(new ReconcilableFeature(IntNode.valueOf(0)));
+            request.setModelId(modelName + modelIdx);
+            given()
+                    .contentType(ContentType.JSON)
+                    .body(request)
+                    .when()
+                    .post("/metrics/group/fairness/spd/request")
+                    .then()
+                    .statusCode(200);
+        }
+
+        final String serviceMetadata = given()
+                .when().get(metadataUrl)
+                .then()
+                .statusCode(200)
+                .extract()
+                .asPrettyString();
+
+        // load expected metadata from resource file
+        String expectedMetadata = ResourceReader.readFile("expected_metadata_output.txt");
+        assertEquals(expectedMetadata, serviceMetadata);
     }
 
     @Test
     void getNoObservations() throws JsonProcessingException {
         resetDatasource();
-        final List<ServiceMetadata> serviceMetadata = given()
+        final Map<String, ServiceMetadata> serviceMetadata = given()
                 .when().get(metadataUrl)
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
         assertEquals(0, serviceMetadata.size());
@@ -163,19 +221,19 @@ abstract class ServiceMetadataEndpointBaseTest {
                 .statusCode(200)
                 .body(is("Feature and output name mapping successfully applied."));
 
-        final List<ServiceMetadata> serviceMetadata = given()
+        final Map<String, ServiceMetadata> serviceMetadata = given()
                 .when().get(metadataUrl)
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
-        for (String value : serviceMetadata.get(0).getData().getInputSchema().getNameMapping().values()) {
+        for (String value : serviceMetadata.get(MODEL_ID).getData().getInputSchema().getNameMapping().values()) {
             assertTrue(value.contains("Mapped"));
         }
 
-        for (String value : serviceMetadata.get(0).getData().getOutputSchema().getNameMapping().values()) {
+        for (String value : serviceMetadata.get(MODEL_ID).getData().getOutputSchema().getNameMapping().values()) {
             assertTrue(value.contains("Mapped"));
         }
 
@@ -188,19 +246,19 @@ abstract class ServiceMetadataEndpointBaseTest {
                 .statusCode(200)
                 .body(is("Feature and output name mapping successfully cleared."));
 
-        final List<ServiceMetadata> serviceMetadataPostClear = given()
+        final Map<String, ServiceMetadata> serviceMetadataPostClear = given()
                 .when().get(metadataUrl)
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
-        for (String value : serviceMetadataPostClear.get(0).getData().getInputSchema().getNameMapping().values()) {
+        for (String value : serviceMetadataPostClear.get(MODEL_ID).getData().getInputSchema().getNameMapping().values()) {
             assertFalse(value.contains("Mapped"));
         }
 
-        for (String value : serviceMetadataPostClear.get(0).getData().getOutputSchema().getNameMapping().values()) {
+        for (String value : serviceMetadataPostClear.get(MODEL_ID).getData().getOutputSchema().getNameMapping().values()) {
             assertFalse(value.contains("Mapped"));
         }
     }
@@ -220,31 +278,31 @@ abstract class ServiceMetadataEndpointBaseTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
-                .when().post(metadataUrl + "/names").peek()
+                .when().post(metadataUrl + "/names")
                 .then()
                 .statusCode(200)
                 .body(is("Feature and output name mapping successfully applied."));
 
-        final List<ServiceMetadata> serviceMetadata = given()
+        final Map<String, ServiceMetadata> serviceMetadata = given()
                 .when().get(metadataUrl)
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
         // check that mappings are applied
-        for (String value : serviceMetadata.get(0).getData().getInputSchema().getNameMapping().values()) {
+        for (String value : serviceMetadata.get(MODEL_ID).getData().getInputSchema().getNameMapping().values()) {
             assertTrue(value.contains("Mapped"));
         }
 
         // make sure non-mapped names don't appear
-        for (String value : serviceMetadata.get(0).getData().getInputSchema().getNameMapping().keySet()) {
+        for (String value : serviceMetadata.get(MODEL_ID).getData().getInputSchema().getNameMapping().keySet()) {
             assertFalse(value.contains("race"));
         }
 
         // make sure that overwritten field names don't appear
-        Set<String> allInputColNames = serviceMetadata.get(0).getData().getInputSchema().getNameMappedItems().keySet();
+        Set<String> allInputColNames = serviceMetadata.get(MODEL_ID).getData().getInputSchema().getItems().keySet();
         assertFalse(allInputColNames.contains("age"));
         assertTrue(allInputColNames.contains("Age Mapped"));
         assertFalse(allInputColNames.contains("gender"));
@@ -252,7 +310,7 @@ abstract class ServiceMetadataEndpointBaseTest {
         assertTrue(allInputColNames.contains("race"));
 
         // make sure no output mappings exist
-        assertEquals(0, serviceMetadata.get(0).getData().getOutputSchema().getNameMapping().size());
+        assertEquals(0, serviceMetadata.get(MODEL_ID).getData().getOutputSchema().getNameMapping().size());
     }
 
     @Test
@@ -339,12 +397,12 @@ abstract class ServiceMetadataEndpointBaseTest {
                     .post("/metrics/group/fairness/spd/request");
         });
 
-        final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl + "/values")
+        final Map<String, ServiceMetadata> serviceMetadata = given()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(200)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
         final String info = given()
@@ -356,19 +414,17 @@ abstract class ServiceMetadataEndpointBaseTest {
 
         assertEquals(2, serviceMetadata.size());
         // Model A
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
-        assertEquals(nRequestsModelA, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
-        assertEquals(modelANobs, serviceMetadata.get(0).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues().size());
-        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
-        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
+        assertEquals(0, serviceMetadata.get(MODEL_A).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(nRequestsModelA, serviceMetadata.get(MODEL_A).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelANobs, serviceMetadata.get(MODEL_A).getData().getObservations());
+        assertFalse(serviceMetadata.get(MODEL_A).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(MODEL_A).getData().getInputSchema().getItems().isEmpty());
         // Model B
-        assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("DIR"));
-        assertEquals(nRequestsModelB, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("SPD"));
-        assertEquals(modelBNobs, serviceMetadata.get(1).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getColumnValues().size());
-        assertFalse(serviceMetadata.get(1).getData().getOutputSchema().getItems().isEmpty());
-        assertFalse(serviceMetadata.get(1).getData().getInputSchema().getItems().isEmpty());
+        assertEquals(0, serviceMetadata.get(MODEL_B).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(nRequestsModelB, serviceMetadata.get(MODEL_B).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelBNobs, serviceMetadata.get(MODEL_B).getData().getObservations());
+        assertFalse(serviceMetadata.get(MODEL_B).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(MODEL_B).getData().getInputSchema().getItems().isEmpty());
 
     }
 
@@ -418,36 +474,27 @@ abstract class ServiceMetadataEndpointBaseTest {
                     .post("/metrics/group/fairness/spd/request");
         });
 
-        final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl + "/values")
+        final Map<String, ServiceMetadata> serviceMetadata = given()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(200)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
-
-        final String info = given()
-                .when().get("/info/values")
-                .then()
-                .statusCode(200)
-                .extract()
-                .body().asString();
 
         assertEquals(2, serviceMetadata.size());
         // Model A
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
-        assertEquals(nRequestsModelA, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
-        assertEquals(modelANobs, serviceMetadata.get(0).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues().size());
-        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
-        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
+        assertEquals(0, serviceMetadata.get(MODEL_A).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(nRequestsModelA, serviceMetadata.get(MODEL_A).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelANobs, serviceMetadata.get(MODEL_A).getData().getObservations());
+        assertFalse(serviceMetadata.get(MODEL_A).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(MODEL_A).getData().getInputSchema().getItems().isEmpty());
         // Model B
-        assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("DIR"));
-        assertEquals(nRequestsModelB, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("SPD"));
-        assertEquals(modelBNobs, serviceMetadata.get(1).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getColumnValues().size());
-        assertFalse(serviceMetadata.get(1).getData().getOutputSchema().getItems().isEmpty());
-        assertFalse(serviceMetadata.get(1).getData().getInputSchema().getItems().isEmpty());
+        assertEquals(0, serviceMetadata.get(MODEL_B).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(nRequestsModelB, serviceMetadata.get(MODEL_B).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelBNobs, serviceMetadata.get(MODEL_B).getData().getObservations());
+        assertFalse(serviceMetadata.get(MODEL_B).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(MODEL_B).getData().getInputSchema().getItems().isEmpty());
 
     }
 
@@ -464,12 +511,12 @@ abstract class ServiceMetadataEndpointBaseTest {
         final String MODEL_B = "example-model-b";
         saveDataframe(dataframeB, MODEL_B);
 
-        final List<ServiceMetadata> serviceMetadata = given()
-                .when().get(metadataUrl + "/values")
+        final Map<String, ServiceMetadata> serviceMetadata = given()
+                .when().get(metadataUrl)
                 .then()
                 .statusCode(200)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
         final String info = given()
@@ -481,19 +528,17 @@ abstract class ServiceMetadataEndpointBaseTest {
 
         assertEquals(2, serviceMetadata.size());
         // Model A
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("DIR"));
-        assertEquals(0, serviceMetadata.get(0).getMetrics().scheduledMetadata.getCount("SPD"));
-        assertEquals(modelANobs, serviceMetadata.get(0).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(0).getData().getInputSchema().getItems().get("age").getColumnValues().size());
-        assertFalse(serviceMetadata.get(0).getData().getOutputSchema().getItems().isEmpty());
-        assertFalse(serviceMetadata.get(0).getData().getInputSchema().getItems().isEmpty());
+        assertEquals(0, serviceMetadata.get(MODEL_A).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(0, serviceMetadata.get(MODEL_A).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelANobs, serviceMetadata.get(MODEL_A).getData().getObservations());
+        assertFalse(serviceMetadata.get(MODEL_A).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(MODEL_A).getData().getInputSchema().getItems().isEmpty());
         // Model B
-        assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("DIR"));
-        assertEquals(0, serviceMetadata.get(1).getMetrics().scheduledMetadata.getCount("SPD"));
-        assertEquals(modelBNobs, serviceMetadata.get(1).getData().getObservations());
-        assertEquals(100, serviceMetadata.get(1).getData().getInputSchema().getItems().get("age").getColumnValues().size());
-        assertFalse(serviceMetadata.get(1).getData().getOutputSchema().getItems().isEmpty());
-        assertFalse(serviceMetadata.get(1).getData().getInputSchema().getItems().isEmpty());
+        assertEquals(0, serviceMetadata.get(MODEL_B).getMetrics().scheduledMetadata.getCount("DIR"));
+        assertEquals(0, serviceMetadata.get(MODEL_B).getMetrics().scheduledMetadata.getCount("SPD"));
+        assertEquals(modelBNobs, serviceMetadata.get(MODEL_B).getData().getObservations());
+        assertFalse(serviceMetadata.get(MODEL_B).getData().getOutputSchema().getItems().isEmpty());
+        assertFalse(serviceMetadata.get(MODEL_B).getData().getInputSchema().getItems().isEmpty());
 
     }
 

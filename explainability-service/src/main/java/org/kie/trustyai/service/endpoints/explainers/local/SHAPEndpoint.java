@@ -16,6 +16,7 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -49,8 +50,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Tag(name = "Local explainers")
-@EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
+@Tag(name = "Explainers: Local", description = "Local explainers provide explanation of model behavior over a single prediction.")
+@EndpointDisabled(name = "endpoints.explainers.local.shap", stringValue = "disable")
 @Path("/explainers/local/shap")
 public class SHAPEndpoint extends ExplainerEndpoint {
 
@@ -65,12 +66,12 @@ public class SHAPEndpoint extends ExplainerEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Generate a SHAP explanation", description = "Generate a SHAP explanation for a given model and inference id")
+    @Operation(summary = "Compute a SHAP explanation.", description = "Generate a SHAP explanation for a given model and inference id")
     public Response explain(SHAPExplanationRequest request) {
         final String inferenceId = request.getPredictionId();
+        final String modelId = request.getConfig().getModelConfig().getName();
         try {
-            final String modelId = request.getConfig().getModelConfig().getName();
-            final Dataframe dataframe = dataSource.get().getDataframe(modelId);
+            final Dataframe dataframe = dataSource.get().getDataframeFilteredByIds(modelId, Set.of(inferenceId));
             final PredictionProvider model = getModel(request.getConfig().getModelConfig(), dataframe.getInputTensorName(),
                     dataframe.getOutputTensorName());
 
@@ -81,7 +82,8 @@ public class SHAPEndpoint extends ExplainerEndpoint {
             } else if (predictions.size() == 1) {
                 final Prediction predictionToExplain = predictions.get(0);
                 final int backgroundSize = serviceConfig.batchSize().orElse(100);
-                final List<PredictionInput> testDataDistribution = dataframe.filterRowsById(inferenceId, true,
+                final Dataframe organicDataframe = dataSource.get().getOrganicDataframe(modelId);
+                final List<PredictionInput> testDataDistribution = organicDataframe.filterRowsById(inferenceId, true,
                         backgroundSize).asPredictionInputs();
                 final BaseExplanationResponse entity = generateExplanation(model, predictionToExplain, testDataDistribution, request);
                 return Response.ok(entity).build();

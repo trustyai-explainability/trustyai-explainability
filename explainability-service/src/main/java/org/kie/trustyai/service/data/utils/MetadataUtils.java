@@ -1,11 +1,9 @@
 package org.kie.trustyai.service.data.utils;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.explainability.model.UnderlyingObject;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.payloads.service.Schema;
@@ -13,7 +11,6 @@ import org.kie.trustyai.service.payloads.service.SchemaItem;
 import org.kie.trustyai.service.payloads.values.DataType;
 
 public class MetadataUtils {
-    public static final Integer MAX_VALUE_ENUMERATION = 200;
 
     private MetadataUtils() {
 
@@ -40,13 +37,9 @@ public class MetadataUtils {
             schemaItem.setType(DataType.MAP);
         }
         schemaItem.setName(dataframe.getColumnNames().get(i));
+        schemaItem.setColumnIndex(i);
 
         // grab unique values
-        Set<UnderlyingObject> uniqueValues = dataframe.getColumn(i).stream()
-                .map(Value::getUnderlyingObjectContainer)
-                .collect(Collectors.toSet());
-        schemaItem.setColumnValues(uniqueValues.size() < MetadataUtils.MAX_VALUE_ENUMERATION ? uniqueValues : null);
-        schemaItem.setColumnIndex(i);
         return schemaItem;
     }
 
@@ -63,5 +56,4 @@ public class MetadataUtils {
                 .map(i -> extractRowSchema(dataframe, i))
                 .collect(Collectors.toMap(SchemaItem::getName, Function.identity())));
     }
-
 }

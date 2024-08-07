@@ -16,6 +16,7 @@
 package org.kie.trustyai.service.endpoints.explainers.local;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -49,8 +50,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Tag(name = "Local explainers")
-@EndpointDisabled(name = "endpoints.explainers.local", stringValue = "disable")
+@Tag(name = "Explainers: Local", description = "Local explainers provide explanation of model behavior over a single prediction.")
+@EndpointDisabled(name = "endpoints.explainers.local.lime", stringValue = "disable")
 @Path("/explainers/local/lime")
 public class LimeEndpoint extends ExplainerEndpoint {
 
@@ -64,24 +65,25 @@ public class LimeEndpoint extends ExplainerEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Generate a LIME explanation", description = "Generate a LIME explanation for a given model and inference id")
+    @Operation(summary = "Compute a LIME explanation.", description = "Generate a LIME explanation for a given model and inference id")
     public Response explain(LimeExplanationRequest request) {
+        final String inferenceId = request.getPredictionId();
+        final String modelId = request.getConfig().getModelConfig().getName();
         try {
-            final String modelId = request.getConfig().getModelConfig().getName();
-            final Dataframe dataframe = dataSource.get().getDataframe(modelId);
+            final Dataframe dataframe = dataSource.get().getDataframeFilteredByIds(modelId, Set.of(inferenceId));
             final PredictionProvider model = getModel(request.getConfig().getModelConfig(),
                     dataframe.getInputTensorName());
-            final String inferenceId = request.getPredictionId();
+
             Prediction predictionToExplain;
-            final List<Prediction> predictions = dataSource.get().getDataframe(modelId)
-                    .filterRowsById(inferenceId).asPredictions();
+            final List<Prediction> predictions = dataframe.filterRowsById(inferenceId).asPredictions();
             if (predictions.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity("No prediction found with id="
                         + inferenceId).build();
             } else if (predictions.size() == 1) {
                 predictionToExplain = predictions.get(0);
                 final int backgroundSize = serviceConfig.batchSize().orElse(100);
-                final List<PredictionInput> testDataDistribution = dataframe.filterRowsById(inferenceId, true,
+                final Dataframe organicDataframe = dataSource.get().getOrganicDataframe(modelId);
+                final List<PredictionInput> testDataDistribution = organicDataframe.filterRowsById(inferenceId, true,
                         backgroundSize).asPredictionInputs();
                 final BaseExplanationResponse entity = generateExplanation(model, predictionToExplain,
                         testDataDistribution, request);

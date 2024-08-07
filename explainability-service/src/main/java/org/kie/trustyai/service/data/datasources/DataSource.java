@@ -17,6 +17,7 @@ import org.kie.trustyai.service.data.parsers.DataParser;
 import org.kie.trustyai.service.data.storage.Storage;
 import org.kie.trustyai.service.data.utils.MetadataUtils;
 import org.kie.trustyai.service.payloads.service.DataTagging;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.payloads.service.Schema;
 
@@ -121,6 +122,16 @@ public abstract class DataSource {
      * @throws DataframeCreateException if the dataframe cannot be created
      */
     public abstract Dataframe getDataframeFilteredByTags(final String modelId, int batchSize, Set<String> tags) throws DataframeCreateException;
+
+    /**
+     * Get a dataframe with matching id data and metadata for a given model.
+     *
+     * @param modelId the model id
+     * @param ids the set of tags to include
+     * @return a dataframe with matching ids
+     * @throws DataframeCreateException if the dataframe cannot be created
+     */
+    public abstract Dataframe getDataframeFilteredByIds(final String modelId, Set<String> ids) throws DataframeCreateException;
 
     /**
      * Get a dataframe with matching tags data and metadata for a given model.
@@ -253,19 +264,13 @@ public abstract class DataSource {
     protected abstract void saveDataframeIntoStorage(final Dataframe dataframe, final String modelId, boolean overwrite);
 
     // METADATA READS ==================================================================================================
-    public StorageMetadata getMetadata(String modelId) throws StorageReadException {
-        return getMetadata(modelId, false);
-    }
-
     /**
      * Get metadata for this modelId, with optional loading of column enumerations
      *
      * @param modelId the model id
-     * @param loadColumnValues if true, add column enumerations to the metadata. This adds an additional storage read,
-     *        so use this only when necessary.
      * @throws StorageReadException if the metadata cannot be read
      */
-    public abstract StorageMetadata getMetadata(String modelId, boolean loadColumnValues) throws StorageReadException;
+    public abstract StorageMetadata getMetadata(String modelId) throws StorageReadException;
 
     /**
      * Check whether metadata exists for this modelId
@@ -320,6 +325,16 @@ public abstract class DataSource {
     public List<String> getVerifiedModels() {
         return knownModels.stream().filter(this::hasMetadata).collect(Collectors.toList());
     }
+
+    /**
+     * @return the list of all inference ids in storage.
+     */
+    public abstract List<InferenceId> getAllInferenceIds(String modelId);
+
+    /**
+     * @return the list of organic inference ids in storage.
+     */
+    public abstract List<InferenceId> getOrganicInferenceIds(String modelId);
 
     // GROUND TRUTH OPERATIONS =========================================================================================
     /**

@@ -3,6 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics.identity;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.model.Value;
@@ -66,6 +67,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
     }
 
     @POST
+    @Operation(summary = "Provide a specific, plain-english interpretation of the current value of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response response(@ValidIdentityMetricRequest IdentityMetricRequest request) throws DataframeCreateException {
@@ -102,6 +104,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
     }
 
     @GET
+    @Operation(summary = "Provide a general definition of this metric.")
     @Path("/definition")
     @Produces(MediaType.TEXT_PLAIN)
     public Response getDefinition() {
@@ -109,6 +112,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
     }
 
     @POST
+    @Operation(summary = "Provide a specific, plain-english interpretation of a specific value of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/definition")
@@ -124,6 +128,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
     }
 
     @POST
+    @Operation(summary = "Schedule a recurring computation of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
