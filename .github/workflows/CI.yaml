@@ -14,7 +14,7 @@ jobs:
         # configure with [ 'ubuntu-latest', 'windows-latest' ] to enable Windows builds
         include:
           - { os: ubuntu-22.04, shell: bash } # Pinned to Ubuntu 22.04 LTS. Change if necessary.
-        java-version: [ 11, 17 ]
+        java-version: [ 17 ]
         # Maven maintained core versions, https://maven.apache.org/docs/history.html
         maven-version: [ '3.6.3', '3.8.8', '3.9.2' ]
       fail-fast: false
