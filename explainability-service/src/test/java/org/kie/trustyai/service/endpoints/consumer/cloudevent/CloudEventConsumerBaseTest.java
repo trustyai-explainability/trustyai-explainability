@@ -202,9 +202,9 @@ abstract public class CloudEventConsumerBaseTest {
         final DataframeCreateException exception = assertThrows(DataframeCreateException.class, () -> {
             consumer.get().consumeKubeflowResponse(mockOutput);
         });
-
         assertEquals("Could not parse input data: Unrecognized token 'foo': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n" +
-                " at [Source: (String)\"foo\"; line: 1, column: 4]", exception.getMessage());
+                        " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 4]",
+                exception.getMessage());
     }
 
     @Test
