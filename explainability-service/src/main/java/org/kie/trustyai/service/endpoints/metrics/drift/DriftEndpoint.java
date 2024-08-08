@@ -1,7 +1,9 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -13,6 +15,8 @@ import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
@@ -128,5 +132,17 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
         // wrap into response
         BaseMetricResponse response = new BaseMetricResponse(metricValue, metricDefinition, thresholds, super.getMetricName());
         return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/requests")
+    @Operation(summary = "List the currently scheduled computations of this metric.")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listRequests() {
+        final ScheduleList scheduleList = new ScheduleList();
+        for (Map.Entry<UUID, BaseMetricRequest> entry : scheduler.getRequests(this.name).entrySet()) {
+            scheduleList.requests.add(new ScheduleRequest(entry.getKey(), ((DriftMetricRequest) entry.getValue()).getReadableVersion()));
+        }
+        return Response.ok(scheduleList).build();
     }
 }

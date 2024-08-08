@@ -10,6 +10,7 @@ import org.kie.trustyai.service.payloads.metrics.drift.kstest.ApproxKSTestMetric
 import org.kie.trustyai.service.payloads.metrics.drift.kstest.KSTestMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -59,6 +60,11 @@ public abstract class DriftMetricRequest extends BaseMetricRequest {
 
     public void setFitColumns(Set<String> fitColumns) {
         this.fitColumns = fitColumns;
+    }
+
+    @JsonIgnore
+    public ReadableDriftMetricRequest getReadableVersion() {
+        return new ReadableDriftMetricRequest(this);
     }
 
     @Override

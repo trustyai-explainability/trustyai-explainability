@@ -41,6 +41,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
@@ -218,6 +219,17 @@ abstract class FourierMMDEndpointBaseTest {
                 .when().post("/request")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode());
+
+        String response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().get("/requests")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .extract().body().asString();
+
+        assertTrue(response.contains("\"modelId\":\"example1\""));
+        assertFalse(response.contains("fitting"));
     }
 
     @Test
