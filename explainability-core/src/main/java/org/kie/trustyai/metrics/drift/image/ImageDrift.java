@@ -8,6 +8,8 @@ import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.utils.KLDivergence;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
+import org.kie.trustyai.explainability.model.tensor.TensorFactory;
 
 /**
  * Jensen-Shannon divergence to calculate image data drift.
@@ -16,36 +18,39 @@ import org.kie.trustyai.metrics.drift.utils.KLDivergence;
 public class ImageDrift {
     /**
      * Converts an image of type BufferedImage to double[][][]
-     * 
+     *
      * @param image An image of type BufferedImage
      */
-    private static double[][][] convertToTensor3d(BufferedImage image) {
+    private static Tensor<Double> convertToTensor3d(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
-        double[][][] tensor3d = new double[width][height][3];
+
+        Double[][][] arr = new Double[width][height][3];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 int pixel = image.getRGB(i, j);
-                tensor3d[i][j][0] = ((pixel >> 16) & 0xff) / 255.0;
-                tensor3d[i][j][1] = ((pixel >> 8) & 0xff) / 255.0;
-                tensor3d[i][j][2] = (pixel & 0xff) / 255.0;
+                arr[i][j][0] = ((pixel >> 16) & 0xff) / 255.0;
+                arr[i][j][1] = ((pixel >> 8) & 0xff) / 255.0;
+                arr[i][j][2] = (pixel & 0xff) / 255.0;
             }
         }
+        Tensor<Double> tensor3d = TensorFactory.fromArray(arr);
         return tensor3d;
     }
 
     /**
      * Takes as input a list of images and converts them into a list of 3d arrays.
-     * 
-     * @param images A list of images of data type BufferedImage or double[][][]
+     *
+     * @param images A list of images of data type BufferedImage or Tensor<Double>?
      */
-    public static List<double[][][]> preprocessImages(List<?> images) {
-        List<double[][][]> preprocessedImgs = new ArrayList<>();
+    @SuppressWarnings("unchecked")
+    public static List<Tensor<Double>> preprocessImages(List<?> images) {
+        List<Tensor<Double>> preprocessedImgs = new ArrayList<>();
         for (Object image : images) {
             if (image instanceof BufferedImage) {
                 preprocessedImgs.add(convertToTensor3d((BufferedImage) image));
-            } else if (image instanceof double[][][]) {
-                preprocessedImgs.add((double[][][]) image);
+            } else if (image instanceof Tensor) {
+                preprocessedImgs.add((Tensor<Double>) image);
             } else {
                 throw new IllegalArgumentException("Unsupported image format.");
             }
@@ -56,28 +61,28 @@ public class ImageDrift {
 
     /**
      * Takes as input of list of images and converts them into a dataframe.
-     * 
-     * @param images A list of images of data type double[][][]
+     *
+     * @param images A list of images of data type Tensor<Double>
      */
-    public static Dataframe getDataframe(List<double[][][]> images) {
+    public static Dataframe getDataframe(List<Tensor<Double>> images) {
         Dataframe dataframe = new Dataframe();
         List<Value> redCol = new ArrayList<>();
         List<Value> greenCol = new ArrayList<>();
         List<Value> blueCol = new ArrayList<>();
 
-        for (double[][][] image : images) {
-            int width = image.length;
-            int height = image[0].length;
-            int channels = image[0][0].length;
+        for (Tensor<Double> image : images) {
+            int width = image.getDimensions(0);
+            int height = image.getDimensions(1);
+            int channels = image.getDimensions(2);
             if (channels != 3) {
                 throw new IllegalArgumentException("Each pixel must have exactly 3 color channels");
             }
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < height; j++) {
 
-                    redCol.add(new Value(image[i][j][0]));
-                    greenCol.add(new Value(image[i][j][1]));
-                    blueCol.add(new Value(image[i][j][2]));
+                    redCol.add(new Value(image.getElement(i, j, 0)));
+                    greenCol.add(new Value(image.getElement(i, j, 1)));
+                    blueCol.add(new Value(image.getElement(i, j, 2)));
 
                 }
             }
@@ -109,7 +114,7 @@ public class ImageDrift {
     /**
      * Calculates the average Jensen-Shannon divergence over RGB values between a reference and hypothesis image.
      * If it is above the threshold, the hypothesis image is said to be different than the reference image.
-     * 
+     *
      * @param <T>
      * @param <T>
      *
@@ -120,8 +125,8 @@ public class ImageDrift {
      */
 
     public static ImageDriftResult calculate(List<?> references, List<?> hypotheses, double threshold) {
-        List<double[][][]> tensor3dRef = preprocessImages(references);
-        List<double[][][]> tensor3dHyp = preprocessImages(hypotheses);
+        List<Tensor<Double>> tensor3dRef = preprocessImages(references);
+        List<Tensor<Double>> tensor3dHyp = preprocessImages(hypotheses);
 
         Dataframe dfRef = getDataframe(tensor3dHyp);
         Dataframe dfHyp = getDataframe(tensor3dRef);
