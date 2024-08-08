@@ -10,7 +10,7 @@ ARG OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/4
 ENV HOME /root
 WORKDIR /root
 
-RUN dnf install -y jq bc git go-toolset python3.12 python3.12-devel python3.12-pip unzip && \
+RUN dnf install -y jq bc git go-toolset python3.10 python3.10-devel python3.10-pip unzip && \
     dnf clean all && \
     git clone https://github.com/opendatahub-io/peak $HOME/peak && \
     cd $HOME/peak && \
