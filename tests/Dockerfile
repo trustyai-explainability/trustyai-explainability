@@ -27,12 +27,9 @@ COPY Pipfile Pipfile.lock $HOME/peak/
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="${PATH}:$HOME/.local/bin"
 RUN cd $HOME/peak && \
-    echo "cloning fork for debugging" && \
-    git clone https://github.com/adolfo-ab/trustyai-tests.git && \
+    git clone https://github.com/trustyai-explainability/trustyai-tests.git && \
     cd trustyai-tests && \
-    git checkout debug-ci-failures && \
     poetry install
-
 
 COPY setup/operatorsetup scripts/install.sh scripts/installandtest.sh $HOME/peak/
 COPY util $HOME/peak/operator-tests/trustyai-explainability
