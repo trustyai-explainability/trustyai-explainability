@@ -14,7 +14,7 @@ public class Tensor<T> {
     private int nEntries;
     private Class datatype;
 
-    Tensor(T[] data, int[] dimensions) {
+    public Tensor(T[] data, int[] dimensions) {
         this.data = data;
         this.dimensions = dimensions;
         this.dimension = dimensions.length;

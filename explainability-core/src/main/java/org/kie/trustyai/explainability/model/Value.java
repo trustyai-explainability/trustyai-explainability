@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -60,6 +61,12 @@ public class Value {
                 // ignored
             }
         }
+
+        if (getUnderlyingObject() instanceof Tensor<?>) {
+            Tensor<?> t = (Tensor<?>) getUnderlyingObject();
+            return t.toString();
+        }
+
         if (getUnderlyingObject() instanceof ByteBuffer) {
             ByteBuffer byteBuffer = (ByteBuffer) getUnderlyingObject();
             return new String(byteBuffer.array());
@@ -68,7 +75,9 @@ public class Value {
     }
 
     public double asNumber() {
-        if (getUnderlyingObject() != null) {
+        if (getUnderlyingObject() instanceof Tensor<?>) {
+            return Double.NaN;
+        } else if (getUnderlyingObject() != null) {
             try {
                 if (getUnderlyingObject() instanceof Double) {
                     return (double) getUnderlyingObject();
