@@ -1,6 +1,10 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.kie.trustyai.connectors.kserve.KServeDatatype;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
@@ -13,12 +17,6 @@ import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.tensor.Tensor;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.kie.trustyai.explainability.model.Type.BOOLEAN;
 import static org.kie.trustyai.explainability.model.Type.CATEGORICAL;
@@ -71,8 +69,13 @@ public class TensorConverterUtils {
     }
 
     // === TENSOR VALUE UTILITIES ======================================================================================
-    static List<?> getNthSlice(List l, int sliceIdx, int shapeProduct){
-        return IntStream.range(0, l.size()).filter(i -> i%shapeProduct==sliceIdx).mapToObj(l::get).toList();
+    static List<?> getNthSlice(List l, int sliceIdx, int shapeProduct) {
+        int startIdx = shapeProduct * sliceIdx;
+        int endIdx = shapeProduct * (sliceIdx + 1);
+        if (startIdx >= l.size() || endIdx > l.size()) {
+            throw new IllegalArgumentException("Can't retrieve batch=" + sliceIdx + " of size=" + shapeProduct + " from list of length=" + l.size());
+        }
+        return IntStream.range(startIdx, endIdx).mapToObj(i -> l.get(i)).collect(Collectors.toList());
     }
 
     // === FEATURE HANDLING ============================================================================================
@@ -175,13 +178,13 @@ public class TensorConverterUtils {
         List<Long> rawShapeList = tensor.getShapeList();
 
         // array of non-batch shapes [shape0, shape1, shape2...]
-        int[] shapeArray = new int[rawShapeList.size()-1];
+        int[] shapeArray = new int[rawShapeList.size() - 1];
 
         // product of all non-batch-shapes
         int nonBatchShapesProduct = 1;
-        for (int i=1; i<rawShapeList.size(); i++){
+        for (int i = 1; i < rawShapeList.size(); i++) {
             nonBatchShapesProduct *= rawShapeList.get(i);
-            shapeArray[i-1] = rawShapeList.get(i).intValue();
+            shapeArray[i - 1] = rawShapeList.get(i).intValue();
         }
 
         switch (type) {
@@ -192,11 +195,11 @@ public class TensorConverterUtils {
             case INT8:
             case INT16:
             case INT32:
-                Integer[] intData =getNthSlice(tensorContents.getIntContentsList(), idx, nonBatchShapesProduct).toArray(new Integer[0]);
+                Integer[] intData = getNthSlice(tensorContents.getIntContentsList(), idx, nonBatchShapesProduct).toArray(new Integer[0]);
                 Tensor<Integer> intTensor = new Tensor<>(intData, shapeArray);
                 return FeatureFactory.newTensorFeature(name, intTensor);
             case INT64:
-                Long[] longData =  getNthSlice(tensorContents.getInt64ContentsList(), idx, nonBatchShapesProduct).toArray(new Long[0]);
+                Long[] longData = getNthSlice(tensorContents.getInt64ContentsList(), idx, nonBatchShapesProduct).toArray(new Long[0]);
                 Tensor<Long> longTensor = new Tensor<>(longData, shapeArray);
                 return FeatureFactory.newTensorFeature(name, longTensor);
             case FP32:
@@ -215,7 +218,6 @@ public class TensorConverterUtils {
                 throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
         }
     }
-
 
     // === OUTPUT HANDLING =============================================================================================
     /**
@@ -319,13 +321,13 @@ public class TensorConverterUtils {
         List<Long> rawShapeList = tensor.getShapeList();
 
         // array of non-batch shapes [shape0, shape1, shape2...]
-        int[] shapeArray = new int[rawShapeList.size()-1];
+        int[] shapeArray = new int[rawShapeList.size() - 1];
 
         // product of all non-batch-shapes
         int nonBatchShapesProduct = 1;
-        for (int i=1; i<rawShapeList.size(); i++){
+        for (int i = 1; i < rawShapeList.size(); i++) {
             nonBatchShapesProduct *= rawShapeList.get(i);
-            shapeArray[i-1] = rawShapeList.get(i).intValue();
+            shapeArray[i - 1] = rawShapeList.get(i).intValue();
         }
 
         switch (type) {
@@ -336,11 +338,11 @@ public class TensorConverterUtils {
             case INT8:
             case INT16:
             case INT32:
-                Integer[] intData =getNthSlice(tensorContents.getIntContentsList(), idx, nonBatchShapesProduct).toArray(new Integer[0]);
+                Integer[] intData = getNthSlice(tensorContents.getIntContentsList(), idx, nonBatchShapesProduct).toArray(new Integer[0]);
                 Tensor<Integer> intTensor = new Tensor<>(intData, shapeArray);
                 return new Output(name, Type.TENSOR, new Value(intTensor), Output.DEFAULT_SCORE);
             case INT64:
-                Long[] longData =  getNthSlice(tensorContents.getInt64ContentsList(), idx, nonBatchShapesProduct).toArray(new Long[0]);
+                Long[] longData = getNthSlice(tensorContents.getInt64ContentsList(), idx, nonBatchShapesProduct).toArray(new Long[0]);
                 Tensor<Long> longTensor = new Tensor<>(longData, shapeArray);
                 return new Output(name, Type.TENSOR, new Value(longTensor), Output.DEFAULT_SCORE);
             case FP32:

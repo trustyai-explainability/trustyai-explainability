@@ -1,6 +1,7 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
-import com.google.protobuf.ByteString;
+import java.util.List;
+
 import org.kie.trustyai.connectors.kserve.KServeDatatype;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
@@ -13,7 +14,7 @@ import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.tensor.Tensor;
 
-import java.util.List;
+import com.google.protobuf.ByteString;
 
 public class RawPayloadParser {
 
@@ -36,13 +37,13 @@ public class RawPayloadParser {
             case INT8:
             case INT16:
             case INT32:
-                return  PayloadParser.inputFromContentList(RawValueExtractor.toInteger(raw), Type.NUMBER, inputNames);
+                return PayloadParser.inputFromContentList(RawValueExtractor.toInteger(raw), Type.NUMBER, inputNames);
             case INT64:
-                return  PayloadParser.inputFromContentList(RawValueExtractor.toLong(raw), Type.NUMBER, inputNames);
+                return PayloadParser.inputFromContentList(RawValueExtractor.toLong(raw), Type.NUMBER, inputNames);
             case FP32:
-                return  PayloadParser.inputFromContentList(RawValueExtractor.toFloat(raw), Type.NUMBER, inputNames);
+                return PayloadParser.inputFromContentList(RawValueExtractor.toFloat(raw), Type.NUMBER, inputNames);
             case FP64:
-                return  PayloadParser.inputFromContentList(RawValueExtractor.toDouble(raw), Type.NUMBER, inputNames);
+                return PayloadParser.inputFromContentList(RawValueExtractor.toDouble(raw), Type.NUMBER, inputNames);
             default:
                 throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
         }
@@ -90,11 +91,11 @@ public class RawPayloadParser {
         List<Long> rawShapeList = tensor.getShapeList();
 
         // array of non-batch shapes [shape0, shape1, shape2...]
-        int[] shapeArray = new int[rawShapeList.size()-1];
+        int[] shapeArray = new int[rawShapeList.size() - 1];
         int nonBatchShapesProduct = 1;
-        for (int i=1; i<rawShapeList.size(); i++){
+        for (int i = 1; i < rawShapeList.size(); i++) {
             nonBatchShapesProduct *= rawShapeList.get(i);
-            shapeArray[i-1] = rawShapeList.get(i).intValue();
+            shapeArray[i - 1] = rawShapeList.get(i).intValue();
         }
 
         switch (type) {
@@ -135,7 +136,7 @@ public class RawPayloadParser {
     }
 
     public static PredictionOutput rawContentToPredictionOutput(ModelInferResponse response,
-                                                                List<String> outputNames, int idx) throws IllegalArgumentException {
+            List<String> outputNames, int idx) throws IllegalArgumentException {
         final ModelInferResponse.InferOutputTensor tensor = response.getOutputs(idx);
         final ByteString raw = response.getRawOutputContents(idx);
         final KServeDatatype type;
@@ -147,17 +148,17 @@ public class RawPayloadParser {
 
         switch (type) {
             case BOOL:
-                return  PayloadParser.outputFromContentList(RawValueExtractor.toBoolean(raw), Type.BOOLEAN, outputNames);
+                return PayloadParser.outputFromContentList(RawValueExtractor.toBoolean(raw), Type.BOOLEAN, outputNames);
             case INT8:
             case INT16:
             case INT32:
-                return  PayloadParser.outputFromContentList(RawValueExtractor.toInteger(raw), Type.NUMBER, outputNames);
+                return PayloadParser.outputFromContentList(RawValueExtractor.toInteger(raw), Type.NUMBER, outputNames);
             case INT64:
-                return  PayloadParser.outputFromContentList(RawValueExtractor.toLong(raw), Type.NUMBER, outputNames);
+                return PayloadParser.outputFromContentList(RawValueExtractor.toLong(raw), Type.NUMBER, outputNames);
             case FP32:
-                return  PayloadParser.outputFromContentList(RawValueExtractor.toFloat(raw), Type.NUMBER, outputNames);
+                return PayloadParser.outputFromContentList(RawValueExtractor.toFloat(raw), Type.NUMBER, outputNames);
             case FP64:
-                return  PayloadParser.outputFromContentList(RawValueExtractor.toDouble(raw), Type.NUMBER, outputNames);
+                return PayloadParser.outputFromContentList(RawValueExtractor.toDouble(raw), Type.NUMBER, outputNames);
             default:
                 throw new IllegalArgumentException("Currently unsupported type for Tensor output, type=" + tensor.getDatatype());
         }
@@ -205,11 +206,11 @@ public class RawPayloadParser {
         List<Long> rawShapeList = tensor.getShapeList();
 
         // array of non-batch shapes [shape0, shape1, shape2...]
-        int[] shapeArray = new int[rawShapeList.size()-1];
+        int[] shapeArray = new int[rawShapeList.size() - 1];
         int nonBatchShapesProduct = 1;
-        for (int i=1; i<rawShapeList.size(); i++){
+        for (int i = 1; i < rawShapeList.size(); i++) {
             nonBatchShapesProduct *= rawShapeList.get(i);
-            shapeArray[i-1] = rawShapeList.get(i).intValue();
+            shapeArray[i - 1] = rawShapeList.get(i).intValue();
         }
 
         switch (type) {
