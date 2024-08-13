@@ -9,15 +9,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.explainability.model.tensor.Tensor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.kie.trustyai.explainability.model.Type.*;
 
 public class TensorConverter {
 

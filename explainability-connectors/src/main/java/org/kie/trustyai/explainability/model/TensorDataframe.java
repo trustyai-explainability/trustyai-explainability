@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverterUtils;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
