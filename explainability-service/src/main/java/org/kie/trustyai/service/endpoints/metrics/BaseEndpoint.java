@@ -33,6 +33,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 public abstract class BaseEndpoint<T extends BaseMetricRequest> {
+    public static String REQUEST_ID_NOT_FOUND_FMT = "Error: Scheduled requestId=%s not found";
+    public static String NO_REQUEST_ID_PROVIDED_FMT = "Scheduled requestId in DELETE payload was null. This can occur if the provided requestId was not a valid UUID, please check the parameters of the DELETE payload.";
+
     protected static final Logger LOG = Logger.getLogger(BaseEndpoint.class);
 
     @Inject
@@ -70,15 +73,15 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
         final UUID id = request.requestId;
 
         if (null == id) {
-            LOG.error("Scheduled requestId in DELETE payload was null. This can occur if the provided requestId was not a valid UUID, please check the parameters of the DELETE payload.");
-            return RestResponse.ResponseBuilder.notFound().build().toResponse();
+            LOG.error(NO_REQUEST_ID_PROVIDED_FMT);
+            return RestResponse.ResponseBuilder.notFound().entity(NO_REQUEST_ID_PROVIDED_FMT).build().toResponse();
         } else if (scheduler.getRequests(this.name).containsKey(id)) {
             scheduler.delete(this.name, request.requestId);
             LOG.info("Removing scheduled request ID=" + id);
             return RestResponse.ResponseBuilder.ok("Removed").build().toResponse();
         } else {
             LOG.error("Scheduled requestId=" + id + " not found");
-            return RestResponse.ResponseBuilder.notFound().build().toResponse();
+            return RestResponse.ResponseBuilder.notFound().entity(String.format(REQUEST_ID_NOT_FOUND_FMT, id)).build().toResponse();
         }
     }
 

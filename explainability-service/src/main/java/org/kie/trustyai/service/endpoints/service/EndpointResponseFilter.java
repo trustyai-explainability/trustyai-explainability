@@ -12,11 +12,12 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 @Priority(9999)
 public class EndpointResponseFilter implements ContainerResponseFilter {
-    public static String NOT_FOUND_MESSAGE_FMT = "404 Not Found: The queried endpoint \"%s\" does not exist within TrustyAI.";
+    public static String NOT_FOUND_MESSAGE_FMT = "Error: The queried endpoint \"%s\" does not exist within TrustyAI.";
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext){
         int status = responseContext.getStatus();
+
         // 404 Mapper
         if (status == Response.Status.NOT_FOUND.getStatusCode() && !responseContext.hasEntity()) {
             String queriedPath = requestContext.getUriInfo().getPath();

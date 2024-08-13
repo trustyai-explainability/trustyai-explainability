@@ -6,6 +6,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.endpoints.metrics.fairness.group.GroupStatisticalParityDifferenceEndpoint;
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
@@ -135,7 +136,7 @@ class GroupStatisticalParityDifferenceEndpointTest {
         final ScheduleId nonExistingRequestId = new ScheduleId();
         nonExistingRequestId.requestId = UUID.randomUUID();
         given().contentType(ContentType.JSON).when().body(nonExistingRequestId).delete("/request")
-                .then().statusCode(RestResponse.StatusCode.NOT_FOUND).body(is(""));
+                .then().statusCode(RestResponse.StatusCode.NOT_FOUND).body(is(String.format(BaseEndpoint.REQUEST_ID_NOT_FOUND_FMT, nonExistingRequestId.requestId)));
 
         scheduleList = given()
                 .when()

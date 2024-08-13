@@ -14,6 +14,7 @@ import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
@@ -314,7 +315,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
         final ScheduleId nonExistingRequestId = new ScheduleId();
         nonExistingRequestId.requestId = secondRequest.getRequestId();
         given().contentType(ContentType.JSON).when().body(nonExistingRequestId).delete("/request")
-                .then().statusCode(RestResponse.StatusCode.NOT_FOUND).body(is(""));
+                .then().statusCode(RestResponse.StatusCode.NOT_FOUND).body(is(String.format(BaseEndpoint.REQUEST_ID_NOT_FOUND_FMT, secondRequest.getRequestId())));
 
         scheduleList = given()
                 .when()
