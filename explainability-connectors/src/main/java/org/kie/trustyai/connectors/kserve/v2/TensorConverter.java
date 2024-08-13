@@ -1,6 +1,7 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -8,9 +9,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,6 +126,14 @@ public class TensorConverter {
                 }).collect(Collectors.toCollection(ArrayList::new));
 
                 return new ArrayList<>(List.of(new PredictionInput(features)));
+            } else if (shape.size() > 2 && !raw){
+                List<PredictionInput> predictionInputs = new ArrayList<>();
+                for (int batch = 0; batch < data.getInputsCount(); batch++) {
+                    List<Feature> fs = new ArrayList<>();
+                    fs.add(TensorConverterUtils.rawHandlerTrustyAITensor(data, data.getInputs(batch), data.getInputs(batch).getName(), 0, raw));
+                    predictionInputs.add(new PredictionInput(fs));
+                }
+                return predictionInputs;
             } else {
                 // given some shape (ntensors, a, b, ... n)
                 // return ntensors of PredictionOutputs, each with a*b*c*...*n outputs
@@ -252,71 +263,88 @@ public class TensorConverter {
                 }
             }
 
-            // given some shape (ntensors, a, b, ... n)
-            // return ntensors of PredictionOutputs, each with a*b*c*...*n outputs
-            boolean secondDimMatch = perTensorSecondShape.stream().allMatch(i -> i == enforcedFirstDimension);
-            boolean firstDimMatch = perTensorShapes.stream().allMatch(i -> i.get(0) == enforcedFirstDimension);
+            // non-TrustyAI tensor case
+            if (perTensorShapes.stream().allMatch(shapeList -> shapeList.size() <= 2)) {
+                // given some shape (ntensors, a, b, ... n)
+                // return ntensors of PredictionOutputs, each with a*b*c*...*n outputs
+                boolean secondDimMatch = perTensorSecondShape.stream().allMatch(i -> i == enforcedFirstDimension);
+                boolean firstDimMatch = perTensorShapes.stream().allMatch(i -> i.get(0) == enforcedFirstDimension);
 
-            if (enforcedFirstDimension == 1) {
-                final List<Output> outputs = IntStream.range(0, tensors.size())
-                        .mapToObj(tensorIDX -> {
-                            List<String> names = TensorConverterUtils.labelTensors(tensors.get(tensorIDX).getName(), perTensorSecondShape.get(tensorIDX));
-                            return TensorConverterUtils.rawHandlerMulti(
-                                    data,
-                                    tensors.get(tensorIDX),
-                                    names,
-                                    perTensorSecondShape.get(tensorIDX),
-                                    raw, tensorIDX).get(0).getOutputs();
-                        }).flatMap(Collection::stream).collect(Collectors.toList());
-                return List.of(new PredictionOutput(outputs));
 
-            } else if (tensors.size() > 1 && firstDimMatch) {
-                // list of tensors of shape [efd, n], [efd, m], ...
-                List<PredictionOutput> outputs = new ArrayList<>();
-                int nOutputs = 0;
-                for (int outputIdx = 0; outputIdx < enforcedFirstDimension; outputIdx++) {
-                    List<Output> os = new ArrayList<>();
-                    for (int tIdx = 0; tIdx < tensors.size(); tIdx++) {
-                        List<String> names = TensorConverterUtils.labelTensors(tensors.get(tIdx).getName(), perTensorSecondShape.get(tIdx));
-                        for (int i = 0; i < perTensorSecondShape.get(tIdx); i++) {
-                            os.add(TensorConverterUtils.rawHandlerSingle(data, tensors.get(tIdx), names.get(i), tIdx, outputIdx * perTensorSecondShape.get(tIdx) + i, raw));
+                if (enforcedFirstDimension == 1) {
+                    final List<Output> outputs = IntStream.range(0, tensors.size())
+                            .mapToObj(tensorIDX -> {
+                                List<String> names = TensorConverterUtils.labelTensors(tensors.get(tensorIDX).getName(), perTensorSecondShape.get(tensorIDX));
+                                return TensorConverterUtils.rawHandlerMulti(
+                                        data,
+                                        tensors.get(tensorIDX),
+                                        names,
+                                        perTensorSecondShape.get(tensorIDX),
+                                        raw, tensorIDX).get(0).getOutputs();
+                            }).flatMap(Collection::stream).collect(Collectors.toList());
+                    return List.of(new PredictionOutput(outputs));
+
+                } else if (tensors.size() > 1 && firstDimMatch) {
+                    // list of tensors of shape [efd, n], [efd, m], ...
+                    List<PredictionOutput> outputs = new ArrayList<>();
+                    int nOutputs = 0;
+                    for (int outputIdx = 0; outputIdx < enforcedFirstDimension; outputIdx++) {
+                        List<Output> os = new ArrayList<>();
+                        for (int tIdx = 0; tIdx < tensors.size(); tIdx++) {
+                            List<String> names = TensorConverterUtils.labelTensors(tensors.get(tIdx).getName(), perTensorSecondShape.get(tIdx));
+                            for (int i = 0; i < perTensorSecondShape.get(tIdx); i++) {
+                                os.add(TensorConverterUtils.rawHandlerSingle(data, tensors.get(tIdx), names.get(i), tIdx, outputIdx * perTensorSecondShape.get(tIdx) + i, raw));
+                            }
                         }
+                        if (outputIdx == 0) {
+                            nOutputs = os.size();
+                        }
+                        outputs.add(new PredictionOutput(os));
                     }
-                    if (outputIdx == 0) {
-                        nOutputs = os.size();
-                    }
-                    outputs.add(new PredictionOutput(os));
-                }
 
-                if (secondDimMatch) {
-                    logger.warn(String.format(
-                            "Output tensor(s) have ambiguous shape: %s. " +
-                                    "The input payload contained %d datapoints. However, both the first dimension and the " +
-                                    "product of subsequent dimensions for all inbound output tensors are also of size %d. " +
-                                    "TrustyAI will assume that the first dimension is the batch dimension, and will parse this payload " +
-                                    "as %d outputs of size %d.",
-                            perTensorShapes, enforcedFirstDimension, enforcedFirstDimension, enforcedFirstDimension, nOutputs));
-                }
-                return outputs;
-            } else if (secondDimMatch) {
-                List<List<Output>> outputs = tensors.stream()
-                        .map(tensor -> IntStream.range(0, perTensorSecondShape.get(0))
-                                .mapToObj(i -> TensorConverterUtils.rawHandlerSingle(data, tensor, tensor.getName(), 0, i, raw))
-                                .collect(Collectors.toCollection(ArrayList::new)))
-                        .collect(Collectors.toCollection(ArrayList::new));
-
-                // Transpose the features
-                final List<PredictionOutput> predictionOutputs = new ArrayList<>();
-                for (int batch = 0; batch < perTensorSecondShape.get(0); batch++) {
-                    final List<Output> batchOutputs = new ArrayList<>();
-                    for (int outputIndex = 0; outputIndex < tensors.size(); outputIndex++) {
-                        batchOutputs.add(outputs.get(outputIndex).get(batch));
+                    if (secondDimMatch) {
+                        logger.warn(String.format(
+                                "Output tensor(s) have ambiguous shape: %s. " +
+                                        "The input payload contained %d datapoints. However, both the first dimension and the " +
+                                        "product of subsequent dimensions for all inbound output tensors are also of size %d. " +
+                                        "TrustyAI will assume that the first dimension is the batch dimension, and will parse this payload " +
+                                        "as %d outputs of size %d.",
+                                perTensorShapes, enforcedFirstDimension, enforcedFirstDimension, enforcedFirstDimension, nOutputs));
                     }
-                    predictionOutputs.add(new PredictionOutput(batchOutputs));
+                    return outputs;
+                } else if (secondDimMatch) {
+                    List<List<Output>> outputs = tensors.stream()
+                            .map(tensor -> IntStream.range(0, perTensorSecondShape.get(0))
+                                    .mapToObj(i -> TensorConverterUtils.rawHandlerSingle(data, tensor, tensor.getName(), 0, i, raw))
+                                    .collect(Collectors.toCollection(ArrayList::new)))
+                            .collect(Collectors.toCollection(ArrayList::new));
+
+                    // Transpose the features
+                    final List<PredictionOutput> predictionOutputs = new ArrayList<>();
+                    for (int batch = 0; batch < perTensorSecondShape.get(0); batch++) {
+                        final List<Output> batchOutputs = new ArrayList<>();
+                        for (int outputIndex = 0; outputIndex < tensors.size(); outputIndex++) {
+                            batchOutputs.add(outputs.get(outputIndex).get(batch));
+                        }
+                        predictionOutputs.add(new PredictionOutput(batchOutputs));
+                    }
+                    return predictionOutputs;
+                } else {
+                    throw new IllegalArgumentException("Tensor shapes=" + perTensorShapes + " were expected to match the input count=" + enforcedFirstDimension + " along either the first or second dimension, but does not.");
                 }
-                return predictionOutputs;
             } else {
-                throw new IllegalArgumentException("Tensor shapes: " + perTensorShapes + " are not compatible with number of inputs " + enforcedFirstDimension);
+                //tensor case
+                if (tensors.size() == enforcedFirstDimension) {
+                    List<PredictionOutput> predictionOutputs = new ArrayList<>();
+                    for (int batch = 0; batch < tensors.size(); batch++) {
+                        List<Output> os = new ArrayList<>();
+                        os.add(TensorConverterUtils.rawHandlerTrustyAITensor(data, tensors.get(batch), tensors.get(batch).getName(), 0, raw));
+                        predictionOutputs.add(new PredictionOutput(os));
+                    }
+                    return predictionOutputs;
+                } else {
+                    throw new IllegalArgumentException("Tensor count=" + tensors.size() + " was expected to match the input count=" + enforcedFirstDimension + ", but does not.");
+                }
             }
 
         } else {

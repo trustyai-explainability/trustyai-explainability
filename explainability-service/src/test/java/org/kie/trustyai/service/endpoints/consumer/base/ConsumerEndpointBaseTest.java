@@ -403,7 +403,7 @@ abstract class ConsumerEndpointBaseTest {
             for (int j = 0; j < shape[1] * shape[2] * shape[3]; j++) {
                 double val = -i - j / 10_000.;
                 outputContentsArray[i][j] = val;
-                inputContents = outputContents.addFp64Contents(val);
+                outputContents.addFp64Contents(val);
                 idx++;
             }
         }
@@ -436,6 +436,212 @@ abstract class ConsumerEndpointBaseTest {
 
         // check that the tensor is correctly retrieved
 
+        for (int i = 0; i < BATCH_SIZE; i++) {
+            Tensor<Double> nthInputTensor = (Tensor<Double>) storedDf.getValue(i, 0).getUnderlyingObject();
+            assertArrayEquals(new int[] { 3, 28, 28 }, nthInputTensor.getDimensions());
+            assertArrayEquals(inputContentsArray[i], nthInputTensor.getData());
+
+            Tensor<Double> nthOutputTensor = (Tensor<Double>) storedDf.getValue(i, 1).getUnderlyingObject();
+            assertArrayEquals(new int[] { 3, 28, 28 }, nthOutputTensor.getDimensions());
+            assertArrayEquals(outputContentsArray[i], nthOutputTensor.getData());
+        }
+    }
+
+    // n input images as tensors (pd codec), one single batch of output images (np codec)
+    @Test
+    void testConsumeImagePDInputNPOutput() {
+        int[] shape = { BATCH_SIZE, 3, 28, 28 };
+
+        //build input image ==========================
+        final Random random = new Random(0);
+        Double[][] inputContentsArray = new Double[shape[0]][shape[1] * shape[2] * shape[3]];
+        int idx = 0;
+
+        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
+        for (int i = 0; i < shape[0]; i++) {
+            InferTensorContents.Builder inputContents = InferTensorContents.newBuilder();
+
+            for (int j = 0; j < shape[1] * shape[2] * shape[3]; j++) {
+                double val = i + j / 10_000.;
+                inputContentsArray[i][j] = val;
+                inputContents.addFp64Contents(val);
+                idx++;
+            }
+
+            ModelInferRequest.InferInputTensor requestTensor = ModelInferRequest.InferInputTensor.newBuilder()
+                    .setDatatype("FP64")
+                    .setName("input")
+                    .addShape(1)
+                    .addShape(shape[1])
+                    .addShape(shape[2])
+                    .addShape(shape[3])
+                    .setContents(inputContents).build();
+            request.addInputs(requestTensor);
+        }
+
+        request.setModelName(MODEL_ID);
+        request.setModelVersion(MODEL_VERSION);
+
+        final String id = UUID.randomUUID().toString();
+        InferencePartialPayload requestPayload = new InferencePartialPayload();
+        requestPayload.setData(Base64.getEncoder().encodeToString(request.build().toByteArray()));
+        requestPayload.setId(id);
+        requestPayload.setKind(PartialKind.request);
+        requestPayload.setModelId(MODEL_ID);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestPayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+        //build output image ==========================
+        InferTensorContents.Builder outputContents = InferTensorContents.newBuilder();
+        Double[][] outputContentsArray = new Double[shape[0]][shape[1] * shape[2] * shape[3]];
+        idx = 0;
+        for (int i = 0; i < shape[0]; i++) {
+            for (int j = 0; j < shape[1] * shape[2] * shape[3]; j++) {
+                double val = -i - j / 10_000.;
+                outputContentsArray[i][j] = val;
+                outputContents.addFp64Contents(val);
+                idx++;
+            }
+        }
+        ModelInferResponse.InferOutputTensor responseTensor = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("output")
+                .addShape(shape[0])
+                .addShape(shape[1])
+                .addShape(shape[2])
+                .addShape(shape[3])
+                .setContents(outputContents).build();
+
+        final ModelInferResponse.Builder response = ModelInferResponse.newBuilder().addOutputs(responseTensor);
+        InferencePartialPayload responsePayload = new InferencePartialPayload();
+        responsePayload.setData(Base64.getEncoder().encodeToString(response.build().toByteArray()));
+        responsePayload.setId(id);
+        responsePayload.setKind(PartialKind.response);
+        responsePayload.setModelId(MODEL_ID);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(responsePayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+        final Dataframe storedDf = datasource.get().getDataframe(MODEL_ID);
+        assertEquals(2, storedDf.getColumnDimension());
+        assertEquals(BATCH_SIZE, storedDf.getRowDimension());
+
+        // check that the tensor is correctly retrieved
+
+        for (int i = 0; i < BATCH_SIZE; i++) {
+            Tensor<Double> nthInputTensor = (Tensor<Double>) storedDf.getValue(i, 0).getUnderlyingObject();
+            assertArrayEquals(new int[] { 3, 28, 28 }, nthInputTensor.getDimensions());
+            assertArrayEquals(inputContentsArray[i], nthInputTensor.getData());
+
+            Tensor<Double> nthOutputTensor = (Tensor<Double>) storedDf.getValue(i, 1).getUnderlyingObject();
+            assertArrayEquals(new int[] { 3, 28, 28 }, nthOutputTensor.getDimensions());
+            assertArrayEquals(outputContentsArray[i], nthOutputTensor.getData());
+        }
+    }
+
+    @Test
+    void testConsumeImagePDInputPDOutput() {
+        int[] shape = { BATCH_SIZE, 3, 28, 28 };
+
+        //build input image ==========================
+        final Random random = new Random(0);
+        Double[][] inputContentsArray = new Double[shape[0]][shape[1] * shape[2] * shape[3]];
+        int idx = 0;
+
+        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
+        for (int i = 0; i < shape[0]; i++) {
+            InferTensorContents.Builder inputContents = InferTensorContents.newBuilder();
+
+            for (int j = 0; j < shape[1] * shape[2] * shape[3]; j++) {
+                double val = i + j / 10_000.;
+                inputContentsArray[i][j] = val;
+                inputContents.addFp64Contents(val);
+                idx++;
+            }
+
+            ModelInferRequest.InferInputTensor requestTensor = ModelInferRequest.InferInputTensor.newBuilder()
+                    .setDatatype("FP64")
+                    .setName("input")
+                    .addShape(1)
+                    .addShape(shape[1])
+                    .addShape(shape[2])
+                    .addShape(shape[3])
+                    .setContents(inputContents).build();
+            request.addInputs(requestTensor);
+        }
+
+        request.setModelName(MODEL_ID);
+        request.setModelVersion(MODEL_VERSION);
+
+        final String id = UUID.randomUUID().toString();
+        InferencePartialPayload requestPayload = new InferencePartialPayload();
+        requestPayload.setData(Base64.getEncoder().encodeToString(request.build().toByteArray()));
+        requestPayload.setId(id);
+        requestPayload.setKind(PartialKind.request);
+        requestPayload.setModelId(MODEL_ID);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(requestPayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+        //build output image ==========================
+        final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
+        Double[][] outputContentsArray = new Double[shape[0]][shape[1] * shape[2] * shape[3]];
+        idx = 0;
+        for (int i = 0; i < shape[0]; i++) {
+            InferTensorContents.Builder outputContents = InferTensorContents.newBuilder();
+            for (int j = 0; j < shape[1] * shape[2] * shape[3]; j++) {
+                double val = -i - j / 10_000.;
+                outputContentsArray[i][j] = val;
+                outputContents.addFp64Contents(val);
+                idx++;
+            }
+
+            ModelInferResponse.InferOutputTensor responseTensor = ModelInferResponse.InferOutputTensor.newBuilder()
+                    .setDatatype("FP64")
+                    .setName("output")
+                    .addShape(1)
+                    .addShape(shape[1])
+                    .addShape(shape[2])
+                    .addShape(shape[3])
+                    .setContents(outputContents).build();
+            response.addOutputs(responseTensor);
+        }
+
+        InferencePartialPayload responsePayload = new InferencePartialPayload();
+        responsePayload.setData(Base64.getEncoder().encodeToString(response.build().toByteArray()));
+        responsePayload.setId(id);
+        responsePayload.setKind(PartialKind.response);
+        responsePayload.setModelId(MODEL_ID);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(responsePayload)
+                .when().post()
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(is(""));
+
+        final Dataframe storedDf = datasource.get().getDataframe(MODEL_ID);
+        assertEquals(2, storedDf.getColumnDimension());
+        assertEquals(BATCH_SIZE, storedDf.getRowDimension());
+
+        // check that the tensor is correctly retrieved
         for (int i = 0; i < BATCH_SIZE; i++) {
             Tensor<Double> nthInputTensor = (Tensor<Double>) storedDf.getValue(i, 0).getUnderlyingObject();
             assertArrayEquals(new int[] { 3, 28, 28 }, nthInputTensor.getDimensions());
