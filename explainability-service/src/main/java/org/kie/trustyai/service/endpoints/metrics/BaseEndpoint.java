@@ -34,7 +34,8 @@ import jakarta.ws.rs.core.Response;
 
 public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     public static String REQUEST_ID_NOT_FOUND_FMT = "Error: Scheduled requestId=%s not found";
-    public static String NO_REQUEST_ID_PROVIDED_FMT = "Scheduled requestId in DELETE payload was null. This can occur if the provided requestId was not a valid UUID, please check the parameters of the DELETE payload.";
+    public static String NO_REQUEST_ID_PROVIDED_FMT =
+            "Scheduled requestId in DELETE payload was null. This can occur if the provided requestId was not a valid UUID, please check the parameters of the DELETE payload.";
 
     protected static final Logger LOG = Logger.getLogger(BaseEndpoint.class);
 
