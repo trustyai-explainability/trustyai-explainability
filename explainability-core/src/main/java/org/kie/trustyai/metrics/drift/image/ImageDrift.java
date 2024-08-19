@@ -2,6 +2,7 @@ package org.kie.trustyai.metrics.drift.image;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.kie.trustyai.explainability.model.Type;
@@ -16,7 +17,7 @@ import org.kie.trustyai.metrics.drift.utils.KLDivergence;
 public class ImageDrift {
     /**
      * Converts an image of type BufferedImage to double[][][]
-     * 
+     *
      * @param image An image of type BufferedImage
      */
     private static double[][][] convertToTensor3d(BufferedImage image) {
@@ -36,7 +37,7 @@ public class ImageDrift {
 
     /**
      * Takes as input a list of images and converts them into a list of 3d arrays.
-     * 
+     *
      * @param images A list of images of data type BufferedImage or double[][][]
      */
     public static List<double[][][]> preprocessImages(List<?> images) {
@@ -56,7 +57,7 @@ public class ImageDrift {
 
     /**
      * Takes as input of list of images and converts them into a dataframe.
-     * 
+     *
      * @param images A list of images of data type double[][][]
      */
     public static Dataframe getDataframe(List<double[][][]> images) {
@@ -89,6 +90,49 @@ public class ImageDrift {
         return dataframe;
     }
 
+    /** Calculates baseline JS divergence thresholds for reference images through cross validation
+     *
+     * @param references List of reference images
+     * @param numCV The number of cross validation sets
+    */
+    public static HashMap<String, Double> getThreshold(List<double[][][]> references, int numCV){
+        // divide into CV sets
+        HashMap<String, Double> thresholds = new HashMap<String, Double>();
+        double minThreshold = 1.0;
+        double avgThreshold = 0;
+        double maxThreshold = 0;
+
+        int cvSize = references.size() / numCV;
+        for (int i = 0; i < references.size(); i++){
+            // index references to get current CV set
+            List<double[][][]> cvSet = references.subList(i, i + cvSize);
+            // divide in half into reference and hypothesis set
+            int index = cvSet.size() / 2;
+            List<double[][][]> reference = cvSet.subList(0, index);
+            List<double[][][]> hypothesis = cvSet.subList(index, cvSet.size());
+            // calculate JS divergence between reference and hypothesis
+            Dataframe dfRef = getDataframe(reference);
+            Dataframe dfHyp = getDataframe(hypothesis);
+            for (int channel = 0; channel < 3; channel++) {
+            avgThreshold += jensonShannonDivergence(
+                dfRef.getColumn(channel).stream().mapToDouble(Value::asNumber).toArray(),
+                dfHyp.getColumn(channel).stream().mapToDouble(Value::asNumber).toArray());
+            };
+            avgThreshold /= 3;
+            if (avgThreshold > maxThreshold){
+                maxThreshold = avgThreshold;
+            } else if (avgThreshold < minThreshold){
+                minThreshold = avgThreshold;
+            } else {
+                avgThreshold /= numCV;
+            }
+        }
+        thresholds.put("Average", avgThreshold);
+        thresholds.put("Min", minThreshold);
+        thresholds.put("Max", maxThreshold);
+        return thresholds;
+    }
+
     /**
      * Calculates the Jenson-Shannon divergence between two pixel arrays.
      *
@@ -109,9 +153,6 @@ public class ImageDrift {
     /**
      * Calculates the average Jensen-Shannon divergence over RGB values between a reference and hypothesis image.
      * If it is above the threshold, the hypothesis image is said to be different than the reference image.
-     * 
-     * @param <T>
-     * @param <T>
      *
      * @param reference The reference image.
      * @param hypothesis The hypothesis image.
