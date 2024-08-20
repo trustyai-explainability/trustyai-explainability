@@ -1,11 +1,11 @@
-package org.kie.trustyai.metrics.drift.image;
+package org.kie.trustyai.metrics.drift.jensonshannon;
 
-public class ImageDriftResult {
+public class JensonShannonDriftResult {
     private final double jsStat;
     private final double threshold;
     private final boolean reject;
 
-    public ImageDriftResult(double jsStat, double threshold, boolean reject) {
+    public JensonShannonDriftResult(double jsStat, double threshold, boolean reject) {
         this.jsStat = jsStat;
         this.threshold = threshold;
         this.reject = reject;
@@ -25,8 +25,8 @@ public class ImageDriftResult {
 
     @Override
     public String toString() {
-        return "ImageDriftResult{" +
-                "jsStat" + jsStat +
+        return "JensonShannonDriftResult{" +
+                "jsStat=" + jsStat +
                 ", threshold=" + threshold +
                 ", reject=" + reject +
                 "}";

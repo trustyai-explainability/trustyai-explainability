@@ -137,6 +137,57 @@ public class Tensor<T> {
         return new Tensor<>(slicedData, slicedDimensionsArr);
     }
 
+    // == COMBINING ====================================================================================================
+    // combine a list of tensors along a new first dimension
+    public static <T> Tensor<T> stack(Tensor<T>... tensors) {
+        int[] firstTensorDimensions = tensors[0].getDimensions();
+
+        // check dimensional compatibility
+        if (!Arrays.stream(tensors).allMatch(t -> Arrays.equals(t.getDimensions(), firstTensorDimensions))) {
+            List<String> tensorDims = Arrays.stream(tensors).map(t -> Arrays.toString(t.getDimensions())).toList();
+            throw new IllegalArgumentException("Tensor dimensions do not all match: " + tensorDims);
+        }
+
+        int[] newDimensions = new int[tensors[0].getDimension() + 1];
+        newDimensions[0] = tensors.length;
+        for (int i = 1; i < newDimensions.length; i++) {
+            newDimensions[i] = firstTensorDimensions[i - 1];
+        }
+        T[] dataArr = (T[]) Array.newInstance(tensors[0].getDatatype(), vectorProduct(newDimensions));
+        int stride = vectorProduct(firstTensorDimensions);
+        for (int tensor = 0; tensor < tensors.length; tensor++) {
+            System.arraycopy(tensors[tensor].getData(), 0, dataArr, stride * tensor, stride);
+        }
+        return new Tensor<>(dataArr, newDimensions);
+    }
+
+    // combine a list of tensors along their existing first dimension
+    public static <T> Tensor<T> concatenate(Tensor<T>... tensors) {
+        int[] firstTensorDimensions = tensors[0].getDimensions();
+
+        // check dimensional compatibility
+        if (!Arrays.stream(tensors).allMatch(t -> Arrays.equals(t.getDimensions(), firstTensorDimensions))) {
+            List<String> tensorDims = Arrays.stream(tensors).map(t -> Arrays.toString(t.getDimensions())).toList();
+            throw new IllegalArgumentException("Tensor dimensions do not all match: " + tensorDims);
+        }
+
+        int[] newDimensions = new int[tensors[0].getDimension()];
+        for (int i = 0; i < newDimensions.length; i++) {
+            if (i == 0) {
+                newDimensions[i] = firstTensorDimensions[i] * tensors.length;
+            } else {
+                newDimensions[i] = firstTensorDimensions[i];
+            }
+        }
+        T[] dataArr = (T[]) Array.newInstance(tensors[0].getDatatype(), vectorProduct(newDimensions));
+        int stride = vectorProduct(firstTensorDimensions);
+        for (int tensor = 0; tensor < tensors.length; tensor++) {
+            System.arraycopy(tensors[tensor].getData(), 0, dataArr, stride * tensor, stride);
+        }
+        return new Tensor<>(dataArr, newDimensions);
+
+    }
+
     // == UTILITY ======================================================================================================
     // get the product of all elements within a vector
     private static int vectorProduct(int[] vector) {

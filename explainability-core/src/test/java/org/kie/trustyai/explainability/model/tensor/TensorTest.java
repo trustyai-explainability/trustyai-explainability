@@ -1,5 +1,6 @@
 package org.kie.trustyai.explainability.model.tensor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -148,6 +149,43 @@ class TensorTest {
 
         assertEquals("0,0,0,0,0", singleElement.getData()[0]);
         assertArrayEquals(new int[] {}, singleElement.getDimensions());
+    }
+
+    @Test
+    @DisplayName("Stacking tensors works as expected")
+    void testStack() {
+        int[] dimensions = { 5, 4, 3 };
+        List<Tensor<String>> tensors = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            List<?> data = generate(dimensions, "stack-" + i);
+            tensors.add(Tensor.fromList(data));
+        }
+
+        //single element slice
+        Tensor<String> stacked = Tensor.stack(tensors.toArray(new Tensor[0]));
+        assertArrayEquals(new int[] { 10, 5, 4, 3 }, stacked.getDimensions());
+        for (int i = 0; i < 10; i++) {
+            assertEquals(tensors.get(i), stacked.slice(Slice.at(i)));
+        }
+    }
+
+    @Test
+    @DisplayName("Concatenating tensors works as expected")
+    void testConcatenate() {
+        int[] dimensions = { 5, 4, 3 };
+        List<Tensor<String>> tensors = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            List<?> data = generate(dimensions, "stack-" + i);
+            tensors.add(Tensor.fromList(data));
+        }
+
+        //single element slice
+        Tensor<String> stacked = Tensor.concatenate(tensors.toArray(new Tensor[0]));
+        assertArrayEquals(new int[] { 50, 4, 3 }, stacked.getDimensions());
+
+        for (int i = 0; i < 10; i++) {
+            assertEquals(tensors.get(i), stacked.slice(Slice.between(i * 5, i * 5 + 5)));
+        }
     }
 
     @Test
