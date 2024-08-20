@@ -4,17 +4,20 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.tensor.Tensor;
 import org.kie.trustyai.explainability.model.tensor.TensorFactory;
-import org.kie.trustyai.explainability.utils.BufferedImageUtils;
+import org.kie.trustyai.explainability.utils.ImageUtils;
 import org.kie.trustyai.metrics.utils.ArrayGenerators;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JensonShannonTest {
+    Random rng = new Random(0L);
 
     // Creates test image
     public List<BufferedImage> generateImage(int width, int height) {
@@ -39,8 +42,8 @@ public class JensonShannonTest {
         List<BufferedImage> imagesRef = generateImage(100, 100);
         List<BufferedImage> imagesHyp = generateImage(100, 100);
 
-        Tensor<Double> ref = BufferedImageUtils.preprocessImages(imagesRef);
-        Tensor<Double> hyp = BufferedImageUtils.preprocessImages(imagesRef);
+        Tensor<Double> ref = ImageUtils.preprocessImages(imagesRef);
+        Tensor<Double> hyp = ImageUtils.preprocessImages(imagesRef);
         JensonShannonDriftResult result = JensonShannon.calculate(ref, hyp, 0.5);
         assertEquals(0.0, result.getjsStat());
         assertFalse(result.isReject());
@@ -54,8 +57,11 @@ public class JensonShannonTest {
         List<Double[][][]> imagesHyp = new ArrayList<Double[][][]>();
         imagesHyp.add(tensor3d);
 
-        Tensor<Double> ref = BufferedImageUtils.preprocessImages(imagesRef);
-        Tensor<Double> hyp = BufferedImageUtils.preprocessImages(imagesHyp);
+        Tensor<Double> ref = ImageUtils.preprocessImages(imagesRef);
+        int nEntries = ref.getnEntries();
+        ref = ref.map(d -> d / nEntries);
+        Tensor<Double> hyp = ImageUtils.preprocessImages(imagesHyp).map(d -> d / nEntries);
+        ;
         JensonShannonDriftResult result = JensonShannon.calculate(ref, hyp, 0.5);
         assertEquals(0.0, result.getjsStat());
         assertFalse(result.isReject());
@@ -68,8 +74,8 @@ public class JensonShannonTest {
         List<Double[][][]> imagesHyp = new ArrayList<Double[][][]>();
         imagesHyp.add(tensor3d);
 
-        Tensor<Double> ref = BufferedImageUtils.preprocessImages(imagesRef);
-        Tensor<Double> hyp = BufferedImageUtils.preprocessImages(imagesRef);
+        Tensor<Double> ref = ImageUtils.preprocessImages(imagesRef);
+        Tensor<Double> hyp = ImageUtils.preprocessImages(imagesRef);
         JensonShannonDriftResult result = JensonShannon.calculate(ref, hyp, 0.5);
         assertNotNull(result);
     }
@@ -80,7 +86,9 @@ public class JensonShannonTest {
         Double[][][][] tensorHyp = ArrayGenerators.get4DDoubleArr(new int[] { 5, 6, 7, 8 });
 
         Tensor<Double> ref = TensorFactory.fromArray(tensorRef);
-        Tensor<Double> hyp = TensorFactory.fromArray(tensorHyp);
+        int nEntries = ref.getnEntries();
+        ref = ref.map(d -> d / nEntries);
+        Tensor<Double> hyp = TensorFactory.fromArray(tensorHyp).map(d -> d / nEntries);
 
         JensonShannonDriftResult result = JensonShannon.calculate(ref, hyp, 0.5);
         assertEquals(0.0, result.getjsStat());
@@ -110,13 +118,66 @@ public class JensonShannonTest {
     }
 
     @Test
-    void testRuntime() {
-        Double[][][][] tensorRef = ArrayGenerators.get4DDoubleArr(new int[] { 64, 3, 256, 256 });
-        Double[][][][] tensorHyp = ArrayGenerators.get4DDoubleArr(new int[] { 64, 3, 256, 256 });
+    void testBaseline() {
+        Double[][][][] tensorRef = ArrayGenerators.get4DDoubleArr(new int[] { 64, 3, 32, 32 });
+        Tensor<Double> ref = TensorFactory.fromArray(tensorRef);
+        int nEntries = ref.getnEntries();
+        ref = ref.map(d -> d / nEntries);
+        rng = new Random(0L);
+        JensonShannonBaseline jsb = JensonShannonBaseline.calculate(ref, 100, 32, rng, false);
+
+        assertTrue(jsb.getAvgThreshold() <= jsb.getMaxThreshold());
+        assertTrue(jsb.getAvgThreshold() >= jsb.getMinThreshold());
+        assertTrue(5000 < jsb.getAvgThreshold() && jsb.getAvgThreshold() < 5100);
+    }
+
+    @Test
+    void testBaselineNormalized() {
+        Double[][][][] tensorRef = ArrayGenerators.get4DDoubleArr(new int[] { 64, 3, 32, 32 });
+        Tensor<Double> ref = TensorFactory.fromArray(tensorRef);
+        int nEntries = ref.getnEntries();
+        ref = ref.map(d -> d / nEntries);
+        rng = new Random(0L);
+        JensonShannonBaseline jsb = JensonShannonBaseline.calculate(ref, 100, 32, rng, true);
+
+        assertTrue(jsb.getAvgThreshold() <= jsb.getMaxThreshold());
+        assertTrue(jsb.getAvgThreshold() >= jsb.getMinThreshold());
+        assertTrue(.05 < jsb.getAvgThreshold() && jsb.getAvgThreshold() < .055);
+    }
+
+    @Test
+    void testLargeImage() {
+        Double[][][][] tensorRef = ArrayGenerators.get4DDoubleArr(new int[] { 64, 3, 128, 128 });
+        Double[][][][] tensorHyp = ArrayGenerators.get4DDoubleArr(new int[] { 64, 3, 128, 128 });
 
         Tensor<Double> ref = TensorFactory.fromArray(tensorRef);
-        Tensor<Double> hyp = TensorFactory.fromArray(tensorHyp);
+        int nEntries = ref.getnEntries();
+        ref = ref.map(d -> d / nEntries);
+        Tensor<Double> hyp = TensorFactory.fromArray(tensorHyp).map(d -> d / nEntries);
 
-        JensonShannon.calculate(ref, hyp, 0.5);
+        rng = new Random(0L);
+        JensonShannonBaseline jsb = JensonShannonBaseline.calculate(ref, 10, 32, rng, true);
+        JensonShannonDriftResult jsdr = JensonShannon.calculate(ref, hyp, jsb.getMaxThreshold() * 1.5, true);
+        assertFalse(jsdr.isReject());
+    }
+
+    @Test
+    void testLargeImagePerChannel() {
+        Double[][][][] tensorRef = ArrayGenerators.get4DDoubleArr(new int[] { 64, 3, 128, 128 });
+        Double[][][][] tensorHyp = ArrayGenerators.get4DDoubleArr(new int[] { 64, 3, 128, 128 });
+
+        Tensor<Double> ref = TensorFactory.fromArray(tensorRef);
+        int nEntries = ref.getnEntries();
+        ref = ref.map(d -> d / nEntries);
+        Tensor<Double> hyp = TensorFactory.fromArray(tensorHyp).map(d -> d / nEntries);
+
+        rng = new Random(0L);
+        JensonShannonBaseline[] jensonShannonBaselines = JensonShannonBaseline.calculatePerChannel(ref, 10, 32, rng, true);
+        double[] perChannelThresholds = Arrays.stream(jensonShannonBaselines).mapToDouble(j -> j.getMaxThreshold() * 1.5).toArray();
+        JensonShannonDriftResult[] jsdr = JensonShannon.calculatePerChannel(ref, hyp, perChannelThresholds, true);
+
+        for (int i = 0; i < ref.getDimensions(1); i++) {
+            assertFalse(jsdr[i].isReject());
+        }
     }
 }

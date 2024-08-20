@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Tensor<T> {
@@ -63,6 +64,74 @@ public class Tensor<T> {
      **/
     public T getElement(int... indices) {
         return this.data[getLinearIndex(indices)];
+    }
+
+    /**
+     * Retrieve a single value from the n-dimensional tensor, using a linear index
+     *
+     * @param index : the linear index of the value to retrieve
+     *
+     * @returns the value at the provided linear index
+     **/
+    public T getLinearElement(int index) {
+        return this.data[index];
+    }
+
+    /**
+     * Retrieve a single slice from the first dimension of the tensor, equivalent to Numpy's array[i] notation.
+     * This is *massively* faster than tensor.slice(Slice.at(index))
+     *
+     * @param index: the index to slice at along the first dimension
+     *
+     * @returns the sliced tensor
+     **/
+    public Tensor<T> get(int index) {
+        int remainingDimensions = vectorProduct(getDimensions(), 1);
+        T[] slicedData = Arrays.copyOfRange(data, index * remainingDimensions, index * remainingDimensions + remainingDimensions);
+        int[] newDimensions = Arrays.copyOfRange(getDimensions(), 1, dimension);
+        return new Tensor<>(slicedData, newDimensions);
+    }
+
+    /**
+     * Retrieve a set of slices from the first dimension of the tensor, equivalent to Numpy's array[idxs] notation.
+     *
+     * @param indices: the indeces of the slice
+     *
+     * @returns the sliced tensor
+     **/
+    public Tensor<T> get(List<Integer> indices) {
+        int remainingDimensions = vectorProduct(getDimensions(), 1);
+        T[] slicedData = (T[]) Array.newInstance(datatype, indices.size() * remainingDimensions);
+
+        for (int i = 0; i < indices.size(); i++) {
+            System.arraycopy(data, indices.get(i) * remainingDimensions, slicedData, remainingDimensions * i, remainingDimensions);
+        }
+        int[] newDimensions = Arrays.copyOfRange(getDimensions(), 0, dimension);
+        newDimensions[0] = indices.size();
+        return new Tensor<>(slicedData, newDimensions);
+    }
+
+    /**
+     * Retrieve a single slice from the second dimension of the tensor, equivalent to Numpy's array[:,i] notation
+     * This is *massively* faster than tensor.slice(Slice.all(), Slice.at(index))
+     *
+     * @param index: the index to slice at along the second dimension
+     *
+     * @returns the sliced tensor
+     **/
+    public Tensor<T> getFromSecondAxis(int index) {
+        int firstDimSize = vectorProduct(getDimensions(), 1);
+        int secondDimSize = firstDimSize / getDimensions(1);
+        T[] slicedData = (T[]) Array.newInstance(datatype, dimensions[0] * secondDimSize);
+
+        for (int i = 0; i < dimensions[0]; i++) {
+            System.arraycopy(data, i * firstDimSize + index * secondDimSize, slicedData, secondDimSize * i, secondDimSize);
+        }
+
+        int[] newDimensions = new int[dimension - 1];
+        newDimensions[0] = dimensions[0];
+        System.arraycopy(dimensions, 2, newDimensions, 1, dimension - 2);
+        return new Tensor<>(slicedData, newDimensions);
     }
 
     /**
@@ -271,6 +340,37 @@ public class Tensor<T> {
      **/
     public List toNestedList() {
         return nestList(Arrays.stream(this.data).collect(Collectors.toList()), dimensions);
+    }
+
+    // == FUNCTIONAL ===================================================================================================
+    /**
+     * Apply a function to every item in the tensor.
+     *
+     * @param f: the function to apply to each element
+     *
+     * @returns the resultant tensor
+     **/
+    public Tensor<T> map(Function<T, T> f) {
+        T[] dataArr = (T[]) Array.newInstance(datatype, nEntries);
+        for (int i = 0; i < nEntries; i++) {
+            dataArr[i] = f.apply(this.data[i]);
+        }
+        return new Tensor<>(dataArr, dimensions);
+    }
+
+    /**
+     * Apply a function to every item in the tensor. This modifies the tensor in-place.
+     *
+     * @param f: the function to apply to each element
+     * @param newDataArray: the array to fill with the result of the mapping. This will be used as the output tensor's data array.
+     *
+     * @returns the resultant tensor
+     **/
+    public <U> Tensor<U> map(Function<T, U> f, U[] newDataArray) {
+        for (int i = 0; i < nEntries; i++) {
+            newDataArray[i] = f.apply(this.data[i]);
+        }
+        return new Tensor<>(newDataArray, dimensions);
     }
 
     // == I/O ==========================================================================================================

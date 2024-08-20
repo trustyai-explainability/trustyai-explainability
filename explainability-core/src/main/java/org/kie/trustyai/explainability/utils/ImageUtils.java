@@ -7,7 +7,7 @@ import java.util.List;
 import org.kie.trustyai.explainability.model.tensor.Tensor;
 import org.kie.trustyai.explainability.model.tensor.TensorFactory;
 
-public class BufferedImageUtils {
+public class ImageUtils {
     /**
      * Converts an image of type BufferedImage to double[][][]
      *
@@ -38,7 +38,7 @@ public class BufferedImageUtils {
         for (Object image : images) {
             if (image instanceof BufferedImage) {
                 BufferedImage bufferedImage = (BufferedImage) image;
-                preprocessedImgs.add(BufferedImageUtils.convertToTensor3d(bufferedImage));
+                preprocessedImgs.add(ImageUtils.convertToTensor3d(bufferedImage));
             } else if (image instanceof Tensor<?>) {
                 Tensor<?> tensor = (Tensor<?>) image;
                 preprocessedImgs.add(tensor);
