@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.drift.jensonshannon;
+package org.kie.trustyai.metrics.drift.jensenshannon;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -16,7 +16,7 @@ import org.kie.trustyai.metrics.utils.ArrayGenerators;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class JensonShannonTest {
+public class JensenShannonTest {
     Random rng = new Random(0L);
 
     // Creates test image
@@ -40,11 +40,10 @@ public class JensonShannonTest {
     @Test
     void testSameBufferedImages() {
         List<BufferedImage> imagesRef = generateImage(100, 100);
-        List<BufferedImage> imagesHyp = generateImage(100, 100);
 
         Tensor<Double> ref = ImageUtils.preprocessImages(imagesRef);
         Tensor<Double> hyp = ImageUtils.preprocessImages(imagesRef);
-        JensonShannonDriftResult result = JensonShannon.calculate(ref, hyp, 0.5);
+        JensenShannonDriftResult result = JensenShannon.calculate(ref, hyp, 0.5);
         assertEquals(0.0, result.getjsStat());
         assertFalse(result.isReject());
     }
@@ -62,7 +61,7 @@ public class JensonShannonTest {
         ref = ref.map(d -> d / nEntries);
         Tensor<Double> hyp = ImageUtils.preprocessImages(imagesHyp).map(d -> d / nEntries);
         ;
-        JensonShannonDriftResult result = JensonShannon.calculate(ref, hyp, 0.5);
+        JensenShannonDriftResult result = JensenShannon.calculate(ref, hyp, 0.5);
         assertEquals(0.0, result.getjsStat());
         assertFalse(result.isReject());
     }
@@ -76,7 +75,7 @@ public class JensonShannonTest {
 
         Tensor<Double> ref = ImageUtils.preprocessImages(imagesRef);
         Tensor<Double> hyp = ImageUtils.preprocessImages(imagesRef);
-        JensonShannonDriftResult result = JensonShannon.calculate(ref, hyp, 0.5);
+        JensenShannonDriftResult result = JensenShannon.calculate(ref, hyp, 0.5);
         assertNotNull(result);
     }
 
@@ -90,7 +89,7 @@ public class JensonShannonTest {
         ref = ref.map(d -> d / nEntries);
         Tensor<Double> hyp = TensorFactory.fromArray(tensorHyp).map(d -> d / nEntries);
 
-        JensonShannonDriftResult result = JensonShannon.calculate(ref, hyp, 0.5);
+        JensenShannonDriftResult result = JensenShannon.calculate(ref, hyp, 0.5);
         assertEquals(0.0, result.getjsStat());
         assertFalse(result.isReject());
     }
@@ -103,7 +102,7 @@ public class JensonShannonTest {
         Tensor<Double> ref = TensorFactory.fromArray(tensorRef);
         Tensor<Double> hyp = TensorFactory.fromArray(tensorHyp);
 
-        assertThrows(IllegalArgumentException.class, () -> JensonShannon.calculate(ref, hyp, 0.5));
+        assertThrows(IllegalArgumentException.class, () -> JensenShannon.calculate(ref, hyp, 0.5));
     }
 
     @Test
@@ -114,7 +113,7 @@ public class JensonShannonTest {
         Tensor<Double> ref = TensorFactory.fromArray(tensorRef);
         Tensor<Double> hyp = TensorFactory.fromArray(tensorHyp);
 
-        assertThrows(IllegalArgumentException.class, () -> JensonShannon.calculate(ref, hyp, 0.5));
+        assertThrows(IllegalArgumentException.class, () -> JensenShannon.calculate(ref, hyp, 0.5));
     }
 
     @Test
@@ -124,7 +123,7 @@ public class JensonShannonTest {
         int nEntries = ref.getnEntries();
         ref = ref.map(d -> d / nEntries);
         rng = new Random(0L);
-        JensonShannonBaseline jsb = JensonShannonBaseline.calculate(ref, 100, 32, rng, false);
+        JensenShannonBaseline jsb = JensenShannonBaseline.calculate(ref, 100, 32, rng, false);
 
         assertTrue(jsb.getAvgThreshold() <= jsb.getMaxThreshold());
         assertTrue(jsb.getAvgThreshold() >= jsb.getMinThreshold());
@@ -138,7 +137,7 @@ public class JensonShannonTest {
         int nEntries = ref.getnEntries();
         ref = ref.map(d -> d / nEntries);
         rng = new Random(0L);
-        JensonShannonBaseline jsb = JensonShannonBaseline.calculate(ref, 100, 32, rng, true);
+        JensenShannonBaseline jsb = JensenShannonBaseline.calculate(ref, 100, 32, rng, true);
 
         assertTrue(jsb.getAvgThreshold() <= jsb.getMaxThreshold());
         assertTrue(jsb.getAvgThreshold() >= jsb.getMinThreshold());
@@ -156,8 +155,8 @@ public class JensonShannonTest {
         Tensor<Double> hyp = TensorFactory.fromArray(tensorHyp).map(d -> d / nEntries);
 
         rng = new Random(0L);
-        JensonShannonBaseline jsb = JensonShannonBaseline.calculate(ref, 10, 32, rng, true);
-        JensonShannonDriftResult jsdr = JensonShannon.calculate(ref, hyp, jsb.getMaxThreshold() * 1.5, true);
+        JensenShannonBaseline jsb = JensenShannonBaseline.calculate(ref, 10, 32, rng, true);
+        JensenShannonDriftResult jsdr = JensenShannon.calculate(ref, hyp, jsb.getMaxThreshold() * 1.5, true);
         assertFalse(jsdr.isReject());
     }
 
@@ -172,9 +171,9 @@ public class JensonShannonTest {
         Tensor<Double> hyp = TensorFactory.fromArray(tensorHyp).map(d -> d / nEntries);
 
         rng = new Random(0L);
-        JensonShannonBaseline[] jensonShannonBaselines = JensonShannonBaseline.calculatePerChannel(ref, 10, 32, rng, true);
-        double[] perChannelThresholds = Arrays.stream(jensonShannonBaselines).mapToDouble(j -> j.getMaxThreshold() * 1.5).toArray();
-        JensonShannonDriftResult[] jsdr = JensonShannon.calculatePerChannel(ref, hyp, perChannelThresholds, true);
+        JensenShannonBaseline[] jensenShannonBaselines = JensenShannonBaseline.calculatePerChannel(ref, 10, 32, rng, true);
+        double[] perChannelThresholds = Arrays.stream(jensenShannonBaselines).mapToDouble(j -> j.getMaxThreshold() * 1.5).toArray();
+        JensenShannonDriftResult[] jsdr = JensenShannon.calculatePerChannel(ref, hyp, perChannelThresholds, true);
 
         for (int i = 0; i < ref.getDimensions(1); i++) {
             assertFalse(jsdr[i].isReject());

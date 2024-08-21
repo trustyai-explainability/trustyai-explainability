@@ -1,4 +1,4 @@
-package org.kie.trustyai.metrics.drift.jensonshannon;
+package org.kie.trustyai.metrics.drift.jensenshannon;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,15 +10,15 @@ import java.util.stream.IntStream;
 import org.kie.trustyai.explainability.model.tensor.Tensor;
 
 /**
- * Cross-validation functions to determine a sensible baseline threshold for Jenson-Shannon
+ * Cross-validation functions to determine a sensible baseline threshold for Jensen-Shannon
  * Adapted from @christinaexyou's original algorithm
  */
-public class JensonShannonBaseline {
+public class JensenShannonBaseline {
     private double minThreshold;
     private double maxThreshold;
     private double avgThreshold;
 
-    public JensonShannonBaseline(double minThreshold, double maxThreshold, double avgThreshold) {
+    public JensenShannonBaseline(double minThreshold, double maxThreshold, double avgThreshold) {
         this.minThreshold = minThreshold;
         this.maxThreshold = maxThreshold;
         this.avgThreshold = avgThreshold;
@@ -50,7 +50,7 @@ public class JensonShannonBaseline {
 
     @Override
     public String toString() {
-        return "JensonShannonBaseline{" +
+        return "JensenShannonBaseline{" +
                 "minThreshold=" + minThreshold +
                 ", maxThreshold=" + maxThreshold +
                 ", avgThreshold=" + avgThreshold +
@@ -66,9 +66,9 @@ public class JensonShannonBaseline {
      * @param cvSize The size of each individual cross-validation sample: two randomly selected, non-overlapping samples of size=cvSize will be compared from the reference set
      * @param randomNumberGenerator: the random number generator to use when selecting random samples. Use this argument to make the baseline cross-validation deterministic.
      *
-     * @return a JensonShannonBaseline containing the min, mean, and max JS divergence over all cross-validations
+     * @return a JensenShannonBaseline containing the min, mean, and max JS divergence over all cross-validations
      */
-    public static JensonShannonBaseline calculate(Tensor<Double> references, int numCV, int cvSize, Random randomNumberGenerator) {
+    public static JensenShannonBaseline calculate(Tensor<Double> references, int numCV, int cvSize, Random randomNumberGenerator) {
         return calculate(references, numCV, cvSize, randomNumberGenerator, true);
     }
 
@@ -79,12 +79,12 @@ public class JensonShannonBaseline {
      * @param numCV The number of cross-validations to run
      * @param cvSize The size of each individual cross-validation sample: two randomly selected, non-overlapping samples of size=cvSize will be compared from the reference set
      * @param randomNumberGenerator: the random number generator to use when selecting random samples. Use this argument to make the baseline cross-validation deterministic.
-     * @param normalize: whether to normalize the Jenson-Shannon values by tensor size for each cross-validation: this should keep JS baseline results consistent regardless of the number of references
+     * @param normalize: whether to normalize the Jensen-Shannon values by tensor size for each cross-validation: this should keep JS baseline results consistent regardless of the number of references
      *        or cvSize
      *
-     * @return a JensonShannonBaseline containing the min, mean, and max JS divergence over all cross-validations
+     * @return a JensenShannonBaseline containing the min, mean, and max JS divergence over all cross-validations
      */
-    public static JensonShannonBaseline calculate(Tensor<Double> references, int numCV, int cvSize, Random randomNumberGenerator, boolean normalize) {
+    public static JensenShannonBaseline calculate(Tensor<Double> references, int numCV, int cvSize, Random randomNumberGenerator, boolean normalize) {
         double minThreshold = Double.MAX_VALUE;
         double avgThreshold = 0;
         double maxThreshold = -Double.MAX_VALUE;
@@ -102,7 +102,7 @@ public class JensonShannonBaseline {
             Collections.shuffle(idxs, randomNumberGenerator);
             Tensor<Double> slice1 = references.get(idxs.subList(0, cvSize));
             Tensor<Double> slice2 = references.get(idxs.subList(cvSize, cvSize * 2));
-            JensonShannonDriftResult jsdr = JensonShannon.calculate(slice1, slice2, .5, normalize);
+            JensenShannonDriftResult jsdr = JensenShannon.calculate(slice1, slice2, .5, normalize);
             double jsStat = jsdr.getjsStat();
             if (jsStat < minThreshold) {
                 minThreshold = jsStat;
@@ -112,7 +112,7 @@ public class JensonShannonBaseline {
             avgThreshold += jsStat;
         }
 
-        return new JensonShannonBaseline(minThreshold, maxThreshold, avgThreshold / numCV);
+        return new JensenShannonBaseline(minThreshold, maxThreshold, avgThreshold / numCV);
     }
 
     // === PER CHANNEL =================================================================================================
@@ -124,9 +124,9 @@ public class JensonShannonBaseline {
      * @param cvSize The size of each individual cross-validation sample: two randomly selected, non-overlapping samples of size=cvSize will be compared from the reference set
      * @param randomNumberGenerator: the random number generator to use when selecting random samples. Use this argument to make the baseline cross-validation deterministic.
      *
-     * @return an array of JensonShannonBaselines, where the ith value containing the min, mean, and max JS divergence of the ith channel over all cross-validations
+     * @return an array of JensenShannonBaselines, where the ith value containing the min, mean, and max JS divergence of the ith channel over all cross-validations
      */
-    public static JensonShannonBaseline[] calculatePerChannel(Tensor<Double> references, int numCV, int cvSize, Random randomNumberGenerator) {
+    public static JensenShannonBaseline[] calculatePerChannel(Tensor<Double> references, int numCV, int cvSize, Random randomNumberGenerator) {
         return calculatePerChannel(references, numCV, cvSize, randomNumberGenerator, true);
     }
 
@@ -137,12 +137,12 @@ public class JensonShannonBaseline {
      * @param numCV The number of cross-validations to run
      * @param cvSize The size of each individual cross-validation sample: two randomly selected, non-overlapping samples of size=cvSize will be compared from the reference set
      * @param randomNumberGenerator: the random number generator to use when selecting random samples. Use this argument to make the baseline cross-validation deterministic.
-     * @param normalize: whether to normalize the Jenson-Shannon values by tensor size for each cross-validation: this should keep JS baseline results consistent regardless of the number of references
+     * @param normalize: whether to normalize the Jensen-Shannon values by tensor size for each cross-validation: this should keep JS baseline results consistent regardless of the number of references
      *        or cvSize
      *
-     * @return an array of JensonShannonBaselines, where the ith value containing the min, mean, and max JS divergence of the ith channel over all cross-validations
+     * @return an array of JensenShannonBaselines, where the ith value containing the min, mean, and max JS divergence of the ith channel over all cross-validations
      */
-    public static JensonShannonBaseline[] calculatePerChannel(Tensor<Double> references, int numCV, int cvSize, Random randomNumberGenerator, boolean normalize) {
+    public static JensenShannonBaseline[] calculatePerChannel(Tensor<Double> references, int numCV, int cvSize, Random randomNumberGenerator, boolean normalize) {
         int nChannels = references.getDimensions(1);
         double[] minThreshold = new double[nChannels];
         double[] avgThreshold = new double[nChannels];
@@ -164,7 +164,7 @@ public class JensonShannonBaseline {
             Collections.shuffle(idxs, randomNumberGenerator);
             Tensor<Double> slice1 = references.get(idxs.subList(0, cvSize));
             Tensor<Double> slice2 = references.get(idxs.subList(cvSize, cvSize * 2));
-            JensonShannonDriftResult[] jsdr = JensonShannon.calculatePerChannel(slice1, slice2, dummyThresholds, normalize);
+            JensenShannonDriftResult[] jsdr = JensenShannon.calculatePerChannel(slice1, slice2, dummyThresholds, normalize);
 
             for (int channel = 0; channel < nChannels; channel++) {
                 double jsStat = jsdr[channel].getjsStat();
@@ -177,9 +177,9 @@ public class JensonShannonBaseline {
             }
         }
 
-        JensonShannonBaseline[] baselines = new JensonShannonBaseline[nChannels];
+        JensenShannonBaseline[] baselines = new JensenShannonBaseline[nChannels];
         for (int channel = 0; channel < nChannels; channel++) {
-            baselines[channel] = new JensonShannonBaseline(minThreshold[channel], maxThreshold[channel], avgThreshold[channel] / numCV);
+            baselines[channel] = new JensenShannonBaseline(minThreshold[channel], maxThreshold[channel], avgThreshold[channel] / numCV);
         }
         return baselines;
     }

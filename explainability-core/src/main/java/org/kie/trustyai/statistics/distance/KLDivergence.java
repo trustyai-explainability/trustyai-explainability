@@ -42,5 +42,4 @@ public class KLDivergence {
         }
         return divergence;
     }
-
 }

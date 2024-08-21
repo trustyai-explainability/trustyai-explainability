@@ -95,7 +95,7 @@ public class Tensor<T> {
     /**
      * Retrieve a set of slices from the first dimension of the tensor, equivalent to Numpy's array[idxs] notation.
      *
-     * @param indices: the indeces of the slice
+     * @param indices: the indices of the slice
      *
      * @returns the sliced tensor
      **/
