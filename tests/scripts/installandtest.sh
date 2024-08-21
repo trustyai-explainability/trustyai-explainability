@@ -16,6 +16,7 @@ TESTS_REGEX=${TESTS_REGEX:-"basictests"}
 ODHPROJECT=${ODHPROJECT:-"opendatahub"}
 SERVICE_IMAGE=${SERVICE_IMAGE:-"quay.io/trustyai/trustyai-service:latest"}
 OPERATOR_IMAGE=${OPERATOR_IMAGE:-"quay.io/trustyai/trustyai-service-operator:latest"}
+PYTEST_MARKERS=${PYTEST_MARKERS:-"openshift and not heavy"}
 
 export ODHPROJECT
 export LOCAL
@@ -57,7 +58,7 @@ success=1
 if [ $INSTALL_FAILURE = false ]; then
   cd peak/trustyai-tests
   echo -e "Running trustyai-tests suite..."
-  poetry run pytest -s --log-cli-level=DEBUG -m openshift --use-modelmesh-image
+  poetry run pytest -s --log-cli-level=DEBUG -m ${PYTEST_MARKERS} --use-modelmesh-image
 else
   echo -e "Skipping tests due to ODH Operator/DSC installation failure, marking suite as failed."
   success=0
