@@ -12,7 +12,6 @@ if [ ! -d "${ARTIFACT_SCREENSHOTS_DIR}" ]; then
   echo "Creating the screenshot artifact directory: ${ARTIFACT_SCREENSHOT_DIR}"
   mkdir -p ${ARTIFACT_SCREENSHOT_DIR}
 fi
-TESTS_REGEX=${TESTS_REGEX:-"basictests"}
 ODHPROJECT=${ODHPROJECT:-"opendatahub"}
 SERVICE_IMAGE=${SERVICE_IMAGE:-"quay.io/trustyai/trustyai-service:latest"}
 OPERATOR_IMAGE=${OPERATOR_IMAGE:-"quay.io/trustyai/trustyai-service-operator:latest"}
