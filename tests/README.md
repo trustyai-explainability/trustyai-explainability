@@ -23,7 +23,7 @@ make clean # remove the artifacts of the test from the cluster (operator, ODH, p
 * `BUILD_TOOL=docker/podman`: set the tool used to build and run the testing container
 * `SKIP_INSTALL=true/false`: skip the install of the ODH operator, if you've already installed it manually or via a previous test
 * `SKIP_DSC_INSTALL=true/false`: skip the install of ODH DSC, if you've already installed it manually or via a previous test
-* `TESTS_REGEX=${REGEX}`: only run tests whose names match the regex
+* `PYTEST_MARKERS`: Used to select the tests that will be executed. [Available markers](https://github.com/trustyai-explainability/trustyai-tests/blob/main/pyproject.toml).
 * `LOCAL=true/false`: This flag makes the test suite stop and wait for user input between the end of a test script and cluster teardown.   This prevents automatic teardown, which is useful for manual inspection of the cluster before teardown when running the tests locally.
 * `TEARDOWN=true/false`: This flag will just run the corresponding `teardown` functions within the various tests, useful for cleaning up stranded components from failed tests, without deleting the operator and ODH install. It's recommended to use this with a `make run`, as using `make test` will trigger a `make clean` that fully wipes the cluster. 
 ### CI Image Arguments
@@ -50,10 +50,6 @@ to skip the installation process and will only run the tests.  example: `make ru
 If you'd like to run the tests against an instance that already has a KfDef created,
 you set `SKIP_KFDEF_INSTALL=true` and that will cause the test run
 to skip the step of creating the default KfDef.  example: `make run SKIP_KFDEF_INSTALL=true`
-
-If you'd like to run a single test instead of all tests, you can
-set the TESTS_REGEX variable `TESTS_REGEX=<name of the test to run>`.  That will
-only run the test that you specify instead of all of the tests.  example: `make run TESTS_REGEX=grafana`
 
 If you have a local instance already running the operator and you'd like to skip that part
 of the install process, you can set `SKIP_OPERATOR_INSTALL=true` and that will bypass installation
