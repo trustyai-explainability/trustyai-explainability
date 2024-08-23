@@ -8,10 +8,36 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
+import org.kie.trustyai.explainability.model.tensor.TensorFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ImageDriftTest {
+
+    Double[][][] get3DArr(int[] dimension) {
+        int a = dimension[0];
+        int b = dimension[1];
+        int c = dimension[2];
+        Double[][][] arr = new Double[a][b][c];
+        Double idx = 0.0;
+        for (int i = 0; i < a; i++) {
+            for (int ii = 0; ii < b; ii++) {
+                for (int iii = 0; iii < c; iii++) {
+                    arr[i][ii][iii] = idx;
+                    idx += 1;
+                }
+            }
+        }
+        return arr;
+    }
+
+    Tensor<Double> create3DTensor(){
+        int[] dimension = {256, 256, 3};
+        Double[][][] arr = get3DArr(dimension);
+        Tensor<Double> tensor3d = TensorFactory.fromArray(arr);
+        return tensor3d;
+    }
 
     // Creates test image
     public List<BufferedImage> generateImage(int width, int height) {
@@ -34,7 +60,7 @@ public class ImageDriftTest {
     @Test
     void testGetBufferedImageDataFrame() {
         List<BufferedImage> bufferedImages = generateImage(100, 100);
-        List<double[][][]> tensor3dRef = ImageDrift.preprocessImages(bufferedImages);
+        List<Tensor<Double>> tensor3dRef = ImageDrift.preprocessImages(bufferedImages);
         Dataframe df = ImageDrift.getDataframe(tensor3dRef);
         assertNotNull(df);
         assertEquals(df.getColumnDimension(), 3);
@@ -43,14 +69,14 @@ public class ImageDriftTest {
 
     @Test
     void testGetTensor3dImageDataFrame() {
-        double[][][] tensor3d = new double[256][256][3];
-        List<double[][][]> tensor3dImages = new ArrayList<double[][][]>();
+        Tensor<Double> tensor3d = create3DTensor();
+        List<Tensor<Double>> tensor3dImages = new ArrayList<Tensor<Double>>();
         tensor3dImages.add(tensor3d);
-        List<double[][][]> tensor3dRef = ImageDrift.preprocessImages(tensor3dImages);
+        List<Tensor<Double>> tensor3dRef = ImageDrift.preprocessImages(tensor3dImages);
         Dataframe df = ImageDrift.getDataframe(tensor3dRef);
         assertNotNull(df);
         assertEquals(df.getColumnDimension(), 3);
-        assertEquals(tensor3d.length * tensor3d[0].length, df.getRowDimension());
+        assertEquals(tensor3d.getDimensions(0) * tensor3d.getDimensions(1), df.getRowDimension());
     }
 
     @Test
@@ -64,10 +90,10 @@ public class ImageDriftTest {
 
     @Test
     void testSameTensor3dImages() {
-        double[][][] tensor3d = new double[256][256][3];
-        List<double[][][]> imagesRef = new ArrayList<double[][][]>();
+        Tensor<Double> tensor3d = create3DTensor();
+        List<Tensor<Double>> imagesRef = new ArrayList<Tensor<Double>>();
         imagesRef.add(tensor3d);
-        List<double[][][]> imagesHyp = new ArrayList<double[][][]>();
+        List<Tensor<Double>> imagesHyp = new ArrayList<Tensor<Double>>();
         imagesHyp.add(tensor3d);
         ImageDriftResult result = ImageDrift.calculate(imagesRef, imagesHyp, 0.5);
         assertEquals(0.0, result.getjsStat());
@@ -77,8 +103,8 @@ public class ImageDriftTest {
     @Test
     void testDiffInputDtypes() {
         List<BufferedImage> imagesRef = generateImage(256, 256);
-        double[][][] tensor3d = new double[256][256][3];
-        List<double[][][]> imagesHyp = new ArrayList<double[][][]>();
+        Tensor<Double> tensor3d = create3DTensor();
+        List<Tensor<Double>> imagesHyp = new ArrayList<Tensor<Double>>();
         imagesHyp.add(tensor3d);
         ImageDriftResult result = ImageDrift.calculate(imagesRef, imagesHyp, 0.5);
         assertNotNull(result);
