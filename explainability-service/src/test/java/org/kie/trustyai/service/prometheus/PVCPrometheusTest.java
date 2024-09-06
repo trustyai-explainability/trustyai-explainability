@@ -18,24 +18,10 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(PVCPrometheusTestProfile.class)
-@TestHTTPEndpoint(GroupStatisticalParityDifferenceEndpoint.class)
 public class PVCPrometheusTest extends BasePrometheusTest {
 
     @Inject
     Instance<MockPVCStorage> storage;
-
-    @BeforeEach
-    void populateStorage() {
-        // Empty mock storage
-        storage.get().emptyStorage("/tmp/" + MODEL_ID + "-data.csv");
-        storage.get().emptyStorage("/tmp/" + MODEL_ID + "-internal_data.csv");
-        storage.get().emptyStorage("/tmp/" + MODEL_ID + "-metadata.json");
-
-        // Clear any requests between tests
-        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(MockCSVDatasource.createMetadata(dataframe), MODEL_ID);
-    }
 
     @AfterEach
     void cleanStorage() {
@@ -43,4 +29,6 @@ public class PVCPrometheusTest extends BasePrometheusTest {
         storage.get().emptyStorage("/tmp/" + MODEL_ID + "-internal_data.csv");
         storage.get().emptyStorage("/tmp/" + MODEL_ID + "-metadata.json");
     }
+
+
 }

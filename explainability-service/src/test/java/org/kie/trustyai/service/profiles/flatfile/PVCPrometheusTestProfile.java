@@ -16,7 +16,7 @@ public class PVCPrometheusTestProfile implements QuarkusTestProfile {
     public Map<String, String> getConfigOverrides() {
         final Map<String, String> overrides = new HashMap<>();
         overrides.put("service.storage-format", String.valueOf(PVC));
-        overrides.put("service.metrics-schedule", "5s");
+        overrides.put("service.metrics-schedule", "1s");
         overrides.put("storage.data-filename", "data.csv");
         overrides.put("storage.data-folder", "/tmp");
         overrides.put("service.batch-size", "5000");

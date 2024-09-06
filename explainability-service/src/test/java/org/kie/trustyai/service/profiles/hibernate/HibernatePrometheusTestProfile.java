@@ -20,7 +20,7 @@ public class HibernatePrometheusTestProfile implements QuarkusTestProfile {
         final Map<String, String> overrides = new HashMap<>();
         overrides.put("service.storage-format", String.valueOf(DATABASE));
         overrides.put("quarkus.hibernate-orm.active", "true");
-        overrides.put("service.metrics-schedule", "5s");
+        overrides.put("service.metrics-schedule", "1s");
         overrides.put("service.batch-size", "5000");
 
         overrides.put("quarkus.datasource.db-kind", "h2");

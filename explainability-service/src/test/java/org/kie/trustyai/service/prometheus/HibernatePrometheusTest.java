@@ -19,25 +19,12 @@ import jakarta.inject.Inject;
 
 @QuarkusTest
 @TestProfile(HibernatePrometheusTestProfile.class)
-@TestHTTPEndpoint(GroupStatisticalParityDifferenceEndpoint.class)
 public class HibernatePrometheusTest extends BasePrometheusTest {
     @Inject
     Instance<MockHibernateStorage> storage;
 
     protected static final String MODEL_ID = "example1";
     protected static final int N_SAMPLES = 100;
-    @Inject
-    Instance<DataSource> datasource;
-
-    @BeforeEach
-    void populateStorage() {
-        // Empty mock storage
-        storage.get().clearData(MODEL_ID);
-
-        final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000);
-        datasource.get().saveDataframe(dataframe, MODEL_ID);
-        datasource.get().saveMetadata(MockCSVDatasource.createMetadata(dataframe), MODEL_ID);
-    }
 
     @AfterEach
     void cleanStorage() {
