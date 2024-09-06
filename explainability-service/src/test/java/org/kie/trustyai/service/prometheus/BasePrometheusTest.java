@@ -42,7 +42,7 @@ public abstract class BasePrometheusTest {
         final ScheduleId requestId = new ScheduleId();
         requestId.requestId = response.getRequestId();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 6; i++) {
             Thread.sleep(1000);
         }
 
