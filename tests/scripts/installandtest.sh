@@ -57,7 +57,7 @@ success=1
 if [ $INSTALL_FAILURE = false ]; then
   cd peak/trustyai-tests
   echo -e "Running trustyai-tests suite..."
-  poetry run pytest --log-cli-level=40 --tb=short --log-file=${ARTIFACT_DIR}/pytest_debug.log --log-file-level=DEBUG -m "${PYTEST_MARKERS}" --use-modelmesh-image
+  poetry run pytest --log-cli-level=30 --tb=short --log-file=${ARTIFACT_DIR}/pytest_debug.log --log-file-level=DEBUG -m "${PYTEST_MARKERS}" --use-modelmesh-image
 else
   echo -e "Skipping tests due to ODH Operator/DSC installation failure, marking suite as failed."
   success=0
