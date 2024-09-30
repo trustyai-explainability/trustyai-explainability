@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.endpoints.metrics.MetricsEndpointTestProfile;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
@@ -263,7 +264,7 @@ class IdentityEndpointTest {
         final ScheduleId nonExistingRequestId = new ScheduleId();
         nonExistingRequestId.requestId = secondRequest.getRequestId();
         given().contentType(ContentType.JSON).when().body(nonExistingRequestId).delete("/request")
-                .then().statusCode(RestResponse.StatusCode.NOT_FOUND).body(is(""));
+                .then().statusCode(RestResponse.StatusCode.NOT_FOUND).body(is(String.format(BaseEndpoint.REQUEST_ID_NOT_FOUND_FMT, secondRequest.getRequestId())));
 
         scheduleList = given()
                 .when()

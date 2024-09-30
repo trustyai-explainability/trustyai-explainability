@@ -135,3 +135,11 @@ jobs:
             📦 [PR image](https://quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}): `quay.io/trustyai/trustyai-service-ci:${{ github.event.pull_request.head.sha }}`
             
             🗂️ [CI manifests](https://github.com/trustyai-explainability/trustyai-service-operator-ci/tree/service-${{ env.TAG }})
+            
+            ```
+            devFlags:
+              manifests:
+                - contextDir: config
+                  sourcePath: ''
+                  uri: https://api.github.com/repos/trustyai-explainability/trustyai-service-operator-ci/tarball/service-${{ env.TAG }}
+            ```
