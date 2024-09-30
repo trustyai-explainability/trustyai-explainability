@@ -167,12 +167,23 @@ else
 
   echo "Creating the following DSC"
   echo $(cat ./${DSC_FILENAME} > ${ARTIFACT_DIR}/${DSC_FILENAME})
-  oc apply -f ./odh-core-dsci.yaml
-  oc apply -f ./${DSC_FILENAME}
-  kfctl_result=$?
-  if [ "$kfctl_result" -ne 0 ]; then
+
+  start_t=$(date +%s) 2>&1
+  ready=1 2>&1
+  while [ "$ready" -ne 0 ]; do
+    oc apply -f ./odh-core-dsci.yaml
+    oc apply -f ./${DSC_FILENAME}
+    ready=$?
+    if [ $(($(date +%s)-start_t)) -gt 300 ]; then
+        echo "ODH DSC Installation timeout"
+        exit 1
+    fi
+    sleep 10
+  done
+
+  if [ "$ready" -ne 0 ]; then
     echo "The installation failed"
-    exit $kfctl_result
+    exit $ready
   fi
 fi
 set +x
