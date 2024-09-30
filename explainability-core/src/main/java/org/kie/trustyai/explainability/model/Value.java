@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
@@ -31,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Transient;
 
 /**
@@ -40,6 +42,7 @@ import jakarta.persistence.Transient;
 @Embeddable
 public class Value {
     @Access(AccessType.FIELD)
+    @Lob
     private final SerializableObject serializableObject;
 
     public Value(Object underlyingObject) {
@@ -60,6 +63,12 @@ public class Value {
                 // ignored
             }
         }
+
+        if (getUnderlyingObject() instanceof Tensor<?>) {
+            Tensor<?> t = (Tensor<?>) getUnderlyingObject();
+            return t.toString();
+        }
+
         if (getUnderlyingObject() instanceof ByteBuffer) {
             ByteBuffer byteBuffer = (ByteBuffer) getUnderlyingObject();
             return new String(byteBuffer.array());
@@ -68,7 +77,9 @@ public class Value {
     }
 
     public double asNumber() {
-        if (getUnderlyingObject() != null) {
+        if (getUnderlyingObject() instanceof Tensor<?>) {
+            return Double.NaN;
+        } else if (getUnderlyingObject() != null) {
             try {
                 if (getUnderlyingObject() instanceof Double) {
                     return (double) getUnderlyingObject();

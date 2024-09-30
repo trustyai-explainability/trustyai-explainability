@@ -1,6 +1,7 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -8,186 +9,24 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.kie.trustyai.connectors.kserve.KServeDatatype;
-import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.kie.trustyai.explainability.model.Type.*;
-
 public class TensorConverter {
 
     private static final Logger logger = LoggerFactory.getLogger(TensorConverter.class);
 
-    public static KServeDatatype inferKServeType(Object object) {
-        if (object instanceof Integer) {
-            return KServeDatatype.INT32;
-        } else if (object instanceof Long) {
-            return KServeDatatype.INT64;
-        } else if (object instanceof Float) {
-            return KServeDatatype.FP32;
-        } else if (object instanceof Double) {
-            return KServeDatatype.FP64;
-        } else if (object instanceof Boolean) {
-            return KServeDatatype.BOOL;
-        } else if (object instanceof String | object instanceof Byte) {
-            return KServeDatatype.BYTES;
-        } else {
-            throw new IllegalArgumentException("Cannot infer KServe type of " + object);
-        }
-    }
-
-    public static KServeDatatype trustyToKserveType(Type type, Value value) throws IllegalArgumentException {
-        final Object object = value.getUnderlyingObject();
-        if (type == NUMBER) {
-            if (object instanceof Integer) {
-                return KServeDatatype.INT32;
-            } else if (object instanceof Double) {
-                return KServeDatatype.FP64;
-            } else if (object instanceof Long) {
-                return KServeDatatype.INT64;
-            } else {
-                throw new IllegalArgumentException("Unsupported object type: " + object.getClass().getName());
-            }
-        } else if (type == BOOLEAN) {
-            return KServeDatatype.BOOL;
-        } else if (type == CATEGORICAL) {
-            return KServeDatatype.BYTES;
-        } else {
-            throw new IllegalArgumentException("Unsupported TrustyAI type: " + type);
-        }
-    }
-
-    static Feature contentsToFeature(ModelInferRequest.InferInputTensor tensor, String name, int index) {
-        final KServeDatatype type;
-        InferTensorContents tensorContents = tensor.getContents();
-        try {
-            type = KServeDatatype.valueOf(tensor.getDatatype());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
-        }
-        int contentsCount = 0;
-        try {
-            switch (type) {
-                case BOOL:
-                    contentsCount = tensorContents.getBoolContentsCount();
-                    return FeatureFactory.newBooleanFeature(name, tensorContents.getBoolContents(index));
-                case INT8:
-                case INT16:
-                case INT32:
-                    contentsCount = tensorContents.getIntContentsCount();
-                    return FeatureFactory.newNumericalFeature(name, tensorContents.getIntContents(index));
-                case INT64:
-                    contentsCount = tensorContents.getInt64ContentsCount();
-                    return FeatureFactory.newNumericalFeature(name, tensorContents.getInt64Contents(index));
-                case FP32:
-                    contentsCount = tensorContents.getFp32ContentsCount();
-                    return FeatureFactory.newNumericalFeature(name, tensorContents.getFp32Contents(index));
-                case FP64:
-                    contentsCount = tensorContents.getFp64ContentsCount();
-                    return FeatureFactory.newNumericalFeature(name, tensorContents.getFp64Contents(index));
-                case BYTES:
-                    contentsCount = tensorContents.getBytesContentsCount();
-                    return FeatureFactory.newCategoricalFeature(name, String.valueOf(tensorContents.getBytesContents(index)));
-                default:
-                    throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
-            }
-        } catch (IndexOutOfBoundsException e) {
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Error in input-tensor parsing: Attempting to access index %d of input-tensor which only has length %d. This can happen if the tensor reports an incorrect shape.%nThe tensor that caused the error is shown below:%n%s",
-                            index, contentsCount, tensor));
-        }
-    }
-
-    /**
-     * Convert a {@link ModelInferResponse.InferOutputTensor} to a {@link Output}.
-     * The datatype is inferred from the contents of the tensor, rather than the datatype field, since these can
-     * sometimes be mismatched by the model itself.
-     *
-     * @param tensor A {@link ModelInferResponse.InferOutputTensor} to convert
-     * @param name The name of the output
-     * @param index The index of the output
-     * @return An {@link Output} object
-     */
-    static Output contentsToOutput(ModelInferResponse.InferOutputTensor tensor, String name, int index) {
-        final KServeDatatype type;
-        InferTensorContents tensorContents = tensor.getContents();
-
-        try {
-            type = KServeDatatype.valueOf(tensor.getDatatype());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
-        }
-
-        int contentsCount = 0;
-        try {
-            if (tensorContents.getBoolContentsCount() != 0) {
-                return new Output(name, Type.BOOLEAN, new Value(tensorContents.getBoolContents(index)), Output.DEFAULT_SCORE);
-            } else if (tensorContents.getIntContentsCount() != 0) {
-                return new Output(name, Type.NUMBER, new Value(tensorContents.getIntContents(index)), Output.DEFAULT_SCORE);
-            } else if (tensorContents.getInt64ContentsCount() != 0) {
-                return new Output(name, Type.NUMBER, new Value(tensorContents.getInt64Contents(index)), Output.DEFAULT_SCORE);
-            } else if (tensorContents.getFp32ContentsCount() != 0) {
-                return new Output(name, Type.NUMBER, new Value(tensorContents.getFp32Contents(index)), Output.DEFAULT_SCORE);
-            } else if (tensorContents.getFp64ContentsCount() != 0) {
-                return new Output(name, Type.NUMBER, new Value(tensorContents.getFp64Contents(index)), Output.DEFAULT_SCORE);
-            } else if (tensorContents.getBytesContentsCount() != 0) {
-                return new Output(name, Type.CATEGORICAL, new Value(String.valueOf(tensorContents.getBytesContents(index))), Output.DEFAULT_SCORE);
-            } else {
-                throw new IllegalArgumentException("Currently unsupported type for Tensor input, type=" + tensor.getDatatype());
-            }
-        } catch (IndexOutOfBoundsException e) {
-            throw new IllegalArgumentException(
-                    String.format(
-                            "Error in output-tensor parsing: Attempting to access index %d of output-tensor which only has length %d. This can happen if the tensor reports an incorrect shape.%nThe tensor that caused the error is shown below:%n%s",
-                            index, contentsCount, tensor));
-        }
-    }
-
+    // =================================================================================================================
+    // === REQUESTS ====================================================================================================
     public static List<PredictionInput> parseKserveModelInferRequest(ModelInferRequest data) {
         return parseKserveModelInferRequest(data, Optional.empty(), false);
     }
 
     public static List<PredictionInput> parseKserveModelInferRequest(ModelInferRequest data, Optional<List<String>> featureNames) {
         return parseKserveModelInferRequest(data, featureNames, false);
-    }
-
-    // converting an entire batch of raw contents is faster, so prefer this function when possible
-    private static List<PredictionInput> rawHandlerMulti(ModelInferRequest data, ModelInferRequest.InferInputTensor tensor, List<String> names, int secondShape, boolean raw) {
-        if (raw) {
-            return new ArrayList<>(List.of(PayloadParser.rawContentToPredictionInput(data, names)));
-        }
-        final List<Feature> feature = IntStream.range(0, secondShape)
-                .mapToObj(i -> contentsToFeature(tensor, names.get(i), i))
-                .collect(Collectors.toCollection(ArrayList::new));
-        return List.of(new PredictionInput(feature));
-    }
-
-    // converting an entire batch of raw contents is faster, so prefer this function when possible
-    private static List<Feature> rawHandlerMultiFeature(ModelInferRequest data, ModelInferRequest.InferInputTensor tensor, List<String> names, int secondShape, boolean raw) {
-        if (raw) {
-            return PayloadParser.rawContentToPredictionInput(data, names).getFeatures();
-        }
-        return IntStream.range(0, secondShape)
-                .mapToObj(i -> contentsToFeature(tensor, names.get(i), i))
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    // if only a single item from raw contents is needed, use this
-    private static Feature rawHandlerSingle(ModelInferRequest data, ModelInferRequest.InferInputTensor tensor, String name, int idx, boolean raw) {
-        if (raw) {
-            return PayloadParser.rawContentToFeature(data, name, 0, idx);
-        } else {
-            return contentsToFeature(tensor, name, idx);
-        }
-    }
-
-    private static List<String> labelTensors(String name, int idxs) {
-        return IntStream.range(0, idxs).mapToObj(i -> name + "-" + i).collect(Collectors.toList());
     }
 
     public static List<PredictionInput> parseKserveModelInferRequest(ModelInferRequest data, Optional<List<String>> featureNames, boolean isBatch) {
@@ -197,18 +36,16 @@ public class TensorConverter {
         if (count == 1) { // The NP codec case
             final ModelInferRequest.InferInputTensor tensor = data.getInputs(0);
             List<Long> shape = tensor.getShapeList();
+
             final int firstShape = shape.get(0).intValue();
 
             if (firstShape < 2) {
-                if (shape.size() >= 2) {
-                    int secondShape = 1;
-                    for (int i = 1; i < shape.size(); i++) {
-                        secondShape *= shape.get(i).intValue();
-                    }
+                if (shape.size() == 2) {
                     // NP features, no batch
+                    int secondShape = shape.get(1).intValue();
                     List<String> names;
                     if (isBatch) {
-                        List<Feature> fs = rawHandlerMultiFeature(
+                        List<Feature> fs = TensorConverterUtils.rawHandlerMultiFeature(
                                 data,
                                 tensor,
                                 Collections.nCopies(secondShape, tensor.getName()),
@@ -219,14 +56,19 @@ public class TensorConverter {
                         if (featureNames.isPresent()) {
                             names = featureNames.get();
                         } else {
-                            names = labelTensors(tensor.getName(), secondShape);
+                            names = TensorConverterUtils.labelTensors(tensor.getName(), secondShape);
                         }
-                        return rawHandlerMulti(data, tensor, names, secondShape, raw);
+                        return TensorConverterUtils.rawHandlerMulti(data, tensor, names, secondShape, raw);
                     }
+                } else if (shape.size() > 2 && !raw) { // raw handling not yet implemented
+                    // tensor data -> entire tensor is one feature
+                    List<Feature> fs = new ArrayList<>();
+                    fs.add(TensorConverterUtils.rawHandlerTrustyAITensor(data, tensor, tensor.getName(), 0, raw));
+                    return List.of(new PredictionInput(fs));
                 } else if (shape.size() == 1) {
                     // A single element feature, no batch. PD or NP irrelevant
                     List<Feature> fs = new ArrayList<>();
-                    fs.add(rawHandlerSingle(data, tensor, tensor.getName(), 0, raw));
+                    fs.add(TensorConverterUtils.rawHandlerSingle(data, tensor, tensor.getName(), 0, raw));
                     return List.of(new PredictionInput(fs));
                 } else {
                     throw new IllegalArgumentException("Shape size not supported for tabular data");
@@ -238,8 +80,15 @@ public class TensorConverter {
                     for (int batch = 0; batch < firstShape; batch++) {
                         final List<Feature> features = new ArrayList<>();
                         String name = featureNames.isPresent() ? featureNames.get().get(0) : tensor.getName();
-                        features.add(rawHandlerSingle(data, tensor, name, batch, raw));
+                        features.add(TensorConverterUtils.rawHandlerSingle(data, tensor, name, batch, raw));
                         predictionInputs.add(new PredictionInput(features));
+                    }
+                } else if (shape.size() > 2 && !raw) { // raw handling not yet implemented {
+                    // tensor data of size [batch, a, b, c...] -> list of $batch tensors of shape [a,b,c...]
+                    for (int batch = 0; batch < firstShape; batch++) {
+                        List<Feature> fs = new ArrayList<>();
+                        fs.add(TensorConverterUtils.rawHandlerTrustyAITensor(data, tensor, tensor.getName(), batch, raw));
+                        predictionInputs.add(new PredictionInput(fs));
                     }
                 } else {
                     int secondShape = 1;
@@ -252,7 +101,7 @@ public class TensorConverter {
                         for (int featureIndex = 0; featureIndex < secondShape; featureIndex++) {
                             final String name = featureNames.isPresent() ? featureNames.get().get(featureIndex) : tensor.getName() + "-" + featureIndex;
                             final int idx = secondShape * batch + featureIndex;
-                            features.add(rawHandlerSingle(data, tensor, name, idx, raw));
+                            features.add(TensorConverterUtils.rawHandlerSingle(data, tensor, name, idx, raw));
                         }
                         predictionInputs.add(new PredictionInput(features));
                     }
@@ -269,10 +118,18 @@ public class TensorConverter {
                 logger.debug("Using PD codec (no batch)");
                 final List<ModelInferRequest.InferInputTensor> tensors = data.getInputsList();
                 final List<Feature> features = tensors.stream().map(tensor -> {
-                    return rawHandlerSingle(data, tensor, tensor.getName(), 0, raw);
+                    return TensorConverterUtils.rawHandlerSingle(data, tensor, tensor.getName(), 0, raw);
                 }).collect(Collectors.toCollection(ArrayList::new));
 
                 return new ArrayList<>(List.of(new PredictionInput(features)));
+            } else if (shape.size() > 2 && !raw){
+                List<PredictionInput> predictionInputs = new ArrayList<>();
+                for (int batch = 0; batch < data.getInputsCount(); batch++) {
+                    List<Feature> fs = new ArrayList<>();
+                    fs.add(TensorConverterUtils.rawHandlerTrustyAITensor(data, data.getInputs(batch), data.getInputs(batch).getName(), 0, raw));
+                    predictionInputs.add(new PredictionInput(fs));
+                }
+                return predictionInputs;
             } else {
                 // given some shape (ntensors, a, b, ... n)
                 // return ntensors of PredictionOutputs, each with a*b*c*...*n outputs
@@ -283,7 +140,7 @@ public class TensorConverter {
                 final List<ModelInferRequest.InferInputTensor> tensors = data.getInputsList();
                 final List<List<Feature>> features = tensors.stream().map(tensor -> {
                     return IntStream.range(0, secondShape)
-                            .mapToObj(i -> rawHandlerSingle(data, tensor, tensor.getName(), i, raw))
+                            .mapToObj(i -> TensorConverterUtils.rawHandlerSingle(data, tensor, tensor.getName(), i, raw))
                             .collect(Collectors.toCollection(ArrayList::new));
                 }).collect(Collectors.toCollection(ArrayList::new));
                 // Transpose the features
@@ -302,40 +159,8 @@ public class TensorConverter {
         }
     }
 
-    // if only a single item from raw contents is needed, use this
-    private static Output rawHandlerSingle(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, String name, int tensorIdx, int idx, boolean raw) {
-        if (raw) {
-            return PayloadParser.rawContentToOutput(data, name, tensorIdx, idx);
-        } else {
-            return contentsToOutput(tensor, name, idx);
-        }
-    }
-
-    // converting an entire batch of raw contents is faster, so prefer this function when possible
-    private static List<Output> rawHandlerMultiOutput(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, List<String> names, int secondShape, boolean raw) {
-        if (raw) {
-            return PayloadParser.rawContentToPredictionOutput(data, names).getOutputs();
-        }
-        return IntStream.range(0, secondShape)
-                .mapToObj(i -> contentsToOutput(tensor, names.get(i), i))
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    private static List<PredictionOutput> rawHandlerMulti(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, List<String> names, int secondShape, boolean raw) {
-        return rawHandlerMulti(data, tensor, names, secondShape, raw, 0);
-    }
-
-    // converting an entire batch of raw contents is faster, so prefer this function when possible
-    private static List<PredictionOutput> rawHandlerMulti(ModelInferResponse data, ModelInferResponse.InferOutputTensor tensor, List<String> names, int secondShape, boolean raw, int idx) {
-        if (raw) {
-            return new ArrayList<>(List.of(PayloadParser.rawContentToPredictionOutput(data, names, idx)));
-        }
-        final List<Output> output = IntStream.range(0, secondShape)
-                .mapToObj(i -> contentsToOutput(tensor, names.get(i), i))
-                .collect(Collectors.toCollection(ArrayList::new));
-        return List.of(new PredictionOutput(output));
-    }
-
+    // =================================================================================================================
+    // === RESPONSES ===================================================================================================
     public static List<PredictionOutput> parseKserveModelInferResponse(ModelInferResponse data, int enforcedFirstDimension) {
         return parseKserveModelInferResponse(data, enforcedFirstDimension, Optional.empty(), false);
     }
@@ -354,17 +179,14 @@ public class TensorConverter {
             final int firstShape = shape.get(0).intValue();
 
             if (firstShape < 2) {
-                if (shape.size() >= 2) {
-                    int secondShape = 1;
-                    for (int i = 1; i < shape.size(); i++) {
-                        secondShape *= shape.get(i).intValue();
-                    }
-
+                if (shape.size() == 2) {
+                    // NP outputs, no batch
+                    int secondShape = shape.get(1).intValue();
                     List<String> names;
                     if (isBatch) {
                         logger.debug("Using NP codec (batch)");
                         names = Collections.nCopies(secondShape, tensor.getName());
-                        List<Output> os = rawHandlerMultiOutput(data, tensor, names, secondShape, raw);
+                        List<Output> os = TensorConverterUtils.rawHandlerMultiOutput(data, tensor, names, secondShape, raw);
                         return os.stream().map(o -> new PredictionOutput(List.of(o))).collect(Collectors.toList());
                     } else {
                         if (featureNames.isPresent()) {
@@ -372,12 +194,15 @@ public class TensorConverter {
                         } else {
                             names = IntStream.range(0, secondShape).mapToObj(i -> tensor.getName() + "-" + i).collect(Collectors.toCollection(ArrayList::new));
                         }
-                        return rawHandlerMulti(data, tensor, names, secondShape, raw);
+                        return TensorConverterUtils.rawHandlerMulti(data, tensor, names, secondShape, raw);
                     }
-
+                } else if (shape.size() > 2) {
+                    List<Output> os = new ArrayList<>();
+                    os.add(TensorConverterUtils.rawHandlerTrustyAITensor(data, tensor, tensor.getName(), 0, raw));
+                    return List.of(new PredictionOutput(os));
                 } else if (shape.size() == 1) {
                     // A single element feature, no batch. PD or NP irrelevant
-                    return List.of(new PredictionOutput(List.of(rawHandlerSingle(data, tensor, tensor.getName(), 0, 0, raw))));
+                    return List.of(new PredictionOutput(List.of(TensorConverterUtils.rawHandlerSingle(data, tensor, tensor.getName(), 0, 0, raw))));
                 } else {
                     throw new IllegalArgumentException("Shape size not supported for tabular data");
                 }
@@ -385,12 +210,18 @@ public class TensorConverter {
                 // NP-batch
                 final List<PredictionOutput> predictionOutputs = new ArrayList<>();
                 if (shape.size() == 1) {
-
                     for (int batch = 0; batch < firstShape; batch++) {
                         final List<Output> outputs = new ArrayList<>();
                         String name = featureNames.isPresent() ? featureNames.get().get(0) : tensor.getName();
-                        outputs.add(rawHandlerSingle(data, tensor, name, 0, batch, raw));
+                        outputs.add(TensorConverterUtils.rawHandlerSingle(data, tensor, name, 0, batch, raw));
                         predictionOutputs.add(new PredictionOutput(outputs));
+                    }
+                } else if (shape.size() > 2 && !raw) { // raw handling not yet implemented {
+                    // tensor data of size [batch, a, b, c...] -> list of $batch tensors of shape [a,b,c...]
+                    for (int batch = 0; batch < firstShape; batch++) {
+                        List<Output> os = new ArrayList<>();
+                        os.add(TensorConverterUtils.rawHandlerTrustyAITensor(data, tensor, tensor.getName(), batch, raw));
+                        predictionOutputs.add(new PredictionOutput(os));
                     }
                 } else {
                     logger.debug("Using NP codec (batch)");
@@ -403,7 +234,7 @@ public class TensorConverter {
                         final List<Output> outputs = new ArrayList<>();
                         for (int featureIndex = 0; featureIndex < secondShape; featureIndex++) {
                             String name = featureNames.isPresent() ? featureNames.get().get(featureIndex) : tensor.getName() + "-" + featureIndex;
-                            outputs.add(rawHandlerSingle(data, tensor, name, 0, secondShape * batch + featureIndex, raw));
+                            outputs.add(TensorConverterUtils.rawHandlerSingle(data, tensor, name, 0, secondShape * batch + featureIndex, raw));
                         }
                         predictionOutputs.add(new PredictionOutput(outputs));
                     }
@@ -428,71 +259,88 @@ public class TensorConverter {
                 }
             }
 
-            // given some shape (ntensors, a, b, ... n)
-            // return ntensors of PredictionOutputs, each with a*b*c*...*n outputs
-            boolean secondDimMatch = perTensorSecondShape.stream().allMatch(i -> i == enforcedFirstDimension);
-            boolean firstDimMatch = perTensorShapes.stream().allMatch(i -> i.get(0) == enforcedFirstDimension);
+            // non-TrustyAI tensor case
+            if (perTensorShapes.stream().allMatch(shapeList -> shapeList.size() <= 2)) {
+                // given some shape (ntensors, a, b, ... n)
+                // return ntensors of PredictionOutputs, each with a*b*c*...*n outputs
+                boolean secondDimMatch = perTensorSecondShape.stream().allMatch(i -> i == enforcedFirstDimension);
+                boolean firstDimMatch = perTensorShapes.stream().allMatch(i -> i.get(0) == enforcedFirstDimension);
 
-            if (enforcedFirstDimension == 1) {
-                final List<Output> outputs = IntStream.range(0, tensors.size())
-                        .mapToObj(tensorIDX -> {
-                            List<String> names = labelTensors(tensors.get(tensorIDX).getName(), perTensorSecondShape.get(tensorIDX));
-                            return rawHandlerMulti(
-                                    data,
-                                    tensors.get(tensorIDX),
-                                    names,
-                                    perTensorSecondShape.get(tensorIDX),
-                                    raw, tensorIDX).get(0).getOutputs();
-                        }).flatMap(Collection::stream).collect(Collectors.toList());
-                return List.of(new PredictionOutput(outputs));
 
-            } else if (tensors.size() > 1 && firstDimMatch) {
-                // list of tensors of shape [efd, n], [efd, m], ...
-                List<PredictionOutput> outputs = new ArrayList<>();
-                int nOutputs = 0;
-                for (int outputIdx = 0; outputIdx < enforcedFirstDimension; outputIdx++) {
-                    List<Output> os = new ArrayList<>();
-                    for (int tIdx = 0; tIdx < tensors.size(); tIdx++) {
-                        List<String> names = labelTensors(tensors.get(tIdx).getName(), perTensorSecondShape.get(tIdx));
-                        for (int i = 0; i < perTensorSecondShape.get(tIdx); i++) {
-                            os.add(rawHandlerSingle(data, tensors.get(tIdx), names.get(i), tIdx, outputIdx * perTensorSecondShape.get(tIdx) + i, raw));
+                if (enforcedFirstDimension == 1) {
+                    final List<Output> outputs = IntStream.range(0, tensors.size())
+                            .mapToObj(tensorIDX -> {
+                                List<String> names = TensorConverterUtils.labelTensors(tensors.get(tensorIDX).getName(), perTensorSecondShape.get(tensorIDX));
+                                return TensorConverterUtils.rawHandlerMulti(
+                                        data,
+                                        tensors.get(tensorIDX),
+                                        names,
+                                        perTensorSecondShape.get(tensorIDX),
+                                        raw, tensorIDX).get(0).getOutputs();
+                            }).flatMap(Collection::stream).collect(Collectors.toList());
+                    return List.of(new PredictionOutput(outputs));
+
+                } else if (tensors.size() > 1 && firstDimMatch) {
+                    // list of tensors of shape [efd, n], [efd, m], ...
+                    List<PredictionOutput> outputs = new ArrayList<>();
+                    int nOutputs = 0;
+                    for (int outputIdx = 0; outputIdx < enforcedFirstDimension; outputIdx++) {
+                        List<Output> os = new ArrayList<>();
+                        for (int tIdx = 0; tIdx < tensors.size(); tIdx++) {
+                            List<String> names = TensorConverterUtils.labelTensors(tensors.get(tIdx).getName(), perTensorSecondShape.get(tIdx));
+                            for (int i = 0; i < perTensorSecondShape.get(tIdx); i++) {
+                                os.add(TensorConverterUtils.rawHandlerSingle(data, tensors.get(tIdx), names.get(i), tIdx, outputIdx * perTensorSecondShape.get(tIdx) + i, raw));
+                            }
                         }
+                        if (outputIdx == 0) {
+                            nOutputs = os.size();
+                        }
+                        outputs.add(new PredictionOutput(os));
                     }
-                    if (outputIdx == 0) {
-                        nOutputs = os.size();
-                    }
-                    outputs.add(new PredictionOutput(os));
-                }
 
-                if (secondDimMatch) {
-                    logger.warn(String.format(
-                            "Output tensor(s) have ambiguous shape: %s. " +
-                                    "The input payload contained %d datapoints. However, both the first dimension and the " +
-                                    "product of subsequent dimensions for all inbound output tensors are also of size %d. " +
-                                    "TrustyAI will assume that the first dimension is the batch dimension, and will parse this payload " +
-                                    "as %d outputs of size %d.",
-                            perTensorShapes, enforcedFirstDimension, enforcedFirstDimension, enforcedFirstDimension, nOutputs));
-                }
-                return outputs;
-            } else if (secondDimMatch) {
-                List<List<Output>> outputs = tensors.stream()
-                        .map(tensor -> IntStream.range(0, perTensorSecondShape.get(0))
-                                .mapToObj(i -> rawHandlerSingle(data, tensor, tensor.getName(), 0, i, raw))
-                                .collect(Collectors.toCollection(ArrayList::new)))
-                        .collect(Collectors.toCollection(ArrayList::new));
-
-                // Transpose the features
-                final List<PredictionOutput> predictionOutputs = new ArrayList<>();
-                for (int batch = 0; batch < perTensorSecondShape.get(0); batch++) {
-                    final List<Output> batchOutputs = new ArrayList<>();
-                    for (int outputIndex = 0; outputIndex < tensors.size(); outputIndex++) {
-                        batchOutputs.add(outputs.get(outputIndex).get(batch));
+                    if (secondDimMatch) {
+                        logger.warn(String.format(
+                                "Output tensor(s) have ambiguous shape: %s. " +
+                                        "The input payload contained %d datapoints. However, both the first dimension and the " +
+                                        "product of subsequent dimensions for all inbound output tensors are also of size %d. " +
+                                        "TrustyAI will assume that the first dimension is the batch dimension, and will parse this payload " +
+                                        "as %d outputs of size %d.",
+                                perTensorShapes, enforcedFirstDimension, enforcedFirstDimension, enforcedFirstDimension, nOutputs));
                     }
-                    predictionOutputs.add(new PredictionOutput(batchOutputs));
+                    return outputs;
+                } else if (secondDimMatch) {
+                    List<List<Output>> outputs = tensors.stream()
+                            .map(tensor -> IntStream.range(0, perTensorSecondShape.get(0))
+                                    .mapToObj(i -> TensorConverterUtils.rawHandlerSingle(data, tensor, tensor.getName(), 0, i, raw))
+                                    .collect(Collectors.toCollection(ArrayList::new)))
+                            .collect(Collectors.toCollection(ArrayList::new));
+
+                    // Transpose the features
+                    final List<PredictionOutput> predictionOutputs = new ArrayList<>();
+                    for (int batch = 0; batch < perTensorSecondShape.get(0); batch++) {
+                        final List<Output> batchOutputs = new ArrayList<>();
+                        for (int outputIndex = 0; outputIndex < tensors.size(); outputIndex++) {
+                            batchOutputs.add(outputs.get(outputIndex).get(batch));
+                        }
+                        predictionOutputs.add(new PredictionOutput(batchOutputs));
+                    }
+                    return predictionOutputs;
+                } else {
+                    throw new IllegalArgumentException("Tensor shapes=" + perTensorShapes + " were expected to match the input count=" + enforcedFirstDimension + " along either the first or second dimension, but does not.");
                 }
-                return predictionOutputs;
             } else {
-                throw new IllegalArgumentException("Tensor shapes: " + perTensorShapes + " are not compatible with number of inputs " + enforcedFirstDimension);
+                //tensor case
+                if (tensors.size() == enforcedFirstDimension) {
+                    List<PredictionOutput> predictionOutputs = new ArrayList<>();
+                    for (int batch = 0; batch < tensors.size(); batch++) {
+                        List<Output> os = new ArrayList<>();
+                        os.add(TensorConverterUtils.rawHandlerTrustyAITensor(data, tensors.get(batch), tensors.get(batch).getName(), 0, raw));
+                        predictionOutputs.add(new PredictionOutput(os));
+                    }
+                    return predictionOutputs;
+                } else {
+                    throw new IllegalArgumentException("Tensor count=" + tensors.size() + " was expected to match the input count=" + enforcedFirstDimension + ", but does not.");
+                }
             }
 
         } else {

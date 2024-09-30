@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.google.protobuf.ByteString;
 
-public class RawConverter {
+public class RawValueExtractor {
 
     public static List<Boolean> toBoolean(ByteString raw) {
         byte[] bytes = raw.toByteArray();

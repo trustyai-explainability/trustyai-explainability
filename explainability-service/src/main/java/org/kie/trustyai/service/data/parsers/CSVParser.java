@@ -18,6 +18,7 @@ import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Value;
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.CSVUtils;
@@ -26,7 +27,6 @@ import org.kie.trustyai.service.payloads.service.InferenceId;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import org.kie.trustyai.service.payloads.service.InferenceId;
 
 @LookupIfProperty(name = "service.data.format", stringValue = "CSV")
 @ApplicationScoped
@@ -35,6 +35,7 @@ public class CSVParser implements DataParser {
     private static final Logger LOG = Logger.getLogger(CSVParser.class);
     private static final Charset UTF8 = StandardCharsets.UTF_8;
     public static final ZoneOffset ZONE_OFFSET = ZoneOffset.UTC;
+    public static final String TENSOR_PREFIX = "tensor[";
 
     @Override
     public Dataframe toDataframe(ByteBuffer byteBuffer, StorageMetadata storageMetadata) throws DataframeCreateException {
@@ -144,6 +145,12 @@ public class CSVParser implements DataParser {
                 final Object obj = value.getUnderlyingObject();
                 if (obj instanceof String) {
                     return "\"" + obj + "\"";
+                } else if (obj instanceof Tensor tensor) {
+                    try {
+                        return tensor.serialize();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
                     return obj.toString();
                 }

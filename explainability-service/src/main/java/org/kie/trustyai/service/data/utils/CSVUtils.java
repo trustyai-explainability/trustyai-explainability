@@ -17,6 +17,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.kie.trustyai.explainability.model.*;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
 import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.service.SchemaItem;
@@ -40,6 +41,12 @@ public class CSVUtils {
             final Type types = PayloadConverter.convertToType(schemaItem.getType());
             if (types.equals(Type.BOOLEAN)) {
                 return new Output(name, Type.BOOLEAN, new Value(Boolean.valueOf(valueString)), 1.0);
+            } else if (types.equals(Type.TENSOR)) {
+                try {
+                    return new Output(name, Type.TENSOR, new Value(Tensor.deserialize(valueString)), 1.0);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             } else if (types.equals(Type.NUMBER)) {
                 if (vtypes.equals(DataType.DOUBLE)) {
                     return new Output(name, Type.NUMBER, new Value(Double.valueOf(valueString)), 1.0);
@@ -80,6 +87,7 @@ public class CSVUtils {
 
         AtomicInteger idx = new AtomicInteger(0);
         List<Prediction> result = new ArrayList<>();
+
         parser.stream().forEach(entry -> {
             if (!header || idx.get() > 0) {
                 final List<Feature> inputFeatures = inputNames.stream().map(colName -> {
@@ -88,6 +96,7 @@ public class CSVUtils {
                     final String name = schemaItem.getName();
                     final String valueString = entry.get(inputIndex);
                     final DataType types = schemaItem.getType();
+
                     if (types.equals(DataType.BOOL)) {
                         return FeatureFactory.newBooleanFeature(name, Boolean.valueOf(valueString));
                     } else if (types.equals(DataType.DOUBLE)) {
@@ -98,6 +107,12 @@ public class CSVUtils {
                         return FeatureFactory.newNumericalFeature(name, Integer.valueOf(valueString));
                     } else if (types.equals(DataType.INT64)) {
                         return FeatureFactory.newNumericalFeature(name, Long.valueOf(valueString));
+                    } else if (types.equals(DataType.TENSOR)) {
+                        try {
+                            return FeatureFactory.newTensorFeature(name, Tensor.deserialize(valueString));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     } else {
                         return FeatureFactory.newCategoricalFeature(name, valueString);
                     }

@@ -32,6 +32,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+          <!-- Override the version of protobuf-java until io-grpc moves from 3.25.3 to 3.25.5-->
+          <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.25.5</version>
+          </dependency>
         </dependencies>
     </dependencyManagement>
   <dependencies>
