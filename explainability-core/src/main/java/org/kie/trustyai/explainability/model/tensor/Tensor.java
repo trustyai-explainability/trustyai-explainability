@@ -1,20 +1,27 @@
 package org.kie.trustyai.explainability.model.tensor;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Tensor<T> {
+public class Tensor<T> implements Serializable {
     private int[] dimensions;
     private T[] data;
     private int dimension;
     private int nEntries;
     private Class datatype;
 
-    Tensor(T[] data, int[] dimensions) {
+    public Tensor(T[] data, int[] dimensions) {
         this.data = data;
         this.dimensions = dimensions;
         this.dimension = dimensions.length;
@@ -292,7 +299,24 @@ public class Tensor<T> {
 
     }
 
-    // == EQUALS =======================================================================================================
+    // == SERIALIZERS ==================================================================================================
+    public String serialize() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream ois = new ObjectOutputStream(baos);
+        ois.writeObject(this);
+        return Base64.getEncoder().encodeToString(baos.toByteArray());
+    }
+
+    public static Tensor deserialize(String encoding) throws IOException {
+        byte[] data = Base64.getDecoder().decode(encoding);
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
+            return (Tensor) ois.readObject();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // == EQUALS == =====================================================================================================
     @Override
     public boolean equals(Object o) {
         if (this == o)

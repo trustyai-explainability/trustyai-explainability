@@ -194,7 +194,7 @@ public class KServeFormatsTest {
         final ModelInferRequest.InferInputTensor.Builder inferInputTensorBuilder = ModelInferRequest.InferInputTensor.newBuilder();
         final InferTensorContents.Builder content = InferTensorContents.newBuilder();
         List<Feature> fs = prediction.getInput().getFeatures();
-        final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(fs.get(0).getType(), fs.get(0).getValue()));
+        final String kserveType = String.valueOf(TensorConverterUtils.trustyToKserveType(fs.get(0).getType(), fs.get(0).getValue()));
         for (Feature f : fs) {
             TensorDataframe.addValue(content, f.getValue(), f.getType());
         }
@@ -215,7 +215,7 @@ public class KServeFormatsTest {
             final ModelInferResponse.InferOutputTensor.Builder inferOutputTensorBuilder = ModelInferResponse.InferOutputTensor.newBuilder();
             final InferTensorContents.Builder contentOut = InferTensorContents.newBuilder();
             List<Output> os = p.getOutput().getOutputs();
-            final String kserveTypeOut = String.valueOf(TensorConverter.trustyToKserveType(os.get(0).getType(), os.get(0).getValue()));
+            final String kserveTypeOut = String.valueOf(TensorConverterUtils.trustyToKserveType(os.get(0).getType(), os.get(0).getValue()));
             for (Output o : os) {
                 TensorDataframe.addValue(contentOut, o.getValue(), o.getType());
             }
