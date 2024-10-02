@@ -12,10 +12,10 @@ if [ ! -d "${ARTIFACT_SCREENSHOTS_DIR}" ]; then
   echo "Creating the screenshot artifact directory: ${ARTIFACT_SCREENSHOT_DIR}"
   mkdir -p ${ARTIFACT_SCREENSHOT_DIR}
 fi
-TESTS_REGEX=${TESTS_REGEX:-"basictests"}
 ODHPROJECT=${ODHPROJECT:-"opendatahub"}
 SERVICE_IMAGE=${SERVICE_IMAGE:-"quay.io/trustyai/trustyai-service:latest"}
 OPERATOR_IMAGE=${OPERATOR_IMAGE:-"quay.io/trustyai/trustyai-service-operator:latest"}
+PYTEST_MARKERS=${PYTEST_MARKERS:-"openshift and not heavy"}
 
 export ODHPROJECT
 export LOCAL
@@ -55,7 +55,9 @@ fi
 success=1
 
 if [ $INSTALL_FAILURE = false ]; then
-  $HOME/peak/run.sh ${TESTS_REGEX}
+  cd peak/trustyai-tests
+  echo -e "Running trustyai-tests suite..."
+  poetry run pytest --log-cli-level=30 --tb=short --log-file=${ARTIFACT_DIR}/pytest_debug.log --log-file-level=DEBUG -m "${PYTEST_MARKERS}" --use-modelmesh-image
 else
   echo -e "Skipping tests due to ODH Operator/DSC installation failure, marking suite as failed."
   success=0

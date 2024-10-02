@@ -3,6 +3,7 @@ package org.kie.trustyai.service.payloads.consumer.partial;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -13,6 +14,7 @@ public abstract class PartialPayload implements PartialPayloadInterface {
     private PartialPayloadId partialPayloadId = new PartialPayloadId();
 
     @ElementCollection
+    @Column(columnDefinition = "text")
     protected Map<String, String> metadata = new HashMap<>();
 
     public Map<String, String> getMetadata() {

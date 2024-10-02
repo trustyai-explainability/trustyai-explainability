@@ -19,6 +19,14 @@ public class InferenceLoggerOutputObject {
     private Long id;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    private List<Integer> shape;
+
+    private String datatype;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<SerializableObject> data;
+
+
     public List<Integer> getShape() {
         return shape;
     }
@@ -42,12 +50,6 @@ public class InferenceLoggerOutputObject {
     public void setData(List<SerializableObject> data) {
         this.data = data;
     }
-
-    private List<Integer> shape;
-    private String datatype;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    private List<SerializableObject> data;
 
     public String getName() {
         return name;

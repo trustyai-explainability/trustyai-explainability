@@ -1,5 +1,8 @@
 package org.kie.trustyai.service.data.reconcilers.payloadstorage;
 
+import org.hibernate.exception.DataException;
+import org.kie.trustyai.service.data.exceptions.PayloadWriteException;
+import org.kie.trustyai.service.payloads.consumer.partial.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.partial.PartialPayload;
 import org.kie.trustyai.service.payloads.consumer.partial.PartialPayloadId;
 
@@ -13,21 +16,48 @@ public class HibernatePayloadStorage<T extends PartialPayload, U extends Partial
 
     @Override
     @Transactional
-    public void addUnreconciledInput(String id, PartialPayload inputPayload) {
-        if (hasUnreconciledInput(id)) {
-            em.merge(inputPayload);
-        } else {
-            em.persist(inputPayload);
+    public void addUnreconciledInput(String id, PartialPayload inputPayload) throws PayloadWriteException {
+        try {
+            if (hasUnreconciledInput(id)) {
+                em.merge(inputPayload);
+            } else {
+                em.persist(inputPayload);
+            }
+            // force the transaction to commit, and therefore throw any errors *inside* the try/catch block
+            em.flush();
+        } catch (DataException e) {
+            if (inputPayload instanceof InferencePartialPayload) {
+                InferencePartialPayload payload = (InferencePartialPayload) inputPayload;
+                int payloadSize = payload.getData().getBytes().length;
+                throw new PayloadWriteException(String.format(
+                        "Could not persist partial input payload of size=%,d bytes. This can happen if the payload is too large, try reducing inference batch size.", payloadSize));
+            } else {
+                throw new PayloadWriteException("Could not persist partial input payload. This can happen if the payload is too large, try reducing inference batch size.");
+            }
+
         }
     }
 
     @Override
     @Transactional
-    public void addUnreconciledOutput(String id, PartialPayload outputPayload) {
-        if (hasUnreconciledOutput(id)) {
-            em.merge(outputPayload);
-        } else {
-            em.persist(outputPayload);
+    public void addUnreconciledOutput(String id, PartialPayload outputPayload) throws PayloadWriteException {
+        try {
+            if (hasUnreconciledOutput(id)) {
+                em.merge(outputPayload);
+            } else {
+                em.persist(outputPayload);
+            }
+            // force the transaction to commit, and therefore throw any errors *inside* the try/catch block
+            em.flush();
+        } catch (DataException e) {
+            if (outputPayload instanceof InferencePartialPayload) {
+                InferencePartialPayload payload = (InferencePartialPayload) outputPayload;
+                int payloadSize = payload.getData().length();
+                throw new PayloadWriteException(String.format(
+                        "Could not persist partial output payload of size=%,d bytes. This can happen if the payload is too large, try reducing inference batch size.", payloadSize));
+            } else {
+                throw new PayloadWriteException("Could not persist partial output payload. This can happen if the payload is too large, try reducing inference batch size.");
+            }
         }
     }
 

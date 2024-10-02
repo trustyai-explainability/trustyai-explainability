@@ -13,12 +13,25 @@
     <name>TrustyAI Connectors</name>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <grpc.version>1.59.0</grpc.version><!-- CURRENT_GRPC_VERSION -->
+        <grpc.version>1.68.0</grpc.version><!-- CURRENT_GRPC_VERSION -->
         <protoc.version>3.19.3</protoc.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Override the version of protobuf-java until io-grpc moves from 3.25.3 to 3.25.5-->
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>3.25.5</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
     <dependencies>
         <dependency>
             <groupId>org.kie.trustyai</groupId>

@@ -8,14 +8,13 @@ import org.kie.trustyai.service.mocks.MockInferenceServiceImpl;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ServerBuilder;
-import io.grpc.inprocess.InProcessServerBuilder;
 
 public class GrpcMockServer {
 
     private static final Logger LOG = Logger.getLogger(GrpcMockServer.class);
 
     private io.grpc.Server server;
-    private final String serverName = InProcessServerBuilder.generateName();
+    private final String serverName = "Mock server";
     private ManagedChannel channel;
     private final int port = 50051;
 

@@ -3,7 +3,7 @@ package org.kie.trustyai.service.data.utils;
 import java.util.Collection;
 import java.util.List;
 
-import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
+import org.kie.trustyai.connectors.kserve.v2.TensorConverterUtils;
 import org.kie.trustyai.explainability.model.SerializableObject;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerGeneral;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerInput;
@@ -52,7 +52,7 @@ public class KServePayloadConverters {
 
     private static TensorPayload[] toTensorPayload(List<List<Object>> objects, String prefix) {
         TensorPayload[] tensorPayloads = new TensorPayload[objects.size()];
-        String dtype = TensorConverter.inferKServeType(objects.get(0).get(0)).toString();
+        String dtype = TensorConverterUtils.inferKServeType(objects.get(0).get(0)).toString();
         for (int i = 0; i < objects.size(); i++) {
             TensorPayload tp = new TensorPayload();
             tp.setData(objects.get(i).toArray());
@@ -112,7 +112,7 @@ public class KServePayloadConverters {
             TensorPayload tp = new TensorPayload();
             tp.setData(ilo.getRawPredictions().stream().map(SerializableObject::getObject).toArray());
             tp.setShape(new Number[] { ilo.getRawPredictions().size() });
-            tp.setDatatype(TensorConverter.inferKServeType(ilo.getRawPredictions().get(0).getObject()).toString());
+            tp.setDatatype(TensorConverterUtils.inferKServeType(ilo.getRawPredictions().get(0).getObject()).toString());
             tp.setName("output");
             payloadInfer.setOutputs(new TensorPayload[] { tp });
         } else {
