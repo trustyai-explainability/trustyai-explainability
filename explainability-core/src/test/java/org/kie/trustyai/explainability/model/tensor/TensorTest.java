@@ -1,5 +1,6 @@
 package org.kie.trustyai.explainability.model.tensor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -8,6 +9,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.kie.trustyai.metrics.utils.ArrayGenerators;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -148,6 +150,118 @@ class TensorTest {
 
         assertEquals("0,0,0,0,0", singleElement.getData()[0]);
         assertArrayEquals(new int[] {}, singleElement.getDimensions());
+    }
+
+    @Test
+    @DisplayName("Stacking tensors works as expected")
+    void testStack() {
+        int[] dimensions = { 5, 4, 3 };
+        List<Tensor<String>> tensors = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            List<?> data = generate(dimensions, "stack-" + i);
+            tensors.add(Tensor.fromList(data));
+        }
+
+        //single element slice
+        Tensor<String> stacked = Tensor.stack(tensors.toArray(new Tensor[0]));
+        assertArrayEquals(new int[] { 10, 5, 4, 3 }, stacked.getDimensions());
+        for (int i = 0; i < 10; i++) {
+            assertEquals(tensors.get(i), stacked.slice(Slice.at(i)));
+        }
+    }
+
+    @Test
+    @DisplayName("Concatenating tensors works as expected")
+    void testConcatenate() {
+        int[] dimensions = { 5, 4, 3 };
+        List<Tensor<String>> tensors = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            List<?> data = generate(dimensions, "stack-" + i);
+            tensors.add(Tensor.fromList(data));
+        }
+
+        //single element slice
+        Tensor<String> stacked = Tensor.concatenate(tensors.toArray(new Tensor[0]));
+        assertArrayEquals(new int[] { 50, 4, 3 }, stacked.getDimensions());
+
+        for (int i = 0; i < 10; i++) {
+            assertEquals(tensors.get(i), stacked.slice(Slice.between(i * 5, i * 5 + 5)));
+        }
+    }
+
+    @Test
+    @DisplayName("First dimensional slicing shortcut works as expected")
+    void testFirstAxisSlice() {
+        int[] dimensions = { 5, 40, 30, 20 };
+        List<Tensor<String>> tensors = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            List<?> data = generate(dimensions, "stack-" + i);
+            tensors.add(Tensor.fromList(data));
+        }
+
+        //single element slice
+        Tensor<String> stacked = Tensor.stack(tensors.toArray(new Tensor[0]));
+
+        for (int i = 0; i < 10; i++) {
+            assertEquals(tensors.get(i), stacked.get(i));
+        }
+    }
+
+    @Test
+    @DisplayName("First dimensional slicing shortcut works as expected")
+    void testFirstAxisSliceRange() {
+        int[] dimensions = { 5, 40, 30, 20 };
+        List<Tensor<String>> tensors = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            List<?> data = generate(dimensions, "stack-" + i);
+            tensors.add(Tensor.fromList(data));
+        }
+
+        //single element slice
+        Tensor<String> stacked = Tensor.stack(tensors.toArray(new Tensor[0]));
+        Tensor<String> sliced = Tensor.stack(new Tensor[] { tensors.get(1), tensors.get(3), tensors.get(0), tensors.get(4) });
+
+        assertEquals(sliced, stacked.get(List.of(1, 3, 0, 4)));
+    }
+
+    @Test
+    @DisplayName("Second dimensional slicing shortcut works as expected")
+    void testSecondAxisSlice() {
+        int[] dimensions = { 5, 14, 13, 12 };
+        List<Tensor<String>> tensors = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            List<Tensor<String>> secondDimTensors = new ArrayList<>();
+            for (int ii = 0; ii < 10; ii++) {
+                List<?> data = generate(dimensions, "stack-" + i + "," + ii);
+                secondDimTensors.add(Tensor.fromList(data));
+            }
+            tensors.add(Tensor.stack(secondDimTensors.toArray(new Tensor[0])));
+        }
+
+        //single element slice
+        Tensor<String> stacked = Tensor.stack(tensors.toArray(new Tensor[0]));
+
+        for (int i = 0; i < 10; i++) {
+            Tensor<String> t1 = stacked.slice(Slice.all(), Slice.at(i));
+            Tensor<String> t2 = stacked.getFromSecondAxis(i);
+            assertEquals(t1, t2);
+        }
+    }
+
+    @Test
+    @DisplayName("Tensor mapping works as expected")
+    void testMap() {
+        int[] dimensions = { 5, 14, 13 };
+        Double[][][] data = ArrayGenerators.get3DDoubleArr(dimensions);
+        Tensor<Double> tensor = TensorFactory.fromArray(data);
+
+        Tensor<Double> doubled = tensor.map(d -> d * 2);
+        Tensor<String> stringed = tensor.map(String::valueOf, new String[tensor.getnEntries()]);
+
+        for (int i = 0; i < tensor.getnEntries(); i++) {
+            assertEquals(tensor.getLinearElement(i) * 2, doubled.getLinearElement(i));
+            assertEquals(String.valueOf(tensor.getLinearElement(i)), stringed.getLinearElement(i));
+        }
     }
 
     @Test
