@@ -11,7 +11,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.connectors.kserve.v2.RawConverter;
+import org.kie.trustyai.connectors.kserve.v2.RawValueExtractor;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferParameter;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
@@ -75,7 +75,7 @@ class ConsumerEndpointRawTest {
         final Random random = new Random(0);
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble(), random.nextDouble());
         ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
-        builder.addRawInputContents(RawConverter.fromDouble(values));
+        builder.addRawInputContents(RawValueExtractor.fromDouble(values));
         ModelInferRequest.InferInputTensor.Builder tensorBuilder = ModelInferRequest.InferInputTensor.newBuilder()
                 .setDatatype("FP64")
                 .addShape(1).addShape(3);
@@ -101,7 +101,7 @@ class ConsumerEndpointRawTest {
         final Random random = new Random(0);
         final List<Double> values = List.of(random.nextDouble(), random.nextDouble());
         ModelInferResponse.Builder builder = ModelInferResponse.newBuilder();
-        builder.addRawOutputContents(RawConverter.fromDouble(values));
+        builder.addRawOutputContents(RawValueExtractor.fromDouble(values));
         ModelInferResponse.InferOutputTensor tensor = ModelInferResponse.InferOutputTensor.newBuilder()
                 .setDatatype("FP64")
                 .addShape(1).addShape(2)
@@ -122,7 +122,7 @@ class ConsumerEndpointRawTest {
         final Random random = new Random(0);
         final List<Long> values = List.of(random.nextLong(), random.nextLong(), random.nextLong());
         ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
-        builder.addRawInputContents(RawConverter.fromLong(values));
+        builder.addRawInputContents(RawValueExtractor.fromLong(values));
         ModelInferRequest.InferInputTensor tensor = ModelInferRequest.InferInputTensor.newBuilder()
                 .setDatatype("INT64")
                 .addShape(1).addShape(3)
@@ -143,7 +143,7 @@ class ConsumerEndpointRawTest {
         final Random random = new Random(0);
         final List<Long> values = List.of(random.nextLong(), random.nextLong());
         ModelInferResponse.Builder builder = ModelInferResponse.newBuilder();
-        builder.addRawOutputContents(RawConverter.fromLong(values));
+        builder.addRawOutputContents(RawValueExtractor.fromLong(values));
         ModelInferResponse.InferOutputTensor tensor = ModelInferResponse.InferOutputTensor.newBuilder()
                 .setDatatype("INT64")
                 .addShape(1).addShape(2)
@@ -164,7 +164,7 @@ class ConsumerEndpointRawTest {
         final Random random = new Random(0);
         final List<Integer> values = List.of(random.nextInt(), random.nextInt(), random.nextInt());
         ModelInferRequest.Builder builder = ModelInferRequest.newBuilder();
-        builder.addRawInputContents(RawConverter.fromInteger(values));
+        builder.addRawInputContents(RawValueExtractor.fromInteger(values));
         ModelInferRequest.InferInputTensor tensor = ModelInferRequest.InferInputTensor.newBuilder()
                 .setDatatype("INT32")
                 .addShape(1).addShape(3)
@@ -185,7 +185,7 @@ class ConsumerEndpointRawTest {
         final Random random = new Random(0);
         final List<Integer> values = List.of(random.nextInt(), random.nextInt());
         ModelInferResponse.Builder builder = ModelInferResponse.newBuilder();
-        builder.addRawOutputContents(RawConverter.fromInteger(values));
+        builder.addRawOutputContents(RawValueExtractor.fromInteger(values));
         ModelInferResponse.InferOutputTensor tensor = ModelInferResponse.InferOutputTensor.newBuilder()
                 .setDatatype("INT32")
                 .addShape(1).addShape(2)

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.kie.trustyai.connectors.kserve.v2.TensorConverter;
+import org.kie.trustyai.connectors.kserve.v2.TensorConverterUtils;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
@@ -67,7 +67,7 @@ public class TensorDataframe {
         final ModelInferRequest.InferInputTensor.Builder inferInputTensorBuilder = ModelInferRequest.InferInputTensor.newBuilder();
 
         final Type trustyType = this.df.getType(0);
-        final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(trustyType, this.df.getValue(row, 0)));
+        final String kserveType = String.valueOf(TensorConverterUtils.trustyToKserveType(trustyType, this.df.getValue(row, 0)));
         inferInputTensorBuilder.setDatatype(kserveType);
 
         final InferTensorContents.Builder contents = InferTensorContents.newBuilder();
@@ -92,7 +92,7 @@ public class TensorDataframe {
         final ModelInferRequest.InferInputTensor.Builder inferInputTensorBuilder = ModelInferRequest.InferInputTensor.newBuilder();
 
         final Type trustyType = this.df.getType(0);
-        final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(trustyType, this.df.getValue(0, 0)));
+        final String kserveType = String.valueOf(TensorConverterUtils.trustyToKserveType(trustyType, this.df.getValue(0, 0)));
         inferInputTensorBuilder.setDatatype(kserveType);
 
         final InferTensorContents.Builder contents = InferTensorContents.newBuilder();
@@ -119,7 +119,7 @@ public class TensorDataframe {
 
         // Type of first output used for all other outputs when in the "array" mode
         final Type trustyType = this.df.getType(indices.get(0));
-        final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(trustyType, this.df.getValue(row, 0)));
+        final String kserveType = String.valueOf(TensorConverterUtils.trustyToKserveType(trustyType, this.df.getValue(row, 0)));
         inferOutputTensorBuilder.setDatatype(kserveType);
 
         final InferTensorContents.Builder contents = InferTensorContents.newBuilder();
@@ -151,7 +151,7 @@ public class TensorDataframe {
 
         // Type of first output used for all other outputs when in the "array" mode
         final Type trustyType = this.df.getType(indices.get(0));
-        final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(trustyType, this.df.getValue(this.df.getOutputsIndices().get(0), 0)));
+        final String kserveType = String.valueOf(TensorConverterUtils.trustyToKserveType(trustyType, this.df.getValue(this.df.getOutputsIndices().get(0), 0)));
         inferOutputTensorBuilder.setDatatype(kserveType);
 
         final InferTensorContents.Builder contents = InferTensorContents.newBuilder();
@@ -177,7 +177,7 @@ public class TensorDataframe {
             addValue(contents, value, type);
 
             final ModelInferRequest.InferInputTensor.Builder tensor = ModelInferRequest.InferInputTensor.newBuilder();
-            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, value));
+            final String kserveType = String.valueOf(TensorConverterUtils.trustyToKserveType(type, value));
             tensor.setDatatypeBytes(ByteString.copyFromUtf8(kserveType));
             tensor.setNameBytes(ByteString.copyFromUtf8(featureName));
             tensor.addShape(1);
@@ -196,7 +196,7 @@ public class TensorDataframe {
             addValue(contents, value, type);
 
             final ModelInferResponse.InferOutputTensor.Builder tensor = ModelInferResponse.InferOutputTensor.newBuilder();
-            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, value));
+            final String kserveType = String.valueOf(TensorConverterUtils.trustyToKserveType(type, value));
             tensor.setDatatypeBytes(ByteString.copyFromUtf8(kserveType));
             tensor.setNameBytes(ByteString.copyFromUtf8(featureName));
             tensor.addShape(1);
@@ -214,7 +214,7 @@ public class TensorDataframe {
             this.df.getColumn(column).forEach(value -> addValue(contents, value, type));
 
             final ModelInferRequest.InferInputTensor.Builder tensor = ModelInferRequest.InferInputTensor.newBuilder();
-            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, this.df.getValue(0, column)));
+            final String kserveType = String.valueOf(TensorConverterUtils.trustyToKserveType(type, this.df.getValue(0, column)));
             tensor.setDatatypeBytes(ByteString.copyFromUtf8(kserveType));
             tensor.setNameBytes(ByteString.copyFromUtf8(featureName));
             tensor.addShape(1);
@@ -233,7 +233,7 @@ public class TensorDataframe {
             this.df.getColumn(column).forEach(value -> addValue(contents, value, type));
 
             final ModelInferResponse.InferOutputTensor.Builder tensor = ModelInferResponse.InferOutputTensor.newBuilder();
-            final String kserveType = String.valueOf(TensorConverter.trustyToKserveType(type, this.df.getValue(0, column)));
+            final String kserveType = String.valueOf(TensorConverterUtils.trustyToKserveType(type, this.df.getValue(0, column)));
             tensor.setDatatypeBytes(ByteString.copyFromUtf8(kserveType));
             tensor.setNameBytes(ByteString.copyFromUtf8(featureName));
             tensor.addShape(1);
