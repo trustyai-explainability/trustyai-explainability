@@ -84,11 +84,8 @@ public class KServePayloadConverters {
     public static ModelInferRequestPayload toRequestPayload(KServeInputPayload payload) throws JsonProcessingException {
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-
-        LOG.info("in request payload function");
         JsonNode rootNode = objectMapper.readTree(payload.getData());
-
-
+        
         ModelInferRequestPayload payloadInfer = new ModelInferRequestPayload();
         payloadInfer.setId(payload.getId());
         if (rootNode.has("instances")) {
