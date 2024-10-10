@@ -85,7 +85,7 @@ public class KServePayloadConverters {
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         JsonNode rootNode = objectMapper.readTree(payload.getData());
-        
+
         ModelInferRequestPayload payloadInfer = new ModelInferRequestPayload();
         payloadInfer.setId(payload.getId());
         if (rootNode.has("instances")) {
