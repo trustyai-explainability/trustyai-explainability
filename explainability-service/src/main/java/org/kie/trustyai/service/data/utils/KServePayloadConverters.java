@@ -3,8 +3,11 @@ package org.kie.trustyai.service.data.utils;
 import java.util.Collection;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import org.jboss.logging.Logger;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverterUtils;
 import org.kie.trustyai.explainability.model.SerializableObject;
+import org.kie.trustyai.service.endpoints.consumer.ConsumerEndpoint;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerGeneral;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerInput;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
@@ -19,6 +22,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class KServePayloadConverters {
+
+    private static final Logger LOG = Logger.getLogger(KServePayloadConverters.class);
 
     public static boolean isV1(InferenceLoggerOutput inferenceLoggerOutput) {
         boolean predExist = inferenceLoggerOutput.getRawPredictions() != null;
@@ -78,7 +83,11 @@ public class KServePayloadConverters {
 
     public static ModelInferRequestPayload toRequestPayload(KServeInputPayload payload) throws JsonProcessingException {
         final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+
+        LOG.info("in request payload function");
         JsonNode rootNode = objectMapper.readTree(payload.getData());
+
 
         ModelInferRequestPayload payloadInfer = new ModelInferRequestPayload();
         payloadInfer.setId(payload.getId());

@@ -8,8 +8,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import io.restassured.http.ContentType;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
+import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +34,9 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
+import static io.restassured.RestAssured.given;
 import static io.smallrye.common.constraint.Assert.assertTrue;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -56,6 +60,7 @@ abstract public class CloudEventConsumerBaseTest {
         resetDatasource();
         clearStorage();
     }
+
 
     private static final String input = "{\n" +
             "    \"inputs\": [\n" +
@@ -115,6 +120,20 @@ abstract public class CloudEventConsumerBaseTest {
             "    ]\n" +
             "}";
 
+    private static final String largeInput = "{\n" +
+            "  \"inputs\": [\n" +
+            "    {\n" +
+            "      \"name\": \"customer_data_input\",\n" +
+            "      \"shape\": [%d, 5],\n" +
+            "      \"datatype\": \"FP64\",\n" +
+            "      \"data\": [\n%s\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
+
+    private static final String data = "        [1.0, 112500.0, 2.0, 1.0, 1.0]";
+
     private CloudEvent<byte[]> generateMockInput(String id) {
         final String payload = "{\"instances\":[[" + Math.random() + ", " + Math.random() + ", " + Math.random() + ", " + Math.random() + "]]}";
         return MockKServeInputPayload.create(id, payload.getBytes(StandardCharsets.UTF_8), MODEL_NAME);
@@ -128,6 +147,12 @@ abstract public class CloudEventConsumerBaseTest {
 
     private CloudEvent<byte[]> generateMockBatchInput(String id) {
         return MockKServeInputPayload.create(id, input.getBytes(StandardCharsets.UTF_8), MODEL_NAME);
+    }
+
+    private String generateMockLargeInput(String id, int n) {
+        String content = (data +",\n").repeat(n-1) + data;
+        String payload = String.format(largeInput, n, content);
+        return payload;//.getBytes(StandardCharsets.UTF_8);
     }
 
     private CloudEvent<InferenceLoggerOutput> generateMockBatchOutput(String id) {
@@ -187,6 +212,25 @@ abstract public class CloudEventConsumerBaseTest {
         assertEquals(5, df.getRowDimension());
         assertEquals(2, df.getInputsCount());
         assertEquals(1, df.getOutputsCount());
+    }
+
+    @Test
+    @DisplayName("Large Kubeflow CloudEvents should be accepted")
+    public void testConsumeLargeKubeflowCloudEvents() {
+        final String id = UUID.randomUUID().toString();
+        String mockInput = generateMockLargeInput(id, 50_000);
+        System.out.println(mockInput.getBytes(StandardCharsets.UTF_8).length/1000./1000. + "MB");
+        given()
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("ce-specversion", "1.0")
+                .header("ce-id", "65b7fe9a-3ef7-4683-8b89-dad1cb5f1464")
+                .header("ce-type", "org.kubeflow.serving.inference.request")
+                .header("ce-source", "http://localhost:9081/")
+                .header("ce-datacontenttype", "application/x-www-form-urlencoded")
+                .body(mockInput)
+                .when().post("/")
+                .then()
+                .statusCode(RestResponse.StatusCode.NO_CONTENT);
     }
 
     @Test
