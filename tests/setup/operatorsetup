@@ -1,2 +1,2 @@
-opendatahub-operator fast https://github.com/opendatahub-io/opendatahub-operator community-operators opendatahub-operator.v2.15.0
-authorino-operator stable https://github.com/Kuadrant/authorino-operator community-operators authorino-operator.v0.11.1
+opendatahub-operator fast https://github.com/opendatahub-io/opendatahub-operator community-operators opendatahub-operator.v2.18.2
+authorino-operator stable https://github.com/Kuadrant/authorino-operator community-operators authorino-operator.v0.13.0
