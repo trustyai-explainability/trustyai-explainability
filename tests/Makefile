@@ -49,15 +49,23 @@ run:
 clean:
 	oc delete -n $(ODHPROJECT) dsc default-dsc || true
 	oc delete project $(ODHPROJECT) || echo -e "\n\n==> If the project deletion failed, you can try to use this script to force it: https://raw.githubusercontent.com/jefferyb/useful-scripts/master/openshift/force-delete-openshift-project\n\n"
-	#Clean up openshift-operators namespace
-	oc get csv -n openshift-operators -o name | grep strimzi-cluster-operator | xargs oc delete -n openshift-operators || true
-	oc get csv -n openshift-operators -o name | grep opendatahub-operator | xargs oc delete -n openshift-operators || true
-	oc delete subscription -n openshift-operators -l peak.test.subscription=opendatahub-operator
+
+	# Remove operator subscriptions
+	oc delete $$(oc get subscription -n openshift-operators -o name | grep opendatahub) -n openshift-operators || true
+	oc delete $$(oc get subscription -n openshift-operators -o name | grep authorino) -n openshift-operators || true
+	oc delete $$(oc get subscription -n openshift-operators -o name | grep maria) -n openshift-operators || true
+
+	oc delete $$(oc get clusterserviceversion -n openshift-operators -o name | grep opendatahub) -n openshift-operators || true
+	oc delete $$(oc get clusterserviceversion -n openshift-operators -o name | grep authorino) -n openshift-operators || true
+	oc delete $$(oc get clusterserviceversion -n openshift-operators -o name | grep maria) -n openshift-operators || true
+
+	#
+	# Other Cleanup
 	oc get mutatingwebhookconfiguration -o name | grep katib | grep $(ODHPROJECT) | xargs oc delete || true
 	oc get validatingwebhookconfiguration -o name | grep katib | grep $(ODHPROJECT) | xargs oc delete || true
-	oc delete project $(ODHPROJECT)-model || true
 	oc delete identity htpasswd-provider:admin || true
-	oc patch $$(oc get kfdef -o name) --type=merge -p '{"metadata": {"finalizers":null}}' || true
-	echo "Deleting test projects"
+
+	#
+	# Delete test projects"
 	oc delete $$(oc get projects -o name | grep basictests-) || true
 	oc delete $$(oc get projects -o name | grep nightly-) || true
