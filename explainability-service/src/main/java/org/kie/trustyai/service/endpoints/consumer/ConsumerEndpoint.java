@@ -21,6 +21,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Path("/consumer/kserve/v2")
 @Tag(name = "{Internal Only} Inference Consumer",
         description = "This endpoint consumes inference payloads produced by ModelMesh-served models. While it's possible to manually interact with this endpoint, it is not recommended.")
@@ -33,6 +36,20 @@ public class ConsumerEndpoint {
     @Inject
     ModelMeshInferencePayloadReconciler reconciler;
 
+
+    private void filterRequestMetadata(InferencePartialPayload request){
+        Map<String, String> originalMetadata = request.getMetadata();
+        HashMap<String, String> filteredMetadata = new HashMap<>();
+        for (Map.Entry<String, String> entry : originalMetadata.entrySet()) {
+            if (entry.getKey().contains("authorization")){
+                filteredMetadata.put(entry.getKey(), "");
+            } else {
+                filteredMetadata.put(entry.getKey(), entry.getValue());
+            }
+        }
+        request.setMetadata(filteredMetadata);
+    }
+
     @POST
     @Operation(summary = "Send a single ModelMesh input or output payload to TrustyAI.")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -40,6 +57,9 @@ public class ConsumerEndpoint {
     public Response consumeInput(InferencePartialPayload request) throws DataframeCreateException {
         if (request.getKind().equals(PartialKind.request)) {
             LOG.info("Received partial input payload from model='" + request.getModelId() + "', id=" + request.getId());
+            filterRequestMetadata(request);
+
+            LOG.info("Request Metadata: " + request.getMetadata());
             try {
                 reconciler.addUnreconciledInput(request);
             } catch (InvalidSchemaException | DataframeCreateException | StorageWriteException e) {
@@ -53,6 +73,8 @@ public class ConsumerEndpoint {
             }
         } else if (request.getKind().equals(PartialKind.response)) {
             LOG.info("Received partial output payload from model='" + request.getModelId() + "', id=" + request.getId());
+            filterRequestMetadata(request);
+            LOG.info("Response Metadata: " + request.getMetadata());
             try {
                 reconciler.addUnreconciledOutput(request);
             } catch (InvalidSchemaException | DataframeCreateException | StorageWriteException e) {

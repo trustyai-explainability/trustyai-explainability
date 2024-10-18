@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Lob;
 
+import java.util.HashMap;
+
 @Entity
 public class InferencePartialPayload extends PartialPayload {
     // mariadb specific?
@@ -32,5 +34,9 @@ public class InferencePartialPayload extends PartialPayload {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public void setMetadata(HashMap<String, String> metadata) {
+        this.metadata = metadata;
     }
 }
