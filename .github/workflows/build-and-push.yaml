@@ -97,6 +97,8 @@ jobs:
           git clone https://github.com/trustyai-explainability/trustyai-service-operator
           cd trustyai-service-operator
           sed -i "s#quay.io/trustyai/trustyai-service:latest#${{ env.IMAGE_NAME }}:$TAG#" ./config/base/params.env
+          sed -i "s#quay.io/trustyai/trustyai-service:latest#${{ env.IMAGE_NAME }}:$TAG#" ./config/overlays/odh/params.env
+          sed -i "s#quay.io/trustyai/trustyai-service:latest#${{ env.IMAGE_NAME }}:$TAG#" ./config/overlays/rhoai/params.env
           rm -Rf $(ls . | grep -v config)
           rm -Rf .gitignore .dockerignore .github .git .yamllint.yaml
           echo "## Automatically Generated Manifests for Service CI" > README.md
