@@ -95,7 +95,8 @@ function installop() {
 
     set +e
     if [ "$installMode" == "true" ]; then
-        echo "install $1 in namespace openshift-operators"
+        true
+        #echo "installing $1 in namespace openshift-operators"
 
 	# For global operators we're just using testproj for a name, so make
 	# one if we have not created the project
@@ -103,11 +104,11 @@ function installop() {
 	    testproj=$(random_name $1)
 	fi
 
-        cat <<- EOF | oc create -f -
+        cat <<- EOF | oc create -f > /dev/null 2>&1 -
 	apiVersion: operators.coreos.com/v1alpha1
 	kind: Subscription
 	metadata:
-	  name: $testproj
+	  name: $1
 	  namespace: openshift-operators
 	  labels:
 	     peak.test.subscription: $1
@@ -125,10 +126,10 @@ function installop() {
 	    return 0
 	fi
 
-        echo "install $1 in namespace $testproj"
+        echo "installing $1 in namespace $testproj"
 
         # in this case we need to make an operator group in the new project
-        cat <<- EOF | oc create -f -
+        cat <<- EOF | oc create -f > /dev/null 2>&1 -
 	apiVersion: operators.coreos.com/v1
 	kind: OperatorGroup
 	metadata:
@@ -142,7 +143,7 @@ function installop() {
 	EOF
 
         # create a subscription object
-        cat <<- EOF | oc create -f -
+        cat <<- EOF | oc create -f > /dev/null 2>&1 -
 	apiVersion: operators.coreos.com/v1alpha1
 	kind: Subscription
 	metadata:
@@ -250,7 +251,7 @@ while IFS= read -r line
 do
     vals=($line)
 
-    echo ++++++++++++++ Processing entry for operator "${vals[0]}" ++++++++++++++
+    echo -n "Processing entry for operator ${vals[0]}..."
 
     if [ "${#vals[@]}" -lt 2 ]; then
         echo "Invalid tuple '${vals[@]}' in $1, skipping"
@@ -274,6 +275,7 @@ do
     # install operator if we're (re)creating
     if [ "$operators" == "true" -a "$delete" == "false" ]; then
         installop ${vals[0]} ${vals[1]} ${vals[3]} ${vals[4]}
+        echo "[DONE]"
     fi
 
     # clone a specific repository for tests if one is listed

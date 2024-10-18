@@ -1,55 +1,58 @@
 #!/bin/bash
 echo "Installing DSC from test directory"
 DSC_FILENAME=odh-core-dsc.yaml
+HEADER="=============="
 
-set -x
 ## Install the opendatahub-operator
 pushd ~/peak
 retry=5
+
 if ! [ -z "${SKIP_OPERATOR_INSTALL}" ]; then
     ## SKIP_OPERATOR_INSTALL is used in the opendatahub-operator repo
     ## because openshift-ci will install the operator for us
     echo "Relying on odh operator installed by openshift-ci"
     ./setup.sh -t ~/peak/operatorsetup 2>&1
 else
-  echo "Installing operator from community marketplace"
-
+  echo
+  echo "$HEADER Verifying Cluster Readiness $HEADER"
+  echo -n "Waiting for catalog sources to appear..."
   start_t=$(date +%s) 2>&1
   ready=false 2>&1
   while ! $ready; do
     CATALOG_SOURCES=$(oc get catalogsources -n openshift-marketplace 2> /dev/null | grep 'community-operators')
     if [ ! -z "${CATALOG_SOURCES}" ]; then
-      echo $CATALOG_SOURCES
       ready=true 2>&1
     else
       sleep 10
     fi
     if [ $(($(date +%s)-start_t)) -gt 300 ]; then
-      echo "Marketplace pods never started"
+      echo "ERROR: Marketplace pods never started"
       exit 1
     fi
   done
+  echo "[DONE]"
 
-    start_t=$(date +%s) 2>&1
-    ready=false 2>&1
-    while ! $ready; do
-      MANIFESTS=$(oc get packagemanifests -n openshift-marketplace 2> /dev/null | grep 'opendatahub')
-      echo $MANIFESTS
-      if [ ! -z "${MANIFESTS}" ]; then
-        echo $MANIFESTS
-        ready=true 2>&1
-      else
-        sleep 10
-      fi
-      if [ $(($(date +%s)-start_t)) -gt 900 ]; then
-        echo "Package manifests never downloaded"
-        exit 1
-      fi
-    done
+  echo -n "Waiting for ODH package manifests to download..."
+  start_t=$(date +%s) 2>&1
+  ready=false 2>&1
+  while ! $ready; do
+    MANIFESTS=$(oc get packagemanifests -n openshift-marketplace 2> /dev/null | grep 'opendatahub')
+    if [ ! -z "${MANIFESTS}" ]; then
+      ready=true 2>&1
+    else
+      sleep 10
+    fi
+    if [ $(($(date +%s)-start_t)) -gt 900 ]; then
+      echo "ERROR: Package manifests never downloaded"
+      exit 1
+    fi
+  done
+  echo "[DONE]"
 
-
-
+  echo
+  echo "$HEADER Starting Operator Installation $HEADER"
   while [[ $retry -gt 0 ]]; do
+
     ./setup.sh -o ~/peak/operatorsetup\
 
     # approve installplans
@@ -62,44 +65,26 @@ else
     fi  
     retry=$(( retry - 1))
 
-#    ODH_VERSION=$(cat ~/peak/operatorsetup | grep opendatahub-operator | awk '{print $5}')
-#    start_t=$(date +%s) 2>&1
-#    ready=false 2>&1
-#    while ! $ready; do
-#      echo $(oc get installplan -n openshift-operators)
-#      INSTALL_PLAN=$(oc get installplan -n openshift-operators 2> /dev/null | grep $ODH_VERSION)
-#      if [ ! -z "${INSTALL_PLAN}" ]; then
-#        echo $INSTALL_PLAN
-#        ready=true 2>&1
-#      else
-#        sleep 10
-#      fi
-#      if [ $(($(date +%s)-start_t)) -gt 600 ]; then
-#        echo "Install Plans never appeared"
-#        exit 1
-#      fi
-#    done
-    # make sure we only approve the right install plan version, to avoid upgrading from our pinned ODH version
+    echo
+    echo "$HEADER Verifying Operator Installation $HEADER"
+    for operator in opendatahub-operator authorino-operator knative-operator knative-openshift istio-operator; do
+      echo -n "Checking $operator readiness..."
+      finished=false 2>&1
+      start_t=$(date +%s) 2>&1
+      while ! $finished; do
+          if [ ! -z "$(oc get pods -n openshift-operators  | grep $operator | grep '1/1')" ]; then
+            echo "[DONE]"
+            finished=true 2>&1
+          else
+            echo -n "."
+            sleep 10
+          fi
 
-    sleep 30
-    echo "Approving Install Plans, if needed"
-    oc patch installplan $(oc get installplan -n openshift-operators | grep $ODH_VERSION | awk '{print $1}') -n openshift-operators --type merge --patch '{"spec":{"approved":true}}' || true
-    oc patch installplan $(oc get installplan -n openshift-operators | grep authorino | awk '{print $1}') -n openshift-operators --type merge --patch '{"spec":{"approved":true}}' || true
-
-    finished=false 2>&1
-    start_t=$(date +%s) 2>&1
-    echo "Verifying installation of ODH operator"
-    while ! $finished; do
-        if [ ! -z "$(oc get pods -n openshift-operators  | grep 'opendatahub-operator-controller-manager' | grep '1/1')" ]; then
-          finished=true 2>&1
-        else
-          sleep 10
-        fi
-
-        if [ $(($(date +%s)-start_t)) -gt 300 ]; then
-          echo "ODH Operator installation timeout, existing test"
-          exit 1
-        fi
+          if [ $(($(date +%s)-start_t)) -gt 300 ]; then
+            echo "ERROR: $operator installation timeout, exiting test"
+            exit 1
+          fi
+      done
     done
 
   done
@@ -138,24 +123,24 @@ else
   fi
 fi
 
-if [ -z "${OPENSHIFT_TESTUSER_NAME}" ] || [ -z "${OPENSHIFT_TESTUSER_PASS}" ]; then
-  OAUTH_PATCH_TEXT="$(cat $HOME/peak/operator-tests/trustyai-explainability/resources/oauth-patch.htpasswd.json)"
-  echo "Creating HTPASSWD OAuth provider"
-  oc apply -f $HOME/peak/operator-tests/trustyai-explainability/resources/htpasswd.secret.yaml
-
-  # Test if any oauth identityProviders exists. If not, initialize the identityProvider list
-  if ! oc get oauth cluster -o json | jq -e '.spec.identityProviders' ; then
-    echo 'No oauth identityProvider exists. Initializing oauth .spec.identityProviders = []'
-    oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders", "value": []}]'
-  fi
-
-  # Patch in the htpasswd identityProvider prevent deletion of any existing identityProviders like ldap
-  #  We can have multiple identityProvdiers enabled aslong as their 'name' value is unique
-  oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_PATCH_TEXT"'}]'
-
-  export OPENSHIFT_TESTUSER_NAME=admin
-  export OPENSHIFT_TESTUSER_PASS=admin
-fi
+#if [ -z "${OPENSHIFT_TESTUSER_NAME}" ] || [ -z "${OPENSHIFT_TESTUSER_PASS}" ]; then
+#  OAUTH_PATCH_TEXT="$(cat $HOME/peak/operator-tests/trustyai-explainability/resources/oauth-patch.htpasswd.json)"
+#  echo "Creating HTPASSWD OAuth provider"
+#  oc apply -f $HOME/peak/operator-tests/trustyai-explainability/resources/htpasswd.secret.yaml
+#
+##  # Test if any oauth identityProviders exists. If not, initialize the identityProvider list
+##  if ! oc get oauth cluster -o json | jq -e '.spec.identityProviders' ; then
+##    echo 'No oauth identityProvider exists. Initializing oauth .spec.identityProviders = []'
+##    oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders", "value": []}]'
+##  fi
+##
+##  # Patch in the htpasswd identityProvider prevent deletion of any existing identityProviders like ldap
+##  #  We can have multiple identityProvdiers enabled aslong as their 'name' value is unique
+##  oc patch oauth cluster --type json -p '[{"op": "add", "path": "/spec/identityProviders/-", "value": '"$OAUTH_PATCH_TEXT"'}]'
+#
+#  export OPENSHIFT_TESTUSER_NAME=admin
+#  export OPENSHIFT_TESTUSER_PASS=admin
+#fi
 
 if ! [ -z "${SKIP_DSC_INSTALL}" ]; then
   ## SKIP_DSC_INSTALL is useful in an instance where the
@@ -165,8 +150,9 @@ if ! [ -z "${SKIP_DSC_INSTALL}" ]; then
 else
 
 
-  echo "Creating the following DSC"
-  echo $(cat ./${DSC_FILENAME} > ${ARTIFACT_DIR}/${DSC_FILENAME})
+  echo
+  echo "$HEADER Installing ODH DSC and DSCI $HEADER"
+  cat ./${DSC_FILENAME} > ${ARTIFACT_DIR}/${DSC_FILENAME}
 
   start_t=$(date +%s) 2>&1
   ready=1 2>&1
@@ -175,14 +161,14 @@ else
     oc apply -f ./${DSC_FILENAME}
     ready=$?
     if [ $(($(date +%s)-start_t)) -gt 300 ]; then
-        echo "ODH DSC Installation timeout"
+        echo "ERROR: ODH DSC Installation timeout"
         exit 1
     fi
     sleep 10
   done
 
   if [ "$ready" -ne 0 ]; then
-    echo "The installation failed"
+    echo "ERROR: The installation failed"
     exit $ready
   fi
 fi

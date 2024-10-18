@@ -1,12 +1,13 @@
 #!/bin/bash
 
-set -x
+#set -x
 env | sort >  ${ARTIFACT_DIR}/env.txt
 mkdir -p ~/.kube
 cp /tmp/kubeconfig ~/.kube/config 2> /dev/null || cp /var/run/secrets/ci.openshift.io/multi-stage/kubeconfig ~/.kube/config
 chmod 644 ~/.kube/config
 export KUBECONFIG=~/.kube/config
 export ARTIFACT_SCREENSHOT_DIR="${ARTIFACT_DIR}/screenshots"
+HEADER="=============="
 
 if [ ! -d "${ARTIFACT_SCREENSHOTS_DIR}" ]; then
   echo "Creating the screenshot artifact directory: ${ARTIFACT_SCREENSHOT_DIR}"
@@ -23,11 +24,10 @@ export TEARDOWN
 export SERVICE_IMAGE
 export OPERATOR_IMAGE
 
+echo "$HEADER Starting CI $HEADER"
 echo "OCP version info"
 echo `oc version`
 
-echo "== Catalog Sources =="
-echo `oc get catalogsources -n openshift-marketplace`
 
 INSTALL_FAILURE=false
 if [ -z "${SKIP_INSTALL}" ]; then
@@ -37,13 +37,36 @@ if [ -z "${SKIP_INSTALL}" ]; then
     $HOME/peak/install.sh || INSTALL_FAILURE=true
 
     if [ $INSTALL_FAILURE = false ]; then
-      if [ ${LOCAL:-false} = true ]; then
-        echo "Sleeping for 30s to let the DSC install settle"
-        sleep 30s
-      else
-        echo "Sleeping for 5 min to let the DSC install settle"
-        sleep 5m
-      fi
+      echo
+      echo "$HEADER Waiting For ODH Pods to Start $HEADER"
+      for pod in trustyai-service-operator kserve-controller modelmesh-controller odh-model-controller; do
+        echo -n "Checking $pod..."
+        finished=false 2>&1
+        start_t=$(date +%s) 2>&1
+        while ! $finished; do
+            if [ ! -z "$(oc get pods -n opendatahub | grep $pod  | grep 1/1)" ]; then
+              finished=true 2>&1
+              echo "[DONE]"
+            else
+              echo -n "."
+              sleep 10
+            fi
+
+            if [ $(($(date +%s)-start_t)) -gt 300 ]; then
+              echo "ERROR: $pod spin up timeout, exiting test"
+              exit 1
+            fi
+        done
+      done
+
+
+#      if [ ${LOCAL:-false} = true ]; then
+#        echo "Sleeping for 30s to let the DSC install settle"
+#        sleep 30s
+#      else
+#        echo "Sleeping for 3 min to let the DSC install settle"
+#        sleep 180s
+#      fi
     fi
 
     # Save the list of events and pods that are running prior to the test run
@@ -54,6 +77,8 @@ fi
 
 success=1
 
+echo
+echo "$HEADER Launching Test Suite $HEADER"
 if [ $INSTALL_FAILURE = false ]; then
   cd peak/trustyai-tests
   echo -e "Running trustyai-tests suite..."
@@ -68,6 +93,8 @@ if  [ "$?" -ne 0 ]; then
     success=0
 fi
 
+echo
+echo "$HEADER Post-Test Actions $HEADER"
 echo "Saving the dump of the pods logs in the artifacts directory"
 oc get pods -o yaml -n ${ODHPROJECT} > ${ARTIFACT_DIR}/${ODHPROJECT}.pods.yaml
 oc get pods -o yaml -n openshift-operators > ${ARTIFACT_DIR}/openshift-operators.pods.yaml
