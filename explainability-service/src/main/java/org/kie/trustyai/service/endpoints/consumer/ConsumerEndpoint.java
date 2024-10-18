@@ -21,7 +21,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Path("/consumer/kserve/v2")
@@ -36,14 +38,14 @@ public class ConsumerEndpoint {
     @Inject
     ModelMeshInferencePayloadReconciler reconciler;
 
+    static List<String> HEADER_WHITELIST = new ArrayList<>();
 
+    // only preserve whitelisted headers in the payload metadata
     private void filterRequestMetadata(InferencePartialPayload request){
         Map<String, String> originalMetadata = request.getMetadata();
         HashMap<String, String> filteredMetadata = new HashMap<>();
         for (Map.Entry<String, String> entry : originalMetadata.entrySet()) {
-            if (entry.getKey().contains("authorization")){
-                filteredMetadata.put(entry.getKey(), "");
-            } else {
+            if (HEADER_WHITELIST.contains(entry.getKey())){
                 filteredMetadata.put(entry.getKey(), entry.getValue());
             }
         }
@@ -57,9 +59,7 @@ public class ConsumerEndpoint {
     public Response consumeInput(InferencePartialPayload request) throws DataframeCreateException {
         if (request.getKind().equals(PartialKind.request)) {
             LOG.info("Received partial input payload from model='" + request.getModelId() + "', id=" + request.getId());
-            filterRequestMetadata(request);
-
-            LOG.info("Request Metadata: " + request.getMetadata());
+            request.setMetadata(new HashMap<>());
             try {
                 reconciler.addUnreconciledInput(request);
             } catch (InvalidSchemaException | DataframeCreateException | StorageWriteException e) {
@@ -73,8 +73,8 @@ public class ConsumerEndpoint {
             }
         } else if (request.getKind().equals(PartialKind.response)) {
             LOG.info("Received partial output payload from model='" + request.getModelId() + "', id=" + request.getId());
-            filterRequestMetadata(request);
-            LOG.info("Response Metadata: " + request.getMetadata());
+            request.setMetadata(new HashMap<>());
+
             try {
                 reconciler.addUnreconciledOutput(request);
             } catch (InvalidSchemaException | DataframeCreateException | StorageWriteException e) {
