@@ -46,26 +46,28 @@ run:
 		-e SERVICE_IMAGE=$(SERVICE_IMAGE) -e OPERATOR_IMAGE=$(OPERATOR_IMAGE)  \
 		-it -v ${LOCAL_ARTIFACT_DIR}/:$(ARTIFACT_DIR):z -v /tmp/tests-kubeconfig:/tmp/kubeconfig:z $(IMAGE)
 
+
+.SILENT:
 clean:
+	echo "============== Cleaning ODH Installation =============="
 	oc delete -n $(ODHPROJECT) dsc default-dsc || true
+	oc delete -n $(ODHPROJECT) dsci default-dsci || true
 	oc delete project $(ODHPROJECT) || echo -e "\n\n==> If the project deletion failed, you can try to use this script to force it: https://raw.githubusercontent.com/jefferyb/useful-scripts/master/openshift/force-delete-openshift-project\n\n"
 
-	# Remove operator subscriptions
-	oc delete $$(oc get subscription -n openshift-operators -o name | grep opendatahub) -n openshift-operators || true
-	oc delete $$(oc get subscription -n openshift-operators -o name | grep authorino) -n openshift-operators || true
-	oc delete $$(oc get subscription -n openshift-operators -o name | grep maria) -n openshift-operators || true
+	# Remove operator subscriptions, csvs
+	for operator in opendatahub authorino maria serverless servicemesh; do \
+  		echo "\n============== Deleting $$operator Operator Subscription and CSV ==============" ;\
+		oc delete $$(oc get subscription -n openshift-operators -o name | grep $$operator) -n openshift-operators || true ;\
+		oc delete $$(oc get clusterserviceversion -n openshift-operators -o name | grep $$operator) -n openshift-operators || true ;\
+	done
 
-	oc delete $$(oc get clusterserviceversion -n openshift-operators -o name | grep opendatahub) -n openshift-operators || true
-	oc delete $$(oc get clusterserviceversion -n openshift-operators -o name | grep authorino) -n openshift-operators || true
-	oc delete $$(oc get clusterserviceversion -n openshift-operators -o name | grep maria) -n openshift-operators || true
-
-	#
+	echo "\n============== Performing Cleanup =============="
 	# Other Cleanup
 	oc get mutatingwebhookconfiguration -o name | grep katib | grep $(ODHPROJECT) | xargs oc delete || true
 	oc get validatingwebhookconfiguration -o name | grep katib | grep $(ODHPROJECT) | xargs oc delete || true
 	oc delete identity htpasswd-provider:admin || true
 
-	#
+	echo "\n============== Deleting CI Projects =============="
 	# Delete test projects"
 	oc delete $$(oc get projects -o name | grep basictests-) || true
 	oc delete $$(oc get projects -o name | grep nightly-) || true
