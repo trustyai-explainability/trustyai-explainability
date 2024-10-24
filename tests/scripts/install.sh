@@ -33,7 +33,7 @@ else
   echo "[DONE]"
 
   echo
-  echo "$HEADER Waiting for Package Manifest Downloads"
+  echo "$HEADER Waiting for Package Manifest Downloads $HEADER"
   for operator in opendatahub-operator authorino-operator serverless-operator servicemesh-operator; do
     echo -n "Waiting for $operator manifests..."
     start_t=$(date +%s) 2>&1
