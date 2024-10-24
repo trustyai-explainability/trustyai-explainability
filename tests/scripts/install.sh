@@ -32,22 +32,26 @@ else
   done
   echo "[DONE]"
 
-  echo -n "Waiting for ODH package manifests to download..."
-  start_t=$(date +%s) 2>&1
-  ready=false 2>&1
-  while ! $ready; do
-    MANIFESTS=$(oc get packagemanifests -n openshift-marketplace 2> /dev/null | grep 'opendatahub')
-    if [ ! -z "${MANIFESTS}" ]; then
-      ready=true 2>&1
-    else
-      sleep 10
-    fi
-    if [ $(($(date +%s)-start_t)) -gt 900 ]; then
-      echo "ERROR: Package manifests never downloaded"
-      exit 1
-    fi
+  echo
+  echo "$HEADER Waiting for Package Manifest Downloads"
+  for operator in opendatahub-operator authorino-operator serverless-operator servicemesh-operator; do
+    echo -n "Waiting for $operator manifests..."
+    start_t=$(date +%s) 2>&1
+    ready=false 2>&1
+    while ! $ready; do
+      MANIFESTS=$(oc get packagemanifests -n openshift-marketplace 2> /dev/null | grep $operator)
+      if [ ! -z "${MANIFESTS}" ]; then
+        ready=true 2>&1
+      else
+        sleep 10
+      fi
+      if [ $(($(date +%s)-start_t)) -gt 900 ]; then
+        echo "ERROR: Package manifests never downloaded"
+        exit 1
+      fi
+    done
+    echo "[DONE]"
   done
-  echo "[DONE]"
 
   echo
   echo "$HEADER Starting Operator Installation $HEADER"
