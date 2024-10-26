@@ -1,0 +1,24 @@
+name: Security
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Build a TrustyAI service image from Dockerfile
+        run: docker build -f ./explainability-service/src/main/docker/Dockerfile.jvm -t quay.io/trustyai/trustyai-service:${{ github.sha }} ./explainability-service/src
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: "quay.io/trustyai/trustyai-service:${{ github.sha }}"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH,MEDIUM"
