@@ -38,6 +38,12 @@
             <artifactId>protobuf-java</artifactId>
             <version>3.25.5</version>
           </dependency>
+          <!-- Override the version of xstream until Quarkus moves to xstream 1.4.21-->
+          <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.21</version>
+          </dependency>
         </dependencies>
     </dependencyManagement>
   <dependencies>
