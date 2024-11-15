@@ -5,7 +5,7 @@ containing XAI algorithms, drift metrics, fairness metrics, and language model a
 A non-exhaustive list of provided algorithms is:
 
 ---
-## Explainability 
+## 🔬 Explainability 🔬
 ### Local
 * [LIME](https://arxiv.org/abs/1602.04938)
 * [Constraint-based counterfactual search](src/main/java/org/kie/trustyai/explainability/local/counterfactual)
@@ -16,7 +16,7 @@ A non-exhaustive list of provided algorithms is:
 * [Partial Dependency Plot (PDP)](https://www.jstor.org/stable/2699986)
 
 ---
-## Fairness
+## ⚖️ Fairness ⚖️
 ### Group
 * [Disparate Impact Ratio (DIR)](src/main/java/org/kie/trustyai/metrics/fairness/group/DisparateImpactRatio.java)
 * [Average Odds Difference](src/main/java/org/kie/trustyai/metrics/fairness/group/GroupAverageOddsDifference.java)
@@ -27,7 +27,7 @@ A non-exhaustive list of provided algorithms is:
 * [Individual Consistency](src/main/java/org/kie/trustyai/metrics/fairness/individual/IndividualConsistency.java)
 
 ---
-## Drift
+## 📈 Drift 📉
 * [Fourier Maximum Mean Discrepancy (FourierMMD)](src/main/java/org/kie/trustyai/metrics/drift/fouriermmd)
 * [Jensen-Shannon](src/main/java/org/kie/trustyai/metrics/drift/jensenshannon)
 * [Approximate Kolmogorov–Smirnov Test](org/kie/trustyai/metrics/drift/kstest/ApproxKSTest.java)
@@ -35,11 +35,11 @@ A non-exhaustive list of provided algorithms is:
 * [Meanshift](src/main/java/org/kie/trustyai/metrics/drift/meanshift)
 
 ---
-## Anomaly
+## ⁉️ Anomaly ⁉️
 * [Gaussian Anomaly Detection](src/main/java/org/kie/trustyai/metrics/anomaly/GaussianAnomalyDetection.java)
 
 ---
-## Language
+## 📝 Language 📝 
 * [BLEU](src/main/java/org/kie/trustyai/metrics/language/bleu)
 * [Fuzzy Match](src/main/java/org/kie/trustyai/metrics/language/match)
 * [Levenshtein](src/main/java/org/kie/trustyai/metrics/language/levenshtein)
