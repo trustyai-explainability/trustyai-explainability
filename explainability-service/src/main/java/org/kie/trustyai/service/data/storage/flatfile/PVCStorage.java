@@ -187,7 +187,7 @@ public class PVCStorage extends FlatFileStorage {
     }
 
     @Override
-    public List<InferenceId>readAllOrganicInferenceIds(String modelId) throws StorageReadException {
+    public List<InferenceId> readAllOrganicInferenceIds(String modelId) throws StorageReadException {
         return readInferenceIds(modelId, true, false);
     }
 
