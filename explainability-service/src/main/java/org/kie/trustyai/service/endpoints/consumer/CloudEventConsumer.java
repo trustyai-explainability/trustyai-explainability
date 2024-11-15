@@ -8,6 +8,10 @@ import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
 import org.kie.trustyai.service.payloads.consumer.partial.KServeInputPayload;
 import org.kie.trustyai.service.payloads.consumer.partial.KServeOutputPayload;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.quarkus.funqy.Funq;
 import io.quarkus.funqy.knative.events.CloudEvent;
 import io.quarkus.funqy.knative.events.CloudEventMapping;
@@ -36,12 +40,19 @@ public class CloudEventConsumer {
 
     @Funq
     @CloudEventMapping(trigger = "org.kubeflow.serving.inference.response")
-    public void consumeKubeflowResponse(CloudEvent<InferenceLoggerOutput> cloudEvent) {
+    public void consumeKubeflowResponse(CloudEvent<byte[]> cloudEvent) throws JsonProcessingException {
         LOG.debug("Received Kubeflow response with id = " + cloudEvent.id());
+
         final KServeOutputPayload output = new KServeOutputPayload();
         output.setId(cloudEvent.id());
         output.setModelId(cloudEvent.extensions().get("Inferenceservicename"));
-        output.setData(cloudEvent.data());
+        byte[] original = cloudEvent.data();
+        String decoded = new String(original, StandardCharsets.UTF_8);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        InferenceLoggerOutput data = objectMapper.readValue(decoded, InferenceLoggerOutput.class);
+        output.setData(data);
         reconciler.addUnreconciledOutput(output);
     }
 }

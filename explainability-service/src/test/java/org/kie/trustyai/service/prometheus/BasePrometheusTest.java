@@ -1,5 +1,8 @@
 package org.kie.trustyai.service.prometheus;
 
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,17 +15,13 @@ import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
+import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import io.restassured.http.ContentType;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
-import org.kie.trustyai.service.utils.DataframeGenerators;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -46,7 +45,6 @@ public abstract class BasePrometheusTest {
         return dataframe;
     }
 
-
     @BeforeEach
     void populateStorage() {
         // Empty mock storage
@@ -57,11 +55,10 @@ public abstract class BasePrometheusTest {
 
     abstract void cleanStorage();
 
-    void saveDF(Dataframe dataframe, String modelId){
+    void saveDF(Dataframe dataframe, String modelId) {
         datasource.get().saveDataframe(dataframe, modelId);
         datasource.get().saveMetadata(MockCSVDatasource.createMetadata(dataframe), modelId);
     }
-
 
     Pair<String, String> createThenDeleteRequest(String endpoint, Object payload) throws InterruptedException {
         final BaseScheduledResponse response = given()
@@ -118,7 +115,6 @@ public abstract class BasePrometheusTest {
         final GroupMetricRequest payload = RequestPayloadGenerator.correct();
         Pair<String, String> metricsRequests = createThenDeleteRequest("/metrics/group/fairness/spd/request", payload);
 
-
         // before deletion, the metrics should exist in the metrics endpoint
         assertTrue(metricsRequests.getLeft()
                 .contains("trustyai_spd{batch_size=\"5000\",favorable_value=\"1\",metricName=\"SPD\",model=\"example1\",outcome=\"income\",privileged=\"1\",protected=\"gender\""));
@@ -127,7 +123,6 @@ public abstract class BasePrometheusTest {
         assertFalse(metricsRequests.getRight()
                 .contains("trustyai_spd{batch_size=\"5000\",favorable_value=\"1\",metricName=\"SPD\",model=\"example1\",outcome=\"income\",privileged=\"1\",protected=\"gender\""));
     }
-
 
     @Test
     @DisplayName("Deleted multi-valued requests are removed from Prometheus metrics endpoint")

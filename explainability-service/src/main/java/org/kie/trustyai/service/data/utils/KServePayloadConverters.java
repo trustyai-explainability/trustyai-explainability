@@ -3,11 +3,9 @@ package org.kie.trustyai.service.data.utils;
 import java.util.Collection;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.connectors.kserve.v2.TensorConverterUtils;
 import org.kie.trustyai.explainability.model.SerializableObject;
-import org.kie.trustyai.service.endpoints.consumer.ConsumerEndpoint;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerGeneral;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerInput;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
@@ -18,6 +16,7 @@ import org.kie.trustyai.service.payloads.data.upload.ModelInferResponsePayload;
 import org.kie.trustyai.service.payloads.data.upload.TensorPayload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

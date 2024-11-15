@@ -26,7 +26,6 @@ public class InferenceLoggerOutputObject {
     @ElementCollection(fetch = FetchType.EAGER)
     private List<SerializableObject> data;
 
-
     public List<Integer> getShape() {
         return shape;
     }

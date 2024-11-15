@@ -1,12 +1,12 @@
 package org.kie.trustyai.service.payloads.consumer.partial;
 
+import java.util.HashMap;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Lob;
-
-import java.util.HashMap;
 
 @Entity
 public class InferencePartialPayload extends PartialPayload {

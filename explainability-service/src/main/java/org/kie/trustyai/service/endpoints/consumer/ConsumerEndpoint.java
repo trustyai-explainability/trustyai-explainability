@@ -1,5 +1,10 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
@@ -21,11 +26,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 @Path("/consumer/kserve/v2")
 @Tag(name = "{Internal Only} Inference Consumer",
         description = "This endpoint consumes inference payloads produced by ModelMesh-served models. While it's possible to manually interact with this endpoint, it is not recommended.")
@@ -41,11 +41,11 @@ public class ConsumerEndpoint {
     static List<String> HEADER_WHITELIST = new ArrayList<>();
 
     // only preserve whitelisted headers in the payload metadata
-    private void filterRequestMetadata(InferencePartialPayload request){
+    private void filterRequestMetadata(InferencePartialPayload request) {
         Map<String, String> originalMetadata = request.getMetadata();
         HashMap<String, String> filteredMetadata = new HashMap<>();
         for (Map.Entry<String, String> entry : originalMetadata.entrySet()) {
-            if (HEADER_WHITELIST.contains(entry.getKey())){
+            if (HEADER_WHITELIST.contains(entry.getKey())) {
                 filteredMetadata.put(entry.getKey(), entry.getValue());
             }
         }

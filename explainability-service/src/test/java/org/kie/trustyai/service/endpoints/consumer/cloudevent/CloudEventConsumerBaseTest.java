@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import io.restassured.http.ContentType;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.eclipse.microprofile.context.ThreadContext;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -27,6 +26,7 @@ import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutput;
 import org.kie.trustyai.service.payloads.consumer.InferenceLoggerOutputObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.funqy.knative.events.CloudEvent;
 import io.quarkus.test.junit.QuarkusTest;
@@ -36,7 +36,6 @@ import jakarta.inject.Inject;
 
 import static io.restassured.RestAssured.given;
 import static io.smallrye.common.constraint.Assert.assertTrue;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -60,7 +59,6 @@ abstract public class CloudEventConsumerBaseTest {
         resetDatasource();
         clearStorage();
     }
-
 
     private static final String input = "{\n" +
             "    \"inputs\": [\n" +
@@ -139,10 +137,11 @@ abstract public class CloudEventConsumerBaseTest {
         return MockKServeInputPayload.create(id, payload.getBytes(StandardCharsets.UTF_8), MODEL_NAME);
     }
 
-    private CloudEvent<InferenceLoggerOutput> generateMockOutput(String id) {
+    private CloudEvent<byte[]> generateMockOutput(String id) throws JsonProcessingException {
         InferenceLoggerOutput ilo = new InferenceLoggerOutput();
         ilo.setPredictionsDouble(List.of(Math.random()));
-        return MockKServeOutputPayload.create(id, ilo, MODEL_NAME);
+        ObjectMapper mapper = new ObjectMapper();
+        return MockKServeOutputPayload.create(id, mapper.writeValueAsBytes(ilo), MODEL_NAME);
     }
 
     private CloudEvent<byte[]> generateMockBatchInput(String id) {
@@ -150,12 +149,12 @@ abstract public class CloudEventConsumerBaseTest {
     }
 
     private String generateMockLargeInput(String id, int n) {
-        String content = (data +",\n").repeat(n-1) + data;
+        String content = (data + ",\n").repeat(n - 1) + data;
         String payload = String.format(largeInput, n, content);
         return payload;//.getBytes(StandardCharsets.UTF_8);
     }
 
-    private CloudEvent<InferenceLoggerOutput> generateMockBatchOutput(String id) {
+    private CloudEvent<byte[]> generateMockBatchOutput(String id) throws JsonProcessingException {
         InferenceLoggerOutput ilo = new InferenceLoggerOutput();
         InferenceLoggerOutputObject iloo = new InferenceLoggerOutputObject();
         ilo.setPredictions(null);
@@ -169,12 +168,13 @@ abstract public class CloudEventConsumerBaseTest {
         iloo.setName("predict");
         iloo.setShape(List.of(5, 1));
         ilo.setOutputs(List.of(iloo));
-        return MockKServeOutputPayload.create(id, ilo, MODEL_NAME);
+        ObjectMapper mapper = new ObjectMapper();
+        return MockKServeOutputPayload.create(id, mapper.writeValueAsBytes(ilo), MODEL_NAME);
     }
 
     @Test
     @DisplayName("Valid Kubeflow CloudEvents should be stored")
-    public void testConsumeKubeflowCloudEvents() {
+    public void testConsumeKubeflowCloudEvents() throws JsonProcessingException {
         final String id = UUID.randomUUID().toString();
         CloudEvent<byte[]> mockInput = MockKServeInputPayload.create(id, "{\"instances\":[[40.0, 3.5, 0.5, 0.0]]}".getBytes(StandardCharsets.UTF_8), MODEL_NAME);
 
@@ -184,7 +184,8 @@ abstract public class CloudEventConsumerBaseTest {
 
         InferenceLoggerOutput ilo = new InferenceLoggerOutput();
         ilo.setPredictions(List.of(new SerializableObject(1.0)));
-        CloudEvent<InferenceLoggerOutput> mockOutput = MockKServeOutputPayload.create(id, ilo, MODEL_NAME);
+        ObjectMapper mapper = new ObjectMapper();
+        CloudEvent<byte[]> mockOutput = MockKServeOutputPayload.create(id, mapper.writeValueAsBytes(ilo), MODEL_NAME);
         consumer.get().consumeKubeflowResponse(mockOutput);
 
         assertTrue(getStorage().dataExists(MODEL_NAME));
@@ -197,13 +198,13 @@ abstract public class CloudEventConsumerBaseTest {
 
     @Test
     @DisplayName("Valid Batched Kubeflow CloudEvents should be stored")
-    public void testConsumeBatchedKubeflowCloudEvents() {
+    public void testConsumeBatchedKubeflowCloudEvents() throws JsonProcessingException {
         final String id = UUID.randomUUID().toString();
         CloudEvent<byte[]> mockInput = generateMockBatchInput(id);
         consumer.get().consumeKubeflowRequest(mockInput);
         assertFalse(getStorage().dataExists(MODEL_NAME));
 
-        CloudEvent<InferenceLoggerOutput> mockOutput = generateMockBatchOutput(id);
+        CloudEvent<byte[]> mockOutput = generateMockBatchOutput(id);
         consumer.get().consumeKubeflowResponse(mockOutput);
         assertTrue(getStorage().dataExists(MODEL_NAME));
 
@@ -219,7 +220,7 @@ abstract public class CloudEventConsumerBaseTest {
     public void testConsumeLargeKubeflowCloudEvents() {
         final String id = UUID.randomUUID().toString();
         String mockInput = generateMockLargeInput(id, 50_000);
-        System.out.println(mockInput.getBytes(StandardCharsets.UTF_8).length/1000./1000. + "MB");
+        System.out.println(mockInput.getBytes(StandardCharsets.UTF_8).length / 1000. / 1000. + "MB");
         given()
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .header("ce-specversion", "1.0")
@@ -235,19 +236,20 @@ abstract public class CloudEventConsumerBaseTest {
 
     @Test
     @DisplayName("Invalid Kubeflow CloudEvents should throw exception")
-    public void testConsumeInvalidKubeflowCloudEvents() {
+    public void testConsumeInvalidKubeflowCloudEvents() throws JsonProcessingException {
         final String id = UUID.randomUUID().toString();
         CloudEvent<byte[]> mockEvent = MockKServeInputPayload.create(id, "foo".getBytes(StandardCharsets.UTF_8), MODEL_NAME);
         consumer.get().consumeKubeflowRequest(mockEvent);
         InferenceLoggerOutput ilo = new InferenceLoggerOutput();
         ilo.setPredictions(List.of(new SerializableObject(1.0)));
-        CloudEvent<InferenceLoggerOutput> mockOutput = MockKServeOutputPayload.create(id, ilo, MODEL_NAME);
+        ObjectMapper mapper = new ObjectMapper();
+        CloudEvent<byte[]> mockOutput = MockKServeOutputPayload.create(id, mapper.writeValueAsBytes(ilo), MODEL_NAME);
 
         final DataframeCreateException exception = assertThrows(DataframeCreateException.class, () -> {
             consumer.get().consumeKubeflowResponse(mockOutput);
         });
         assertEquals("Could not parse input data: Unrecognized token 'foo': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n" +
-                        " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 4]",
+                " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 4]",
                 exception.getMessage());
     }
 
@@ -269,8 +271,17 @@ abstract public class CloudEventConsumerBaseTest {
                     Thread.currentThread().interrupt();
                 }
 
-                final CloudEvent<InferenceLoggerOutput> mockOutput = generateMockOutput(id);
-                consumer.get().consumeKubeflowResponse(mockOutput);
+                final CloudEvent<byte[]> mockOutput;
+                try {
+                    mockOutput = generateMockOutput(id);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    consumer.get().consumeKubeflowResponse(mockOutput);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
             });
         });
 
