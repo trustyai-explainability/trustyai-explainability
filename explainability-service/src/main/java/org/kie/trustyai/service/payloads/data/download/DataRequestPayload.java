@@ -1,5 +1,6 @@
 package org.kie.trustyai.service.payloads.data.download;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,13 +42,18 @@ public class DataRequestPayload {
         this.matchNone = matchNone;
     }
 
-    @Override
-    public String toString() {
-        return "DataRequestPayload{" +
-                "modelId='" + modelId + '\'' +
-                ", matchAny=" + matchAny +
-                ", matchAll=" + matchAll +
-                ", matchNone=" + matchNone +
-                '}';
+    public String prettyPrint() {
+        List<String> builder = new ArrayList<>();
+
+        if (!matchAll.isEmpty()) {
+            builder.add("ALL of: " + matchAll);
+        }
+        if (!matchAny.isEmpty()) {
+            builder.add("ANY of: " + matchAny);
+        }
+        if (!matchNone.isEmpty()) {
+            builder.add("NONE of: " + matchNone);
+        }
+        return String.join(", ", builder);
     }
 }
