@@ -42,6 +42,16 @@ public class DataRequestPayload {
         this.matchNone = matchNone;
     }
 
+    @Override
+    public String toString() {
+        return "DataRequestPayload{" +
+                "modelId='" + modelId + '\'' +
+                ", matchAny=" + matchAny +
+                ", matchAll=" + matchAll +
+                ", matchNone=" + matchNone +
+                '}';
+    }
+
     public String prettyPrint() {
         List<String> builder = new ArrayList<>();
 
