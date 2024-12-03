@@ -279,7 +279,8 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
                 .body(containsString("privilegedAttribute\":{\"type\":\"MAP\",\"value\":\"{"))
                 .body(containsString("unprivilegedAttribute\":{\"type\":\"MAP\",\"value\":\"{"))
                 .body(containsString("favorableOutcome\":{\"type\":\"MAP\",\"value\":\"{"))
-                .body(containsString("\"protectedAttribute\":\"Defined by TrustyQL\",\"outcomeName\":\"Defined by TrustyQL\""));
+                .body(containsString("\"protectedAttribute\":\"Defined by TrustyQL\""))
+                .body(containsString("\"outcomeName\":\"Defined by TrustyQL\""));
     }
 
     @Test

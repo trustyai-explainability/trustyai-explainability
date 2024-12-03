@@ -186,19 +186,15 @@ abstract class DisparateImpactRatioRequestsEndpointBaseTest {
                 .body().as(BaseScheduledResponse.class);
 
         // ensure serialization is okay
-        String scheduleList = given()
+        given()
                 .when()
                 .get("/requests")
-                .then().statusCode(200).extract().body().asString();
-
-        // ensure compatibility with ODH UI ===
-        // make sure data request payload serialization matches structure of ReconcilableField/Output
-        assertTrue(scheduleList.contains("privilegedAttribute\":{\"type\":\"MAP\",\"value\":\"{"));
-        assertTrue(scheduleList.contains("unprivilegedAttribute\":{\"type\":\"MAP\",\"value\":\"{"));
-        assertTrue(scheduleList.contains("favorableOutcome\":{\"type\":\"MAP\",\"value\":\"{"));
-
-        // make sure protectedAttribute and outcomeName fields are correctly emulated
-        assertTrue(scheduleList.contains("\"protectedAttribute\":\"Defined by TrustyQL\",\"outcomeName\":\"Defined by TrustyQL\""));
+                .then().statusCode(200).extract().response().then()
+                .body(containsString("privilegedAttribute\":{\"type\":\"MAP\",\"value\":\"{"))
+                .body(containsString("unprivilegedAttribute\":{\"type\":\"MAP\",\"value\":\"{"))
+                .body(containsString("favorableOutcome\":{\"type\":\"MAP\",\"value\":\"{"))
+                .body(containsString("\"protectedAttribute\":\"Defined by TrustyQL\""))
+                .body(containsString("\"outcomeName\":\"Defined by TrustyQL\""));
     }
 
     @Test
