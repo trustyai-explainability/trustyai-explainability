@@ -1,5 +1,5 @@
 # TrustyAI Explainability Core
-TrustyAI Core is a Java library for explainable and transparent AI, 
+TrustyAI's `explainability-core` is a Java library for explainable and transparent AI, 
 containing XAI algorithms, drift metrics, fairness metrics, and language model accuracy metrics.
 
 A non-exhaustive list of provided algorithms is:
