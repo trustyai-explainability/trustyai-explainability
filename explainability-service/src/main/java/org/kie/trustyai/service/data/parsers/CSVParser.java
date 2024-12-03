@@ -13,14 +13,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionMetadata;
 import org.kie.trustyai.explainability.model.SimplePrediction;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.CSVUtils;
+import org.kie.trustyai.service.payloads.service.InferenceId;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 
@@ -33,14 +35,15 @@ public class CSVParser implements DataParser {
     private static final Logger LOG = Logger.getLogger(CSVParser.class);
     private static final Charset UTF8 = StandardCharsets.UTF_8;
     public static final ZoneOffset ZONE_OFFSET = ZoneOffset.UTC;
+    public static final String TENSOR_PREFIX = "tensor[";
 
     @Override
-    public Dataframe toDataframe(ByteBuffer byteBuffer, Metadata metadata) throws DataframeCreateException {
+    public Dataframe toDataframe(ByteBuffer byteBuffer, StorageMetadata storageMetadata) throws DataframeCreateException {
         final String data = UTF8.decode(byteBuffer).toString();
 
         final List<Prediction> predictions;
         try {
-            predictions = CSVUtils.parse(data, metadata);
+            predictions = CSVUtils.parse(data, storageMetadata);
         } catch (IOException e) {
             throw new DataframeCreateException(e.getMessage());
         }
@@ -50,14 +53,40 @@ public class CSVParser implements DataParser {
     }
 
     @Override
-    public Dataframe toDataframe(ByteBuffer dataByteBuffer, ByteBuffer internalDataByteBuffer, Metadata metadata)
+    public List<InferenceId> toInferenceIds(ByteBuffer byteBuffer) {
+        final String data = UTF8.decode(byteBuffer).toString();
+        try {
+            final List<List<Value>> values = CSVUtils.parseRaw(data);
+            final List<InferenceId> inferenceIds = new ArrayList<>();
+            if (values != null && !values.isEmpty()) {
+                for (List<Value> value : values) {
+                    if (value.size() == 2) {
+                        final String id = value.get(0).asString();
+                        final LocalDateTime predictionTime = LocalDateTime.parse(value.get(1).asString());
+                        inferenceIds.add(new InferenceId(id, predictionTime));
+                    } else if (value.size() == 3) {
+                        final String id = value.get(1).asString();
+                        final LocalDateTime predictionTime = LocalDateTime.parse(value.get(2).asString());
+                        inferenceIds.add(new InferenceId(id, predictionTime));
+                    }
+                }
+            }
+            return inferenceIds;
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Dataframe toDataframe(ByteBuffer dataByteBuffer, ByteBuffer internalDataByteBuffer, StorageMetadata storageMetadata)
             throws DataframeCreateException {
 
         // read predictions
         final String data = UTF8.decode(dataByteBuffer).toString();
         final List<Prediction> predictions;
         try {
-            predictions = CSVUtils.parse(data, metadata);
+            predictions = CSVUtils.parse(data, storageMetadata);
         } catch (IOException e) {
             throw new DataframeCreateException(e.getMessage());
         }
@@ -116,6 +145,12 @@ public class CSVParser implements DataParser {
                 final Object obj = value.getUnderlyingObject();
                 if (obj instanceof String) {
                     return "\"" + obj + "\"";
+                } else if (obj instanceof Tensor tensor) {
+                    try {
+                        return tensor.serialize();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else {
                     return obj.toString();
                 }

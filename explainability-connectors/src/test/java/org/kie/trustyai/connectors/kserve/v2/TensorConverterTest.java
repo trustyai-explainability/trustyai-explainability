@@ -8,13 +8,16 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.model.TensorDataframe;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -127,8 +130,32 @@ class TensorConverterTest {
     }
 
     @Test
-    void modelInferResponseToPredictionInputImageBatch() {
+    void modelInferResponseToPredictionInputImage() {
+        int[] shape = { 1, 3, 224, 224 };
+        final Random random = new Random(0);
+        InferTensorContents.Builder contents = InferTensorContents.newBuilder();
+        for (int i = 0; i < shape[0] * shape[1] * shape[2] * shape[3]; i++) {
+            contents = contents.addFp64Contents(i * 1.);
+        }
+        ModelInferRequest.InferInputTensor tensor = ModelInferRequest.InferInputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("input")
+                .addShape(shape[0])
+                .addShape(shape[1])
+                .addShape(shape[2])
+                .addShape(shape[3])
+                .setContents(contents).build();
 
+        final ModelInferRequest request = ModelInferRequest.newBuilder().addInputs(tensor).build();
+        final List<PredictionInput> predictionInputs = TensorConverter.parseKserveModelInferRequest(request);
+
+        Tensor t = (Tensor) predictionInputs.get(0).getFeatures().get(0).getValue().getUnderlyingObject();
+        assertEquals(1, predictionInputs.size());
+        assertArrayEquals(new int[] { 3, 224, 224 }, t.getDimensions());
+    }
+
+    @Test
+    void modelInferResponseToPredictionInputImageBatch() {
         int[] shape = { 5, 3, 224, 224 };
         final Random random = new Random(0);
         InferTensorContents.Builder contents = InferTensorContents.newBuilder();
@@ -147,8 +174,36 @@ class TensorConverterTest {
         final ModelInferRequest request = ModelInferRequest.newBuilder().addInputs(tensor).build();
         final List<PredictionInput> predictionInputs = TensorConverter.parseKserveModelInferRequest(request);
 
+        Tensor t = (Tensor) predictionInputs.get(0).getFeatures().get(0).getValue().getUnderlyingObject();
         assertEquals(5, predictionInputs.size());
-        assertEquals(shape[1] * shape[2] * shape[3], predictionInputs.get(0).getFeatures().size());
+        assertArrayEquals(new int[] { 3, 224, 224 }, t.getDimensions());
+    }
+
+    @Test
+    void modelInferResponseToPredictionInputExoticTensorBatch() {
+        int[] shape = { 37, 10, 12, 14, 16, 18 };
+        final Random random = new Random(0);
+        InferTensorContents.Builder contents = InferTensorContents.newBuilder();
+        for (int i = 0; i < shape[0] * shape[1] * shape[2] * shape[3] * shape[4] * shape[5]; i++) {
+            contents = contents.addFp64Contents(i * 1.);
+        }
+        ModelInferRequest.InferInputTensor tensor = ModelInferRequest.InferInputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("input")
+                .addShape(shape[0])
+                .addShape(shape[1])
+                .addShape(shape[2])
+                .addShape(shape[3])
+                .addShape(shape[4])
+                .addShape(shape[5])
+                .setContents(contents).build();
+
+        final ModelInferRequest request = ModelInferRequest.newBuilder().addInputs(tensor).build();
+        final List<PredictionInput> predictionInputs = TensorConverter.parseKserveModelInferRequest(request);
+
+        Tensor t = (Tensor) predictionInputs.get(0).getFeatures().get(0).getValue().getUnderlyingObject();
+        assertEquals(37, predictionInputs.size());
+        assertArrayEquals(new int[] { 10, 12, 14, 16, 18 }, t.getDimensions());
     }
 
     @Test
@@ -257,6 +312,33 @@ class TensorConverterTest {
     }
 
     @Test
+    void modelInferResponseToPredictionOutputExoticTensorBatch() {
+        int[] shape = { 37, 10, 12, 14, 16, 18 };
+        final Random random = new Random(0);
+        InferTensorContents.Builder contents = InferTensorContents.newBuilder();
+        for (int i = 0; i < shape[0] * shape[1] * shape[2] * shape[3] * shape[4] * shape[5]; i++) {
+            contents = contents.addFp64Contents(i * 1.);
+        }
+        ModelInferResponse.InferOutputTensor tensor = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("FP64")
+                .setName("input")
+                .addShape(shape[0])
+                .addShape(shape[1])
+                .addShape(shape[2])
+                .addShape(shape[3])
+                .addShape(shape[4])
+                .addShape(shape[5])
+                .setContents(contents).build();
+
+        final ModelInferResponse request = ModelInferResponse.newBuilder().addOutputs(tensor).build();
+        final List<PredictionOutput> predictionOutputs = TensorConverter.parseKserveModelInferResponse(request, 37);
+
+        Tensor t = (Tensor) predictionOutputs.get(0).getOutputs().get(0).getValue().getUnderlyingObject();
+        assertEquals(37, predictionOutputs.size());
+        assertArrayEquals(new int[] { 10, 12, 14, 16, 18 }, t.getDimensions());
+    }
+
+    @Test
     void modelInferResponseToPredictionInputFp32() {
 
         final Random random = new Random(0);
@@ -341,5 +423,19 @@ class TensorConverterTest {
                 assertTrue(Math.abs(o.getValue().asNumber()) < 3);
             }
         }
+    }
+
+    @Test
+    @DisplayName("Test mismatch between output tensor type and tensor data")
+    void testMismatchOutputTypeData() {
+        final String NAME = "output";
+        final ModelInferResponse.InferOutputTensor outputTensor = ModelInferResponse.InferOutputTensor.newBuilder()
+                .setDatatype("INT32")
+                .addShape(1).addShape(1).setContents(InferTensorContents.newBuilder().addFp64Contents(1.0)).build();
+        final Output output = TensorConverterUtils.contentsToOutput(outputTensor, NAME, 0);
+        assertEquals(1.0, output.getValue().asNumber());
+        assertEquals(Double.class, output.getValue().getUnderlyingObject().getClass());
+        assertEquals(NAME, output.getName());
+        assertEquals(Type.NUMBER, output.getType());
     }
 }

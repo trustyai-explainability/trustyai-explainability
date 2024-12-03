@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.data.metadata.Metadata;
-import org.kie.trustyai.service.endpoints.data.DataEndpoint;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
+import org.kie.trustyai.service.endpoints.data.DownloadEndpoint;
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.MatchOperation;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
@@ -17,11 +17,11 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 
 public class DownloadUtils {
 
-    public static DataType getDataType(Metadata metadata, RowMatcher rowMatcher) {
-        if (metadata.getInputSchema().getItems().containsKey(rowMatcher.getColumnName())) {
-            return metadata.getInputSchema().getItems().get(rowMatcher.getColumnName()).getType();
+    public static DataType getDataType(StorageMetadata storageMetadata, RowMatcher rowMatcher) {
+        if (storageMetadata.getInputSchema().getItems().containsKey(rowMatcher.getColumnName())) {
+            return storageMetadata.getInputSchema().getItems().get(rowMatcher.getColumnName()).getType();
         } else {
-            return metadata.getOutputSchema().getItems().get(rowMatcher.getColumnName()).getType();
+            return storageMetadata.getOutputSchema().getItems().get(rowMatcher.getColumnName()).getType();
         }
     }
 
@@ -138,11 +138,11 @@ public class DownloadUtils {
         }
     }
 
-    public static Dataframe applyMatches(Dataframe df, Metadata metadata, DataRequestPayload requestPayload) {
+    public static Dataframe applyMatches(Dataframe df, StorageMetadata metadata, DataRequestPayload requestPayload) {
         for (RowMatcher rowMatcher : requestPayload.getMatchAll()) {
             MatchOperation operation = MatchOperation.valueOf(rowMatcher.getOperation());
-            if (rowMatcher.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
-                Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(DataEndpoint.TRUSTY_PREFIX, ""));
+            if (rowMatcher.getColumnName().startsWith(DownloadEndpoint.TRUSTY_PREFIX)) {
+                Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(DownloadEndpoint.TRUSTY_PREFIX, ""));
                 if (operation == MatchOperation.BETWEEN) {
                     df = DownloadUtils.betweenMatcherInternal(df, rowMatcher, internalColumn, false);
                 } else if (operation == MatchOperation.EQUALS) {
@@ -163,8 +163,8 @@ public class DownloadUtils {
 
         for (RowMatcher rowMatcher : requestPayload.getMatchNone()) {
             MatchOperation operation = MatchOperation.valueOf(rowMatcher.getOperation());
-            if (rowMatcher.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
-                Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(DataEndpoint.TRUSTY_PREFIX, ""));
+            if (rowMatcher.getColumnName().startsWith(DownloadEndpoint.TRUSTY_PREFIX)) {
+                Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(DownloadEndpoint.TRUSTY_PREFIX, ""));
                 if (operation == MatchOperation.BETWEEN) {
                     df = DownloadUtils.betweenMatcherInternal(df, rowMatcher, internalColumn, true);
                 } else if (operation == MatchOperation.EQUALS) {
@@ -188,8 +188,8 @@ public class DownloadUtils {
             returnDF = df.filterByColumnValue(0, v -> false); //get null df
             for (RowMatcher rowMatcher : requestPayload.getMatchAny()) {
                 MatchOperation operation = MatchOperation.valueOf(rowMatcher.getOperation());
-                if (rowMatcher.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
-                    Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(DataEndpoint.TRUSTY_PREFIX, ""));
+                if (rowMatcher.getColumnName().startsWith(DownloadEndpoint.TRUSTY_PREFIX)) {
+                    Dataframe.InternalColumn internalColumn = Dataframe.InternalColumn.valueOf(rowMatcher.getColumnName().replace(DownloadEndpoint.TRUSTY_PREFIX, ""));
                     if (operation == MatchOperation.BETWEEN) {
                         returnDF.addPredictions(DownloadUtils.betweenMatcherInternal(df, rowMatcher, internalColumn, false).asPredictions());
                     } else if (operation == MatchOperation.EQUALS) {

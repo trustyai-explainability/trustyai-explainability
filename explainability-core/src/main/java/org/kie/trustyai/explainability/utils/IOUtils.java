@@ -19,6 +19,7 @@ package org.kie.trustyai.explainability.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -293,5 +294,16 @@ public class IOUtils {
             }
         }
         return generateTable("Output Mismatches", List.of(colIndex, colOutputs1, colOutputs2), List.of(" |", " !="));
+    }
+
+    // === STRING UTILS ================================================================================================
+    public static String randomString(int length, Random random) {
+        int leftLimit = 97; // letter 'a'
+        int rightLimit = 122; // letter 'z'
+
+        return random.ints(leftLimit, rightLimit + 1)
+                .limit(length)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
     }
 }

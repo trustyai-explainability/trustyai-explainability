@@ -36,15 +36,16 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 
-        <version.org.slf4j>1.7.30</version.org.slf4j>
-        <version.com.fasterxml.jackson.databind>2.13.4.2</version.com.fasterxml.jackson.databind>
+        <version.org.slf4j>1.7.36</version.org.slf4j>
+        <version.com.fasterxml.jackson.databind>2.15.0</version.com.fasterxml.jackson.databind>
         <version.org.apache.commons.commons-lang3>3.12.0</version.org.apache.commons.commons-lang3>
         <version.org.apache.commons.commons-csv>1.9.0</version.org.apache.commons.commons-csv>
         <version.org.apache.opennlp>1.9.2</version.org.apache.opennlp>
         <version.org.junit.jupiter>5.9.1</version.org.junit.jupiter>
+        <version.org.junit.platform>1.9.0</version.org.junit.platform>
         <version.org.mockito>4.8.0</version.org.mockito>
         <version.org.assertj>3.22.0</version.org.assertj>
         <version.org.awaitility>4.2.0</version.org.awaitility>
@@ -52,13 +53,14 @@
         <version.org.optaplanner>8.30.0.Final</version.org.optaplanner>
         <version.org.kie.kogito>1.30.0.Final</version.org.kie.kogito>
 
-        <version.surefire.plugin>2.22.2</version.surefire.plugin> <!-- minimum required by JUnit 5 -->
+        <version.surefire.plugin>3.2.5</version.surefire.plugin> <!-- minimum required by JUnit 5 -->
         <version.shade.plugin>3.4.0</version.shade.plugin> <!-- minimum required by JUnit 5 -->
 
         <kogito.formatter.version>${version.org.kie.kogito}</kogito.formatter.version>
         <formatter.plugin.version>2.13.0</formatter.plugin.version>
         <impsort.plugin.version>1.9.0</impsort.plugin.version>
 
+        <version.io.netty>4.1.100.Final</version.io.netty>
         <nexus.staging.plugin.version>1.6.6</nexus.staging.plugin.version>
 
         <formatter.skip>false</formatter.skip>
@@ -107,7 +109,6 @@
                 <version>${version.org.junit.jupiter}</version>
                 <scope>test</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
@@ -155,7 +156,6 @@
                 <artifactId>opennlp-tools</artifactId>
                 <version>${version.org.apache.opennlp}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -249,6 +249,27 @@
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>${version.shade.plugin}</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <configuration>
+                                <minimizeJar>false</minimizeJar>
+                                <filters>
+                                    <filter>
+                                        <artifact>*:*</artifact>
+                                        <excludes>
+                                            <exclude>META-INF/*.SF</exclude>
+                                            <exclude>META-INF/*.DSA</exclude>
+                                            <exclude>META-INF/*.RSA</exclude>
+                                        </excludes>
+                                    </filter>
+                                </filters>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -271,6 +292,11 @@
             <plugin>
                 <groupId>net.revelc.code</groupId>
                 <artifactId>impsort-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
             </plugin>
         </plugins>
     </build>

@@ -29,7 +29,7 @@ public class TSSaliencyRunner implements Runnable {
         this.alphaList = alphaList;
     }
 
-    public void run() {
+    public void run() throws IllegalStateException {
 
         try {
 

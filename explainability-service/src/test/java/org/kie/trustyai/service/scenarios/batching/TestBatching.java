@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.parsers.CSVParser;
 import org.kie.trustyai.service.data.storage.BatchReader;
 import org.kie.trustyai.service.payloads.service.Schema;
@@ -32,20 +32,20 @@ class TestBatching {
         return String.join(",", names.stream().map(name -> "\"" + name + "\"").collect(Collectors.toList()));
     }
 
-    private static Metadata createMetadata(List<String> inputNames, List<String> outputNames) {
-        final Metadata metadata = new Metadata();
+    private static StorageMetadata createMetadata(List<String> inputNames, List<String> outputNames) {
+        final StorageMetadata storageMetadata = new StorageMetadata();
 
         final int s = inputNames.size();
 
-        Map<String, SchemaItem> inputSchema = IntStream.range(0, s).mapToObj(i -> new SchemaItem(DataType.DOUBLE, inputNames.get(i), null, i))
+        Map<String, SchemaItem> inputSchema = IntStream.range(0, s).mapToObj(i -> new SchemaItem(DataType.DOUBLE, inputNames.get(i), i))
                 .collect(Collectors.toMap(SchemaItem::getName, Function.identity()));
-        Map<String, SchemaItem> outputSchema = IntStream.range(s, s + outputNames.size()).mapToObj(i -> new SchemaItem(DataType.DOUBLE, outputNames.get(i - s), null, i))
+        Map<String, SchemaItem> outputSchema = IntStream.range(s, s + outputNames.size()).mapToObj(i -> new SchemaItem(DataType.DOUBLE, outputNames.get(i - s), i))
                 .collect(Collectors.toMap(SchemaItem::getName, Function.identity()));
 
-        metadata.setInputSchema(Schema.from(inputSchema));
-        metadata.setOutputSchema(Schema.from(outputSchema));
+        storageMetadata.setInputSchema(Schema.from(inputSchema));
+        storageMetadata.setOutputSchema(Schema.from(outputSchema));
 
-        return metadata;
+        return storageMetadata;
     }
 
     @Test
@@ -97,10 +97,10 @@ class TestBatching {
 
         final List<String> inputNames = List.of("in-1", "in-2");
         final List<String> outputNames = List.of("out-1");
-        final Metadata metadata = createMetadata(inputNames, outputNames);
+        final StorageMetadata storageMetadata = createMetadata(inputNames, outputNames);
 
         final CSVParser parser = new CSVParser();
-        final Dataframe dataframe = parser.toDataframe(buffer, metadata);
+        final Dataframe dataframe = parser.toDataframe(buffer, storageMetadata);
 
         assertEquals(batchSize, dataframe.getRowDimension());
         assertEquals(inputNames, dataframe.getInputDataframe().getColumnNames());
@@ -127,10 +127,10 @@ class TestBatching {
 
         final List<String> inputNames = List.of("xa-1", "xa-2");
         final List<String> outputNames = List.of("yb-3");
-        final Metadata metadata = createMetadata(inputNames, outputNames);
+        final StorageMetadata storageMetadata = createMetadata(inputNames, outputNames);
 
         final CSVParser parser = new CSVParser();
-        final Dataframe dataframe = parser.toDataframe(buffer, metadata);
+        final Dataframe dataframe = parser.toDataframe(buffer, storageMetadata);
 
         assertEquals(N, dataframe.getRowDimension());
         assertEquals(inputNames, dataframe.getInputNames());
@@ -166,11 +166,11 @@ class TestBatching {
 
         final List<String> inputNames = List.of("xa-1", "xa-2", "xa-3");
         final List<String> outputNames = List.of("ya-1");
-        final Metadata metadata = createMetadata(inputNames, outputNames);
+        final StorageMetadata storageMetadata = createMetadata(inputNames, outputNames);
 
         final CSVParser parser = new CSVParser();
 
-        final Dataframe dataframe = parser.toDataframe(inputBuffer, metadata);
+        final Dataframe dataframe = parser.toDataframe(inputBuffer, storageMetadata);
 
         assertEquals(N, dataframe.getRowDimension());
         assertEquals(4, dataframe.getColumnDimension());

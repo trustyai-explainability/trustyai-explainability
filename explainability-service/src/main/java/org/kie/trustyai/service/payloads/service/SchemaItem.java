@@ -1,25 +1,36 @@
 package org.kie.trustyai.service.payloads.service;
 
 import java.util.Objects;
-import java.util.Set;
 
 import org.kie.trustyai.service.payloads.values.DataType;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+
+@Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SchemaItem {
     private DataType type;
     private String name;
-    private Set<Object> values;
-    private int index;
+
+    @JsonAlias({ "index" })
+    private int columnIndex;
+
+    @Id
+    @GeneratedValue
+    long id;
 
     public SchemaItem() {
-
     }
 
-    public SchemaItem(DataType type, String name, Set<Object> values, int index) {
+    public SchemaItem(DataType type, String name, int columnIndex) {
         this.type = type;
         this.name = name;
-        this.values = values;
-        this.index = index;
+        this.columnIndex = columnIndex;
     }
 
     public DataType getType() {
@@ -38,20 +49,12 @@ public class SchemaItem {
         this.name = name;
     }
 
-    public Set<Object> getValues() {
-        return values;
+    public int getColumnIndex() {
+        return columnIndex;
     }
 
-    public void setValues(Set<Object> values) {
-        this.values = values;
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
+    public void setColumnIndex(int index) {
+        this.columnIndex = index;
     }
 
     @Override
@@ -61,12 +64,12 @@ public class SchemaItem {
         if (o == null || getClass() != o.getClass())
             return false;
         SchemaItem that = (SchemaItem) o;
-        return index == that.index && type == that.type && Objects.equals(name, that.name);
+        return columnIndex == that.columnIndex && type == that.type && Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, name, index);
+        return Objects.hash(type, name, columnIndex);
     }
 
     @Override
@@ -74,8 +77,7 @@ public class SchemaItem {
         return "SchemaItem{" +
                 "type=" + type +
                 ", name='" + name + '\'' +
-                ", values=" + values +
-                ", index=" + index +
+                ", index=" + columnIndex +
                 '}';
     }
 }

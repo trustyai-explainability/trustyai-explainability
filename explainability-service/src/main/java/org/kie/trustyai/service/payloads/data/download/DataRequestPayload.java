@@ -1,12 +1,22 @@
 package org.kie.trustyai.service.payloads.data.download;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataRequestPayload {
+    String modelId;
     List<RowMatcher> matchAny = new ArrayList<>();
     List<RowMatcher> matchAll = new ArrayList<>();
     List<RowMatcher> matchNone = new ArrayList<>();
+
+    public String getModelId() {
+        return modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
 
     public List<RowMatcher> getMatchAny() {
         return matchAny;

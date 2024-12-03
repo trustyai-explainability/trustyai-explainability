@@ -1,15 +1,17 @@
 package org.kie.trustyai.service.scenarios.nodata;
 
-import java.util.List;
+import java.util.Map;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.service.BaseTestProfile;
 import org.kie.trustyai.service.endpoints.service.ServiceMetadataEndpoint;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.service.ServiceMetadata;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -23,7 +25,7 @@ import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(ServiceMetadataEndpoint.class)
 class ServiceMetadataEndpointTest {
 
@@ -31,7 +33,7 @@ class ServiceMetadataEndpointTest {
     Instance<MockMemoryStorage> storage;
 
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     @BeforeEach
     void emptyStorage() {
@@ -39,14 +41,14 @@ class ServiceMetadataEndpointTest {
     }
 
     @Test
-    void get() {
-        datasource.get().empty();
-        final List<ServiceMetadata> serviceMetadata = given()
+    void get() throws JsonProcessingException {
+        datasource.get().reset();
+        final Map<String, ServiceMetadata> serviceMetadata = given()
                 .when().get()
                 .then()
                 .statusCode(RestResponse.StatusCode.OK)
                 .extract()
-                .body().as(new TypeRef<List<ServiceMetadata>>() {
+                .body().as(new TypeRef<Map<String, ServiceMetadata>>() {
                 });
 
         assertEquals(0, serviceMetadata.size());

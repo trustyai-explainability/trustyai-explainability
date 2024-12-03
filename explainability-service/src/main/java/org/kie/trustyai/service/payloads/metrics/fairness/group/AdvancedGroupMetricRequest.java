@@ -4,7 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
+import org.kie.trustyai.service.payloads.data.download.serializers.DataRequestDeserializer;
+import org.kie.trustyai.service.payloads.data.download.serializers.DataRequestSerializer;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -21,10 +25,26 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = AdvancedGroupMetricRequest.class, name = "AdvancedGroupMetricRequest")
 })
 public class AdvancedGroupMetricRequest extends BaseMetricRequest {
-    // For any request-provider value that needs to be validated against feature/output types
-    public DataRequestPayload privilegedAttribute;
-    public DataRequestPayload unprivilegedAttribute;
-    public DataRequestPayload favorableOutcome;
+    /**
+     * Serialize the data request to match the ReconcilableField and ReconcilableOutput json structure
+     * This maps the DataRequestPayload to the following json: {"type": MAP, "value": "$DATA_REQUEST_JSON_AS_QUOTED_STRING"}
+     * This ensures compatibility with the ODH UI
+     */
+    @JsonSerialize(using = DataRequestSerializer.class)
+    @JsonDeserialize(using = DataRequestDeserializer.class)
+    private DataRequestPayload privilegedAttribute;
+
+    @JsonSerialize(using = DataRequestSerializer.class)
+    @JsonDeserialize(using = DataRequestDeserializer.class)
+    private DataRequestPayload unprivilegedAttribute;
+
+    @JsonSerialize(using = DataRequestSerializer.class)
+    @JsonDeserialize(using = DataRequestDeserializer.class)
+    private DataRequestPayload favorableOutcome;
+    private String modelId;
+
+    // define an "output name" and "privileged attribute name" to match the existing metric request format
+    private final static String VIRTUAL_FIELD_NAME = "Defined by TrustyQL";
 
     private Double thresholdDelta;
 
@@ -63,6 +83,14 @@ public class AdvancedGroupMetricRequest extends BaseMetricRequest {
 
     public void setThresholdDelta(Double thresholdDelta) {
         this.thresholdDelta = thresholdDelta;
+    }
+
+    public String getOutcomeName() {
+        return VIRTUAL_FIELD_NAME;
+    }
+
+    public String getProtectedAttribute() {
+        return VIRTUAL_FIELD_NAME;
     }
 
     // Tag Retrieval

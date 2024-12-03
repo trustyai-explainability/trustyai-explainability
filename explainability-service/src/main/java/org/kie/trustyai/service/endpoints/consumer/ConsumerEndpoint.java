@@ -1,19 +1,21 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
-import java.util.Base64;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.reactive.RestResponse;
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.InvalidSchemaException;
+import org.kie.trustyai.service.data.exceptions.PayloadWriteException;
 import org.kie.trustyai.service.data.exceptions.StorageWriteException;
-import org.kie.trustyai.service.data.utils.ModelMeshInferencePayloadReconciler;
-import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
-import org.kie.trustyai.service.payloads.consumer.InferencePayload;
-import org.kie.trustyai.service.payloads.consumer.PartialKind;
+import org.kie.trustyai.service.data.reconcilers.ModelMeshInferencePayloadReconciler;
+import org.kie.trustyai.service.payloads.consumer.partial.InferencePartialPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.PartialKind;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -25,6 +27,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Path("/consumer/kserve/v2")
+@Tag(name = "{Internal Only} Inference Consumer",
+        description = "This endpoint consumes inference payloads produced by ModelMesh-served models. While it's possible to manually interact with this endpoint, it is not recommended.")
 public class ConsumerEndpoint {
 
     private static final Logger LOG = Logger.getLogger(ConsumerEndpoint.class);
@@ -34,61 +38,51 @@ public class ConsumerEndpoint {
     @Inject
     ModelMeshInferencePayloadReconciler reconciler;
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    @Path("/full")
-    public Response consume(InferencePayload request) throws DataframeCreateException {
-        LOG.debug("Got full payload on the consumer");
+    static List<String> HEADER_WHITELIST = new ArrayList<>();
 
-        final String modelId = request.getModelId();
-
-        final byte[] inputBytes = Base64.getDecoder().decode(request.getInput().getBytes());
-        final byte[] outputBytes = Base64.getDecoder().decode(request.getOutput().getBytes());
-
-        Dataframe dataframe;
-
-        try {
-            dataframe = reconciler.payloadToDataFrame(inputBytes, outputBytes, String.valueOf(UUID.randomUUID()),
-                    request.getMetadata(), modelId);
-        } catch (DataframeCreateException e) {
-
-            LOG.error("Could not create dataframe from payloads: " + e.getMessage());
-            return Response.serverError().status(RestResponse.StatusCode.INTERNAL_SERVER_ERROR).build();
+    // only preserve whitelisted headers in the payload metadata
+    private void filterRequestMetadata(InferencePartialPayload request) {
+        Map<String, String> originalMetadata = request.getMetadata();
+        HashMap<String, String> filteredMetadata = new HashMap<>();
+        for (Map.Entry<String, String> entry : originalMetadata.entrySet()) {
+            if (HEADER_WHITELIST.contains(entry.getKey())) {
+                filteredMetadata.put(entry.getKey(), entry.getValue());
+            }
         }
-
-        // Save data
-        dataSource.get().saveDataframe(dataframe, modelId);
-
-        try {
-            dataSource.get().updateMetadataObservations(dataframe.getRowDimension(), modelId);
-        } catch (StorageWriteException e) {
-            LOG.error("Error saving metadata for model " + modelId + ": " + e.getMessage());
-            return Response.serverError().status(RestResponse.StatusCode.INTERNAL_SERVER_ERROR).build();
-        }
-
-        return Response.ok().build();
+        request.setMetadata(filteredMetadata);
     }
 
     @POST
+    @Operation(summary = "Send a single ModelMesh input or output payload to TrustyAI.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public Response consumeInput(InferencePartialPayload request) throws DataframeCreateException {
         if (request.getKind().equals(PartialKind.request)) {
             LOG.info("Received partial input payload from model='" + request.getModelId() + "', id=" + request.getId());
+            request.setMetadata(new HashMap<>());
             try {
                 reconciler.addUnreconciledInput(request);
-            } catch (InvalidSchemaException | DataframeCreateException e) {
-                final String message = "Invalid schema for payload request id=" + request.getId() + ", " + e.getMessage();
+            } catch (InvalidSchemaException | DataframeCreateException | StorageWriteException e) {
+                final String message = "Error when reconciling payload for request id='" + request.getId() + "': " + e.getMessage();
+                LOG.error(message);
+                return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
+            } catch (PayloadWriteException e) {
+                final String message = e.getMessage();
                 LOG.error(message);
                 return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
             }
         } else if (request.getKind().equals(PartialKind.response)) {
             LOG.info("Received partial output payload from model='" + request.getModelId() + "', id=" + request.getId());
+            request.setMetadata(new HashMap<>());
+
             try {
                 reconciler.addUnreconciledOutput(request);
-            } catch (InvalidSchemaException | DataframeCreateException e) {
-                final String message = "Invalid schema for payload response id=" + request.getId() + ", " + e.getMessage();
+            } catch (InvalidSchemaException | DataframeCreateException | StorageWriteException e) {
+                final String message = "Error when reconciling payload for response id='" + request.getId() + "': " + e.getMessage();
+                LOG.error(message);
+                return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
+            } catch (PayloadWriteException e) {
+                final String message = e.getMessage();
                 LOG.error(message);
                 return Response.serverError().entity(message).status(Response.Status.BAD_REQUEST).build();
             }

@@ -2,7 +2,7 @@ package org.kie.trustyai.service.endpoints.metrics.fairness.group.advanced;
 
 import java.util.Objects;
 
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
@@ -51,7 +51,7 @@ public abstract class AdvancedGroupEndpoint extends BaseEndpoint<AdvancedGroupMe
                 LOG.warn("Request batch size is empty. Using the default value of " + defaultBatchSize);
                 request.setBatchSize(defaultBatchSize);
             }
-            dataframe = super.dataSource.get().getDataframe(request.getModelId(), request.getBatchSize()).filterRowsBySynthetic(false);
+            dataframe = super.dataSource.get().getOrganicDataframe(request.getModelId(), request.getBatchSize());
         } catch (DataframeCreateException e) {
             LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();

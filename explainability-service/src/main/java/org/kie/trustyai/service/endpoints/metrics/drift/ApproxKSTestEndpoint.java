@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 import org.kie.trustyai.metrics.drift.kstest.ApproxKSFitting;
 import org.kie.trustyai.metrics.drift.kstest.ApproxKSTest;
@@ -19,13 +19,15 @@ import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
 
 import io.quarkus.cache.CacheResult;
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
 
 @ApplicationScoped
-@Tag(name = "ApproxKSTest Drift Endpoint", description = "Approximate Kolmogorov-Smirnov Test measures that the columns of the tested dataframe come " +
+@Tag(name = "Drift Metrics: ApproxKSTest", description = "Approximate Kolmogorov-Smirnov Test measures that the columns of the tested dataframe come " +
         "from the same distribution as the training dataframe.")
+@EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
 @Path("/metrics/drift/approxkstest")
 public class ApproxKSTestEndpoint extends DriftEndpoint<ApproxKSTestMetricRequest> {
     public ApproxKSTestEndpoint() {

@@ -22,8 +22,11 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.kie.trustyai.explainability.ThreadDumpOnTimeoutExtension;
+import org.kie.trustyai.explainability.local.counterfactual.CounterfactualUtils;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.PredictionInput;
@@ -36,12 +39,14 @@ import org.kie.trustyai.explainability.utils.models.TestModels;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(ThreadDumpOnTimeoutExtension.class)
 class CounterfactualGeneratorTest {
     int N_COUNTERFACTUALS_TO_GENERATE = 10;
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 1 })
     void testDefaultGeneration(int seed) throws ExecutionException, InterruptedException, TimeoutException {
+
         List<PredictionInput> seeds = new ArrayList<>();
         Random rn = new Random(seed);
 
@@ -57,16 +62,19 @@ class CounterfactualGeneratorTest {
             }
             seeds.add(new PredictionInput(features));
         }
-
         // given some arbitrary linear model
         PredictionProvider model = TestModels.getLinearModel(new double[] { 5., 0., 1., 25., -5. });
 
         // generate a background such that f(bg) == 0 for all bg in the backgrounds
         PredictionOutput goal = new PredictionOutput(
                 List.of(new Output("linear-sum", Type.NUMBER, new Value(0.), 0d)));
-        List<PredictionInput> background = CounterfactualGenerator.builder()
+        List<PredictionInput> background;
+
+        background = CounterfactualGenerator.builder()
                 .withModel(model)
-                .withTimeoutSeconds(5)
+                // Run the counterfactual on a different thread pool
+                .withCounterfactualConfig(CounterfactualUtils.getCounterfactualConfig((long) seed, 10_000L))
+                .withTimeoutSeconds(10)
                 .withStepCount(10_000L)
                 .withGoalThreshold(.01)
                 .withRandom(rn)
@@ -75,10 +83,12 @@ class CounterfactualGeneratorTest {
         assertEquals(N_COUNTERFACTUALS_TO_GENERATE, background.size());
 
         List<PredictionOutput> fnull = model.predictAsync(background).get();
+
         // make sure the fnull is within the default goal of .01
         for (PredictionOutput output : fnull) {
             assertEquals(0., output.getOutputs().get(0).getValue().asNumber(), .05);
         }
+
     }
 
     @ParameterizedTest
@@ -109,7 +119,9 @@ class CounterfactualGeneratorTest {
         }
         List<PredictionInput> background = CounterfactualGenerator.builder()
                 .withModel(model)
-                .withTimeoutSeconds(5)
+                // Run the counterfactual on a different thread pool
+                .withCounterfactualConfig(CounterfactualUtils.getCounterfactualConfig((long) seed, 30_000L))
+                .withTimeoutSeconds(10)
                 .withStepCount(30_000L)
                 .withGoalThreshold(0.01)
                 .withRandom(rn)
@@ -149,7 +161,9 @@ class CounterfactualGeneratorTest {
         }
         List<PredictionInput> background = CounterfactualGenerator.builder()
                 .withModel(model)
-                .withTimeoutSeconds(5)
+                // Run the counterfactual on a different thread pool
+                .withCounterfactualConfig(CounterfactualUtils.getCounterfactualConfig((long) seed, 30_000L))
+                .withTimeoutSeconds(10)
                 .withStepCount(30_000L)
                 .withGoalThreshold(0.01)
                 .withRandom(rn)

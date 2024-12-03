@@ -19,11 +19,25 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<Object> {
+import org.kie.trustyai.explainability.model.SerializableObject;
 
-    private ObjectFeatureDomain(Set<Object> categories) {
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
+
+@Entity
+public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<SerializableObject> {
+
+    private ObjectFeatureDomain(Set<SerializableObject> categories) {
         super(categories);
+    }
+
+    public ObjectFeatureDomain() {
+        super(new HashSet<>());
     }
 
     /**
@@ -32,15 +46,27 @@ public class ObjectFeatureDomain extends AbstractCategoricalFeatureDomain<Object
      * @param categories A set with all the allowed category values
      * @return A {@link FeatureDomain}
      */
-    public static FeatureDomain<Object> create(Set<Object> categories) {
-        return new ObjectFeatureDomain(categories);
+    public static ObjectFeatureDomain create(Set<Object> categories) {
+        return new ObjectFeatureDomain(categories.stream().map(SerializableObject::new).collect(Collectors.toSet()));
     }
 
-    public static FeatureDomain<Object> create(List<Object> categories) {
-        return new ObjectFeatureDomain(new HashSet<>(categories));
+    public static ObjectFeatureDomain create(List<Object> categories) {
+        return new ObjectFeatureDomain(categories.stream().map(SerializableObject::new).collect(Collectors.toSet()));
     }
 
-    public static FeatureDomain<Object> create(Object... categories) {
-        return new ObjectFeatureDomain(new HashSet<>(Arrays.asList(categories)));
+    public static ObjectFeatureDomain create(Object... categories) {
+        return new ObjectFeatureDomain(Arrays.stream(categories).map(SerializableObject::new).collect(Collectors.toSet()));
+    }
+
+    @ElementCollection
+    @Access(AccessType.FIELD)
+    @Override
+    public Set<SerializableObject> getCategories() {
+        return this.categories;
+    }
+
+    @Transient
+    public Set<Object> getRawCategories() {
+        return this.categories.stream().map(SerializableObject::getObject).collect(Collectors.toSet());
     }
 }

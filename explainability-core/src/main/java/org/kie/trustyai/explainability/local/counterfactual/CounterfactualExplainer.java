@@ -127,6 +127,9 @@ public class CounterfactualExplainer implements LocalExplainer<CounterfactualRes
             final CounterfactualGoalCriteria goalCriteria,
             final Long maxRunningTimeSeconds,
             final Consumer<CounterfactualResult> intermediateResultsConsumer) {
+
+        logger.debug("executor in use: " + this.counterfactualConfig.getExecutor());
+
         final AtomicLong sequenceId = new AtomicLong(0);
         Function<UUID, CounterfactualSolution> initial =
                 uuid -> new CounterfactualSolution(entities, originalFeatures, model, UUID.randomUUID(), executionId,

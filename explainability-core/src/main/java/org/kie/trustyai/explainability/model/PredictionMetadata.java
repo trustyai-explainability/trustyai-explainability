@@ -1,6 +1,7 @@
 package org.kie.trustyai.explainability.model;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class PredictionMetadata {
 
@@ -32,5 +33,17 @@ public class PredictionMetadata {
 
     public String getDataPointTag() {
         return datapointTag;
+    }
+
+    /**
+     * Create a {@link PredictionMetadata} with a random {@link UUID}, current {@link LocalDateTime} and
+     * the specified tag.
+     *
+     * @param datapointTag A {@link String} containing the tag
+     * @return A {@link PredictionMetadata}
+     */
+    public static PredictionMetadata fromTag(String datapointTag) {
+        return new PredictionMetadata(UUID.randomUUID().toString(),
+                LocalDateTime.now(), datapointTag);
     }
 }

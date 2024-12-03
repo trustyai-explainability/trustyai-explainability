@@ -15,17 +15,27 @@
  */
 package org.kie.trustyai.explainability.model.domain;
 
-import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Set;
 
-public class DurationFeatureDomain extends NumericalFeatureDomain {
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 
+@Entity
+public class DurationFeatureDomain extends NumericalFeatureDomain {
     private final TemporalUnit unit;
 
     private DurationFeatureDomain(double lowerBound, double upperBound, TemporalUnit unit) {
         super(lowerBound, upperBound);
         this.unit = unit;
+    }
+
+    public DurationFeatureDomain() {
+        super(Double.MIN_VALUE, Double.MAX_VALUE);
+        this.unit = ChronoUnit.SECONDS;
     }
 
     /**
@@ -35,30 +45,34 @@ public class DurationFeatureDomain extends NumericalFeatureDomain {
      * @param upperBound The end point of the search space
      * @return A {@link FeatureDomain}
      */
-    public static FeatureDomain<Duration> create(double lowerBound, double upperBound, TemporalUnit unit) {
+    public static DurationFeatureDomain create(double lowerBound, double upperBound, TemporalUnit unit) {
         return new DurationFeatureDomain(lowerBound, upperBound, unit);
     }
 
     @Override
+    @Transient
     public boolean isEmpty() {
         return false;
     }
 
     @Override
+    @Access(AccessType.FIELD)
     public Double getLowerBound() {
         return this.lowerBound;
     }
 
-    @Override
+    @Access(AccessType.FIELD)
     public Double getUpperBound() {
         return this.upperBound;
     }
 
     @Override
-    public Set<Duration> getCategories() {
+    @Transient
+    public Set<Double> getCategories() {
         return null;
     }
 
+    @Transient
     public TemporalUnit getUnit() {
         return unit;
     }

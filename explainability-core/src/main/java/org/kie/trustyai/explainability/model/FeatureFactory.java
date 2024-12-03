@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
 
 /**
  * Factory class for {@link Feature}s
@@ -139,6 +140,10 @@ public class FeatureFactory {
         return new Feature(name, Type.VECTOR, new Value(doubles));
     }
 
+    public static Feature newTensorFeature(String name, Object object) {
+        return new Feature(name, Type.TENSOR, new Value(object));
+    }
+
     public static Feature newObjectFeature(String name, Object object) {
         return new Feature(name, Type.UNDEFINED, new Value(object));
     }
@@ -185,6 +190,8 @@ public class FeatureFactory {
             return (Feature) value;
         } else if (value instanceof List) {
             return parseList(featureName, (List<Object>) value);
+        } else if (value instanceof Tensor<?>) {
+            return newTensorFeature(featureName, (Tensor) value);
         } else {
             return newObjectFeature(featureName, value);
         }

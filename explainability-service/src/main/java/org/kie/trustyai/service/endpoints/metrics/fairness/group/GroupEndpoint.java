@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.exceptions.StorageReadException;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.payloads.PayloadConverter;
 import org.kie.trustyai.service.payloads.definitions.GroupDefinitionRequest;
@@ -20,11 +22,7 @@ import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -55,29 +53,32 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
                 .map(Value::toString)
                 .collect(Collectors.toList());
         return specificDefinitionFunction(outcomeName, favorableOutcomeAttrs, protectedAttribute, privilegeds, unprivilegeds, metricValue);
-    };
+    }
 
     @POST
+    @Operation(summary = "Compute the current value of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response response(@ValidGroupMetricRequest GroupMetricRequest request) throws DataframeCreateException {
 
         final Dataframe dataframe;
-        final Metadata metadata;
+        final StorageMetadata storageMetadata;
         try {
             if (Objects.isNull(request.getBatchSize())) {
                 final int defaultBatchSize = serviceConfig.batchSize().getAsInt();
                 LOG.warn("Request batch size is empty. Using the default value of " + defaultBatchSize);
                 request.setBatchSize(defaultBatchSize);
             }
-            dataframe = super.dataSource.get().getDataframe(request.getModelId(), request.getBatchSize()).filterRowsBySynthetic(false);
-            metadata = dataSource.get().getMetadata(request.getModelId());
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
+
+            dataframe = super.dataSource.get().getOrganicDataframe(request.getModelId(), request.getBatchSize());
+            storageMetadata = dataSource.get().getMetadata(request.getModelId());
+
+        } catch (DataframeCreateException | StorageReadException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        RequestReconciler.reconcile(request, metadata);
+        RequestReconciler.reconcile(request, storageMetadata);
 
         final MetricValueCarrier metricValue;
         try {
@@ -99,6 +100,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
 
     @GET
     @Path("/definition")
+    @Operation(summary = "Provide a general definition of this metric.")
     @Produces(MediaType.TEXT_PLAIN)
     @Override
     public Response getDefinition() {
@@ -108,13 +110,14 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Provide a specific, plain-english interpretation of a specific value of this metric.")
     @Path("/definition")
     public Response getSpecificDefinition(GroupDefinitionRequest request) {
         try {
             RequestReconciler.reconcile(request, dataSource);
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available: " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
+        } catch (DataframeCreateException | StorageReadException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
         return Response.ok(this.getSpecificDefinition(new MetricValueCarrier(request.getMetricValue()), request)).build();
@@ -123,6 +126,7 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Schedule a recurring computation of this metric.")
     @Path("/request")
     public Response createRequest(@ValidGroupMetricRequest GroupMetricRequest request) {
         return super.createRequestGeneric(request);

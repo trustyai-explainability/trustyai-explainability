@@ -19,16 +19,19 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.kie.trustyai.explainability.global.pdp.PartialDependencePlotExplainer;
 import org.kie.trustyai.explainability.model.PartialDependenceGraph;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.payloads.explainers.BaseExplanationResponse;
 import org.kie.trustyai.service.payloads.explainers.GlobalExplanationRequest;
 import org.kie.trustyai.service.payloads.explainers.PartialDependencePlotExplanationResponse;
+
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -39,7 +42,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Tag(name = "Partial Dependence Plot Explainer Endpoint")
+@EndpointDisabled(name = "endpoints.explainers.global", stringValue = "disable")
+@Tag(name = "Explainers: Global", description = "Global explainers provide explanations of model behavior over broad sets of predictions.")
 @Path("/explainers/global/pdp")
 public class PartialDependencePlotEndpoint extends GlobalExplainerEndpoint {
 
@@ -49,6 +53,7 @@ public class PartialDependencePlotEndpoint extends GlobalExplainerEndpoint {
     Instance<DataSource> dataSource;
 
     @POST
+    @Operation(summary = "Compute a global PDP explanation.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response explain(GlobalExplanationRequest request) {

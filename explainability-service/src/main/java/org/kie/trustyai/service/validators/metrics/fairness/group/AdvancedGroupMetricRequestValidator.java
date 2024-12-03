@@ -1,9 +1,8 @@
 package org.kie.trustyai.service.validators.metrics.fairness.group;
 
 import org.jboss.logging.Logger;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
-import org.kie.trustyai.service.payloads.data.download.ModelDataRequestPayload;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.AdvancedGroupMetricRequest;
 import org.kie.trustyai.service.validators.data.DataDownloadRequestValidator;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
@@ -27,12 +26,8 @@ public class AdvancedGroupMetricRequestValidator implements ConstraintValidator<
     }
 
     public boolean validateDataRequest(String modelId, DataRequestPayload drp, ConstraintValidatorContext context) {
-        ModelDataRequestPayload mdrp = new ModelDataRequestPayload();
-        mdrp.setMatchAll(drp.getMatchAll());
-        mdrp.setMatchAny(drp.getMatchAny());
-        mdrp.setMatchNone(drp.getMatchNone());
-        mdrp.setModelId(modelId);
-        return DataDownloadRequestValidator.manualValidation(mdrp, context, dataSource);
+        drp.setModelId(modelId);
+        return DataDownloadRequestValidator.manualValidation(drp, context, dataSource);
     }
 
     @Override
@@ -43,6 +38,7 @@ public class AdvancedGroupMetricRequestValidator implements ConstraintValidator<
         if (!GenericValidationUtils.validateModelId(context, dataSource, modelId)) {
             result = false;
         } else {
+
             result = validateDataRequest(request.getModelId(), request.getFavorableOutcome(), context) && result;
             result = validateDataRequest(request.getModelId(), request.getPrivilegedAttribute(), context) && result;
             result = validateDataRequest(request.getModelId(), request.getUnprivilegedAttribute(), context) && result;

@@ -61,6 +61,8 @@ public class PayloadConverter {
                 return Type.BOOLEAN;
             } else if (type == FLOAT || type == DOUBLE || type == INT32 || type == INT64) {
                 return Type.NUMBER;
+            } else if (type == TENSOR) {
+                return Type.TENSOR;
             } else if (type == STRING) {
                 return Type.CATEGORICAL;
             } else {

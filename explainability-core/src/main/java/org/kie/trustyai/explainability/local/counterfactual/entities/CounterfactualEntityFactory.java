@@ -137,7 +137,7 @@ public class CounterfactualEntityFactory {
             } else if (featureDomain instanceof CurrencyFeatureDomain) {
                 entity = CurrencyEntity.from(feature, ((CurrencyFeatureDomain) featureDomain).getCategories());
             } else if (featureDomain instanceof ObjectFeatureDomain) {
-                entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getCategories());
+                entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getRawCategories());
             } else if (featureDomain instanceof URIFeatureDomain) {
                 entity = URIEntity.from(feature, ((URIFeatureDomain) featureDomain).getCategories());
             } else if (featureDomain instanceof CategoricalNumericalFeatureDomain) {
@@ -149,7 +149,7 @@ public class CounterfactualEntityFactory {
             if (isConstrained) {
                 entity = ObjectEntity.from(feature, null, true);
             } else {
-                entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getCategories(), isConstrained);
+                entity = ObjectEntity.from(feature, ((ObjectFeatureDomain) featureDomain).getRawCategories(), isConstrained);
             }
         } else {
             throw new IllegalArgumentException(UNSUPPORTED_TYPE_MESSAGE + feature.getType());

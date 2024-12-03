@@ -6,14 +6,15 @@ import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.kie.trustyai.service.BaseTestProfile;
+import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.endpoints.metrics.fairness.group.DisparateImpactRatioEndpoint;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -30,19 +31,18 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(DisparateImpactRatioEndpoint.class)
 class DisparateImpactRatioEndpointTest {
 
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     @Inject
     Instance<MockMemoryStorage> storage;
 
     /**
      * Populate storage with 1000 random observations before each test.
-     *
      */
     @BeforeEach
     void populateStorage() {
@@ -129,7 +129,7 @@ class DisparateImpactRatioEndpointTest {
         final ScheduleId nonExistingRequestId = new ScheduleId();
         nonExistingRequestId.requestId = UUID.randomUUID();
         given().contentType(ContentType.JSON).when().body(nonExistingRequestId).delete("/request")
-                .then().statusCode(RestResponse.StatusCode.NOT_FOUND).body(is(""));
+                .then().statusCode(RestResponse.StatusCode.NOT_FOUND).body(is(String.format(BaseEndpoint.REQUEST_ID_NOT_FOUND_FMT, nonExistingRequestId.requestId)));
 
         scheduleList = given()
                 .when()

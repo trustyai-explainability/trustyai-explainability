@@ -27,6 +27,7 @@ public class CounterfactualPrediction extends BasePrediction {
 
     private final DataDistribution dataDistribution;
     private final Long maxRunningTimeSeconds;
+    private final Long DEFAULT_MAX_RUNNING_TIME_SECONDS = 120L;
 
     public CounterfactualGoalCriteria getGoalCriteria() {
         return goalCriteria;
@@ -79,6 +80,6 @@ public class CounterfactualPrediction extends BasePrediction {
     }
 
     public Long getMaxRunningTimeSeconds() {
-        return maxRunningTimeSeconds;
+        return maxRunningTimeSeconds == null ? DEFAULT_MAX_RUNNING_TIME_SECONDS : maxRunningTimeSeconds;
     }
 }

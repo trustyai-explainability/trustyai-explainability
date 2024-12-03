@@ -4,12 +4,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestResponse;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.config.ServiceConfig;
 import org.kie.trustyai.service.config.metrics.MetricsConfig;
-import org.kie.trustyai.service.data.DataSource;
+import org.kie.trustyai.service.data.datasources.DataSource;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
@@ -32,6 +33,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 public abstract class BaseEndpoint<T extends BaseMetricRequest> {
+    public static String REQUEST_ID_NOT_FOUND_FMT = "Error: Scheduled requestId=%s not found";
+    public static String NO_REQUEST_ID_PROVIDED_FMT =
+            "Scheduled requestId in DELETE payload was null. This can occur if the provided requestId was not a valid UUID, please check the parameters of the DELETE payload.";
+
     protected static final Logger LOG = Logger.getLogger(BaseEndpoint.class);
 
     @Inject
@@ -46,7 +51,7 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     @Inject
     protected ServiceConfig serviceConfig;
 
-    private final String name;
+    protected final String name;
 
     protected BaseEndpoint() {
         this.name = "GenericBaseEndpoint";
@@ -63,21 +68,27 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
+    @Operation(summary = "Delete a recurring computation of this metric.")
     @Path("/request")
     public Response deleteRequest(ScheduleId request) {
         final UUID id = request.requestId;
-        if (scheduler.getRequests(this.name).containsKey(id)) {
+
+        if (null == id) {
+            LOG.error(NO_REQUEST_ID_PROVIDED_FMT);
+            return RestResponse.ResponseBuilder.notFound().entity(NO_REQUEST_ID_PROVIDED_FMT).build().toResponse();
+        } else if (scheduler.getRequests(this.name).containsKey(id)) {
             scheduler.delete(this.name, request.requestId);
-            LOG.info("Removing scheduled request id=" + id);
+            LOG.info("Removing scheduled request ID=" + id);
             return RestResponse.ResponseBuilder.ok("Removed").build().toResponse();
         } else {
-            LOG.error("Scheduled request id=" + id + " not found");
-            return RestResponse.ResponseBuilder.notFound().build().toResponse();
+            LOG.error("Scheduled requestId=" + id + " not found");
+            return RestResponse.ResponseBuilder.notFound().entity(String.format(REQUEST_ID_NOT_FOUND_FMT, id)).build().toResponse();
         }
     }
 
     @GET
     @Path("/requests")
+    @Operation(summary = "List the currently scheduled computations of this metric.")
     @Produces(MediaType.APPLICATION_JSON)
     public Response listRequests() {
         final ScheduleList scheduleList = new ScheduleList();
@@ -103,8 +114,8 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
         try {
             RequestReconciler.reconcile(request, dataSource);
         } catch (DataframeCreateException e) {
-            LOG.error("No data available: " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
         scheduler.register(request.getMetricName(), id, request);
 

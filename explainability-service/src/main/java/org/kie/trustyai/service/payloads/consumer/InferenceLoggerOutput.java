@@ -1,69 +1,78 @@
 package org.kie.trustyai.service.payloads.consumer;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.kie.trustyai.explainability.model.SerializableObject;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.*;
+
+@Entity
 public class InferenceLoggerOutput {
     // Match the old "predictions" format
     @JsonAlias({ "predictions" })
-    private List<Double> predictions;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<SerializableObject> predictions;
 
     // Match the "outputs" format
     @JsonProperty("outputs")
-    private List<Output> outputs;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<InferenceLoggerOutputObject> outputs;
 
-    public static class Output {
-        private String name;
+    @Column(name = "inference_id")
+    private String id;
 
-        public List<Integer> getShape() {
-            return shape;
-        }
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    private Long dbId;
 
-        public void setShape(List<Integer> shape) {
-            this.shape = shape;
-        }
-
-        public String getDatatype() {
-            return datatype;
-        }
-
-        public void setDatatype(String datatype) {
-            this.datatype = datatype;
-        }
-
-        public List<Double> getData() {
-            return data;
-        }
-
-        public void setData(List<Double> data) {
-            this.data = data;
-        }
-
-        private List<Integer> shape;
-        private String datatype;
-        private List<Double> data;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
+    public void setDbId(Long dbId) {
+        this.dbId = dbId;
     }
 
-    public List<Double> getPredictions() {
+    public Long getDbId() {
+        return dbId;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public List<SerializableObject> getPredictions() {
         if (predictions != null) {
             return predictions;
         } else if (outputs != null && !outputs.isEmpty()) {
-            return outputs.get(0).data;
+            return outputs.get(0).getData();
         }
         return null;
     }
 
-    public void setPredictions(List<Double> predictions) {
+    public List<InferenceLoggerOutputObject> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<InferenceLoggerOutputObject> outputs) {
+        this.outputs = outputs;
+    }
+
+    public List<SerializableObject> getRawPredictions() {
+        return this.predictions;
+    }
+
+    public void setPredictions(List<SerializableObject> predictions) {
         this.predictions = predictions;
     }
+
+    public void setPredictionsDouble(List<Double> predictions) {
+        this.predictions = predictions.stream().map(SerializableObject::new).collect(Collectors.toList());
+    }
+
 }

@@ -3,14 +3,16 @@ package org.kie.trustyai.service.endpoints.metrics.identity;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.exceptions.StorageReadException;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
@@ -65,12 +67,13 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
     }
 
     @POST
+    @Operation(summary = "Provide a specific, plain-english interpretation of the current value of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response response(@ValidIdentityMetricRequest IdentityMetricRequest request) throws DataframeCreateException {
 
         final Dataframe dataframe;
-        final Metadata metadata;
+        final StorageMetadata storageMetadata;
         try {
             if (Objects.isNull(request.getBatchSize())) {
                 final int defaultBatchSize = serviceConfig.batchSize().getAsInt();
@@ -78,13 +81,13 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
                 request.setBatchSize(defaultBatchSize);
             }
             dataframe = super.dataSource.get().getDataframe(request.getModelId(), request.getBatchSize()).filterRowsBySynthetic(false);
-            metadata = dataSource.get().getMetadata(request.getModelId());
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
+            storageMetadata = dataSource.get().getMetadata(request.getModelId());
+        } catch (DataframeCreateException | StorageReadException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
-        RequestReconciler.reconcile(request, metadata);
+        RequestReconciler.reconcile(request, storageMetadata);
 
         final MetricValueCarrier metricValue;
         try {
@@ -101,6 +104,7 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
     }
 
     @GET
+    @Operation(summary = "Provide a general definition of this metric.")
     @Path("/definition")
     @Produces(MediaType.TEXT_PLAIN)
     public Response getDefinition() {
@@ -108,21 +112,23 @@ public class IdentityEndpoint extends BaseEndpoint<IdentityMetricRequest> {
     }
 
     @POST
+    @Operation(summary = "Provide a specific, plain-english interpretation of a specific value of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/definition")
     public Response getSpecificDefinition(IdentityMetricRequest request) {
         try {
             RequestReconciler.reconcile(request, dataSource);
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available: " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.BAD_REQUEST).entity("No data available").build();
+        } catch (DataframeCreateException | StorageReadException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
         return Response.ok(this.getSpecificDefinitionFunction(request)).build();
     }
 
     @POST
+    @Operation(summary = "Schedule a recurring computation of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")

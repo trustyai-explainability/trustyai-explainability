@@ -8,20 +8,21 @@ import java.util.stream.IntStream;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.*;
-import org.kie.trustyai.service.BaseTestProfile;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.PayloadProducer;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
-import org.kie.trustyai.service.mocks.MockDatasource;
-import org.kie.trustyai.service.mocks.MockMemoryStorage;
-import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
+import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
+import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
-import org.kie.trustyai.service.payloads.consumer.PartialKind;
-import org.kie.trustyai.service.utils.KServePayloads;
+import org.kie.trustyai.service.payloads.consumer.partial.InferencePartialPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.PartialKind;
+import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -38,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.kie.trustyai.service.PayloadProducer.MODEL_A_ID;
 
 @QuarkusTest
-@TestProfile(BaseTestProfile.class)
+@TestProfile(MemoryTestProfile.class)
 @TestHTTPEndpoint(ConsumerEndpoint.class)
 class ConsumerEndpointFormatsTest {
 
@@ -49,138 +50,23 @@ class ConsumerEndpointFormatsTest {
 
     private static final int BATCH_SIZE = 100;
     @Inject
-    Instance<MockDatasource> datasource;
+    Instance<MockCSVDatasource> datasource;
 
     @Inject
     Instance<MockMemoryStorage> storage;
-
-    static Prediction generateSingleInputSingleOutputPrediction() {
-        return new SimplePrediction(
-                new PredictionInput(
-                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))),
-                new PredictionOutput(
-                        List.of(
-                                new Output("o-1", Type.NUMBER, new Value(1.0), 1.0))));
-    }
-
-    static Prediction generateSingleInputMultiOutputPrediction(int nOutputFeatures) {
-        return new SimplePrediction(
-                new PredictionInput(
-                        List.of(FeatureFactory.newNumericalFeature("f-1", 10.0))),
-                new PredictionOutput(IntStream.range(0, nOutputFeatures)
-                        .mapToObj(i -> new Output("o-" + i, Type.NUMBER, new Value((double) i), 1.0))
-                        .collect(Collectors.toUnmodifiableList())));
-    }
-
-    static Prediction generateMultiInputSingleOutputPrediction(int nInputFeatures) {
-        return new SimplePrediction(
-                new PredictionInput(
-                        IntStream.range(0, nInputFeatures)
-                                .mapToObj(i -> FeatureFactory.newNumericalFeature("f-" + i, (double) i * 10))
-                                .collect(Collectors.toUnmodifiableList())),
-                new PredictionOutput(
-                        List.of(
-                                new Output("o-1", Type.NUMBER, new Value(1.0), 1.0))));
-    }
-
-    static Prediction generateMultiInputMultiOutputPrediction(int nInputs, int nOutputs) {
-        return new SimplePrediction(
-                new PredictionInput(
-                        IntStream.range(0, nInputs)
-                                .mapToObj(i -> FeatureFactory.newNumericalFeature("f-" + i, (double) i * 10))
-                                .collect(Collectors.toUnmodifiableList())),
-                new PredictionOutput(
-                        IntStream.range(0, nOutputs)
-                                .mapToObj(i -> new Output("o-" + i, Type.NUMBER, new Value((double) i), 1.0))
-                                .collect(Collectors.toUnmodifiableList())));
-    }
-
-    public static KServePayloads generateNPNoBatch(Prediction prediction) {
-        final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
-
-        ModelInferRequest.InferInputTensor.Builder requestTensor = df.rowAsSingleArrayInputTensor(0, INPUT_PREFIX);
-        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
-        request.addInputs(requestTensor);
-        request.setModelName(MODEL_ID);
-        request.setModelVersion(MODEL_VERSION);
-
-        final ModelInferResponse.InferOutputTensor.Builder responseTensor = df.rowAsSingleArrayOutputTensor(0, OUTPUT_PREFIX);
-        final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
-        response.addOutputs(responseTensor);
-        response.setModelName(MODEL_ID);
-        response.setModelVersion(MODEL_VERSION);
-
-        return new KServePayloads(request.build(), response.build());
-    }
-
-    public static KServePayloads generateNPBatch(Prediction prediction, int batchSize) {
-        final List<Prediction> predictions = IntStream.range(0, batchSize).mapToObj(i -> prediction).collect(Collectors.toList());
-        final TensorDataframe df = TensorDataframe.createFrom(predictions);
-
-        ModelInferRequest.InferInputTensor.Builder requestTensor = df.asArrayInputTensor(INPUT_PREFIX);
-        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
-        request.addInputs(requestTensor);
-        request.setModelName(MODEL_ID);
-        request.setModelVersion(MODEL_VERSION);
-
-        final ModelInferResponse.InferOutputTensor.Builder responseTensor = df.asArrayOutputTensor(OUTPUT_PREFIX);
-        final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
-        response.addOutputs(responseTensor);
-        response.setModelName(MODEL_ID);
-        response.setModelVersion(MODEL_VERSION);
-
-        return new KServePayloads(request.build(), response.build());
-    }
-
-    public static KServePayloads generatePDNoBatch(Prediction prediction) {
-        final TensorDataframe df = TensorDataframe.createFrom(List.of(prediction));
-
-        List<ModelInferRequest.InferInputTensor.Builder> requestTensor = df.rowAsSingleDataframeInputTensor(0);
-        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
-        requestTensor.forEach(request::addInputs);
-        request.setModelName(MODEL_ID);
-        request.setModelVersion(MODEL_VERSION);
-
-        final List<ModelInferResponse.InferOutputTensor.Builder> responseTensor = df.rowAsSingleDataframeOutputTensor(0);
-        final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
-        responseTensor.forEach(response::addOutputs);
-        response.setModelName(MODEL_ID);
-        response.setModelVersion(MODEL_VERSION);
-
-        return new KServePayloads(request.build(), response.build());
-    }
-
-    public static KServePayloads generatePDBatch(Prediction prediction, int batchSize) {
-        final List<Prediction> predictions = IntStream.range(0, batchSize).mapToObj(i -> prediction).collect(Collectors.toList());
-        final TensorDataframe df = TensorDataframe.createFrom(predictions);
-
-        List<ModelInferRequest.InferInputTensor.Builder> requestTensor = df.asBatchDataframeInputTensor();
-        final ModelInferRequest.Builder request = ModelInferRequest.newBuilder();
-        requestTensor.forEach(request::addInputs);
-        request.setModelName(MODEL_ID);
-        request.setModelVersion(MODEL_VERSION);
-
-        final List<ModelInferResponse.InferOutputTensor.Builder> responseTensor = df.asBatchDataframeOutputTensor();
-        final ModelInferResponse.Builder response = ModelInferResponse.newBuilder();
-        responseTensor.forEach(response::addOutputs);
-        response.setModelName(MODEL_ID);
-        response.setModelVersion(MODEL_VERSION);
-
-        return new KServePayloads(request.build(), response.build());
-    }
 
     /**
      * Empty the storage before each test.
      */
     @BeforeEach
-    void emptyStorage() {
-        datasource.get().empty();
+    void emptyStorage() throws JsonProcessingException {
+        datasource.get().reset();
         storage.get().emptyStorage();
     }
 
     /**
      * Scenario 1:
-     *
+     * <p>
      * Consume a single payload with a single input and multiple outputs, using the NP codec.
      * The input corresponds to:
      *
@@ -197,7 +83,7 @@ class ConsumerEndpointFormatsTest {
      *   }
      * }
      * </pre>
-     *
+     * <p>
      * and the output corresponds to:
      *
      * <pre>
@@ -416,7 +302,7 @@ class ConsumerEndpointFormatsTest {
 
     /**
      * Scenario: 2 inputs, 1 output, PD codec, no batch
-     *
+     * <p>
      * The input corresponds to:
      *
      * <pre>
@@ -438,7 +324,6 @@ class ConsumerEndpointFormatsTest {
      *   }
      * }
      * </pre>
-     *
      */
     @Test
     void consumeMultiInputSingleOutputPDCodecNoBatch() {
@@ -656,79 +541,6 @@ class ConsumerEndpointFormatsTest {
     }
 
     @Test
-    void consumeFullPostCorrectModelA() {
-        final InferencePayload payload = PayloadProducer.getInferencePayloadA(0);
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/full")
-                .then()
-                .statusCode(RestResponse.StatusCode.OK)
-
-                .body(is(""));
-
-        final Dataframe dataframe = datasource.get().getDataframe(payload.getModelId());
-        assertEquals(1, dataframe.getRowDimension());
-        assertEquals(4, dataframe.getColumnDimension());
-        assertEquals(3, dataframe.getInputsCount());
-        assertEquals(1, dataframe.getOutputsCount());
-    }
-
-    @Order(3)
-    @Test
-    void consumeFullPostIncorrectModelA() {
-        final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
-        // Mangle inputs
-        payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/full")
-                .then()
-                .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
-
-                .body(is(""));
-    }
-
-    @Order(2)
-    @Test
-    void consumeFullPostCorrectModelB() {
-        final InferencePayload payload = PayloadProducer.getInferencePayloadB(1);
-
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/full")
-                .then()
-                .statusCode(RestResponse.StatusCode.OK)
-
-                .body(is(""));
-
-        final Dataframe dataframe = datasource.get().getDataframe(PayloadProducer.MODEL_B_ID);
-        assertEquals(1, dataframe.getRowDimension());
-        assertEquals(5, dataframe.getColumnDimension());
-        assertEquals(3, dataframe.getInputsCount());
-        assertEquals(2, dataframe.getOutputsCount());
-    }
-
-    @Order(4)
-    @Test
-    void consumeFullPostIncorrectModelB() {
-        final InferencePayload payload = PayloadProducer.getInferencePayloadA(1);
-        // Mangle inputs
-        payload.setInput(payload.getInput().substring(0, 10) + "X" + payload.getInput().substring(11));
-        given()
-                .contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/full")
-                .then()
-                .statusCode(RestResponse.StatusCode.INTERNAL_SERVER_ERROR)
-
-                .body(is(""));
-    }
-
-    @Test
     void consumePartialPostInputsOnly() {
         final String id = UUID.randomUUID().toString();
         for (int i = 0; i < 5; i++) {
@@ -744,7 +556,7 @@ class ConsumerEndpointFormatsTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -764,7 +576,7 @@ class ConsumerEndpointFormatsTest {
         Exception exception = assertThrows(DataframeCreateException.class, () -> {
             final Dataframe dataframe = datasource.get().getDataframe(MODEL_A_ID);
         });
-        assertEquals("Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
+        assertEquals("Error reading dataframe for model=" + MODEL_A_ID + ": Data file '" + MODEL_A_ID + "-data.csv' not found", exception.getMessage());
 
     }
 
@@ -881,10 +693,12 @@ class ConsumerEndpointFormatsTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(partialResponsePayloadBWrongSchema)
-                .when().post()
+                .when().post().peek()
                 .then()
                 .statusCode(RestResponse.StatusCode.BAD_REQUEST)
-                .body(is("Invalid schema for payload response id=" + newId + ", Payload schema and stored schema are not the same"));
+                .body(is("Error when reconciling payload for response id='" + newId + "': Payload schema does not match stored schema for model=" + MODEL_A_ID + ": See mismatch description below:\n" +
+                        "Output Schema mismatch:\n" +
+                        "\tSchema column names do not match. Existing schema columns=[input-0], comparison schema columns=[output-0, output-1]"));
     }
 
 }

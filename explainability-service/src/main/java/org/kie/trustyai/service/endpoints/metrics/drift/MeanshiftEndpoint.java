@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.meanshift.Meanshift;
 import org.kie.trustyai.metrics.drift.meanshift.MeanshiftResult;
 import org.kie.trustyai.metrics.utils.PerColumnStatistics;
@@ -20,12 +20,14 @@ import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
 
 import io.quarkus.cache.CacheResult;
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
 
 @ApplicationScoped
-@Tag(name = "Meanshift Drift Endpoint", description = "Meanshift measures that the columns of the tested dataframe come " +
+@EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
+@Tag(name = "Drift Metrics: Meanshift", description = "Meanshift measures that the columns of the tested dataframe come " +
         "from the same distribution as the training dataframe.")
 @Path("/metrics/drift/meanshift")
 public class MeanshiftEndpoint extends DriftEndpoint<MeanshiftMetricRequest> {
@@ -105,7 +107,7 @@ public class MeanshiftEndpoint extends DriftEndpoint<MeanshiftMetricRequest> {
         // get data that does _not_ have the provided reference tag: test data
         Dataframe filtered = dataframe.filterRowsByTagNotEquals(((DriftMetricRequest) request).getReferenceTag());
 
-        if (dataframe.getRowDimension() < 2) {
+        if (filtered.getRowDimension() < 2) {
             LOG.warn("Test data has less than two observations; Meanshift results will not be numerically reliable.");
         }
         Map<String, MeanshiftResult> result = ms.calculate(filtered, request.getThresholdDelta());

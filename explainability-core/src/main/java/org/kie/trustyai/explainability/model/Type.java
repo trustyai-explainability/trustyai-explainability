@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.kie.trustyai.explainability.model.tensor.Tensor;
+import org.kie.trustyai.explainability.model.tensor.TensorUtilities;
 import org.kie.trustyai.explainability.utils.DataUtils;
 
 /**
@@ -373,6 +375,40 @@ public enum Type {
                 vector[i] = perturbationContext.getRandom().nextDouble();
             }
             return new Value(vector);
+        }
+    },
+
+    TENSOR("tensor") {
+        @Override
+        public Value drop(Value value) {
+            return new Value(null);
+        }
+
+        @Override
+        public Value perturb(Value value, PerturbationContext perturbationContext) {
+            Tensor tensor;
+            if (value.getUnderlyingObject() instanceof Tensor) {
+                tensor = (Tensor) value.getUnderlyingObject();
+            } else {
+                tensor = (Tensor) Type.TENSOR.randomValue(perturbationContext).getUnderlyingObject();
+            }
+            return new Value(TensorUtilities.randomFill(tensor, perturbationContext));
+        }
+
+        @Override
+        public List<double[]> encode(EncodingParams params, Value target, Value... values) {
+            return encodeEquals(target, values);
+        }
+
+        @Override
+        public Value randomValue(PerturbationContext perturbationContext) {
+            // new MNIST sized random image
+            int[] shape = { 3, 28, 28 };
+            Double[] values = new Double[3 * 28 * 28];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = perturbationContext.getRandom().nextDouble();
+            }
+            return new Value(new Tensor<>(values, shape));
         }
     },
 

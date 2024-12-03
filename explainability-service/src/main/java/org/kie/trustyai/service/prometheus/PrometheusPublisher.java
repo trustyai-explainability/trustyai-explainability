@@ -86,7 +86,7 @@ public class PrometheusPublisher {
         for (Map.Entry<String, Double> entry : namedValues.entrySet()) {
             UUID newID = UUID.nameUUIDFromBytes((id.toString() + idx.getAndIncrement()).getBytes(StandardCharsets.UTF_8));
             values.put(newID, new AtomicDouble(entry.getValue()));
-            List<Tag> tags = generateTags(modelName, newID, Optional.of(request));
+            List<Tag> tags = generateTags(modelName, id, Optional.of(request));
             tags.add(Tag.of("subcategory", entry.getKey()));
             createOrUpdateGauge(METRIC_PREFIX + request.getMetricName().toLowerCase(), tags, newID);
         }

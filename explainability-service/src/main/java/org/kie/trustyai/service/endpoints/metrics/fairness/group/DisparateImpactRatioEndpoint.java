@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Output;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.fairness.FairnessDefinitions;
 import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
@@ -21,16 +21,22 @@ import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.fairness.group.ValidGroupMetricRequest;
 
 import io.quarkus.cache.CacheResult;
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Path;
 
 @ApplicationScoped
-@Tag(name = "Disparate Impact Ratio Endpoint", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
+@Tag(name = "Fairness Metrics: Group: Disparate Impact Ratio", description = "Disparate Impact Ratio (DIR) measures imbalances in " +
         "classifications by calculating the ratio between the proportion of the majority and protected classes getting" +
         " a particular outcome.")
+@EndpointDisabled(name = "endpoints.fairness", stringValue = "disable")
 @Path("/metrics/group/fairness/dir")
 public class DisparateImpactRatioEndpoint extends GroupEndpoint {
+    public DisparateImpactRatioEndpoint() {
+        super("DIR");
+    }
+
     @Override
     public MetricThreshold thresholdFunction(Number delta, MetricValueCarrier metricValue) {
         if (delta == null) {
@@ -89,9 +95,5 @@ public class DisparateImpactRatioEndpoint extends GroupEndpoint {
     @Override
     public String getGeneralDefinition() {
         return FairnessDefinitions.defineGroupDisparateImpactRatio();
-    }
-
-    public DisparateImpactRatioEndpoint() {
-        super("DIR");
     }
 }

@@ -1,12 +1,12 @@
 package org.kie.trustyai.service.endpoints.metrics.fairness.group.advanced;
 
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.fairness.FairnessDefinitions;
 import org.kie.trustyai.metrics.fairness.group.DisparateImpactRatio;
 import org.kie.trustyai.service.data.cache.MetricCalculationCacheKeyGen;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
-import org.kie.trustyai.service.data.metadata.Metadata;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
 import org.kie.trustyai.service.data.utils.DownloadUtils;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
@@ -54,7 +54,7 @@ public class AdvancedDisparateImpactRatioEndpoint extends AdvancedGroupEndpoint 
 
         @ValidAdvancedGroupMetricRequest
         AdvancedGroupMetricRequest gmRequest = (AdvancedGroupMetricRequest) request;
-        Metadata metadata = dataSource.get().getMetadata(request.getModelId());
+        StorageMetadata metadata = dataSource.get().getMetadata(request.getModelId());
         try {
 
             final Dataframe privileged = DownloadUtils.applyMatches(dataframe, metadata, gmRequest.getPrivilegedAttribute());

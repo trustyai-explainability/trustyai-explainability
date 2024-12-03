@@ -7,6 +7,7 @@ public enum DataType {
     INT32,
     INT64,
     STRING,
+    TENSOR,
     MAP,
     UNKNOWN,
 }

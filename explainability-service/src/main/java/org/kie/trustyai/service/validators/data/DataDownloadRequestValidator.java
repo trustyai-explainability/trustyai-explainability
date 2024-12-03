@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.kie.trustyai.explainability.model.Dataframe;
-import org.kie.trustyai.service.data.DataSource;
-import org.kie.trustyai.service.data.metadata.Metadata;
-import org.kie.trustyai.service.endpoints.data.DataEndpoint;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
+import org.kie.trustyai.service.data.datasources.DataSource;
+import org.kie.trustyai.service.data.metadata.StorageMetadata;
+import org.kie.trustyai.service.endpoints.data.DownloadEndpoint;
+import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.MatchOperation;
-import org.kie.trustyai.service.payloads.data.download.ModelDataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.RowMatcher;
 import org.kie.trustyai.service.validators.generic.GenericValidationUtils;
 
@@ -26,7 +26,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class DataDownloadRequestValidator implements ConstraintValidator<ValidDataDownloadRequest, ModelDataRequestPayload> {
+public class DataDownloadRequestValidator implements ConstraintValidator<ValidDataDownloadRequest, DataRequestPayload> {
 
     @Inject
     Instance<DataSource> dataSource;
@@ -60,7 +60,7 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
         } catch (IllegalArgumentException e) {
             context.buildConstraintViolationWithTemplate(String.format(
                     "Invalid internal column passed, %s* columns must be one of %s, got %s",
-                    DataEndpoint.TRUSTY_PREFIX,
+                    DownloadEndpoint.TRUSTY_PREFIX,
                     Arrays.toString(Dataframe.InternalColumn.values()),
                     internalColumn))
                     .addPropertyNode(modelId)
@@ -119,7 +119,7 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
         }
 
         List<ValueNode> nonNumerics = rowMatch.getValues().stream().filter(vn -> !vn.isNumber()).collect(Collectors.toList());
-        if (!nonNumerics.isEmpty() && !rowMatch.getColumnName().equals(DataEndpoint.TRUSTY_PREFIX + "TIMESTAMP")) {
+        if (!nonNumerics.isEmpty() && !rowMatch.getColumnName().equals(DownloadEndpoint.TRUSTY_PREFIX + "TIMESTAMP")) {
             context.buildConstraintViolationWithTemplate(
                     String.format(
                             "BETWEEN operation must only contain numbers, describing the lower and upper bounds of the desired range. Received non-numeric values: %s",
@@ -133,35 +133,36 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
         return outcome;
     }
 
-    private static boolean checkColumnTypeCompatibility(RowMatcher rowMatch, String modelId, Metadata metadata, ConstraintValidatorContext context) {
-        boolean feature = metadata.getInputSchema().getItems().containsKey(rowMatch.getColumnName());
+    private static boolean checkColumnTypeCompatibility(RowMatcher rowMatch, String modelId, StorageMetadata storageMetadata, ConstraintValidatorContext context) {
+        boolean feature = storageMetadata.getInputSchema().getItems().containsKey(rowMatch.getColumnName());
         boolean outcome = true;
         for (ValueNode vn : rowMatch.getValues()) {
             if (feature) {
-                outcome = GenericValidationUtils.validateFeatureColumnType(context, metadata, modelId, rowMatch.getColumnName(), List.of(vn)) && outcome;
+                outcome = GenericValidationUtils.validateFeatureColumnType(context, storageMetadata, modelId, rowMatch.getColumnName(), List.of(vn)) && outcome;
             } else {
-                outcome = GenericValidationUtils.validateOutputColumnType(context, metadata, modelId, rowMatch.getColumnName(), List.of(vn)) && outcome;
+                outcome = GenericValidationUtils.validateOutputColumnType(context, storageMetadata, modelId, rowMatch.getColumnName(), List.of(vn)) && outcome;
             }
         }
         return outcome;
     }
 
-    public static boolean manualValidation(ModelDataRequestPayload modelDataRequestPayload, ConstraintValidatorContext context, Instance<DataSource> dataSource) {
+    public static boolean manualValidation(DataRequestPayload dataRequestPayload, ConstraintValidatorContext context, Instance<DataSource> dataSource) {
         context.disableDefaultConstraintViolation();
-        final String modelId = modelDataRequestPayload.getModelId();
+        final String modelId = dataRequestPayload.getModelId();
 
         if (!GenericValidationUtils.validateModelId(context, dataSource, modelId)) {
             return false;
         } else {
             boolean result = true;
-            final Metadata metadata = dataSource.get().getMetadata(modelId);
-            for (RowMatcher rowMatch : Stream.of(modelDataRequestPayload.getMatchAll(), modelDataRequestPayload.getMatchAny(), modelDataRequestPayload.getMatchNone()).flatMap(Collection::stream)
+
+            final StorageMetadata storageMetadata = dataSource.get().getMetadata(modelId);
+            for (RowMatcher rowMatch : Stream.of(dataRequestPayload.getMatchAll(), dataRequestPayload.getMatchAny(), dataRequestPayload.getMatchNone()).flatMap(Collection::stream)
                     .collect(Collectors.toList())) {
                 boolean validOp = checkOperationExists(rowMatch, modelId, context);
                 result = validOp && result;
 
-                if (rowMatch.getColumnName().startsWith(DataEndpoint.TRUSTY_PREFIX)) {
-                    String internalColumn = rowMatch.getColumnName().replace(DataEndpoint.TRUSTY_PREFIX, "");
+                if (rowMatch.getColumnName().startsWith(DownloadEndpoint.TRUSTY_PREFIX)) {
+                    String internalColumn = rowMatch.getColumnName().replace(DownloadEndpoint.TRUSTY_PREFIX, "");
 
                     // check internal column specification
                     result = checkInternalColumnValid(rowMatch, modelId, internalColumn, context) && result;
@@ -175,11 +176,11 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
                     }
                 } else {
                     // make sure the column exists as a feature/output in the data
-                    result = GenericValidationUtils.validateColumnName(context, metadata, modelId, rowMatch.getColumnName()) && result;
+                    result = GenericValidationUtils.validateColumnName(context, storageMetadata, modelId, rowMatch.getColumnName()) && result;
 
                     // make sure passed values are compatible with the chosen row
                     // ** SHORT-CUT IF COLUMN DOES NOT EXIST **
-                    result = result && checkColumnTypeCompatibility(rowMatch, modelId, metadata, context);
+                    result = result && checkColumnTypeCompatibility(rowMatch, modelId, storageMetadata, context);
                 }
 
                 // for the between operation, check that values passed have the right count and type
@@ -194,7 +195,7 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
     }
 
     @Override
-    public boolean isValid(ModelDataRequestPayload modelDataRequestPayload, ConstraintValidatorContext context) {
-        return manualValidation(modelDataRequestPayload, context, dataSource);
+    public boolean isValid(DataRequestPayload dataRequestPayload, ConstraintValidatorContext context) {
+        return manualValidation(dataRequestPayload, context, dataSource);
     }
 }

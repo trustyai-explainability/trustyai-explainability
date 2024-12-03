@@ -1,0 +1,108 @@
+x-common-variables: &global-variables
+  QUARKUS_DATASOURCE_USER: quarkus
+  QUARKUS_DATASOURCE_PASSWORD: quarkus
+  QUARKUS_DATASOURCE_DATABASE: trustyai-database
+  MARIADB_ROOT_PASSWORD: root
+  MARIADB_USER: quarkus
+  MARIADB_PASSWORD: quarkus
+  MARIADB_DATABASE: trustyai-database
+
+services:
+  trustyai:
+    image: trustyai/trustyai-service:999-SNAPSHOT
+    container_name: trustyai-service
+    networks:
+      - data-connection
+    ports:
+      - "8080:8080"
+    depends_on:
+      trustyai-db-container:
+        condition: service_healthy
+    environment:
+      <<: *global-variables
+      SERVICE_STORAGE_FORMAT: "HIBERNATE"
+      SERVICE_DATA_FORMAT: "BEAN"
+      SERVICE_METRICS_SCHEDULE: "5s"
+      SERVICE_BATCH_SIZE: 5000
+      STORAGE_DATA_FILENAME: "data.csv"
+      STORAGE_DATA_FOLDER: "/inputs"
+      LOG_LEVEL: "DEBUG"
+      HIBERNATE: 'true'
+      QUARKUS_DATASOURCE_URL: "jdbc:mariadb://trustyai-db-container:3306/trustyai-database?autoReconnect=true"
+    volumes:
+      - ~/volumes/pvc/inputs:/inputs
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/info" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+  generator-1:
+    depends_on:
+      trustyai:
+        condition: service_healthy
+    container_name: generator-1
+    networks:
+      - data-connection
+    image: trustyai/trustyai-service-partial
+    build:
+      context: ./logger
+      dockerfile: ./partial.Dockerfile
+    environment:
+      MODEL_NAME: "example-model-1"
+      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
+      PYTHONUNBUFFERED: "1"
+  generator-2:
+    depends_on:
+      trustyai:
+        condition: service_healthy
+    networks:
+      - data-connection
+    container_name: generator-2
+    image: trustyai/trustyai-service-partial
+    build:
+      context: ./logger
+      dockerfile: ./partial.Dockerfile
+    environment:
+      MODEL_NAME: "example-model-2"
+      SERVICE_ENDPOINT: "http://trustyai:8080/consumer/kserve/v2"
+      PYTHONUNBUFFERED: "1"
+  trustyai-db-container:
+    networks:
+      - data-connection
+    container_name: trustyai-db-container
+    healthcheck:
+      interval: 30s
+      retries: 3
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--su-mysql",
+          "--connect",
+          "--innodb_initialized"
+        ]
+      timeout: 30s
+    ports:
+      - 3306:3306
+    volumes:
+      - trustyai-db-container:/var/lib/mysql/
+    environment:
+      <<: *global-variables
+    image: mariadb
+volumes:
+  prom_data:
+  trustyai-db-container:
+
+networks:
+  data-connection:

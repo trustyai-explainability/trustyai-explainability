@@ -1,8 +1,8 @@
 package org.kie.trustyai.service;
 
-import org.kie.trustyai.service.payloads.consumer.InferencePartialPayload;
 import org.kie.trustyai.service.payloads.consumer.InferencePayload;
-import org.kie.trustyai.service.payloads.consumer.PartialKind;
+import org.kie.trustyai.service.payloads.consumer.partial.InferencePartialPayload;
+import org.kie.trustyai.service.payloads.consumer.partial.PartialKind;
 
 public class PayloadProducer {
 
@@ -60,6 +60,15 @@ public class PayloadProducer {
     public static InferencePartialPayload getInferencePartialPayloadInput(String id, int number) {
         final InferencePartialPayload payload = new InferencePartialPayload();
         payload.setData(encondedInputPayloadsA[number]);
+        payload.setId(id);
+        payload.setKind(PartialKind.request);
+        payload.setModelId(MODEL_A_ID);
+        return payload;
+    }
+
+    public static InferencePartialPayload getInferencePartialPayloadInput(String id, int number, int repeats) {
+        final InferencePartialPayload payload = new InferencePartialPayload();
+        payload.setData(encondedInputPayloadsA[number].repeat(repeats));
         payload.setId(id);
         payload.setKind(PartialKind.request);
         payload.setModelId(MODEL_A_ID);

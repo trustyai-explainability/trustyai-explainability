@@ -1,18 +1,27 @@
 package org.kie.trustyai.service.endpoints.metrics.drift;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
-import org.kie.trustyai.explainability.model.Dataframe;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.data.exceptions.DataframeCreateException;
 import org.kie.trustyai.service.data.exceptions.MetricCalculationException;
+import org.kie.trustyai.service.data.exceptions.StorageReadException;
 import org.kie.trustyai.service.endpoints.metrics.BaseEndpoint;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
 import org.kie.trustyai.service.payloads.metrics.MetricThreshold;
 import org.kie.trustyai.service.payloads.metrics.drift.DriftMetricRequest;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.payloads.scheduler.ScheduleRequest;
 import org.kie.trustyai.service.prometheus.MetricValueCarrier;
 import org.kie.trustyai.service.validators.metrics.ValidReconciledMetricRequest;
 import org.kie.trustyai.service.validators.metrics.drift.ValidDriftMetricRequest;
+
+import io.quarkus.resteasy.reactive.server.EndpointDisabled;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -22,6 +31,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+@EndpointDisabled(name = "endpoints.drift", stringValue = "disable")
 public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEndpoint<T> {
     protected DriftEndpoint(String name) {
         super(name);
@@ -45,6 +55,7 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
     @Override
     @GET
     @Path("/definition")
+    @Operation(summary = "Provide a general definition of this metric.")
     @Produces(MediaType.TEXT_PLAIN)
     public Response getDefinition() {
         return Response.ok(getGeneralDefinition()).build();
@@ -52,6 +63,7 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
 
     // defines the request scheduling mechanism
     @POST
+    @Operation(summary = "Schedule a recurring computation of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/request")
@@ -66,6 +78,7 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
     // == GLOBAL FUNCTIONS ======
     // this function defines the default individual request/response flow, for a single metric calculation at this exact timestamp
     @POST
+    @Operation(summary = "Compute the current value of this metric.")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response response(@ValidDriftMetricRequest T request) throws DataframeCreateException {
@@ -85,11 +98,22 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
                 request.setThresholdDelta(defaultUpperThresh);
             }
 
-            // grab the slice of the requested data according to the provided batch size
-            dataframe = super.dataSource.get().getDataframe(request.getModelId(), request.getBatchSize()).filterRowsBySynthetic(false);
-        } catch (DataframeCreateException e) {
-            LOG.error("No data available for model " + request.getModelId() + ": " + e.getMessage(), e);
-            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("No data available").build();
+            // get the entirety of the reference tag
+            int totalRows = (int) dataSource.get().getNumObservations(request.getModelId());
+
+            // get the last $batchSize references
+
+            dataframe = dataSource.get().getDataframeFilteredByTags(request.getModelId(), totalRows, Set.of(request.getReferenceTag()));
+
+            try {
+                dataframe.addPredictions(
+                        dataSource.get().getDataframeFilteredByTags(request.getModelId(), request.getBatchSize(), Set.of(Dataframe.InternalTags.UNLABELED.get())).asPredictions());
+            } catch (DataframeCreateException e) {
+                // pass: no inference data, which should return a 'null' drift response, i.e., because we are checking if the training data has drifted from itself
+            }
+        } catch (DataframeCreateException | StorageReadException e) {
+            LOG.error(e.getMessage());
+            return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
         // use the calculate function to compute the metric value(s)
@@ -97,7 +121,7 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
         try {
             metricValue = this.calculate(dataframe, request);
         } catch (MetricCalculationException e) {
-            LOG.error("Error calculating metric for model " + request.getModelId() + ": " + e.getMessage(), e);
+            LOG.error("Error calculating metric for model=" + request.getModelId() + ": " + e.getMessage(), e);
             return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error calculating metric").build();
         }
 
@@ -108,5 +132,17 @@ public abstract class DriftEndpoint<T extends DriftMetricRequest> extends BaseEn
         // wrap into response
         BaseMetricResponse response = new BaseMetricResponse(metricValue, metricDefinition, thresholds, super.getMetricName());
         return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/requests")
+    @Operation(summary = "List the currently scheduled computations of this metric.")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listRequests() {
+        final ScheduleList scheduleList = new ScheduleList();
+        for (Map.Entry<UUID, BaseMetricRequest> entry : scheduler.getRequests(this.name).entrySet()) {
+            scheduleList.requests.add(new ScheduleRequest(entry.getKey(), ((DriftMetricRequest) entry.getValue()).getReadableVersion()));
+        }
+        return Response.ok(scheduleList).build();
     }
 }

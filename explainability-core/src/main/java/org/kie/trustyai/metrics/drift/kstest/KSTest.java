@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
-import org.kie.trustyai.explainability.model.Dataframe;
 import org.kie.trustyai.explainability.model.Type;
 import org.kie.trustyai.explainability.model.Value;
+import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.metrics.drift.HypothesisTestResult;
 
 public class KSTest {
@@ -20,8 +20,8 @@ public class KSTest {
     public HashMap<String, HypothesisTestResult> calculate(Dataframe dfTrain, Dataframe dfTest, double signif) {
         double d = 0.0d;
         List<Type> types = dfTrain.getColumnTypes();
-        List<String> trainNames = dfTrain.getColumnNames();
-        List<String> testNames = dfTest.getColumnNames();
+        List<String> trainNames = dfTrain.getRawColumnNames();
+        List<String> testNames = dfTest.getRawColumnNames();
 
         HashMap<String, HypothesisTestResult> result = new HashMap<>();
         for (int i = 0; i < dfTest.getColumnDimension(); i++) {
