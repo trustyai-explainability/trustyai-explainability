@@ -244,7 +244,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
 
         ScheduleList scheduleList = given()
                 .when()
-                .get("/requests").peek()
+                .get("/requests")
                 .then().statusCode(Response.Status.OK.getStatusCode()).extract().body().as(ScheduleList.class);
 
         // Correct number of active requests
@@ -611,7 +611,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
         final BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post("/advanced").peek()
+                .when().post("/advanced")
                 .then().statusCode(Response.Status.OK.getStatusCode())
                 .extract()
                 .body().as(BaseMetricResponse.class);
