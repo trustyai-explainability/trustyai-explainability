@@ -3,7 +3,6 @@ package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,8 @@ import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.AdvancedGroupMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.restassured.http.ContentType;
 
@@ -172,7 +173,6 @@ abstract class DisparateImpactRatioRequestsEndpointBaseTest {
         // Correct number of active requests
         assertEquals(2, scheduleList.requests.size());
     }
-
 
     @Test
     void postAdvancedCorrect() throws JsonProcessingException {

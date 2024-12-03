@@ -621,7 +621,6 @@ abstract class DisparateImpactRatioEndpointBaseTest {
         assertFalse(Double.isNaN(response.getValue()));
     }
 
-
     @Test
     void postAdvancedIncorrect() throws JsonProcessingException {
         populate();

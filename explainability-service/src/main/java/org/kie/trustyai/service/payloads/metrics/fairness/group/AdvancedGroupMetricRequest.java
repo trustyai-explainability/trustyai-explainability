@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
 import org.kie.trustyai.service.payloads.data.download.serializers.DataRequestDeserializer;
 import org.kie.trustyai.service.payloads.data.download.serializers.DataRequestSerializer;
@@ -14,6 +12,8 @@ import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 @JsonTypeInfo(

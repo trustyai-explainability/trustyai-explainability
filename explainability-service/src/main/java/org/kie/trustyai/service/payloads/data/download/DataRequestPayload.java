@@ -1,6 +1,5 @@
 package org.kie.trustyai.service.payloads.data.download;
 
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hamcrest.core.StringContains;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +34,6 @@ import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -566,5 +564,5 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
                 .body(containsString("No feature or output found with name=FIELD_DOES_NOT_EXIST."))
                 .body(containsString("Invalid type for output=income: got 'WRONG_VALUE_TYPE', expected object compatible with 'INT32'"))
                 .body(containsString("RowMatch operation must be one of [BETWEEN, EQUALS], got NO_SUCH_OPERATION"));
-  }
+    }
 }
