@@ -187,7 +187,7 @@ public class UploadEndpoint {
             dpSource = "";
         } else {
             dpSource = jointPayload.getDataTag();
-            Optional<String> tagValidationErrorMessage = GenericValidationUtils.validateDataTag(dpSource);
+            Optional<String> tagValidationErrorMessage = GenericValidationUtils.validateNewDataTag(dpSource);
             if (tagValidationErrorMessage.isPresent()) {
                 return Optional.of(Response.serverError().entity(tagValidationErrorMessage.get()).status(Response.Status.BAD_REQUEST).build());
             }

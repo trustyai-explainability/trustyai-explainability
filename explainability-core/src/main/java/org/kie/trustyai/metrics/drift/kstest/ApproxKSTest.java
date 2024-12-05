@@ -71,7 +71,7 @@ public class ApproxKSTest {
                                     testNames.get(i)));
                 }
                 if (dfTest.getRowDimension() < 2 || trainGKSketches.get(colName).size() < 2) {
-                    result.put(colName, new HypothesisTestResult(0, 1, false));
+                    result.put(dfTest.getColumnNames().get(i), new HypothesisTestResult(0, 1, false));
                 } else {
                     GKSketch testSketch = new GKSketch(eps);
                     GKSketch trainSketch = trainGKSketches.get(colName);
@@ -84,7 +84,7 @@ public class ApproxKSTest {
                     }
                     double pValue = computePvalue(d, trainSketch.getNumx(), testSketch.getNumx()); //compute pvalue
                     boolean reject = pValue <= signif;
-                    result.put(colName, new HypothesisTestResult(d, pValue, reject));
+                    result.put(dfTest.getColumnNames().get(i), new HypothesisTestResult(d, pValue, reject));
                 }
             }
         }

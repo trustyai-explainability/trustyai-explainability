@@ -89,7 +89,6 @@ public abstract class GroupEndpoint extends BaseEndpoint<GroupMetricRequest> {
         }
         if (metricValue.isSingle()) {
             final String metricDefinition = this.getSpecificDefinition(metricValue, request);
-
             MetricThreshold thresholds = thresholdFunction(request.getThresholdDelta(), metricValue);
             final BaseMetricResponse dirObj = new BaseMetricResponse(metricValue, metricDefinition, thresholds, super.getMetricName());
             return Response.ok(dirObj).build();

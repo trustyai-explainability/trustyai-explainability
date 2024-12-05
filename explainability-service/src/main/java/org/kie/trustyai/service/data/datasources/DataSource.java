@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.data.datasources;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -387,6 +388,11 @@ public abstract class DataSource {
      * @return the tag column of the requested dataframe
      */
     public abstract List<String> getTags(String modelId);
+
+    /**
+     * Return a map of tag count in a particular dataframe, keyed by tag name
+     */
+    public abstract Map<String, Long> getTagCounts(String modelId);
 
     // NAME MAPPING OPERATIONS =========================================================================================
     /**
