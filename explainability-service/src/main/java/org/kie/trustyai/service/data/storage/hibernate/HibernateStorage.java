@@ -560,6 +560,28 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         }
     }
 
+    @Transactional
+    public Map<String, Long> getTagCounts(String modelId) {
+        if (dataExists(modelId)) {
+            refreshIfDirty();
+            List<List> out = em.createQuery(
+                    "select dr.tag, COUNT(*) from DataframeRow dr " +
+                            "where dr.modelId = ?1" +
+                            " group by dr.tag",
+                    List.class)
+                    .setParameter(1, modelId)
+                    .getResultList();
+
+            Map<String, Long> tagCounts = new HashMap<>();
+            for (List tuple : out) {
+                tagCounts.put((String) tuple.get(0), (Long) tuple.get(1));
+            }
+            return tagCounts;
+        } else {
+            throw new StorageReadException("Error reading tags for model=" + modelId + ": " + NO_DATA_ERROR_MSG);
+        }
+    }
+
     // NAME MAPPING MANIPULATION =======================================================================================
     @Transactional
     public void applyNameMapping(NameMapping nameMapping) {

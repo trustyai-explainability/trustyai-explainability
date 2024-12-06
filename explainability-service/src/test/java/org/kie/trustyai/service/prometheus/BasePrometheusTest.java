@@ -1,7 +1,10 @@
 package org.kie.trustyai.service.prometheus;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +18,7 @@ import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.drift.meanshift.MeanshiftMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
+import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import io.restassured.http.ContentType;
@@ -24,6 +28,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -143,6 +150,71 @@ public abstract class BasePrometheusTest {
             // after deletion, they should not
             assertFalse(metricsRequests.getRight().contains("trustyai_meanshift{batch_size=\"5000\",metricName=\"MEANSHIFT\""));
             assertFalse(metricsRequests.getRight().contains("subcategory=\"" + column + "\""));
+        }
+    }
+
+    /**
+     * Deleting a request should remove it from the Prometheus /q/metrics endpoint
+     */
+    @Test
+    @DisplayName("Single-valued requests  provide name mappings to Prometheus")
+    void nameMappedFairnessRequest() throws InterruptedException {
+        Map<String, String> inputMapping = new HashMap<>();
+        inputMapping.put("gender", "genderMapped");
+        Map<String, String> outputMapping = new HashMap<>();
+        outputMapping.put("income", "incomeMapped");
+        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
+        given()
+                .contentType(ContentType.JSON)
+                .body(nameMapping)
+                .when().post("info/names")
+                .then()
+                .statusCode(200)
+                .body(is("Feature and output name mapping successfully applied."));
+
+        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
+        payload.setProtectedAttribute("genderMapped");
+        payload.setOutcomeName("incomeMapped");
+        Pair<String, String> metricsRequests = createThenDeleteRequest("/metrics/group/fairness/spd/request", payload);
+
+        // Metrics should contain the mapped names
+        assertThat(metricsRequests.getLeft(),
+                containsString("trustyai_spd{batch_size=\"5000\",favorable_value=\"1\",metricName=\"SPD\",model=\"example1\",outcome=\"incomeMapped\",privileged=\"1\",protected=\"genderMapped\""));
+    }
+
+    @Test
+    @DisplayName("Multi-valued requests provide name mappings to Prometheus")
+    void nameMappedDriftRequest() throws InterruptedException {
+        Dataframe taggedDataframe = getTaggedDataframe();
+        saveDF(taggedDataframe, MODEL_ID);
+
+        Map<String, String> inputMapping = new HashMap<>();
+        inputMapping.put("age", "ageMapped");
+        inputMapping.put("gender", "genderMapped");
+        inputMapping.put("race", "raceMapped");
+        Map<String, String> outputMapping = new HashMap<>();
+        outputMapping.put("income", "incomeMapped");
+
+        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
+        given()
+                .contentType(ContentType.JSON)
+                .body(nameMapping)
+                .when().post("info/names")
+                .then()
+                .statusCode(200)
+                .body(is("Feature and output name mapping successfully applied."));
+
+        MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
+        payload.setReferenceTag(TRAINING_TAG);
+        payload.setModelId(MODEL_ID);
+        Pair<String, String> metricsRequests = createThenDeleteRequest("/metrics/drift/meanshift/request", payload);
+
+        String filteredResponseMeanshift = Arrays.stream(metricsRequests.getLeft().split("\n")).filter(x -> x.contains("trustyai_meanshift")).collect(Collectors.joining());
+        for (String column : taggedDataframe.getInputNames()) {
+            ;
+            // the metrics should contain the mapped column names
+            assertThat(filteredResponseMeanshift, containsString("trustyai_meanshift{batch_size=\"5000\",metricName=\"MEANSHIFT\""));
+            assertThat(filteredResponseMeanshift, containsString("subcategory=\"" + column + "Mapped\""));
         }
     }
 }

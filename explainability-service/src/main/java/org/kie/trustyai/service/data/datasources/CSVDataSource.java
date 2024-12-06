@@ -453,6 +453,16 @@ public class CSVDataSource extends DataSource {
         return getDataframe(modelId, numObs).getTags();
     }
 
+    @Override
+    public Map<String, Long> getTagCounts(String modelId) {
+        List<String> tags = getTags(modelId);
+        Map<String, Long> counts = new HashMap<>();
+        for (String tag : tags) {
+            counts.put(tag, counts.computeIfAbsent(tag, t -> 0L) + 1);
+        }
+        return counts;
+    }
+
     // NAME MAPPING OPERATIONS =========================================================================================
     /**
      * Apply a name mapping to a dataframe

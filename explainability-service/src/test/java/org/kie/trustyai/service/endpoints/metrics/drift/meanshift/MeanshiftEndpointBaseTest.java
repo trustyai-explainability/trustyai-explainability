@@ -198,4 +198,45 @@ abstract class MeanshiftEndpointBaseTest {
         scheduler.get().calculateManual(true);
         assertDoesNotThrow(() -> scheduler.get().calculateManual(true));
     }
+
+    @Test
+    void meanshiftNameMappedNonPreFitRequestTagDoesNotExist() throws InterruptedException {
+        clearData();
+
+        // add only TRAINING data, no inference data
+        Dataframe dataframe = DataframeGenerators.generateRandomDataframe(N_SAMPLES);
+        HashMap<String, List<List<Integer>>> tagging = new HashMap<>();
+        tagging.put(TRAINING_TAG, List.of(List.of(0, N_SAMPLES)));
+        dataframe.tagDataPoints(tagging);
+        saveDF(dataframe);
+
+        MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
+        payload.setReferenceTag("DOES NOT EXIST");
+        payload.setModelId(MODEL_ID);
+
+        HashMap<String, String> inputMapping = new HashMap<>();
+        HashMap<String, String> outputMapping = new HashMap<>();
+        inputMapping.put("age", "Age Mapped");
+        inputMapping.put("gender", "Gender Mapped");
+        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(nameMapping)
+                .basePath("/info")
+                .when().post("/names")
+                .then()
+                .statusCode(200)
+                .body(is("Feature and output name mapping successfully applied."));
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/request")
+                .then()
+                .statusCode(Response.Status.BAD_REQUEST.getStatusCode());
+
+        scheduler.get().calculateManual(true);
+        assertDoesNotThrow(() -> scheduler.get().calculateManual(true));
+    }
 }
