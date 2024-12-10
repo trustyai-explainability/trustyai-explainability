@@ -34,6 +34,7 @@ public class AdvancedGroupMetricRequestValidator implements ConstraintValidator<
     public boolean isValid(AdvancedGroupMetricRequest request, ConstraintValidatorContext context) {
         final String modelId = request.getModelId();
         boolean result = true;
+        LOG.info("validating advanced group metric request");
 
         if (!GenericValidationUtils.validateModelId(context, dataSource, modelId)) {
             result = false;

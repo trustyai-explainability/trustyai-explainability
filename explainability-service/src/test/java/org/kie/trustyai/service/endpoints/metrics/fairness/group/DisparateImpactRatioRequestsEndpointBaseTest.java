@@ -190,9 +190,9 @@ abstract class DisparateImpactRatioRequestsEndpointBaseTest {
                 .when()
                 .get("/requests")
                 .then().statusCode(200).extract().response().then()
-                .body(containsString("privilegedAttribute\":{\"type\":\"MAP\",\"value\":\"{"))
-                .body(containsString("unprivilegedAttribute\":{\"type\":\"MAP\",\"value\":\"{"))
-                .body(containsString("favorableOutcome\":{\"type\":\"MAP\",\"value\":\"{"))
+                .body(containsString("privilegedAttribute\":{\"type\":\"null\",\"value\":\"DataRequestPayload"))
+                .body(containsString("unprivilegedAttribute\":{\"type\":\"null\",\"value\":\"DataRequestPayload"))
+                .body(containsString("favorableOutcome\":{\"type\":\"null\",\"value\":\"DataRequestPayload"))
                 .body(containsString("\"protectedAttribute\":\"Defined by TrustyQL\""))
                 .body(containsString("\"outcomeName\":\"Defined by TrustyQL\""));
     }

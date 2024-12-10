@@ -8,6 +8,7 @@ import org.kie.trustyai.service.payloads.metrics.fairness.group.AdvancedGroupMet
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.identity.IdentityMetricRequest;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
         @JsonSubTypes.Type(value = IdentityMetricRequest.class, name = "IdentityMetricRequest"),
         @JsonSubTypes.Type(value = DriftMetricRequest.class, name = "DriftMetricRequest"),
 })
+
 @JsonTypeName("BaseMetricRequest")
 public abstract class BaseMetricRequest {
     private String modelId;
@@ -70,6 +72,11 @@ public abstract class BaseMetricRequest {
         output.put("metricName", metricName);
         output.put("model", modelId);
         return output;
+    }
+
+    @JsonIgnore
+    public BaseMetricRequest getRepresentationForRequestListing() {
+        return this;
     }
 
     public abstract Map<String, String> retrieveTags();

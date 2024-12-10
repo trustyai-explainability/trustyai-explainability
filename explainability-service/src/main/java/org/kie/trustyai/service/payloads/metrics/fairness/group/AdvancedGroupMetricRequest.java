@@ -5,15 +5,15 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
-import org.kie.trustyai.service.payloads.data.download.serializers.DataRequestDeserializer;
-import org.kie.trustyai.service.payloads.data.download.serializers.DataRequestSerializer;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
+import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 @JsonPropertyOrder({ "protected", "favorable" })
 @JsonTypeInfo(
@@ -30,16 +30,10 @@ public class AdvancedGroupMetricRequest extends BaseMetricRequest {
      * This maps the DataRequestPayload to the following json: {"type": MAP, "value": "$DATA_REQUEST_JSON_AS_QUOTED_STRING"}
      * This ensures compatibility with the ODH UI
      */
-    @JsonSerialize(using = DataRequestSerializer.class)
-    @JsonDeserialize(using = DataRequestDeserializer.class)
     private DataRequestPayload privilegedAttribute;
 
-    @JsonSerialize(using = DataRequestSerializer.class)
-    @JsonDeserialize(using = DataRequestDeserializer.class)
     private DataRequestPayload unprivilegedAttribute;
 
-    @JsonSerialize(using = DataRequestSerializer.class)
-    @JsonDeserialize(using = DataRequestDeserializer.class)
     private DataRequestPayload favorableOutcome;
     private String modelId;
 
@@ -51,6 +45,7 @@ public class AdvancedGroupMetricRequest extends BaseMetricRequest {
     public AdvancedGroupMetricRequest() {
         // Public default no-argument constructor
         super();
+
     }
 
     public DataRequestPayload getFavorableOutcome() {
@@ -127,5 +122,20 @@ public class AdvancedGroupMetricRequest extends BaseMetricRequest {
                 thresholdDelta,
                 getBatchSize(),
                 this.getMetricName());
+    }
+
+    // map the representation in the /requests endpoint to comply with group endpoint spec
+    @JsonIgnore
+    @Override
+    public BaseMetricRequest getRepresentationForRequestListing() {
+        GroupMetricRequest gmr = new GroupMetricRequest();
+        gmr.setMetricName(this.getMetricName());
+        gmr.setModelId(this.getModelId());
+        gmr.setOutcomeName(getOutcomeName());
+        gmr.setProtectedAttribute(this.getProtectedAttribute());
+        gmr.setPrivilegedAttribute(new ReconcilableFeature(new TextNode(privilegedAttribute.toString())));
+        gmr.setUnprivilegedAttribute(new ReconcilableFeature(new TextNode(unprivilegedAttribute.toString())));
+        gmr.setFavorableOutcome(new ReconcilableOutput(new TextNode(favorableOutcome.toString())));
+        return gmr;
     }
 }
