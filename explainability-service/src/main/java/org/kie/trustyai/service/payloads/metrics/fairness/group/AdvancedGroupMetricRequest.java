@@ -25,15 +25,8 @@ import com.fasterxml.jackson.databind.node.TextNode;
         @JsonSubTypes.Type(value = AdvancedGroupMetricRequest.class, name = "AdvancedGroupMetricRequest")
 })
 public class AdvancedGroupMetricRequest extends BaseMetricRequest {
-    /**
-     * Serialize the data request to match the ReconcilableField and ReconcilableOutput json structure
-     * This maps the DataRequestPayload to the following json: {"type": MAP, "value": "$DATA_REQUEST_JSON_AS_QUOTED_STRING"}
-     * This ensures compatibility with the ODH UI
-     */
     private DataRequestPayload privilegedAttribute;
-
     private DataRequestPayload unprivilegedAttribute;
-
     private DataRequestPayload favorableOutcome;
     private String modelId;
 
