@@ -134,7 +134,7 @@ public class DataDownloadRequestValidator implements ConstraintValidator<ValidDa
     }
 
     private static boolean checkColumnTypeCompatibility(RowMatcher rowMatch, String modelId, StorageMetadata storageMetadata, ConstraintValidatorContext context) {
-        boolean feature = storageMetadata.getInputSchema().getItems().containsKey(rowMatch.getColumnName());
+        boolean feature = storageMetadata.getInputSchema().getNameMappedItems().containsKey(rowMatch.getColumnName());
         boolean outcome = true;
         for (ValueNode vn : rowMatch.getValues()) {
             if (feature) {

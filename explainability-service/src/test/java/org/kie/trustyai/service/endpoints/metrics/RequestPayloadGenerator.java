@@ -219,6 +219,46 @@ public class RequestPayloadGenerator {
         return request;
     }
 
+    public static AdvancedGroupMetricRequest advancedNameMappedCorrect() {
+        DataRequestPayload privileged = new DataRequestPayload();
+        List<RowMatcher> matchAllList = new ArrayList<>();
+        matchAllList.add(new RowMatcher("genderMapped", "EQUALS", List.of(new IntNode(0))));
+        matchAllList.add(new RowMatcher("raceMapped", "EQUALS", List.of(new IntNode(0))));
+        privileged.setMatchAll(matchAllList);
+
+        List<RowMatcher> matchAnyList = new ArrayList<>();
+        matchAnyList.add(new RowMatcher("ageMapped", "BETWEEN", List.of(new IntNode(5), new IntNode(10))));
+        matchAnyList.add(new RowMatcher("ageMapped", "BETWEEN", List.of(new IntNode(50), new IntNode(70))));
+        privileged.setMatchAny(matchAnyList);
+
+        List<RowMatcher> matchNoneList = new ArrayList<>();
+        matchNoneList.add(new RowMatcher("ageMapped", "BETWEEN", List.of(new IntNode(55), new IntNode(65))));
+        privileged.setMatchNone(matchNoneList);
+
+        DataRequestPayload unprivileged = new DataRequestPayload();
+        matchAllList = new ArrayList<>();
+        matchAllList.add(new RowMatcher("genderMapped", "EQUALS", List.of(new IntNode(1))));
+        matchAllList.add(new RowMatcher("raceMapped", "EQUALS", List.of(new IntNode(1))));
+        unprivileged.setMatchAll(matchAllList);
+
+        matchAnyList = new ArrayList<>();
+        matchAnyList.add(new RowMatcher("ageMapped", "BETWEEN", List.of(new IntNode(10), new IntNode(50))));
+        matchAnyList.add(new RowMatcher("ageMapped", "BETWEEN", List.of(new IntNode(70), new IntNode(100))));
+        unprivileged.setMatchAny(matchAnyList);
+
+        DataRequestPayload favorable = new DataRequestPayload();
+        matchAllList = new ArrayList<>();
+        matchAllList.add(new RowMatcher("incomeMapped", "EQUALS", List.of(new IntNode(1))));
+        favorable.setMatchAll(matchAllList);
+
+        AdvancedGroupMetricRequest request = new AdvancedGroupMetricRequest();
+        request.setModelId(MODEL_ID);
+        request.setPrivilegedAttribute(privileged);
+        request.setUnprivilegedAttribute(unprivileged);
+        request.setFavorableOutcome(favorable);
+        return request;
+    }
+
     public static AdvancedGroupMetricRequest advancedIncorrect() {
         DataRequestPayload privileged = new DataRequestPayload();
         List<RowMatcher> matchAllList = new ArrayList<>();
