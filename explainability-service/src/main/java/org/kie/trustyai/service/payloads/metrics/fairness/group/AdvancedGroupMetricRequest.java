@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.kie.trustyai.service.payloads.data.download.DataRequestPayload;
+import org.kie.trustyai.service.payloads.data.download.serializers.DataRequestDeserializer;
+import org.kie.trustyai.service.payloads.data.download.serializers.DataRequestSerializer;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
-import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableFeature;
-import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilableOutput;
-import org.kie.trustyai.service.payloads.values.reconcilable.ReconcilerMatcher;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -18,71 +20,60 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
         property = "@type",
-        defaultImpl = GroupMetricRequest.class)
+        defaultImpl = AdvancedGroupMetricRequest.class)
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = GroupMetricRequest.class, name = "GroupMetricRequest")
+        @JsonSubTypes.Type(value = AdvancedGroupMetricRequest.class, name = "AdvancedGroupMetricRequest")
 })
-public class GroupMetricRequest extends BaseMetricRequest {
+public class AdvancedGroupMetricRequest extends BaseMetricRequest {
+    /**
+     * Serialize the data request to match the ReconcilableField and ReconcilableOutput json structure
+     * This maps the DataRequestPayload to the following json: {"type": MAP, "value": "$DATA_REQUEST_JSON_AS_QUOTED_STRING"}
+     * This ensures compatibility with the ODH UI
+     */
+    @JsonSerialize(using = DataRequestSerializer.class)
+    @JsonDeserialize(using = DataRequestDeserializer.class)
+    private DataRequestPayload privilegedAttribute;
 
-    // fields to be reconciled against dataset metadata
-    private String protectedAttribute;
-    private String outcomeName;
+    @JsonSerialize(using = DataRequestSerializer.class)
+    @JsonDeserialize(using = DataRequestDeserializer.class)
+    private DataRequestPayload unprivilegedAttribute;
 
-    // For any request-provider value that needs to be validated against feature/output types
-    @ReconcilerMatcher(nameProvider = "getProtectedAttribute")
-    public ReconcilableFeature privilegedAttribute;
+    @JsonSerialize(using = DataRequestSerializer.class)
+    @JsonDeserialize(using = DataRequestDeserializer.class)
+    private DataRequestPayload favorableOutcome;
+    private String modelId;
 
-    @ReconcilerMatcher(nameProvider = "getProtectedAttribute")
-    public ReconcilableFeature unprivilegedAttribute;
-
-    @ReconcilerMatcher(nameProvider = "getOutcomeName")
-    public ReconcilableOutput favorableOutcome;
+    // define an "output name" and "privileged attribute name" to match the existing metric request format
+    private final static String VIRTUAL_FIELD_NAME = "Defined by TrustyQL";
 
     private Double thresholdDelta;
 
-    public GroupMetricRequest() {
+    public AdvancedGroupMetricRequest() {
         // Public default no-argument constructor
         super();
     }
 
-    // Getters and Setterers ================================================
-    public String getProtectedAttribute() {
-        return protectedAttribute;
-    }
-
-    public void setProtectedAttribute(String protectedAttribute) {
-        this.protectedAttribute = protectedAttribute;
-    }
-
-    public String getOutcomeName() {
-        return outcomeName;
-    }
-
-    public void setOutcomeName(String outcomeName) {
-        this.outcomeName = outcomeName;
-    }
-
-    public ReconcilableOutput getFavorableOutcome() {
+    public DataRequestPayload getFavorableOutcome() {
         return favorableOutcome;
     }
 
-    public void setFavorableOutcome(ReconcilableOutput favorableOutcome) {
+    public void setFavorableOutcome(DataRequestPayload favorableOutcome) {
         this.favorableOutcome = favorableOutcome;
     }
 
-    public ReconcilableFeature getPrivilegedAttribute() {
+    public DataRequestPayload getPrivilegedAttribute() {
         return privilegedAttribute;
     }
 
-    public void setPrivilegedAttribute(ReconcilableFeature privilegedAttribute) {
+    public void setPrivilegedAttribute(DataRequestPayload privilegedAttribute) {
         this.privilegedAttribute = privilegedAttribute;
     }
 
-    public ReconcilableFeature getUnprivilegedAttribute() {
+    public DataRequestPayload getUnprivilegedAttribute() {
         return unprivilegedAttribute;
     }
 
-    public void setUnprivilegedAttribute(ReconcilableFeature unprivilegedAttribute) {
+    public void setUnprivilegedAttribute(DataRequestPayload unprivilegedAttribute) {
         this.unprivilegedAttribute = unprivilegedAttribute;
     }
 
@@ -94,16 +85,18 @@ public class GroupMetricRequest extends BaseMetricRequest {
         this.thresholdDelta = thresholdDelta;
     }
 
+    public String getOutcomeName() {
+        return VIRTUAL_FIELD_NAME;
+    }
 
-
-
+    public String getProtectedAttribute() {
+        return VIRTUAL_FIELD_NAME;
+    }
 
     // Tag Retrieval
     public Map<String, String> retrieveTags() {
         Map<String, String> tags = new HashMap<>();
-        tags.put("outcome", this.getOutcomeName());
         tags.put("favorable_value", this.getFavorableOutcome().toString());
-        tags.put("protected", this.getProtectedAttribute());
         tags.put("privileged", this.getPrivilegedAttribute().toString());
         tags.put("unprivileged", this.getUnprivilegedAttribute().toString());
         tags.put("batch_size", String.valueOf(this.getBatchSize()));
@@ -116,10 +109,8 @@ public class GroupMetricRequest extends BaseMetricRequest {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        GroupMetricRequest that = (GroupMetricRequest) o;
-        return protectedAttribute.equals(that.protectedAttribute)
-                && favorableOutcome.equals(that.favorableOutcome)
-                && outcomeName.equals(that.outcomeName)
+        AdvancedGroupMetricRequest that = (AdvancedGroupMetricRequest) o;
+        return favorableOutcome.equals(that.favorableOutcome)
                 && privilegedAttribute.equals(that.privilegedAttribute)
                 && unprivilegedAttribute.equals(that.unprivilegedAttribute)
                 && this.getMetricName().equals(that.getMetricName())
@@ -129,9 +120,8 @@ public class GroupMetricRequest extends BaseMetricRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(protectedAttribute,
+        return Objects.hash(
                 favorableOutcome,
-                outcomeName,
                 privilegedAttribute,
                 unprivilegedAttribute,
                 thresholdDelta,

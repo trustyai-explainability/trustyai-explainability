@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hamcrest.core.StringContains;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.AdvancedGroupMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
@@ -33,6 +35,7 @@ import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -528,4 +531,40 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         assertDoesNotThrow(() -> scheduler.get().calculateManual(true));
     }
 
+    // === ADVANCED METRICS ======
+    @Test
+    void postAdvancedCorrect() throws JsonProcessingException {
+        populate();
+
+        final AdvancedGroupMetricRequest payload = RequestPayloadGenerator.advancedCorrect();
+
+        final BaseMetricResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/advanced").peek()
+                .then().statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseMetricResponse.class);
+
+        assertEquals("metric", response.getType());
+        assertEquals("SPD", response.getName());
+        assertFalse(Double.isNaN(response.getValue()));
+    }
+
+    @Test
+    void postAdvancedIncorrect() throws JsonProcessingException {
+        populate();
+
+        final AdvancedGroupMetricRequest payload = RequestPayloadGenerator.advancedIncorrect();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/advanced")
+                .then().statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .extract().response().then()
+                .body(containsString("No feature or output found with name=FIELD_DOES_NOT_EXIST."))
+                .body(containsString("Invalid type for output=income: got 'WRONG_VALUE_TYPE', expected object compatible with 'INT32'"))
+                .body(containsString("RowMatch operation must be one of [BETWEEN, EQUALS], got NO_SUCH_OPERATION"));
+  }
 }

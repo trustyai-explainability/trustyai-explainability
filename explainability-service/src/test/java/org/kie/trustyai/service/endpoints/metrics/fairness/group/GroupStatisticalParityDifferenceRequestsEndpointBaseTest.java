@@ -3,6 +3,7 @@ package org.kie.trustyai.service.endpoints.metrics.fairness.group;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +14,8 @@ import org.kie.trustyai.service.endpoints.metrics.RequestPayloadGenerator;
 import org.kie.trustyai.service.mocks.MockPrometheusScheduler;
 import org.kie.trustyai.service.payloads.BaseScheduledResponse;
 import org.kie.trustyai.service.payloads.metrics.BaseMetricRequest;
+import org.kie.trustyai.service.payloads.metrics.BaseMetricResponse;
+import org.kie.trustyai.service.payloads.metrics.fairness.group.AdvancedGroupMetricRequest;
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
@@ -255,5 +258,43 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
                 .when().delete("/request")
                 .then()
                 .statusCode(Response.Status.NOT_FOUND.getStatusCode());
+    }
+
+    @Test
+    void postAdvancedCorrect() throws JsonProcessingException {
+        final AdvancedGroupMetricRequest payload = RequestPayloadGenerator.advancedCorrect();
+        final BaseScheduledResponse response = given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/advanced/request")
+                .then().statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .body().as(BaseScheduledResponse.class);
+
+        // check compatibility with ODH UI
+        given()
+                .when()
+                .get("/requests")
+                .then().statusCode(200).extract().response().then()
+                .body(containsString("privilegedAttribute\":{\"type\":\"MAP\",\"value\":\"{"))
+                .body(containsString("unprivilegedAttribute\":{\"type\":\"MAP\",\"value\":\"{"))
+                .body(containsString("favorableOutcome\":{\"type\":\"MAP\",\"value\":\"{"))
+                .body(containsString("\"protectedAttribute\":\"Defined by TrustyQL\",\"outcomeName\":\"Defined by TrustyQL\""));
+    }
+
+    @Test
+    void postAdvancedIncorrect() throws JsonProcessingException {
+
+        final AdvancedGroupMetricRequest payload = RequestPayloadGenerator.advancedIncorrect();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/advanced/request")
+                .then().statusCode(Response.Status.BAD_REQUEST.getStatusCode())
+                .extract().response().then()
+                .body(containsString("No feature or output found with name=FIELD_DOES_NOT_EXIST."))
+                .body(containsString("Invalid type for output=income: got 'WRONG_VALUE_TYPE', expected object compatible with 'INT32'"))
+                .body(containsString("RowMatch operation must be one of [BETWEEN, EQUALS], got NO_SUCH_OPERATION"));
     }
 }
