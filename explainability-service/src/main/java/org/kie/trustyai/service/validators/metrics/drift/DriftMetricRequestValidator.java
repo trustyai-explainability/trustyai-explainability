@@ -50,7 +50,7 @@ public class DriftMetricRequestValidator implements ConstraintValidator<ValidDri
 
             boolean tagValidation = true;
             if (Objects.nonNull(request.getReferenceTag())) {
-                Optional<String> tagValidationErrorMessage = GenericValidationUtils.validateDataTag(request.getReferenceTag());
+                Optional<String> tagValidationErrorMessage = GenericValidationUtils.validateAgainstExistingDataTags(modelId, dataSource.get().getTagCounts(modelId), request.getReferenceTag());
                 if (tagValidationErrorMessage.isPresent()) {
                     context.buildConstraintViolationWithTemplate(tagValidationErrorMessage.get())
                             .addConstraintViolation();

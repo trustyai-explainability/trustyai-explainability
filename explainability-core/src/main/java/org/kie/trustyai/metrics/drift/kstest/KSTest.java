@@ -34,7 +34,7 @@ public class KSTest {
                                     testNames.get(i)));
                 }
                 if (dfTrain.getRowDimension() < 2 || (dfTest.getRowDimension() < 2)) {
-                    result.put(colName, new HypothesisTestResult(0, 1, false));
+                    result.put(dfTest.getColumnNames().get(i), new HypothesisTestResult(0, 1, false));
                 } else {
                     double[] trainArray = dfTrain.getColumn(i).stream().mapToDouble(Value::asNumber).toArray();
                     double[] testArray = dfTest.getColumn(i).stream().mapToDouble(Value::asNumber).toArray();
@@ -43,7 +43,7 @@ public class KSTest {
                     d = ks_test.kolmogorovSmirnovStatistic(trainArray, testArray);
                     double pValue = ks_test.kolmogorovSmirnovTest(trainArray, testArray);
                     boolean reject = pValue <= signif;
-                    result.put(colName, new HypothesisTestResult(d, pValue, reject));
+                    result.put(dfTest.getColumnNames().get(i), new HypothesisTestResult(d, pValue, reject));
                 }
             }
         }

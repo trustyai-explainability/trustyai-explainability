@@ -290,6 +290,29 @@ abstract class DataSourceBaseTest {
     }
 
     @Test
+    void testReadingTagCount() {
+        int nrows = 100;
+        int ncols = 10;
+
+        Dataframe original = DataframeGenerators.generateRandomNColumnDataframe(nrows, ncols);
+        HashMap<String, List<List<Integer>>> tagMap = new HashMap<>();
+        tagMap.put("A", List.of(List.of(0, 10)));
+        tagMap.put("B", List.of(List.of(20, 31)));
+        tagMap.put("C", List.of(List.of(40, 52)));
+
+        DataTagging dataTagging = new DataTagging(MODEL_ID, tagMap);
+        datasource.get().saveDataframe(original, MODEL_ID);
+        datasource.get().tagDataframeRows(dataTagging);
+
+        // not tags
+        Map<String, Long> tagCounts = datasource.get().getTagCounts(MODEL_ID);
+        assertEquals(10, tagCounts.get("A"));
+        assertEquals(11, tagCounts.get("B"));
+        assertEquals(12, tagCounts.get("C"));
+        assertEquals(67, tagCounts.get("_trustyai_unlabeled"));
+    }
+
+    @Test
     void testReadingIdFilteringLargerThanBatch() {
         final int nrows = 10000;
         final int ncols = 10;

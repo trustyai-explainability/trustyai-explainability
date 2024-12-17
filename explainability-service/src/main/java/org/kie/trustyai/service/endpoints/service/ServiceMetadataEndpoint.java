@@ -119,7 +119,7 @@ public class ServiceMetadataEndpoint {
             HashMap<String, List<List<Integer>>> tagMapping = new HashMap<>();
             List<String> tagErrors = new ArrayList<>();
             for (String tag : dataTagging.getDataTagging().keySet()) {
-                Optional<String> tagValidationErrorMessage = GenericValidationUtils.validateDataTag(tag);
+                Optional<String> tagValidationErrorMessage = GenericValidationUtils.validateNewDataTag(tag);
                 tagValidationErrorMessage.ifPresent(tagErrors::add);
                 tagMapping.put(tag, dataTagging.getDataTagging().get(tag));
             }

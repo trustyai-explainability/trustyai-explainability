@@ -2,6 +2,7 @@ package org.kie.trustyai.service.validators.generic;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -147,7 +148,7 @@ public class GenericValidationUtils {
     }
 
     // if tag is invalid, return error string. Else return nothing
-    public static Optional<String> validateDataTag(String dataTag) {
+    public static Optional<String> validateNewDataTag(String dataTag) {
         if (dataTag.startsWith(Dataframe.TRUSTYAI_INTERNAL_TAG_PREFIX)) {
             return Optional.of(String.format(
                     "The tag prefix '%s' is reserved for internal TrustyAI use only. Provided tag '%s' violates this restriction.",
@@ -155,6 +156,21 @@ public class GenericValidationUtils {
                     dataTag));
         }
         return Optional.empty();
+    }
+
+    public static Optional<String> validateAgainstExistingDataTags(String modelName, Map<String, Long> tagCounts, String dataTag) {
+        if (dataTag.startsWith(Dataframe.TRUSTYAI_INTERNAL_TAG_PREFIX)) {
+            return Optional.of(String.format(
+                    "The tag prefix '%s' is reserved for internal TrustyAI use only. Provided tag '%s' violates this restriction.",
+                    Dataframe.TRUSTYAI_INTERNAL_TAG_PREFIX,
+                    dataTag));
+        }
+
+        if (tagCounts.containsKey(dataTag) && tagCounts.get(dataTag) > 0) {
+            return Optional.empty();
+        } else {
+            return Optional.of(String.format("No tag named '%s' found in data for model=%s. %s", dataTag, modelName, getEnumerateMessage(tagCounts.keySet(), "tag")));
+        }
     }
 
     // validate actual dataframe columns, not mapping
