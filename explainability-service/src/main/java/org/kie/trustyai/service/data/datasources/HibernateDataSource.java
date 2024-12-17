@@ -2,6 +2,7 @@ package org.kie.trustyai.service.data.datasources;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.kie.trustyai.explainability.model.dataframe.Dataframe;
@@ -359,6 +360,15 @@ public class HibernateDataSource extends DataSource {
             return getStorage().getTags(modelId);
         } catch (Exception e) {
             throw DataSourceErrors.getGenericReadError(modelId, e.getMessage(), "retrieving tags");
+        }
+    }
+
+    @Override
+    public Map<String, Long> getTagCounts(String modelId) {
+        try {
+            return getStorage().getTagCounts(modelId);
+        } catch (Exception e) {
+            throw DataSourceErrors.getGenericReadError(modelId, e.getMessage(), "retrieving tag counts");
         }
     }
 
