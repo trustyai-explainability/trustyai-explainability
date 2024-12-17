@@ -18,10 +18,10 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 public class DownloadUtils {
 
     public static DataType getDataType(StorageMetadata storageMetadata, RowMatcher rowMatcher) {
-        if (storageMetadata.getInputSchema().getItems().containsKey(rowMatcher.getColumnName())) {
-            return storageMetadata.getInputSchema().getItems().get(rowMatcher.getColumnName()).getType();
+        if (storageMetadata.getInputSchema().getNameMappedItems().containsKey(rowMatcher.getColumnName())) {
+            return storageMetadata.getInputSchema().getNameMappedItems().get(rowMatcher.getColumnName()).getType();
         } else {
-            return storageMetadata.getOutputSchema().getItems().get(rowMatcher.getColumnName()).getType();
+            return storageMetadata.getOutputSchema().getNameMappedItems().get(rowMatcher.getColumnName()).getType();
         }
     }
 

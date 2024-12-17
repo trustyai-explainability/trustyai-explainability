@@ -24,6 +24,7 @@ import org.kie.trustyai.service.payloads.metrics.fairness.group.AdvancedGroupMet
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.payloads.service.NameMapping;
 import org.kie.trustyai.service.utils.DataframeGenerators;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -622,7 +623,7 @@ abstract class DisparateImpactRatioEndpointBaseTest {
     }
 
     @Test
-    void postAdvancedIncorrect() throws JsonProcessingException {
+    void postAdvancedIncorrect() {
         populate();
 
         final AdvancedGroupMetricRequest payload = RequestPayloadGenerator.advancedIncorrect();
@@ -636,6 +637,39 @@ abstract class DisparateImpactRatioEndpointBaseTest {
                 .body(containsString("No feature or output found with name=FIELD_DOES_NOT_EXIST."))
                 .body(containsString("Invalid type for output=income: got 'WRONG_VALUE_TYPE', expected object compatible with 'INT32'"))
                 .body(containsString("RowMatch operation must be one of [BETWEEN, EQUALS], got NO_SUCH_OPERATION"));
+    }
+
+    @Test
+    void postAdvancedNameMappingCorrect() {
+        populate();
+
+        final AdvancedGroupMetricRequest payload = RequestPayloadGenerator.advancedNameMappedCorrect();
+
+        HashMap<String, String> inputMapping = new HashMap<>();
+        HashMap<String, String> outputMapping = new HashMap<>();
+        inputMapping.put("age", "ageMapped");
+        inputMapping.put("race", "raceMapped");
+        inputMapping.put("gender", "genderMapped");
+        outputMapping.put("income", "incomeMapped");
+        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(nameMapping)
+                .basePath("/info")
+                .when().post("/names")
+                .then()
+                .statusCode(200)
+                .body(is("Feature and output name mapping successfully applied."));
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/advanced/")
+                .then().statusCode(Response.Status.OK.getStatusCode())
+                .extract()
+                .response().then()
+                .body(containsString("The DIR of 0.701754 indicates that the likelihood of the group matching ALL of: [{genderMapped EQUALS 0}"));
     }
 
 }

@@ -18,6 +18,7 @@ import org.kie.trustyai.service.payloads.metrics.fairness.group.AdvancedGroupMet
 import org.kie.trustyai.service.payloads.metrics.fairness.group.GroupMetricRequest;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleId;
 import org.kie.trustyai.service.payloads.scheduler.ScheduleList;
+import org.kie.trustyai.service.payloads.service.NameMapping;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -26,7 +27,6 @@ import io.restassured.http.ContentType;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
-import org.kie.trustyai.service.payloads.service.NameMapping;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
@@ -205,7 +205,7 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
         given()
                 .contentType(ContentType.JSON)
                 .body(requestId)
-                .when().delete("/request").peek()
+                .when().delete("/request")
                 .then()
                 .statusCode(Response.Status.OK.getStatusCode());
     }
@@ -309,7 +309,7 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
         final BaseScheduledResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post("/advanced/request").peek()
+                .when().post("/advanced/request")
                 .then().statusCode(Response.Status.OK.getStatusCode())
                 .extract()
                 .body().as(BaseScheduledResponse.class);

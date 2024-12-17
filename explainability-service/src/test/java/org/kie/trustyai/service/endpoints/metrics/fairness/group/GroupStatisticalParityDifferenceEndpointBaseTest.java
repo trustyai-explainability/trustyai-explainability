@@ -478,7 +478,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
                 .basePath("/info")
-                .when().post("/names").peek()
+                .when().post("/names")
                 .then()
                 .statusCode(200)
                 .body(is("Feature and output name mapping successfully applied."));
@@ -514,7 +514,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
                 .contentType(ContentType.JSON)
                 .body(nameMapping)
                 .basePath("/info")
-                .when().post("/names").peek()
+                .when().post("/names")
                 .then()
                 .statusCode(200)
                 .body(is("Feature and output name mapping successfully applied."));
@@ -539,7 +539,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
         final BaseMetricResponse response = given()
                 .contentType(ContentType.JSON)
                 .body(payload)
-                .when().post("/advanced").peek()
+                .when().post("/advanced")
                 .then().statusCode(Response.Status.OK.getStatusCode())
                 .extract()
                 .body().as(BaseMetricResponse.class);

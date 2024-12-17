@@ -24,8 +24,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 
 public abstract class BasePrometheusTest {
     protected static final String MODEL_ID = "example1";
@@ -48,12 +49,15 @@ public abstract class BasePrometheusTest {
     @BeforeEach
     void populateStorage() {
         // Empty mock storage
+        clearRequests();
         cleanStorage();
         final Dataframe dataframe = DataframeGenerators.generateRandomDataframe(1000);
         saveDF(dataframe, MODEL_ID);
     }
 
     abstract void cleanStorage();
+
+    abstract void clearRequests();
 
     void saveDF(Dataframe dataframe, String modelId) {
         datasource.get().saveDataframe(dataframe, modelId);
@@ -116,12 +120,12 @@ public abstract class BasePrometheusTest {
         Pair<String, String> metricsRequests = createThenDeleteRequest("/metrics/group/fairness/spd/request", payload);
 
         // before deletion, the metrics should exist in the metrics endpoint
-        assertTrue(metricsRequests.getLeft()
-                .contains("trustyai_spd{batch_size=\"5000\",favorable_value=\"1\",metricName=\"SPD\",model=\"example1\",outcome=\"income\",privileged=\"1\",protected=\"gender\""));
+        assertThat(metricsRequests.getLeft(),
+                containsString("trustyai_spd{batch_size=\"5000\",favorable_value=\"1\",metricName=\"SPD\",model=\"example1\",outcome=\"income\",privileged=\"1\",protected=\"gender\""));
 
         // after deletion, they should not
-        assertFalse(metricsRequests.getRight()
-                .contains("trustyai_spd{batch_size=\"5000\",favorable_value=\"1\",metricName=\"SPD\",model=\"example1\",outcome=\"income\",privileged=\"1\",protected=\"gender\""));
+        assertThat(metricsRequests.getRight(),
+                not(containsString("trustyai_spd{batch_size=\"5000\",favorable_value=\"1\",metricName=\"SPD\",model=\"example1\",outcome=\"income\",privileged=\"1\",protected=\"gender\"")));
     }
 
     @Test
@@ -137,12 +141,12 @@ public abstract class BasePrometheusTest {
 
         for (String column : taggedDataframe.getInputNames()) {
             // before deletion, the metrics should exist in the metrics endpoint
-            assertTrue(metricsRequests.getLeft().contains("trustyai_meanshift{batch_size=\"5000\",metricName=\"MEANSHIFT\""));
-            assertTrue(metricsRequests.getLeft().contains("subcategory=\"" + column + "\""));
+            assertThat(metricsRequests.getLeft(), containsString("trustyai_meanshift{batch_size=\"5000\",metricName=\"MEANSHIFT\""));
+            assertThat(metricsRequests.getLeft(), containsString("subcategory=\"" + column + "\""));
 
             // after deletion, they should not
-            assertFalse(metricsRequests.getRight().contains("trustyai_meanshift{batch_size=\"5000\",metricName=\"MEANSHIFT\""));
-            assertFalse(metricsRequests.getRight().contains("subcategory=\"" + column + "\""));
+            assertThat(metricsRequests.getRight(), not(containsString("trustyai_meanshift{batch_size=\"5000\",metricName=\"MEANSHIFT\"")));
+            assertThat(metricsRequests.getRight(), not(containsString("subcategory=\"" + column + "\"")));
         }
     }
 }
