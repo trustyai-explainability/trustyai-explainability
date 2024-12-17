@@ -75,6 +75,6 @@ public class AdvancedDisparateImpactRatioEndpoint extends AdvancedGroupEndpoint 
     }
 
     public AdvancedDisparateImpactRatioEndpoint() {
-        super("DIR");
+        super("DIR_ADVANCED");
     }
 }

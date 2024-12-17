@@ -51,6 +51,7 @@ public abstract class BaseEndpoint<T extends BaseMetricRequest> {
     @Inject
     protected ServiceConfig serviceConfig;
 
+    // names need to be unique!
     protected final String name;
 
     protected BaseEndpoint() {

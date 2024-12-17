@@ -75,7 +75,7 @@ public class AdvancedGroupStatisticalParityDifferenceEndpoint extends AdvancedGr
     }
 
     public AdvancedGroupStatisticalParityDifferenceEndpoint() {
-        super("SPD");
+        super("SPD_ADVANCED");
     }
 
 }

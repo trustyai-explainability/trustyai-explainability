@@ -276,7 +276,7 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
         // check compatibility with ODH UI
         given()
                 .when()
-                .get("/requests")
+                .get("/advanced/requests")
                 .then().statusCode(200).extract().response().then()
                 .body(containsString("privilegedAttribute\":{\"type\":\"null\",\"value\":\"DataRequestPayload"))
                 .body(containsString("unprivilegedAttribute\":{\"type\":\"null\",\"value\":\"DataRequestPayload"))
@@ -317,7 +317,7 @@ abstract class GroupStatisticalParityDifferenceRequestsEndpointBaseTest {
         // check compatibility with ODH UI
         given()
                 .when()
-                .get("/requests")
+                .get("/advanced/requests")
                 .then().statusCode(200).extract().response().then()
                 .body(containsString("privilegedAttribute\":{\"type\":\"null\",\"value\":\"DataRequestPayload"))
                 .body(containsString("unprivilegedAttribute\":{\"type\":\"null\",\"value\":\"DataRequestPayload"))

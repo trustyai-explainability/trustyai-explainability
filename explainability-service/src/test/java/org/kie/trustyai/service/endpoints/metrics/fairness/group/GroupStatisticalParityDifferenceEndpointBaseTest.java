@@ -545,7 +545,7 @@ abstract class GroupStatisticalParityDifferenceEndpointBaseTest {
                 .body().as(BaseMetricResponse.class);
 
         assertEquals("metric", response.getType());
-        assertEquals("SPD", response.getName());
+        assertEquals("SPD_ADVANCED", response.getName());
         assertFalse(Double.isNaN(response.getValue()));
     }
 
