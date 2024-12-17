@@ -168,7 +168,6 @@ public abstract class BasePrometheusTest {
         }
     }
 
-<<<<<<< HEAD
     @ParameterizedTest
     @ValueSource(strings = { "spd", "dir" })
     void advancedBiasLogToPrometheus(String algo) throws InterruptedException {
@@ -214,70 +213,5 @@ public abstract class BasePrometheusTest {
 
         deleteRequest(endpoint1, metricsRequestFirst.getRight());
         deleteRequest(endpoint2, metricsAfterBothRequests.getRight());
-=======
-    /**
-     * Deleting a request should remove it from the Prometheus /q/metrics endpoint
-     */
-    @Test
-    @DisplayName("Single-valued requests  provide name mappings to Prometheus")
-    void nameMappedFairnessRequest() throws InterruptedException {
-        Map<String, String> inputMapping = new HashMap<>();
-        inputMapping.put("gender", "genderMapped");
-        Map<String, String> outputMapping = new HashMap<>();
-        outputMapping.put("income", "incomeMapped");
-        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
-        given()
-                .contentType(ContentType.JSON)
-                .body(nameMapping)
-                .when().post("info/names")
-                .then()
-                .statusCode(200)
-                .body(is("Feature and output name mapping successfully applied."));
-
-        final GroupMetricRequest payload = RequestPayloadGenerator.correct();
-        payload.setProtectedAttribute("genderMapped");
-        payload.setOutcomeName("incomeMapped");
-        Pair<String, String> metricsRequests = createThenDeleteRequest("/metrics/group/fairness/spd/request", payload);
-
-        // Metrics should contain the mapped names
-        assertThat(metricsRequests.getLeft(),
-                containsString("trustyai_spd{batch_size=\"5000\",favorable_value=\"1\",metricName=\"SPD\",model=\"example1\",outcome=\"incomeMapped\",privileged=\"1\",protected=\"genderMapped\""));
-    }
-
-    @Test
-    @DisplayName("Multi-valued requests provide name mappings to Prometheus")
-    void nameMappedDriftRequest() throws InterruptedException {
-        Dataframe taggedDataframe = getTaggedDataframe();
-        saveDF(taggedDataframe, MODEL_ID);
-
-        Map<String, String> inputMapping = new HashMap<>();
-        inputMapping.put("age", "ageMapped");
-        inputMapping.put("gender", "genderMapped");
-        inputMapping.put("race", "raceMapped");
-        Map<String, String> outputMapping = new HashMap<>();
-        outputMapping.put("income", "incomeMapped");
-
-        NameMapping nameMapping = new NameMapping(MODEL_ID, inputMapping, outputMapping);
-        given()
-                .contentType(ContentType.JSON)
-                .body(nameMapping)
-                .when().post("info/names")
-                .then()
-                .statusCode(200)
-                .body(is("Feature and output name mapping successfully applied."));
-
-        MeanshiftMetricRequest payload = new MeanshiftMetricRequest();
-        payload.setReferenceTag(TRAINING_TAG);
-        payload.setModelId(MODEL_ID);
-        Pair<String, String> metricsRequests = createThenDeleteRequest("/metrics/drift/meanshift/request", payload);
-
-        String filteredResponseMeanshift = Arrays.stream(metricsRequests.getLeft().split("\n")).filter(x -> x.contains("trustyai_meanshift")).collect(Collectors.joining());
-        for (String column : taggedDataframe.getInputNames()) {
-            ;
-            // the metrics should contain the mapped column names
-            assertThat(filteredResponseMeanshift, containsString("trustyai_meanshift{batch_size=\"5000\",metricName=\"MEANSHIFT\""));
-            assertThat(filteredResponseMeanshift, containsString("subcategory=\"" + column + "Mapped\""));
-        }
->>>>>>> 5304fbd629f4176ead8b34774915e43e17b9adfd
     }
 }
