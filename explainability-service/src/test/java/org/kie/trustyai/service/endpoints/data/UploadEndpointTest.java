@@ -89,9 +89,9 @@ class UploadEndpointTest {
 
     @Test
     void uploadMultiInputData() throws JsonProcessingException {
-        int[] testRows = new int[] { 2, 5, 250 };
-        int[] testInputCols = new int[] { 2, 4 };
-        int[] testOutputCols = new int[] { 2 };
+        int[] testRows = new int[] { 1, 3, 5, 250 };
+        int[] testInputCols = new int[] { 2, 6 };
+        int[] testOutputCols = new int[] { 4 };
         String[] testDatatypes = new String[] { "INT64", "INT32", "FP32", "FP64", "BOOL" };
         String dataTag = "TRAINING";
 
@@ -131,11 +131,6 @@ class UploadEndpointTest {
 
     @Test
     void uploadMultiInputDataNoUniqueName() throws JsonProcessingException {
-        int nRows = 250;
-        int nInputCols = 4;
-        int nOutputCols = 2;
-        String datatype = "FP64";
-        String dataTag = "TRAINING";
         ModelInferJointPayload payload = KserveRestPayloads.generateMismatchedShapeNoUniqueNameMultiInputPayload(250, 4, 3, "FP64", "TRAINING");
 
         emptyStorage();

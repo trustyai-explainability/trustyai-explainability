@@ -161,10 +161,15 @@ public class UploadUtils {
             for (TensorPayload tp : payload.getInputs()) {
                 // assume we have data of shape [1, x] in the form [[a], [b], [c]]
                 // transpose and flatten to shape=[x,1], [a,b,c]
-                Object[] vector = transpose(tp.getData())[0];
-                Number[] reverseShape = tp.getShape().clone();
-                ArrayUtils.reverse(reverseShape);
-                tp.setShape(reverseShape);
+                Object[] vector;
+                if (tp.getData()[0] instanceof List) {
+                    vector = transpose(tp.getData())[0];
+                    Number[] reverseShape = tp.getShape().clone();
+                    ArrayUtils.reverse(reverseShape);
+                    tp.setShape(reverseShape);
+                } else {
+                    vector = tp.getData();
+                }
                 ModelInferRequest.InferInputTensor.Builder inputBuilder = inputBuilderInitializer(tp, tp.getName());
                 inputBuilder.setContents(getTensorBuilder(tp.getDatatype(), vector));
                 inferBuilder.addInputs(inputBuilder.build());
@@ -271,10 +276,15 @@ public class UploadUtils {
             for (TensorPayload tp : payload.getOutputs()) {
                 // assume we have data of shape [1, x] in the form [[a], [b], [c]]
                 // transpose and flatten to shape=[x,1], [a,b,c]
-                Object[] vector = transpose(tp.getData())[0];
-                Number[] reverseShape = tp.getShape().clone();
-                ArrayUtils.reverse(reverseShape);
-                tp.setShape(reverseShape);
+                Object[] vector;
+                if (tp.getData()[0] instanceof List) {
+                    vector = transpose(tp.getData())[0];
+                    Number[] reverseShape = tp.getShape().clone();
+                    ArrayUtils.reverse(reverseShape);
+                    tp.setShape(reverseShape);
+                } else {
+                    vector = tp.getData();
+                }
                 ModelInferResponse.InferOutputTensor.Builder outputBuilder = outputBuilderInitializer(tp, tp.getName());
                 outputBuilder.setContents(getTensorBuilder(tp.getDatatype(), vector));
                 inferBuilder.addOutputs(outputBuilder.build());
