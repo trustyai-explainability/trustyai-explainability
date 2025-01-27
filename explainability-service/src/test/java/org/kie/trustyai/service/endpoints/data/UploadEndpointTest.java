@@ -84,6 +84,70 @@ class UploadEndpointTest {
                 }
             }
         }
+        emptyStorage();
+    }
+
+    @Test
+    void uploadMultiInputData() throws JsonProcessingException {
+        int[] testRows = new int[] { 2, 5, 250 };
+        int[] testInputCols = new int[] { 2, 4 };
+        int[] testOutputCols = new int[] { 2 };
+        String[] testDatatypes = new String[] { "INT64", "INT32", "FP32", "FP64", "BOOL" };
+        String dataTag = "TRAINING";
+
+        for (int nRows : testRows) {
+            for (int nInputCols : testInputCols) {
+                for (int nOutputCols : testOutputCols) {
+                    for (String datatype : testDatatypes) {
+                        ModelInferJointPayload payload = KserveRestPayloads.generateMultiInputPayload(nRows, nInputCols, nOutputCols, datatype, dataTag);
+
+                        emptyStorage();
+
+                        given()
+                                .contentType(ContentType.JSON)
+                                .body(payload)
+                                .when().post("/upload")
+                                .then()
+                                .statusCode(RestResponse.StatusCode.OK)
+                                .body(containsString(nRows + " datapoints"));
+
+                        // check that tagging is correctly applied
+                        Dataframe df = datasource.get().getDataframe(payload.getModelName());
+                        Dataframe trainDF = df.filterRowsByTagEquals(dataTag);
+                        Dataframe nonTrainDF = df.filterRowsByTagNotEquals(dataTag);
+
+                        assertEquals(nRows, df.getRowDimension());
+                        assertEquals(nInputCols + nOutputCols, df.getColumnDimension());
+                        assertEquals(nInputCols, df.getInputNames().size());
+                        assertEquals(nOutputCols, df.getOutputNames().size());
+                        assertEquals(nRows, trainDF.getRowDimension());
+                        assertEquals(0, nonTrainDF.getRowDimension());
+                    }
+                }
+            }
+        }
+        emptyStorage();
+    }
+
+    @Test
+    void uploadMultiInputDataNoUniqueName() throws JsonProcessingException {
+        int nRows = 250;
+        int nInputCols = 4;
+        int nOutputCols = 2;
+        String datatype = "FP64";
+        String dataTag = "TRAINING";
+        ModelInferJointPayload payload = KserveRestPayloads.generateMismatchedShapeNoUniqueNameMultiInputPayload(250, 4, 3, "FP64", "TRAINING");
+
+        emptyStorage();
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/upload").peek()
+                .then()
+                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("One or more errors"), containsString("unique names"), containsString("first dimension"));
+
     }
 
     @Test
