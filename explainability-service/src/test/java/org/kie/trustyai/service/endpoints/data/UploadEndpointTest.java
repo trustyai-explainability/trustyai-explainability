@@ -229,7 +229,7 @@ class UploadEndpointTest {
 
                         ModelInferJointPayload payloadGroundTruth = KserveRestPayloads.generatePayload(nInputRows, nInputCols, nOutputCols, datatype, "TRAINING", 0, 1);
                         payloadGroundTruth.setRequest(payload.getRequest());
-                        payloadGroundTruth.getRequest().getInputs()[0].setExecutionIDs(ids.toArray(String[]::new));
+                        payloadGroundTruth.getRequest().getTensorPayloads()[0].setExecutionIDs(ids.toArray(String[]::new));
                         payloadGroundTruth.setGroundTruth(true);
 
                         postTest(payloadGroundTruth, RestResponse.StatusCode.OK, List.of(nInputRows + " ground truths"));
@@ -258,7 +258,7 @@ class UploadEndpointTest {
         List<String> ids = originalDF.getIds();
 
         payload1.setRequest(payload1.getRequest());
-        payload1.getRequest().getInputs()[0].setExecutionIDs(ids.toArray(String[]::new));
+        payload1.getRequest().getTensorPayloads()[0].setExecutionIDs(ids.toArray(String[]::new));
         payload1.setGroundTruth(true);
         postTest(payload1, RestResponse.StatusCode.BAD_REQUEST, List.of(
                 "Found fatal mismatches between uploaded data and recorded inference data:",
@@ -279,7 +279,7 @@ class UploadEndpointTest {
         List<String> ids = originalDF.getIds();
 
         payload1.setRequest(payload1.getRequest());
-        payload1.getRequest().getInputs()[0].setExecutionIDs(ids.toArray(String[]::new));
+        payload1.getRequest().getTensorPayloads()[0].setExecutionIDs(ids.toArray(String[]::new));
         payload1.setGroundTruth(true);
         postTest(payload1, RestResponse.StatusCode.BAD_REQUEST, List.of(
                 "Found fatal mismatches between uploaded data and recorded inference data:",
@@ -298,7 +298,7 @@ class UploadEndpointTest {
         List<String> ids = originalDF.getIds();
 
         payload1.setRequest(payload1.getRequest());
-        payload1.getRequest().getInputs()[0].setExecutionIDs(ids.toArray(String[]::new));
+        payload1.getRequest().getTensorPayloads()[0].setExecutionIDs(ids.toArray(String[]::new));
         payload1.setGroundTruth(true);
         postTest(payload1, RestResponse.StatusCode.BAD_REQUEST, List.of(
                 "Found fatal mismatches between uploaded data and recorded inference data:",

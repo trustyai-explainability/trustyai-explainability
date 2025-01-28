@@ -74,8 +74,8 @@ public class KserveRestPayloads {
         responsePayload.setModelName("test-model__isvc-120380123");
         responsePayload.setModelVersion("1");
 
-        requestPayload.setInputs(new TensorPayload[] { generateTensor(nInputRows, nInputCols, "input", datatype, requestOffset) });
-        responsePayload.setOutputs(new TensorPayload[] { generateTensor(nInputRows, nOutputCols, "output", datatype, responseOffset) });
+        requestPayload.setTensorPayloads(new TensorPayload[] { generateTensor(nInputRows, nInputCols, "input", datatype, requestOffset) });
+        responsePayload.setTensorPayloads(new TensorPayload[] { generateTensor(nInputRows, nOutputCols, "output", datatype, responseOffset) });
 
         payload.setRequest(requestPayload);
         payload.setResponse(responsePayload);
@@ -106,8 +106,8 @@ public class KserveRestPayloads {
             outputs[i] = generateTensor(nRows, 1, "output-" + i, datatype, 10 * i);
         }
 
-        requestPayload.setInputs(inputs);
-        responsePayload.setOutputs(outputs);
+        requestPayload.setTensorPayloads(inputs);
+        responsePayload.setTensorPayloads(outputs);
 
         payload.setRequest(requestPayload);
         payload.setResponse(responsePayload);
@@ -138,8 +138,8 @@ public class KserveRestPayloads {
             outputs[i] = generateTensor(nRows, 1, "output", datatype, 10 * i);
         }
 
-        requestPayload.setInputs(inputs);
-        responsePayload.setOutputs(outputs);
+        requestPayload.setTensorPayloads(inputs);
+        responsePayload.setTensorPayloads(outputs);
 
         payload.setRequest(requestPayload);
         payload.setResponse(responsePayload);

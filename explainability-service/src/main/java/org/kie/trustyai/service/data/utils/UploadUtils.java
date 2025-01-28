@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.data.utils;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -10,6 +11,7 @@ import org.kie.trustyai.connectors.kserve.v2.grpc.InferTensorContents;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferRequest;
 import org.kie.trustyai.connectors.kserve.v2.grpc.ModelInferResponse;
 import org.kie.trustyai.explainability.model.tensor.Tensor;
+import org.kie.trustyai.service.payloads.data.upload.ModelInferBasePayload;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferRequestPayload;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferResponsePayload;
 import org.kie.trustyai.service.payloads.data.upload.TensorPayload;
@@ -25,6 +27,15 @@ public class UploadUtils {
 
     public static boolean shapeReversalCheckInt(List<Integer> shape) {
         return shape.get(0) != 1 && shape.get(shape.size() - 1) != 1;
+    }
+
+    public static List<Long> shapeProcess(Number[] payloadShape) {
+        // the shapes are parsed in different directions in the kserve parser depending on codec
+        List<Long> shape = Arrays.stream(payloadShape).mapToLong(Number::longValue).boxed().collect(Collectors.toList());
+        if (UploadUtils.shapeReversalCheckLong(shape)) {
+            Collections.reverse(shape);
+        }
+        return shape;
     }
 
     // fill a tensor builder based on provided datatype
@@ -95,17 +106,127 @@ public class UploadUtils {
         return objectVector;
     }
 
-    // request =========================================================================================================
+    // generic cases ==================================================================================================
+    private static class TensorContructionHolder {
+        public TensorPayload tp;
+        public Object[] vector;
+        public String name;
+
+        public TensorContructionHolder(TensorPayload tp) {
+            this.tp = tp;
+            this.vector = tp.getData();
+            this.name = tp.getName();
+        }
+
+        public TensorContructionHolder(TensorPayload tp, Object[] vector) {
+            this.tp = tp;
+            this.vector = vector;
+            this.name = tp.getName();
+        }
+
+        public TensorContructionHolder(TensorPayload tp, Object[] vector, String name) {
+            this.tp = tp;
+            this.vector = vector;
+            this.name = name;
+        }
+    }
+
+    private static <U extends ModelInferBasePayload> void validateMultiTensors(U payload, String payloadType, String contentType) {
+        // check validity of multi-tensor payloads
+        Set<String> names = new HashSet<>();
+        Set<String> nameDups = new HashSet<>();
+        Set<Number> firstDims = new HashSet<>();
+        Set<Number> laterDims = new HashSet<>();
+        for (TensorPayload tp : payload.getTensorPayloads()) {
+            if (names.contains(tp.getName())) {
+                nameDups.add(tp.getName());
+            } else {
+                names.add(tp.getName());
+            }
+            firstDims.add(tp.getShape()[0]);
+            if (tp.getShape().length > 1) {
+                laterDims.add(Tensor.vectorProduct(Arrays.stream(tp.getShape()).mapToInt(Number::intValue).toArray(), 1));
+            }
+        }
+
+        // make sure all column names are unique
+        List<String> errors = new ArrayList<>();
+        if (names.size() != payload.getTensorPayloads().length) {
+            errors.add(String.format(
+                    "Each %s tensor must have unique names. However, the following duplicate names were found: %s",
+                    contentType, nameDups));
+        }
+
+        // make sure all columns have matched length
+        if (firstDims.size() > 1) {
+            errors.add(String.format(
+                    "Each %s tensor must have the same sized first dimension (e.g., shape[0]). However, the following first dimensions were passed: %s",
+                    contentType, firstDims));
+        }
+
+        // assert that all columns are vectors
+        if (laterDims.size() != 1 && !laterDims.contains(1)) {
+            errors.add(String.format(
+                    "Higher dimensional %ss (e.g., shape=[m, n] where n>1) are not yet supported.", contentType));
+        }
+
+        // report all validation errors together
+        if (!errors.isEmpty()) {
+            StringBuilder errorMsg = new StringBuilder();
+            errorMsg.append(String.format("One or more errors were found with the inbound %s payload:", payloadType));
+            for (String error : errors) {
+                errorMsg.append(System.lineSeparator() + " - ");
+                errorMsg.append(error);
+            }
+            throw new IllegalArgumentException(errorMsg.toString());
+        }
+    }
+
+    private static <T, U extends ModelInferBasePayload> List<T> getBuilderInputsOrOutputs(U payload, String payloadType, String contentType, Function<TensorContructionHolder, T> tensorCreator) {
+        List<T> builtPayloads = new ArrayList<>();
+
+        // if we have multiple tensors, assume each tensor describes a data column
+        if (payload.getTensorPayloads().length > 1) {
+            validateMultiTensors(payload, payloadType, contentType);
+
+            for (TensorPayload tp : payload.getTensorPayloads()) {
+                Object[] vector;
+
+                // if we have data where shape=[1, x], values=[[a], [b], [c]], transpose and flatten to shape=[x], values=[a,b,c]
+                if (tp.getData()[0] instanceof List) {
+                    vector = transpose(tp.getData())[0];
+                    Number[] reverseShape = tp.getShape().clone();
+                    ArrayUtils.reverse(reverseShape);
+                    tp.setShape(reverseShape);
+                } else {
+                    vector = tp.getData();
+                }
+                builtPayloads.add(tensorCreator.apply(new TensorContructionHolder(tp, vector)));
+
+            }
+        } else { //otherwise, assume that we have one tensor, holding data in row vector(s)
+            TensorPayload tp = payload.getTensorPayloads()[0];
+
+            // is the payload a matrix/tensor?
+            if (tp.getData()[0] instanceof ArrayList) {
+                //transpose objects
+                Object[][] objectVector = transpose(tp.getData());
+
+                for (int i = 0; i < objectVector.length; i++) {
+                    builtPayloads.add(tensorCreator.apply(new TensorContructionHolder(tp, objectVector[i], tp.getName() + "-" + i)));
+                }
+            } else { // else, payload is a vector
+                builtPayloads.add(tensorCreator.apply(new TensorContructionHolder(tp)));
+            }
+        }
+        return builtPayloads;
+    }
+
+    // === TENSOR BUILDERS =============================================================================================
     // initialize the input tensor builder
     private static ModelInferRequest.InferInputTensor.Builder inputBuilderInitializer(TensorPayload input, String name) {
         ModelInferRequest.InferInputTensor.Builder inputBuilder = ModelInferRequest.InferInputTensor.newBuilder();
-
-        // the shapes are parsed in different directions in the kserve parser depending on codec
-        List<Long> shape = Arrays.stream(input.getShape()).mapToLong(Number::longValue).boxed().collect(Collectors.toList());
-        if (UploadUtils.shapeReversalCheckLong(shape)) {
-            Collections.reverse(shape);
-        }
-        inputBuilder.addAllShape(shape);
+        inputBuilder.addAllShape(shapeProcess(input.getShape()));
         inputBuilder.setDatatype(input.getDatatype());
         inputBuilder.setName(name);
 
@@ -115,97 +236,10 @@ public class UploadUtils {
         return inputBuilder;
     }
 
-    // populate a model infer request builder
-    public static void populateRequestBuilder(ModelInferRequest.Builder inferBuilder, ModelInferRequestPayload payload) {
-        if (payload.getInputs().length > 1) {
-            // check validity
-            Set<String> names = new HashSet<>();
-            Set<String> nameDups = new HashSet<>();
-            Set<Number> firstDims = new HashSet<>();
-            Set<Number> laterDims = new HashSet<>();
-            for (TensorPayload tp : payload.getInputs()) {
-                if (names.contains(tp.getName())) {
-                    nameDups.add(tp.getName());
-                } else {
-                    names.add(tp.getName());
-                }
-                firstDims.add(tp.getShape()[0]);
-                if (tp.getShape().length > 1) {
-                    laterDims.add(Tensor.vectorProduct(Arrays.stream(tp.getShape()).mapToInt(Number::intValue).toArray(), 1));
-                }
-            }
-
-            List<String> errors = new ArrayList<>();
-            if (names.size() != payload.getInputs().length) {
-                errors.add("Each input tensor must have unique names. However, the following duplicate names were found: " + nameDups);
-            }
-
-            if (firstDims.size() > 1) {
-                errors.add("Each input tensor must have the same sized first dimension (e.g., shape[0]). However, the following first dimensions were passed: " + firstDims);
-            }
-
-            if (laterDims.size() != 1 && !laterDims.contains(1)) {
-                errors.add("Higher dimensional inputs (e.g., shape=[m, n] where n>1) are not yet supported.");
-            }
-
-            if (!errors.isEmpty()) {
-                StringBuilder errorMsg = new StringBuilder();
-                errorMsg.append("One or more errors were found with the inbound request payload:");
-                for (String error : errors) {
-                    errorMsg.append(System.lineSeparator() + " - ");
-                    errorMsg.append(error);
-                }
-                throw new IllegalArgumentException(errorMsg.toString());
-            }
-
-            for (TensorPayload tp : payload.getInputs()) {
-                // assume we have data of shape [1, x] in the form [[a], [b], [c]]
-                // transpose and flatten to shape=[x,1], [a,b,c]
-                Object[] vector;
-                if (tp.getData()[0] instanceof List) {
-                    vector = transpose(tp.getData())[0];
-                    Number[] reverseShape = tp.getShape().clone();
-                    ArrayUtils.reverse(reverseShape);
-                    tp.setShape(reverseShape);
-                } else {
-                    vector = tp.getData();
-                }
-                ModelInferRequest.InferInputTensor.Builder inputBuilder = inputBuilderInitializer(tp, tp.getName());
-                inputBuilder.setContents(getTensorBuilder(tp.getDatatype(), vector));
-                inferBuilder.addInputs(inputBuilder.build());
-
-            }
-        } else {
-            TensorPayload input = payload.getInputs()[0];
-            if (input.getData()[0] instanceof ArrayList) {
-                //transpose objects
-                Object[][] objectVector = transpose(input.getData());
-
-                for (int i = 0; i < objectVector.length; i++) {
-                    ModelInferRequest.InferInputTensor.Builder inputBuilder = inputBuilderInitializer(input, input.getName() + "-" + i);
-                    inputBuilder.setContents(getTensorBuilder(input.getDatatype(), objectVector[i]));
-                    inferBuilder.addInputs(inputBuilder.build());
-                }
-            } else {
-                ModelInferRequest.InferInputTensor.Builder inputBuilder = inputBuilderInitializer(input, input.getName());
-                inputBuilder.setContents(getTensorBuilder(input.getDatatype(), input.getData()).build());
-                inferBuilder.addInputs(inputBuilder.build());
-            }
-        }
-    }
-
-    // response ========================================================================================================
     // initialize the output tensor builder
     private static ModelInferResponse.InferOutputTensor.Builder outputBuilderInitializer(TensorPayload output, String name) {
         ModelInferResponse.InferOutputTensor.Builder outputBuilder = ModelInferResponse.InferOutputTensor.newBuilder();
-
-        // the shapes are parsed in different directions in the kserve parser depending on codec
-        List<Long> shape = Arrays.stream(output.getShape()).mapToLong(Number::longValue).boxed().collect(Collectors.toList());
-        if (UploadUtils.shapeReversalCheckLong(shape)) {
-            Collections.reverse(shape);
-        }
-        outputBuilder.addAllShape(shape);
-
+        outputBuilder.addAllShape(shapeProcess(output.getShape()));
         outputBuilder.setDatatype(output.getDatatype());
         outputBuilder.setName(name);
 
@@ -213,6 +247,37 @@ public class UploadUtils {
             outputBuilder.putAllParameters(getParameterMap(output.getParameters()));
         }
         return outputBuilder;
+    }
+
+    // === TENSOR PAYLOAD EXTRACTORS ===================================================================================
+    public static List<ModelInferRequest.InferInputTensor> getBuilderInputs(ModelInferRequestPayload payload) {
+        return getBuilderInputsOrOutputs(
+                payload,
+                "request",
+                "input",
+                (TensorContructionHolder tch) -> {
+                    ModelInferRequest.InferInputTensor.Builder inputBuilder = inputBuilderInitializer(tch.tp, tch.name);
+                    inputBuilder.setContents(getTensorBuilder(tch.tp.getDatatype(), tch.vector));
+                    return inputBuilder.build();
+                });
+    }
+
+    public static List<ModelInferResponse.InferOutputTensor> getBuilderOutputs(ModelInferResponsePayload payload) {
+        return getBuilderInputsOrOutputs(
+                payload,
+                "response",
+                "output",
+                (TensorContructionHolder tch) -> {
+                    ModelInferResponse.InferOutputTensor.Builder outputBuilder = outputBuilderInitializer(tch.tp, tch.name);
+                    outputBuilder.setContents(getTensorBuilder(tch.tp.getDatatype(), tch.vector));
+                    return outputBuilder.build();
+                });
+    }
+
+    // === MODEL INFER RESPONSE/REQUEST POPULATORS =====================================================================
+    // populate a model infer request builder
+    public static void populateRequestBuilder(ModelInferRequest.Builder inferBuilder, ModelInferRequestPayload payload) {
+        inferBuilder.addAllInputs(getBuilderInputs(payload));
     }
 
     // populate a model infer response builder
@@ -233,77 +298,6 @@ public class UploadUtils {
             inferBuilder.putAllParameters(getParameterMap(payload.getParameters()));
         }
 
-        if (payload.getOutputs().length > 1) {
-            // check validity
-            Set<String> names = new HashSet<>();
-            Set<String> nameDups = new HashSet<>();
-            Set<Number> firstDims = new HashSet<>();
-            Set<Number> laterDims = new HashSet<>();
-            for (TensorPayload tp : payload.getOutputs()) {
-                if (names.contains(tp.getName())) {
-                    nameDups.add(tp.getName());
-                } else {
-                    names.add(tp.getName());
-                }
-                firstDims.add(tp.getShape()[0]);
-                if (tp.getShape().length > 1) {
-                    laterDims.add(Tensor.vectorProduct(Arrays.stream(tp.getShape()).mapToInt(Number::intValue).toArray(), 1));
-                }
-            }
-            List<String> errors = new ArrayList<>();
-            if (names.size() != payload.getOutputs().length) {
-                errors.add("Each output tensor must have unique names. However, the following duplicate names were found: " + nameDups);
-            }
-
-            if (firstDims.size() > 1) {
-                errors.add("Each output tensor must have the same sized first dimension (e.g., shape[0]). However, the following first dimensions were passed: " + firstDims);
-            }
-
-            if (laterDims.size() != 1 && !laterDims.contains(1)) {
-                errors.add("Higher dimensional inputs (e.g., shape=[m, n] where n>1) are not yet supported.");
-            }
-
-            if (!errors.isEmpty()) {
-                StringBuilder errorMsg = new StringBuilder();
-                errorMsg.append("One or more errors were found with the inbound response payload:");
-                for (String error : errors) {
-                    errorMsg.append(System.lineSeparator() + " - ");
-                    errorMsg.append(error);
-                }
-                throw new IllegalArgumentException(errorMsg.toString());
-            }
-
-            for (TensorPayload tp : payload.getOutputs()) {
-                // assume we have data of shape [1, x] in the form [[a], [b], [c]]
-                // transpose and flatten to shape=[x,1], [a,b,c]
-                Object[] vector;
-                if (tp.getData()[0] instanceof List) {
-                    vector = transpose(tp.getData())[0];
-                    Number[] reverseShape = tp.getShape().clone();
-                    ArrayUtils.reverse(reverseShape);
-                    tp.setShape(reverseShape);
-                } else {
-                    vector = tp.getData();
-                }
-                ModelInferResponse.InferOutputTensor.Builder outputBuilder = outputBuilderInitializer(tp, tp.getName());
-                outputBuilder.setContents(getTensorBuilder(tp.getDatatype(), vector));
-                inferBuilder.addOutputs(outputBuilder.build());
-            }
-        } else {
-            TensorPayload output = payload.getOutputs()[0];
-            if (output.getData()[0] instanceof ArrayList) {
-                Object[][] objectVector = transpose(output.getData());
-
-                for (int i = 0; i < objectVector.length; i++) {
-                    ModelInferResponse.InferOutputTensor.Builder outputBuilder = outputBuilderInitializer(output, output.getName() + "-" + i);
-                    outputBuilder.setContents(getTensorBuilder(output.getDatatype(), objectVector[i]));
-                    inferBuilder.addOutputs(outputBuilder.build());
-                }
-            } else {
-                ModelInferResponse.InferOutputTensor.Builder outputBuilder = outputBuilderInitializer(output, output.getName());
-                outputBuilder.setContents(getTensorBuilder(output.getDatatype(), output.getData()));
-                inferBuilder.addOutputs(outputBuilder.build());
-            }
-        }
+        inferBuilder.addAllOutputs(getBuilderOutputs(payload));
     }
 }
