@@ -1,4 +1,4 @@
-opendatahub-operator fast https://github.com/opendatahub-io/opendatahub-operator community-operators opendatahub-operator.v2.18.2
-authorino-operator stable https://github.com/Kuadrant/authorino-operator community-operators authorino-operator.v0.13.0
-serverless-operator stable https://github.com/openshift-knative/serverless-operator redhat-operators serverless-operator.v1.34.0
-servicemeshoperator stable https://github.com/maistra/istio-operator redhat-operators servicemeshoperator.v2.6.2
+opendatahub-operator fast https://github.com/opendatahub-io/opendatahub-operator community-operators opendatahub-operator.v2.22.0
+authorino-operator stable https://github.com/Kuadrant/authorino-operator community-operators authorino-operator.v0.16.0
+serverless-operator stable https://github.com/openshift-knative/serverless-operator redhat-operators serverless-operator.v1.35.0
+servicemeshoperator stable https://github.com/maistra/istio-operator redhat-operators servicemeshoperator.v2.6.3
