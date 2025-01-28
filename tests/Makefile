@@ -38,13 +38,14 @@ build:
 run:
 	# Confirm that we have a directory for storing any screenshots from selenium tests
 	mkdir -p ${LOCAL_ARTIFACT_DIR}/screenshots
-	oc config view --flatten --minify > /tmp/tests-kubeconfig
+	oc config view --flatten --minify > ${LOCAL_ARTIFACT_DIR}/tests-kubeconfig
 	${BUILD_TOOL} run -e SKIP_INSTALL=$(SKIP_INSTALL) -e PYTEST_MARKERS=$(PYTEST_MARKERS) -e SKIP_OPERATOR_INSTALL=$(SKIP_OPERATOR_INSTALL) \
 	    -e SKIP_DSC_INSTALL=$(SKIP_DSC_INSTALL) -e ODHPROJECT=$(ODHPROJECT) \
 		-e OPENSHIFT_TESTUSER_NAME="$(OPENSHIFT_TESTUSER_NAME)" -e OPENSHIFT_TESTUSER_PASS="$(OPENSHIFT_TESTUSER_PASS)" -e OPENSHIFT_TESTUSER_LOGIN_PROVIDER=$(OPENSHIFT_TESTUSER_LOGIN_PROVIDER) -e ARTIFACT_DIR=$(ARTIFACT_DIR) \
 		-e LOCAL=$(LOCAL) -e TEARDOWN=$(TEARDOWN) \
 		-e SERVICE_IMAGE=$(SERVICE_IMAGE) -e OPERATOR_IMAGE=$(OPERATOR_IMAGE)  \
-		-it -v ${LOCAL_ARTIFACT_DIR}/:$(ARTIFACT_DIR):z -v /tmp/tests-kubeconfig:/tmp/kubeconfig:z $(IMAGE)
+		--platform=$(PLATFORM) \
+		-it -v ${LOCAL_ARTIFACT_DIR}/:$(ARTIFACT_DIR):z -v ${LOCAL_ARTIFACT_DIR}/tests-kubeconfig:/tmp/kubeconfig:z $(IMAGE)
 
 
 .SILENT:
