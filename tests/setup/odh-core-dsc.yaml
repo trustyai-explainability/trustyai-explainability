@@ -18,10 +18,12 @@ spec:
       managementState: Removed
     kserve:
       managementState: Managed
+      nim:
+        managementState: Removed
       serving:
         ingressGateway:
           certificate:
-            type: SelfSigned
+            type: OpenshiftDefaultIngress
         managementState: Managed
         name: knative-serving
     kueue:
@@ -30,14 +32,12 @@ spec:
       managementState: Managed
     modelregistry:
       managementState: Removed
+      registriesNamespace: odh-model-registries
     ray:
       managementState: Removed
+    trainingoperator:
+      managementState: Removed
     trustyai:
-      devFlags:
-        manifests:
-          - contextDir: config
-            sourcePath: ''
-            uri: trustyaiRepoPlaceholder
       managementState: Managed
     workbenches:
       managementState: Removed

@@ -36,6 +36,8 @@ if [ -z "${SKIP_INSTALL}" ]; then
     oc project ${ODHPROJECT} # in case a new project is not created
     $HOME/peak/install.sh || INSTALL_FAILURE=true
 
+
+
     if [ $INSTALL_FAILURE = false ]; then
       echo
       echo "$HEADER Waiting For ODH Pods to Start $HEADER"

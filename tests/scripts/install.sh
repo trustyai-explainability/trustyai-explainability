@@ -70,13 +70,40 @@ else
     retry=$(( retry - 1))
 
     echo
+    echo "$HEADER Approving install plans $HEADER"
+
+    for operator in authorino-operator servicemeshoperator serverless-operator opendatahub-operator; do
+      OP_VERSION=$(cat ~/peak/operatorsetup | grep $operator | awk '{print $5}')
+      echo -n "Checking for $operator $OP_VERSION install plan..."
+      start_t=$(date +%s) 2>&1
+      ready=false 2>&1
+      while ! $ready; do
+        if [ ! -z "$(oc get installplan --all-namespaces 2> /dev/null | grep $OP_VERSION)" ]; then
+          ready=true 2>&1
+          install_plan_namespace=$(oc get installplan --all-namespaces | grep $OP_VERSION | awk '{print $1}')
+          install_plan_name=$(oc get installplan --all-namespaces | grep $OP_VERSION | awk '{print $2}')
+          oc patch installplan "$install_plan_name" -n "$install_plan_namespace" --type merge --patch '{"spec":{"approved":true}}' 1> /dev/null
+          echo "[APPROVED]"
+        else
+          echo -n "."
+          sleep 2
+        fi
+        if [ $(($(date +%s)-start_t)) -gt 30 ]; then
+          echo "[NOT FOUND]"
+          ready=true 2>&1
+        fi
+      done
+    done
+
+
+    echo
     echo "$HEADER Verifying Operator Installation $HEADER"
     for operator in opendatahub-operator authorino-operator knative-operator knative-openshift istio-operator; do
       echo -n "Checking $operator readiness..."
       finished=false 2>&1
       start_t=$(date +%s) 2>&1
       while ! $finished; do
-          if [ ! -z "$(oc get pods -n openshift-operators  | grep $operator | grep '1/1')" ]; then
+          if [ ! -z "$(oc get pods --all-namespaces  | grep $operator | grep '1/1')" ]; then
             echo "[DONE]"
             finished=true 2>&1
           else
