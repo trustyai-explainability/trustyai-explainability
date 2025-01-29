@@ -49,3 +49,5 @@ RUN chmod -R 777 $HOME/kfdef && \
 # ADD kubeconfig /root/.kube/config
 
 CMD $HOME/peak/installandtest.sh
+
+# This is a dummy PR to test the CI
