@@ -88,7 +88,7 @@ else
           echo -n "."
           sleep 2
         fi
-        if [ $(($(date +%s)-start_t)) -gt 30 ]; then
+        if [ $(($(date +%s)-start_t)) -gt 300 ]; then
           echo "[NOT FOUND]"
           ready=true 2>&1
         fi
