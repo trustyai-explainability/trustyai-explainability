@@ -22,7 +22,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -43,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(ThreadDumpOnTimeoutExtension.class)
 class CounterfactualGeneratorTest {
     int N_COUNTERFACTUALS_TO_GENERATE = 10;
+    int TIMEOUT = 30;
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 1 })
@@ -75,7 +75,7 @@ class CounterfactualGeneratorTest {
                 .withModel(model)
                 // Run the counterfactual on a different thread pool
                 .withCounterfactualConfig(CounterfactualUtils.getCounterfactualConfig((long) seed, 10_000L))
-                .withTimeoutSeconds(30)
+                .withTimeoutSeconds(TIMEOUT)
                 .withStepCount(10_000L)
                 .withGoalThreshold(.01)
                 .withRandom(rn)
@@ -122,7 +122,7 @@ class CounterfactualGeneratorTest {
                 .withModel(model)
                 // Run the counterfactual on a different thread pool
                 .withCounterfactualConfig(CounterfactualUtils.getCounterfactualConfig((long) seed, 30_000L))
-                .withTimeoutSeconds(30)
+                .withTimeoutSeconds(TIMEOUT)
                 .withStepCount(30_000L)
                 .withGoalThreshold(0.01)
                 .withRandom(rn)
@@ -164,7 +164,7 @@ class CounterfactualGeneratorTest {
                 .withModel(model)
                 // Run the counterfactual on a different thread pool
                 .withCounterfactualConfig(CounterfactualUtils.getCounterfactualConfig((long) seed, 30_000L))
-                .withTimeoutSeconds(30)
+                .withTimeoutSeconds(TIMEOUT)
                 .withStepCount(30_000L)
                 .withGoalThreshold(0.01)
                 .withRandom(rn)
