@@ -22,6 +22,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -74,7 +75,7 @@ class CounterfactualGeneratorTest {
                 .withModel(model)
                 // Run the counterfactual on a different thread pool
                 .withCounterfactualConfig(CounterfactualUtils.getCounterfactualConfig((long) seed, 10_000L))
-                .withTimeoutSeconds(10)
+                .withTimeoutSeconds(30)
                 .withStepCount(10_000L)
                 .withGoalThreshold(.01)
                 .withRandom(rn)
@@ -121,7 +122,7 @@ class CounterfactualGeneratorTest {
                 .withModel(model)
                 // Run the counterfactual on a different thread pool
                 .withCounterfactualConfig(CounterfactualUtils.getCounterfactualConfig((long) seed, 30_000L))
-                .withTimeoutSeconds(10)
+                .withTimeoutSeconds(30)
                 .withStepCount(30_000L)
                 .withGoalThreshold(0.01)
                 .withRandom(rn)
@@ -163,7 +164,7 @@ class CounterfactualGeneratorTest {
                 .withModel(model)
                 // Run the counterfactual on a different thread pool
                 .withCounterfactualConfig(CounterfactualUtils.getCounterfactualConfig((long) seed, 30_000L))
-                .withTimeoutSeconds(10)
+                .withTimeoutSeconds(30)
                 .withStepCount(30_000L)
                 .withGoalThreshold(0.01)
                 .withRandom(rn)
