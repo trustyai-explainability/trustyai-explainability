@@ -22,6 +22,7 @@ dependency-reduced-pom.xml
 .run/
 .checkstyle
 tests/artifacts/*
+tests/custom_operators_config.yaml
 
 *.log
 release.properties

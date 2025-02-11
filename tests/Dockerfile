@@ -1,7 +1,8 @@
 FROM registry.access.redhat.com/ubi8:8.10-1020
-ARG ORG=trustyai-explainability
-ARG BRANCH=main
 ARG OC_CLI_URL=https://mirror.openshift.com/pub/openshift-v4/amd64/clients/ocp/4.14.33/openshift-client-linux.tar.gz
+ARG TRUSTYAI_TESTS_ORG=trustyai-explainability
+ARG TRUSTYAI_TESTS_REPO=trustyai-tests
+ARG TRUSTYAI_TESTS_BRANCH=main
 
 ENV HOME /root
 WORKDIR /root
@@ -21,23 +22,20 @@ ADD ${OC_CLI_URL} $HOME/peak/oc-cli.tar.gz
 RUN tar -C /usr/local/bin -xvf $HOME/peak/oc-cli.tar.gz && \
     chmod +x /usr/local/bin/oc
 
-COPY Pipfile Pipfile.lock $HOME/peak/
-
 # Install poetry to support the exeuction of trustyai-tests
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="${PATH}:$HOME/.local/bin"
+
+# break cache if the repo has changed
+ADD https://api.github.com/repos/${TRUSTYAI_TESTS_ORG}/${TRUSTYAI_TESTS_REPO}/git/refs/heads/${TRUSTYAI_TESTS_BRANCH} version.json
 RUN cd $HOME/peak && \
-    git clone https://github.com/trustyai-explainability/trustyai-tests.git && \
+    git clone -b ${TRUSTYAI_TESTS_BRANCH} https://github.com/${TRUSTYAI_TESTS_ORG}/${TRUSTYAI_TESTS_REPO}.git && \
     cd trustyai-tests && \
     poetry install
 
-COPY setup/operatorsetup scripts/install.sh scripts/installandtest.sh $HOME/peak/
-COPY util $HOME/peak/operator-tests/trustyai-explainability
-COPY setup/odh-core-dsc.yaml setup/odh-core-dsci.yaml $HOME/kfdef/
-COPY scripts/setup.sh $HOME/peak/setup.sh
+COPY installandtest.sh custom_operators_config*.yaml $HOME/peak/
 
-RUN chmod -R 777 $HOME/kfdef && \
-    mkdir -p $HOME/.kube && \
+RUN mkdir -p $HOME/.kube && \
     chmod -R 777 $HOME/.kube && \
     chmod -R 777 $HOME/peak && \
     mkdir -p /peak && \

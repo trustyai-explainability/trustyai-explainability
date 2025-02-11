@@ -1,122 +1,41 @@
-# TrustyAI OpenShift CI and E2E Tests
-The TrustyAI OpenShift-CI tests are based off the [odh-manifests CI tests](https://github.com/opendatahub-io/odh-manifests/tree/master/tests).
+# TrustyAI CI Testing
+The home of the TrustyAI CI tests is now https://github.com/trustyai-explainability/trustyai-tests
 
-# Running locally
-
-Assuming you are oc login'd with admin rights to a cluster, run the following from within the `tests` directory:
-
-```sh
-make test
+## Running the CI locally
+```bash
+make test LOCAL=true
 ```
 
-This will build the test container, run those tests against the cluster you are logged into, and then clean up afterwards.
-This is equivalent to running:
-```sh
-make build # build the test container (necessarily after any changes to test scripts/resources
-make run   # run the tests against the existing cluster
-make clean # remove the artifacts of the test from the cluster (operator, ODH, projects, etc)
-```
+## Useful Arguments
 
+### make build
+* `CACHE_ARG="--no-cache"`
+  * Rebuild the test docker image from scratch
+* `TRUSTYAI_TESTS_ORG`, `TRUSTYAI_TESTS_REPO`
+  * Which Github org and repo to clone (e.g.,  `https://github.com/${TRUSTYAI_TESTS_ORG}/${TRUSTYAI_TESTS_REPO}.git)` when grabbing the TrustyAI Python test suite, defaults to `trustyai-explainability` and `trustyai-tests` respectively.
+* `TRUSTYAI_TESTS_BRANCH`
+  * Which branch of the TrustyAI tests repo to use, defaults to `main`
 
+### make run
+* `SKIP_OPERATORS_INSTALLATION=true`
+  * Use this argument to skip the installation of prequisite operators (ODH, Servicemesh, etc.) into your cluster. This is useful
+  if they are already installed.
+* `SKIP_DSC_INSTALLATION=true`
+  * Use this argument to skip the installation of an ODH Data Science Cluster into your cluster. This is useful
+      if you already have a DSC installed
+* `LOCAL=true`
+  * This flag makes the test suite stop and wait for user input between the end of a test script and cluster teardown. This prevents automatic teardown, which is useful for manual inspection of the cluster before teardown when running the tests locally.
+* `TRUSTYAI_MANIFESTS_REPO=`
+  * Set the URL of the TrustyAI manifests tarball. This will default to `main` if not set.
+* `USE_LOCAL_OPERATOR_CONFIG=true` use whatever inside of your local copy of `custom_operator_config.yaml` instead of the upstream operators spec
+from the tests repo. This is useful for testing against arbitrary ODH versions, for example. 
+* `PYTEST_MARKERS=`
+  * Use this to restrict which tests you are running, e.g., `PYTEST_MARKERS="openshift and pvc and modelmesh"`
 
-## Useful Makefile Arguments
-* `BUILD_TOOL=docker/podman`: set the tool used to build and run the testing container
-* `SKIP_INSTALL=true/false`: skip the install of the ODH operator, if you've already installed it manually or via a previous test
-* `SKIP_DSC_INSTALL=true/false`: skip the install of ODH DSC, if you've already installed it manually or via a previous test
-* `PYTEST_MARKERS`: Used to select the tests that will be executed. [Available markers](https://github.com/trustyai-explainability/trustyai-tests/blob/main/pyproject.toml).
-* `LOCAL=true/false`: This flag makes the test suite stop and wait for user input between the end of a test script and cluster teardown.   This prevents automatic teardown, which is useful for manual inspection of the cluster before teardown when running the tests locally.
-* `TEARDOWN=true/false`: This flag will just run the corresponding `teardown` functions within the various tests, useful for cleaning up stranded components from failed tests, without deleting the operator and ODH install. It's recommended to use this with a `make run`, as using `make test` will trigger a `make clean` that fully wipes the cluster. 
-### CI Image Arguments
-To change the images used in CI, use the following flags in the `make run` command:
-* `SERVICE_IMAGE_REPO`: Set the repo to pull the service image from, defaults to `quay.io/trustyai/trustyai-service`
-* `SERVICE_IMAGE_TAG`: Set the tag to pull for the service image, defaults to `latest`
-* `OPERATOR_IMAGE_REPO`: Set the repo to pull the operator image from, defaults to `quay.io/trustyai/trustyai-service-operator`
-* `OPERATOR_IMAGE_TAG`: Set the tag to pull for the operator image, defaults to `latest`
+All of the above arguments can also be passed to `make test`, which will pass them to their corresponding subfunctions.
 
-
-# OpenShift-CI Information
-## Customizing test behavior
-
-Without changes, the test image will run `$HOME/peak/installandtest.sh` which
-handles setting up the opendatahub-operator and then creating the KfDef found in
-`tests/setup/odh-core.yaml`.  If you want to modify your test run, you
-might want to change those files to get the behavior that you're looking for.
-After you make changes, you will need to rebuild the test image with `make build`.
-
-If you'd like to run the tests against an instance that already has Open Data Hub installed,
-you set `SKIP_INSTALL=true` and that will cause the test run
-to skip the installation process and will only run the tests.  example: `make run SKIP_INSTALL=true`
-
-If you'd like to run the tests against an instance that already has a KfDef created,
-you set `SKIP_KFDEF_INSTALL=true` and that will cause the test run
-to skip the step of creating the default KfDef.  example: `make run SKIP_KFDEF_INSTALL=true`
-
-If you have a local instance already running the operator and you'd like to skip that part
-of the install process, you can set `SKIP_OPERATOR_INSTALL=true` and that will bypass installation
-of the operator, but will still install the authentication for any user tests.
-
-Without changes, the tests will install the ODH components in the `opendatahub` namespace. If your installation  
-is in a different namespace or you wish to deploy ODH in a different namespace, edit the following files.  
-- In `tests/util` : `export ODHPROJECT=${ODHPROJECT:-"YOUR_DESIRED_NAMESPACE"}`
-- In `tests/setup/odh-core.yaml` : 
-  - change `model-mesh` parameter `monitoring-namespace` to your desired namespace  
-  - change `modelmesh-monitoring` parameter `deployment-namespace` to your desired namespace  
-
-For other possible configurations, you can look in the Makefile.  There are a set of
-variables at the top that you could change to meet the needs of your particular test run.
-
-## Test Artifacts
-The environment variable `ARTIFACT_DIR` specifies the root directory where all test artifacts should be
-stored for retrieval at the end of a test run. Any files created should be uniquely named to prevent
-a test from overwriting an artifact generated by another test.
-
-# Running tests manually
-
-Manual running of the tests relies on the test
-runner [located here](https://github.com/opendatahub-io/peak).
-See the README.md there for more detailed information on how it works.
-
-Note when running on a **mac** you may need to do the following:
-
-```sh
-brew install coreutils
-ln -s /usr/local/bin/greadlink /usr/local/bin/readlink
-```
-
-Make sure you have an OpenShift login, then do the following:
-
-```sh
-git clone https://github.com/opendatahub-io/peak
-cd peak
-git submodule update --init
-echo opendatahub-kubeflow nil https://github.com/opendatahub-io/odh-manifests > my-list
-./setup.sh -t my-list
-./run.sh operator-tests/opendatahub-kubeflow/tests/basictests
-```
-
-Note, if you're looking to test another repo and/or branch, you can change the "echo" command from above to something of the following form where "your branch" is optional:
-
-```sh
-echo opendatahub-kubeflow nil <your repo> <your branch> > my-list
-```
-
-If your installation is not in the opendatahub project, you will need to modify
-the export line in tests/util to set the value of ODHPROJECT to match name of the project you are using.
-
-You can run tests individually by passing a substring to run.sh to match:
-
-```sh
-./run.sh dashboard.sh
-```
-
-# Basic test
-
-These tests are in the basictests directory.  This set of tests assumes that you have opendatahub (Kubeflow-based) installed.  It then goes through each module and tests
-to be sure that the expected pods are all in the running state.  This is meant to be the barebones basic smoke tests for an installation.
-The steps to run this test are:
-
-* Run the tests
-
-  ```sh
-  ./run.sh tests/basictests
-  ```
+## Testing Different Operator Versions
+`make fetch_custom_operator_config`
+will download the [latest operator config](https://raw.githubusercontent.com/trustyai-explainability/trustyai-tests/refs/heads/main/trustyai_tests/setup/operators_config.yaml) from the trustyai-tests repo and save it into this directory. It will be saved as `custom_operators_config.yaml`, and any
+changes you make to this file will be used for the CI tests when the `USE_LOCAL_OPERATOR_CONFIG=true` argument is provided to `make test`. For example, you could use this to test against 
+different versions of the ODH operator, without needing to make a dev branch of the trustyai-tests repo. 
