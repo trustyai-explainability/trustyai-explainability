@@ -44,6 +44,12 @@
             <artifactId>xstream</artifactId>
             <version>1.4.21</version>
           </dependency>
+          <!-- Override to io.netty:netty-handler:4.1.118.Final -->
+          <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler</artifactId>
+            <version>4.1.118.Final</version>
+          </dependency>
         </dependencies>
     </dependencyManagement>
   <dependencies>
