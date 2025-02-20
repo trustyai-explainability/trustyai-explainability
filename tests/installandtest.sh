@@ -69,15 +69,4 @@ if [ $LOCAL ]; then
     echo -n "Hit enter to finish tests: "; read
 fi
 
-# Gather artifacts
-echo
-echo "$HEADER Post-Test Actions $HEADER"
-echo "Saving the dump of the pods logs in the artifacts directory"
-oc get pods -o yaml -n ${ODHPROJECT} > ${ARTIFACT_DIR}/${ODHPROJECT}-pods-postrun.yaml
-oc get pods -o yaml -n openshift-operators > ${ARTIFACT_DIR}/openshift-operators-pods-postrun.yaml
-echo "Saving the events in the artifacts directory"
-oc get events --sort-by='{.lastTimestamp}' > ${ARTIFACT_DIR}/${ODHPROJECT}-postrun-events-postrun.txt
-echo "Saving the logs from the opendatahub-operator pod in the artifacts directory"
-oc logs -n openshift-operators $(oc get pods -n openshift-operators --field-selector=spec.serviceAccountName=opendatahub-operator-controller-manager -o jsonpath="{$.items[*].metadata.name}") > ${ARTIFACT_DIR}/opendatahub-operator-postrun.log 2> /dev/null || echo "No logs for openshift-operators/opendatahub-operator"
-
 exit $exitcode

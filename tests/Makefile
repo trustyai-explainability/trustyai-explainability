@@ -48,9 +48,8 @@ build:
  		--build-arg TRUSTYAI_TESTS_REPO=$(TRUSTYAI_TESTS_REPO) \
  		--build-arg TRUSTYAI_TESTS_BRANCH=$(TRUSTYAI_TESTS_BRANCH) \
  		--platform=$(PLATFORM) .  --progress=plain $(CACHE_ARG)
-run:
+run: clean_tests
 	# Confirm that we have a directory for storing any screenshots from selenium tests
-	mkdir -p ${LOCAL_ARTIFACT_DIR}/screenshots
 	oc config view --flatten --minify > ${LOCAL_ARTIFACT_DIR}/tests-kubeconfig
 	${BUILD_TOOL} run -e PYTEST_MARKERS="$(PYTEST_MARKERS)" \
 		-e OPENSHIFT_TESTUSER_NAME="$(OPENSHIFT_TESTUSER_NAME)" -e OPENSHIFT_TESTUSER_PASS="$(OPENSHIFT_TESTUSER_PASS)" -e OPENSHIFT_TESTUSER_LOGIN_PROVIDER=$(OPENSHIFT_TESTUSER_LOGIN_PROVIDER) \
@@ -109,6 +108,7 @@ clean_authorino:
 	oc delete $$(oc get clusterrole --all-namespaces -o name | grep authorino) || true
 
 clean_tests:
+	echo "\n============== Cleaning Conflicting Resources from Previous Tests =============="
 	oc delete project test-namespace || true
 	oc delete configmap model-serving-config -n opendatahub || true
 
