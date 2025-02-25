@@ -107,24 +107,24 @@ public class UploadUtils {
     }
 
     // generic cases ==================================================================================================
-    private static class TensorContructionHolder {
+    private static class TensorConstructionHolder {
         public TensorPayload tp;
         public Object[] vector;
         public String name;
 
-        public TensorContructionHolder(TensorPayload tp) {
+        public TensorConstructionHolder(TensorPayload tp) {
             this.tp = tp;
             this.vector = tp.getData();
             this.name = tp.getName();
         }
 
-        public TensorContructionHolder(TensorPayload tp, Object[] vector) {
+        public TensorConstructionHolder(TensorPayload tp, Object[] vector) {
             this.tp = tp;
             this.vector = vector;
             this.name = tp.getName();
         }
 
-        public TensorContructionHolder(TensorPayload tp, Object[] vector, String name) {
+        public TensorConstructionHolder(TensorPayload tp, Object[] vector, String name) {
             this.tp = tp;
             this.vector = vector;
             this.name = name;
@@ -182,7 +182,7 @@ public class UploadUtils {
         }
     }
 
-    private static <T, U extends ModelInferBasePayload> List<T> getBuilderInputsOrOutputs(U payload, String payloadType, String contentType, Function<TensorContructionHolder, T> tensorCreator) {
+    private static <T, U extends ModelInferBasePayload> List<T> getBuilderInputsOrOutputs(U payload, String payloadType, String contentType, Function<TensorConstructionHolder, T> tensorCreator) {
         List<T> builtPayloads = new ArrayList<>();
 
         // if we have multiple tensors, assume each tensor describes a data column
@@ -201,22 +201,22 @@ public class UploadUtils {
                 } else {
                     vector = tp.getData();
                 }
-                builtPayloads.add(tensorCreator.apply(new TensorContructionHolder(tp, vector)));
+                builtPayloads.add(tensorCreator.apply(new TensorConstructionHolder(tp, vector)));
 
             }
         } else { //otherwise, assume that we have one tensor, holding data in row vector(s)
             TensorPayload tp = payload.getTensorPayloads()[0];
 
             // is the payload a matrix/tensor?
-            if (tp.getData()[0] instanceof ArrayList) {
+            if (tp.getData()[0] instanceof List) {
                 //transpose objects
                 Object[][] objectVector = transpose(tp.getData());
 
                 for (int i = 0; i < objectVector.length; i++) {
-                    builtPayloads.add(tensorCreator.apply(new TensorContructionHolder(tp, objectVector[i], tp.getName() + "-" + i)));
+                    builtPayloads.add(tensorCreator.apply(new TensorConstructionHolder(tp, objectVector[i], tp.getName() + "-" + i)));
                 }
             } else { // else, payload is a vector
-                builtPayloads.add(tensorCreator.apply(new TensorContructionHolder(tp)));
+                builtPayloads.add(tensorCreator.apply(new TensorConstructionHolder(tp)));
             }
         }
         return builtPayloads;
@@ -255,7 +255,7 @@ public class UploadUtils {
                 payload,
                 "request",
                 "input",
-                (TensorContructionHolder tch) -> {
+                (TensorConstructionHolder tch) -> {
                     ModelInferRequest.InferInputTensor.Builder inputBuilder = inputBuilderInitializer(tch.tp, tch.name);
                     inputBuilder.setContents(getTensorBuilder(tch.tp.getDatatype(), tch.vector));
                     return inputBuilder.build();
@@ -267,7 +267,7 @@ public class UploadUtils {
                 payload,
                 "response",
                 "output",
-                (TensorContructionHolder tch) -> {
+                (TensorConstructionHolder tch) -> {
                     ModelInferResponse.InferOutputTensor.Builder outputBuilder = outputBuilderInitializer(tch.tp, tch.name);
                     outputBuilder.setContents(getTensorBuilder(tch.tp.getDatatype(), tch.vector));
                     return outputBuilder.build();

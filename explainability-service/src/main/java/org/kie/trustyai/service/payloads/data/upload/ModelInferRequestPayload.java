@@ -3,7 +3,6 @@ package org.kie.trustyai.service.payloads.data.upload;
 import java.util.Arrays;
 
 public class ModelInferRequestPayload extends ModelInferBasePayload {
-    private String id;
     private TensorPayload[] inputs;
 
     public TensorPayload[] getTensorPayloads() {
@@ -17,7 +16,7 @@ public class ModelInferRequestPayload extends ModelInferBasePayload {
     @Override
     public String toString() {
         return "ModelJsonPayload{" +
-                "id='" + id + '\'' +
+                "id='" + getId() + '\'' +
                 ", inputs=" + Arrays.toString(inputs) +
                 '}';
     }
