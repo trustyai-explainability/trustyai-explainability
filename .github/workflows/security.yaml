@@ -41,6 +41,8 @@ jobs:
 
       - name: Trivy scan (second pass)
         uses: aquasecurity/trivy-action@0.28.0
+        env:
+          TRIVY_FORMAT: table
         with:
           scan-type: 'image'
           image-ref: "quay.io/trustyai/trustyai-service:${{ github.sha }}"
