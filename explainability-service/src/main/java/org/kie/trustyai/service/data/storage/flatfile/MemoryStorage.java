@@ -274,16 +274,8 @@ public class MemoryStorage extends FlatFileStorage {
 
     /**
      * Read {@link ByteBuffer} from the memory storage, for a given filename and batch size.
-     * <<<<<<< HEAD:explainability-service/src/main/java/org/kie/trustyai/service/data/storage/flatfile/MemoryStorage.java
-     * 
-     * @param location The filename to read
-     *        =======
      *
      * @param location The filename to read
-     *        <<<<<<< HEAD:explainability-service/src/main/java/org/kie/trustyai/service/data/storage/flatfile/MemoryStorage.java
-     *        >>>>>>> 971331215cad9fd6a58c6be30edccb949c459c65:explainability-service/src/main/java/org/kie/trustyai/service/data/storage/MemoryStorage.java
-     *        =======
-     *        >>>>>>> 735c6e77a450570e5590dbd03c5f5e632de641d0:explainability-service/src/main/java/org/kie/trustyai/service/data/storage/MemoryStorage.java
      * @param batchSize The batch size
      * @return A {@link ByteBuffer} containing the data
      * @throws StorageReadException If an error occurs while reading the data
