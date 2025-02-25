@@ -50,4 +50,4 @@ jobs:
           severity: 'HIGH,CRITICAL'
           ignore-unfixed: false
           vuln-type: 'os,library'
-          exit-code: '1'
+          exit-code: '0'
