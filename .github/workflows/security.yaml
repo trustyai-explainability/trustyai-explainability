@@ -4,21 +4,48 @@ on:
     branches:
       - main
   pull_request:
+
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-20.04
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v3
-      - name: Build a TrustyAI service image from Dockerfile
-        run: docker build -t quay.io/trustyai/trustyai-service:${{ github.sha }} .
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.28.0
+
+      - name: Build Docker image
+        run: |
+          docker build -t quay.io/trustyai/trustyai-service:${{ github.sha }} .
+
+      - name: Trivy scan (first pass)
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
+          scan-type: 'image'
           image-ref: "quay.io/trustyai/trustyai-service:${{ github.sha }}"
-          format: "table"
-          exit-code: "1"
-          ignore-unfixed: true
-          vuln-type: "os,library"
-          severity: "CRITICAL,HIGH,MEDIUM"
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'MEDIUM,HIGH,CRITICAL'
+          # Don't fail with Medium results. Fail is done on second pass with only High and Critical
+          exit-code: '0'
+          ignore-unfixed: false
+          vuln-type: 'os,library'
+
+      - name: Add to Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Trivy scan (second pass)
+        uses: aquasecurity/trivy-action@v0.28.0
+        with:
+          scan-type: 'image'
+          image-ref: "quay.io/trustyai/trustyai-service:${{ github.sha }}"
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: false
+          vuln-type: 'os,library'
+          exit-code: '1'
