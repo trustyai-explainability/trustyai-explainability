@@ -60,7 +60,7 @@
         <formatter.plugin.version>2.13.0</formatter.plugin.version>
         <impsort.plugin.version>1.9.0</impsort.plugin.version>
 
-        <version.io.netty>4.1.100.Final</version.io.netty>
+        <version.io.netty>4.1.118.Final</version.io.netty>
         <nexus.staging.plugin.version>1.6.6</nexus.staging.plugin.version>
 
         <formatter.skip>false</formatter.skip>
@@ -100,6 +100,13 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${version.com.fasterxml.jackson.databind}</version>
+            </dependency>
+
+            <!-- Override the version of  io.netty:netty-handler -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-handler</artifactId>
+                <version>4.1.118.Final</version>
             </dependency>
 
             <!-- TEST dependencies -->

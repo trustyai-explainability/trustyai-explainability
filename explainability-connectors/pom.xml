@@ -28,6 +28,12 @@
                 <artifactId>protobuf-java</artifactId>
                 <version>3.25.5</version>
             </dependency>
+            <!-- Override the version of  io.netty:netty-handler -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-handler</artifactId>
+                <version>4.1.118.Final</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
