@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: write
       security-events: write
     steps: # Assign context variable for various action contexts (tag, main, CI)
       - name: Assigning CI context
