@@ -9,6 +9,7 @@ import org.kie.trustyai.explainability.model.dataframe.Dataframe;
 import org.kie.trustyai.service.mocks.flatfile.MockCSVDatasource;
 import org.kie.trustyai.service.mocks.flatfile.MockMemoryStorage;
 import org.kie.trustyai.service.payloads.data.upload.ModelInferJointPayload;
+import org.kie.trustyai.service.payloads.data.upload.ModelInferRequestPayload;
 import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 import org.kie.trustyai.service.utils.KserveRestPayloads;
 
@@ -305,5 +306,62 @@ class UploadEndpointTest {
                 "1 | Class=Long != Class=Float",
                 "inputs are not identical",
                 "Class=Long, Value=9 != Class=Float, Value=9.0"));
+    }
+
+    @Test
+    void uploadGaussianData(){
+        String payload = """
+                {
+                  "model_name": "gaussian-credit-model",
+                  "data_tag": "TRAINING",
+                  "request": {
+                    "inputs": [
+                      {
+                        "name": "credit_inputs",
+                        "shape": [2, 4],
+                        "datatype": "FP64",
+                        "data": [
+                          [
+                            47.45380690750797,
+                            478.6846214843319,
+                            13.462184703540503,
+                            20.764525303373535
+                          ],
+                          [
+                            47.468246185717554,
+                            575.6911203538863,
+                            10.844143722475575,
+                            14.81343667761101
+                          ]
+                        ]
+                      }
+                    ]
+                  },
+                  "response": {
+                    "model_name": "gaussian-credit-model__isvc-d79a7d395d",
+                    "model_version": "1",
+                    "outputs": [
+                      {
+                        "name": "predict",
+                        "datatype": "FP32",
+                        "shape": [2, 1],
+                        "data": [
+                          0.19013395683309373,
+                          0.2754730253205645
+                        ]
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/upload")
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(containsString("2 datapoints"));
+
     }
 }
