@@ -82,8 +82,14 @@ jobs:
       # Run docker commands
       - name: Pull prerequisite images
         run: |
-          docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
-          docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
+          if [ -f Dockerfile ]; then
+            docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS build)')
+            docker pull $(cat Dockerfile | grep -o -P '(?<=FROM ).*(?= AS runtime)')
+          else
+            echo "Dockerfile not found in current directory: $(pwd)"
+            ls -la
+            exit 1
+          fi
       - name: Put expiry date on CI-tagged image
         if:  env.BUILD_CONTEXT == 'ci'
         run: sed -i 's#summary="odh-trustyai-service\"#summary="odh-trustyai-service" \\ \n      quay.expires-after=7d#' Dockerfile
