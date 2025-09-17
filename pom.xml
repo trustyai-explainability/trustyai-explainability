@@ -60,7 +60,7 @@
         <formatter.plugin.version>2.13.0</formatter.plugin.version>
         <impsort.plugin.version>1.9.0</impsort.plugin.version>
 
-        <version.io.netty>4.1.124.Final</version.io.netty>
+        <version.io.netty>4.1.125.Final</version.io.netty>
         <nexus.staging.plugin.version>1.6.6</nexus.staging.plugin.version>
 
         <formatter.skip>false</formatter.skip>
@@ -106,74 +106,74 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             
             <!-- Force all Netty modules to use the same version -->
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-common</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-buffer</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-transport</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-resolver</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-transport-native-unix-common</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler-proxy</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http2</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-socks</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-resolver-dns</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-dns</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-haproxy</artifactId>
-                <version>4.1.124.Final</version>
+                <version>4.1.125.Final</version>
             </dependency>
 
             <!-- TEST dependencies -->
