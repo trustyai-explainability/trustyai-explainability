@@ -151,19 +151,4 @@ jobs:
                   sourcePath: ''
                   uri: https://api.github.com/repos/trustyai-explainability/trustyai-service-operator-ci/tarball/service-${{ env.TAG }}
             ```
-      - name: Trivy scan
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'MEDIUM,HIGH,CRITICAL'
-          exit-code: '0'
-          ignore-unfixed: false
-          vuln-type: 'os,library'
 
-      - name: Update Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
