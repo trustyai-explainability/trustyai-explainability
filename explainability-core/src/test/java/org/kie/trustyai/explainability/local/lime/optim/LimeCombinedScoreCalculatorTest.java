@@ -26,7 +26,8 @@ import org.kie.trustyai.explainability.Config;
 import org.kie.trustyai.explainability.local.lime.LimeConfig;
 import org.kie.trustyai.explainability.model.*;
 import org.kie.trustyai.explainability.utils.models.TestModels;
-import org.optaplanner.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalScore;
+
+import ai.timefold.solver.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalScore;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -42,7 +43,7 @@ class LimeCombinedScoreCalculatorTest {
         LimeConfigSolution solution = new LimeConfigSolution(config, predictions, entities, model);
         SimpleBigDecimalScore score = scoreCalculator.calculateScore(solution);
         assertThat(score).isNotNull();
-        assertThat(score.getScore()).isNotNull().isEqualTo(BigDecimal.valueOf(0));
+        assertThat(score.score()).isNotNull().isEqualTo(BigDecimal.valueOf(0));
     }
 
     @Test
@@ -63,7 +64,7 @@ class LimeCombinedScoreCalculatorTest {
         LimeConfigSolution solution = new LimeConfigSolution(config, predictions, entities, model);
         SimpleBigDecimalScore score = scoreCalculator.calculateScore(solution);
         assertThat(score).isNotNull();
-        assertThat(score.getScore()).isNotNull().isNotEqualTo(BigDecimal.valueOf(0));
+        assertThat(score.score()).isNotNull().isNotEqualTo(BigDecimal.valueOf(0));
     }
 
 }
