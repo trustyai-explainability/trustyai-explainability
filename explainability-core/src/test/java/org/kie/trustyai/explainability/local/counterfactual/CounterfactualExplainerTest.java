@@ -66,14 +66,15 @@ import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.utils.DataUtils;
 import org.kie.trustyai.explainability.utils.models.TestModels;
 import org.mockito.ArgumentCaptor;
-import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
-import org.optaplanner.core.api.solver.SolverJob;
-import org.optaplanner.core.api.solver.SolverManager;
-import org.optaplanner.core.config.solver.EnvironmentMode;
-import org.optaplanner.core.config.solver.SolverConfig;
-import org.optaplanner.core.config.solver.termination.TerminationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ai.timefold.solver.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
+import ai.timefold.solver.core.api.solver.SolverJob;
+import ai.timefold.solver.core.api.solver.SolverManager;
+import ai.timefold.solver.core.config.solver.EnvironmentMode;
+import ai.timefold.solver.core.config.solver.SolverConfig;
+import ai.timefold.solver.core.config.solver.termination.TerminationConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -639,7 +640,7 @@ class CounterfactualExplainerTest {
         ArgumentCaptor<Consumer<CounterfactualSolution>> intermediateSolutionConsumerCaptor =
                 ArgumentCaptor.forClass(Consumer.class);
         CounterfactualResult result = mockExplainerInvocation(captureSequenceIds, null);
-        verify(solverManager).solveAndListen(any(), any(), intermediateSolutionConsumerCaptor.capture(), any());
+        verify(solverManager).solveBuilder().withProblemId(any()).withProblemFinder(any()).withBestSolutionConsumer(intermediateSolutionConsumerCaptor.capture()).withExceptionHandler(any()).run();
         Consumer<CounterfactualSolution> intermediateSolutionConsumer = intermediateSolutionConsumerCaptor.getValue();
 
         //Mock the intermediate Solution callback being invoked
@@ -855,7 +856,7 @@ class CounterfactualExplainerTest {
         SolverJob<CounterfactualSolution, UUID> solverJob = mock(SolverJob.class);
         CounterfactualSolution solution = mock(CounterfactualSolution.class);
         BendableBigDecimalScore score = BendableBigDecimalScore.zero(0, 0);
-        when(solverManager.solveAndListen(any(), any(), any(), any())).thenReturn(solverJob);
+        when(solverManager.solveBuilder().withProblemId(any()).withProblemFinder(any()).withBestSolutionConsumer(any()).withExceptionHandler(any()).run()).thenReturn(solverJob);
         when(solverJob.getFinalBestSolution()).thenReturn(solution);
         when(solution.getScore()).thenReturn(score);
 
