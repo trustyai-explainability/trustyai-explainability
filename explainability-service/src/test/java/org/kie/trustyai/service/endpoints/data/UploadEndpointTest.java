@@ -1,6 +1,7 @@
 package org.kie.trustyai.service.endpoints.data;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
@@ -402,5 +403,21 @@ class UploadEndpointTest {
         assertEquals(3, df.getColumnDimension()); // 2 inputs + 1 output
 
         emptyStorage();
+    }
+
+    @Test
+    void uploadMalformedGzipCompressedData() {
+        // Test that malformed gzip-compressed payloads return a client error (400)
+        // rather than a server error (500)
+        byte[] invalidGzipPayload = "not-a-valid-gzip-stream".getBytes(StandardCharsets.UTF_8);
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Content-Encoding", "gzip")
+                .body(invalidGzipPayload)
+                .when().post("/upload")
+                .then()
+                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("could not be decompressed"));
     }
 }
