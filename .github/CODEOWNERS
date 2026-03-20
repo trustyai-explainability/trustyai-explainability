@@ -1,0 +1,13 @@
+# CODEOWNERS file
+# Define code ownership for automatic review requests
+
+# Global owners - these users are requested for review on all PRs
+# *       @owner
+
+# Specific paths can have different owners
+# /docs/  @documentation-team
+# /src/   @development-team
+# /.github/ @devops-team
+
+# Default: assign to repository owner
+*       @owner
