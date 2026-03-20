@@ -1,6 +1,9 @@
 package org.kie.trustyai.service.endpoints.data;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 
 import org.jboss.resteasy.reactive.RestResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +16,7 @@ import org.kie.trustyai.service.profiles.flatfile.MemoryTestProfile;
 import org.kie.trustyai.service.utils.KserveRestPayloads;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
@@ -305,5 +309,115 @@ class UploadEndpointTest {
                 "1 | Class=Long != Class=Float",
                 "inputs are not identical",
                 "Class=Long, Value=9 != Class=Float, Value=9.0"));
+    }
+
+    @Test
+    void uploadGaussianData() {
+        String payload = """
+                {
+                  "model_name": "gaussian-credit-model",
+                  "data_tag": "TRAINING",
+                  "request": {
+                    "inputs": [
+                      {
+                        "name": "credit_inputs",
+                        "shape": [2, 4],
+                        "datatype": "FP64",
+                        "data": [
+                          [
+                            47.45380690750797,
+                            478.6846214843319,
+                            13.462184703540503,
+                            20.764525303373535
+                          ],
+                          [
+                            47.468246185717554,
+                            575.6911203538863,
+                            10.844143722475575,
+                            14.81343667761101
+                          ]
+                        ]
+                      }
+                    ]
+                  },
+                  "response": {
+                    "model_name": "gaussian-credit-model__isvc-d79a7d395d",
+                    "model_version": "1",
+                    "outputs": [
+                      {
+                        "name": "predict",
+                        "datatype": "FP32",
+                        "shape": [2, 1],
+                        "data": [
+                          0.19013395683309373,
+                          0.2754730253205645
+                        ]
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/upload")
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(containsString("2 datapoints"));
+
+    }
+
+    @Test
+    void uploadGzipCompressedData() throws Exception {
+        // Test that gzip-compressed payloads are handled correctly
+        // This simulates KServe agent behavior in RawDeployment mode
+        ModelInferJointPayload payload = KserveRestPayloads.generatePayload(5, 2, 1, "INT64", "COMPRESSED_TEST");
+
+        // Serialize payload to JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        byte[] jsonBytes = objectMapper.writeValueAsBytes(payload);
+
+        // Compress with gzip
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzipStream = new GZIPOutputStream(byteStream)) {
+            gzipStream.write(jsonBytes);
+        }
+        byte[] gzipBytes = byteStream.toByteArray();
+
+        emptyStorage();
+
+        // Send gzip-compressed request
+        given()
+                .contentType(ContentType.JSON)
+                .header("Content-Encoding", "gzip")
+                .body(gzipBytes)
+                .when().post("/upload")
+                .then()
+                .statusCode(RestResponse.StatusCode.OK)
+                .body(containsString("5 datapoints"));
+
+        // Verify data was stored correctly
+        Dataframe df = datasource.get().getDataframe(payload.getModelName());
+        assertEquals(5, df.getRowDimension());
+        assertEquals(3, df.getColumnDimension()); // 2 inputs + 1 output
+
+        emptyStorage();
+    }
+
+    @Test
+    void uploadMalformedGzipCompressedData() {
+        // Test that malformed gzip-compressed payloads return a client error (400)
+        // rather than a server error (500)
+        byte[] invalidGzipPayload = "not-a-valid-gzip-stream".getBytes(StandardCharsets.UTF_8);
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Content-Encoding", "gzip")
+                .body(invalidGzipPayload)
+                .when().post("/upload")
+                .then()
+                .statusCode(RestResponse.StatusCode.BAD_REQUEST)
+                .body(containsString("could not be decompressed"));
     }
 }
