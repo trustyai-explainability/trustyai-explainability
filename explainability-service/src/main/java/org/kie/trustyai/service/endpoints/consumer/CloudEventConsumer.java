@@ -1,6 +1,10 @@
 package org.kie.trustyai.service.endpoints.consumer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.zip.GZIPInputStream;
 
 import org.jboss.logging.Logger;
 import org.kie.trustyai.service.data.reconcilers.KServeInferencePayloadReconciler;
@@ -34,7 +38,7 @@ public class CloudEventConsumer {
         final KServeInputPayload input = new KServeInputPayload();
         input.setId(cloudEvent.id());
         input.setModelId(cloudEvent.extensions().get("Inferenceservicename"));
-        input.setData(new String(cloudEvent.data(), StandardCharsets.UTF_8));
+        input.setData(new String(decompressIfGzip(cloudEvent.data()), StandardCharsets.UTF_8));
         reconciler.addUnreconciledInput(input);
     }
 
@@ -46,7 +50,7 @@ public class CloudEventConsumer {
         final KServeOutputPayload output = new KServeOutputPayload();
         output.setId(cloudEvent.id());
         output.setModelId(cloudEvent.extensions().get("Inferenceservicename"));
-        byte[] original = cloudEvent.data();
+        byte[] original = decompressIfGzip(cloudEvent.data());
         String decoded = new String(original, StandardCharsets.UTF_8);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -54,5 +58,29 @@ public class CloudEventConsumer {
         InferenceLoggerOutput data = objectMapper.readValue(decoded, InferenceLoggerOutput.class);
         output.setData(data);
         reconciler.addUnreconciledOutput(output);
+    }
+
+    static final int MAX_DECOMPRESSED_SIZE = 100 * 1024 * 1024; // 100 MB
+
+    static byte[] decompressIfGzip(byte[] data) {
+        if (data.length < 2 || (data[0] & 0xFF) != 0x1F || (data[1] & 0xFF) != 0x8B) {
+            return data;
+        }
+        try (GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(data));
+                ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = gis.read(buffer)) != -1) {
+                bos.write(buffer, 0, len);
+                if (bos.size() > MAX_DECOMPRESSED_SIZE) {
+                    throw new IOException("Decompressed payload exceeds " + MAX_DECOMPRESSED_SIZE + " bytes");
+                }
+            }
+            LOG.debug("Decompressed gzip CloudEvent payload");
+            return bos.toByteArray();
+        } catch (IOException e) {
+            LOG.warn("CloudEvent payload starts with gzip magic bytes but failed to decompress, using raw bytes", e);
+            return data;
+        }
     }
 }
