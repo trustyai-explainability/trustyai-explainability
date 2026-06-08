@@ -63,8 +63,8 @@ public class CloudEventConsumer {
     static final int MAX_DECOMPRESSED_SIZE = 100 * 1024 * 1024; // 100 MB
 
     static byte[] decompressIfGzip(byte[] data) {
-        if (data.length < 2 || (data[0] & 0xFF) != 0x1F || (data[1] & 0xFF) != 0x8B) {
-            return data;
+        if (data == null || data.length < 2 || (data[0] & 0xFF) != 0x1F || (data[1] & 0xFF) != 0x8B) {
+            return data != null ? data : new byte[0];
         }
         try (GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(data));
                 ByteArrayOutputStream bos = new ByteArrayOutputStream()) {

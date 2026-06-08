@@ -407,7 +407,10 @@ class UploadEndpointTest {
 
     @Test
     void uploadMalformedGzipCompressedData() {
-        // Vert.x rejects malformed gzip at the transport layer by closing the connection
+        // Vert.x rejects malformed gzip at the transport layer by closing the connection.
+        // We assert the specific NoHttpResponseException to verify this transport-level
+        // behavior (not an HTTP 400 from application code). If the test fails due to
+        // client changes, the test expectation should be updated to match the new behavior.
         byte[] invalidGzipPayload = "not-a-valid-gzip-stream".getBytes(StandardCharsets.UTF_8);
 
         org.junit.jupiter.api.Assertions.assertThrows(org.apache.http.NoHttpResponseException.class, () -> {
