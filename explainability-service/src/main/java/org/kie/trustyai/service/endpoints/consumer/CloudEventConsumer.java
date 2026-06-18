@@ -35,10 +35,17 @@ public class CloudEventConsumer {
     @CloudEventMapping(trigger = "org.kubeflow.serving.inference.request")
     public void consumeKubeflowRequest(CloudEvent<byte[]> cloudEvent) {
         LOG.debug("Received Kubeflow request with id = " + cloudEvent.id());
+        byte[] data;
+        try {
+            data = cloudEvent.data();
+        } catch (NullPointerException e) {
+            LOG.warn("CloudEvent request has no data payload, skipping id=" + cloudEvent.id());
+            return;
+        }
         final KServeInputPayload input = new KServeInputPayload();
         input.setId(cloudEvent.id());
         input.setModelId(cloudEvent.extensions().get("Inferenceservicename"));
-        input.setData(new String(decompressIfGzip(cloudEvent.data()), StandardCharsets.UTF_8));
+        input.setData(new String(decompressIfGzip(data), StandardCharsets.UTF_8));
         reconciler.addUnreconciledInput(input);
     }
 
@@ -46,17 +53,24 @@ public class CloudEventConsumer {
     @CloudEventMapping(trigger = "org.kubeflow.serving.inference.response")
     public void consumeKubeflowResponse(CloudEvent<byte[]> cloudEvent) throws JsonProcessingException {
         LOG.debug("Received Kubeflow response with id = " + cloudEvent.id());
+        byte[] data;
+        try {
+            data = cloudEvent.data();
+        } catch (NullPointerException e) {
+            LOG.warn("CloudEvent response has no data payload, skipping id=" + cloudEvent.id());
+            return;
+        }
 
         final KServeOutputPayload output = new KServeOutputPayload();
         output.setId(cloudEvent.id());
         output.setModelId(cloudEvent.extensions().get("Inferenceservicename"));
-        byte[] original = decompressIfGzip(cloudEvent.data());
+        byte[] original = decompressIfGzip(data);
         String decoded = new String(original, StandardCharsets.UTF_8);
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        InferenceLoggerOutput data = objectMapper.readValue(decoded, InferenceLoggerOutput.class);
-        output.setData(data);
+        InferenceLoggerOutput loggerOutput = objectMapper.readValue(decoded, InferenceLoggerOutput.class);
+        output.setData(loggerOutput);
         reconciler.addUnreconciledOutput(output);
     }
 
