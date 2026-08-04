@@ -1,0 +1,6 @@
+# Only the Java service components are part of the final container image, so tests and demos should not be
+# part of any generated SBOM from Syft.
+exclude:
+  - ./.github
+  - ./explainability-service/demo/**
+  - ./tests/**
