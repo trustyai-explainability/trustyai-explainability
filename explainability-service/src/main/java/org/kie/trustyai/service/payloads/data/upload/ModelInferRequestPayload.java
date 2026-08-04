@@ -1,8 +1,8 @@
 package org.kie.trustyai.service.payloads.data.upload;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Arrays;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ModelInferRequestPayload extends ModelInferBasePayload {
     @JsonProperty("inputs")
