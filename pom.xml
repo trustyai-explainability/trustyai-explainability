@@ -50,7 +50,7 @@
         <version.org.assertj>3.22.0</version.org.assertj>
         <version.org.awaitility>4.2.0</version.org.awaitility>
 
-        <version.org.optaplanner>8.30.0.Final</version.org.optaplanner>
+        <version.ai.timefold.solver>1.26.1</version.ai.timefold.solver>
         <version.org.kie.kogito>1.30.0.Final</version.org.kie.kogito>
 
         <version.surefire.plugin>3.2.5</version.surefire.plugin> <!-- minimum required by JUnit 5 -->
@@ -72,9 +72,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.optaplanner</groupId>
-                <artifactId>optaplanner-bom</artifactId>
-                <version>${version.org.optaplanner}</version>
+                <groupId>ai.timefold.solver</groupId>
+                <artifactId>timefold-solver-bom</artifactId>
+                <version>${version.ai.timefold.solver}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

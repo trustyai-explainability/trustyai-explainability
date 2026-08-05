@@ -32,13 +32,14 @@ import org.kie.trustyai.explainability.local.counterfactual.entities.TimeEntity;
 import org.kie.trustyai.explainability.local.counterfactual.entities.URIEntity;
 import org.kie.trustyai.explainability.local.counterfactual.score.CounterfactualScoreCalculator;
 import org.kie.trustyai.explainability.local.counterfactual.score.DefaultCounterfactualScoreCalculator;
-import org.optaplanner.core.config.localsearch.LocalSearchPhaseConfig;
-import org.optaplanner.core.config.localsearch.decider.acceptor.LocalSearchAcceptorConfig;
-import org.optaplanner.core.config.localsearch.decider.forager.LocalSearchForagerConfig;
-import org.optaplanner.core.config.phase.PhaseConfig;
-import org.optaplanner.core.config.score.director.ScoreDirectorFactoryConfig;
-import org.optaplanner.core.config.solver.SolverConfig;
-import org.optaplanner.core.config.solver.termination.TerminationConfig;
+
+import ai.timefold.solver.core.config.localsearch.LocalSearchPhaseConfig;
+import ai.timefold.solver.core.config.localsearch.decider.acceptor.LocalSearchAcceptorConfig;
+import ai.timefold.solver.core.config.localsearch.decider.forager.LocalSearchForagerConfig;
+import ai.timefold.solver.core.config.phase.PhaseConfig;
+import ai.timefold.solver.core.config.score.director.ScoreDirectorFactoryConfig;
+import ai.timefold.solver.core.config.solver.SolverConfig;
+import ai.timefold.solver.core.config.solver.termination.TerminationConfig;
 
 public class SolverConfigBuilder {
 
