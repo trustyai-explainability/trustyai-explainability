@@ -18,7 +18,7 @@ ARG CI_CONTAINER_VERSION="unknown"
 
 
 ## Livebuilder CODE BEGIN ##
-FROM registry.access.redhat.com/ubi8/openjdk-17:latest AS build
+FROM registry.access.redhat.com/ubi8/openjdk-17@sha256:77bd2fd2106febf50963030c1f24d54ef8dc0133b99765ed50e006e01e17b863 AS build
 
 ## Build args to be used at this step
 ARG SOURCE_CODE
@@ -44,7 +44,7 @@ RUN mvn -B clean package --file pom.xml -P service-minimal -DskipTests -Dquarkus
 
 
 ###############################################################################
-FROM registry.access.redhat.com/ubi8/openjdk-17-runtime:latest AS runtime
+FROM registry.access.redhat.com/ubi8/openjdk-17-runtime@sha256:11a3bed44171c78ee00bb0c9e85ef086f5be14698c6fbfb4feaccb9d201b31a9 AS runtime
 ENV LANGUAGE='en_US:en'
 
 ## Livebuilder CODE BEGIN ##
