@@ -18,7 +18,7 @@
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
         <quarkus.platform.bom-group-id>io.quarkus</quarkus.platform.bom-group-id>
-        <quarkus.platform.version>3.8.5</quarkus.platform.version>
+        <quarkus.platform.version>3.20.6.2</quarkus.platform.version>
         <apache.commons.collections.version>4.4</apache.commons.collections.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.2.5</surefire-plugin.version>
@@ -117,6 +117,42 @@
                 <artifactId>netty-codec-haproxy</artifactId>
                 <version>4.1.125.Final</version>
             </dependency>
+            <!-- Override Vert.x to 4.5.32 for fixed request path and redirect handling. -->
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-core</artifactId>
+                <version>4.5.32</version>
+            </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-web</artifactId>
+                <version>4.5.32</version>
+            </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-web-common</artifactId>
+                <version>4.5.32</version>
+            </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-auth-common</artifactId>
+                <version>4.5.32</version>
+            </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-bridge-common</artifactId>
+                <version>4.5.32</version>
+            </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-uri-template</artifactId>
+                <version>4.5.32</version>
+            </dependency>
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-codegen</artifactId>
+                <version>4.5.32</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
   <dependencies>
@@ -126,7 +162,7 @@
     </dependency>
     <dependency>
       <groupId>${quarkus.platform.group-id}</groupId>
-      <artifactId>quarkus-resteasy-reactive</artifactId>
+      <artifactId>quarkus-rest</artifactId>
     </dependency>
     <dependency>
       <groupId>org.kie.trustyai</groupId>
@@ -141,7 +177,7 @@
     <dependency>
       <groupId>io.quarkiverse.minio</groupId>
       <artifactId>quarkus-minio</artifactId>
-      <version>3.3.1</version>
+      <version>3.8.6</version>
     </dependency>
     <dependency>
       <groupId>${quarkus.platform.group-id}</groupId>
@@ -185,7 +221,7 @@
     </dependency>
     <dependency>
       <groupId>${quarkus.platform.group-id}</groupId>
-      <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
+      <artifactId>quarkus-rest-jackson</artifactId>
     </dependency>
     <dependency>
       <groupId>${quarkus.platform.group-id}</groupId>
