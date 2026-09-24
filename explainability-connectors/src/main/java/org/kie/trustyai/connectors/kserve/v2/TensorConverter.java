@@ -1,7 +1,6 @@
 package org.kie.trustyai.connectors.kserve.v2;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -122,7 +121,7 @@ public class TensorConverter {
                 }).collect(Collectors.toCollection(ArrayList::new));
 
                 return new ArrayList<>(List.of(new PredictionInput(features)));
-            } else if (shape.size() > 2 && !raw){
+            } else if (shape.size() > 2 && !raw) {
                 List<PredictionInput> predictionInputs = new ArrayList<>();
                 for (int batch = 0; batch < data.getInputsCount(); batch++) {
                     List<Feature> fs = new ArrayList<>();
@@ -266,7 +265,6 @@ public class TensorConverter {
                 boolean secondDimMatch = perTensorSecondShape.stream().allMatch(i -> i == enforcedFirstDimension);
                 boolean firstDimMatch = perTensorShapes.stream().allMatch(i -> i.get(0) == enforcedFirstDimension);
 
-
                 if (enforcedFirstDimension == 1) {
                     final List<Output> outputs = IntStream.range(0, tensors.size())
                             .mapToObj(tensorIDX -> {
@@ -326,7 +324,8 @@ public class TensorConverter {
                     }
                     return predictionOutputs;
                 } else {
-                    throw new IllegalArgumentException("Tensor shapes=" + perTensorShapes + " were expected to match the input count=" + enforcedFirstDimension + " along either the first or second dimension, but does not.");
+                    throw new IllegalArgumentException(
+                            "Tensor shapes=" + perTensorShapes + " were expected to match the input count=" + enforcedFirstDimension + " along either the first or second dimension, but does not.");
                 }
             } else {
                 //tensor case
