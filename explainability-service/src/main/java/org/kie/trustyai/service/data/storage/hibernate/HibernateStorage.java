@@ -618,7 +618,7 @@ public class HibernateStorage extends Storage<Dataframe, StorageMetadata> {
         return em.createQuery("" +
                 "select 1 from DataframeMetadata dm" +
                 " where dm.id = ?1" +
-                " order by dm.id limit 1", Integer.class)
+                " order by dm.id limit 1", Boolean.class)
                 .setParameter(1, modelId)
                 .getResultList().size() > 0;
     }
