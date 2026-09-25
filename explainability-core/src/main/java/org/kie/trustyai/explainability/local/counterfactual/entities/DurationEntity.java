@@ -20,15 +20,16 @@ import java.time.Duration;
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.FeatureDistribution;
 import org.kie.trustyai.explainability.model.FeatureFactory;
-import org.optaplanner.core.api.domain.entity.PlanningEntity;
-import org.optaplanner.core.api.domain.entity.PlanningPin;
-import org.optaplanner.core.api.domain.valuerange.ValueRange;
-import org.optaplanner.core.api.domain.valuerange.ValueRangeFactory;
-import org.optaplanner.core.api.domain.valuerange.ValueRangeProvider;
-import org.optaplanner.core.api.domain.variable.PlanningVariable;
+
+import ai.timefold.solver.core.api.domain.entity.PlanningEntity;
+import ai.timefold.solver.core.api.domain.entity.PlanningPin;
+import ai.timefold.solver.core.api.domain.valuerange.ValueRange;
+import ai.timefold.solver.core.api.domain.valuerange.ValueRangeFactory;
+import ai.timefold.solver.core.api.domain.valuerange.ValueRangeProvider;
+import ai.timefold.solver.core.api.domain.variable.PlanningVariable;
 
 /**
- * Mapping between a Duration feature an OptaPlanner {@link PlanningEntity}
+ * Mapping between a Duration feature an Timefold Solver {@link PlanningEntity}
  */
 @PlanningEntity
 public class DurationEntity extends AbstractAlgebraicEntity<Duration> {

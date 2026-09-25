@@ -20,7 +20,8 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LassoLarsICTest {
     // check equivalent output as https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LassoLarsIC.html

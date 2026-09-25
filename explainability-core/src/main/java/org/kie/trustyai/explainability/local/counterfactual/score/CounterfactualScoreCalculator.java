@@ -17,8 +17,9 @@
 package org.kie.trustyai.explainability.local.counterfactual.score;
 
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualSolution;
-import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
-import org.optaplanner.core.api.score.calculator.EasyScoreCalculator;
+
+import ai.timefold.solver.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
+import ai.timefold.solver.core.api.score.calculator.EasyScoreCalculator;
 
 public interface CounterfactualScoreCalculator extends EasyScoreCalculator<CounterfactualSolution, BendableBigDecimalScore> {
 }

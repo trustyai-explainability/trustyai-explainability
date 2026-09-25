@@ -18,8 +18,9 @@ package org.kie.trustyai.explainability.local.counterfactual.score;
 import java.math.BigDecimal;
 
 import org.kie.trustyai.explainability.local.counterfactual.CounterfactualSolution;
-import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
-import org.optaplanner.core.api.score.calculator.EasyScoreCalculator;
+
+import ai.timefold.solver.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
+import ai.timefold.solver.core.api.score.calculator.EasyScoreCalculator;
 
 /**
  * Mock score calculation class which guarantees an increasing soft score with each call
