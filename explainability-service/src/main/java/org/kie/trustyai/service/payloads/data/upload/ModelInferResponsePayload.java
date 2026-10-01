@@ -14,6 +14,8 @@ public class ModelInferResponsePayload extends ModelInferBasePayload {
 
     private String id;
     private Map<String, Object> parameters;
+
+    @JsonProperty("outputs")
     private TensorPayload[] outputs;
 
     public String getModelName() {

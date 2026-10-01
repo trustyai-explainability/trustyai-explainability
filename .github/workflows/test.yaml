@@ -1,16 +1,14 @@
-name: TrustyAI Explainability - Build
+name: Tier 1 - Unit tests
 on: [ push, pull_request ]
 jobs:
-  build:
-    # Only run on the main repository, not on forks
-    if: github.repository == 'trustyai-explainability/trustyai-explainability'
+  unit-tests:
     env:
       MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
       MAVEN_ARGS: "-nsu -fae -e"
     concurrency:
-      group: build-${{ github.event_name }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.java-version }}-${{ matrix.maven-version }}
+      group: tests-${{ github.event_name }}-${{ github.head_ref }}-${{ matrix.os }}-${{ matrix.java-version }}-${{ matrix.maven-version }}
       cancel-in-progress: true
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       matrix:
         # configure with [ 'ubuntu-latest', 'windows-latest' ] to enable Windows builds
@@ -25,7 +23,7 @@ jobs:
       run:
         shell: ${{ matrix.shell }} {0}
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }} - Java ${{ matrix.java-version }} - Maven ${{ matrix.maven-version }} - Build
+    name: ${{ matrix.os }} - Java ${{ matrix.java-version }} - Maven ${{ matrix.maven-version }} - Unit Tests
     steps:
       - name: Disk space report before modification
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -54,9 +52,23 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           maven-version: ${{ matrix.maven-version }}
-      - name: Run mvn package
-        run: mvn package -Dmaven.test.skip=true -Dformatter.skip=true
-      - name: Validate Formatting
-        # execute formatting validation only on Ubuntu to avoid issues with CR LF
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: mvn net.revelc.code.formatter:formatter-maven-plugin:validate
+      - name: Build project for testing
+        run: mvn compile test-compile -Dformatter.skip=true
+      - name: Run Test Suite
+        run: mvn test
+      - name: Generate Test Report
+        if: ${{ always() }}
+        uses: scacap/action-surefire-report@v1.0.10
+        with:
+          skip_publishing: false
+          check_name: Test Results - Java ${{ matrix.java-version }} Maven ${{ matrix.maven-version }}
+          fail_on_test_failures: true
+          fail_if_no_tests: false
+      - name: Upload Test Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-results-${{ matrix.os }}-java${{ matrix.java-version }}-maven${{ matrix.maven-version }}
+          path: |
+            **/target/surefire-reports/*.xml
+            **/target/failsafe-reports/*.xml

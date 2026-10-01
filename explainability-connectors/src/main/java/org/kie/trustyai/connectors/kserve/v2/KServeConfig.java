@@ -17,6 +17,7 @@ public class KServeConfig {
 
     /**
      * Create a configuration class for a remote Open Inference model server
+     * 
      * @param target The model's URI, typically a DNS name and port
      * @param modelId The model's ID
      * @param version The model version
