@@ -15,11 +15,13 @@
  */
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import org.kie.trustyai.explainability.model.Feature;
-import org.optaplanner.core.api.domain.valuerange.ValueRange;
-import org.optaplanner.core.impl.domain.valuerange.buildin.composite.EmptyValueRange;
+
+import ai.timefold.solver.core.api.domain.valuerange.ValueRange;
+import ai.timefold.solver.core.impl.domain.valuerange.buildin.collection.ListValueRange;
 
 /**
  * Common class for counterfactual entities
@@ -71,7 +73,7 @@ public abstract class AbstractEntity<T> implements CounterfactualEntity {
 
     @Override
     public ValueRange getValueRange() {
-        return new EmptyValueRange<>();
+        return new ListValueRange<>(Collections.emptyList());
     }
 
     @Override

@@ -16,7 +16,8 @@
 package org.kie.trustyai.explainability.local.counterfactual.entities;
 
 import org.kie.trustyai.explainability.model.Feature;
-import org.optaplanner.core.api.domain.valuerange.ValueRange;
+
+import ai.timefold.solver.core.api.domain.valuerange.ValueRange;
 
 public interface CounterfactualEntity {
     public double distance();

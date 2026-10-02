@@ -39,15 +39,16 @@ import org.kie.trustyai.explainability.model.PredictionInput;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
 import org.kie.trustyai.explainability.utils.CompositeFeatureUtils;
-import org.optaplanner.core.api.solver.SolverJob;
-import org.optaplanner.core.api.solver.SolverManager;
-import org.optaplanner.core.config.solver.SolverConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.timefold.solver.core.api.solver.SolverJob;
+import ai.timefold.solver.core.api.solver.SolverManager;
+import ai.timefold.solver.core.config.solver.SolverConfig;
+
 /**
  * Provides exemplar (counterfactual) explanations for a predictive model.
- * This implementation uses the Constraint Solution Problem solver OptaPlanner to search for
+ * This implementation uses the Constraint Solution Problem solver Timefold Solver to search for
  * counterfactuals which minimize a score calculated by {@link DefaultCounterfactualScoreCalculator}.
  */
 public class CounterfactualExplainer implements LocalExplainer<CounterfactualResult> {
@@ -64,9 +65,9 @@ public class CounterfactualExplainer implements LocalExplainer<CounterfactualRes
     }
 
     /**
-     * Create a new {@link CounterfactualExplainer} using OptaPlanner as the underlying engine.
+     * Create a new {@link CounterfactualExplainer} using Timefold Solver as the underlying engine.
      * The data distribution information (if available) will be used to scale the features during the search.
-     * A customizable OptaPlanner solver configuration can be passed using a {@link SolverConfig}.
+     * A customizable Timefold Solver solver configuration can be passed using a {@link SolverConfig}.
      * An specific {@link Executor} can also be provided.
      * The score calculation (as performed by {@link DefaultCounterfactualScoreCalculator}) will use the goal threshold
      * to if a proposed solution is close enough to the goal to be considered a match. This will only apply
@@ -84,12 +85,12 @@ public class CounterfactualExplainer implements LocalExplainer<CounterfactualRes
     }
 
     /**
-     * Wrap the provided {@link Consumer<CounterfactualResult>} in a OptaPlanner-accepted
+     * Wrap the provided {@link Consumer<CounterfactualResult>} in a Timefold Solver-accepted
      * {@link Consumer<CounterfactualSolution>}.
      * The consumer is only called when the provided {@link CounterfactualSolution} is valid.
      *
      * @param consumer {@link Consumer<CounterfactualResult>} provided to the explainer for intermediate results
-     * @return {@link Consumer<CounterfactualSolution>} as accepted by OptaPlanner
+     * @return {@link Consumer<CounterfactualSolution>} as accepted by Timefold Solver
      */
     private Consumer<CounterfactualSolution> createSolutionConsumer(Consumer<CounterfactualResult> consumer,
             AtomicLong sequenceId) {
@@ -145,10 +146,10 @@ public class CounterfactualExplainer implements LocalExplainer<CounterfactualRes
                     .apply(solverConfig)) {
 
                 SolverJob<CounterfactualSolution, UUID> solverJob =
-                        solverManager.solveAndListen(executionId, initial,
-                                assignSolutionId.andThen(createSolutionConsumer(intermediateResultsConsumer,
-                                        sequenceId)),
-                                null);
+                        solverManager.solveBuilder().withProblemId(executionId).withProblemFinder(initial)
+                                .withBestSolutionConsumer(assignSolutionId.andThen(createSolutionConsumer(intermediateResultsConsumer,
+                                        sequenceId)))
+                                .run();
                 try {
                     // Wait until the solving ends
                     return solverJob.getFinalBestSolution();
