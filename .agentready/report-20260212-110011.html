@@ -1,0 +1,3064 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline';">
+    <title>AgentReady Assessment - trustyai-explainability</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Default theme colors - will be overridden by active theme */
+            
+            --background: #0a0e27;
+            
+            --surface: #1a1f3a;
+            
+            --surface-elevated: #252b4a;
+            
+            --primary: #8b5cf6;
+            
+            --primary-light: #a78bfa;
+            
+            --primary-dark: #6d28d9;
+            
+            --text-primary: #f8fafc;
+            
+            --text-secondary: #cbd5e1;
+            
+            --text-muted: #94a3b8;
+            
+            --success: #10b981;
+            
+            --warning: #f59e0b;
+            
+            --danger: #ef4444;
+            
+            --neutral: #64748b;
+            
+            --border: #334155;
+            
+            --shadow: rgba(0, 0, 0, 0.5);
+            
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            font-size: 18px;                 /* Increased from 16px */
+            color: var(--text-primary);
+            background: var(--background);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px var(--shadow);
+        }
+
+        /* Header */
+        header {
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 36px;                 /* Increased from 32px (2rem) */
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .report-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .repo-info h2 {
+            font-size: 30px;                 /* Increased from 24px (1.5rem) */
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .repo-info .info-line {
+            color: var(--text-secondary);
+            font-size: 18px;                 /* Increased from 15px (0.95rem) */
+            margin: 6px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .repo-info .info-line code {
+            background: var(--surface-elevated);
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: var(--text-primary);
+        }
+
+        .meta-info {
+            text-align: right;
+            color: var(--text-muted);
+            font-size: 17px;                 /* Increased from 14px (0.9rem) */
+        }
+
+        .meta-info .info-line {
+            margin: 6px 0;
+        }
+
+        .meta-info strong {
+            color: var(--text-secondary);
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .summary-card {
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid var(--border);
+        }
+
+        .summary-card.score {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--surface-elevated) 0%, var(--primary-dark) 100%);
+        }
+
+        .summary-card.certification {
+            border-color: var(--primary-light);
+        }
+
+        .summary-card.assessed {
+            border-color: var(--success);
+        }
+
+        .summary-card.duration {
+            border-color: var(--neutral);
+        }
+
+        .summary-card h3 {
+            font-size: 18px;             /* Increased from 14px (0.9rem) */
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+        }
+
+        .summary-card .value {
+            font-size: 56px;             /* Increased from 32px (2rem) */
+            font-weight: 700;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--surface-elevated);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 17px;                 /* Increased from 14px (0.9rem) */
+        }
+
+        select, input[type="search"] {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 17px;                 /* Increased from 14px (0.9rem) */
+            background: var(--surface);
+            color: var(--text-primary);
+        }
+
+        input[type="search"] {
+            min-width: 250px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 17px;                 /* Increased from 14px (0.9rem) */
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+            background: var(--surface-elevated);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: var(--text-primary);
+            border-color: var(--primary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 15px;                 /* Increased from 12px (0.75rem) */
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        /* Certification Ladder */
+        .cert-ladder {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--surface-elevated);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .cert-level {
+            flex: 1;
+            text-align: center;
+            padding: 15px 10px;
+            border-radius: 6px;
+            margin: 0 5px;
+            transition: all 0.3s;
+            background: var(--surface);
+            border: 2px solid var(--border);
+        }
+
+        .cert-level.platinum { border-color: var(--primary-light); }
+        .cert-level.gold { border-color: var(--warning); }
+        .cert-level.silver { border-color: var(--neutral); }
+        .cert-level.bronze { border-color: #92400e; }
+        .cert-level.needs-improvement { border-color: var(--danger); }
+
+        .cert-level.active {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 3px solid var(--primary);
+            background: var(--surface-elevated);
+        }
+
+        .cert-level h4 {
+            font-size: 17px;                 /* Increased from 14px (0.9rem) */
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .cert-level .range {
+            font-size: 15px;                 /* Increased from 13px (0.8rem) */
+            opacity: 0.7;
+            color: var(--text-muted);
+        }
+
+        /* Findings */
+        .findings {
+            margin: 30px 0;
+        }
+
+        .finding {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: all 0.2s;
+            background: var(--surface);
+        }
+
+        .finding:hover {
+            box-shadow: 0 4px 12px var(--shadow);
+            border-color: var(--primary);
+        }
+
+        .finding-header {
+            padding: 15px 20px;
+            background: var(--surface-elevated);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .finding-header:hover {
+            background: var(--surface);
+        }
+
+        .finding-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .status-icon {
+            font-size: 26px;                 /* Increased from 24px (1.5rem) */
+        }
+
+        .finding-info h3 {
+            font-size: 22px;                 /* Increased from 16px (1rem) */
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+
+        .finding-meta {
+            font-size: 17px;                 /* Increased from 14px (0.85rem) */
+            color: var(--text-muted);
+        }
+
+        .tier-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 15px;                 /* Increased from 12px (0.75rem) */
+            font-weight: 600;
+        }
+
+        .tier-1 { background: #7f1d1d; color: #fca5a5; }
+        .tier-2 { background: #78350f; color: #fdba74; }
+        .tier-3 { background: #713f12; color: #fde68a; }
+        .tier-4 { background: #064e3b; color: #6ee7b7; }
+
+        .score-display {
+            font-size: 26px;                 /* Increased from 24px (1.5rem) */
+            font-weight: 700;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .score-pass { color: var(--success); }
+        .score-fail { color: var(--danger); }
+        .score-skip { color: var(--neutral); }
+
+        .finding-body {
+            padding: 20px;
+            display: none;
+            background: var(--surface);
+        }
+
+        .finding.expanded .finding-body {
+            display: block;
+        }
+
+        .finding-section {
+            margin-bottom: 20px;
+        }
+
+        .finding-section h4 {
+            font-size: 17px;                 /* Increased from 14px (0.9rem) */
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .evidence-list, .remediation-steps {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .evidence-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 17px;                 /* Increased from ~16px */
+        }
+
+        .evidence-list li:before {
+            content: "▸ ";
+            color: var(--primary);
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        .remediation-steps li {
+            padding: 10px 0 10px 30px;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 17px;                 /* Increased from ~16px */
+        }
+
+        .remediation-steps li:before {
+            content: counter(step);
+            counter-increment: step;
+            position: absolute;
+            left: 0;
+            top: 10px;
+            background: var(--primary);
+            color: var(--text-primary);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;                 /* Increased from 12px (0.75rem) */
+            font-weight: 700;
+        }
+
+        .remediation-steps {
+            counter-reset: step;
+        }
+
+        code {
+            background: var(--surface-elevated);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;                 /* Increased from ~14px (0.9em) */
+            color: var(--primary-light);
+        }
+
+        pre {
+            background: var(--background);
+            color: var(--text-secondary);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 10px 0;
+            border: 1px solid var(--border);
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 17px;                 /* Increased from 14px (0.9rem) */
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            input[type="search"] {
+                min-width: 100%;
+            }
+
+            .cert-ladder {
+                flex-direction: column;
+            }
+
+            .cert-level {
+                margin: 5px 0;
+            }
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Theme Switcher */
+        .theme-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-switcher label {
+            font-size: 17px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .theme-select {
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            color: var(--text-primary);
+            font-size: 17px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .theme-select:hover {
+            border-color: var(--primary);
+        }
+
+        .theme-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .theme-switcher {
+                position: static;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Switcher -->
+    <div class="theme-switcher">
+        <label for="theme-select">Theme:</label>
+        <select id="theme-select" class="theme-select">
+            
+            <option value="default" selected>
+                Default (Dark Professional)
+            </option>
+            
+            <option value="light" >
+                Light
+            </option>
+            
+            <option value="dark" >
+                Dark
+            </option>
+            
+            <option value="high-contrast" >
+                High Contrast
+            </option>
+            
+            <option value="solarized-dark" >
+                Solarized Dark
+            </option>
+            
+            <option value="dracula" >
+                Dracula
+            </option>
+            
+        </select>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>🤖 AgentReady Assessment Report</h1>
+            <div class="report-header">
+                <div class="repo-info">
+                    <h2>trustyai-explainability</h2>
+                    <div class="info-line">📁 ~/Documents/repos/trusty/trustyai-explainability/trustyai-explainability</div>
+                    <div class="info-line">🌿 <code>main</code> @ <code>9e011426</code></div>
+                </div>
+                
+                <div class="meta-info">
+                    <div class="info-line"><strong>Assessed:</strong> February 12, 2026 at 11:00 AM</div>
+                    <div class="info-line"><strong>AgentReady:</strong> v2.27.0</div>
+                    <div class="info-line"><strong>Run by:</strong> ddahlem@ddahlem-mac</div>
+                </div>
+                
+            </div>
+        </header>
+
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+            <div class="summary-card score">
+                <h3>Overall Score</h3>
+                <div class="value">37.7</div>
+            </div>
+            <div class="summary-card certification">
+                <h3>Certification</h3>
+                <div class="value">Needs Improvement</div>
+            </div>
+            <div class="summary-card assessed">
+                <h3>Assessed</h3>
+                <div class="value">22/25</div>
+            </div>
+            <div class="summary-card duration">
+                <h3>Duration</h3>
+                <div class="value">0.6s</div>
+            </div>
+        </div>
+
+        <!-- Certification Ladder -->
+        <div class="cert-ladder">
+            <div class="cert-level platinum ">
+                <h4>💎 Platinum</h4>
+                <p class="range">90-100</p>
+            </div>
+            <div class="cert-level gold ">
+                <h4>🥇 Gold</h4>
+                <p class="range">75-89</p>
+            </div>
+            <div class="cert-level silver ">
+                <h4>🥈 Silver</h4>
+                <p class="range">60-74</p>
+            </div>
+            <div class="cert-level bronze ">
+                <h4>🥉 Bronze</h4>
+                <p class="range">40-59</p>
+            </div>
+            <div class="cert-level needs-improvement active">
+                <h4>⚠️ Needs Work</h4>
+                <p class="range">0-39</p>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label>Filter:</label>
+                <button class="filter-btn active" data-filter="all">All <span class="badge">25</span></button>
+                <button class="filter-btn" data-filter="pass">Pass <span class="badge">7</span></button>
+                <button class="filter-btn" data-filter="fail">Fail <span class="badge">15</span></button>
+                <button class="filter-btn" data-filter="skipped">Skipped <span class="badge">3</span></button>
+            </div>
+
+            <div class="control-group">
+                <label>Sort:</label>
+                <select id="sort-select">
+                    <option value="category">Category</option>
+                    <option value="score-desc">Score (High to Low)</option>
+                    <option value="score-asc">Score (Low to High)</option>
+                    <option value="tier">Tier (Essential First)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <input type="search" id="search-box" placeholder="Search attributes...">
+            </div>
+        </div>
+
+        <!-- Findings -->
+        <div class="findings" id="findings-container">
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="1"
+                 data-category="Context Window Optimization"
+                 data-score="0"
+                 data-name="claude.md configuration files">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>CLAUDE.md Configuration Files</h3>
+                            <div class="finding-meta">
+                                Context Window Optimization •
+                                <span class="tier-badge tier-1">Tier 1</span>
+                                 • missing
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        0
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>CLAUDE.md not found in repository root</li>
+                            
+                            <li>AGENTS.md not found (alternative)</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Create CLAUDE.md or AGENTS.md with project-specific configuration for AI coding assistants</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Choose one of three approaches:</li>
+                            
+                            <li>  Option 1: Create standalone CLAUDE.md (&gt;50 bytes) with project context</li>
+                            
+                            <li>  Option 2: Create AGENTS.md and symlink CLAUDE.md to it (cross-tool compatibility)</li>
+                            
+                            <li>  Option 3: Create AGENTS.md and reference it with @AGENTS.md in minimal CLAUDE.md</li>
+                            
+                            <li>Add project overview and purpose</li>
+                            
+                            <li>Document key architectural patterns</li>
+                            
+                            <li>Specify coding standards and conventions</li>
+                            
+                            <li>Include build/test/deployment commands</li>
+                            
+                            <li>Add any project-specific context that helps AI assistants</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code># Option 1: Standalone CLAUDE.md
+touch CLAUDE.md
+# Add content describing your project
+
+# Option 2: Symlink CLAUDE.md to AGENTS.md
+touch AGENTS.md
+# Add content to AGENTS.md
+ln -s AGENTS.md CLAUDE.md
+
+# Option 3: @ reference in CLAUDE.md
+echo &#39;@AGENTS.md&#39; &gt; CLAUDE.md
+touch AGENTS.md
+# Add content to AGENTS.md</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># Standalone CLAUDE.md (Option 1)
+
+## Overview
+Brief description of what this project does.
+
+## Architecture
+Key patterns and structure.
+
+## Development
+```bash
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Build
+npm run build
+```
+
+## Coding Standards
+- Use TypeScript strict mode
+- Follow ESLint configuration
+- Write tests for new features
+</code></pre>
+                        
+                        <pre><code># CLAUDE.md with @ reference (Option 3)
+@AGENTS.md
+</code></pre>
+                        
+                        <pre><code># AGENTS.md (shared by multiple tools)
+
+## Project Overview
+This project implements a REST API for user management.
+
+## Architecture
+- Layered architecture: controllers, services, repositories
+- PostgreSQL database with SQLAlchemy ORM
+- FastAPI web framework
+
+## Development Workflow
+```bash
+# Setup
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+
+# Run tests
+pytest
+
+# Start server
+uvicorn app.main:app --reload
+```
+
+## Code Conventions
+- Use type hints for all functions
+- Follow PEP 8 style guide
+- Write docstrings for public APIs
+- Maintain &gt;80% test coverage
+</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="1"
+                 data-category="Documentation Standards"
+                 data-score="33.33333333333333"
+                 data-name="readme structure">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>README Structure</h3>
+                            <div class="finding-meta">
+                                Documentation Standards •
+                                <span class="tier-badge tier-1">Tier 1</span>
+                                 • 1/3 sections
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        33
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>Found 1/3 essential sections</li>
+                            
+                            <li>Installation: ✗</li>
+                            
+                            <li>Usage: ✗</li>
+                            
+                            <li>Development: ✓</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Create or enhance README.md with essential sections</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Add project overview and description</li>
+                            
+                            <li>Include installation/setup instructions</li>
+                            
+                            <li>Document basic usage with examples</li>
+                            
+                            <li>Add development/contributing guidelines</li>
+                            
+                            <li>Include build and test commands</li>
+                            
+                        </ol>
+                        
+
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># Project Name
+
+## Overview
+What this project does and why it exists.
+
+## Installation
+```bash
+pip install -e .
+```
+
+## Usage
+```bash
+myproject --help
+```
+
+## Development
+```bash
+# Run tests
+pytest
+
+# Format code
+black .
+```
+</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="pass"
+                 data-tier="1"
+                 data-category="Code Quality"
+                 data-score="100.0"
+                 data-name="type annotations">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ✅
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Type Annotations</h3>
+                            <div class="finding-meta">
+                                Code Quality •
+                                <span class="tier-badge tier-1">Tier 1</span>
+                                 • 100.0%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-pass">
+                        100
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>Typed functions: 3/3</li>
+                            
+                            <li>Coverage: 100.0%</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="1"
+                 data-category="Repository Structure"
+                 data-score="50.0"
+                 data-name="standard project layouts">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Standard Project Layouts</h3>
+                            <div class="finding-meta">
+                                Repository Structure •
+                                <span class="tier-badge tier-1">Tier 1</span>
+                                 • 1/2 directories
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        50
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>Found 1/2 standard directories</li>
+                            
+                            <li>src/: ✗</li>
+                            
+                            <li>tests/: ✓</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Organize code into standard directories (src/, tests/, docs/)</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Create src/ directory for source code</li>
+                            
+                            <li>Create tests/ directory for test files</li>
+                            
+                            <li>Create docs/ directory for documentation</li>
+                            
+                            <li>Move source code into src/</li>
+                            
+                            <li>Move tests into tests/</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code>mkdir -p src tests docs
+# Move source files to src/
+# Move test files to tests/</code></pre>
+                        
+
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="1"
+                 data-category="Dependency Management"
+                 data-score="0"
+                 data-name="dependency pinning for reproducibility">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Dependency Pinning for Reproducibility</h3>
+                            <div class="finding-meta">
+                                Dependency Management •
+                                <span class="tier-badge tier-1">Tier 1</span>
+                                 • none
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        0
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>No dependency lock files found</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Add lock file for dependency reproducibility</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>For npm: run &#39;npm install&#39; (generates package-lock.json)</li>
+                            
+                            <li>For Python: use &#39;pip freeze &gt; requirements.txt&#39; or poetry</li>
+                            
+                            <li>For Ruby: run &#39;bundle install&#39; (generates Gemfile.lock)</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code>npm install  # npm
+pip freeze &gt; requirements.txt  # Python
+poetry lock  # Python with Poetry</code></pre>
+                        
+
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="pass"
+                 data-tier="1"
+                 data-category="Security"
+                 data-score="35"
+                 data-name="dependency security &amp; vulnerability scanning">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ✅
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Dependency Security &amp; Vulnerability Scanning</h3>
+                            <div class="finding-meta">
+                                Security •
+                                <span class="tier-badge tier-1">Tier 1</span>
+                                 • Security tools configured: Dependabot
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-pass">
+                        35
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>✓ Dependabot configured for dependency alerts</li>
+                            
+                            <li>  1 package ecosystem(s) monitored</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Add more security scanning tools for comprehensive coverage</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Enable Dependabot alerts in GitHub repository settings</li>
+                            
+                            <li>Add CodeQL scanning workflow for SAST</li>
+                            
+                            <li>Configure secret detection (detect-secrets, gitleaks)</li>
+                            
+                            <li>Set up language-specific scanners (pip-audit, npm audit, Snyk)</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code>gh repo edit --enable-security
+pip install detect-secrets  # Python secret detection
+npm audit  # JavaScript dependency audit</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="2"
+                 data-category="Testing &amp; CI/CD"
+                 data-score="0"
+                 data-name="test coverage requirements">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Test Coverage Requirements</h3>
+                            <div class="finding-meta">
+                                Testing &amp; CI/CD •
+                                <span class="tier-badge tier-2">Tier 2</span>
+                                 • not configured
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        0
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>No coverage configuration found</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Configure test coverage with ≥80% threshold</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Install coverage tool (pytest-cov for Python, jest for JavaScript)</li>
+                            
+                            <li>Configure coverage threshold in project config</li>
+                            
+                            <li>Add coverage reporting to CI/CD pipeline</li>
+                            
+                            <li>Run coverage locally before committing</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code># Python
+pip install pytest-cov
+pytest --cov=src --cov-report=term-missing --cov-fail-under=80
+
+# JavaScript
+npm install --save-dev jest
+npm test -- --coverage --coverageThreshold=&#39;{\&#39;global\&#39;: {\&#39;lines\&#39;: 80}}&#39;</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># Python - pyproject.toml
+[tool.pytest.ini_options]
+addopts = &#34;--cov=src --cov-report=term-missing&#34;
+
+[tool.coverage.report]
+fail_under = 80
+</code></pre>
+                        
+                        <pre><code>// JavaScript - package.json
+{
+  &#34;jest&#34;: {
+    &#34;coverageThreshold&#34;: {
+      &#34;global&#34;: {
+        &#34;lines&#34;: 80,
+        &#34;statements&#34;: 80,
+        &#34;functions&#34;: 80,
+        &#34;branches&#34;: 80
+      }
+    }
+  }
+}
+</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="pass"
+                 data-tier="2"
+                 data-category="Testing &amp; CI/CD"
+                 data-score="100.0"
+                 data-name="pre-commit hooks &amp; ci/cd linting">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ✅
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Pre-commit Hooks &amp; CI/CD Linting</h3>
+                            <div class="finding-meta">
+                                Testing &amp; CI/CD •
+                                <span class="tier-badge tier-2">Tier 2</span>
+                                 • configured
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-pass">
+                        100
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>.pre-commit-config.yaml found</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="2"
+                 data-category="Git &amp; Version Control"
+                 data-score="0"
+                 data-name="conventional commit messages">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Conventional Commit Messages</h3>
+                            <div class="finding-meta">
+                                Git &amp; Version Control •
+                                <span class="tier-badge tier-2">Tier 2</span>
+                                 • not configured
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        0
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>No commitlint or husky configuration</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Configure conventional commits with commitlint</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Install commitlint</li>
+                            
+                            <li>Configure husky for commit-msg hook</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code>npm install --save-dev @commitlint/cli @commitlint/config-conventional husky</code></pre>
+                        
+
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="2"
+                 data-category="Git &amp; Version Control"
+                 data-score="23.52941176470588"
+                 data-name=".gitignore completeness">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>.gitignore Completeness</h3>
+                            <div class="finding-meta">
+                                Git &amp; Version Control •
+                                <span class="tier-badge tier-2">Tier 2</span>
+                                 • 4/17 patterns
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        24
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>.gitignore found (433 bytes)</li>
+                            
+                            <li>Pattern coverage: 4/17 (24%)</li>
+                            
+                            <li>Missing 13 recommended patterns</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Add missing language-specific ignore patterns</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Review GitHub&#39;s gitignore templates for your language</li>
+                            
+                            <li>Add the 13 missing patterns</li>
+                            
+                            <li>Ensure editor/IDE patterns are included</li>
+                            
+                        </ol>
+                        
+
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># Missing patterns:
+__pycache__/
+.env
+venv/
+*.swp
+.gradle/</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="2"
+                 data-category="Build &amp; Development"
+                 data-score="0"
+                 data-name="one-command build/setup">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>One-Command Build/Setup</h3>
+                            <div class="finding-meta">
+                                Build &amp; Development •
+                                <span class="tier-badge tier-2">Tier 2</span>
+                                 • multi-step setup
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        0
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>No clear setup command found in README</li>
+                            
+                            <li>No Makefile or setup script found</li>
+                            
+                            <li>Setup instructions not in first 3 sections</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Create single-command setup for development environment</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Choose setup automation tool (Makefile, setup script, or package manager)</li>
+                            
+                            <li>Create setup command that handles all dependencies</li>
+                            
+                            <li>Document setup command prominently in README (Quick Start section)</li>
+                            
+                            <li>Ensure setup is idempotent (safe to run multiple times)</li>
+                            
+                            <li>Test setup on fresh clone to verify it works</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code># Example Makefile
+cat &gt; Makefile &lt;&lt; &#39;EOF&#39;
+.PHONY: setup
+setup:
+	python -m venv venv
+	. venv/bin/activate &amp;&amp; pip install -r requirements.txt
+	pre-commit install
+	cp .env.example .env
+	@echo &#39;Setup complete! Run make test to verify.&#39;
+EOF</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># Quick Start section in README
+
+## Quick Start
+
+```bash
+make setup  # One command to set up development environment
+make test   # Run tests to verify setup
+```
+</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="2"
+                 data-category="Context Window Optimization"
+                 data-score="57.28813559322034"
+                 data-name="file size limits">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>File Size Limits</h3>
+                            <div class="finding-meta">
+                                Context Window Optimization •
+                                <span class="tier-badge tier-2">Tier 2</span>
+                                 • 9 huge, 21 large out of 708
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        57
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>Found 9 files &gt;1000 lines (1.3% of 708 files)</li>
+                            
+                            <li>Largest: explainability-connectors/src/main/java/org/kie/trustyai/connectors/kserve/v2/grpc/InferParameter.java (1039 lines)</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Refactor large files into smaller, focused modules</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Identify files &gt;1000 lines</li>
+                            
+                            <li>Split into logical submodules</li>
+                            
+                            <li>Extract classes/functions into separate files</li>
+                            
+                            <li>Maintain single responsibility principle</li>
+                            
+                        </ol>
+                        
+
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># Split large file:
+# models.py (1500 lines) → models/user.py, models/product.py, models/order.py</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="pass"
+                 data-tier="2"
+                 data-category="Code Organization"
+                 data-score="100.0"
+                 data-name="separation of concerns">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ✅
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Separation of Concerns</h3>
+                            <div class="finding-meta">
+                                Code Organization •
+                                <span class="tier-badge tier-2">Tier 2</span>
+                                 • organization:100, cohesion:100, naming:100
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-pass">
+                        100
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>Good directory organization (feature-based or flat)</li>
+                            
+                            <li>File cohesion: 0/3 files &gt;500 lines</li>
+                            
+                            <li>No catch-all modules (utils.py, helpers.py) detected</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="2"
+                 data-category="Documentation"
+                 data-score="64.0"
+                 data-name="concise documentation">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Concise Documentation</h3>
+                            <div class="finding-meta">
+                                Documentation •
+                                <span class="tier-badge tier-2">Tier 2</span>
+                                 • 35 lines, 6 headings, 8 bullets
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        64
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>README length: 35 lines (excellent)</li>
+                            
+                            <li>Heading density: 17.1 per 100 lines (target: 3-5)</li>
+                            
+                            <li>Only 8 bullet points (prefer bullets over prose)</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Make documentation more concise and structured</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Break long README into multiple documents (docs/ directory)</li>
+                            
+                            <li>Add clear Markdown headings (##, ###) for structure</li>
+                            
+                            <li>Convert prose paragraphs to bullet points where possible</li>
+                            
+                            <li>Add table of contents for documents &gt;100 lines</li>
+                            
+                            <li>Use code blocks instead of describing commands in prose</li>
+                            
+                            <li>Move detailed content to wiki or docs/, keep README focused</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code># Check README length
+wc -l README.md
+
+# Count headings
+grep -c &#39;^#&#39; README.md</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># Good: Concise with structure
+
+## Quick Start
+```bash
+pip install -e .
+agentready assess .
+```
+
+## Features
+- Fast repository scanning
+- HTML and Markdown reports
+- 25 agent-ready attributes
+
+## Documentation
+See [docs/](docs/) for detailed guides.
+</code></pre>
+                        
+                        <pre><code># Bad: Verbose prose
+
+This project is a tool that helps you assess your repository
+against best practices for AI-assisted development. It works by
+scanning your codebase and checking for various attributes that
+make repositories more effective when working with AI coding
+assistants like Claude Code...
+
+[Many more paragraphs of prose...]
+</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="2"
+                 data-category="Documentation"
+                 data-score="0"
+                 data-name="inline documentation">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Inline Documentation</h3>
+                            <div class="finding-meta">
+                                Documentation •
+                                <span class="tier-badge tier-2">Tier 2</span>
+                                 • 0.0%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        0
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>Documented items: 0/6</li>
+                            
+                            <li>Coverage: 0.0%</li>
+                            
+                            <li>Many public functions/classes lack docstrings</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Add docstrings to public functions and classes</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Identify functions/classes without docstrings</li>
+                            
+                            <li>Add PEP 257 compliant docstrings for Python</li>
+                            
+                            <li>Add JSDoc comments for JavaScript/TypeScript</li>
+                            
+                            <li>Include: description, parameters, return values, exceptions</li>
+                            
+                            <li>Add examples for complex functions</li>
+                            
+                            <li>Run pydocstyle to validate docstring format</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code># Install pydocstyle
+pip install pydocstyle
+
+# Check docstring coverage
+pydocstyle src/
+
+# Generate documentation
+pip install sphinx
+sphinx-apidoc -o docs/ src/</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># Python - Good docstring
+def calculate_discount(price: float, discount_percent: float) -&gt; float:
+    &#34;&#34;&#34;Calculate discounted price.
+
+    Args:
+        price: Original price in USD
+        discount_percent: Discount percentage (0-100)
+
+    Returns:
+        Discounted price
+
+    Raises:
+        ValueError: If discount_percent not in 0-100 range
+
+    Example:
+        &gt;&gt;&gt; calculate_discount(100.0, 20.0)
+        80.0
+    &#34;&#34;&#34;
+    if not 0 &lt;= discount_percent &lt;= 100:
+        raise ValueError(&#34;Discount must be 0-100&#34;)
+    return price * (1 - discount_percent / 100)
+</code></pre>
+                        
+                        <pre><code>// JavaScript - Good JSDoc
+/**
+ * Calculate discounted price
+ *
+ * @param {number} price - Original price in USD
+ * @param {number} discountPercent - Discount percentage (0-100)
+ * @returns {number} Discounted price
+ * @throws {Error} If discountPercent not in 0-100 range
+ * @example
+ * calculateDiscount(100.0, 20.0)
+ * // Returns: 80.0
+ */
+function calculateDiscount(price, discountPercent) {
+    if (discountPercent &lt; 0 || discountPercent &gt; 100) {
+        throw new Error(&#34;Discount must be 0-100&#34;);
+    }
+    return price * (1 - discountPercent / 100);
+}
+</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="skipped"
+                 data-tier="3"
+                 data-category="Code Quality"
+                 data-score="0"
+                 data-name="cyclomatic complexity thresholds">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ⊘
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Cyclomatic Complexity Thresholds</h3>
+                            <div class="finding-meta">
+                                Code Quality •
+                                <span class="tier-badge tier-3">Tier 3</span>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-skip">—</div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>Missing tool: radon</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Install with: pip install radon</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Install with: pip install radon</li>
+                            
+                        </ol>
+                        
+
+                        
+
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="3"
+                 data-category="Documentation Standards"
+                 data-score="0"
+                 data-name="architecture decision records (adrs)">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Architecture Decision Records (ADRs)</h3>
+                            <div class="finding-meta">
+                                Documentation Standards •
+                                <span class="tier-badge tier-3">Tier 3</span>
+                                 • no ADR directory
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        0
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>No ADR directory found (checked docs/adr/, .adr/, adr/, docs/decisions/)</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Create Architecture Decision Records (ADRs) directory and document key decisions</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Create docs/adr/ directory in repository root</li>
+                            
+                            <li>Use Michael Nygard ADR template or MADR format</li>
+                            
+                            <li>Document each significant architectural decision</li>
+                            
+                            <li>Number ADRs sequentially (0001-*.md, 0002-*.md)</li>
+                            
+                            <li>Include Status, Context, Decision, and Consequences sections</li>
+                            
+                            <li>Update ADR status when decisions are revised (Superseded, Deprecated)</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code># Create ADR directory
+mkdir -p docs/adr
+
+# Create first ADR using template
+cat &gt; docs/adr/0001-use-architecture-decision-records.md &lt;&lt; &#39;EOF&#39;
+# 1. Use Architecture Decision Records
+
+Date: 2025-11-22
+
+## Status
+Accepted
+
+## Context
+We need to record architectural decisions made in this project.
+
+## Decision
+We will use Architecture Decision Records (ADRs) as described by Michael Nygard.
+
+## Consequences
+- Decisions are documented with context
+- Future contributors understand rationale
+- ADRs are lightweight and version-controlled
+EOF</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># Example ADR Structure
+
+```markdown
+# 2. Use PostgreSQL for Database
+
+Date: 2025-11-22
+
+## Status
+Accepted
+
+## Context
+We need a relational database for complex queries and ACID transactions.
+Team has PostgreSQL experience. Need full-text search capabilities.
+
+## Decision
+Use PostgreSQL 15+ as primary database.
+
+## Consequences
+- Positive: Robust ACID, full-text search, team familiarity
+- Negative: Higher resource usage than SQLite
+- Neutral: Need to manage migrations, backups
+```
+</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="pass"
+                 data-tier="3"
+                 data-category="Repository Structure"
+                 data-score="100"
+                 data-name="issue &amp; pull request templates">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ✅
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Issue &amp; Pull Request Templates</h3>
+                            <div class="finding-meta">
+                                Repository Structure •
+                                <span class="tier-badge tier-3">Tier 3</span>
+                                 • PR:True, Issues:3
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-pass">
+                        100
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>PR template found</li>
+                            
+                            <li>Issue templates found: 3 templates</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="3"
+                 data-category="Testing &amp; CI/CD"
+                 data-score="70"
+                 data-name="ci/cd pipeline visibility">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>CI/CD Pipeline Visibility</h3>
+                            <div class="finding-meta">
+                                Testing &amp; CI/CD •
+                                <span class="tier-badge tier-3">Tier 3</span>
+                                 • basic config
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        70
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>CI config found: .github/workflows/security.yml, .github/workflows/tests.yml, .github/workflows/agentready-assessment.yml, .github/workflows/trivy-scan.yaml, .github/workflows/CI.yaml, .github/workflows/test.yaml</li>
+                            
+                            <li>Descriptive job/step names found</li>
+                            
+                            <li>No caching detected</li>
+                            
+                            <li>Parallel job execution detected</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Add or improve CI/CD pipeline configuration</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Create CI config for your platform (GitHub Actions, GitLab CI, etc.)</li>
+                            
+                            <li>Define jobs: lint, test, build</li>
+                            
+                            <li>Use descriptive job and step names</li>
+                            
+                            <li>Configure dependency caching</li>
+                            
+                            <li>Enable parallel job execution</li>
+                            
+                            <li>Upload artifacts: test results, coverage reports</li>
+                            
+                            <li>Add status badge to README</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code># Create GitHub Actions workflow
+mkdir -p .github/workflows
+touch .github/workflows/ci.yml
+
+# Validate workflow
+gh workflow view ci.yml</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># .github/workflows/ci.yml - Good example
+
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: &#39;3.11&#39;
+          cache: &#39;pip&#39;  # Caching
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run linters
+        run: |
+          black --check .
+          isort --check .
+          ruff check .
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: &#39;3.11&#39;
+          cache: &#39;pip&#39;
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests with coverage
+        run: pytest --cov --cov-report=xml
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    needs: [lint, test]  # Runs after lint/test pass
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build package
+        run: python -m build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
+</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="pass"
+                 data-tier="3"
+                 data-category="Code Quality"
+                 data-score="100.0"
+                 data-name="semantic naming">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ✅
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Semantic Naming</h3>
+                            <div class="finding-meta">
+                                Code Quality •
+                                <span class="tier-badge tier-3">Tier 3</span>
+                                 • functions:100%, classes:100%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-pass">
+                        100
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>Functions: 3/3 follow snake_case (100.0%)</li>
+                            
+                            <li>Classes: 0/0 follow PascalCase (100.0%)</li>
+                            
+                            <li>No generic names (temp, data, obj) detected</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="not_applicable"
+                 data-tier="3"
+                 data-category="Code Quality"
+                 data-score="0"
+                 data-name="structured logging">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ⊘
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Structured Logging</h3>
+                            <div class="finding-meta">
+                                Code Quality •
+                                <span class="tier-badge tier-3">Tier 3</span>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-skip">—</div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>No Python dependency files found</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="3"
+                 data-category="API Documentation"
+                 data-score="0"
+                 data-name="openapi/swagger specifications">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>OpenAPI/Swagger Specifications</h3>
+                            <div class="finding-meta">
+                                API Documentation •
+                                <span class="tier-badge tier-3">Tier 3</span>
+                                 • no OpenAPI spec
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        0
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>No OpenAPI specification found</li>
+                            
+                            <li>Searched recursively for: openapi.yaml, openapi.yml, openapi.json, swagger.yaml, swagger.yml, swagger.json</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Create OpenAPI specification for API endpoints</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Create openapi.yaml in repository root</li>
+                            
+                            <li>Define OpenAPI version 3.x</li>
+                            
+                            <li>Document all API endpoints with full schemas</li>
+                            
+                            <li>Add request/response examples</li>
+                            
+                            <li>Define security schemes (API keys, OAuth, etc.)</li>
+                            
+                            <li>Validate spec with Swagger Editor or Spectral</li>
+                            
+                            <li>Generate API documentation with Swagger UI or ReDoc</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code># Install OpenAPI validator
+npm install -g @stoplight/spectral-cli
+
+# Validate spec
+spectral lint openapi.yaml
+
+# Generate client SDK
+npx @openapitools/openapi-generator-cli generate \
+  -i openapi.yaml \
+  -g python \
+  -o client/</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># openapi.yaml - Minimal example
+openapi: 3.1.0
+info:
+  title: My API
+  version: 1.0.0
+  description: API for managing users
+
+servers:
+  - url: https://api.example.com/v1
+
+paths:
+  /users/{userId}:
+    get:
+      summary: Get user by ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        &#39;200&#39;:
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: &#39;#/components/schemas/User&#39;
+        &#39;404&#39;:
+          description: User not found
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: string
+          example: &#34;user_123&#34;
+        email:
+          type: string
+          format: email
+          example: &#34;user@example.com&#34;
+        name:
+          type: string
+          example: &#34;John Doe&#34;
+</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="not_applicable"
+                 data-tier="4"
+                 data-category="Git &amp; Version Control"
+                 data-score="0"
+                 data-name="branch protection rules">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ⊘
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Branch Protection Rules</h3>
+                            <div class="finding-meta">
+                                Git &amp; Version Control •
+                                <span class="tier-badge tier-4">Tier 4</span>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-skip">—</div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>Requires GitHub API integration for branch protection checks. Future implementation will verify: required status checks, required reviews, force push prevention, and branch update requirements.</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="fail"
+                 data-tier="4"
+                 data-category="Code Quality"
+                 data-score="0"
+                 data-name="code smell elimination">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ❌
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Code Smell Elimination</h3>
+                            <div class="finding-meta">
+                                Code Quality •
+                                <span class="tier-badge tier-4">Tier 4</span>
+                                 • none
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-fail">
+                        0
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>No linters configured</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Configure 4 missing linter(s)</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Configure pylint for Python code smell detection</li>
+                            
+                            <li>Configure ruff for fast Python linting</li>
+                            
+                            <li>Add actionlint for GitHub Actions workflow validation</li>
+                            
+                            <li>Configure markdownlint for documentation quality</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code>pip install pylint &amp;&amp; pylint --generate-rcfile &gt; .pylintrc
+pip install ruff &amp;&amp; ruff init
+npm install --save-dev markdownlint-cli &amp;&amp; touch .markdownlint.json</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># .pylintrc example
+[MASTER]
+max-line-length=100
+
+[MESSAGES CONTROL]
+disable=C0111</code></pre>
+                        
+                        <pre><code># .eslintrc.json example
+{
+  &#34;extends&#34;: &#34;eslint:recommended&#34;,
+  &#34;rules&#34;: {
+    &#34;no-console&#34;: &#34;warn&#34;
+  }
+}</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+            <div class="finding"
+                 data-status="pass"
+                 data-tier="4"
+                 data-category="Build &amp; Development"
+                 data-score="50"
+                 data-name="container/virtualization setup">
+
+                <div class="finding-header" onclick="toggleFinding(this)">
+                    <div class="finding-title">
+                        <span class="status-icon">
+                            ✅
+                            
+                        </span>
+                        <div class="finding-info">
+                            <h3>Container/Virtualization Setup</h3>
+                            <div class="finding-meta">
+                                Build &amp; Development •
+                                <span class="tier-badge tier-4">Tier 4</span>
+                                 • 50 points
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="score-display score-pass">
+                        50
+                    </div>
+                    
+                </div>
+
+                <div class="finding-body">
+                    
+                    <div class="finding-section">
+                        <h4>Evidence</h4>
+                        <ul class="evidence-list">
+                            
+                            <li>✓ Dockerfile present</li>
+                            
+                            <li>✓ Multi-stage build detected (optimized image size)</li>
+                            
+                            <li>ℹ️ No .dockerignore file (consider adding to reduce image size)</li>
+                            
+                        </ul>
+                    </div>
+                    
+
+                    
+                    <div class="finding-section">
+                        <h4>Remediation</h4>
+                        <p><strong>Improve container configuration</strong></p>
+
+                        
+                        <ol class="remediation-steps">
+                            
+                            <li>Add docker-compose.yml for multi-service development</li>
+                            
+                            <li>Create .dockerignore to exclude build artifacts and secrets</li>
+                            
+                            <li>Consider multi-stage builds to reduce image size</li>
+                            
+                        </ol>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Commands</h4>
+                        <pre><code>docker build -t myapp .
+docker-compose up -d</code></pre>
+                        
+
+                        
+                        <h4 style="margin-top: 15px;">Examples</h4>
+                        
+                        <pre><code># .dockerignore example
+.git
+.venv
+__pycache__
+*.pyc
+.env
+node_modules</code></pre>
+                        
+                        <pre><code># Multi-stage Dockerfile example
+FROM node:18 AS builder
+WORKDIR /app
+COPY . .
+RUN npm ci &amp;&amp; npm run build
+
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+CMD [&#34;node&#34;, &#34;dist/index.js&#34;]</code></pre>
+                        
+                        
+                    </div>
+                    
+
+                    
+                </div>
+            </div>
+            
+        </div>
+
+        <footer>
+            
+            <p>Generated by <strong>AgentReady v2.27.0</strong> (Research v1.0.1)</p>
+            <p>Repository: ~/Documents/repos/trusty/trustyai-explainability/trustyai-explainability • Branch: main • Commit: 9e011426</p>
+            <p style="font-size: 0.85rem; color: #666;">Assessed by ddahlem@ddahlem-mac on February 12, 2026 at 11:00 AM</p>
+            
+            <p style="margin-top: 10px; font-size: 0.85rem;">
+                🤖 Generated with <a href="https://claude.com/claude-code" style="color: #2563eb;">Claude Code</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Security: Using Jinja2's tojson filter for proper XSS prevention
+        // tojson creates JavaScript objects directly, no JSON.parse() needed
+        const ASSESSMENT = {"attributes_assessed": 22, "attributes_skipped": 3, "attributes_total": 25, "certification_level": "Needs Improvement", "config": {"custom_theme": null, "excluded_attributes": [], "language_overrides": {}, "output_dir": null, "report_theme": "default", "weights": {}}, "discovered_skills": [], "duration_seconds": 0.6, "findings": [{"attribute": {"category": "Context Window Optimization", "criteria": "CLAUDE.md file exists in repository root", "default_weight": 0.1, "description": "Project-specific configuration for Claude Code", "id": "claude_md_file", "name": "CLAUDE.md Configuration Files", "tier": 1}, "error_message": null, "evidence": ["CLAUDE.md not found in repository root", "AGENTS.md not found (alternative)"], "measured_value": "missing", "remediation": {"citations": [{"relevance": "Official guidance on CLAUDE.md configuration", "source": "Anthropic", "title": "Claude Code Documentation", "url": "https://docs.anthropic.com/claude-code"}, {"relevance": "Emerging standard for cross-tool AI assistant configuration", "source": "agents.md", "title": "AGENTS.md Specification", "url": "https://agents.md/"}], "commands": ["# Option 1: Standalone CLAUDE.md", "touch CLAUDE.md", "# Add content describing your project", "", "# Option 2: Symlink CLAUDE.md to AGENTS.md", "touch AGENTS.md", "# Add content to AGENTS.md", "ln -s AGENTS.md CLAUDE.md", "", "# Option 3: @ reference in CLAUDE.md", "echo \u0027@AGENTS.md\u0027 \u003e CLAUDE.md", "touch AGENTS.md", "# Add content to AGENTS.md"], "examples": ["# Standalone CLAUDE.md (Option 1)\n\n## Overview\nBrief description of what this project does.\n\n## Architecture\nKey patterns and structure.\n\n## Development\n```bash\n# Install dependencies\nnpm install\n\n# Run tests\nnpm test\n\n# Build\nnpm run build\n```\n\n## Coding Standards\n- Use TypeScript strict mode\n- Follow ESLint configuration\n- Write tests for new features\n", "# CLAUDE.md with @ reference (Option 3)\n@AGENTS.md\n", "# AGENTS.md (shared by multiple tools)\n\n## Project Overview\nThis project implements a REST API for user management.\n\n## Architecture\n- Layered architecture: controllers, services, repositories\n- PostgreSQL database with SQLAlchemy ORM\n- FastAPI web framework\n\n## Development Workflow\n```bash\n# Setup\npython -m venv .venv\nsource .venv/bin/activate\npip install -e .\n\n# Run tests\npytest\n\n# Start server\nuvicorn app.main:app --reload\n```\n\n## Code Conventions\n- Use type hints for all functions\n- Follow PEP 8 style guide\n- Write docstrings for public APIs\n- Maintain \u003e80% test coverage\n"], "steps": ["Choose one of three approaches:", "  Option 1: Create standalone CLAUDE.md (\u003e50 bytes) with project context", "  Option 2: Create AGENTS.md and symlink CLAUDE.md to it (cross-tool compatibility)", "  Option 3: Create AGENTS.md and reference it with @AGENTS.md in minimal CLAUDE.md", "Add project overview and purpose", "Document key architectural patterns", "Specify coding standards and conventions", "Include build/test/deployment commands", "Add any project-specific context that helps AI assistants"], "summary": "Create CLAUDE.md or AGENTS.md with project-specific configuration for AI coding assistants", "tools": []}, "score": 0.0, "status": "fail", "threshold": "present"}, {"attribute": {"category": "Documentation Standards", "criteria": "README.md with installation, usage, and development sections", "default_weight": 0.1, "description": "Well-structured README with key sections", "id": "readme_structure", "name": "README Structure", "tier": 1}, "error_message": null, "evidence": ["Found 1/3 essential sections", "Installation: \u2717", "Usage: \u2717", "Development: \u2713"], "measured_value": "1/3 sections", "remediation": {"citations": [{"relevance": "Best practices for README structure", "source": "GitHub", "title": "About READMEs", "url": "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes"}], "commands": [], "examples": ["# Project Name\n\n## Overview\nWhat this project does and why it exists.\n\n## Installation\n```bash\npip install -e .\n```\n\n## Usage\n```bash\nmyproject --help\n```\n\n## Development\n```bash\n# Run tests\npytest\n\n# Format code\nblack .\n```\n"], "steps": ["Add project overview and description", "Include installation/setup instructions", "Document basic usage with examples", "Add development/contributing guidelines", "Include build and test commands"], "summary": "Create or enhance README.md with essential sections", "tools": []}, "score": 33.33333333333333, "status": "fail", "threshold": "3/3 sections"}, {"attribute": {"category": "Code Quality", "criteria": "\u003e80% of functions have type annotations", "default_weight": 0.1, "description": "Type hints in function signatures", "id": "type_annotations", "name": "Type Annotations", "tier": 1}, "error_message": null, "evidence": ["Typed functions: 3/3", "Coverage: 100.0%"], "measured_value": "100.0%", "remediation": null, "score": 100.0, "status": "pass", "threshold": "\u226580%"}, {"attribute": {"category": "Repository Structure", "criteria": "Standard directories (src/, tests/, docs/) present", "default_weight": 0.1, "description": "Follows standard project structure for language", "id": "standard_layout", "name": "Standard Project Layouts", "tier": 1}, "error_message": null, "evidence": ["Found 1/2 standard directories", "src/: \u2717", "tests/: \u2713"], "measured_value": "1/2 directories", "remediation": {"citations": [{"relevance": "Standard Python project layout", "source": "Python Packaging Authority", "title": "Python Project Structure", "url": "https://packaging.python.org/en/latest/tutorials/packaging-projects/"}], "commands": ["mkdir -p src tests docs", "# Move source files to src/", "# Move test files to tests/"], "examples": [], "steps": ["Create src/ directory for source code", "Create tests/ directory for test files", "Create docs/ directory for documentation", "Move source code into src/", "Move tests into tests/"], "summary": "Organize code into standard directories (src/, tests/, docs/)", "tools": []}, "score": 50.0, "status": "fail", "threshold": "2/2 directories"}, {"attribute": {"category": "Dependency Management", "criteria": "Lock file with pinned versions, updated within 6 months", "default_weight": 0.1, "description": "Dependencies pinned to exact versions in lock files", "id": "lock_files", "name": "Dependency Pinning for Reproducibility", "tier": 1}, "error_message": null, "evidence": ["No dependency lock files found"], "measured_value": "none", "remediation": {"citations": [], "commands": ["npm install  # npm", "pip freeze \u003e requirements.txt  # Python", "poetry lock  # Python with Poetry"], "examples": [], "steps": ["For npm: run \u0027npm install\u0027 (generates package-lock.json)", "For Python: use \u0027pip freeze \u003e requirements.txt\u0027 or poetry", "For Ruby: run \u0027bundle install\u0027 (generates Gemfile.lock)"], "summary": "Add lock file for dependency reproducibility", "tools": ["npm", "pip", "poetry", "bundler"]}, "score": 0.0, "status": "fail", "threshold": "lock file with pinned versions"}, {"attribute": {"category": "Security", "criteria": "Dependabot, CodeQL, or SAST tools configured; secret detection enabled", "default_weight": 0.04, "description": "Security scanning tools configured for dependencies and code", "id": "dependency_security", "name": "Dependency Security \u0026 Vulnerability Scanning", "tier": 1}, "error_message": null, "evidence": ["\u2713 Dependabot configured for dependency alerts", "  1 package ecosystem(s) monitored"], "measured_value": "Security tools configured: Dependabot", "remediation": {"citations": [{"relevance": "Open-source tool for detecting known vulnerabilities in dependencies", "source": "OWASP", "title": "Dependency-Check Project", "url": "https://owasp.org/www-project-dependency-check/"}, {"relevance": "Official guide for configuring automated dependency updates and security alerts", "source": "GitHub", "title": "Dependabot Documentation", "url": "https://docs.github.com/en/code-security/dependabot"}], "commands": ["gh repo edit --enable-security", "pip install detect-secrets  # Python secret detection", "npm audit  # JavaScript dependency audit"], "examples": ["# .github/dependabot.yml\nversion: 2\nupdates:\n  - package-ecosystem: pip\n    directory: /\n    schedule:\n      interval: weekly"], "steps": ["Enable Dependabot alerts in GitHub repository settings", "Add CodeQL scanning workflow for SAST", "Configure secret detection (detect-secrets, gitleaks)", "Set up language-specific scanners (pip-audit, npm audit, Snyk)"], "summary": "Add more security scanning tools for comprehensive coverage", "tools": ["Dependabot", "CodeQL", "detect-secrets", "pip-audit", "npm audit"]}, "score": 35, "status": "pass", "threshold": "\u226560 points (Dependabot + SAST or multiple scanners)"}, {"attribute": {"category": "Testing \u0026 CI/CD", "criteria": "\u003e80% code coverage", "default_weight": 0.03, "description": "Test coverage thresholds configured and enforced", "id": "test_coverage", "name": "Test Coverage Requirements", "tier": 2}, "error_message": null, "evidence": ["No coverage configuration found"], "measured_value": "not configured", "remediation": {"citations": [{"relevance": "pytest-cov configuration guide", "source": "pytest-cov", "title": "Coverage Configuration", "url": "https://pytest-cov.readthedocs.io/"}], "commands": ["# Python", "pip install pytest-cov", "pytest --cov=src --cov-report=term-missing --cov-fail-under=80", "", "# JavaScript", "npm install --save-dev jest", "npm test -- --coverage --coverageThreshold=\u0027{\\\u0027global\\\u0027: {\\\u0027lines\\\u0027: 80}}\u0027"], "examples": ["# Python - pyproject.toml\n[tool.pytest.ini_options]\naddopts = \"--cov=src --cov-report=term-missing\"\n\n[tool.coverage.report]\nfail_under = 80\n", "// JavaScript - package.json\n{\n  \"jest\": {\n    \"coverageThreshold\": {\n      \"global\": {\n        \"lines\": 80,\n        \"statements\": 80,\n        \"functions\": 80,\n        \"branches\": 80\n      }\n    }\n  }\n}\n"], "steps": ["Install coverage tool (pytest-cov for Python, jest for JavaScript)", "Configure coverage threshold in project config", "Add coverage reporting to CI/CD pipeline", "Run coverage locally before committing"], "summary": "Configure test coverage with \u226580% threshold", "tools": ["pytest-cov", "jest", "vitest", "coverage"]}, "score": 0.0, "status": "fail", "threshold": "configured with \u003e80% threshold"}, {"attribute": {"category": "Testing \u0026 CI/CD", "criteria": ".pre-commit-config.yaml exists", "default_weight": 0.03, "description": "Pre-commit hooks configured for linting and formatting", "id": "precommit_hooks", "name": "Pre-commit Hooks \u0026 CI/CD Linting", "tier": 2}, "error_message": null, "evidence": [".pre-commit-config.yaml found"], "measured_value": "configured", "remediation": null, "score": 100.0, "status": "pass", "threshold": "configured"}, {"attribute": {"category": "Git \u0026 Version Control", "criteria": "\u226580% of recent commits follow convention", "default_weight": 0.03, "description": "Follows conventional commit format", "id": "conventional_commits", "name": "Conventional Commit Messages", "tier": 2}, "error_message": null, "evidence": ["No commitlint or husky configuration"], "measured_value": "not configured", "remediation": {"citations": [], "commands": ["npm install --save-dev @commitlint/cli @commitlint/config-conventional husky"], "examples": [], "steps": ["Install commitlint", "Configure husky for commit-msg hook"], "summary": "Configure conventional commits with commitlint", "tools": ["commitlint", "husky"]}, "score": 0.0, "status": "fail", "threshold": "configured"}, {"attribute": {"category": "Git \u0026 Version Control", "criteria": ".gitignore exists and includes language-specific patterns from GitHub templates", "default_weight": 0.03, "description": "Comprehensive .gitignore file with language-specific patterns", "id": "gitignore_completeness", "name": ".gitignore Completeness", "tier": 2}, "error_message": null, "evidence": [".gitignore found (433 bytes)", "Pattern coverage: 4/17 (24%)", "Missing 13 recommended patterns"], "measured_value": "4/17 patterns", "remediation": {"citations": [{"relevance": "Comprehensive collection of language-specific gitignore patterns", "source": "GitHub", "title": "gitignore Templates Collection", "url": "https://github.com/github/gitignore"}], "commands": [], "examples": ["# Missing patterns:\n__pycache__/\n.env\nvenv/\n*.swp\n.gradle/"], "steps": ["Review GitHub\u0027s gitignore templates for your language", "Add the 13 missing patterns", "Ensure editor/IDE patterns are included"], "summary": "Add missing language-specific ignore patterns", "tools": []}, "score": 23.52941176470588, "status": "fail", "threshold": "\u226570% of language-specific patterns"}, {"attribute": {"category": "Build \u0026 Development", "criteria": "Single command (make setup, npm install, etc.) documented prominently", "default_weight": 0.03, "description": "Single command to set up development environment from fresh clone", "id": "one_command_setup", "name": "One-Command Build/Setup", "tier": 2}, "error_message": null, "evidence": ["No clear setup command found in README", "No Makefile or setup script found", "Setup instructions not in first 3 sections"], "measured_value": "multi-step setup", "remediation": {"citations": [{"relevance": "Guide to using Makefiles for one-command setup", "source": "freeCodeCamp", "title": "Using make for project automation", "url": "https://www.freecodecamp.org/news/want-to-know-the-easiest-way-to-save-time-use-make/"}], "commands": ["# Example Makefile", "cat \u003e Makefile \u003c\u003c \u0027EOF\u0027", ".PHONY: setup", "setup:", "\tpython -m venv venv", "\t. venv/bin/activate \u0026\u0026 pip install -r requirements.txt", "\tpre-commit install", "\tcp .env.example .env", "\t@echo \u0027Setup complete! Run make test to verify.\u0027", "EOF"], "examples": ["# Quick Start section in README\n\n## Quick Start\n\n```bash\nmake setup  # One command to set up development environment\nmake test   # Run tests to verify setup\n```\n"], "steps": ["Choose setup automation tool (Makefile, setup script, or package manager)", "Create setup command that handles all dependencies", "Document setup command prominently in README (Quick Start section)", "Ensure setup is idempotent (safe to run multiple times)", "Test setup on fresh clone to verify it works"], "summary": "Create single-command setup for development environment", "tools": ["make", "npm", "pip", "poetry"]}, "score": 0, "status": "fail", "threshold": "single command"}, {"attribute": {"category": "Context Window Optimization", "criteria": "\u003c5% of files \u003e500 lines, no files \u003e1000 lines", "default_weight": 0.03, "description": "Files are reasonably sized for AI context windows", "id": "file_size_limits", "name": "File Size Limits", "tier": 2}, "error_message": null, "evidence": ["Found 9 files \u003e1000 lines (1.3% of 708 files)", "Largest: explainability-connectors/src/main/java/org/kie/trustyai/connectors/kserve/v2/grpc/InferParameter.java (1039 lines)"], "measured_value": "9 huge, 21 large out of 708", "remediation": {"citations": [], "commands": [], "examples": ["# Split large file:\n# models.py (1500 lines) \u2192 models/user.py, models/product.py, models/order.py"], "steps": ["Identify files \u003e1000 lines", "Split into logical submodules", "Extract classes/functions into separate files", "Maintain single responsibility principle"], "summary": "Refactor large files into smaller, focused modules", "tools": ["refactoring tools", "linters"]}, "score": 57.28813559322034, "status": "fail", "threshold": "\u003c5% files \u003e500 lines, 0 files \u003e1000 lines"}, {"attribute": {"category": "Code Organization", "criteria": "Feature-based organization, cohesive modules, low coupling", "default_weight": 0.03, "description": "Code organized with single responsibility per module", "id": "separation_of_concerns", "name": "Separation of Concerns", "tier": 2}, "error_message": null, "evidence": ["Good directory organization (feature-based or flat)", "File cohesion: 0/3 files \u003e500 lines", "No catch-all modules (utils.py, helpers.py) detected"], "measured_value": "organization:100, cohesion:100, naming:100", "remediation": null, "score": 100.0, "status": "pass", "threshold": "\u226575 overall"}, {"attribute": {"category": "Documentation", "criteria": "README \u003c500 lines with clear structure, bullet points over prose", "default_weight": 0.03, "description": "Documentation maximizes information density while minimizing token consumption", "id": "concise_documentation", "name": "Concise Documentation", "tier": 2}, "error_message": null, "evidence": ["README length: 35 lines (excellent)", "Heading density: 17.1 per 100 lines (target: 3-5)", "Only 8 bullet points (prefer bullets over prose)"], "measured_value": "35 lines, 6 headings, 8 bullets", "remediation": {"citations": [{"relevance": "Research showing performance degradation with long contexts", "source": "ArXiv", "title": "LongCodeBench: Evaluating Coding LLMs at 1M Context Windows", "url": "https://arxiv.org/abs/2501.00343"}, {"relevance": "Best practices for Markdown formatting", "source": "Markdown Guide", "title": "Basic Syntax", "url": "https://www.markdownguide.org/basic-syntax/"}], "commands": ["# Check README length", "wc -l README.md", "", "# Count headings", "grep -c \u0027^#\u0027 README.md"], "examples": ["# Good: Concise with structure\n\n## Quick Start\n```bash\npip install -e .\nagentready assess .\n```\n\n## Features\n- Fast repository scanning\n- HTML and Markdown reports\n- 25 agent-ready attributes\n\n## Documentation\nSee [docs/](docs/) for detailed guides.\n", "# Bad: Verbose prose\n\nThis project is a tool that helps you assess your repository\nagainst best practices for AI-assisted development. It works by\nscanning your codebase and checking for various attributes that\nmake repositories more effective when working with AI coding\nassistants like Claude Code...\n\n[Many more paragraphs of prose...]\n"], "steps": ["Break long README into multiple documents (docs/ directory)", "Add clear Markdown headings (##, ###) for structure", "Convert prose paragraphs to bullet points where possible", "Add table of contents for documents \u003e100 lines", "Use code blocks instead of describing commands in prose", "Move detailed content to wiki or docs/, keep README focused"], "summary": "Make documentation more concise and structured", "tools": []}, "score": 64.0, "status": "fail", "threshold": "\u003c500 lines, structured format"}, {"attribute": {"category": "Documentation", "criteria": "\u226580% of public functions/classes have docstrings", "default_weight": 0.03, "description": "Function, class, and module-level documentation using language-specific conventions", "id": "inline_documentation", "name": "Inline Documentation", "tier": 2}, "error_message": null, "evidence": ["Documented items: 0/6", "Coverage: 0.0%", "Many public functions/classes lack docstrings"], "measured_value": "0.0%", "remediation": {"citations": [{"relevance": "Python docstring standards", "source": "Python.org", "title": "PEP 257 - Docstring Conventions", "url": "https://peps.python.org/pep-0257/"}, {"relevance": "TypeScript documentation standard", "source": "TypeScript", "title": "TSDoc Reference", "url": "https://tsdoc.org/"}], "commands": ["# Install pydocstyle", "pip install pydocstyle", "", "# Check docstring coverage", "pydocstyle src/", "", "# Generate documentation", "pip install sphinx", "sphinx-apidoc -o docs/ src/"], "examples": ["# Python - Good docstring\ndef calculate_discount(price: float, discount_percent: float) -\u003e float:\n    \"\"\"Calculate discounted price.\n\n    Args:\n        price: Original price in USD\n        discount_percent: Discount percentage (0-100)\n\n    Returns:\n        Discounted price\n\n    Raises:\n        ValueError: If discount_percent not in 0-100 range\n\n    Example:\n        \u003e\u003e\u003e calculate_discount(100.0, 20.0)\n        80.0\n    \"\"\"\n    if not 0 \u003c= discount_percent \u003c= 100:\n        raise ValueError(\"Discount must be 0-100\")\n    return price * (1 - discount_percent / 100)\n", "// JavaScript - Good JSDoc\n/**\n * Calculate discounted price\n *\n * @param {number} price - Original price in USD\n * @param {number} discountPercent - Discount percentage (0-100)\n * @returns {number} Discounted price\n * @throws {Error} If discountPercent not in 0-100 range\n * @example\n * calculateDiscount(100.0, 20.0)\n * // Returns: 80.0\n */\nfunction calculateDiscount(price, discountPercent) {\n    if (discountPercent \u003c 0 || discountPercent \u003e 100) {\n        throw new Error(\"Discount must be 0-100\");\n    }\n    return price * (1 - discountPercent / 100);\n}\n"], "steps": ["Identify functions/classes without docstrings", "Add PEP 257 compliant docstrings for Python", "Add JSDoc comments for JavaScript/TypeScript", "Include: description, parameters, return values, exceptions", "Add examples for complex functions", "Run pydocstyle to validate docstring format"], "summary": "Add docstrings to public functions and classes", "tools": ["pydocstyle", "jsdoc"]}, "score": 0.0, "status": "fail", "threshold": "\u226580%"}, {"attribute": {"category": "Code Quality", "criteria": "Average complexity \u003c10, no functions \u003e15", "default_weight": 0.03, "description": "Cyclomatic complexity thresholds enforced", "id": "cyclomatic_complexity", "name": "Cyclomatic Complexity Thresholds", "tier": 3}, "error_message": null, "evidence": ["Missing tool: radon"], "measured_value": null, "remediation": {"citations": [], "commands": [], "examples": [], "steps": ["Install with: pip install radon"], "summary": "Install with: pip install radon", "tools": []}, "score": null, "status": "skipped", "threshold": null}, {"attribute": {"category": "Documentation Standards", "criteria": "ADR directory with documented decisions", "default_weight": 0.015, "description": "Lightweight documents capturing architectural decisions", "id": "architecture_decisions", "name": "Architecture Decision Records (ADRs)", "tier": 3}, "error_message": null, "evidence": ["No ADR directory found (checked docs/adr/, .adr/, adr/, docs/decisions/)"], "measured_value": "no ADR directory", "remediation": {"citations": [{"relevance": "Original ADR format and rationale", "source": "Michael Nygard", "title": "Documenting Architecture Decisions", "url": "https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions"}, {"relevance": "Modern ADR template with examples", "source": "GitHub adr/madr", "title": "Markdown ADR (MADR) Template", "url": "https://github.com/adr/madr"}], "commands": ["# Create ADR directory", "mkdir -p docs/adr", "", "# Create first ADR using template", "cat \u003e docs/adr/0001-use-architecture-decision-records.md \u003c\u003c \u0027EOF\u0027", "# 1. Use Architecture Decision Records", "", "Date: 2025-11-22", "", "## Status", "Accepted", "", "## Context", "We need to record architectural decisions made in this project.", "", "## Decision", "We will use Architecture Decision Records (ADRs) as described by Michael Nygard.", "", "## Consequences", "- Decisions are documented with context", "- Future contributors understand rationale", "- ADRs are lightweight and version-controlled", "EOF"], "examples": ["# Example ADR Structure\n\n```markdown\n# 2. Use PostgreSQL for Database\n\nDate: 2025-11-22\n\n## Status\nAccepted\n\n## Context\nWe need a relational database for complex queries and ACID transactions.\nTeam has PostgreSQL experience. Need full-text search capabilities.\n\n## Decision\nUse PostgreSQL 15+ as primary database.\n\n## Consequences\n- Positive: Robust ACID, full-text search, team familiarity\n- Negative: Higher resource usage than SQLite\n- Neutral: Need to manage migrations, backups\n```\n"], "steps": ["Create docs/adr/ directory in repository root", "Use Michael Nygard ADR template or MADR format", "Document each significant architectural decision", "Number ADRs sequentially (0001-*.md, 0002-*.md)", "Include Status, Context, Decision, and Consequences sections", "Update ADR status when decisions are revised (Superseded, Deprecated)"], "summary": "Create Architecture Decision Records (ADRs) directory and document key decisions", "tools": ["adr-tools", "log4brains"]}, "score": 0.0, "status": "fail", "threshold": "ADR directory with decisions"}, {"attribute": {"category": "Repository Structure", "criteria": "PR template and issue templates in .github/", "default_weight": 0.015, "description": "Standardized templates for issues and PRs", "id": "issue_pr_templates", "name": "Issue \u0026 Pull Request Templates", "tier": 3}, "error_message": null, "evidence": ["PR template found", "Issue templates found: 3 templates"], "measured_value": "PR:True, Issues:3", "remediation": null, "score": 100, "status": "pass", "threshold": "PR template + \u22652 issue templates"}, {"attribute": {"category": "Testing \u0026 CI/CD", "criteria": "CI config with descriptive names, caching, parallelization", "default_weight": 0.015, "description": "Clear, well-documented CI/CD configuration files", "id": "cicd_pipeline_visibility", "name": "CI/CD Pipeline Visibility", "tier": 3}, "error_message": null, "evidence": ["CI config found: .github/workflows/security.yml, .github/workflows/tests.yml, .github/workflows/agentready-assessment.yml, .github/workflows/trivy-scan.yaml, .github/workflows/CI.yaml, .github/workflows/test.yaml", "Descriptive job/step names found", "No caching detected", "Parallel job execution detected"], "measured_value": "basic config", "remediation": {"citations": [{"relevance": "Official GitHub Actions guide", "source": "GitHub", "title": "GitHub Actions Documentation", "url": "https://docs.github.com/en/actions"}, {"relevance": "Industry best practices for CI/CD", "source": "CircleCI", "title": "CI/CD Best Practices", "url": "https://circleci.com/blog/ci-cd-best-practices/"}], "commands": ["# Create GitHub Actions workflow", "mkdir -p .github/workflows", "touch .github/workflows/ci.yml", "", "# Validate workflow", "gh workflow view ci.yml"], "examples": ["# .github/workflows/ci.yml - Good example\n\nname: CI Pipeline\n\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n\njobs:\n  lint:\n    name: Lint Code\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Set up Python\n        uses: actions/setup-python@v5\n        with:\n          python-version: \u00273.11\u0027\n          cache: \u0027pip\u0027  # Caching\n\n      - name: Install dependencies\n        run: pip install -r requirements.txt\n\n      - name: Run linters\n        run: |\n          black --check .\n          isort --check .\n          ruff check .\n\n  test:\n    name: Run Tests\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Set up Python\n        uses: actions/setup-python@v5\n        with:\n          python-version: \u00273.11\u0027\n          cache: \u0027pip\u0027\n\n      - name: Install dependencies\n        run: pip install -r requirements.txt\n\n      - name: Run tests with coverage\n        run: pytest --cov --cov-report=xml\n\n      - name: Upload coverage reports\n        uses: codecov/codecov-action@v3\n        with:\n          files: ./coverage.xml\n\n  build:\n    name: Build Package\n    runs-on: ubuntu-latest\n    needs: [lint, test]  # Runs after lint/test pass\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Build package\n        run: python -m build\n\n      - name: Upload build artifacts\n        uses: actions/upload-artifact@v3\n        with:\n          name: dist\n          path: dist/\n"], "steps": ["Create CI config for your platform (GitHub Actions, GitLab CI, etc.)", "Define jobs: lint, test, build", "Use descriptive job and step names", "Configure dependency caching", "Enable parallel job execution", "Upload artifacts: test results, coverage reports", "Add status badge to README"], "summary": "Add or improve CI/CD pipeline configuration", "tools": ["github-actions", "gitlab-ci", "circleci"]}, "score": 70, "status": "fail", "threshold": "CI with best practices"}, {"attribute": {"category": "Code Quality", "criteria": "Language conventions followed, avoid generic names", "default_weight": 0.015, "description": "Systematic naming patterns following language conventions", "id": "semantic_naming", "name": "Semantic Naming", "tier": 3}, "error_message": null, "evidence": ["Functions: 3/3 follow snake_case (100.0%)", "Classes: 0/0 follow PascalCase (100.0%)", "No generic names (temp, data, obj) detected"], "measured_value": "functions:100%, classes:100%", "remediation": null, "score": 100.0, "status": "pass", "threshold": "\u226575% compliance"}, {"attribute": {"category": "Code Quality", "criteria": "Structured logging library configured (structlog, winston, zap)", "default_weight": 0.015, "description": "Logging in structured format (JSON) with consistent fields", "id": "structured_logging", "name": "Structured Logging", "tier": 3}, "error_message": null, "evidence": ["No Python dependency files found"], "measured_value": null, "remediation": null, "score": null, "status": "not_applicable", "threshold": null}, {"attribute": {"category": "API Documentation", "criteria": "OpenAPI 3.x spec with complete endpoint documentation", "default_weight": 0.015, "description": "Machine-readable API documentation in OpenAPI format", "id": "openapi_specs", "name": "OpenAPI/Swagger Specifications", "tier": 3}, "error_message": null, "evidence": ["No OpenAPI specification found", "Searched recursively for: openapi.yaml, openapi.yml, openapi.json, swagger.yaml, swagger.yml, swagger.json"], "measured_value": "no OpenAPI spec", "remediation": {"citations": [{"relevance": "Official OpenAPI 3.1 specification", "source": "OpenAPI Initiative", "title": "OpenAPI Specification", "url": "https://spec.openapis.org/oas/v3.1.0"}, {"relevance": "Guide to writing effective API docs", "source": "Swagger", "title": "API Documentation Best Practices", "url": "https://swagger.io/resources/articles/best-practices-in-api-documentation/"}], "commands": ["# Install OpenAPI validator", "npm install -g @stoplight/spectral-cli", "", "# Validate spec", "spectral lint openapi.yaml", "", "# Generate client SDK", "npx @openapitools/openapi-generator-cli generate \\", "  -i openapi.yaml \\", "  -g python \\", "  -o client/"], "examples": ["# openapi.yaml - Minimal example\nopenapi: 3.1.0\ninfo:\n  title: My API\n  version: 1.0.0\n  description: API for managing users\n\nservers:\n  - url: https://api.example.com/v1\n\npaths:\n  /users/{userId}:\n    get:\n      summary: Get user by ID\n      parameters:\n        - name: userId\n          in: path\n          required: true\n          schema:\n            type: string\n      responses:\n        \u0027200\u0027:\n          description: User found\n          content:\n            application/json:\n              schema:\n                $ref: \u0027#/components/schemas/User\u0027\n        \u0027404\u0027:\n          description: User not found\n\ncomponents:\n  schemas:\n    User:\n      type: object\n      required:\n        - id\n        - email\n      properties:\n        id:\n          type: string\n          example: \"user_123\"\n        email:\n          type: string\n          format: email\n          example: \"user@example.com\"\n        name:\n          type: string\n          example: \"John Doe\"\n"], "steps": ["Create openapi.yaml in repository root", "Define OpenAPI version 3.x", "Document all API endpoints with full schemas", "Add request/response examples", "Define security schemes (API keys, OAuth, etc.)", "Validate spec with Swagger Editor or Spectral", "Generate API documentation with Swagger UI or ReDoc"], "summary": "Create OpenAPI specification for API endpoints", "tools": ["swagger-editor", "spectral", "openapi-generator"]}, "score": 0.0, "status": "fail", "threshold": "OpenAPI 3.x spec present"}, {"attribute": {"category": "Git \u0026 Version Control", "criteria": "Branch protection enabled with status checks and required reviews", "default_weight": 0.005, "description": "Required status checks and review approvals before merging", "id": "branch_protection", "name": "Branch Protection Rules", "tier": 4}, "error_message": null, "evidence": ["Requires GitHub API integration for branch protection checks. Future implementation will verify: required status checks, required reviews, force push prevention, and branch update requirements."], "measured_value": null, "remediation": null, "score": null, "status": "not_applicable", "threshold": null}, {"attribute": {"category": "Code Quality", "criteria": "Language-specific linters configured (pylint, ESLint, RuboCop, etc.)", "default_weight": 0.01, "description": "Linter configuration for detecting code smells and anti-patterns", "id": "code_smells", "name": "Code Smell Elimination", "tier": 4}, "error_message": null, "evidence": ["No linters configured"], "measured_value": "none", "remediation": {"citations": [{"relevance": "Official documentation for Pylint code analysis tool", "source": "Pylint", "title": "Pylint Documentation", "url": "https://pylint.readthedocs.io/"}, {"relevance": "Official documentation for ESLint JavaScript/TypeScript linter", "source": "ESLint", "title": "ESLint Documentation", "url": "https://eslint.org/docs/latest/"}], "commands": ["pip install pylint \u0026\u0026 pylint --generate-rcfile \u003e .pylintrc", "pip install ruff \u0026\u0026 ruff init", "npm install --save-dev markdownlint-cli \u0026\u0026 touch .markdownlint.json"], "examples": ["# .pylintrc example\n[MASTER]\nmax-line-length=100\n\n[MESSAGES CONTROL]\ndisable=C0111", "# .eslintrc.json example\n{\n  \"extends\": \"eslint:recommended\",\n  \"rules\": {\n    \"no-console\": \"warn\"\n  }\n}"], "steps": ["Configure pylint for Python code smell detection", "Configure ruff for fast Python linting", "Add actionlint for GitHub Actions workflow validation", "Configure markdownlint for documentation quality"], "summary": "Configure 4 missing linter(s)", "tools": ["pylint", "ruff", "actionlint", "markdownlint"]}, "score": 0.0, "status": "fail", "threshold": "\u226560% of applicable linters configured"}, {"attribute": {"category": "Build \u0026 Development", "criteria": "Dockerfile/Containerfile, docker-compose.yml, .dockerignore, multi-stage builds", "default_weight": 0.01, "description": "Container configuration for consistent development environments", "id": "container_setup", "name": "Container/Virtualization Setup", "tier": 4}, "error_message": null, "evidence": ["\u2713 Dockerfile present", "\u2713 Multi-stage build detected (optimized image size)", "\u2139\ufe0f No .dockerignore file (consider adding to reduce image size)"], "measured_value": "50 points", "remediation": {"citations": [{"relevance": "Official Docker guide for writing efficient and secure Dockerfiles", "source": "Docker", "title": "Dockerfile Best Practices", "url": "https://docs.docker.com/develop/develop-images/dockerfile_best-practices/"}], "commands": ["docker build -t myapp .", "docker-compose up -d"], "examples": ["# .dockerignore example\n.git\n.venv\n__pycache__\n*.pyc\n.env\nnode_modules", "# Multi-stage Dockerfile example\nFROM node:18 AS builder\nWORKDIR /app\nCOPY . .\nRUN npm ci \u0026\u0026 npm run build\n\nFROM node:18-alpine\nWORKDIR /app\nCOPY --from=builder /app/dist ./dist\nCMD [\"node\", \"dist/index.js\"]"], "steps": ["Add docker-compose.yml for multi-service development", "Create .dockerignore to exclude build artifacts and secrets", "Consider multi-stage builds to reduce image size"], "summary": "Improve container configuration", "tools": ["docker", "podman", "docker-compose"]}, "score": 50, "status": "pass", "threshold": "\u226570 points (Dockerfile + compose + .dockerignore)"}], "metadata": {"agentready_version": "2.27.0", "assessment_timestamp": "2026-02-12T11:00:11.837329", "assessment_timestamp_human": "February 12, 2026 at 11:00 AM", "command": "/Users/ddahlem/.local/bin/agentready assess .", "executed_by": "ddahlem@ddahlem-mac", "research_version": "1.0.1", "working_directory": "/Users/ddahlem/Documents/repos/trusty/trustyai-explainability/trustyai-explainability"}, "overall_score": 37.7, "repository": {"branch": "main", "commit_hash": "9e011426e527ccac4c25e5c477c062d5beb03ac8", "languages": {"Java": 705, "Markdown": 17, "Python": 3, "XML": 11, "YAML": 20}, "name": "trustyai-explainability", "path": "/Users/ddahlem/Documents/repos/trusty/trustyai-explainability/trustyai-explainability", "total_files": 826, "total_lines": 460728, "url": "https://github.com/trustyai-explainability/trustyai-explainability.git"}, "schema_version": "1.0.0", "timestamp": "2026-02-12T11:00:11.837329"};
+
+        // Embedded theme data (properly escaped)
+        const THEMES = {"dark": {"background": "#0f172a", "border": "#475569", "danger": "#ef4444", "display_name": "Dark", "name": "dark", "neutral": "#64748b", "primary": "#8b5cf6", "primary_dark": "#6d28d9", "primary_light": "#a78bfa", "shadow": "rgba(0, 0, 0, 0.6)", "success": "#10b981", "surface": "#1e293b", "surface_elevated": "#334155", "text_muted": "#94a3b8", "text_primary": "#f1f5f9", "text_secondary": "#cbd5e1", "warning": "#f59e0b"}, "default": {"background": "#0a0e27", "border": "#334155", "danger": "#ef4444", "display_name": "Default (Dark Professional)", "name": "default", "neutral": "#64748b", "primary": "#8b5cf6", "primary_dark": "#6d28d9", "primary_light": "#a78bfa", "shadow": "rgba(0, 0, 0, 0.5)", "success": "#10b981", "surface": "#1a1f3a", "surface_elevated": "#252b4a", "text_muted": "#94a3b8", "text_primary": "#f8fafc", "text_secondary": "#cbd5e1", "warning": "#f59e0b"}, "dracula": {"background": "#282a36", "border": "#6272a4", "danger": "#ff5555", "display_name": "Dracula", "name": "dracula", "neutral": "#8be9fd", "primary": "#bd93f9", "primary_dark": "#9b72d6", "primary_light": "#d4b5ff", "shadow": "rgba(0, 0, 0, 0.5)", "success": "#50fa7b", "surface": "#44475a", "surface_elevated": "#6272a4", "text_muted": "#6272a4", "text_primary": "#f8f8f2", "text_secondary": "#e6e6e6", "warning": "#f1fa8c"}, "high-contrast": {"background": "#000000", "border": "#ffffff", "danger": "#ff0000", "display_name": "High Contrast", "name": "high-contrast", "neutral": "#808080", "primary": "#00ffff", "primary_dark": "#00cccc", "primary_light": "#66ffff", "shadow": "rgba(255, 255, 255, 0.2)", "success": "#00ff00", "surface": "#1a1a1a", "surface_elevated": "#2d2d2d", "text_muted": "#b0b0b0", "text_primary": "#ffffff", "text_secondary": "#e0e0e0", "warning": "#ffff00"}, "light": {"background": "#f8fafc", "border": "#e2e8f0", "danger": "#ef4444", "display_name": "Light", "name": "light", "neutral": "#94a3b8", "primary": "#8b5cf6", "primary_dark": "#6d28d9", "primary_light": "#a78bfa", "shadow": "rgba(0, 0, 0, 0.1)", "success": "#10b981", "surface": "#ffffff", "surface_elevated": "#f1f5f9", "text_muted": "#64748b", "text_primary": "#0f172a", "text_secondary": "#334155", "warning": "#f59e0b"}, "solarized-dark": {"background": "#002b36", "border": "#586e75", "danger": "#dc322f", "display_name": "Solarized Dark", "name": "solarized-dark", "neutral": "#586e75", "primary": "#268bd2", "primary_dark": "#1e6fa9", "primary_light": "#5fa8db", "shadow": "rgba(0, 0, 0, 0.5)", "success": "#859900", "surface": "#073642", "surface_elevated": "#0e4e5c", "text_muted": "#93a1a1", "text_primary": "#fdf6e3", "text_secondary": "#eee8d5", "warning": "#b58900"}};
+        const DEFAULT_THEME = "default";
+
+        // Theme management with localStorage persistence
+        function applyTheme(themeName) {
+            const theme = THEMES[themeName];
+            if (!theme) {
+                console.warn(`Theme ${themeName} not found, using default`);
+                themeName = DEFAULT_THEME;
+            }
+
+            const themeData = THEMES[themeName];
+            const root = document.documentElement;
+
+            // Apply CSS custom properties
+            root.style.setProperty('--background', themeData.background);
+            root.style.setProperty('--surface', themeData.surface);
+            root.style.setProperty('--surface-elevated', themeData.surface_elevated);
+            root.style.setProperty('--primary', themeData.primary);
+            root.style.setProperty('--primary-light', themeData.primary_light);
+            root.style.setProperty('--primary-dark', themeData.primary_dark);
+            root.style.setProperty('--text-primary', themeData.text_primary);
+            root.style.setProperty('--text-secondary', themeData.text_secondary);
+            root.style.setProperty('--text-muted', themeData.text_muted);
+            root.style.setProperty('--success', themeData.success);
+            root.style.setProperty('--warning', themeData.warning);
+            root.style.setProperty('--danger', themeData.danger);
+            root.style.setProperty('--neutral', themeData.neutral);
+            root.style.setProperty('--border', themeData.border);
+            root.style.setProperty('--shadow', themeData.shadow);
+
+            // Update data attribute for potential CSS targeting
+            root.setAttribute('data-theme', themeName);
+
+            // Save preference to localStorage
+            try {
+                localStorage.setItem('agentready-theme', themeName);
+            } catch (e) {
+                console.warn('Could not save theme preference to localStorage:', e);
+            }
+        }
+
+        // Load theme from localStorage on page load
+        function loadSavedTheme() {
+            try {
+                const savedTheme = localStorage.getItem('agentready-theme');
+                if (savedTheme && THEMES[savedTheme]) {
+                    return savedTheme;
+                }
+            } catch (e) {
+                console.warn('Could not load theme preference from localStorage:', e);
+            }
+            return DEFAULT_THEME;
+        }
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = loadSavedTheme();
+            const themeSelect = document.getElementById('theme-select');
+
+            // Apply saved theme if different from default
+            if (savedTheme !== DEFAULT_THEME) {
+                applyTheme(savedTheme);
+                if (themeSelect) {
+                    themeSelect.value = savedTheme;
+                }
+            }
+
+            // Set up theme switcher
+            if (themeSelect) {
+                themeSelect.addEventListener('change', (e) => {
+                    applyTheme(e.target.value);
+                });
+            }
+        });
+
+        // Toggle finding expansion
+        function toggleFinding(header) {
+            const finding = header.parentElement;
+            finding.classList.toggle('expanded');
+        }
+
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active button
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.dataset.filter;
+                const findings = document.querySelectorAll('.finding');
+
+                findings.forEach(finding => {
+                    const status = finding.dataset.status;
+
+                    if (filter === 'all') {
+                        finding.classList.remove('hidden');
+                    } else if (filter === 'skipped') {
+                        if (status === 'skipped' || status === 'not_applicable' || status === 'error') {
+                            finding.classList.remove('hidden');
+                        } else {
+                            finding.classList.add('hidden');
+                        }
+                    } else {
+                        if (status === filter) {
+                            finding.classList.remove('hidden');
+                        } else {
+                            finding.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+        });
+
+        // Sort functionality
+        document.getElementById('sort-select').addEventListener('change', (e) => {
+            const sortBy = e.target.value;
+            const container = document.getElementById('findings-container');
+            const findings = Array.from(container.querySelectorAll('.finding'));
+
+            findings.sort((a, b) => {
+                if (sortBy === 'category') {
+                    return a.dataset.category.localeCompare(b.dataset.category);
+                } else if (sortBy === 'score-desc') {
+                    return parseFloat(b.dataset.score) - parseFloat(a.dataset.score);
+                } else if (sortBy === 'score-asc') {
+                    return parseFloat(a.dataset.score) - parseFloat(b.dataset.score);
+                } else if (sortBy === 'tier') {
+                    return parseInt(a.dataset.tier) - parseInt(b.dataset.tier);
+                }
+            });
+
+            findings.forEach(finding => container.appendChild(finding));
+        });
+
+        // Search functionality
+        document.getElementById('search-box').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const findings = document.querySelectorAll('.finding');
+
+            findings.forEach(finding => {
+                const name = finding.dataset.name;
+                const category = finding.dataset.category.toLowerCase();
+
+                if (name.includes(query) || category.includes(query)) {
+                    finding.classList.remove('hidden');
+                } else {
+                    finding.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
