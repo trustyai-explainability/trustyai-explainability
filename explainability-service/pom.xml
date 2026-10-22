@@ -44,6 +44,18 @@
             <artifactId>xstream</artifactId>
             <version>1.4.21</version>
           </dependency>
+          <!-- Override Parsson until Quarkus moves to a release with the JSON input limit. -->
+          <dependency>
+            <groupId>org.eclipse.parsson</groupId>
+            <artifactId>parsson</artifactId>
+            <version>1.1.9</version>
+          </dependency>
+          <!-- Override Plexus Utils until the Quarkus test tooling moves to a fixed release. -->
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>3.6.1</version>
+          </dependency>
           <!-- Align all unshaded Netty modules to the centrally managed version. -->
           <dependency>
             <groupId>io.netty</groupId>
