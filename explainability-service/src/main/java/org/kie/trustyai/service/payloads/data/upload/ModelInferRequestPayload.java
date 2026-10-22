@@ -2,7 +2,10 @@ package org.kie.trustyai.service.payloads.data.upload;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ModelInferRequestPayload extends ModelInferBasePayload {
+    @JsonProperty("inputs")
     private TensorPayload[] inputs;
 
     public TensorPayload[] getTensorPayloads() {
@@ -15,7 +18,7 @@ public class ModelInferRequestPayload extends ModelInferBasePayload {
 
     @Override
     public String toString() {
-        return "ModelJsonPayload{" +
+        return "ModelInferRequestPayload{" +
                 "id='" + getId() + '\'' +
                 ", inputs=" + Arrays.toString(inputs) +
                 '}';
