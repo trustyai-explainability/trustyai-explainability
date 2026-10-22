@@ -15,8 +15,8 @@
  */
 package org.kie.trustyai.explainability.local.lime.optim;
 
-import org.optaplanner.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalScore;
-import org.optaplanner.core.api.score.calculator.EasyScoreCalculator;
+import ai.timefold.solver.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalScore;
+import ai.timefold.solver.core.api.score.calculator.EasyScoreCalculator;
 
 /**
  * A score calculator which combines stability and impact-score scores.

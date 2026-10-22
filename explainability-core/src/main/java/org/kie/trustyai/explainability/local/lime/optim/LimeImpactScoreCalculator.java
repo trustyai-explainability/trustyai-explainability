@@ -29,10 +29,11 @@ import org.kie.trustyai.explainability.model.FeatureImportance;
 import org.kie.trustyai.explainability.model.Prediction;
 import org.kie.trustyai.explainability.model.Saliency;
 import org.kie.trustyai.metrics.explainability.ExplainabilityMetrics;
-import org.optaplanner.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalScore;
-import org.optaplanner.core.api.score.calculator.EasyScoreCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ai.timefold.solver.core.api.score.buildin.simplebigdecimal.SimpleBigDecimalScore;
+import ai.timefold.solver.core.api.score.calculator.EasyScoreCalculator;
 
 public class LimeImpactScoreCalculator implements EasyScoreCalculator<LimeConfigSolution, SimpleBigDecimalScore> {
 

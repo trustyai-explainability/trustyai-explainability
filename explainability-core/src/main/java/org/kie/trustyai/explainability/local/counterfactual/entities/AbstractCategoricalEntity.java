@@ -21,13 +21,12 @@ import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.optaplanner.core.api.domain.entity.PlanningEntity;
-import org.optaplanner.core.api.domain.valuerange.CountableValueRange;
+import ai.timefold.solver.core.api.domain.entity.PlanningEntity;
+import ai.timefold.solver.core.api.domain.valuerange.CountableValueRange;
 
 /**
- * Abstract categorical feature an OptaPlanner {@link PlanningEntity}
+ * Abstract categorical feature an Timefold Solver {@link PlanningEntity}
  */
-@PlanningEntity
 public abstract class AbstractCategoricalEntity<T> extends AbstractEntity<T> {
 
     protected Set<T> allowedCategories;
