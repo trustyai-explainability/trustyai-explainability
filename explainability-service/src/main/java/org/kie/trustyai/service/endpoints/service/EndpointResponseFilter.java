@@ -1,6 +1,9 @@
 package org.kie.trustyai.service.endpoints.service;
 
+import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
+
 import jakarta.annotation.Priority;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
@@ -21,5 +24,13 @@ public class EndpointResponseFilter implements ContainerResponseFilter {
             String queriedPath = requestContext.getUriInfo().getPath();
             responseContext.setEntity(String.format(NOT_FOUND_MESSAGE_FMT, queriedPath));
         }
+    }
+
+    @ServerExceptionMapper
+    public Response mapNotFound(NotFoundException exception, ContainerRequestContext requestContext) {
+        String queriedPath = requestContext.getUriInfo().getPath();
+        return Response.status(Response.Status.NOT_FOUND)
+                .entity(String.format(NOT_FOUND_MESSAGE_FMT, queriedPath))
+                .build();
     }
 }

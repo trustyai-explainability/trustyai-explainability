@@ -39,7 +39,6 @@ public class KServeV2HTTPPredictionProvider extends AbstractKServePredictionProv
         this.outputShape = outputShape;
     }
 
-
     public CompletableFuture<List<PredictionOutput>> predictAsync(List<PredictionInput> inputs) {
         final ObjectMapper mapper = new ObjectMapper();
 
