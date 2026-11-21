@@ -49,7 +49,8 @@ import org.kie.trustyai.explainability.model.domain.EmptyFeatureDomain;
 import org.kie.trustyai.explainability.model.domain.FeatureDomain;
 import org.kie.trustyai.explainability.model.domain.NumericalFeatureDomain;
 import org.kie.trustyai.explainability.utils.models.TestModels;
-import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
+
+import ai.timefold.solver.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -1105,11 +1106,11 @@ class CounterfactualScoreCalculatorTest {
         assertEquals(2, goal.size());
         assertEquals(1, predictionOutputs.size()); // A single prediction is expected
         assertEquals(2, predictionOutputs.get(0).getOutputs().size()); // Single prediction with two features
-        assertEquals(0, score.getHardScore(0).compareTo(BigDecimal.ZERO));
-        assertEquals(0, score.getHardScore(1).compareTo(BigDecimal.ZERO));
-        assertEquals(0, score.getHardScore(2).compareTo(BigDecimal.ZERO));
-        assertEquals(0, score.getSoftScore(0).compareTo(BigDecimal.ZERO));
-        assertEquals(0, score.getSoftScore(1).compareTo(BigDecimal.ZERO));
+        assertEquals(0, score.hardScore(0).compareTo(BigDecimal.ZERO));
+        assertEquals(0, score.hardScore(1).compareTo(BigDecimal.ZERO));
+        assertEquals(0, score.hardScore(2).compareTo(BigDecimal.ZERO));
+        assertEquals(0, score.softScore(0).compareTo(BigDecimal.ZERO));
+        assertEquals(0, score.softScore(1).compareTo(BigDecimal.ZERO));
         assertEquals(3, score.getHardLevelsSize());
         assertEquals(2, score.getSoftLevelsSize());
     }
@@ -1250,11 +1251,11 @@ class CounterfactualScoreCalculatorTest {
         assertEquals(2, goal.size());
         assertEquals(1, predictionOutputs.size()); // A single prediction is expected
         assertEquals(2, predictionOutputs.get(0).getOutputs().size()); // Single prediction with two features
-        assertEquals(0, score.getHardScore(0).compareTo(BigDecimal.ZERO));
-        assertEquals(0, score.getHardScore(1).compareTo(BigDecimal.ZERO));
-        assertEquals(0, score.getHardScore(2).compareTo(BigDecimal.ZERO));
-        assertEquals(0, score.getSoftScore(0).compareTo(BigDecimal.ZERO));
-        assertEquals(0, score.getSoftScore(1).compareTo(BigDecimal.ZERO));
+        assertEquals(0, score.hardScore(0).compareTo(BigDecimal.ZERO));
+        assertEquals(0, score.hardScore(1).compareTo(BigDecimal.ZERO));
+        assertEquals(0, score.hardScore(2).compareTo(BigDecimal.ZERO));
+        assertEquals(0, score.softScore(0).compareTo(BigDecimal.ZERO));
+        assertEquals(0, score.softScore(1).compareTo(BigDecimal.ZERO));
         assertEquals(3, score.getHardLevelsSize());
         assertEquals(2, score.getSoftLevelsSize());
     }
@@ -1371,7 +1372,7 @@ class CounterfactualScoreCalculatorTest {
 
         final BendableBigDecimalScore score = scoreCalculator.calculateScore(solution);
 
-        assertEquals(0.0, score.getSoftScore(0).doubleValue(), 1e-5);
+        assertEquals(0.0, score.softScore(0).doubleValue(), 1e-5);
     }
 
 }

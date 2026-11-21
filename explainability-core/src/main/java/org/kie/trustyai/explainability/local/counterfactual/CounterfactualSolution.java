@@ -23,13 +23,14 @@ import org.kie.trustyai.explainability.local.counterfactual.goal.CounterfactualG
 import org.kie.trustyai.explainability.model.Feature;
 import org.kie.trustyai.explainability.model.PredictionOutput;
 import org.kie.trustyai.explainability.model.PredictionProvider;
-import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
-import org.optaplanner.core.api.domain.solution.PlanningScore;
-import org.optaplanner.core.api.domain.solution.PlanningSolution;
-import org.optaplanner.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
+
+import ai.timefold.solver.core.api.domain.solution.PlanningEntityCollectionProperty;
+import ai.timefold.solver.core.api.domain.solution.PlanningScore;
+import ai.timefold.solver.core.api.domain.solution.PlanningSolution;
+import ai.timefold.solver.core.api.score.buildin.bendablebigdecimal.BendableBigDecimalScore;
 
 /**
- * Represents an OptaPlanner {@link PlanningSolution}.
+ * Represents an Timefold Solver {@link PlanningSolution}.
  * This solution stores all the features as {@link CounterfactualEntity}, as well as a reference to the
  * {@link PredictionProvider} model.
  */
